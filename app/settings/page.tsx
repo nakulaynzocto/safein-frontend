@@ -1,14 +1,16 @@
 import { ProtectedLayout } from "@/components/layout/protected-layout"
-import { SettingsForm } from "@/components/settings/settings-form"
+import { SettingsForm } from "@/components/settings"
 import { PageHeader } from "@/components/common/page-header"
 
 export default function SettingsPage() {
   return (
     <ProtectedLayout>
-      <div className="container mx-auto space-y-8">
-        <div className="flex justify-center">
-          <SettingsForm />
-        </div>
+      <div className="space-y-6">
+        <PageHeader 
+          title="Settings" 
+          description="Manage your application settings and preferences"
+        />
+        <SettingsForm />
       </div>
     </ProtectedLayout>
   )

@@ -11,7 +11,9 @@ import { LoadingSpinner } from "@/components/common/loading-spinner"
 import { useAppDispatch } from "@/store/hooks"
 import { useLoginMutation } from "@/store/api/authApi"
 import { setCredentials } from "@/store/slices/authSlice"
-import { showError } from "@/utils/toaster"
+import { showError, showSuccess } from "@/utils/toaster"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 
 const loginSchema = yup.object({
   email: yup.string().email("Invalid email address").required("Email is required"),
@@ -23,7 +25,9 @@ type LoginFormData = yup.InferType<typeof loginSchema>
 export function LoginForm() {
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const searchParams = useSearchParams()
   const [login, { isLoading }] = useLoginMutation()
+  const [errorMessage, setErrorMessage] = useState<string | null>(null) // State to hold error message
 
   const {
     register,
@@ -33,14 +37,32 @@ export function LoginForm() {
     resolver: yupResolver(loginSchema),
   })
 
+  useEffect(() => {
+    const message = searchParams.get('message')
+    if (message) {
+      showSuccess(message)
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('message')
+      window.history.replaceState({}, '', newUrl.toString())
+    }
+  }, [searchParams])
+
   const onSubmit = async (data: LoginFormData) => {
     try {
-      console.log('ddsd')
-      // const result = await login(data).unwrap()
-      // dispatch(setCredentials(result))
+      const result = await login(data).unwrap()
+      
+      // Check if token exists and is valid
+      if (!result.token || result.token === 'undefined') {
+        throw new Error('No valid token received from server')
+      }
+      
+      dispatch(setCredentials(result))
+      setErrorMessage(null)
       router.push("/dashboard")
     } catch (error: any) {
-      showError(error?.data?.message || error?.message || "Login failed")
+      const message = error?.data?.message || error?.message || "Login failed"
+      setErrorMessage(message) 
+      // showError(message)
     }
   }
 
@@ -51,6 +73,12 @@ export function LoginForm() {
         <CardDescription>Sign in to your Gatekeeper account</CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Display error message at the top of the form */}
+        {errorMessage && (
+          <div className="mb-4 text-red-500 text-sm font-medium p-3 bg-red-100 rounded-md">
+            {errorMessage}
+          </div>
+        )}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <InputField
             label="Email"

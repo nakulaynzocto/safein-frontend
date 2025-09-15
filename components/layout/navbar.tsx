@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { logout } from "@/store/slices/authSlice"
-import { User, LogOut, Settings } from "lucide-react"
+import { User, LogOut, Settings, UserCircle } from "lucide-react"
 import { MobileSidebar } from "./mobile-sidebar"
 
 export function Navbar() {
@@ -26,12 +26,22 @@ export function Navbar() {
     router.push("/")
   }
 
-  const getUserInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
+  const handleAvatarClick = () => {
+    router.push("/profile")
+  }
+
+  const getUserInitials = (name?: string, firstName?: string, lastName?: string) => {
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase()
+    }
+    if (name) {
+      return name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+    }
+    return "U"
   }
 
   return (
@@ -59,10 +69,14 @@ export function Navbar() {
                 {/* User Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Button 
+                      variant="ghost" 
+                      className="relative h-8 w-8 rounded-full"
+                      onClick={handleAvatarClick}
+                    >
                       <Avatar className="h-8 w-8">
                         <AvatarFallback className="bg-secondary text-secondary-foreground">
-                          {user ? getUserInitials(user.name) : "U"}
+                          {user ? getUserInitials(user.name, user.firstName, user.lastName) : "U"}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -70,7 +84,12 @@ export function Navbar() {
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <div className="flex items-center justify-start gap-2 p-2">
                       <div className="flex flex-col space-y-1 leading-none">
-                        <p className="font-medium">{user?.name}</p>
+                        <p className="font-medium">
+                          {user?.firstName && user?.lastName 
+                            ? `${user.firstName} ${user.lastName}`
+                            : user?.name || "User"
+                          }
+                        </p>
                         <p className="w-[200px] truncate text-sm text-muted-foreground">{user?.email}</p>
                       </div>
                     </div>
@@ -79,6 +98,12 @@ export function Navbar() {
                       <Link href="/dashboard" className="flex items-center">
                         <User className="mr-2 h-4 w-4" />
                         Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="flex items-center">
+                        <UserCircle className="mr-2 h-4 w-4" />
+                        Profile
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>

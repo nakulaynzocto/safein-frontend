@@ -96,7 +96,7 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <div
       className={cn(
-        "flex h-full flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300",
+        "flex h-full flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300 overflow-hidden",
         collapsed ? "w-16" : "w-64",
         className,
       )}
@@ -115,7 +115,7 @@ export function Sidebar({ className }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-4">
+      <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
         {navigation.map((item) => {
           if (item.children) {
             const isExpanded = expandedItems.includes(item.name)

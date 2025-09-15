@@ -9,8 +9,8 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
-  isAuthenticated: typeof window !== "undefined" ? !!localStorage.getItem("token") : false,
+  token: null,
+  isAuthenticated: false,
 }
 
 const authSlice = createSlice({
@@ -26,6 +26,12 @@ const authSlice = createSlice({
       }
     },
     setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
+      // Validate token before storing
+      if (!action.payload.token || action.payload.token === 'undefined' || action.payload.token.length < 10) {
+        console.error('Invalid token received:', action.payload.token)
+        return
+      }
+      
       state.user = action.payload.user
       state.token = action.payload.token
       state.isAuthenticated = true
@@ -37,8 +43,21 @@ const authSlice = createSlice({
       state.user = action.payload
       state.isAuthenticated = true
     },
+    initializeAuth: (state) => {
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("token")
+        
+        // Validate token before using it
+        if (token && token !== 'undefined' && token.length > 10) {
+          state.token = token
+          state.isAuthenticated = true
+        } else {
+          localStorage.removeItem("token")
+        }
+      }
+    },
   },
 })
 
-export const { logout, setCredentials, setUser } = authSlice.actions
+export const { logout, setCredentials, setUser, initializeAuth } = authSlice.actions
 export default authSlice.reducer
