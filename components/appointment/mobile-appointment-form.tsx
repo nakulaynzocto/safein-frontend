@@ -31,7 +31,8 @@ const timeSlots = [
 
 export function MobileAppointmentForm() {
   const router = useRouter()
-  const { data: employees = [] } = useGetEmployeesQuery()
+  const { data: employeesData } = useGetEmployeesQuery()
+  const employees = Array.isArray(employeesData) ? employeesData : []
   const [createAppointment, { isLoading }] = useCreateAppointmentMutation()
 
   const {

@@ -26,7 +26,7 @@ interface EmptyData {
 }
 
 interface DataTableProps<T> {
-  data: T[]
+  data: T[] | undefined | null
   columns: Column<T>[]
   className?: string
   emptyMessage?: string
@@ -70,8 +70,11 @@ export function DataTable<T extends Record<string, any>>({
     }))
   }
 
+  // Ensure data is an array, default to empty array if not
+  const safeData = Array.isArray(data) ? data : []
+  
   const sortedData = enableSorting && sortConfig.key 
-    ? [...data].sort((a, b) => {
+    ? [...safeData].sort((a, b) => {
         const aValue = a[sortConfig.key as keyof T]
         const bValue = b[sortConfig.key as keyof T]
         
@@ -79,7 +82,7 @@ export function DataTable<T extends Record<string, any>>({
         if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
         return 0
       })
-    : data
+    : safeData
 
   const getSortIcon = (columnKey: string, column: Column<T>) => {
     if (!enableSorting || !column.sortable) return null
@@ -116,7 +119,7 @@ export function DataTable<T extends Record<string, any>>({
   }
 
   // Show empty state
-  if (data.length === 0) {
+  if (!Array.isArray(data) || data.length === 0) {
     const emptyStateProps = emptyData ? {
       title: emptyData.title,
       description: emptyData.description || description,

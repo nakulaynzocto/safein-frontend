@@ -47,8 +47,15 @@ export const appointmentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAppointments: builder.query<Appointment[], void>({
       query: () => '/appointments',
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       providesTags: (result) =>
-        result
+        Array.isArray(result)
           ? [
               ...result.map(({ id }) => ({ type: 'Appointment' as const, id })),
               { type: 'Appointment', id: 'LIST' },
@@ -57,6 +64,13 @@ export const appointmentApi = baseApi.injectEndpoints({
     }),
     getAppointment: builder.query<Appointment, string>({
       query: (id) => `/appointments/${id}`,
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       providesTags: (result, error, id) => [{ type: 'Appointment', id }],
     }),
     createAppointment: builder.mutation<Appointment, CreateAppointmentRequest>({
@@ -65,6 +79,13 @@ export const appointmentApi = baseApi.injectEndpoints({
         method: 'POST',
         body: { ...appointmentData, status: 'pending' },
       }),
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       invalidatesTags: [{ type: 'Appointment', id: 'LIST' }],
     }),
     updateAppointment: builder.mutation<Appointment, UpdateAppointmentRequest>({
@@ -73,6 +94,13 @@ export const appointmentApi = baseApi.injectEndpoints({
         method: 'PUT',
         body: appointmentData,
       }),
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       invalidatesTags: (result, error, { id }) => [
         { type: 'Appointment', id },
         { type: 'Appointment', id: 'LIST' },
@@ -84,6 +112,13 @@ export const appointmentApi = baseApi.injectEndpoints({
         method: 'PATCH',
         body: { status },
       }),
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       invalidatesTags: (result, error, { id }) => [
         { type: 'Appointment', id },
         { type: 'Appointment', id: 'LIST' },
@@ -101,8 +136,15 @@ export const appointmentApi = baseApi.injectEndpoints({
     }),
     getTrashedAppointments: builder.query<Appointment[], void>({
       query: () => '/appointments/trashed',
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       providesTags: (result) =>
-        result
+        Array.isArray(result)
           ? [
               ...result.map(({ id }) => ({ type: 'Appointment' as const, id })),
               { type: 'Appointment', id: 'TRASHED' },
@@ -114,6 +156,13 @@ export const appointmentApi = baseApi.injectEndpoints({
         url: `/appointments/${id}/restore`,
         method: 'POST',
       }),
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       invalidatesTags: (result, error, id) => [
         { type: 'Appointment', id },
         { type: 'Appointment', id: 'LIST' },
@@ -122,8 +171,15 @@ export const appointmentApi = baseApi.injectEndpoints({
     }),
     getAppointmentsByEmployee: builder.query<Appointment[], string>({
       query: (employeeId) => `/appointments/employee/${employeeId}`,
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       providesTags: (result, error, employeeId) =>
-        result
+        Array.isArray(result)
           ? [
               ...result.map(({ id }) => ({ type: 'Appointment' as const, id })),
               { type: 'Appointment', id: `EMPLOYEE_${employeeId}` },

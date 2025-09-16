@@ -13,6 +13,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { logout } from "@/store/slices/authSlice"
+import { useLogoutMutation } from "@/store/api/authApi"
 import { User, LogOut, Settings, UserCircle } from "lucide-react"
 import { MobileSidebar } from "./mobile-sidebar"
 
@@ -20,10 +21,22 @@ export function Navbar() {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { user, isAuthenticated } = useAppSelector((state) => state.auth)
+  const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation()
 
-  const handleLogout = () => {
-    dispatch(logout())
-    router.push("/")
+  const handleLogout = async () => {
+    try {
+      // Call the logout API endpoint
+      await logoutMutation().unwrap()
+      
+      // Clear local state and redirect
+      dispatch(logout())
+      router.push("/")
+    } catch (error) {
+      console.error('Logout failed:', error)
+      // Even if API call fails, still clear local state and redirect
+      dispatch(logout())
+      router.push("/")
+    }
   }
 
   const handleAvatarClick = () => {
@@ -113,9 +126,13 @@ export function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                    <DropdownMenuItem 
+                      onClick={handleLogout} 
+                      className="text-destructive"
+                      disabled={isLoggingOut}
+                    >
                       <LogOut className="mr-2 h-4 w-4" />
-                      Log out
+                      {isLoggingOut ? "Logging out..." : "Log out"}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

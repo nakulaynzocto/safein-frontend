@@ -25,7 +25,7 @@ interface EmptyData {
 }
 
 interface MobileDataTableProps<T> {
-  data: T[]
+  data: T[] | undefined | null
   columns: Column<T>[]
   className?: string
   emptyMessage?: string
@@ -89,7 +89,7 @@ export function MobileDataTable<T extends Record<string, any>>({
   }
 
   // Show empty state
-  if (data.length === 0) {
+  if (!Array.isArray(data) || data.length === 0) {
     const emptyStateProps = emptyData ? {
       title: emptyData.title,
       description: emptyData.description || description,
@@ -109,7 +109,7 @@ export function MobileDataTable<T extends Record<string, any>>({
 
   const MobileCardContent = () => (
     <div className={cn("space-y-3", className)}>
-      {data.map((item, index) => {
+      {(Array.isArray(data) ? data : []).map((item, index) => {
         const isExpanded = expandedItems.has(index)
         const primaryColumns = columns.slice(0, 2) // Show first 2 columns in collapsed view
         const remainingColumns = columns.slice(2) // Show remaining columns when expanded

@@ -36,7 +36,8 @@ type AppointmentFormData = yup.InferType<typeof appointmentSchema>
 export function AppointmentForm() {
   const router = useRouter()
   const [createAppointment, { isLoading }] = useCreateAppointmentMutation()
-  const { data: employees = [] } = useGetEmployeesQuery()
+  const { data: employeesData } = useGetEmployeesQuery()
+  const employees = Array.isArray(employeesData) ? employeesData : []
   const [aadhaarPhoto, setAadhaarPhoto] = useState<File | null>(null)
 
   const {
@@ -44,6 +45,8 @@ export function AppointmentForm() {
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
+    setValue,
   } = useForm<AppointmentFormData>({
     resolver: yupResolver(appointmentSchema),
     defaultValues: {
@@ -193,7 +196,8 @@ export function AppointmentForm() {
                   placeholder="Select employee"
                   options={employeeOptions}
                   error={errors.employeeId?.message}
-                  {...register("employeeId")}
+                  value={watch("employeeId") || ""}
+                  onChange={(value) => setValue("employeeId", value)}
                 />
                 <InputField
                   label="Purpose of Visit"

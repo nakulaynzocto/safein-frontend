@@ -34,8 +34,15 @@ export const employeeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getEmployees: builder.query<Employee[], void>({
       query: () => '/employees',
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       providesTags: (result) =>
-        result
+        Array.isArray(result)
           ? [
               ...result.map(({ id }) => ({ type: 'Employee' as const, id })),
               { type: 'Employee', id: 'LIST' },
@@ -44,6 +51,13 @@ export const employeeApi = baseApi.injectEndpoints({
     }),
     getEmployee: builder.query<Employee, string>({
       query: (id) => `/employees/${id}`,
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       providesTags: (result, error, id) => [{ type: 'Employee', id }],
     }),
     createEmployee: builder.mutation<Employee, CreateEmployeeRequest>({
@@ -52,6 +66,13 @@ export const employeeApi = baseApi.injectEndpoints({
         method: 'POST',
         body: employeeData,
       }),
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       invalidatesTags: [{ type: 'Employee', id: 'LIST' }],
     }),
     updateEmployee: builder.mutation<Employee, UpdateEmployeeRequest>({
@@ -60,6 +81,13 @@ export const employeeApi = baseApi.injectEndpoints({
         method: 'PUT',
         body: employeeData,
       }),
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       invalidatesTags: (result, error, { id }) => [
         { type: 'Employee', id },
         { type: 'Employee', id: 'LIST' },
@@ -77,8 +105,15 @@ export const employeeApi = baseApi.injectEndpoints({
     }),
     getTrashedEmployees: builder.query<Employee[], void>({
       query: () => '/employees/trashed',
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       providesTags: (result) =>
-        result
+        Array.isArray(result)
           ? [
               ...result.map(({ id }) => ({ type: 'Employee' as const, id })),
               { type: 'Employee', id: 'TRASHED' },
@@ -90,6 +125,13 @@ export const employeeApi = baseApi.injectEndpoints({
         url: `/employees/${id}/restore`,
         method: 'POST',
       }),
+      transformResponse: (response: any) => {
+        // Handle wrapped response format from backend
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       invalidatesTags: (result, error, id) => [
         { type: 'Employee', id },
         { type: 'Employee', id: 'LIST' },
