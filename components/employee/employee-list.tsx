@@ -98,7 +98,7 @@ export function EmployeeList() {
     <div className="space-y-6">
       <PageHeader title="Employees" description="Manage your organization's employees">
         <Button asChild>
-          <Link href="/employee/create">
+          <Link href="/employee/create" prefetch={true}>
             <UserPlus className="mr-2 h-4 w-4" />
             Add Employee
           </Link>

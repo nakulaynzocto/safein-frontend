@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -23,10 +25,10 @@ export default function HomePage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" className="px-8 py-3 text-lg text-white" style={{ backgroundColor: '#3882a5' }} asChild>
-                  <Link href="/register">Get Started Now</Link>
+                  <Link href="/register" prefetch={true}>Get Started Now</Link>
                 </Button>
                 <Button size="lg" variant="outline" className="px-8 py-3 text-lg" style={{ borderColor: '#555879', color: '#555879' }} asChild>
-                  <Link href="/login">Sign In</Link>
+                  <Link href="/login" prefetch={true}>Sign In</Link>
                 </Button>
               </div>
             </div>
@@ -59,7 +61,7 @@ export default function HomePage() {
                   SafeIn visitor management system is built with years of experience and continuous improvement. 
                   We understand that security and efficiency require careful attention to detail.
                 </p>
-                <Link href="#" className="underline" style={{ color: '#3882a5' }}>
+                <Link href="#" className="underline" style={{ color: '#3882a5' }} prefetch={true}>
                   Read our story →
                 </Link>
               </div>
@@ -97,7 +99,7 @@ export default function HomePage() {
                 Automate workflows, delight visitors, and empower your security team to increase organizational efficiency.
               </p>
               <Button size="lg" className="px-8 py-3 text-lg text-white" style={{ backgroundColor: '#121212' }} asChild>
-                <Link href="/register">Try SafeIn Analytics</Link>
+                <Link href="/register" prefetch={true}>Try SafeIn Analytics</Link>
               </Button>
             </div>
             <div className="relative">
@@ -135,7 +137,7 @@ export default function HomePage() {
                 Streamline staff onboarding, manage permissions, and ensure proper access control throughout your organization.
               </p>
               <Button size="lg" className="px-8 py-3 text-lg text-white" style={{ backgroundColor: '#3882a5' }} asChild>
-                <Link href="/register">Learn more →</Link>
+                <Link href="/register" prefetch={true}>Learn more →</Link>
               </Button>
             </div>
           </div>
@@ -153,7 +155,7 @@ export default function HomePage() {
             offers smart recommendations, and keeps you updated on all security operations.
           </p>
           <Button size="lg" className="px-8 py-3 text-lg text-white" style={{ backgroundColor: '#3882a5' }} asChild>
-            <Link href="/register">Explore SafeIn Notifications →</Link>
+            <Link href="/register" prefetch={true}>Explore SafeIn Notifications →</Link>
           </Button>
           <div className="mt-12">
             <Image
@@ -196,7 +198,7 @@ export default function HomePage() {
             </div>
           </div>
           <Button size="lg" className="px-8 py-3 text-lg" style={{ backgroundColor: '#d1d8e2', color: '#121212' }} asChild>
-            <Link href="/register">More about SafeIn →</Link>
+            <Link href="/register" prefetch={true}>More about SafeIn →</Link>
           </Button>
         </div>
       </section>
@@ -214,7 +216,7 @@ export default function HomePage() {
             We believe that trust is earned by a relationship. SafeIn does not monetize your visitor data and has never sold it to anyone. 
             Your data is your data. We are responsible for protecting your information from surveillance and security intrusions.
           </p>
-          <Link href="#" className="underline" style={{ color: '#3882a5' }}>
+          <Link href="#" className="underline" style={{ color: '#3882a5' }} prefetch={true}>
             Read our privacy policy →
           </Link>
         </div>
@@ -262,7 +264,7 @@ export default function HomePage() {
           </div>
           <div className="text-center mt-12">
             <Button size="lg" className="px-8 py-3 text-lg text-white" style={{ backgroundColor: '#3882a5' }} asChild>
-              <Link href="/register">Read our story →</Link>
+              <Link href="/register" prefetch={true}>Read our story →</Link>
             </Button>
           </div>
         </div>
@@ -275,7 +277,7 @@ export default function HomePage() {
             Ready to do your best work? Let's get you started.
           </h2>
           <Button size="lg" className="px-8 py-3 text-lg text-white" style={{ backgroundColor: '#3882a5' }} asChild>
-            <Link href="/register">Sign Up Now</Link>
+            <Link href="/register" prefetch={true}>Sign Up Now</Link>
           </Button>
         </div>
       </section>

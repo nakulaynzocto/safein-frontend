@@ -1,3 +1,5 @@
+"use client"
+
 import { ProtectedLayout } from "@/components/layout/protected-layout"
 import { TrashTable } from "@/components/trash/trash-table"
 import { PageHeader } from "@/components/common/page-header"
@@ -15,7 +17,7 @@ export default function AppointmentTrashPage() {
         >
           <div className="flex gap-2">
             <Button variant="outline" size="sm" asChild>
-              <Link href="/appointment/list">
+              <Link href="/appointment/list" prefetch={true}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Appointments
               </Link>

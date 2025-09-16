@@ -152,7 +152,7 @@ export function Sidebar({ className }: SidebarProps) {
                           isActive(child.href) && "bg-sidebar-primary text-sidebar-primary-foreground",
                         )}
                       >
-                        <Link href={child.href}>
+                        <Link href={child.href} prefetch={true}>
                           <child.icon className="mr-2 h-3 w-3" />
                           {child.name}
                         </Link>
@@ -175,7 +175,7 @@ export function Sidebar({ className }: SidebarProps) {
                 collapsed && "justify-center px-2",
               )}
             >
-              <Link href={item.href!}>
+              <Link href={item.href!} prefetch={true}>
                 <item.icon className={cn("h-4 w-4", !collapsed && "mr-2")} />
                 {!collapsed && item.name}
               </Link>

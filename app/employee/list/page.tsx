@@ -1,3 +1,5 @@
+"use client"
+
 import { ProtectedLayout } from "@/components/layout/protected-layout"
 import { EmployeeList } from "@/components/employee/employee-list"
 

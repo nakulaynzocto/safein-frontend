@@ -159,7 +159,7 @@ export function RegisterForm() {
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="text-primary hover:underline" prefetch={true}>
               Sign in
             </Link>
           </p>

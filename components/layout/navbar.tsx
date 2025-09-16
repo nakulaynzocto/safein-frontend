@@ -51,7 +51,7 @@ export function Navbar() {
           {/* Mobile Menu + Logo */}
           <div className="flex items-center gap-4">
             <MobileSidebar />
-            <Link href="/dashboard" className="flex items-center space-x-2">
+            <Link href="/dashboard" className="flex items-center space-x-2" prefetch={true}>
               <Image
                 src="/aynzo-logo.svg"
                 alt="Aynzo Logo"
@@ -95,19 +95,19 @@ export function Navbar() {
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard" className="flex items-center">
+                      <Link href="/dashboard" className="flex items-center" prefetch={true}>
                         <User className="mr-2 h-4 w-4" />
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/profile" className="flex items-center">
+                      <Link href="/profile" className="flex items-center" prefetch={true}>
                         <UserCircle className="mr-2 h-4 w-4" />
                         Profile
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/settings" className="flex items-center">
+                      <Link href="/settings" className="flex items-center" prefetch={true}>
                         <Settings className="mr-2 h-4 w-4" />
                         Settings
                       </Link>
@@ -123,10 +123,10 @@ export function Navbar() {
             ) : (
               <>
                 <Button variant="ghost" asChild>
-                  <Link href="/login">Login</Link>
+                  <Link href="/login" prefetch={true}>Login</Link>
                 </Button>
                 <Button asChild>
-                  <Link href="/register">Sign Up</Link>
+                  <Link href="/register" prefetch={true}>Sign Up</Link>
                 </Button>
               </>
             )}

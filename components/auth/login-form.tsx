@@ -105,7 +105,7 @@ export function LoginForm() {
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <Link href="/register" className="text-primary hover:underline">
+            <Link href="/register" className="text-primary hover:underline" prefetch={true}>
               Sign up
             </Link>
           </p>

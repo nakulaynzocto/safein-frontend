@@ -14,7 +14,7 @@ export function DashboardHeader({ userName }: DashboardHeaderProps) {
     <PageHeader title={`Hi, ${userName || "User"}!`}>
       <div className="flex gap-2">
         <Button asChild>
-          <Link href="/appointment/create">
+          <Link href="/appointment/create" prefetch={true}>
             <CalendarPlus className="mr-2 h-4 w-4" />
             New Appointment
           </Link>

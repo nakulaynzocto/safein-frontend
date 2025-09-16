@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Providers } from "./providers"
 import { Suspense } from "react"
+import { ErrorBoundary } from "@/components/common/error-boundary"
 
 export const metadata: Metadata = {
   title: "Gatekeeper - Visitor Appointment System",
@@ -21,10 +22,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        {/* Wrapped children with Redux Provider and Suspense boundary */}
-        <Suspense fallback={<div>Loading...</div>}>
-          <Providers>{children}</Providers>
-        </Suspense>
+        {/* Wrapped children with Error Boundary, Redux Provider and Suspense boundary */}
+        <ErrorBoundary>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Providers>{children}</Providers>
+          </Suspense>
+        </ErrorBoundary>
         <Analytics />
       </body>
     </html>

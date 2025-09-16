@@ -1,3 +1,5 @@
+"use client"
+
 import { ProtectedLayout } from "@/components/layout/protected-layout"
 import { DashboardOverview } from "@/components/dashboard"
 

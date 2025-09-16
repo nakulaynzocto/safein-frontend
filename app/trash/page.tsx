@@ -1,3 +1,5 @@
+"use client"
+
 import { ProtectedLayout } from "@/components/layout/protected-layout"
 import { TrashTable } from "@/components/trash/trash-table"
 import { PageHeader } from "@/components/common/page-header"

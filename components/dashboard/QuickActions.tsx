@@ -50,7 +50,7 @@ export function QuickActions() {
               variant="outline"
               asChild
             >
-              <Link href={action.href}>
+              <Link href={action.href} prefetch={true}>
                 <action.icon className="h-6 w-6 mb-2" />
                 {action.label}
               </Link>

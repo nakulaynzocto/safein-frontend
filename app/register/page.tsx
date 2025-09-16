@@ -1,3 +1,5 @@
+"use client"
+
 import { RegisterForm } from "@/components/auth/register-form"
 import { PublicLayout } from "@/components/layout/public-layout"
 

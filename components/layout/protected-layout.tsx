@@ -17,22 +17,24 @@ interface ProtectedLayoutProps {
 export function ProtectedLayout({ children }: ProtectedLayoutProps) {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const { isAuthenticated } = useAppSelector((state) => state.auth)
+  const { isAuthenticated, token } = useAppSelector((state) => state.auth)
   const [isClient, setIsClient] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
     dispatch(initializeAuth())
+    setIsInitialized(true)
   }, [dispatch])
 
   useEffect(() => {
-    if (isClient && !isAuthenticated) {
+    if (isInitialized && !isAuthenticated && !token) {
       router.push("/login")
     }
-  }, [isClient, isAuthenticated, router])
+  }, [isInitialized, isAuthenticated, token, router])
 
-  // Show loading during hydration
-  if (!isClient) {
+  // Show loading during hydration and auth initialization
+  if (!isClient || !isInitialized) {
     return (
       <div className="flex h-screen items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -42,7 +44,11 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
   // Don't render anything if not authenticated (will redirect)
   if (!isAuthenticated) {
-    return null
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
   }
 
   return (

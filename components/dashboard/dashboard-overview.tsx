@@ -97,7 +97,7 @@ export function DashboardOverview() {
       >
         <div className="flex gap-2">
           <Button asChild>
-            <Link href="/appointment/create">
+            <Link href="/appointment/create" prefetch={true}>
               <CalendarPlus className="mr-2 h-4 w-4" />
               New Appointment
             </Link>
@@ -211,25 +211,25 @@ export function DashboardOverview() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Button className="h-20 flex-col bg-transparent" variant="outline" asChild>
-              <Link href="/appointment/create">
+              <Link href="/appointment/create" prefetch={true}>
                 <CalendarPlus className="h-6 w-6 mb-2" />
                 Create Appointment
               </Link>
             </Button>
             <Button className="h-20 flex-col bg-transparent" variant="outline" asChild>
-              <Link href="/appointment/list">
+              <Link href="/appointment/list" prefetch={true}>
                 <Calendar className="h-6 w-6 mb-2" />
                 View All Appointments
               </Link>
             </Button>
             <Button className="h-20 flex-col bg-transparent" variant="outline" asChild>
-              <Link href="/employee/create">
+              <Link href="/employee/create" prefetch={true}>
                 <UserPlus className="h-6 w-6 mb-2" />
                 Add Employee
               </Link>
             </Button>
             <Button className="h-20 flex-col bg-transparent" variant="outline" asChild>
-              <Link href="/employee/list">
+              <Link href="/employee/list" prefetch={true}>
                 <Users className="h-6 w-6 mb-2" />
                 Manage Employees
               </Link>

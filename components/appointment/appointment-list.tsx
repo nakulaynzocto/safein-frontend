@@ -164,7 +164,7 @@ export function AppointmentList() {
     <div className="space-y-6">
       <PageHeader title="Appointments" description="Manage visitor appointments">
         <Button asChild>
-          <Link href="/appointment/create">
+          <Link href="/appointment/create" prefetch={true}>
             <CalendarPlus className="mr-2 h-4 w-4" />
             New Appointment
           </Link>

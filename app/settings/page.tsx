@@ -1,3 +1,5 @@
+"use client"
+
 import { ProtectedLayout } from "@/components/layout/protected-layout"
 import { SettingsForm } from "@/components/settings"
 import { PageHeader } from "@/components/common/page-header"
