@@ -1,43 +1,113 @@
 "use client"
 
-import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from "react-hook-form"
-import { SelectField } from "@/components/common/select-field"
+import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue, Control } from "react-hook-form"
+import { Controller } from "react-hook-form"
 import { SettingsCard } from "./SettingsCard"
-import { Palette } from "lucide-react"
-import { SettingsData, themes, languages } from "./settings.utils"
+import { SelectField } from "@/components/common/select-field"
+import { SettingsData } from "./settings.utils"
 
 interface AppearanceSettingsProps {
   register: UseFormRegister<SettingsData>
   errors: FieldErrors<SettingsData>
   watch: UseFormWatch<SettingsData>
   setValue: UseFormSetValue<SettingsData>
+  control: Control<SettingsData>
 }
 
-export function AppearanceSettings({ register, errors, watch, setValue }: AppearanceSettingsProps) {
-  return (
-    <SettingsCard icon={Palette} title="Appearance Settings">
-      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-        <div className="space-y-2">
-          <SelectField
-            label="Theme"
-            placeholder="Select theme"
-            options={themes}
-            error={errors.theme?.message}
-            value={watch("theme") || ""}
-            onChange={(value) => setValue("theme", value)}
-          />
-        </div>
+export function AppearanceSettings({ register, errors, control }: AppearanceSettingsProps) {
+  const themeOptions = [
+    { value: 'light', label: 'Light' },
+    { value: 'dark', label: 'Dark' },
+    { value: 'system', label: 'System' },
+  ]
 
-        <div className="space-y-2">
-          <SelectField
-            label="Language"
-            placeholder="Select language"
-            options={languages}
-            error={errors.language?.message}
-            value={watch("language") || ""}
-            onChange={(value) => setValue("language", value)}
-          />
-        </div>
+  const languageOptions = [
+    { value: 'en', label: 'English' },
+    { value: 'es', label: 'Spanish' },
+    { value: 'fr', label: 'French' },
+    { value: 'de', label: 'German' },
+    { value: 'it', label: 'Italian' },
+    { value: 'pt', label: 'Portuguese' },
+    { value: 'zh', label: 'Chinese' },
+    { value: 'ja', label: 'Japanese' },
+  ]
+
+  const dateFormatOptions = [
+    { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY (US)' },
+    { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY (EU)' },
+    { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD (ISO)' },
+  ]
+
+  const timeFormatOptions = [
+    { value: '12h', label: '12-hour (AM/PM)' },
+    { value: '24h', label: '24-hour' },
+  ]
+
+  return (
+    <SettingsCard
+      title="Appearance Settings"
+      description="Customize the look and feel of your application"
+    >
+      <div className="space-y-4">
+        <Controller
+          name="theme"
+          control={control}
+          rules={{ required: "Theme is required" }}
+          render={({ field }) => (
+            <SelectField
+              label="Theme"
+              options={themeOptions}
+              value={field.value}
+              onChange={field.onChange}
+              error={errors.theme?.message}
+            />
+          )}
+        />
+        
+        <Controller
+          name="language"
+          control={control}
+          rules={{ required: "Language is required" }}
+          render={({ field }) => (
+            <SelectField
+              label="Language"
+              options={languageOptions}
+              value={field.value}
+              onChange={field.onChange}
+              error={errors.language?.message}
+            />
+          )}
+        />
+        
+        <Controller
+          name="dateFormat"
+          control={control}
+          rules={{ required: "Date format is required" }}
+          render={({ field }) => (
+            <SelectField
+              label="Date Format"
+              options={dateFormatOptions}
+              value={field.value}
+              onChange={field.onChange}
+              error={errors.dateFormat?.message}
+            />
+          )}
+        />
+        
+        <Controller
+          name="timeFormat"
+          control={control}
+          rules={{ required: "Time format is required" }}
+          render={({ field }) => (
+            <SelectField
+              label="Time Format"
+              options={timeFormatOptions}
+              value={field.value}
+              onChange={field.onChange}
+              error={errors.timeFormat?.message}
+            />
+          )}
+        />
       </div>
     </SettingsCard>
   )

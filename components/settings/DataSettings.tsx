@@ -1,64 +1,97 @@
 "use client"
 
-import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from "react-hook-form"
-import { SelectField } from "@/components/common/select-field"
+import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue, Control } from "react-hook-form"
+import { Controller } from "react-hook-form"
+import { SettingsCard } from "./SettingsCard"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { SettingsCard } from "./SettingsCard"
-import { Database } from "lucide-react"
-import { SettingsData, backupFrequencies, dataRetentionPeriods } from "./settings.utils"
+import { SelectField } from "@/components/common/select-field"
+import { SettingsData } from "./settings.utils"
 
 interface DataSettingsProps {
   register: UseFormRegister<SettingsData>
   errors: FieldErrors<SettingsData>
   watch: UseFormWatch<SettingsData>
   setValue: UseFormSetValue<SettingsData>
+  control: Control<SettingsData>
 }
 
-export function DataSettings({ register, errors, watch, setValue }: DataSettingsProps) {
-  const watchedValues = watch()
+export function DataSettings({ register, errors, watch, setValue, control }: DataSettingsProps) {
+  const autoBackup = watch("autoBackup")
+
+  const backupFrequencyOptions = [
+    { value: 'daily', label: 'Daily' },
+    { value: 'weekly', label: 'Weekly' },
+    { value: 'monthly', label: 'Monthly' },
+  ]
+
+  const dataRetentionOptions = [
+    { value: "30", label: '30 days' },
+    { value: "90", label: '90 days' },
+    { value: "180", label: '6 months' },
+    { value: "365", label: '1 year' },
+    { value: "730", label: '2 years' },
+    { value: "1095", label: '3 years' },
+  ]
 
   return (
-    <SettingsCard icon={Database} title="Data Settings">
-      <div className="flex items-center justify-between">
-        <div className="space-y-0.5">
-          <Label htmlFor="autoBackup">Automatic Backup</Label>
-          <p className="text-sm text-muted-foreground">
-            Automatically backup data at regular intervals
-          </p>
+    <SettingsCard
+      title="Data Settings"
+      description="Configure data backup and retention policies"
+    >
+      <div className="space-y-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="autoBackup">Automatic Backup</Label>
+              <p className="text-sm text-muted-foreground">
+                Automatically backup your data on a schedule
+              </p>
+            </div>
+            <Switch
+              id="autoBackup"
+              checked={autoBackup}
+              onCheckedChange={(checked) => setValue("autoBackup", checked)}
+            />
+          </div>
         </div>
-        <Switch
-          id="autoBackup"
-          checked={watchedValues.autoBackup}
-          onCheckedChange={(checked) => setValue("autoBackup", checked)}
-        />
+
+        {autoBackup && (
+          <div className="space-y-4">
+            <Controller
+              name="backupFrequency"
+              control={control}
+              rules={{ required: "Backup frequency is required" }}
+              render={({ field }) => (
+                <SelectField
+                  label="Backup Frequency"
+                  options={backupFrequencyOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.backupFrequency?.message}
+                />
+              )}
+            />
+          </div>
+        )}
+
+        <div className="space-y-4">
+          <Controller
+            name="dataRetention"
+            control={control}
+            rules={{ required: "Data retention period is required" }}
+            render={({ field }) => (
+              <SelectField
+                label="Data Retention Period"
+                options={dataRetentionOptions}
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.dataRetention?.message}
+              />
+            )}
+          />
+        </div>
       </div>
-
-      {watchedValues.autoBackup && (
-        <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-          <div className="space-y-2">
-            <SelectField
-              label="Backup Frequency"
-              placeholder="Select backup frequency"
-              options={backupFrequencies}
-              error={errors.backupFrequency?.message}
-              value={watch("backupFrequency") || ""}
-              onChange={(value) => setValue("backupFrequency", value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <SelectField
-              label="Data Retention Period"
-              placeholder="Select retention period"
-              options={dataRetentionPeriods}
-              error={errors.dataRetention?.message}
-              value={watch("dataRetention") || ""}
-              onChange={(value) => setValue("dataRetention", value)}
-            />
-          </div>
-        </div>
-      )}
     </SettingsCard>
   )
 }

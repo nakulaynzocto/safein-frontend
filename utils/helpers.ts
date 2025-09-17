@@ -49,3 +49,18 @@ export function isValidPhone(phone: string): boolean {
   const phoneRegex = /^[+]?[1-9][\d]{0,15}$/
   return phoneRegex.test(phone.replace(/\s/g, ""))
 }
+
+export const createUrlParams = (urlData: Record<string, any>): string => {
+  let datasize = Object.keys(urlData)?.length;
+  const keys = Object.keys(urlData);
+  let search = "";
+  if (datasize) {
+    keys.forEach((key) => {
+      if (urlData[key] !== null && urlData[key] !== "" && urlData[key] !== undefined) {
+        search += `${key}=${urlData[key]}&`;
+      }
+    });
+    return search?.substring(0, search.length - 1);
+  }
+  return "";
+};

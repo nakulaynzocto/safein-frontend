@@ -1,61 +1,93 @@
 "use client"
 
-import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from "react-hook-form"
-import { SelectField } from "@/components/common/select-field"
+import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue, Control } from "react-hook-form"
+import { Controller } from "react-hook-form"
+import { SettingsCard } from "./SettingsCard"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { SettingsCard } from "./SettingsCard"
-import { Shield } from "lucide-react"
-import { SettingsData, sessionTimeouts, passwordPolicies } from "./settings.utils"
+import { SelectField } from "@/components/common/select-field"
+import { SettingsData } from "./settings.utils"
 
 interface SecuritySettingsProps {
   register: UseFormRegister<SettingsData>
   errors: FieldErrors<SettingsData>
   watch: UseFormWatch<SettingsData>
   setValue: UseFormSetValue<SettingsData>
+  control: Control<SettingsData>
 }
 
-export function SecuritySettings({ register, errors, watch, setValue }: SecuritySettingsProps) {
-  const watchedValues = watch()
+export function SecuritySettings({ register, errors, watch, setValue, control }: SecuritySettingsProps) {
+  const twoFactorAuth = watch("twoFactorAuth")
+
+  const sessionTimeoutOptions = [
+    { value: "15", label: "15 minutes" },
+    { value: "30", label: "30 minutes" },
+    { value: "60", label: "1 hour" },
+    { value: "120", label: "2 hours" },
+    { value: "480", label: "8 hours" },
+  ]
+
+  const passwordExpiryOptions = [
+    { value: "30", label: "30 days" },
+    { value: "60", label: "60 days" },
+    { value: "90", label: "90 days" },
+    { value: "180", label: "6 months" },
+    { value: "365", label: "1 year" },
+  ]
 
   return (
-    <SettingsCard icon={Shield} title="Security Settings">
-      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-        <div className="space-y-2">
-          <SelectField
-            label="Session Timeout"
-            placeholder="Select session timeout"
-            options={sessionTimeouts}
-            error={errors.sessionTimeout?.message}
-            value={watch("sessionTimeout") || ""}
-            onChange={(value) => setValue("sessionTimeout", value)}
-          />
+    <SettingsCard
+      title="Security Settings"
+      description="Configure security preferences and authentication settings"
+    >
+      <div className="space-y-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="twoFactorAuth">Two-Factor Authentication</Label>
+              <p className="text-sm text-muted-foreground">
+                Add an extra layer of security to your account
+              </p>
+            </div>
+            <Switch
+              id="twoFactorAuth"
+              checked={twoFactorAuth}
+              onCheckedChange={(checked) => setValue("twoFactorAuth", checked)}
+            />
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <SelectField
-            label="Password Policy"
-            placeholder="Select password policy"
-            options={passwordPolicies}
-            error={errors.passwordPolicy?.message}
-            value={watch("passwordPolicy") || ""}
-            onChange={(value) => setValue("passwordPolicy", value)}
+        <div className="space-y-4">
+          <Controller
+            name="sessionTimeout"
+            control={control}
+            rules={{ required: "Session timeout is required" }}
+            render={({ field }) => (
+              <SelectField
+                label="Session Timeout"
+                options={sessionTimeoutOptions}
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.sessionTimeout?.message}
+              />
+            )}
+          />
+          
+          <Controller
+            name="passwordExpiry"
+            control={control}
+            rules={{ required: "Password expiry is required" }}
+            render={({ field }) => (
+              <SelectField
+                label="Password Expiry"
+                options={passwordExpiryOptions}
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.passwordExpiry?.message}
+              />
+            )}
           />
         </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="space-y-0.5">
-          <Label htmlFor="twoFactorAuth">Two-Factor Authentication</Label>
-          <p className="text-sm text-muted-foreground">
-            Enable two-factor authentication for enhanced security
-          </p>
-        </div>
-        <Switch
-          id="twoFactorAuth"
-          checked={watchedValues.twoFactorAuth}
-          onCheckedChange={(checked) => setValue("twoFactorAuth", checked)}
-        />
       </div>
     </SettingsCard>
   )

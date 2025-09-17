@@ -1,81 +1,103 @@
 "use client"
 
-import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from "react-hook-form"
-import { SelectField } from "@/components/common/select-field"
+import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue, Control } from "react-hook-form"
+import { Controller } from "react-hook-form"
+import { SettingsCard } from "./SettingsCard"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { SettingsCard } from "./SettingsCard"
-import { Bell } from "lucide-react"
-import { SettingsData, reminderTimes } from "./settings.utils"
+import { SelectField } from "@/components/common/select-field"
+import { SettingsData } from "./settings.utils"
 
 interface NotificationSettingsProps {
   register: UseFormRegister<SettingsData>
   errors: FieldErrors<SettingsData>
   watch: UseFormWatch<SettingsData>
   setValue: UseFormSetValue<SettingsData>
+  control: Control<SettingsData>
 }
 
-export function NotificationSettings({ register, errors, watch, setValue }: NotificationSettingsProps) {
-  const watchedValues = watch()
+export function NotificationSettings({ register, errors, watch, setValue, control }: NotificationSettingsProps) {
+  const emailNotifications = watch("emailNotifications")
+  const smsNotifications = watch("smsNotifications")
+  const appointmentReminders = watch("appointmentReminders")
+
+  const reminderTimeOptions = [
+    { value: "15", label: "15 minutes before" },
+    { value: "30", label: "30 minutes before" },
+    { value: "60", label: "1 hour before" },
+    { value: "120", label: "2 hours before" },
+    { value: "1440", label: "1 day before" },
+  ]
 
   return (
-    <SettingsCard icon={Bell} title="Notification Settings">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label htmlFor="emailNotifications">Email Notifications</Label>
-            <p className="text-sm text-muted-foreground">
-              Receive notifications via email
-            </p>
+    <SettingsCard
+      title="Notification Settings"
+      description="Configure how you receive notifications and reminders"
+    >
+      <div className="space-y-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="emailNotifications">Email Notifications</Label>
+              <p className="text-sm text-muted-foreground">
+                Receive notifications via email
+              </p>
+            </div>
+            <Switch
+              id="emailNotifications"
+              checked={emailNotifications}
+              onCheckedChange={(checked) => setValue("emailNotifications", checked)}
+            />
           </div>
-          <Switch
-            id="emailNotifications"
-            checked={watchedValues.emailNotifications}
-            onCheckedChange={(checked) => setValue("emailNotifications", checked)}
-          />
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="smsNotifications">SMS Notifications</Label>
+              <p className="text-sm text-muted-foreground">
+                Receive notifications via SMS
+              </p>
+            </div>
+            <Switch
+              id="smsNotifications"
+              checked={smsNotifications}
+              onCheckedChange={(checked) => setValue("smsNotifications", checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="appointmentReminders">Appointment Reminders</Label>
+              <p className="text-sm text-muted-foreground">
+                Send automatic reminders for upcoming appointments
+              </p>
+            </div>
+            <Switch
+              id="appointmentReminders"
+              checked={appointmentReminders}
+              onCheckedChange={(checked) => setValue("appointmentReminders", checked)}
+            />
+          </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label htmlFor="smsNotifications">SMS Notifications</Label>
-            <p className="text-sm text-muted-foreground">
-              Receive notifications via SMS
-            </p>
+        {appointmentReminders && (
+          <div className="space-y-2">
+            <Controller
+              name="reminderTime"
+              control={control}
+              rules={{ required: "Reminder time is required" }}
+              render={({ field }) => (
+                <SelectField
+                  label="Reminder Time"
+                  options={reminderTimeOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.reminderTime?.message}
+                />
+              )}
+            />
           </div>
-          <Switch
-            id="smsNotifications"
-            checked={watchedValues.smsNotifications}
-            onCheckedChange={(checked) => setValue("smsNotifications", checked)}
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label htmlFor="appointmentReminders">Appointment Reminders</Label>
-            <p className="text-sm text-muted-foreground">
-              Send automatic appointment reminders
-            </p>
-          </div>
-          <Switch
-            id="appointmentReminders"
-            checked={watchedValues.appointmentReminders}
-            onCheckedChange={(checked) => setValue("appointmentReminders", checked)}
-          />
-        </div>
+        )}
       </div>
-
-      {watchedValues.appointmentReminders && (
-        <div className="space-y-2">
-          <SelectField
-            label="Reminder Time"
-            placeholder="Select reminder time"
-            options={reminderTimes}
-            error={errors.reminderTime?.message}
-            value={watch("reminderTime") || ""}
-            onChange={(value) => setValue("reminderTime", value)}
-          />
-        </div>
-      )}
     </SettingsCard>
   )
 }

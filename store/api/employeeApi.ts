@@ -1,23 +1,35 @@
 import { baseApi } from './baseApi'
+import { createUrlParams } from '@/utils/helpers'
 
 export interface Employee {
-  id: string
+  _id: string
+  employeeId: string
   name: string
   email: string
   phone: string
+  whatsapp?: string
   department: string
-  position: string
-  isActive: boolean
+  designation: string
+  role: string
+  officeLocation: string
+  status: 'Active' | 'Inactive'
+  isDeleted: boolean
+  deletedAt?: string
   createdAt: string
+  updatedAt: string
 }
 
 export interface CreateEmployeeRequest {
+  employeeId: string
   name: string
   email: string
   phone: string
+  whatsapp?: string
   department: string
-  position: string
-  isActive?: boolean
+  designation: string
+  role: string
+  officeLocation: string
+  status?: 'Active' | 'Inactive'
 }
 
 export interface UpdateEmployeeRequest {
@@ -25,15 +37,42 @@ export interface UpdateEmployeeRequest {
   name?: string
   email?: string
   phone?: string
+  whatsapp?: string
   department?: string
-  position?: string
-  isActive?: boolean
+  designation?: string
+  role?: string
+  officeLocation?: string
+  status?: 'Active' | 'Inactive'
+}
+
+export interface GetEmployeesQuery {
+  page?: number
+  limit?: number
+  search?: string
+  department?: string
+  status?: 'Active' | 'Inactive'
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+}
+
+export interface EmployeeListResponse {
+  employees: Employee[]
+  pagination: {
+    currentPage: number
+    totalPages: number
+    totalEmployees: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+  }
 }
 
 export const employeeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getEmployees: builder.query<Employee[], void>({
-      query: () => '/employees',
+    getEmployees: builder.query<EmployeeListResponse, GetEmployeesQuery | void>({
+      query: (params) => {
+        const queryParams = createUrlParams(params || {})
+        return `/employees${queryParams ? `?${queryParams}` : ''}`
+      },
       transformResponse: (response: any) => {
         // Handle wrapped response format from backend
         if (response.success && response.data) {
@@ -42,9 +81,9 @@ export const employeeApi = baseApi.injectEndpoints({
         return response
       },
       providesTags: (result) =>
-        Array.isArray(result)
+        result?.employees
           ? [
-              ...result.map(({ id }) => ({ type: 'Employee' as const, id })),
+              ...result.employees.map(({ _id }) => ({ type: 'Employee' as const, id: _id })),
               { type: 'Employee', id: 'LIST' },
             ]
           : [{ type: 'Employee', id: 'LIST' }],
@@ -103,8 +142,11 @@ export const employeeApi = baseApi.injectEndpoints({
         { type: 'Employee', id: 'LIST' },
       ],
     }),
-    getTrashedEmployees: builder.query<Employee[], void>({
-      query: () => '/employees/trashed',
+    getTrashedEmployees: builder.query<EmployeeListResponse, GetEmployeesQuery | void>({
+      query: (params) => {
+        const queryParams = createUrlParams(params || {})
+        return `/employees/trashed${queryParams ? `?${queryParams}` : ''}`
+      },
       transformResponse: (response: any) => {
         // Handle wrapped response format from backend
         if (response.success && response.data) {
@@ -113,9 +155,9 @@ export const employeeApi = baseApi.injectEndpoints({
         return response
       },
       providesTags: (result) =>
-        Array.isArray(result)
+        result?.employees
           ? [
-              ...result.map(({ id }) => ({ type: 'Employee' as const, id })),
+              ...result.employees.map(({ _id }) => ({ type: 'Employee' as const, id: _id })),
               { type: 'Employee', id: 'TRASHED' },
             ]
           : [{ type: 'Employee', id: 'TRASHED' }],
@@ -123,7 +165,7 @@ export const employeeApi = baseApi.injectEndpoints({
     restoreEmployee: builder.mutation<Employee, string>({
       query: (id) => ({
         url: `/employees/${id}/restore`,
-        method: 'POST',
+        method: 'PUT',
       }),
       transformResponse: (response: any) => {
         // Handle wrapped response format from backend
@@ -138,6 +180,54 @@ export const employeeApi = baseApi.injectEndpoints({
         { type: 'Employee', id: 'TRASHED' },
       ],
     }),
+    updateEmployeeStatus: builder.mutation<Employee, { id: string; status: 'Active' | 'Inactive' }>({
+      query: ({ id, status }) => ({
+        url: `/employees/${id}/status`,
+        method: 'PUT',
+        body: { status },
+      }),
+      transformResponse: (response: any) => {
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Employee', id },
+        { type: 'Employee', id: 'LIST' },
+      ],
+    }),
+    bulkUpdateEmployees: builder.mutation<{ updatedCount: number }, { employeeIds: string[]; status?: 'Active' | 'Inactive'; department?: string; designation?: string }>({
+      query: (bulkData) => ({
+        url: '/employees/bulk-update',
+        method: 'PUT',
+        body: bulkData,
+      }),
+      transformResponse: (response: any) => {
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
+      invalidatesTags: [{ type: 'Employee', id: 'LIST' }],
+    }),
+    getEmployeeStats: builder.query<{
+      totalEmployees: number
+      activeEmployees: number
+      inactiveEmployees: number
+      deletedEmployees: number
+      employeesByDepartment: Array<{ department: string; count: number }>
+      employeesByStatus: Array<{ status: string; count: number }>
+    }, void>({
+      query: () => '/employees/stats',
+      transformResponse: (response: any) => {
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
+      providesTags: [{ type: 'Employee', id: 'STATS' }],
+    }),
   }),
 })
 
@@ -149,4 +239,7 @@ export const {
   useDeleteEmployeeMutation,
   useGetTrashedEmployeesQuery,
   useRestoreEmployeeMutation,
+  useUpdateEmployeeStatusMutation,
+  useBulkUpdateEmployeesMutation,
+  useGetEmployeeStatsQuery,
 } = employeeApi

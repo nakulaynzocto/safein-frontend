@@ -3,18 +3,18 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { showSuccess, showError } from "@/utils/toaster"
-import { GeneralSettings } from "./GeneralSettings"
-import { NotificationSettings } from "./NotificationSettings"
-import { SecuritySettings } from "./SecuritySettings"
-import { AppearanceSettings } from "./AppearanceSettings"
-import { DataSettings } from "./DataSettings"
-import { SettingsActions } from "./SettingsActions"
-import { SettingsData, defaultSettings } from "./settings.utils"
+import { GeneralSettings } from "@/components/settings/GeneralSettings"
+import { NotificationSettings } from "@/components/settings/NotificationSettings"
+import { SecuritySettings } from "@/components/settings/SecuritySettings"
+import { AppearanceSettings } from "@/components/settings/AppearanceSettings"
+import { DataSettings } from "@/components/settings/DataSettings"
+import { SettingsActions } from "@/components/settings/SettingsActions"
+import { SettingsData, defaultSettings } from "@/components/settings/settings.utils"
 
 export function SettingsForm() {
   const [isLoading, setIsLoading] = useState(false)
   
-  const { register, handleSubmit, watch, setValue, formState: { errors }, reset } = useForm<SettingsData>({
+  const { register, handleSubmit, watch, setValue, control, formState: { errors }, reset } = useForm<SettingsData>({
     defaultValues: defaultSettings
   })
 
@@ -44,6 +44,7 @@ export function SettingsForm() {
           errors={errors} 
           watch={watch} 
           setValue={setValue} 
+          control={control}
         />
         
         <NotificationSettings 
@@ -51,6 +52,7 @@ export function SettingsForm() {
           errors={errors} 
           watch={watch} 
           setValue={setValue} 
+          control={control}
         />
         
         <SecuritySettings 
@@ -58,6 +60,7 @@ export function SettingsForm() {
           errors={errors} 
           watch={watch} 
           setValue={setValue} 
+          control={control}
         />
         
         <AppearanceSettings 
@@ -65,6 +68,7 @@ export function SettingsForm() {
           errors={errors} 
           watch={watch} 
           setValue={setValue} 
+          control={control}
         />
         
         <DataSettings 
@@ -72,6 +76,7 @@ export function SettingsForm() {
           errors={errors} 
           watch={watch} 
           setValue={setValue} 
+          control={control}
         />
 
         <SettingsActions 

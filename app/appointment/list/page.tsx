@@ -1,5 +1,3 @@
-"use client"
-
 import { ProtectedLayout } from "@/components/layout/protected-layout"
 import { AppointmentList } from "@/components/appointment/appointment-list"
 

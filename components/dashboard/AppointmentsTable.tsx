@@ -84,3 +84,4 @@ export function AppointmentsTable({
     </Card>
   )
 }
+

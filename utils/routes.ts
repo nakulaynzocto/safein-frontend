@@ -14,6 +14,7 @@ export const routes = {
     EMPLOYEECREATE: "/employee/create",
     EMPLOYEELIST: "/employee/list",
     EMPLOYEETRASH: "/employee/trash",
+    EMPLOYEEEDIT: "/employee/[id]", // Dynamic route pattern
     APPOINTMENTCREATE: "/appointment/create",
     APPOINTMENTLIST: "/appointment/list",
     APPOINTMENTTRASH: "/appointment/trash",
@@ -41,7 +42,18 @@ export const isPublicRoute = (path: string): boolean => {
 }
 
 export const isPrivateRoute = (path: string): boolean => {
-  return Object.values(routes.privateroute).includes(path as PrivateRoute)
+  // Check exact matches first
+  if (Object.values(routes.privateroute).includes(path as PrivateRoute)) {
+    return true
+  }
+  
+  // Check dynamic route patterns
+  // Employee edit route: /employee/[id]
+  if (path.startsWith('/employee/') && path !== '/employee/create' && path !== '/employee/list' && path !== '/employee/trash') {
+    return true
+  }
+  
+  return false
 }
 
 // Route key helpers

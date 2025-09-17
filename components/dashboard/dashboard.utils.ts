@@ -1,31 +1,84 @@
-// ---------- Dashboard Utils ----------
+import { Appointment } from "@/store/api/appointmentApi"
 
-export const calculateAppointmentStats = (appointments: any[]) => {
-  const totalAppointments = appointments.length
-  const pendingAppointments = appointments.filter((apt) => apt.status === "pending").length
-  const todayAppointments = appointments.filter((apt) => {
-    const today = new Date().toISOString().split("T")[0]
-    return apt.appointmentDate === today
-  }).length
-  const completedAppointments = appointments.filter((apt) => apt.status === "completed").length
-
-  return {
-    totalAppointments,
-    pendingAppointments,
-    todayAppointments,
-    completedAppointments,
-  }
+export interface AppointmentStats {
+  totalAppointments: number
+  pendingAppointments: number
+  approvedAppointments: number
+  rejectedAppointments: number
+  completedAppointments: number
+  todaysAppointments: number
 }
 
-export const getRecentAppointments = (appointments: any[], limit: number = 5) => {
+export function calculateAppointmentStats(appointments: Appointment[]): AppointmentStats {
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  
+  const stats = appointments.reduce(
+    (acc, appointment) => {
+      acc.totalAppointments++
+      
+      // Count by status
+      switch (appointment.status) {
+        case 'pending':
+          acc.pendingAppointments++
+          break
+        case 'approved':
+          acc.approvedAppointments++
+          break
+        case 'rejected':
+          acc.rejectedAppointments++
+          break
+        case 'completed':
+        case 'checked-out':
+          acc.completedAppointments++
+          break
+      }
+      
+      // Count today's appointments
+      const appointmentDate = new Date(appointment.appointmentDate)
+      const appointmentDateOnly = new Date(
+        appointmentDate.getFullYear(),
+        appointmentDate.getMonth(),
+        appointmentDate.getDate()
+      )
+      
+      if (appointmentDateOnly.getTime() === today.getTime()) {
+        acc.todaysAppointments++
+      }
+      
+      return acc
+    },
+    {
+      totalAppointments: 0,
+      pendingAppointments: 0,
+      approvedAppointments: 0,
+      rejectedAppointments: 0,
+      completedAppointments: 0,
+      todaysAppointments: 0,
+    }
+  )
+  
+  return stats
+}
+
+export function getRecentAppointments(appointments: Appointment[], limit: number = 5): Appointment[] {
   return appointments
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, limit)
 }
 
-export const getTodaysAppointments = (appointments: any[]) => {
-  const today = new Date().toISOString().split("T")[0]
-  return appointments
-    .filter((apt) => apt.appointmentDate === today)
-    .sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime))
+export function getTodaysAppointments(appointments: Appointment[]): Appointment[] {
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  
+  return appointments.filter((appointment) => {
+    const appointmentDate = new Date(appointment.appointmentDate)
+    const appointmentDateOnly = new Date(
+      appointmentDate.getFullYear(),
+      appointmentDate.getMonth(),
+      appointmentDate.getDate()
+    )
+    
+    return appointmentDateOnly.getTime() === today.getTime()
+  })
 }

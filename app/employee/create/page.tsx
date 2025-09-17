@@ -1,5 +1,3 @@
-"use client"
-
 import { ProtectedLayout } from "@/components/layout/protected-layout"
 import { EmployeeForm } from "@/components/employee/employee-form"
 import { PageHeader } from "@/components/common/page-header"

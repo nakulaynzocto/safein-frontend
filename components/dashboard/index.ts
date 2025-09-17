@@ -5,3 +5,4 @@ export { StatCard } from './StatCard'
 export { AppointmentsTable } from './AppointmentsTable'
 export { QuickActions } from './QuickActions'
 export * from './dashboard.utils'
+
