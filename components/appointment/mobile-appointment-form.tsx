@@ -9,6 +9,7 @@ import { MobileForm, MobileInput, MobileTextarea, MobileSelect, MobileFormAction
 import { useGetEmployeesQuery, useCreateAppointmentMutation } from "@/store/api"
 import { showSuccess, showError } from "@/utils/toaster"
 import { LoadingSpinner } from "@/components/common/loading-spinner"
+import { routes } from "@/utils/routes"
 
 const appointmentSchema = z.object({
   visitorName: z.string().min(1, "Visitor name is required"),
@@ -49,7 +50,7 @@ export function MobileAppointmentForm() {
     try {
       await createAppointment(data).unwrap()
       showSuccess("Appointment created successfully!")
-      router.push("/appointment/list")
+      router.push(routes.privateroute.APPOINTMENTLIST)
     } catch (error: any) {
       showError(error?.data?.message || error?.message || "Failed to create appointment")
     }

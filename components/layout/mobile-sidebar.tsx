@@ -6,6 +6,7 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { routes } from "@/utils/routes"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { 
   Menu, 
@@ -28,7 +29,7 @@ interface MobileSidebarProps {
 const navigation = [
   {
     name: "Dashboard",
-    href: "/dashboard",
+    href: routes.privateroute.DASHBOARD,
     icon: LayoutDashboard,
   },
   {
@@ -37,17 +38,17 @@ const navigation = [
     children: [
       {
         name: "All Employees",
-        href: "/employee/list",
+        href: routes.privateroute.EMPLOYEELIST,
         icon: Users,
       },
       {
         name: "Add Employee",
-        href: "/employee/create",
+        href: routes.privateroute.EMPLOYEECREATE,
         icon: UserPlus,
       },
       {
         name: "Trash",
-        href: "/employee/trash",
+        href: routes.privateroute.EMPLOYEETRASH,
         icon: Trash2,
       },
     ],
@@ -58,24 +59,24 @@ const navigation = [
     children: [
       {
         name: "All Appointments",
-        href: "/appointment/list",
+        href: routes.privateroute.APPOINTMENTLIST,
         icon: Calendar,
       },
       {
         name: "Create Appointment",
-        href: "/appointment/create",
+        href: routes.privateroute.APPOINTMENTCREATE,
         icon: CalendarPlus,
       },
       {
         name: "Trash",
-        href: "/appointment/trash",
+        href: routes.privateroute.APPOINTMENTTRASH,
         icon: Trash2,
       },
     ],
   },
   {
     name: "Settings",
-    href: "/settings",
+    href: routes.privateroute.SETTINGS,
     icon: Settings,
   },
 ]

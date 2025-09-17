@@ -13,6 +13,7 @@ import { useGetAppointmentsQuery, useUpdateAppointmentStatusMutation } from "@/s
 import { formatDateTime } from "@/utils/helpers"
 import { showSuccess, showError } from "@/utils/toaster"
 import { CalendarPlus, Check, X, LogOut } from "lucide-react"
+import { routes } from "@/utils/routes"
 
 export function AppointmentList() {
   const router = useRouter()
@@ -164,7 +165,7 @@ export function AppointmentList() {
     <div className="space-y-6">
       <PageHeader title="Appointments" description="Manage visitor appointments">
         <Button asChild>
-          <Link href="/appointment/create" prefetch={true}>
+          <Link href={routes.privateroute.APPOINTMENTCREATE} prefetch={true}>
             <CalendarPlus className="mr-2 h-4 w-4" />
             New Appointment
           </Link>
@@ -179,7 +180,7 @@ export function AppointmentList() {
           isLoading={isLoading} 
           emptyData={emptyData}
           enableSorting={true}
-          onPrimaryAction={() => router.push("/appointment/create")}
+          onPrimaryAction={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
         />
       </div>
 
@@ -190,7 +191,7 @@ export function AppointmentList() {
           columns={columns} 
           isLoading={isLoading} 
           emptyData={emptyData}
-          onPrimaryAction={() => router.push("/appointment/create")}
+          onPrimaryAction={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
         />
       </div>
 

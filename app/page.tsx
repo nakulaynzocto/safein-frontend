@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PublicLayout } from "@/components/layout/public-layout"
 import { Calendar, Users, Shield, Clock, CheckCircle, UserCheck, ArrowRight, Building2, Globe, Award, Heart, Zap } from "lucide-react"
+import { routes } from "@/utils/routes"
 
 export default function HomePage() {
   return (
@@ -18,18 +19,18 @@ export default function HomePage() {
             <div>
               <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight" style={{ color: '#121212' }}>
                 Your visitor management, powered by SafeIn
-              </h1>
+          </h1>
               <p className="text-xl mb-8 leading-relaxed" style={{ color: '#555879' }}>
                 A comprehensive and powerful visitor appointment system to transform the way you manage visitors. 
                 Designed for organizations of all sizes, built by SafeIn that values security and efficiency.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" className="px-8 py-3 text-lg text-white" style={{ backgroundColor: '#3882a5' }} asChild>
-                  <Link href="/register" prefetch={true}>Get Started Now</Link>
-                </Button>
+                  <Link href={routes.publicroute.REGISTER} prefetch={true}>Get Started Now</Link>
+            </Button>
                 <Button size="lg" variant="outline" className="px-8 py-3 text-lg" style={{ borderColor: '#555879', color: '#555879' }} asChild>
-                  <Link href="/login" prefetch={true}>Sign In</Link>
-                </Button>
+                  <Link href={routes.publicroute.LOGIN} prefetch={true}>Sign In</Link>
+            </Button>
               </div>
             </div>
             
@@ -99,7 +100,7 @@ export default function HomePage() {
                 Automate workflows, delight visitors, and empower your security team to increase organizational efficiency.
               </p>
               <Button size="lg" className="px-8 py-3 text-lg text-white" style={{ backgroundColor: '#121212' }} asChild>
-                <Link href="/register" prefetch={true}>Try SafeIn Analytics</Link>
+                <Link href={routes.publicroute.REGISTER} prefetch={true}>Try SafeIn Analytics</Link>
               </Button>
             </div>
             <div className="relative">
@@ -137,7 +138,7 @@ export default function HomePage() {
                 Streamline staff onboarding, manage permissions, and ensure proper access control throughout your organization.
               </p>
               <Button size="lg" className="px-8 py-3 text-lg text-white" style={{ backgroundColor: '#3882a5' }} asChild>
-                <Link href="/register" prefetch={true}>Learn more →</Link>
+                <Link href={routes.publicroute.REGISTER} prefetch={true}>Learn more →</Link>
               </Button>
             </div>
           </div>
@@ -155,7 +156,7 @@ export default function HomePage() {
             offers smart recommendations, and keeps you updated on all security operations.
           </p>
           <Button size="lg" className="px-8 py-3 text-lg text-white" style={{ backgroundColor: '#3882a5' }} asChild>
-            <Link href="/register" prefetch={true}>Explore SafeIn Notifications →</Link>
+            <Link href={routes.publicroute.REGISTER} prefetch={true}>Explore SafeIn Notifications →</Link>
           </Button>
           <div className="mt-12">
             <Image
@@ -198,7 +199,7 @@ export default function HomePage() {
             </div>
           </div>
           <Button size="lg" className="px-8 py-3 text-lg" style={{ backgroundColor: '#d1d8e2', color: '#121212' }} asChild>
-            <Link href="/register" prefetch={true}>More about SafeIn →</Link>
+            <Link href={routes.publicroute.REGISTER} prefetch={true}>More about SafeIn →</Link>
           </Button>
         </div>
       </section>
@@ -264,7 +265,7 @@ export default function HomePage() {
           </div>
           <div className="text-center mt-12">
             <Button size="lg" className="px-8 py-3 text-lg text-white" style={{ backgroundColor: '#3882a5' }} asChild>
-              <Link href="/register" prefetch={true}>Read our story →</Link>
+              <Link href={routes.publicroute.REGISTER} prefetch={true}>Read our story →</Link>
             </Button>
           </div>
         </div>
@@ -277,7 +278,7 @@ export default function HomePage() {
             Ready to do your best work? Let's get you started.
           </h2>
           <Button size="lg" className="px-8 py-3 text-lg text-white" style={{ backgroundColor: '#3882a5' }} asChild>
-            <Link href="/register" prefetch={true}>Sign Up Now</Link>
+            <Link href={routes.publicroute.REGISTER} prefetch={true}>Sign Up Now</Link>
           </Button>
         </div>
       </section>

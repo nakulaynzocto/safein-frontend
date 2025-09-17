@@ -13,13 +13,13 @@ export const baseApi = createApi({
       const token = state.auth.token
       
       if (token) {
-        headers.set('authorization', `Bearer ${token}`)
+        headers.set('Authorization', `Bearer ${token}`)
       }
       
       headers.set('Content-Type', 'application/json')
       return headers
     },
   }),
-  tagTypes: ['User', 'Employee', 'Appointment'],
+  tagTypes: ['User', 'Employee', 'Appointment', 'Company'],
   endpoints: () => ({}),
 })

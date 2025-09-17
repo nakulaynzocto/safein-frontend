@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useAppSelector } from "@/store/hooks"
 import { useGetAppointmentsQuery } from "@/store/api/appointmentApi"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
+import { routes } from "@/utils/routes"
 import { DashboardHeader } from "./DashboardHeader"
 import { StatsGrid } from "./StatsGrid"
 import { AppointmentsTable } from "./AppointmentsTable"
@@ -46,7 +47,7 @@ export function DashboardOverview() {
             description: "You don't have any appointments scheduled for today.",
             primaryActionLabel: "Schedule Appointment",
           }}
-          onPrimaryAction={() => router.push("/appointment/create")}
+          onPrimaryAction={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
         />
 
         {/* Recent Appointments */}
@@ -61,7 +62,7 @@ export function DashboardOverview() {
             description: "You don't have any recent appointments.",
             primaryActionLabel: "View All Appointments",
           }}
-          onPrimaryAction={() => router.push("/appointment/list")}
+          onPrimaryAction={() => router.push(routes.privateroute.APPOINTMENTLIST)}
         />
       </div>
 

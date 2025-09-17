@@ -28,7 +28,6 @@ const authSlice = createSlice({
     setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
       // Validate token before storing
       if (!action.payload.token || action.payload.token === 'undefined' || action.payload.token.length < 10) {
-        console.error('Invalid token received:', action.payload.token)
         return
       }
       

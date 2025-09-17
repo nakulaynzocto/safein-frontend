@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar, CalendarPlus, UserPlus, Users } from "lucide-react"
+import { routes } from "@/utils/routes"
 
 interface QuickAction {
   href: string
@@ -13,22 +14,22 @@ interface QuickAction {
 
 const quickActions: QuickAction[] = [
   {
-    href: "/appointment/create",
+    href: routes.privateroute.APPOINTMENTCREATE,
     icon: CalendarPlus,
     label: "Create Appointment",
   },
   {
-    href: "/appointment/list",
+    href: routes.privateroute.APPOINTMENTLIST,
     icon: Calendar,
     label: "View All Appointments",
   },
   {
-    href: "/employee/create",
+    href: routes.privateroute.EMPLOYEECREATE,
     icon: UserPlus,
     label: "Add Employee",
   },
   {
-    href: "/employee/list",
+    href: routes.privateroute.EMPLOYEELIST,
     icon: Users,
     label: "Manage Employees",
   },

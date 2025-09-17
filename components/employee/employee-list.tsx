@@ -11,6 +11,7 @@ import { ConfirmationDialog } from "@/components/common/confirmation-dialog"
 import { useGetEmployeesQuery, useDeleteEmployeeMutation } from "@/store/api/employeeApi"
 import { showSuccess, showError } from "@/utils/toaster"
 import { UserPlus, Edit, Trash2 } from "lucide-react"
+import { routes } from "@/utils/routes"
 
 export function EmployeeList() {
   const router = useRouter()
@@ -98,7 +99,7 @@ export function EmployeeList() {
     <div className="space-y-6">
       <PageHeader title="Employees" description="Manage your organization's employees">
         <Button asChild>
-          <Link href="/employee/create" prefetch={true}>
+          <Link href={routes.privateroute.EMPLOYEECREATE} prefetch={true}>
             <UserPlus className="mr-2 h-4 w-4" />
             Add Employee
           </Link>
@@ -111,7 +112,7 @@ export function EmployeeList() {
         isLoading={isLoading} 
         emptyData={emptyData}
         enableSorting={true}
-        onPrimaryAction={() => router.push("/employee/create")}
+        onPrimaryAction={() => router.push(routes.privateroute.EMPLOYEECREATE)}
       />
 
       <ConfirmationDialog

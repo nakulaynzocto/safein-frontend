@@ -10,7 +10,9 @@ import { InputField } from "@/components/common/input-field"
 import { LoadingSpinner } from "@/components/common/loading-spinner"
 import { useAppDispatch } from "@/store/hooks"
 import { useLoginMutation } from "@/store/api/authApi"
+import { useCheckCompanyExistsQuery } from "@/store/api/companyApi"
 import { setCredentials } from "@/store/slices/authSlice"
+import { routes } from "@/utils/routes"
 import { showError, showSuccess } from "@/utils/toaster"
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
@@ -58,7 +60,37 @@ export function LoginForm() {
       
       dispatch(setCredentials(result))
       setErrorMessage(null)
-      router.push("/dashboard")
+      
+      // Check if company exists after successful login
+      try {
+        
+        const companyCheckResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/companies/exists`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${result.token}`,
+            'Content-Type': 'application/json',
+          },
+        })
+        
+        
+        if (companyCheckResponse.ok) {
+          const companyData = await companyCheckResponse.json()
+          const companyExists = companyData.success ? companyData.data?.exists : false
+          
+          if (companyExists) {
+            router.push(routes.privateroute.DASHBOARD)
+          } else {
+            router.push(routes.privateroute.COMPANYCREATE)
+          }
+        } else {
+          const errorData = await companyCheckResponse.json()
+          // If company check fails (401, 404, etc.), assume no company exists and redirect to creation
+          router.push(routes.privateroute.COMPANYCREATE)
+        }
+      } catch (companyError) {
+        // If company check fails, redirect to company creation
+        router.push(routes.privateroute.COMPANYCREATE)
+      }
     } catch (error: any) {
       const message = error?.data?.message || error?.message || "Login failed"
       setErrorMessage(message) 
@@ -105,7 +137,7 @@ export function LoginForm() {
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <Link href="/register" className="text-primary hover:underline" prefetch={true}>
+            <Link href={routes.publicroute.REGISTER} className="text-primary hover:underline" prefetch={true}>
               Sign up
             </Link>
           </p>

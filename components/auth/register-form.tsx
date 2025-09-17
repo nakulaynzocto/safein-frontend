@@ -11,6 +11,7 @@ import { InputField } from "@/components/common/input-field"
 import { LoadingSpinner } from "@/components/common/loading-spinner"
 import { useAppDispatch } from "@/store/hooks"
 import { useRegisterMutation } from "@/store/api/authApi"
+import { routes } from "@/utils/routes"
 
 const registerSchema = yup.object({
   firstName: yup.string().required("First name is required"),
@@ -53,7 +54,7 @@ export function RegisterForm() {
       }
       const result = await register(formattedData).unwrap()
 
-      router.push("/login?message=Registration successful. Please login to continue.")
+      router.push(`${routes.publicroute.LOGIN}?message=Registration successful. Please login to continue.`)
     } catch (error: any) {
       let errorMessage = "Registration failed"
 
@@ -159,7 +160,7 @@ export function RegisterForm() {
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="text-primary hover:underline" prefetch={true}>
+            <Link href={routes.publicroute.LOGIN} className="text-primary hover:underline" prefetch={true}>
               Sign in
             </Link>
           </p>

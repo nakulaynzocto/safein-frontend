@@ -67,7 +67,6 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     try {
       await onSubmit(data)
     } catch (error) {
-      console.error("Form submission error:", error)
     } finally {
       setIsSubmitting(false)
     }
@@ -91,7 +90,6 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
       setProfileImage(url)
       setValue("profilePicture", url)
     } catch (err) {
-      console.error("Upload error:", err)
     }
   }
 

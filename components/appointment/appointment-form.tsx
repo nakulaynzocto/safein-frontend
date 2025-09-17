@@ -17,6 +17,7 @@ import { FileUpload } from "@/components/common/file-upload"
 import { useCreateAppointmentMutation } from "@/store/api/appointmentApi"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
 import { showSuccess, showError } from "@/utils/toaster"
+import { routes } from "@/utils/routes"
 
 const appointmentSchema = yup.object({
   visitorName: yup.string().required("Visitor name is required"),
@@ -80,7 +81,7 @@ export function AppointmentForm() {
       showSuccess("Appointment created successfully")
       reset()
       setAadhaarPhoto(null)
-      router.push("/appointment/list")
+      router.push(routes.privateroute.APPOINTMENTLIST)
     } catch (error: any) {
       showError(error?.data?.message || error?.message || "Failed to create appointment")
     }

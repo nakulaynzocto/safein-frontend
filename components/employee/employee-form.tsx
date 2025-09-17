@@ -11,6 +11,7 @@ import { SelectField } from "@/components/common/select-field"
 import { LoadingSpinner } from "@/components/common/loading-spinner"
 import { useCreateEmployeeMutation } from "@/store/api/employeeApi"
 import { showSuccess, showError } from "@/utils/toaster"
+import { routes } from "@/utils/routes"
 
 // ✅ Validation schema
 const employeeSchema = yup.object({
@@ -54,7 +55,7 @@ export function EmployeeForm() {
       await createEmployee({ ...data, isActive: true }).unwrap()
       showSuccess("Employee created successfully")
       reset()
-      router.push("/employee/list")
+      router.push(routes.privateroute.EMPLOYEELIST)
     } catch (error: any) {
       showError(error?.data?.message || error?.message || "Failed to create employee")
     }

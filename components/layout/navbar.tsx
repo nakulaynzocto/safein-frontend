@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { logout } from "@/store/slices/authSlice"
 import { useLogoutMutation } from "@/store/api/authApi"
+import { routes } from "@/utils/routes"
 import { User, LogOut, Settings, UserCircle } from "lucide-react"
 import { MobileSidebar } from "./mobile-sidebar"
 
@@ -30,17 +31,16 @@ export function Navbar() {
       
       // Clear local state and redirect
       dispatch(logout())
-      router.push("/")
+      router.push(routes.publicroute.HOME)
     } catch (error) {
-      console.error('Logout failed:', error)
       // Even if API call fails, still clear local state and redirect
       dispatch(logout())
-      router.push("/")
+      router.push(routes.publicroute.HOME)
     }
   }
 
   const handleAvatarClick = () => {
-    router.push("/profile")
+    router.push(routes.privateroute.PROFILE)
   }
 
   const getUserInitials = (name?: string, firstName?: string, lastName?: string) => {
@@ -64,7 +64,7 @@ export function Navbar() {
           {/* Mobile Menu + Logo */}
           <div className="flex items-center gap-4">
             <MobileSidebar />
-            <Link href="/dashboard" className="flex items-center space-x-2" prefetch={true}>
+            <Link href={routes.privateroute.DASHBOARD} className="flex items-center space-x-2" prefetch={true}>
               <Image
                 src="/aynzo-logo.svg"
                 alt="Aynzo Logo"
@@ -108,19 +108,19 @@ export function Navbar() {
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard" className="flex items-center" prefetch={true}>
+                      <Link href={routes.privateroute.DASHBOARD} className="flex items-center" prefetch={true}>
                         <User className="mr-2 h-4 w-4" />
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/profile" className="flex items-center" prefetch={true}>
+                      <Link href={routes.privateroute.PROFILE} className="flex items-center" prefetch={true}>
                         <UserCircle className="mr-2 h-4 w-4" />
                         Profile
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/settings" className="flex items-center" prefetch={true}>
+                      <Link href={routes.privateroute.SETTINGS} className="flex items-center" prefetch={true}>
                         <Settings className="mr-2 h-4 w-4" />
                         Settings
                       </Link>
@@ -140,10 +140,10 @@ export function Navbar() {
             ) : (
               <>
                 <Button variant="ghost" asChild>
-                  <Link href="/login" prefetch={true}>Login</Link>
+                  <Link href={routes.publicroute.LOGIN} prefetch={true}>Login</Link>
                 </Button>
                 <Button asChild>
-                  <Link href="/register" prefetch={true}>Sign Up</Link>
+                  <Link href={routes.publicroute.REGISTER} prefetch={true}>Sign Up</Link>
                 </Button>
               </>
             )}

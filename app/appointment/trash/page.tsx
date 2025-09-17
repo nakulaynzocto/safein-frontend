@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/common/page-header"
 import { Button } from "@/components/ui/button"
 import { Trash2, RotateCcw, ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { routes } from "@/utils/routes"
 
 export default function AppointmentTrashPage() {
   return (
@@ -17,7 +18,7 @@ export default function AppointmentTrashPage() {
         >
           <div className="flex gap-2">
             <Button variant="outline" size="sm" asChild>
-              <Link href="/appointment/list" prefetch={true}>
+              <Link href={routes.privateroute.APPOINTMENTLIST} prefetch={true}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Appointments
               </Link>

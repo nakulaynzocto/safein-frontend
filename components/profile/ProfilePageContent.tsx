@@ -23,7 +23,6 @@ export function ProfilePageContent() {
       await updateProfile(data).unwrap()
       setIsEditing(false)
     } catch (err) {
-      console.error("Failed to update profile:", err)
     }
   }
 
