@@ -22,12 +22,14 @@ type NotificationsFormData = yup.InferType<typeof notificationsSchema>
 
 interface NotificationsStepProps {
   onComplete: (data: NotificationPreferences) => void
+  onFinalSubmit?: () => void
   initialData?: NotificationPreferences | null
   disabled?: boolean
 }
 
 export function NotificationsStep({ 
   onComplete, 
+  onFinalSubmit,
   initialData, 
   disabled = false 
 }: NotificationsStepProps) {
@@ -59,6 +61,11 @@ export function NotificationsStep({
       reminderSent: data.reminderSent,
     }
     onComplete(notifications)
+    
+    // If onFinalSubmit is provided, call it to trigger the final submission
+    if (onFinalSubmit) {
+      onFinalSubmit()
+    }
   }
 
   const handleSmsChange = (checked: boolean) => {
@@ -228,8 +235,8 @@ export function NotificationsStep({
         <CardContent>
           <div className="bg-green-50 p-4 rounded-lg">
             <p className="text-sm text-green-800">
-              <strong>All steps completed!</strong> Click the button below to submit the 
-              complete visitor registration with all the information provided.
+              <strong>All steps completed!</strong> Click the "Complete Registration & Submit" button below 
+              to finalize the visitor registration with all the information provided.
             </p>
           </div>
         </CardContent>

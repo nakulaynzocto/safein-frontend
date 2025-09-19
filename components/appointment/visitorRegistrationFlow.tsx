@@ -21,6 +21,7 @@ import {
 import { useCreateAppointmentMutation } from "@/store/api/appointmentApi"
 import { showSuccess, showError } from "@/utils/toaster"
 import { routes } from "@/utils/routes"
+import { generateId } from "@/utils/helpers"
 
 interface Step {
   id: number
@@ -109,7 +110,7 @@ export function VisitorRegistrationFlow() {
       return prev
     })
 
-    // Move to next step
+    // Move to next step (only if not the last step)
     if (stepId < steps.length) {
       setCurrentStep(stepId + 1)
     }
@@ -137,6 +138,7 @@ export function VisitorRegistrationFlow() {
 
     try {
       const payload: CreateAppointmentRequest = {
+        appointmentId: generateId(),
         employeeId,
         visitorDetails,
         accompaniedBy,
@@ -196,6 +198,7 @@ export function VisitorRegistrationFlow() {
         return (
           <NotificationsStep
             onComplete={(data: NotificationPreferences) => handleStepComplete(4, data)}
+            onFinalSubmit={handleFinalSubmit}
             initialData={notifications}
             disabled={!completedSteps.includes(3)}
           />
@@ -294,48 +297,6 @@ export function VisitorRegistrationFlow() {
         </CardContent>
       </Card>
 
-      {/* Navigation Buttons */}
-      <div className="flex justify-between items-center">
-        <Button
-          variant="outline"
-          onClick={handlePreviousStep}
-          disabled={currentStep === 1}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Previous
-        </Button>
-
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground">
-            Step {currentStep} of {steps.length}
-          </p>
-          {!canProceedToNext() && currentStep < steps.length && (
-            <p className="text-xs text-orange-600 mt-1">
-              Complete current step to proceed
-            </p>
-          )}
-        </div>
-
-        <div className="flex gap-2">
-          {currentStep < steps.length ? (
-            <Button
-              onClick={handleNextStep}
-              disabled={!canProceedToNext()}
-            >
-              Next
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          ) : (
-            <Button
-              onClick={handleFinalSubmit}
-              disabled={!canSubmit() || isLoading}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              {isLoading ? "Submitting..." : "Complete Registration"}
-            </Button>
-          )}
-        </div>
-      </div>
     </div>
   )
 }

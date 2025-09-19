@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils"
 
 interface StatusBadgeProps {
-  status: "pending" | "approved" | "rejected" | "completed" | "checked-out" | "active" | "inactive"
+  status: "pending" | "approved" | "rejected" | "completed" | "checked-out" | "active" | "inactive" | "scheduled"
   className?: string
 }
 
@@ -35,6 +35,10 @@ const statusConfig = {
   inactive: {
     label: "Inactive",
     className: "bg-gray-100 text-gray-800 border-gray-200",
+  },
+  scheduled: {
+    label: "Scheduled",
+    className: "bg-blue-100 text-blue-800 border-blue-200",
   },
 }
 

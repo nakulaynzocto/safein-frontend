@@ -17,7 +17,17 @@ import { Calendar, Clock, MapPin, FileText, User } from "lucide-react"
 
 const appointmentDetailsSchema = yup.object({
   purpose: yup.string().required("Purpose of visit is required"),
-  scheduledDate: yup.string().required("Scheduled date is required"),
+  scheduledDate: yup.string().required("Scheduled date is required").test(
+    'not-past-date',
+    'Scheduled date cannot be in the past',
+    function(value) {
+      if (!value) return false
+      const selectedDate = new Date(value)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0) // Reset time to start of day
+      return selectedDate >= today
+    }
+  ),
   scheduledTime: yup.string().required("Scheduled time is required"),
   duration: yup.number().min(15, "Duration must be at least 15 minutes").required("Duration is required"),
   meetingRoom: yup.string().required("Meeting room is required"),

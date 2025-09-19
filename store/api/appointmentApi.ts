@@ -4,20 +4,20 @@ import { createUrlParams } from '@/utils/helpers'
 export interface Appointment {
   _id: string
   appointmentId: string
-  visitorName: string
-  visitorEmail: string
-  visitorPhone: string
   employeeId: string
-  employeeName: string
-  purpose: string
-  appointmentDate: string
-  appointmentTime: string
-  status: 'pending' | 'approved' | 'rejected' | 'completed' | 'checked-out'
-  notes?: string
+  visitorDetails: VisitorDetails
+  accompaniedBy?: AccompaniedBy
+  appointmentDetails: AppointmentDetails
+  status: 'pending' | 'approved' | 'rejected' | 'completed' | 'checked-out' | 'scheduled'
   checkInTime?: string
   checkOutTime?: string
+  actualDuration?: number
+  securityDetails: SecurityDetails
+  notifications: NotificationPreferences
+  createdBy: string
   isDeleted: boolean
-  deletedAt?: string
+  deletedAt?: string | null
+  deletedBy?: string | null
   createdAt: string
   updatedAt: string
 }
@@ -78,6 +78,7 @@ export interface NotificationPreferences {
 }
 
 export interface CreateAppointmentRequest {
+  appointmentId: string
   employeeId: string
   visitorDetails: VisitorDetails
   accompaniedBy?: AccompaniedBy

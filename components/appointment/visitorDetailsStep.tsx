@@ -97,12 +97,11 @@ export function VisitorDetailsStep({ onComplete, initialData }: VisitorDetailsSt
   })
 
   const idProofTypes = [
-    { value: "Aadhaar", label: "Aadhaar Card" },
-    { value: "PAN", label: "PAN Card" },
-    { value: "Driving License", label: "Driving License" },
-    { value: "Passport", label: "Passport" },
-    { value: "Voter ID", label: "Voter ID" },
-    { value: "Other", label: "Other" },
+    { value: "aadhaar", label: "Aadhaar Card" },
+    { value: "pan", label: "PAN Card" },
+    { value: "driving_license", label: "Driving License" },
+    { value: "passport", label: "Passport" },
+    { value: "other", label: "Other" },
   ]
 
   const onSubmit = (data: VisitorDetailsFormData) => {

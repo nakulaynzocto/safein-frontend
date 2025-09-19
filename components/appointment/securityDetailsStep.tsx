@@ -15,13 +15,9 @@ import { Shield, Badge, CheckCircle, FileText } from "lucide-react"
 
 const securityDetailsSchema = yup.object({
   badgeIssued: yup.boolean().required(),
-  badgeNumber: yup.string().when('badgeIssued', {
-    is: true,
-    then: (schema) => schema.required('Badge number is required when badge is issued'),
-    otherwise: (schema) => schema.optional(),
-  }),
+  badgeNumber: yup.string().required('Badge number is required'),
   securityClearance: yup.boolean().required(),
-  securityNotes: yup.string().optional(),
+  securityNotes: yup.string().required('Security notes are required'),
 })
 
 type SecurityDetailsFormData = yup.InferType<typeof securityDetailsSchema>
@@ -59,9 +55,9 @@ export function SecurityDetailsStep({
   const onSubmit = (data: SecurityDetailsFormData) => {
     const securityDetails: SecurityDetails = {
       badgeIssued: data.badgeIssued,
-      badgeNumber: data.badgeNumber || "",
+      badgeNumber: data.badgeNumber,
       securityClearance: data.securityClearance,
-      securityNotes: data.securityNotes || "",
+      securityNotes: data.securityNotes,
     }
     onComplete(securityDetails)
   }
@@ -69,9 +65,6 @@ export function SecurityDetailsStep({
   const handleBadgeIssuedChange = (checked: boolean) => {
     setBadgeIssued(checked)
     setValue("badgeIssued", checked)
-    if (!checked) {
-      setValue("badgeNumber", "")
-    }
   }
 
   const handleSecurityClearanceChange = (checked: boolean) => {
@@ -110,14 +103,12 @@ export function SecurityDetailsStep({
             <Label htmlFor="badge-issued">Badge has been issued to visitor</Label>
           </div>
 
-          {badgeIssued && (
-            <InputField
-              label="Badge Number"
-              placeholder="Enter badge number"
-              error={errors.badgeNumber?.message}
-              {...register("badgeNumber")}
-            />
-          )}
+          <InputField
+            label="Badge Number"
+            placeholder="Enter badge number"
+            error={errors.badgeNumber?.message}
+            {...register("badgeNumber")}
+          />
         </CardContent>
       </Card>
 
@@ -163,13 +154,16 @@ export function SecurityDetailsStep({
         <CardContent>
           <div>
             <label className="block text-sm font-medium mb-2">
-              Additional Security Notes (Optional)
+              Security Notes <span className="text-red-500">*</span>
             </label>
             <Textarea
-              placeholder="Enter any additional security notes, observations, or special instructions..."
+              placeholder="Enter security notes, observations, or special instructions..."
               className="min-h-[100px]"
               {...register("securityNotes")}
             />
+            {errors.securityNotes && (
+              <p className="text-sm text-red-500 mt-1">{errors.securityNotes.message}</p>
+            )}
           </div>
         </CardContent>
       </Card>

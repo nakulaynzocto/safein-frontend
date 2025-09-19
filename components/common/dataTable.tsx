@@ -1,6 +1,6 @@
 "use client"
 
-import type { ReactNode } from "react"
+import React, { type ReactNode } from "react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
@@ -95,6 +95,7 @@ export function DataTable<T extends Record<string, any>>({
       ? <ArrowUp className="h-4 w-4" />
       : <ArrowDown className="h-4 w-4" />
   }
+
   // Show loading skeleton
   if (isLoading) {
     if (showCard) {
@@ -171,7 +172,39 @@ export function DataTable<T extends Record<string, any>>({
                   key={colIndex}
                   className={cn("px-4 py-3 text-sm text-foreground", column.className)}
                 >
-                  {column.render ? column.render(item) : String(item[column.key as keyof T] || "")}
+                  {(() => {
+                    const renderSafeValue = (value: any): React.ReactNode => {
+                      if (value === null || value === undefined) return ""
+                      if (React.isValidElement(value)) return value
+                      if (typeof value === 'object') {
+                        // Handle objects by trying to find a meaningful string representation
+                        if (Array.isArray(value)) {
+                          return value.join(', ')
+                        }
+                        if (value.name) return String(value.name)
+                        if (value.title) return String(value.title)
+                        if (value.label) return String(value.label)
+                        if (value.id) return String(value.id)
+                        if (value._id) return String(value._id)
+                        // Fallback to JSON if no meaningful property found
+                        return "[Object]"
+                      }
+                      return String(value)
+                    }
+
+                    try {
+                      if (column.render) {
+                        const result = column.render(item)
+                        return renderSafeValue(result)
+                      } else {
+                        const value = item[column.key as keyof T]
+                        return renderSafeValue(value)
+                      }
+                    } catch (error) {
+                      console.error('Error rendering table cell:', error, { column: column.key, item })
+                      return "Error"
+                    }
+                  })()}
                 </td>
               ))}
             </tr>

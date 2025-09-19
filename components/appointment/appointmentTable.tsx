@@ -181,49 +181,49 @@ export function AppointmentTable({
         header: "Appointment ID",
         render: (appointment: Appointment) => (
           <div className="font-medium">{appointment.appointmentId}</div>
-        )
+        ),
       },
       {
         key: "visitorName",
         header: "Visitor",
         render: (appointment: Appointment) => (
           <div>
-            <div className="font-medium">{appointment.visitorName}</div>
-            <div className="text-sm text-muted-foreground">{appointment.visitorEmail}</div>
+            <div className="font-medium">{appointment.visitorDetails.name}</div>
+            <div className="text-sm text-muted-foreground">{appointment.visitorDetails.email}</div>
           </div>
-        )
+        ),
       },
       {
         key: "employeeName",
         header: "Employee",
         render: (appointment: Appointment) => (
-          <div className="text-sm">{appointment.employeeName}</div>
-        )
+          <div className="text-sm">{appointment.employeeId?.name || "N/A"}</div>
+        ),
       },
       {
         key: "purpose",
         header: "Purpose",
         render: (appointment: Appointment) => (
-          <div className="text-sm max-w-[200px] truncate" title={appointment.purpose}>
-            {appointment.purpose}
+          <div className="text-sm max-w-[200px] truncate" title={appointment.appointmentDetails.purpose}>
+            {appointment.appointmentDetails.purpose}
           </div>
-        )
+        ),
       },
       {
         key: "appointmentDate",
         header: "Date & Time",
         render: (appointment: Appointment) => (
           <div className="text-sm">
-            <div>{format(new Date(appointment.appointmentDate), "MMM dd, yyyy")}</div>
-            <div className="text-muted-foreground">{appointment.appointmentTime}</div>
+            <div>{format(new Date(appointment.appointmentDetails.scheduledDate), "MMM dd, yyyy")}</div>
+            <div className="text-muted-foreground">{appointment.appointmentDetails.scheduledTime}</div>
           </div>
-        )
+        ),
       },
       {
         key: "status",
         header: "Status",
-        render: (appointment: Appointment) => <StatusBadge status={appointment.status} />
-      }
+        render: (appointment: Appointment) => <StatusBadge status={appointment.status} />,
+      },
     ]
 
     // Add mode-specific columns
@@ -238,7 +238,7 @@ export function AppointmentTable({
               {format(new Date(appointment.deletedAt!), "HH:mm")}
             </div>
           </div>
-        )
+        ),
       })
     }
 
@@ -320,7 +320,7 @@ export function AppointmentTable({
             </Button>
           )}
         </div>
-      )
+      ),
     })
 
     return baseColumns
@@ -420,7 +420,7 @@ export function AppointmentTable({
           open={showCheckInDialog}
           onOpenChange={setShowCheckInDialog}
           title="Check In Appointment"
-          description={`Are you sure you want to check in visitor ${selectedAppointment?.visitorName} for appointment ${selectedAppointment?.appointmentId}?`}
+          description={`Are you sure you want to check in visitor ${selectedAppointment?.visitorDetails.name} for appointment ${selectedAppointment?.appointmentId}?`}
           onConfirm={handleCheckIn}
           confirmText={isCheckingIn ? "Checking In..." : "Check In"}
           variant="default"
@@ -432,7 +432,7 @@ export function AppointmentTable({
           open={showCheckOutDialog}
           onOpenChange={setShowCheckOutDialog}
           title="Check Out Appointment"
-          description={`Are you sure you want to check out visitor ${selectedAppointment?.visitorName} for appointment ${selectedAppointment?.appointmentId}?`}
+          description={`Are you sure you want to check out visitor ${selectedAppointment?.visitorDetails.name} for appointment ${selectedAppointment?.appointmentId}? `}
           onConfirm={handleCheckOut}
           confirmText={isCheckingOut ? "Checking Out..." : "Check Out"}
           variant="default"
