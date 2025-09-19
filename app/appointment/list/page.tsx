@@ -1,5 +1,5 @@
-import { ProtectedLayout } from "@/components/layout/protected-layout"
-import { AppointmentList } from "@/components/appointment/appointment-list"
+import { ProtectedLayout } from "@/components/layout/protectedLayout"
+import { AppointmentList } from "@/components/appointment/appointmentList"
 
 export default function AppointmentListPage() {
   return (

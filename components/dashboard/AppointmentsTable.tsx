@@ -1,8 +1,8 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { DataTable } from "@/components/common/data-table"
-import { StatusBadge } from "@/components/common/status-badge"
+import { DataTable } from "@/components/common/dataTable"
+import { StatusBadge } from "@/components/common/statusBadge"
 import { formatDateTime } from "@/utils/helpers"
 
 interface AppointmentsTableProps {

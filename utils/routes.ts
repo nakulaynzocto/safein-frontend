@@ -18,6 +18,7 @@ export const routes = {
     APPOINTMENTCREATE: "/appointment/create",
     APPOINTMENTLIST: "/appointment/list",
     APPOINTMENTTRASH: "/appointment/trash",
+    VISITORREGISTRATION: "/appointment/visitor-registration",
     TRASH: "/trash",
   },
 } as const

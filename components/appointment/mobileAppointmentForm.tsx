@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { MobileForm, MobileInput, MobileTextarea, MobileSelect, MobileFormActions } from "@/components/common/mobile-form"
+import { MobileForm, MobileInput, MobileTextarea, MobileSelect, MobileFormActions } from "@/components/common/mobileForm"
 import { useGetEmployeesQuery, useCreateAppointmentMutation } from "@/store/api"
 import { showSuccess, showError } from "@/utils/toaster"
-import { LoadingSpinner } from "@/components/common/loading-spinner"
+import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { routes } from "@/utils/routes"
 
 const appointmentSchema = z.object({

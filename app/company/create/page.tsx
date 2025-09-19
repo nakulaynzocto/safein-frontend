@@ -1,7 +1,7 @@
 "use client"
 
-import { AuthWrapper } from "@/components/layout/auth-wrapper"
-import { CompanyForm } from "@/components/company/company-form"
+import { AuthWrapper } from "@/components/layout/authWrapper"
+import { CompanyForm } from "@/components/company/companyForm"
 
 export default function CreateCompanyPage() {
   return (

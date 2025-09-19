@@ -1,8 +1,8 @@
 "use client"
 
 import { Calendar, CalendarCheck, CalendarX, CheckCircle, Users } from "lucide-react"
-import { StatCard } from "./StatCard"
-import { AppointmentStats } from "./dashboard.utils"
+import { StatCard } from "./statCard"
+import { AppointmentStats } from "./dashboardUtils"
 
 interface StatsGridProps {
   stats: AppointmentStats & { totalEmployees: number }

@@ -10,6 +10,18 @@ export interface AppointmentStats {
 }
 
 export function calculateAppointmentStats(appointments: Appointment[]): AppointmentStats {
+  // Safety check: ensure appointments is an array
+  if (!Array.isArray(appointments)) {
+    return {
+      totalAppointments: 0,
+      pendingAppointments: 0,
+      approvedAppointments: 0,
+      rejectedAppointments: 0,
+      completedAppointments: 0,
+      todaysAppointments: 0,
+    }
+  }
+
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   
@@ -62,12 +74,20 @@ export function calculateAppointmentStats(appointments: Appointment[]): Appointm
 }
 
 export function getRecentAppointments(appointments: Appointment[], limit: number = 5): Appointment[] {
+  if (!Array.isArray(appointments)) {
+    return []
+  }
+  
   return appointments
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, limit)
 }
 
 export function getTodaysAppointments(appointments: Appointment[]): Appointment[] {
+  if (!Array.isArray(appointments)) {
+    return []
+  }
+  
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   

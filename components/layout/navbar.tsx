@@ -9,14 +9,14 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdownMenu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { logout } from "@/store/slices/authSlice"
 import { useLogoutMutation } from "@/store/api/authApi"
 import { routes } from "@/utils/routes"
 import { User, LogOut, Settings, UserCircle } from "lucide-react"
-import { MobileSidebar } from "./mobile-sidebar"
+import { MobileSidebar } from "./mobileSidebar"
 
 export function Navbar() {
   const router = useRouter()

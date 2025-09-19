@@ -1,6 +1,6 @@
-import { ProtectedLayout } from "@/components/layout/protected-layout"
-import { EmployeeForm } from "@/components/employee/employee-form"
-import { PageHeader } from "@/components/common/page-header"
+import { ProtectedLayout } from "@/components/layout/protectedLayout"
+import { EmployeeForm } from "@/components/employee/employeeForm"
+import { PageHeader } from "@/components/common/pageHeader"
 
 export default function CreateEmployeePage() {
   return (

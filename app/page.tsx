@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PublicLayout } from "@/components/layout/public-layout"
+import { PublicLayout } from "@/components/layout/publicLayout"
 import { Calendar, Users, Shield, Clock, CheckCircle, UserCheck, ArrowRight, Building2, Globe, Award, Heart, Zap } from "lucide-react"
 import { routes } from "@/utils/routes"
 

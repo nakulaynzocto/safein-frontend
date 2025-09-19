@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { initializeAuth } from "@/store/slices/authSlice"
 import { routes } from "@/utils/routes"
-import { LoadingSpinner } from "@/components/common/loading-spinner"
+import { LoadingSpinner } from "@/components/common/loadingSpinner"
 
 interface AuthWrapperProps {
   children: React.ReactNode

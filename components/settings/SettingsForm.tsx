@@ -3,13 +3,13 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { showSuccess, showError } from "@/utils/toaster"
-import { GeneralSettings } from "@/components/settings/GeneralSettings"
-import { NotificationSettings } from "@/components/settings/NotificationSettings"
-import { SecuritySettings } from "@/components/settings/SecuritySettings"
-import { AppearanceSettings } from "@/components/settings/AppearanceSettings"
-import { DataSettings } from "@/components/settings/DataSettings"
-import { SettingsActions } from "@/components/settings/SettingsActions"
-import { SettingsData, defaultSettings } from "@/components/settings/settings.utils"
+import { GeneralSettings } from "@/components/settings/generalSettings"
+import { NotificationSettings } from "@/components/settings/notificationSettings"
+import { SecuritySettings } from "@/components/settings/securitySettings"
+import { AppearanceSettings } from "@/components/settings/appearanceSettings"
+import { DataSettings } from "@/components/settings/dataSettings"
+import { SettingsActions } from "@/components/settings/settingsActions"
+import { SettingsData, defaultSettings } from "@/components/settings/settingsUtils"
 
 export function SettingsForm() {
   const [isLoading, setIsLoading] = useState(false)

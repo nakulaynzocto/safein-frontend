@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Mail, Phone, Calendar, Users } from "lucide-react"
-import { getUserInitials, formatDate, formatValue, formatGender } from "./profile.utils"
+import { getUserInitials, formatDate, formatValue, formatGender } from "./profileUtils"
 
 export function ProfileCard({ profile }: { profile: any }) {
   return (

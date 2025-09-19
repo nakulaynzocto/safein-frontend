@@ -2,10 +2,10 @@
 
 import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue, Control } from "react-hook-form"
 import { Controller } from "react-hook-form"
-import { SettingsCard } from "./SettingsCard"
-import { InputField } from "@/components/common/input-field"
-import { SelectField } from "@/components/common/select-field"
-import { SettingsData } from "./settings.utils"
+import { SettingsCard } from "./settingsCard"
+import { InputField } from "@/components/common/inputField"
+import { SelectField } from "@/components/common/selectField"
+import { SettingsData } from "./settingsUtils"
 
 interface GeneralSettingsProps {
   register: UseFormRegister<SettingsData>

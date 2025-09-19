@@ -2,15 +2,15 @@
 
 import { useState } from "react"
 import { useGetProfileQuery, useUpdateProfileMutation } from "@/store/api/authApi"
-import { PageHeader } from "@/components/common/page-header"
+import { PageHeader } from "@/components/common/pageHeader"
 import { Button } from "@/components/ui/button"
 import { Edit, User, Building, MapPin } from "lucide-react"
-import { ProfileForm } from "@/components/profile/profile-form"
-import { LoadingSpinner } from "@/components/common/loading-spinner"
-import { EmptyState } from "@/components/common/empty-state"
-import { ProfileCard } from "./ProfileCard"
-import { InfoCard } from "./InfoCard"
-import { formatDate, formatValue, formatGender } from "./profile.utils"
+import { ProfileForm } from "@/components/profile/profileForm"
+import { LoadingSpinner } from "@/components/common/loadingSpinner"
+import { EmptyState } from "@/components/common/emptyState"
+import { ProfileCard } from "./profileCard"
+import { InfoCard } from "./infoCard"
+import { formatDate, formatValue, formatGender } from "./profileUtils"
 import { Badge } from "@/components/ui/badge"
 
 export function ProfilePageContent() {

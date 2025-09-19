@@ -5,8 +5,8 @@ import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { EmptyState } from "./empty-state"
-import { TableSkeleton } from "./table-skeleton"
+import { EmptyState } from "./emptyState"
+import { TableSkeleton } from "./tableSkeleton"
 import { ChevronDown, ChevronUp } from "lucide-react"
 
 interface Column<T> {

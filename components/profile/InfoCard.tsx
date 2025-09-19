@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { InfoRow } from "./InfoRow"
+import { InfoRow } from "./infoRow"
 
 export function InfoCard({
   icon: Icon,

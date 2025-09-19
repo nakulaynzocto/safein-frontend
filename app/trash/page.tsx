@@ -1,8 +1,8 @@
 "use client"
 
-import { ProtectedLayout } from "@/components/layout/protected-layout"
-import { TrashTable } from "@/components/trash/trash-table"
-import { PageHeader } from "@/components/common/page-header"
+import { ProtectedLayout } from "@/components/layout/protectedLayout"
+import { TrashTable } from "@/components/trash/trashTable"
+import { PageHeader } from "@/components/common/pageHeader"
 import { Button } from "@/components/ui/button"
 import { Trash2, RotateCcw } from "lucide-react"
 

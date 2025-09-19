@@ -2,11 +2,11 @@
 
 import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue, Control } from "react-hook-form"
 import { Controller } from "react-hook-form"
-import { SettingsCard } from "./SettingsCard"
+import { SettingsCard } from "./settingsCard"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { SelectField } from "@/components/common/select-field"
-import { SettingsData } from "./settings.utils"
+import { SelectField } from "@/components/common/selectField"
+import { SettingsData } from "./settingsUtils"
 
 interface SecuritySettingsProps {
   register: UseFormRegister<SettingsData>

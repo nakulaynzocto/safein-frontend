@@ -175,6 +175,7 @@ export function MobileDatePicker({ label, error, required, value, onChange, plac
           selected={value}
           onSelect={onChange}
           initialFocus
+          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
         />
       </PopoverContent>
     </Popover>

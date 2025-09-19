@@ -1,8 +1,8 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { EmployeeForm } from "@/components/employee/employee-form"
-import { ProtectedLayout } from "@/components/layout/protected-layout"
+import { EmployeeForm } from "@/components/employee/employeeForm"
+import { ProtectedLayout } from "@/components/layout/protectedLayout"
 
 export default function EmployeeEditPage() {
   const params = useParams()

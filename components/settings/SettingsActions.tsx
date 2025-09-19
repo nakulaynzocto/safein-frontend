@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { LoadingSpinner } from "@/components/common/loading-spinner"
+import { LoadingSpinner } from "@/components/common/loadingSpinner"
 
 interface SettingsActionsProps {
   isLoading: boolean

@@ -5,17 +5,21 @@ import { useAppSelector } from "@/store/hooks"
 import { useGetAppointmentsQuery } from "@/store/api/appointmentApi"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
 import { routes } from "@/utils/routes"
-import { DashboardHeader } from "./DashboardHeader"
-import { StatsGrid } from "./StatsGrid"
-import { AppointmentsTable } from "./AppointmentsTable"
-import { QuickActions } from "./QuickActions"
-import { calculateAppointmentStats, getRecentAppointments, getTodaysAppointments } from "./dashboard.utils"
+import { DashboardHeader } from "./dashboardHeader"
+import { StatsGrid } from "./statsGrid"
+import { AppointmentsTable } from "./appointmentsTable"
+import { QuickActions } from "./quickActions"
+import { calculateAppointmentStats, getRecentAppointments, getTodaysAppointments } from "./dashboardUtils"
 
 export function DashboardOverview() {
   const router = useRouter()
-  const { data: appointments = [], isLoading: appointmentsLoading } = useGetAppointmentsQuery()
-  const { data: employees = [], isLoading: employeesLoading } = useGetEmployeesQuery()
+  const { data: appointmentsData, isLoading: appointmentsLoading } = useGetAppointmentsQuery()
+  const { data: employeesData, isLoading: employeesLoading } = useGetEmployeesQuery()
   const { user } = useAppSelector((state) => state.auth)
+
+  // Extract appointments array from the API response
+  const appointments = appointmentsData?.appointments || []
+  const employees = employeesData?.employees || []
 
   // Calculate statistics
   const stats = calculateAppointmentStats(appointments)

@@ -6,7 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Providers } from "./providers"
 import { Suspense } from "react"
-import { ErrorBoundary } from "@/components/common/error-boundary"
+import { ErrorBoundary } from "@/components/common/errorBoundary"
 
 export const metadata: Metadata = {
   title: "Gatekeeper - Visitor Appointment System",

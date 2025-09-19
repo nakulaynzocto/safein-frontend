@@ -1,6 +1,6 @@
-import { ProtectedLayout } from "@/components/layout/protected-layout"
-import { AppointmentForm } from "@/components/appointment/appointment-form"
-import { PageHeader } from "@/components/common/page-header"
+import { ProtectedLayout } from "@/components/layout/protectedLayout"
+import { AppointmentForm } from "@/components/appointment/appointmentForm"
+import { PageHeader } from "@/components/common/pageHeader"
 
 export default function CreateAppointmentPage() {
   return (

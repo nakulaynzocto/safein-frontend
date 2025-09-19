@@ -1,0 +1,341 @@
+"use client"
+
+import { useState, useMemo } from "react"
+import { useRouter } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
+import { CheckCircle, Circle, ArrowLeft, ArrowRight } from "lucide-react"
+import { VisitorDetailsStep } from "./visitorDetailsStep"
+import { AppointmentDetailsStep } from "./appointmentDetailsStep"
+import { SecurityDetailsStep } from "./securityDetailsStep"
+import { NotificationsStep } from "./notificationsStep"
+import { 
+  VisitorDetails, 
+  AppointmentDetails, 
+  SecurityDetails, 
+  NotificationPreferences,
+  CreateAppointmentRequest 
+} from "@/store/api/appointmentApi"
+import { useCreateAppointmentMutation } from "@/store/api/appointmentApi"
+import { showSuccess, showError } from "@/utils/toaster"
+import { routes } from "@/utils/routes"
+
+interface Step {
+  id: number
+  title: string
+  description: string
+  completed: boolean
+  current: boolean
+}
+
+export function VisitorRegistrationFlow() {
+  const router = useRouter()
+  const [createAppointment, { isLoading }] = useCreateAppointmentMutation()
+  
+  // Step management
+  const [currentStep, setCurrentStep] = useState(1)
+  const [completedSteps, setCompletedSteps] = useState<number[]>([])
+  
+  // Form data for each step
+  const [visitorDetails, setVisitorDetails] = useState<VisitorDetails | null>(null)
+  const [accompaniedBy, setAccompaniedBy] = useState<any>(null)
+  const [appointmentDetails, setAppointmentDetails] = useState<AppointmentDetails | null>(null)
+  const [securityDetails, setSecurityDetails] = useState<SecurityDetails | null>(null)
+  const [notifications, setNotifications] = useState<NotificationPreferences | null>(null)
+  const [employeeId, setEmployeeId] = useState<string>("")
+
+  const steps: Step[] = useMemo(() => [
+    {
+      id: 1,
+      title: "Visitor Details",
+      description: "Enter visitor information",
+      completed: completedSteps.includes(1),
+      current: currentStep === 1
+    },
+    {
+      id: 2,
+      title: "Appointment Details",
+      description: "Provide appointment information",
+      completed: completedSteps.includes(2),
+      current: currentStep === 2
+    },
+    {
+      id: 3,
+      title: "Security Details",
+      description: "Security officer information",
+      completed: completedSteps.includes(3),
+      current: currentStep === 3
+    },
+    {
+      id: 4,
+      title: "Notifications",
+      description: "Select notification preferences",
+      completed: completedSteps.includes(4),
+      current: currentStep === 4
+    }
+  ], [completedSteps, currentStep])
+
+  const progressPercentage = (completedSteps.length / steps.length) * 100
+
+  const handleStepComplete = (stepId: number, data: any, accompaniedByData?: any) => {
+    console.log(`Step ${stepId} completed with data:`, data)
+    
+    // Store step data first
+    switch (stepId) {
+      case 1:
+        setVisitorDetails(data)
+        setAccompaniedBy(accompaniedByData)
+        break
+      case 2:
+        setAppointmentDetails(data)
+        break
+      case 3:
+        setSecurityDetails(data)
+        break
+      case 4:
+        setNotifications(data)
+        break
+    }
+
+    // Mark step as completed
+    setCompletedSteps(prev => {
+      if (!prev.includes(stepId)) {
+        const newCompleted = [...prev, stepId].sort()
+        console.log('Updated completed steps:', newCompleted)
+        return newCompleted
+      }
+      return prev
+    })
+
+    // Move to next step
+    if (stepId < steps.length) {
+      setCurrentStep(stepId + 1)
+    }
+  }
+
+  const handlePreviousStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
+  const handleNextStep = () => {
+    if (currentStep < steps.length && completedSteps.includes(currentStep)) {
+      setCurrentStep(currentStep + 1)
+    } else {
+      console.log(`Cannot proceed to next step. Current: ${currentStep}, Completed: ${completedSteps}`)
+    }
+  }
+
+  const handleFinalSubmit = async () => {
+    if (!visitorDetails || !appointmentDetails || !securityDetails || !notifications || !employeeId) {
+      showError("Please complete all steps before submitting")
+      return
+    }
+
+    try {
+      const payload: CreateAppointmentRequest = {
+        employeeId,
+        visitorDetails,
+        accompaniedBy,
+        appointmentDetails,
+        securityDetails,
+        notifications
+      }
+
+      await createAppointment(payload).unwrap()
+      showSuccess("Visitor registration completed successfully!")
+      router.push(routes.privateroute.APPOINTMENTLIST)
+    } catch (error: any) {
+      showError(error?.data?.message || "Failed to register visitor")
+    }
+  }
+
+  const canProceedToNext = () => {
+    return completedSteps.includes(currentStep)
+  }
+
+  const canSubmit = () => {
+    return completedSteps.length === steps.length && 
+           visitorDetails && 
+           appointmentDetails && 
+           securityDetails && 
+           notifications && 
+           employeeId
+  }
+
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <VisitorDetailsStep
+            onComplete={(data: VisitorDetails, accompaniedByData?: any) => handleStepComplete(1, data, accompaniedByData)}
+            initialData={visitorDetails}
+          />
+        )
+      case 2:
+        return (
+          <AppointmentDetailsStep
+            onComplete={(data: AppointmentDetails) => handleStepComplete(2, data)}
+            initialData={appointmentDetails}
+            onEmployeeSelect={setEmployeeId}
+            disabled={!completedSteps.includes(1)}
+          />
+        )
+      case 3:
+        return (
+          <SecurityDetailsStep
+            onComplete={(data: SecurityDetails) => handleStepComplete(3, data)}
+            initialData={securityDetails}
+            disabled={!completedSteps.includes(2)}
+          />
+        )
+      case 4:
+        return (
+          <NotificationsStep
+            onComplete={(data: NotificationPreferences) => handleStepComplete(4, data)}
+            initialData={notifications}
+            disabled={!completedSteps.includes(3)}
+          />
+        )
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="space-y-6 h-100">
+      {/* Progress Bar */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>Progress</span>
+              <span>{completedSteps.length} of {steps.length} steps completed</span>
+            </div>
+            <Progress value={progressPercentage} className="h-2" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Steps Navigation */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Registration Steps</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {steps.map((step) => (
+              <div
+                key={step.id}
+                className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                  step.current
+                    ? "border-primary bg-primary/10 shadow-md"
+                    : step.completed
+                    ? "border-green-500 bg-green-50 hover:bg-green-100"
+                    : "border-muted bg-muted/20 hover:bg-muted/30"
+                }`}
+                onClick={() => {
+                  // Allow clicking on completed steps or current step
+                  if (step.completed || step.current) {
+                    setCurrentStep(step.id)
+                  }
+                }}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  {step.completed ? (
+                    <CheckCircle className="h-6 w-6 text-green-500" />
+                  ) : step.current ? (
+                    <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+                      <div className="h-3 w-3 rounded-full bg-white"></div>
+                    </div>
+                  ) : (
+                    <Circle className="h-6 w-6 text-muted-foreground" />
+                  )}
+                  <Badge 
+                    variant={step.current ? "default" : step.completed ? "secondary" : "outline"}
+                    className={step.current ? "bg-primary text-primary-foreground" : ""}
+                  >
+                    Step {step.id}
+                  </Badge>
+                </div>
+                <h3 className={`font-semibold ${step.current ? "text-primary" : ""}`}>
+                  {step.title}
+                </h3>
+                <p className="text-sm text-muted-foreground">{step.description}</p>
+                {step.completed && (
+                  <div className="mt-2 text-xs text-green-600 font-medium">
+                    ✓ Completed
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Current Step Content */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Badge variant="default" className="text-lg px-3 py-1">
+              Step {currentStep}
+            </Badge>
+            <span className="text-xl font-semibold">{steps[currentStep - 1]?.title}</span>
+          </CardTitle>
+          <p className="text-muted-foreground mt-2">
+            {steps[currentStep - 1]?.description}
+          </p>
+        </CardHeader>
+        <CardContent>
+          {renderCurrentStep()}
+        </CardContent>
+      </Card>
+
+      {/* Navigation Buttons */}
+      <div className="flex justify-between items-center">
+        <Button
+          variant="outline"
+          onClick={handlePreviousStep}
+          disabled={currentStep === 1}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Previous
+        </Button>
+
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">
+            Step {currentStep} of {steps.length}
+          </p>
+          {!canProceedToNext() && currentStep < steps.length && (
+            <p className="text-xs text-orange-600 mt-1">
+              Complete current step to proceed
+            </p>
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          {currentStep < steps.length ? (
+            <Button
+              onClick={handleNextStep}
+              disabled={!canProceedToNext()}
+            >
+              Next
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleFinalSubmit}
+              disabled={!canSubmit() || isLoading}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isLoading ? "Submitting..." : "Complete Registration"}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

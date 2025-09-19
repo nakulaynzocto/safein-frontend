@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { PageHeader } from "@/components/common/page-header"
+import { PageHeader } from "@/components/common/pageHeader"
 import { CalendarPlus } from "lucide-react"
 import { routes } from "@/utils/routes"
 

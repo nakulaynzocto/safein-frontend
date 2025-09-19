@@ -1,8 +1,8 @@
 "use client"
 
-import { ProtectedLayout } from "@/components/layout/protected-layout"
+import { ProtectedLayout } from "@/components/layout/protectedLayout"
 import { SettingsForm } from "@/components/settings"
-import { PageHeader } from "@/components/common/page-header"
+import { PageHeader } from "@/components/common/pageHeader"
 
 export default function SettingsPage() {
   return (

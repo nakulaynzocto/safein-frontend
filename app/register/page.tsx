@@ -1,7 +1,7 @@
 "use client"
 
-import { RegisterForm } from "@/components/auth/register-form"
-import { PublicLayout } from "@/components/layout/public-layout"
+import { RegisterForm } from "@/components/auth/registerForm"
+import { PublicLayout } from "@/components/layout/publicLayout"
 
 export default function RegisterPage() {
   return (

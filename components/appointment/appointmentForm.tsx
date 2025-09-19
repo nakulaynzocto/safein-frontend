@@ -8,12 +8,12 @@ import * as yup from "yup"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-import { InputField } from "@/components/common/input-field"
-import { SelectField } from "@/components/common/select-field"
-import { DatePicker } from "@/components/common/date-picker"
-import { TimePicker } from "@/components/common/time-picker"
-import { LoadingSpinner } from "@/components/common/loading-spinner"
-import { FileUpload } from "@/components/common/file-upload"
+import { InputField } from "@/components/common/inputField"
+import { SelectField } from "@/components/common/selectField"
+import { DatePicker } from "@/components/common/datePicker"
+import { TimePicker } from "@/components/common/timePicker"
+import { LoadingSpinner } from "@/components/common/loadingSpinner"
+import { FileUpload } from "@/components/common/fileUpload"
 import { useCreateAppointmentMutation } from "@/store/api/appointmentApi"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
 import { showSuccess, showError } from "@/utils/toaster"
@@ -24,7 +24,7 @@ const appointmentSchema = yup.object({
   visitorEmail: yup.string().email("Invalid email address").required("Visitor email is required"),
   visitorPhone: yup.string().required("Visitor phone is required"),
   aadhaarNumber: yup.string().optional().matches(/^\d{12}$/, "Aadhaar number must be 12 digits").default(""),
-  aadhaarPhoto: yup.mixed().optional().default(null),
+  // aadhaarPhoto: yup.mixed().optional().default(null),
   employeeId: yup.string().required("Please select an employee"),
   purpose: yup.string().required("Purpose of visit is required"),
   appointmentDate: yup.string().required("Appointment date is required"),
@@ -38,8 +38,8 @@ export function AppointmentForm() {
   const router = useRouter()
   const [createAppointment, { isLoading }] = useCreateAppointmentMutation()
   const { data: employeesData } = useGetEmployeesQuery()
-  const employees = Array.isArray(employeesData) ? employeesData : []
-  const [aadhaarPhoto, setAadhaarPhoto] = useState<File | null>(null)
+  const employees = employeesData?.employees || []
+  // const [aadhaarPhoto, setAadhaarPhoto] = useState<File | null>(null)
 
   const {
     register,
@@ -55,7 +55,7 @@ export function AppointmentForm() {
       visitorEmail: "",
       visitorPhone: "",
       aadhaarNumber: "",
-      aadhaarPhoto: undefined,
+      // aadhaarPhoto: undefined,
       employeeId: "",
       purpose: "",
       appointmentDate: "",
@@ -65,22 +65,22 @@ export function AppointmentForm() {
   })
 
   const employeeOptions = employees.map((emp) => ({
-    value: emp.id,
+    value: emp._id,
     label: `${emp.name} - ${emp.department}`,
   }))
 
   const onSubmit = async (data: AppointmentFormData) => {
     try {
-      const selectedEmployee = employees.find((emp) => emp.id === data.employeeId)
+      const selectedEmployee = employees.find((emp) => emp._id === data.employeeId)
       const appointmentData = {
         ...data,
         employeeName: selectedEmployee?.name || "",
-        aadhaarPhoto,
+        // aadhaarPhoto,
       }
       await createAppointment(appointmentData).unwrap()
       showSuccess("Appointment created successfully")
       reset()
-      setAadhaarPhoto(null)
+      // setAadhaarPhoto(null)
       router.push(routes.privateroute.APPOINTMENTLIST)
     } catch (error: any) {
       showError(error?.data?.message || error?.message || "Failed to create appointment")
@@ -171,7 +171,7 @@ export function AppointmentForm() {
                 />
               </div>
 
-              <FileUpload
+              {/* <FileUpload
                 label="Aadhaar Photo (Optional)"
                 accept="image/*"
                 maxSize={5}
@@ -179,7 +179,7 @@ export function AppointmentForm() {
                 onChange={setAadhaarPhoto}
                 placeholder="Upload Aadhaar card photo"
                 error={errors.aadhaarPhoto?.message}
-              />
+              /> */}
             </div>
 
             {/* Appointment Details */}

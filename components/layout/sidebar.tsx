@@ -59,6 +59,11 @@ const navigation = [
         icon: Calendar,
       },
       {
+        name: "Visitor registration",
+        href: routes.privateroute.VISITORREGISTRATION,
+        icon: UserPlus,
+      },
+      {
         name: "Create Appointment",
         href: routes.privateroute.APPOINTMENTCREATE,
         icon: CalendarPlus,
