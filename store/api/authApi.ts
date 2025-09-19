@@ -53,6 +53,7 @@ export interface AuthResponse {
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+
     login: builder.mutation<AuthResponse, LoginRequest>({
       query: (credentials) => ({
         url: '/users/login',
@@ -60,7 +61,6 @@ export const authApi = baseApi.injectEndpoints({
         body: credentials,
       }),
       transformResponse: (response: any) => {
-        // Handle wrapped response format from backend
         if (response.success && response.data) {
           return response.data
         }
@@ -68,6 +68,8 @@ export const authApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ['User'],
     }),
+
+
     register: builder.mutation<User, RegisterRequest>({
       query: (userData) => ({
         url: '/users/register',
@@ -75,7 +77,6 @@ export const authApi = baseApi.injectEndpoints({
         body: userData,
       }),
       transformResponse: (response: any) => {
-        // Handle wrapped response format from backend
         if (response.success && response.data) {
           return response.data
         }
@@ -83,6 +84,8 @@ export const authApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ['User'],
     }),
+
+
     getCurrentUser: builder.query<User, void>({
       query: () => '/users/me',
       providesTags: ['User'],
@@ -94,10 +97,11 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['User'],
     }),
+
+
     getProfile: builder.query<User, void>({
       query: () => '/users/profile',
       transformResponse: (response: any) => {
-        // Handle wrapped response format from backend
         if (response.success && response.data) {
           return response.data
         }
@@ -105,6 +109,8 @@ export const authApi = baseApi.injectEndpoints({
       },
       providesTags: ['User'],
     }),
+
+
     updateProfile: builder.mutation<User, UpdateProfileRequest>({
       query: (profileData) => ({
         url: '/users/profile',
@@ -112,7 +118,6 @@ export const authApi = baseApi.injectEndpoints({
         body: profileData,
       }),
       transformResponse: (response: any) => {
-        // Handle wrapped response format from backend
         if (response.success && response.data) {
           return response.data
         }

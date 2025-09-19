@@ -8,7 +8,6 @@ export const baseApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: API_BASE_URL,
     prepareHeaders: (headers, { getState }) => {
-      // Get token from Redux store
       const state = getState() as RootState
       const token = state.auth.token
       

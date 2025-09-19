@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/common/pageHeader"
@@ -9,6 +9,7 @@ import { useGetEmployeesQuery, useDeleteEmployeeMutation } from "@/store/api/emp
 import { showSuccess, showError } from "@/utils/toaster"
 import { UserPlus, Archive } from "lucide-react"
 import { routes } from "@/utils/routes"
+import { useDebounce } from "@/hooks/useDebounce"
 
 export function EmployeeList() {
   // State for pagination and filtering
@@ -20,11 +21,14 @@ export function EmployeeList() {
   const [sortBy, setSortBy] = useState("createdAt")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   
+  // Debounce search input to prevent excessive API calls
+  const debouncedSearch = useDebounce(search, 500)
+  
   // API query with parameters
   const { data: employeeData, isLoading, error } = useGetEmployeesQuery({
     page: currentPage,
     limit: pageSize,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     department: departmentFilter && departmentFilter !== "all" ? departmentFilter : undefined,
     status: statusFilter && statusFilter !== "all" ? statusFilter as "Active" | "Inactive" : undefined,
     sortBy,
@@ -46,9 +50,13 @@ export function EmployeeList() {
     }
   }
 
+  // Reset to first page when debounced search changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [debouncedSearch])
+
   const handleSearchChange = (value: string) => {
     setSearch(value)
-    setCurrentPage(1) // Reset to first page when searching
   }
 
   const handleDepartmentFilterChange = (value: string) => {
@@ -113,10 +121,7 @@ export function EmployeeList() {
         
         // Actions
         onDelete={handleDelete}
-        onView={(employee) => {
-          // You can implement view functionality here if needed
-          console.log("View employee:", employee)
-        }}
+        onView={(employee) => {}}
         
         // Loading states
         isDeleting={isDeleting}

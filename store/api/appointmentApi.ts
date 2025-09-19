@@ -168,7 +168,6 @@ export interface AppointmentStats {
 
 export const appointmentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // 1. POST /appointments - Create a new appointment
     createAppointment: builder.mutation<Appointment, CreateAppointmentRequest>({
       query: (appointmentData) => ({
         url: '/appointments',
@@ -184,7 +183,6 @@ export const appointmentApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'Appointment', id: 'LIST' }],
     }),
 
-    // 2. GET /appointments - Get all appointments
     getAppointments: builder.query<AppointmentListResponse, GetAppointmentsQuery | void>({
       query: (params) => {
         const queryParams = createUrlParams(params || {})
@@ -205,7 +203,6 @@ export const appointmentApi = baseApi.injectEndpoints({
           : [{ type: 'Appointment', id: 'LIST' }],
     }),
 
-    // 3. GET /appointments/{id} - Get appointment by ID
     getAppointment: builder.query<Appointment, string>({
       query: (id) => `/appointments/${id}`,
       transformResponse: (response: any) => {
@@ -217,7 +214,6 @@ export const appointmentApi = baseApi.injectEndpoints({
       providesTags: (result, error, id) => [{ type: 'Appointment', id }],
     }),
 
-    // 4. PUT /appointments/{id} - Update appointment
     updateAppointment: builder.mutation<Appointment, { id: string } & UpdateAppointmentRequest>({
       query: ({ id, ...appointmentData }) => ({
         url: `/appointments/${id}`,
@@ -236,7 +232,6 @@ export const appointmentApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // 5. DELETE /appointments/{id} - Delete appointment
     deleteAppointment: builder.mutation<void, string>({
       query: (id) => ({
         url: `/appointments/${id}`,
@@ -248,7 +243,6 @@ export const appointmentApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // 6. GET /appointments/appointment/{appointmentId} - Get appointment by appointment ID
     getAppointmentByAppointmentId: builder.query<Appointment, string>({
       query: (appointmentId) => `/appointments/appointment/${appointmentId}`,
       transformResponse: (response: any) => {
@@ -260,7 +254,6 @@ export const appointmentApi = baseApi.injectEndpoints({
       providesTags: (result, error, appointmentId) => [{ type: 'Appointment', id: appointmentId }],
     }),
 
-    // 7. POST /appointments/check-in - Check in appointment
     checkInAppointment: builder.mutation<Appointment, CheckInRequest>({
       query: (checkInData) => ({
         url: '/appointments/check-in',
@@ -276,7 +269,6 @@ export const appointmentApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'Appointment', id: 'LIST' }],
     }),
 
-    // 8. POST /appointments/check-out - Check out appointment
     checkOutAppointment: builder.mutation<Appointment, CheckOutRequest>({
       query: (checkOutData) => ({
         url: '/appointments/check-out',
@@ -292,7 +284,6 @@ export const appointmentApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'Appointment', id: 'LIST' }],
     }),
 
-    // 9. GET /appointments/stats - Get appointment statistics
     getAppointmentStats: builder.query<AppointmentStats, void>({
       query: () => '/appointments/stats',
       transformResponse: (response: any) => {
@@ -304,7 +295,6 @@ export const appointmentApi = baseApi.injectEndpoints({
       providesTags: [{ type: 'Appointment', id: 'STATS' }],
     }),
 
-    // 10. PUT /appointments/bulk-update - Bulk update appointments
     bulkUpdateAppointments: builder.mutation<{ updatedCount: number }, BulkUpdateAppointmentsRequest>({
       query: (bulkData) => ({
         url: '/appointments/bulk-update',
@@ -320,7 +310,6 @@ export const appointmentApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'Appointment', id: 'LIST' }],
     }),
 
-    // 11. PUT /appointments/{id}/restore - Restore appointment
     restoreAppointment: builder.mutation<Appointment, string>({
       query: (id) => ({
         url: `/appointments/${id}/restore`,
@@ -339,7 +328,6 @@ export const appointmentApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // 12. GET /appointments/employee/{employeeId} - Get appointments by employee
     getAppointmentsByEmployee: builder.query<AppointmentListResponse, { employeeId: string } & GetAppointmentsQuery>({
       query: ({ employeeId, ...params }) => {
         const queryParams = createUrlParams(params)
@@ -360,7 +348,6 @@ export const appointmentApi = baseApi.injectEndpoints({
           : [{ type: 'Appointment', id: `EMPLOYEE_${employeeId}` }],
     }),
 
-    // 13. GET /appointments/date-range - Get appointments by date range
     getAppointmentsByDateRange: builder.query<AppointmentListResponse, { dateFrom: string; dateTo: string } & GetAppointmentsQuery>({
       query: ({ dateFrom, dateTo, ...params }) => {
         const queryParams = createUrlParams({ dateFrom, dateTo, ...params })
@@ -384,24 +371,20 @@ export const appointmentApi = baseApi.injectEndpoints({
 })
 
 export const {
-  // Basic CRUD operations
   useGetAppointmentsQuery,
   useGetAppointmentQuery,
   useCreateAppointmentMutation,
   useUpdateAppointmentMutation,
   useDeleteAppointmentMutation,
   
-  // Specialized queries
   useGetAppointmentByAppointmentIdQuery,
   useGetAppointmentsByEmployeeQuery,
   useGetAppointmentsByDateRangeQuery,
   
-  // Actions
   useCheckInAppointmentMutation,
   useCheckOutAppointmentMutation,
   useBulkUpdateAppointmentsMutation,
   useRestoreAppointmentMutation,
   
-  // Statistics
   useGetAppointmentStatsQuery,
 } = appointmentApi

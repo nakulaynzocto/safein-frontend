@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InputField } from "@/components/common/inputField"
 import { SelectField } from "@/components/common/selectField"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
-import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQuery } from "@/store/api/employeeApi"
+import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQuery, useGetEmployeeStatsQuery } from "@/store/api/employeeApi"
 import { showSuccess, showError } from "@/utils/toaster"
 import { routes } from "@/utils/routes"
 
@@ -89,6 +89,9 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
   const { data: employeeData, isLoading: isLoadingEmployee } = useGetEmployeeQuery(employeeId!, {
     skip: !isEditMode
   })
+
+  // Fetch employee stats for dynamic count
+  const { data: employeeStats, isLoading: isLoadingStats } = useGetEmployeeStatsQuery()
 
   const {
     register,
@@ -239,7 +242,9 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
 
           {/* Optional stats */}
           <div className="flex flex-col items-end">
-            <span className="text-lg font-semibold text-primary">Total Employees: 42</span>
+            <span className="text-lg font-semibold text-primary">
+              Total Employees: {isLoadingStats ? "..." : employeeStats?.totalEmployees || 0}
+            </span>
             <span className="text-sm text-muted-foreground">Manage your team efficiently</span>
           </div>
         </CardContent>

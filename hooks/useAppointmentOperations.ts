@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { 
   useGetAppointmentsQuery, 
@@ -9,6 +9,7 @@ import {
   Appointment,
   GetAppointmentsQuery 
 } from '@/store/api/appointmentApi'
+import { useDebounce } from './useDebounce'
 
 export interface UseAppointmentOperationsOptions {
   initialPage?: number
@@ -100,11 +101,19 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
   const [sortBy, setSortBy] = useState(initialSortBy)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(initialSortOrder)
 
+  // Debounce search input to prevent excessive API calls
+  const debouncedSearch = useDebounce(searchTerm, 500)
+
+  // Reset to first page when debounced search changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [debouncedSearch])
+
   // API queries
   const queryParams: GetAppointmentsQuery = {
     page: currentPage,
     limit: pageSize,
-    search: searchTerm || undefined,
+    search: debouncedSearch || undefined,
     status: (statusFilter as Appointment['status']) || undefined,
     employeeId: employeeFilter || undefined,
     dateFrom: dateFrom || undefined,

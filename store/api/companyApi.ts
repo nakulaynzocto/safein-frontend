@@ -77,10 +77,10 @@ export interface UpdateCompanyRequest {
 
 export const companyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+
     getCompany: builder.query<Company, void>({
       query: () => '/companies',
       transformResponse: (response: any) => {
-        // Handle wrapped response format from backend
         if (response.success && response.data) {
           return response.data
         }
@@ -88,6 +88,8 @@ export const companyApi = baseApi.injectEndpoints({
       },
       providesTags: ['Company'],
     }),
+
+
     createCompany: builder.mutation<Company, CreateCompanyRequest>({
       query: (companyData) => ({
         url: '/companies',
@@ -95,7 +97,6 @@ export const companyApi = baseApi.injectEndpoints({
         body: companyData,
       }),
       transformResponse: (response: any) => {
-        // Handle wrapped response format from backend
         if (response.success && response.data) {
           return response.data
         }
@@ -103,6 +104,8 @@ export const companyApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ['Company'],
     }),
+
+
     updateCompany: builder.mutation<Company, UpdateCompanyRequest>({
       query: (companyData) => ({
         url: '/companies',
@@ -110,7 +113,6 @@ export const companyApi = baseApi.injectEndpoints({
         body: companyData,
       }),
       transformResponse: (response: any) => {
-        // Handle wrapped response format from backend
         if (response.success && response.data) {
           return response.data
         }
@@ -118,10 +120,11 @@ export const companyApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ['Company'],
     }),
+
+
     checkCompanyExists: builder.query<{ exists: boolean }, void>({
       query: () => '/companies/exists',
       transformResponse: (response: any) => {
-        // Handle wrapped response format from backend
         if (response.success && response.data) {
           return response.data
         }
