@@ -1,18 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { InputField } from "@/components/common/inputField"
 import { SelectField } from "@/components/common/selectField"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
+import { ImageUploadField } from "@/components/common/imageUploadField"
 import { VisitorDetails } from "@/store/api/appointmentApi"
-import { User, Building, MapPin, CreditCard, Camera, Users } from "lucide-react"
+import { User, MapPin, CreditCard, Camera } from "lucide-react"
 
 const visitorDetailsSchema = yup.object({
   name: yup.string().required("Name is required"),
@@ -35,17 +33,6 @@ const visitorDetailsSchema = yup.object({
   photo: yup.string().url("Invalid image URL").required("Visitor photo URL is required"),
 })
 
-const accompaniedBySchema = yup.object({
-  name: yup.string().required("Accompanied by name is required"),
-  phone: yup.string().required("Accompanied by phone is required"),
-  relation: yup.string().required("Relation is required"),
-  idProof: yup.object({
-    type: yup.string().required("ID proof type is required"),
-    number: yup.string().required("ID proof number is required"),
-    image: yup.string().url("Invalid image URL").required("ID proof image URL is required"),
-  }),
-})
-
 type VisitorDetailsFormData = yup.InferType<typeof visitorDetailsSchema>
 
 interface VisitorDetailsStepProps {
@@ -53,18 +40,9 @@ interface VisitorDetailsStepProps {
   initialData?: VisitorDetails | null
 }
 
+
 export function VisitorDetailsStep({ onComplete, initialData }: VisitorDetailsStepProps) {
   const [hasAccompaniedBy, setHasAccompaniedBy] = useState(false)
-  const [accompaniedByData, setAccompaniedByData] = useState({
-    name: "",
-    phone: "",
-    relation: "",
-    idProof: {
-      type: "",
-      number: "",
-      image: "",
-    }
-  })
 
   const {
     register,
@@ -93,7 +71,7 @@ export function VisitorDetailsStep({ onComplete, initialData }: VisitorDetailsSt
         image: initialData?.idProof?.image || "",
       },
       photo: initialData?.photo || "",
-    }
+    },
   })
 
   const idProofTypes = [
@@ -115,15 +93,15 @@ export function VisitorDetailsStep({ onComplete, initialData }: VisitorDetailsSt
       idProof: data.idProof,
       photo: data.photo,
     }
-    onComplete(visitorDetails, hasAccompaniedBy ? accompaniedByData : undefined)
+    onComplete(visitorDetails, hasAccompaniedBy ? {} : undefined)
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Personal Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="card-hostinger">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg font-medium">
             <User className="h-5 w-5" />
             Personal Information
           </CardTitle>
@@ -166,9 +144,9 @@ export function VisitorDetailsStep({ onComplete, initialData }: VisitorDetailsSt
       </Card>
 
       {/* Address Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="card-hostinger">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg font-medium">
             <MapPin className="h-5 w-5" />
             Address Information
           </CardTitle>
@@ -210,15 +188,15 @@ export function VisitorDetailsStep({ onComplete, initialData }: VisitorDetailsSt
       </Card>
 
       {/* ID Proof */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="card-hostinger">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg font-medium">
             <CreditCard className="h-5 w-5" />
-            ID Proof
+            ID Proof & Photos
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <SelectField
               label="ID Proof Type"
               placeholder="Select ID proof type"
@@ -233,112 +211,54 @@ export function VisitorDetailsStep({ onComplete, initialData }: VisitorDetailsSt
               error={errors.idProof?.number?.message}
               {...register("idProof.number")}
             />
-            <InputField
-              label="ID Proof Image URL"
-              placeholder="Enter image URL"
-              error={errors.idProof?.image?.message}
-              {...register("idProof.image")}
-            />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Visitor Photo */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Camera className="h-5 w-5" />
-            Visitor Photo
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <InputField
-            label="Visitor Photo URL"
-            placeholder="Enter visitor photo URL"
-            error={errors.photo?.message}
-            {...register("photo")}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Accompanied By */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Accompanied By (Optional)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="accompanied-by"
-              checked={hasAccompaniedBy}
-              onCheckedChange={setHasAccompaniedBy}
-            />
-            <Label htmlFor="accompanied-by">Visitor is accompanied by someone</Label>
-          </div>
-
-          {hasAccompaniedBy && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField
-                  label="Accompanied By Name"
-                  placeholder="Enter companion name"
-                  value={accompaniedByData.name}
-                  onChange={(e) => setAccompaniedByData({...accompaniedByData, name: e.target.value})}
-                />
-                <InputField
-                  label="Companion Phone"
-                  placeholder="Enter companion phone"
-                  value={accompaniedByData.phone}
-                  onChange={(e) => setAccompaniedByData({...accompaniedByData, phone: e.target.value})}
-                />
-                <InputField
-                  label="Relation"
-                  placeholder="Enter relation"
-                  value={accompaniedByData.relation}
-                  onChange={(e) => setAccompaniedByData({...accompaniedByData, relation: e.target.value})}
+          
+          {/* Image Uploads Section */}
+          <div className="border-t pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  ID Proof Document
+                </h4>
+                <p className="text-xs text-gray-500 mb-4">
+                  Upload a clear photo of your ID document
+                </p>
+                <ImageUploadField
+                  name="idProof.image"
+                  label="ID Proof Image"
+                  register={register}
+                  setValue={setValue}
+                  errors={errors.idProof?.image}
+                  initialUrl={initialData?.idProof?.image}
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <SelectField
-                  label="Companion ID Proof Type"
-                  placeholder="Select ID proof type"
-                  options={idProofTypes}
-                  value={accompaniedByData.idProof.type}
-                  onChange={(value) => setAccompaniedByData({
-                    ...accompaniedByData, 
-                    idProof: {...accompaniedByData.idProof, type: value}
-                  })}
-                />
-                <InputField
-                  label="Companion ID Proof Number"
-                  placeholder="Enter ID proof number"
-                  value={accompaniedByData.idProof.number}
-                  onChange={(e) => setAccompaniedByData({
-                    ...accompaniedByData, 
-                    idProof: {...accompaniedByData.idProof, number: e.target.value}
-                  })}
-                />
-                <InputField
-                  label="Companion ID Proof Image URL"
-                  placeholder="Enter image URL"
-                  value={accompaniedByData.idProof.image}
-                  onChange={(e) => setAccompaniedByData({
-                    ...accompaniedByData, 
-                    idProof: {...accompaniedByData.idProof, image: e.target.value}
-                  })}
+              
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                  <Camera className="h-4 w-4" />
+                  Visitor Photo
+                </h4>
+                <p className="text-xs text-gray-500 mb-4">
+                  Upload a clear photo of yourself
+                </p>
+                <ImageUploadField
+                  name="photo"
+                  label="Visitor Photo"
+                  register={register}
+                  setValue={setValue}
+                  errors={errors.photo}
+                  initialUrl={initialData?.photo}
                 />
               </div>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
 
       {/* Submit Button */}
       <div className="flex justify-end">
-        <Button type="submit" size="lg">
+        <Button type="submit" className="btn-hostinger btn-hostinger-primary px-6 py-2">
           Complete Step 1 - Proceed to Appointment Details
         </Button>
       </div>

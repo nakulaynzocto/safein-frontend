@@ -16,10 +16,18 @@ import {
   Trash2, 
   Eye,
   RotateCcw,
+  MoreVertical
 } from "lucide-react"
 import { Employee } from "@/store/api/employeeApi"
 import { FilterSection } from "./filterSection"
 import { EmployeeDetailsDialog } from "./employeeDetailsDialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdownMenu"
 
 export interface EmployeeTableProps {
   employees: Employee[]
@@ -205,52 +213,57 @@ export function EmployeeTable({
       key: "actions",
       header: "Actions",
       render: (employee: Employee) => (
-        <div className="flex gap-2 justify-end">
-          {onView && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleView(employee)}
-            >
-              <Eye className="h-3 w-3" />
-            </Button>
-          )}
-          {mode === 'active' && (
-            <>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => router.push(`/employee/${employee._id}`)}
-              >
-                <Edit className="h-3 w-3" />
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <MoreVertical className="h-4 w-4" />
               </Button>
-              {onDelete && (
-                <Button 
-                  size="sm" 
-                  variant="outline" 
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {onView && (
+                <DropdownMenuItem onClick={() => handleView(employee)}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </DropdownMenuItem>
+              )}
+              {mode === 'active' && (
+                <>
+                  <DropdownMenuItem onClick={() => router.push(`/employee/${employee._id}`)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                  {onDelete && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={() => {
+                          setSelectedEmployee(employee)
+                          setShowDeleteDialog(true)
+                        }}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </>
+              )}
+              {mode === 'trash' && onRestore && (
+                <DropdownMenuItem 
                   onClick={() => {
                     setSelectedEmployee(employee)
-                    setShowDeleteDialog(true)
+                    setShowRestoreDialog(true)
                   }}
+                  disabled={isRestoring}
                 >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Restore
+                </DropdownMenuItem>
               )}
-            </>
-          )}
-          {mode === 'trash' && onRestore && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSelectedEmployee(employee)
-                setShowRestoreDialog(true)
-              }}
-              disabled={isRestoring}
-            >
-              <RotateCcw className="h-3 w-3" />
-            </Button>
-          )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )
     })

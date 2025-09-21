@@ -18,7 +18,9 @@ export const routes = {
     APPOINTMENTCREATE: "/appointment/create",
     APPOINTMENTLIST: "/appointment/list",
     APPOINTMENTTRASH: "/appointment/trash",
-    VISITORREGISTRATION: "/appointment/visitor-registration",
+    VISITORLIST: "/visitor/list",
+    VISITORREGISTRATION: "/visitor/register",
+    VISITOREDIT: "/visitor/[id]", // Dynamic route pattern
     TRASH: "/trash",
   },
 } as const

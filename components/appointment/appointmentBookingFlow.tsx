@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, Circle, ArrowLeft, ArrowRight } from "lucide-react"
+import { CheckCircle, Circle, ArrowLeft, ArrowRight, User, Calendar, Shield, Bell } from "lucide-react"
+import { VisitorSearchStep } from "./visitorSearchStep"
 import { VisitorDetailsStep } from "./visitorDetailsStep"
 import { AppointmentDetailsStep } from "./appointmentDetailsStep"
 import { SecurityDetailsStep } from "./securityDetailsStep"
@@ -29,9 +30,10 @@ interface Step {
   description: string
   completed: boolean
   current: boolean
+  icon: React.ReactNode
 }
 
-export function VisitorRegistrationFlow() {
+export function AppointmentBookingFlow() {
   const router = useRouter()
   const [createAppointment, { isLoading }] = useCreateAppointmentMutation()
   
@@ -50,35 +52,51 @@ export function VisitorRegistrationFlow() {
   const steps: Step[] = useMemo(() => [
     {
       id: 1,
-      title: "Visitor Details",
-      description: "Enter visitor information",
+      title: "Find Visitor",
+      description: "Search for existing visitor or register new",
       completed: completedSteps.includes(1),
-      current: currentStep === 1
+      current: currentStep === 1,
+      icon: <User className="h-5 w-5" />
     },
     {
       id: 2,
       title: "Appointment Details",
       description: "Provide appointment information",
       completed: completedSteps.includes(2),
-      current: currentStep === 2
+      current: currentStep === 2,
+      icon: <Calendar className="h-5 w-5" />
     },
     {
       id: 3,
       title: "Security Details",
       description: "Security officer information",
       completed: completedSteps.includes(3),
-      current: currentStep === 3
+      current: currentStep === 3,
+      icon: <Shield className="h-5 w-5" />
     },
     {
       id: 4,
       title: "Notifications",
       description: "Select notification preferences",
       completed: completedSteps.includes(4),
-      current: currentStep === 4
+      current: currentStep === 4,
+      icon: <Bell className="h-5 w-5" />
     }
   ], [completedSteps, currentStep])
 
   const progressPercentage = (completedSteps.length / steps.length) * 100
+
+  const handleVisitorFound = (visitor: VisitorDetails) => {
+    setVisitorDetails(visitor)
+    setCompletedSteps(prev => [...prev, 1])
+    setCurrentStep(2)
+    showSuccess("Visitor found! Proceeding to appointment details.")
+  }
+
+  const handleNewVisitor = () => {
+    setCurrentStep(1)
+    // This will show the visitor details form for new registration
+  }
 
   const handleStepComplete = (stepId: number, data: any, accompaniedByData?: any) => {
     console.log(`Step ${stepId} completed with data:`, data)
@@ -148,10 +166,10 @@ export function VisitorRegistrationFlow() {
       }
 
       await createAppointment(payload).unwrap()
-      showSuccess("Visitor registration completed successfully!")
+      showSuccess("Appointment booked successfully!")
       router.push(routes.privateroute.APPOINTMENTLIST)
     } catch (error: any) {
-      showError(error?.data?.message || "Failed to register visitor")
+      showError(error?.data?.message || "Failed to book appointment")
     }
   }
 
@@ -171,12 +189,23 @@ export function VisitorRegistrationFlow() {
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 1:
-        return (
-          <VisitorDetailsStep
-            onComplete={(data: VisitorDetails, accompaniedByData?: any) => handleStepComplete(1, data, accompaniedByData)}
-            initialData={visitorDetails}
-          />
-        )
+        if (visitorDetails) {
+          // Show visitor details form for editing/confirming
+          return (
+            <VisitorDetailsStep
+              onComplete={(data: VisitorDetails, accompaniedByData?: any) => handleStepComplete(1, data, accompaniedByData)}
+              initialData={visitorDetails}
+            />
+          )
+        } else {
+          // Show search form
+          return (
+            <VisitorSearchStep
+              onVisitorFound={handleVisitorFound}
+              onNewVisitor={handleNewVisitor}
+            />
+          )
+        }
       case 2:
         return (
           <AppointmentDetailsStep
@@ -211,11 +240,11 @@ export function VisitorRegistrationFlow() {
   return (
     <div className="space-y-6">
       {/* Progress Bar */}
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="card-hostinger">
+        <CardContent className="pt-4 pb-4">
           <div className="space-y-4">
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>Progress</span>
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Appointment Booking Progress</span>
               <span>{completedSteps.length} of {steps.length} steps completed</span>
             </div>
             <Progress value={progressPercentage} className="h-2" />
@@ -224,9 +253,9 @@ export function VisitorRegistrationFlow() {
       </Card>
 
       {/* Steps Navigation */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Registration Steps</CardTitle>
+      <Card className="card-hostinger">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-medium">Booking Steps</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -264,7 +293,8 @@ export function VisitorRegistrationFlow() {
                     Step {step.id}
                   </Badge>
                 </div>
-                <h3 className={`font-semibold ${step.current ? "text-primary" : ""}`}>
+                <h3 className={`font-semibold flex items-center gap-2 ${step.current ? "text-primary" : ""}`}>
+                  {step.icon}
                   {step.title}
                 </h3>
                 <p className="text-sm text-muted-foreground">{step.description}</p>
@@ -280,15 +310,15 @@ export function VisitorRegistrationFlow() {
       </Card>
 
       {/* Current Step Content */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Badge variant="default" className="text-lg px-3 py-1">
+      <Card className="card-hostinger">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg font-medium">
+            <Badge variant="default" className="text-sm px-3 py-1">
               Step {currentStep}
             </Badge>
-            <span className="text-xl font-semibold">{steps[currentStep - 1]?.title}</span>
+            <span className="text-lg font-medium">{steps[currentStep - 1]?.title}</span>
           </CardTitle>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-sm text-gray-600 mt-2">
             {steps[currentStep - 1]?.description}
           </p>
         </CardHeader>
@@ -297,6 +327,42 @@ export function VisitorRegistrationFlow() {
         </CardContent>
       </Card>
 
+      {/* Navigation Buttons */}
+      {currentStep > 1 && (
+        <Card className="card-hostinger">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex justify-between">
+              <Button
+                className="btn-hostinger btn-hostinger-secondary flex items-center gap-2"
+                onClick={handlePreviousStep}
+                disabled={currentStep === 1}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              
+              {currentStep < steps.length ? (
+                <Button
+                  className="btn-hostinger btn-hostinger-primary flex items-center gap-2"
+                  onClick={handleNextStep}
+                  disabled={!canProceedToNext()}
+                >
+                  Next
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button
+                  className="btn-hostinger btn-hostinger-primary flex items-center gap-2"
+                  onClick={handleFinalSubmit}
+                  disabled={!canSubmit() || isLoading}
+                >
+                  {isLoading ? "Booking..." : "Complete Booking"}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

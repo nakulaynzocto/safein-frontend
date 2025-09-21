@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { routes } from "@/utils/routes"
 import { Button } from "@/components/ui/button"
@@ -16,6 +16,7 @@ import {
   ChevronRight,
   UserPlus,
   CalendarPlus,
+  UserCheck,
 } from "lucide-react"
 
 interface SidebarProps {
@@ -50,6 +51,22 @@ const navigation = [
     ],
   },
   {
+    name: "Visitor Registration",
+    icon: UserCheck,
+    children: [
+      {
+        name: "All Visitors",
+        href: routes.privateroute.VISITORLIST,
+        icon: Users,
+      },
+      {
+        name: "Register Visitor",
+        href: routes.privateroute.VISITORREGISTRATION,
+        icon: UserPlus,
+      },
+    ],
+  },
+  {
     name: "Appointments",
     icon: Calendar,
     children: [
@@ -57,11 +74,6 @@ const navigation = [
         name: "All Appointments",
         href: routes.privateroute.APPOINTMENTLIST,
         icon: Calendar,
-      },
-      {
-        name: "Visitor registration",
-        href: routes.privateroute.VISITORREGISTRATION,
-        icon: UserPlus,
       },
       {
         name: "Create Appointment",
@@ -84,13 +96,38 @@ const navigation = [
 
 export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const [collapsed, setCollapsed] = useState(false)
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Employees", "Appointments"])
+  const [expandedItem, setExpandedItem] = useState<string | null>(null)
 
-  const toggleExpanded = (itemName: string) => {
-    setExpandedItems((prev) =>
-      prev.includes(itemName) ? prev.filter((item) => item !== itemName) : [...prev, itemName],
-    )
+  // Automatically expand the parent category based on current pathname
+  useEffect(() => {
+    if (collapsed) return // Don't auto-expand if collapsed
+
+    for (const item of navigation) {
+      if (item.children) {
+        const activeChild = item.children.find((child) => child.href === pathname)
+        if (activeChild) {
+          setExpandedItem(item.name)
+          return
+        }
+      }
+    }
+    setExpandedItem(null)
+  }, [pathname, collapsed])
+
+  const toggleExpanded = (itemName: string, children?: any[]) => {
+    if (collapsed) return // Prevent expansion when collapsed
+
+    const newExpanded = expandedItem === itemName ? null : itemName
+    setExpandedItem(newExpanded)
+
+    if (children && children.length > 0 && newExpanded === itemName) {
+      const activeChild = children.find((child) => child.href === pathname)
+      if (!activeChild) {
+        router.push(children[0].href)
+      }
+    }
   }
 
   const isActive = (href: string) => pathname === href
@@ -102,67 +139,52 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <div
       className={cn(
-        "flex h-full flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300 overflow-hidden",
-        collapsed ? "w-16" : "w-64",
+        "flex h-full flex-col sidebar-hostinger transition-all duration-300 overflow-hidden",
+        collapsed ? "sidebar-collapsed" : "sidebar-expanded",
         className,
       )}
     >
-      {/* Sidebar Header */}
-      <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border">
-        {!collapsed && <span className="text-lg font-semibold text-sidebar-foreground">Menu</span>}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCollapsed(!collapsed)}
-          className="h-8 w-8 p-0 text-sidebar-foreground hover:bg-sidebar-accent"
-        >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </Button>
-      </div>
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
         {navigation.map((item) => {
           if (item.children) {
-            const isExpanded = expandedItems.includes(item.name)
+            const isExpanded = expandedItem === item.name
             const hasActiveChild = isParentActive(item.children)
 
             return (
               <div key={item.name}>
-                <Button
-                  variant="ghost"
-                  onClick={() => !collapsed && toggleExpanded(item.name)}
+                <div
+                  onClick={() => toggleExpanded(item.name, item.children)}
                   className={cn(
-                    "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                    
+                    "sidebar-item",
+                    hasActiveChild && "active"
                   )}
                 >
-                  <item.icon className={cn("h-4 w-4", !collapsed && "mr-2")} />
+                  <item.icon className="sidebar-item-icon" />
                   {!collapsed && (
                     <>
-                      <span className="flex-1 text-left">{item.name}</span>
-                      <ChevronRight className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-90")} />
+                      <span className="sidebar-item-text">{item.name}</span>
+                      <ChevronRight className={cn("sidebar-item-arrow", isExpanded && "expanded")} />
                     </>
                   )}
-                </Button>
+                </div>
 
                 {!collapsed && isExpanded && (
-                  <div className="ml-4 mt-1 space-y-1">
+                  <div className="sidebar-submenu">
                     {item.children.map((child) => (
-                      <Button
+                      <Link
                         key={child.href}
-                        variant="ghost"
-                        asChild
+                        href={child.href}
+                        prefetch={true}
                         className={cn(
-                          "w-full justify-start text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                          isActive(child.href) && "bg-sidebar-primary text-sidebar-primary-foreground",
+                          "sidebar-submenu-item",
+                          isActive(child.href) && "active"
                         )}
                       >
-                        <Link href={child.href} prefetch={true}>
-                          <child.icon className="mr-2 h-3 w-3" />
-                          {child.name}
-                        </Link>
-                      </Button>
+                        <child.icon className="sidebar-submenu-item-icon" />
+                        {child.name}
+                      </Link>
                     ))}
                   </div>
                 )}
@@ -171,21 +193,18 @@ export function Sidebar({ className }: SidebarProps) {
           }
 
           return (
-            <Button
+            <Link
               key={item.name}
-              variant="ghost"
-              asChild
+              href={item.href!}
+              prefetch={true}
               className={cn(
-                "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                isActive(item.href!) && "bg-sidebar-primary text-sidebar-primary-foreground",
-                collapsed && "justify-center px-2",
+                "sidebar-item",
+                isActive(item.href!) && "active"
               )}
             >
-              <Link href={item.href!} prefetch={true}>
-                <item.icon className={cn("h-4 w-4", !collapsed && "mr-2")} />
-                {!collapsed && item.name}
-              </Link>
-            </Button>
+              <item.icon className="sidebar-item-icon" />
+              {!collapsed && <span className="sidebar-item-text">{item.name}</span>}
+            </Link>
           )
         })}
       </nav>

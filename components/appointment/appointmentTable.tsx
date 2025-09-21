@@ -18,11 +18,19 @@ import {
   Clock,
   LogOut,
   Calendar,
-  User
+  User,
+  MoreVertical
 } from "lucide-react"
 import { Appointment } from "@/store/api/appointmentApi"
 import { AppointmentFilterSection } from "./appointmentFilterSection"
 import { AppointmentDetailsDialog } from "./appointmentDetailsDialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdownMenu"
 
 export interface AppointmentTableProps {
   appointments: Appointment[]
@@ -188,24 +196,31 @@ export function AppointmentTable({
         header: "Visitor",
         render: (appointment: Appointment) => (
           <div>
-            <div className="font-medium">{appointment.visitorDetails.name}</div>
-            <div className="text-sm text-muted-foreground">{appointment.visitorDetails.email}</div>
+            <div className="font-medium">{appointment.visitorDetails?.name || "N/A"}</div>
+            <div className="text-sm text-muted-foreground">{appointment.visitorDetails?.email || "N/A"}</div>
           </div>
         ),
       },
       {
         key: "employeeName",
         header: "Employee",
-        render: (appointment: Appointment) => (
-          <div className="text-sm">{appointment.employeeId?.name || "N/A"}</div>
-        ),
+        render: (appointment: Appointment) => {
+          // Handle case where employeeId might be an object or string
+          let employeeName = "N/A"
+          if (typeof appointment.employeeId === 'string') {
+            employeeName = appointment.employeeId
+          } else if (typeof appointment.employeeId === 'object' && appointment.employeeId !== null) {
+            employeeName = (appointment.employeeId as any).name || (appointment.employeeId as any).employeeId || "N/A"
+          }
+          return <div className="text-sm">{employeeName}</div>
+        },
       },
       {
         key: "purpose",
         header: "Purpose",
         render: (appointment: Appointment) => (
-          <div className="text-sm max-w-[200px] truncate" title={appointment.appointmentDetails.purpose}>
-            {appointment.appointmentDetails.purpose}
+          <div className="text-sm max-w-[200px] truncate" title={appointment.appointmentDetails?.purpose || "N/A"}>
+            {appointment.appointmentDetails?.purpose || "N/A"}
           </div>
         ),
       },
@@ -214,15 +229,19 @@ export function AppointmentTable({
         header: "Date & Time",
         render: (appointment: Appointment) => (
           <div className="text-sm">
-            <div>{format(new Date(appointment.appointmentDetails.scheduledDate), "MMM dd, yyyy")}</div>
-            <div className="text-muted-foreground">{appointment.appointmentDetails.scheduledTime}</div>
+            <div>{appointment.appointmentDetails?.scheduledDate ? format(new Date(appointment.appointmentDetails.scheduledDate), "MMM dd, yyyy") : "N/A"}</div>
+            <div className="text-muted-foreground">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
           </div>
         ),
       },
       {
         key: "status",
         header: "Status",
-        render: (appointment: Appointment) => <StatusBadge status={appointment.status} />,
+        render: (appointment: Appointment) => {
+          // Ensure status is a string, not an object
+          const status = typeof appointment.status === 'string' ? appointment.status : 'pending'
+          return <StatusBadge status={status} />
+        },
       },
     ]
 
@@ -247,78 +266,81 @@ export function AppointmentTable({
       key: "actions",
       header: "Actions",
       render: (appointment: Appointment) => (
-        <div className="flex gap-2 justify-end">
-          {onView && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleView(appointment)}
-            >
-              <Eye className="h-3 w-3" />
-            </Button>
-          )}
-          {mode === 'active' && (
-            <>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => router.push(`/appointment/${appointment._id}`)}
-              >
-                <Edit className="h-3 w-3" />
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <MoreVertical className="h-4 w-4" />
               </Button>
-              {appointment.status === 'approved' && onCheckIn && (
-                <Button
-                  variant="outline"
-                  size="sm"
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {onView && (
+                <DropdownMenuItem onClick={() => handleView(appointment)}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </DropdownMenuItem>
+              )}
+              {mode === 'active' && (
+                <>
+                  <DropdownMenuItem onClick={() => router.push(`/appointment/${appointment._id}`)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                  {appointment.status === 'approved' && onCheckIn && (
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        setSelectedAppointment(appointment)
+                        setShowCheckInDialog(true)
+                      }}
+                      disabled={isCheckingIn}
+                    >
+                      <Clock className="mr-2 h-4 w-4" />
+                      Check In
+                    </DropdownMenuItem>
+                  )}
+                  {appointment.status === 'completed' && onCheckOut && (
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        setSelectedAppointment(appointment)
+                        setShowCheckOutDialog(true)
+                      }}
+                      disabled={isCheckingOut}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Check Out
+                    </DropdownMenuItem>
+                  )}
+                  {onDelete && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={() => {
+                          setSelectedAppointment(appointment)
+                          setShowDeleteDialog(true)
+                        }}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </>
+              )}
+              {mode === 'trash' && onRestore && (
+                <DropdownMenuItem 
                   onClick={() => {
                     setSelectedAppointment(appointment)
-                    setShowCheckInDialog(true)
+                    setShowRestoreDialog(true)
                   }}
-                  disabled={isCheckingIn}
+                  disabled={isRestoring}
                 >
-                  <Clock className="h-3 w-3" />
-                </Button>
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Restore
+                </DropdownMenuItem>
               )}
-              {appointment.status === 'completed' && onCheckOut && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedAppointment(appointment)
-                    setShowCheckOutDialog(true)
-                  }}
-                  disabled={isCheckingOut}
-                >
-                  <LogOut className="h-3 w-3" />
-                </Button>
-              )}
-              {onDelete && (
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={() => {
-                    setSelectedAppointment(appointment)
-                    setShowDeleteDialog(true)
-                  }}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              )}
-            </>
-          )}
-          {mode === 'trash' && onRestore && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSelectedAppointment(appointment)
-                setShowRestoreDialog(true)
-              }}
-              disabled={isRestoring}
-            >
-              <RotateCcw className="h-3 w-3" />
-            </Button>
-          )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       ),
     })

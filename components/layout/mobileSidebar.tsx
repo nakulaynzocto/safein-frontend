@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { routes } from "@/utils/routes"
@@ -14,12 +14,12 @@ import {
   Users, 
   Calendar, 
   Settings, 
-  ChevronDown, 
   ChevronRight,
   UserPlus,
   CalendarPlus,
   Trash2,
-  LogOut
+  LogOut,
+  UserCheck
 } from "lucide-react"
 
 interface MobileSidebarProps {
@@ -54,6 +54,22 @@ const navigation = [
     ],
   },
   {
+    name: "Visitor Registration",
+    icon: UserCheck,
+    children: [
+      {
+        name: "All Visitors",
+        href: routes.privateroute.VISITORLIST,
+        icon: Users,
+      },
+      {
+        name: "Register Visitor",
+        href: routes.privateroute.VISITORREGISTRATION,
+        icon: UserPlus,
+      },
+    ],
+  },
+  {
     name: "Appointments",
     icon: Calendar,
     children: [
@@ -83,16 +99,38 @@ const navigation = [
 
 export function MobileSidebar({ className }: MobileSidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Employees", "Appointments"])
+  const [expandedItem, setExpandedItem] = useState<string | null>(null)
 
-  const toggleExpanded = (itemName: string) => {
-    setExpandedItems((prev) =>
-      prev.includes(itemName) ? prev.filter((item) => item !== itemName) : [...prev, itemName],
-    )
+  // Automatically expand the parent category based on current pathname
+  useEffect(() => {
+    for (const item of navigation) {
+      if (item.children) {
+        const activeChild = item.children.find((child) => child.href === pathname)
+        if (activeChild) {
+          setExpandedItem(item.name)
+          return
+        }
+      }
+    }
+    setExpandedItem(null)
+  }, [pathname])
+
+  const toggleExpanded = (itemName: string, children?: any[]) => {
+    const newExpanded = expandedItem === itemName ? null : itemName
+    setExpandedItem(newExpanded)
+
+    if (children && children.length > 0 && newExpanded === itemName) {
+      const activeChild = children.find((child) => child.href === pathname)
+      if (!activeChild) {
+        router.push(children[0].href)
+        setOpen(false) // Close mobile sidebar after navigation
+      }
+    }
   }
 
-  const isActive = (href: string | undefined) => href ? pathname === href : false
+  const isActive = (href: string) => pathname === href
 
   const isParentActive = (children: any[]) => {
     return children.some((child) => pathname === child.href)
@@ -106,7 +144,7 @@ export function MobileSidebar({ className }: MobileSidebarProps) {
           <span className="sr-only">Toggle navigation menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-72 p-0">
+      <SheetContent side="left" className="w-72 p-0 sidebar-hostinger">
         <SheetHeader className="sr-only">
           <SheetTitle>Navigation Menu</SheetTitle>
         </SheetHeader>
@@ -125,78 +163,63 @@ export function MobileSidebar({ className }: MobileSidebarProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
+          <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
             {navigation.map((item) => {
-              const Icon = item.icon
-              const hasChildren = item.children && item.children.length > 0
-              const isExpanded = expandedItems.includes(item.name)
-              const isItemActive = isActive(item.href) || (hasChildren && isParentActive(item.children))
+              if (item.children) {
+                const isExpanded = expandedItem === item.name
+                const hasActiveChild = isParentActive(item.children)
 
-              return (
-                <div key={item.name}>
-                  <div
-                    className={cn(
-                      "flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                      isItemActive
-                        ? "bg-primary text-white"
-                        : "text-gray-700 hover:bg-gray-100"
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Icon className="h-5 w-5" />
-                      {hasChildren ? (
-                        <span>{item.name}</span>
-                      ) : (
-                        <Link 
-                          href={item.href || "#"} 
-                          className="flex-1"
-                          onClick={() => setOpen(false)}
-                        >
-                          {item.name}
-                        </Link>
+                return (
+                  <div key={item.name}>
+                    <div
+                      onClick={() => toggleExpanded(item.name, item.children)}
+                      className={cn(
+                        "sidebar-item",
+                        hasActiveChild && "active"
                       )}
+                    >
+                      <item.icon className="sidebar-item-icon" />
+                      <span className="sidebar-item-text">{item.name}</span>
+                      <ChevronRight className={cn("sidebar-item-arrow", isExpanded && "expanded")} />
                     </div>
-                    {hasChildren && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={() => toggleExpanded(item.name)}
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                      </Button>
-                    )}
-                  </div>
 
-                  {/* Submenu */}
-                  {hasChildren && isExpanded && (
-                    <div className="ml-6 mt-2 space-y-1">
-                      {item.children.map((child) => {
-                        const ChildIcon = child.icon
-                        return (
+                    {isExpanded && (
+                      <div className="sidebar-submenu">
+                        {item.children.map((child) => (
                           <Link
-                            key={child.name}
+                            key={child.href}
                             href={child.href}
+                            prefetch={true}
                             className={cn(
-                              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                              isActive(child.href)
-                                ? "bg-primary text-white font-medium"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                              "sidebar-submenu-item",
+                              isActive(child.href) && "active"
                             )}
                             onClick={() => setOpen(false)}
                           >
-                            <ChildIcon className="h-4 w-4" />
+                            <child.icon className="sidebar-submenu-item-icon" />
                             {child.name}
                           </Link>
-                        )
-                      })}
-                    </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              }
+
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href!}
+                  prefetch={true}
+                  className={cn(
+                    "sidebar-item",
+                    isActive(item.href!) && "active"
                   )}
-                </div>
+                  onClick={() => setOpen(false)}
+                >
+                  <item.icon className="sidebar-item-icon" />
+                  <span className="sidebar-item-text">{item.name}</span>
+                </Link>
               )
             })}
           </nav>
@@ -204,8 +227,7 @@ export function MobileSidebar({ className }: MobileSidebarProps) {
           {/* Footer */}
           <div className="border-t border-gray-200 p-4">
             <Button 
-              variant="outline" 
-              className="w-full justify-start gap-3"
+              className="btn-hostinger btn-hostinger-secondary w-full justify-start gap-3"
               onClick={() => setOpen(false)}
             >
               <LogOut className="h-5 w-5" />
