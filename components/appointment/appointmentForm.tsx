@@ -7,6 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Textarea } from "@/components/ui/textarea"
 import { InputField } from "@/components/common/inputField"
 import { SelectField } from "@/components/common/selectField"
@@ -18,6 +19,7 @@ import { useCreateAppointmentMutation } from "@/store/api/appointmentApi"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
 import { showSuccess, showError } from "@/utils/toaster"
 import { routes } from "@/utils/routes"
+import { Calendar, User, CheckCircle } from "lucide-react"
 
 const appointmentSchema = yup.object({
   visitorName: yup.string().required("Visitor name is required"),
@@ -39,6 +41,7 @@ export function AppointmentForm() {
   const [createAppointment, { isLoading }] = useCreateAppointmentMutation()
   const { data: employeesData } = useGetEmployeesQuery()
   const employees = employeesData?.employees || []
+  const [generalError, setGeneralError] = useState<string | null>(null)
   // const [aadhaarPhoto, setAadhaarPhoto] = useState<File | null>(null)
 
   const {
@@ -69,7 +72,16 @@ export function AppointmentForm() {
     label: `${emp.name} - ${emp.department}`,
   }))
 
+  // Clear general error when user starts typing
+  const clearGeneralError = () => {
+    if (generalError) {
+      setGeneralError(null)
+    }
+  }
+
   const onSubmit = async (data: AppointmentFormData) => {
+    setGeneralError(null)
+    
     try {
       const selectedEmployee = employees.find((emp) => emp._id === data.employeeId)
       const appointmentData = {
@@ -83,8 +95,21 @@ export function AppointmentForm() {
       // setAadhaarPhoto(null)
       router.push(routes.privateroute.APPOINTMENTLIST)
     } catch (error: any) {
-      showError(error?.data?.message || error?.message || "Failed to create appointment")
+      const errorMessage = error?.data?.message || error?.message || "Failed to create appointment"
+      setGeneralError(errorMessage)
+      showError(errorMessage)
     }
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <LoadingSpinner size="lg" />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -95,9 +120,7 @@ export function AppointmentForm() {
         <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-full bg-primary/50">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+              <Calendar className="w-8 h-8 text-white" />
             </div>
             <div>
               <h2 className="text-2xl font-bold text-foreground">Schedule New Appointment</h2>
@@ -115,32 +138,24 @@ export function AppointmentForm() {
         </CardContent>
       </Card>
 
+      {/* General Error Alert */}
+      {generalError && (
+        <Alert variant="destructive">
+          <AlertDescription>{generalError}</AlertDescription>
+        </Alert>
+      )}
+
       {/* Appointment Form Card */}
       <Card className="w-full hover:shadow-xl transition-all duration-300">
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            
-            {/* Progress Indicator */}
-            <div className="flex items-center mb-6">
-              <div className="flex-1 h-1 bg-gray-200 rounded-full relative">
-                <div className="absolute h-1 bg-primary rounded-full w-1/2"></div>
-              </div>
-              <div className="flex justify-between w-full text-sm mt-1">
-                <span>Visitor Info</span>
-                <span>Appointment Details</span>
-              </div>
-            </div>
-
+        <CardContent className="p-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" onChange={clearGeneralError}>
             {/* Visitor Information */}
-            <div className="space-y-6">
-              <h3 className="text-xl font-semibold flex items-center gap-2">
-                <svg className="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-lg font-medium">
+                <User className="h-5 w-5" />
                 Visitor Information
-              </h3>
-
-              <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
                 <InputField
                   label="Visitor Name"
                   placeholder="Enter visitor's full name"
@@ -154,9 +169,6 @@ export function AppointmentForm() {
                   error={errors.visitorEmail?.message}
                   {...register("visitorEmail")}
                 />
-              </div>
-
-              <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
                 <InputField
                   label="Phone Number"
                   placeholder="Enter visitor's phone number"
@@ -170,28 +182,15 @@ export function AppointmentForm() {
                   {...register("aadhaarNumber")}
                 />
               </div>
-
-              {/* <FileUpload
-                label="Aadhaar Photo (Optional)"
-                accept="image/*"
-                maxSize={5}
-                value={aadhaarPhoto}
-                onChange={setAadhaarPhoto}
-                placeholder="Upload Aadhaar card photo"
-                error={errors.aadhaarPhoto?.message}
-              /> */}
             </div>
 
             {/* Appointment Details */}
-            <div className="space-y-6">
-              <h3 className="text-xl font-semibold flex items-center gap-2">
-                <svg className="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-lg font-medium">
+                <Calendar className="h-5 w-5" />
                 Appointment Details
-              </h3>
-
-              <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
                 <SelectField
                   label="Employee to Meet"
                   placeholder="Select employee"
@@ -206,9 +205,6 @@ export function AppointmentForm() {
                   error={errors.purpose?.message}
                   {...register("purpose")}
                 />
-              </div>
-
-              <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
                 <DatePicker
                   label="Appointment Date"
                   error={errors.appointmentDate?.message}
@@ -220,7 +216,6 @@ export function AppointmentForm() {
                   {...register("appointmentTime")}
                 />
               </div>
-
               <div>
                 <label className="text-sm font-medium text-foreground">Additional Notes (Optional)</label>
                 <Textarea
@@ -231,16 +226,24 @@ export function AppointmentForm() {
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border">
+            {/* Submit Button */}
+            <div className="flex justify-end pt-6">
               <Button 
                 type="submit" 
                 disabled={isLoading}
-                className="w-full sm:w-auto sm:min-w-[160px]"
-                size="lg"
+                className="btn-hostinger btn-hostinger-primary px-6 py-2"
               >
-                {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-                Create Appointment
+                {isLoading ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    Creating Appointment...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Create Appointment
+                  </>
+                )}
               </Button>
             </div>
           </form>

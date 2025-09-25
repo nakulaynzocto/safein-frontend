@@ -1,4 +1,3 @@
-"use client"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
@@ -6,6 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InputField } from "@/components/common/inputField"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { useAppDispatch } from "@/store/hooks"
@@ -16,6 +16,7 @@ import { routes } from "@/utils/routes"
 import { showError, showSuccess } from "@/utils/toaster"
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
+import { LogIn } from "lucide-react"
 
 const loginSchema = yup.object({
   email: yup.string().email("Invalid email address").required("Email is required"),
@@ -101,15 +102,20 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
+        <div className="flex items-center justify-center mb-4">
+          <div className="p-3 rounded-full bg-primary/10">
+            <LogIn className="w-8 h-8 text-primary" />
+          </div>
+        </div>
         <CardTitle className="text-2xl">Welcome Back</CardTitle>
         <CardDescription>Sign in to your Gatekeeper account</CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Display error message at the top of the form */}
+        {/* Display error message */}
         {errorMessage && (
-          <div className="mb-4 text-red-500 text-sm font-medium p-3 bg-red-100 rounded-md">
-            {errorMessage}
-          </div>
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
         )}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <InputField

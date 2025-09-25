@@ -5,7 +5,8 @@ export interface Appointment {
   _id: string
   appointmentId: string
   employeeId: string
-  visitorDetails: VisitorDetails
+  visitorId: string // Reference to Visitor
+  visitor?: VisitorDetails // Populated visitor details
   accompaniedBy?: AccompaniedBy
   appointmentDetails: AppointmentDetails
   status: 'pending' | 'approved' | 'rejected' | 'completed' | 'checked-out' | 'scheduled'
@@ -80,7 +81,7 @@ export interface NotificationPreferences {
 export interface CreateAppointmentRequest {
   appointmentId: string
   employeeId: string
-  visitorDetails: VisitorDetails
+  visitorId: string // Reference to Visitor
   accompaniedBy?: AccompaniedBy
   appointmentDetails: AppointmentDetails
   securityDetails: SecurityDetails
@@ -100,9 +101,7 @@ export interface LegacyCreateAppointmentRequest {
 }
 
 export interface UpdateAppointmentRequest {
-  visitorName?: string
-  visitorEmail?: string
-  visitorPhone?: string
+  visitorId?: string // Reference to Visitor
   employeeId?: string
   purpose?: string
   appointmentDate?: string

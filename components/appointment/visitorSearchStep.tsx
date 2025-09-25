@@ -4,12 +4,16 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { InputField } from "@/components/common/inputField"
 import { Badge } from "@/components/ui/badge"
 import { Search, User, Phone, Mail, Building, MapPin, CheckCircle } from "lucide-react"
 import { VisitorDetails } from "@/store/api/appointmentApi"
+import { useSearchVisitorsMutation, Visitor } from "@/store/api/visitorApi"
+import { toast } from "sonner"
+import { routes } from "@/utils/routes"
 
 // ✅ Custom validation: at least one of phone or email required
 const searchSchema = yup.object({
@@ -22,58 +26,15 @@ const searchSchema = yup.object({
 type SearchFormData = yup.InferType<typeof searchSchema>
 
 interface VisitorSearchStepProps {
-  onVisitorFound: (visitor: VisitorDetails) => void
-  onNewVisitor: () => void
+  onVisitorFound: (visitorId: string, visitorDetails: VisitorDetails) => void
 }
 
-// Mock visitor data - replace with actual API call
-const mockVisitors: VisitorDetails[] = [
-  {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1234567890",
-    company: "Tech Corp",
-    designation: "Software Engineer",
-    address: {
-      street: "123 Main St",
-      city: "New York",
-      state: "NY",
-      country: "USA",
-      zipCode: "10001"
-    },
-    idProof: {
-      type: "passport",
-      number: "P123456789",
-      image: "/placeholder.jpg"
-    },
-    photo: "/placeholder-user.jpg"
-  },
-  {
-    name: "Jane Smith",
-    email: "jane.smith@company.com",
-    phone: "+1987654321",
-    company: "Design Studio",
-    designation: "UI/UX Designer",
-    address: {
-      street: "456 Oak Ave",
-      city: "San Francisco",
-      state: "CA",
-      country: "USA",
-      zipCode: "94102"
-    },
-    idProof: {
-      type: "driving_license",
-      number: "DL987654321",
-      image: "/placeholder.jpg"
-    },
-    photo: "/placeholder-user.jpg"
-  }
-]
-
-export function VisitorSearchStep({ onVisitorFound, onNewVisitor }: VisitorSearchStepProps) {
-  const [searchResults, setSearchResults] = useState<VisitorDetails[]>([])
-  const [isSearching, setIsSearching] = useState(false)
+export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
+  const router = useRouter()
+  const [searchResults, setSearchResults] = useState<Visitor[]>([])
   const [hasSearched, setHasSearched] = useState(false)
+
+  const [searchVisitors, { isLoading: isSearching }] = useSearchVisitorsMutation()
 
   const {
     register,
@@ -88,29 +49,47 @@ export function VisitorSearchStep({ onVisitorFound, onNewVisitor }: VisitorSearc
   const emailValue = watch("email")
 
   const handleSearch = async (data: SearchFormData) => {
-    setIsSearching(true)
     setHasSearched(true)
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const searchData = {
+        phone: data.phone || undefined,
+        email: data.email || undefined,
+      }
 
-      // ✅ OR condition search
-      const results = mockVisitors.filter(visitor =>
-        (data.phone && visitor.phone === data.phone) ||
-        (data.email && visitor.email === data.email)
-      )
-
-      setSearchResults(results)
-    } catch (error) {
+      const result = await searchVisitors(searchData).unwrap()
+      
+      if (result.found) {
+        setSearchResults(result.visitors)
+        toast.success(result.message)
+      } else {
+        setSearchResults([])
+        toast.info(result.message)
+      }
+    } catch (error: any) {
       console.error("Search failed:", error)
       setSearchResults([])
-    } finally {
-      setIsSearching(false)
+      toast.error(error?.data?.message || "Failed to search visitors")
     }
   }
 
-  const handleSelectVisitor = (visitor: VisitorDetails) => {
-    onVisitorFound(visitor)
+  const handleSelectVisitor = (visitor: Visitor) => {
+    // Convert Visitor to VisitorDetails format
+    const visitorDetails: VisitorDetails = {
+      name: visitor.name,
+      email: visitor.email,
+      phone: visitor.phone,
+      company: visitor.company,
+      designation: visitor.designation,
+      address: visitor.address,
+      idProof: visitor.idProof,
+      photo: visitor.photo || "",
+    }
+    onVisitorFound(visitor._id, visitorDetails)
+  }
+
+  const handleNewVisitor = () => {
+    router.push(routes.privateroute.VISITORREGISTRATION)
   }
 
   return (
@@ -157,7 +136,7 @@ export function VisitorSearchStep({ onVisitorFound, onNewVisitor }: VisitorSearc
               </Button>
               <Button
                 type="button"
-                onClick={onNewVisitor}
+                onClick={handleNewVisitor}
                 className="btn-hostinger btn-hostinger-secondary flex items-center gap-2"
               >
                 <User className="h-4 w-4" />
@@ -256,7 +235,7 @@ export function VisitorSearchStep({ onVisitorFound, onNewVisitor }: VisitorSearc
                   No visitor record found with the provided phone or email.
                 </p>
                 <Button
-                  onClick={onNewVisitor}
+                  onClick={handleNewVisitor}
                   className="flex items-center gap-2"
                 >
                   <User className="h-4 w-4" />
@@ -270,3 +249,4 @@ export function VisitorSearchStep({ onVisitorFound, onNewVisitor }: VisitorSearc
     </div>
   )
 }
+

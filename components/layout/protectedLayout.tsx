@@ -45,45 +45,45 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
   }, [dispatch])
 
   // Redirect to login if not authenticated
-  // useEffect(() => {
-  //   if (isInitialized && !isAuthenticated && !token) {
-  //     router.push(routes.publicroute.LOGIN)
-  //   }
-  // }, [isInitialized, isAuthenticated, token, router])
+  useEffect(() => {
+    if (isInitialized && !isAuthenticated && !token) {
+      router.push(routes.publicroute.LOGIN)
+    }
+  }, [isInitialized, isAuthenticated, token, router])
 
-  // // Check company existence and handle redirects
-  // useEffect(() => {
-  //   if (isAuthenticated && token && !companyCheckLoading) {
-  //     const path = window.location.pathname
+  // Check company existence and handle redirects
+  useEffect(() => {
+    if (isAuthenticated && token && !companyCheckLoading) {
+      const path = window.location.pathname
 
-  //     if (companyCheck) {
-  //       const companyExists = companyCheck.exists
+      if (companyCheck) {
+        const companyExists = companyCheck.exists
 
-  //       // STRICT: If company does not exist → only allow /company/create
-  //       if (!companyExists) {
-  //         if (path !== routes.privateroute.COMPANYCREATE) {
-  //           router.push(routes.privateroute.COMPANYCREATE)
-  //         }
-  //         setShouldShowLayout(false)
-  //       }
-  //       // If company exists but user is on /company/create → redirect to dashboard
-  //       else if (companyExists && path === routes.privateroute.COMPANYCREATE) {
-  //         router.push(routes.privateroute.DASHBOARD)
-  //         setShouldShowLayout(true)
-  //       } else {
-  //         // Normal case → company exists and valid route
-  //         setShouldShowLayout(true)
-  //       }
-  //     }
-  //     // If API error → treat as "no company" and force /company/create
-  //     else if (companyCheckError) {
-  //       if (path !== routes.privateroute.COMPANYCREATE) {
-  //         router.push(routes.privateroute.COMPANYCREATE)
-  //       }
-  //       setShouldShowLayout(false)
-  //     }
-  //   }
-  // }, [isAuthenticated, token, companyCheck, companyCheckLoading, companyCheckError, router])
+        // STRICT: If company does not exist → only allow /company/create
+        if (!companyExists) {
+          if (path !== routes.privateroute.COMPANYCREATE) {
+            router.push(routes.privateroute.COMPANYCREATE)
+          }
+          setShouldShowLayout(false)
+        }
+        // If company exists but user is on /company/create → redirect to dashboard
+        else if (companyExists && path === routes.privateroute.COMPANYCREATE) {
+          router.push(routes.privateroute.DASHBOARD)
+          setShouldShowLayout(true)
+        } else {
+          // Normal case → company exists and valid route
+          setShouldShowLayout(true)
+        }
+      }
+      // If API error → treat as "no company" and force /company/create
+      else if (companyCheckError) {
+        if (path !== routes.privateroute.COMPANYCREATE) {
+          router.push(routes.privateroute.COMPANYCREATE)
+        }
+        setShouldShowLayout(false)
+      }
+    }
+  }, [isAuthenticated, token, companyCheck, companyCheckLoading, companyCheckError, router])
 
   // Show spinner during company check loading (except on /company/create)
   const shouldShowCompanyCheckLoading =

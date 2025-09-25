@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DataTable } from "@/components/common/dataTable"
 import { ConfirmationDialog } from "@/components/common/confirmationDialog"
 import { Pagination } from "@/components/common/pagination"
@@ -19,10 +20,15 @@ import {
   LogOut,
   Calendar,
   User,
-  MoreVertical
+  MoreVertical,
+  Plus,
+  RefreshCw,
+  Phone,
+  Mail,
+  Building
 } from "lucide-react"
 import { Appointment } from "@/store/api/appointmentApi"
-import { AppointmentFilterSection } from "./appointmentFilterSection"
+import { SearchInput } from "@/components/common/searchInput"
 import { AppointmentDetailsDialog } from "./appointmentDetailsDialog"
 import {
   DropdownMenu,
@@ -44,22 +50,10 @@ export interface AppointmentTableProps {
   isLoading?: boolean
   error?: any
   searchTerm: string
-  statusFilter?: string
-  employeeFilter?: string
-  dateFrom?: string
-  dateTo?: string
   currentPage: number
   pageSize: number
-  sortBy: string
-  sortOrder: 'asc' | 'desc'
   onSearchChange: (value: string) => void
-  onStatusFilterChange?: (value: string) => void
-  onEmployeeFilterChange?: (value: string) => void
-  onDateFromChange?: (value: string) => void
-  onDateToChange?: (value: string) => void
   onPageChange: (page: number) => void
-  onPageSizeChange: (size: number) => void
-  onSortChange: (field: string) => void
   mode: 'active' | 'trash'
   showSelection?: boolean
   selectedItems?: string[]
@@ -86,22 +80,10 @@ export function AppointmentTable({
   isLoading,
   error,
   searchTerm,
-  statusFilter,
-  employeeFilter,
-  dateFrom,
-  dateTo,
   currentPage,
   pageSize,
-  sortBy,
-  sortOrder,
   onSearchChange,
-  onStatusFilterChange,
-  onEmployeeFilterChange,
-  onDateFromChange,
-  onDateToChange,
   onPageChange,
-  onPageSizeChange,
-  onSortChange,
   mode,
   showSelection = false,
   selectedItems = [],
@@ -181,29 +163,49 @@ export function AppointmentTable({
     setShowViewDialog(true)
   }
 
+  // Handle schedule appointment
+  const handleScheduleAppointment = () => {
+    router.push('/appointment/create')
+  }
+
   // Define columns based on mode
   const getColumns = () => {
     const baseColumns = [
       {
         key: "appointmentId",
-        header: "Appointment ID",
+        header: "Appointment",
         render: (appointment: Appointment) => (
-          <div className="font-medium">{appointment.appointmentId}</div>
+          <div className="space-y-1">
+            <div className="font-medium">{appointment.appointmentId}</div>
+            <div className="text-xs text-blue-600 font-mono">ID: {appointment._id.slice(-8)}</div>
+          </div>
         ),
       },
       {
         key: "visitorName",
         header: "Visitor",
         render: (appointment: Appointment) => (
-          <div>
-            <div className="font-medium">{appointment.visitorDetails?.name || "N/A"}</div>
-            <div className="text-sm text-muted-foreground">{appointment.visitorDetails?.email || "N/A"}</div>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={appointment.visitor?.photo} alt={appointment.visitor?.name || "Visitor"} />
+              <AvatarFallback>
+                {(appointment.visitor?.name || "V").split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="font-medium">{appointment.visitor?.name || "N/A"}</div>
+              <div className="text-sm text-gray-500">{appointment.visitor?.designation || "N/A"}</div>
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <Phone className="h-3 w-3" />
+                {appointment.visitor?.phone || "N/A"}
+              </div>
+            </div>
           </div>
         ),
       },
       {
         key: "employeeName",
-        header: "Employee",
+        header: "Meeting With",
         render: (appointment: Appointment) => {
           // Handle case where employeeId might be an object or string
           let employeeName = "N/A"
@@ -212,15 +214,30 @@ export function AppointmentTable({
           } else if (typeof appointment.employeeId === 'object' && appointment.employeeId !== null) {
             employeeName = (appointment.employeeId as any).name || (appointment.employeeId as any).employeeId || "N/A"
           }
-          return <div className="text-sm">{employeeName}</div>
+          return (
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm">
+                <User className="h-3 w-3" />
+                {employeeName}
+              </div>
+            </div>
+          )
         },
       },
       {
         key: "purpose",
         header: "Purpose",
         render: (appointment: Appointment) => (
-          <div className="text-sm max-w-[200px] truncate" title={appointment.appointmentDetails?.purpose || "N/A"}>
-            {appointment.appointmentDetails?.purpose || "N/A"}
+          <div className="space-y-1">
+            <div className="text-sm max-w-[200px] truncate" title={appointment.appointmentDetails?.purpose || "N/A"}>
+              {appointment.appointmentDetails?.purpose || "N/A"}
+            </div>
+            {appointment.visitor?.company && (
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <Building className="h-3 w-3" />
+                {appointment.visitor.company}
+              </div>
+            )}
           </div>
         ),
       },
@@ -228,9 +245,12 @@ export function AppointmentTable({
         key: "appointmentDate",
         header: "Date & Time",
         render: (appointment: Appointment) => (
-          <div className="text-sm">
-            <div>{appointment.appointmentDetails?.scheduledDate ? format(new Date(appointment.appointmentDetails.scheduledDate), "MMM dd, yyyy") : "N/A"}</div>
-            <div className="text-muted-foreground">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="h-3 w-3" />
+              {appointment.appointmentDetails?.scheduledDate ? format(new Date(appointment.appointmentDetails.scheduledDate), "MMM dd, yyyy") : "N/A"}
+            </div>
+            <div className="text-xs text-gray-500">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
           </div>
         ),
       },
@@ -350,67 +370,96 @@ export function AppointmentTable({
 
   if (error) {
     return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center text-red-500">
-            Failed to load appointments. Please try again.
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <Card className="card-hostinger">
+          <CardContent className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <p className="text-red-500 mb-4">Failed to load appointments</p>
+              <Button onClick={onRefresh} className="btn-hostinger btn-hostinger-primary">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      {/* Search and Filters */}
-      <AppointmentFilterSection
-        searchTerm={searchTerm}
-        statusFilter={statusFilter}
-        employeeFilter={employeeFilter}
-        dateFrom={dateFrom}
-        dateTo={dateTo}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        mode={mode}
-        onSearchChange={onSearchChange}
-        onStatusFilterChange={onStatusFilterChange}
-        onEmployeeFilterChange={onEmployeeFilterChange}
-        onDateFromChange={onDateFromChange}
-        onDateToChange={onDateToChange}
-        onSortChange={onSortChange}
-      />
+      {/* Header Actions */}
+      <Card className="card-hostinger">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+                <Calendar className="h-5 w-5" />
+                {title || (mode === 'active' ? 'Appointment Management' : 'Deleted Appointments')}
+              </CardTitle>
+              <p className="text-sm text-gray-600 mt-1">
+                {mode === 'active' ? 'Manage and view all scheduled appointments' : 'View and restore deleted appointments'}
+                {pagination && ` (${pagination.totalAppointments} total appointments)`}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={onRefresh}
+                variant="outline"
+                size="sm"
+                disabled={isLoading}
+              >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </Button>
+              {mode === 'active' && (
+                <Button 
+                  onClick={handleScheduleAppointment}
+                  className="btn-hostinger btn-hostinger-primary flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Schedule Appointment
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
 
       {/* Main Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{title || (mode === 'active' ? 'Appointments' : 'Deleted Appointments')}</CardTitle>
+      <Card className="card-hostinger">
+        <CardHeader className="pb-4">
+            <SearchInput
+              placeholder="Search appointments..."
+              value={searchTerm}
+              onChange={onSearchChange}
+              debounceDelay={500}
+            />
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <DataTable
             data={appointments}
             columns={getColumns()}
-            emptyMessage={`No ${mode === 'active' ? 'appointments' : 'deleted appointments'} found`}
+            emptyMessage={`No ${mode === 'active' ? 'appointments' : 'deleted appointments'} found. Try adjusting your search criteria.`}
             showCard={false}
             isLoading={isLoading}
           />
-          
-          {/* Pagination */}
-          {pagination && (
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalPages={pagination.totalPages}
-              totalItems={pagination.totalAppointments}
-              pageSize={pageSize}
-              hasNextPage={pagination.hasNextPage}
-              hasPrevPage={pagination.hasPrevPage}
-              onPageChange={onPageChange}
-              onPageSizeChange={onPageSizeChange}
-              showPageSizeSelector={true}
-              className="mt-4"
-            />
-          )}
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex justify-center">
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalAppointments}
+            pageSize={pageSize}
+            onPageChange={onPageChange}
+            hasNextPage={pagination.hasNextPage}
+            hasPrevPage={pagination.hasPrevPage}
+          />
+        </div>
+      )}
 
       {/* Confirmation Dialogs */}
       {mode === 'active' && onDelete && (
@@ -442,7 +491,7 @@ export function AppointmentTable({
           open={showCheckInDialog}
           onOpenChange={setShowCheckInDialog}
           title="Check In Appointment"
-          description={`Are you sure you want to check in visitor ${selectedAppointment?.visitorDetails.name} for appointment ${selectedAppointment?.appointmentId}?`}
+          description={`Are you sure you want to check in visitor ${selectedAppointment?.visitor?.name} for appointment ${selectedAppointment?.appointmentId}?`}
           onConfirm={handleCheckIn}
           confirmText={isCheckingIn ? "Checking In..." : "Check In"}
           variant="default"
@@ -454,7 +503,7 @@ export function AppointmentTable({
           open={showCheckOutDialog}
           onOpenChange={setShowCheckOutDialog}
           title="Check Out Appointment"
-          description={`Are you sure you want to check out visitor ${selectedAppointment?.visitorDetails.name} for appointment ${selectedAppointment?.appointmentId}? `}
+          description={`Are you sure you want to check out visitor ${selectedAppointment?.visitor?.name} for appointment ${selectedAppointment?.appointmentId}? `}
           onConfirm={handleCheckOut}
           confirmText={isCheckingOut ? "Checking Out..." : "Check Out"}
           variant="default"

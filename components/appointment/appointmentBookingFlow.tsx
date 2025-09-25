@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, Circle, ArrowLeft, ArrowRight, User, Calendar, Shield, Bell } from "lucide-react"
 import { VisitorSearchStep } from "./visitorSearchStep"
-import { VisitorDetailsStep } from "./visitorDetailsStep"
+import { VisitorDetailsStep } from "../visitor/visitorRegister"
 import { AppointmentDetailsStep } from "./appointmentDetailsStep"
 import { SecurityDetailsStep } from "./securityDetailsStep"
 import { NotificationsStep } from "./notificationsStep"
@@ -42,6 +42,7 @@ export function AppointmentBookingFlow() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
   
   // Form data for each step
+  const [visitorId, setVisitorId] = useState<string>("")
   const [visitorDetails, setVisitorDetails] = useState<VisitorDetails | null>(null)
   const [accompaniedBy, setAccompaniedBy] = useState<any>(null)
   const [appointmentDetails, setAppointmentDetails] = useState<AppointmentDetails | null>(null)
@@ -86,16 +87,12 @@ export function AppointmentBookingFlow() {
 
   const progressPercentage = (completedSteps.length / steps.length) * 100
 
-  const handleVisitorFound = (visitor: VisitorDetails) => {
+  const handleVisitorFound = (visitorId: string, visitor: VisitorDetails) => {
+    setVisitorId(visitorId)
     setVisitorDetails(visitor)
     setCompletedSteps(prev => [...prev, 1])
     setCurrentStep(2)
     showSuccess("Visitor found! Proceeding to appointment details.")
-  }
-
-  const handleNewVisitor = () => {
-    setCurrentStep(1)
-    // This will show the visitor details form for new registration
   }
 
   const handleStepComplete = (stepId: number, data: any, accompaniedByData?: any) => {
@@ -149,7 +146,7 @@ export function AppointmentBookingFlow() {
   }
 
   const handleFinalSubmit = async () => {
-    if (!visitorDetails || !appointmentDetails || !securityDetails || !notifications || !employeeId) {
+    if (!visitorId || !appointmentDetails || !securityDetails || !notifications || !employeeId) {
       showError("Please complete all steps before submitting")
       return
     }
@@ -158,8 +155,8 @@ export function AppointmentBookingFlow() {
       const payload: CreateAppointmentRequest = {
         appointmentId: generateId(),
         employeeId,
-        visitorDetails,
-        accompaniedBy,
+        visitorId,
+        accompaniedBy: accompaniedBy || null,
         appointmentDetails,
         securityDetails,
         notifications
@@ -179,7 +176,7 @@ export function AppointmentBookingFlow() {
 
   const canSubmit = () => {
     return completedSteps.length === steps.length && 
-           visitorDetails && 
+           visitorId && 
            appointmentDetails && 
            securityDetails && 
            notifications && 
@@ -202,7 +199,6 @@ export function AppointmentBookingFlow() {
           return (
             <VisitorSearchStep
               onVisitorFound={handleVisitorFound}
-              onNewVisitor={handleNewVisitor}
             />
           )
         }

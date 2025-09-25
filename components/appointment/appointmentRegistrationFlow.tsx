@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, Circle, ArrowLeft, ArrowRight } from "lucide-react"
-import { VisitorDetailsStep } from "./visitorDetailsStep"
+import { VisitorDetailsStep } from "../visitor/visitorRegister"
 import { AppointmentDetailsStep } from "./appointmentDetailsStep"
 import { SecurityDetailsStep } from "./securityDetailsStep"
 import { NotificationsStep } from "./notificationsStep"
@@ -19,6 +19,7 @@ import {
   CreateAppointmentRequest 
 } from "@/store/api/appointmentApi"
 import { useCreateAppointmentMutation } from "@/store/api/appointmentApi"
+import { useCreateVisitorMutation } from "@/store/api/visitorApi"
 import { showSuccess, showError } from "@/utils/toaster"
 import { routes } from "@/utils/routes"
 import { generateId } from "@/utils/helpers"
@@ -31,15 +32,17 @@ interface Step {
   current: boolean
 }
 
-export function VisitorRegistrationFlow() {
+export function appointmentRegistrationFlow() {
   const router = useRouter()
   const [createAppointment, { isLoading }] = useCreateAppointmentMutation()
+  const [createVisitor] = useCreateVisitorMutation()
   
   // Step management
   const [currentStep, setCurrentStep] = useState(1)
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
   
   // Form data for each step
+  const [visitorId, setVisitorId] = useState<string>("")
   const [visitorDetails, setVisitorDetails] = useState<VisitorDetails | null>(null)
   const [accompaniedBy, setAccompaniedBy] = useState<any>(null)
   const [appointmentDetails, setAppointmentDetails] = useState<AppointmentDetails | null>(null)
@@ -80,14 +83,23 @@ export function VisitorRegistrationFlow() {
 
   const progressPercentage = (completedSteps.length / steps.length) * 100
 
-  const handleStepComplete = (stepId: number, data: any, accompaniedByData?: any) => {
+  const handleStepComplete = async (stepId: number, data: any, accompaniedByData?: any) => {
     console.log(`Step ${stepId} completed with data:`, data)
     
     // Store step data first
     switch (stepId) {
       case 1:
-        setVisitorDetails(data)
-        setAccompaniedBy(accompaniedByData)
+        // For visitor details, create the visitor first and get the ID
+        try {
+          const createdVisitor = await createVisitor(data).unwrap()
+          setVisitorId(createdVisitor._id)
+          setVisitorDetails(data)
+          setAccompaniedBy(accompaniedByData)
+          showSuccess("Visitor created successfully!")
+        } catch (error: any) {
+          showError(error?.data?.message || "Failed to create visitor")
+          return // Don't proceed if visitor creation fails
+        }
         break
       case 2:
         setAppointmentDetails(data)
@@ -116,22 +128,8 @@ export function VisitorRegistrationFlow() {
     }
   }
 
-  const handlePreviousStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
-    }
-  }
-
-  const handleNextStep = () => {
-    if (currentStep < steps.length && completedSteps.includes(currentStep)) {
-      setCurrentStep(currentStep + 1)
-    } else {
-      console.log(`Cannot proceed to next step. Current: ${currentStep}, Completed: ${completedSteps}`)
-    }
-  }
-
   const handleFinalSubmit = async () => {
-    if (!visitorDetails || !appointmentDetails || !securityDetails || !notifications || !employeeId) {
+    if (!visitorId || !appointmentDetails || !securityDetails || !notifications || !employeeId) {
       showError("Please complete all steps before submitting")
       return
     }
@@ -140,8 +138,8 @@ export function VisitorRegistrationFlow() {
       const payload: CreateAppointmentRequest = {
         appointmentId: generateId(),
         employeeId,
-        visitorDetails,
-        accompaniedBy,
+        visitorId,
+        accompaniedBy: accompaniedBy || null,
         appointmentDetails,
         securityDetails,
         notifications
@@ -161,7 +159,7 @@ export function VisitorRegistrationFlow() {
 
   const canSubmit = () => {
     return completedSteps.length === steps.length && 
-           visitorDetails && 
+           visitorId && 
            appointmentDetails && 
            securityDetails && 
            notifications && 

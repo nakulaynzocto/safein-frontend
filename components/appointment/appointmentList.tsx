@@ -92,29 +92,6 @@ export function AppointmentList() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Appointments" description="Manage visitor appointments">
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href={routes.privateroute.APPOINTMENTTRASH} prefetch={true}>
-              <Archive className="mr-2 h-4 w-4" />
-              View Trash
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href={routes.privateroute.VISITORREGISTRATION} prefetch={true}>
-              <CalendarPlus className="mr-2 h-4 w-4" />
-              Visitor Registration
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href={routes.privateroute.APPOINTMENTCREATE} prefetch={true}>
-              <CalendarPlus className="mr-2 h-4 w-4" />
-              New Appointment
-            </Link>
-          </Button>
-        </div>
-      </PageHeader>
-
       <AppointmentTable
         mode="active"
         appointments={appointments}

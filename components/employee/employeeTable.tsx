@@ -5,21 +5,31 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DataTable } from "@/components/common/dataTable"
 import { ConfirmationDialog } from "@/components/common/confirmationDialog"
 import { Pagination } from "@/components/common/pagination"
 import { Checkbox } from "@/components/ui/checkbox"
 import { StatusBadge } from "@/components/common/statusBadge"
 import { format } from "date-fns"
-import { 
-  Edit, 
-  Trash2, 
+import {
+  Edit,
+  Trash2,
   Eye,
   RotateCcw,
-  MoreVertical
+  MoreVertical,
+  Plus,
+  RefreshCw,
+  Filter,
+  Phone,
+  Mail,
+  Building,
+  Calendar,
+  User,
+  Briefcase
 } from "lucide-react"
 import { Employee } from "@/store/api/employeeApi"
-import { FilterSection } from "./filterSection"
+import { SearchInput } from "@/components/common/searchInput"
 import { EmployeeDetailsDialog } from "./employeeDetailsDialog"
 import {
   DropdownMenu,
@@ -28,6 +38,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu"
+import { Input } from "../ui/input"
 
 export interface EmployeeTableProps {
   employees: Employee[]
@@ -41,18 +52,11 @@ export interface EmployeeTableProps {
   isLoading?: boolean
   error?: any
   searchTerm: string
-  departmentFilter: string
-  statusFilter?: string
   currentPage: number
   pageSize: number
-  sortBy: string
-  sortOrder: 'asc' | 'desc'
   onSearchChange: (value: string) => void
-  onDepartmentFilterChange: (value: string) => void
-  onStatusFilterChange?: (value: string) => void
   onPageChange: (page: number) => void
   onPageSizeChange: (size: number) => void
-  onSortChange: (field: string) => void
   mode: 'active' | 'trash'
   showSelection?: boolean
   selectedItems?: string[]
@@ -75,18 +79,11 @@ export function EmployeeTable({
   isLoading,
   error,
   searchTerm,
-  departmentFilter,
-  statusFilter,
   currentPage,
   pageSize,
-  sortBy,
-  sortOrder,
   onSearchChange,
-  onDepartmentFilterChange,
-  onStatusFilterChange,
   onPageChange,
   onPageSizeChange,
-  onSortChange,
   mode,
   showSelection = false,
   selectedItems = [],
@@ -102,7 +99,6 @@ export function EmployeeTable({
   title,
 }: EmployeeTableProps) {
   const router = useRouter()
-  
   // Dialog states
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showRestoreDialog, setShowRestoreDialog] = useState(false)
@@ -150,38 +146,60 @@ export function EmployeeTable({
   const getColumns = () => {
     const baseColumns = [
       {
-        key: "employeeId",
-        header: "Employee ID",
+        key: "employee",
+        header: "Employee",
         render: (employee: Employee) => (
-          <div className="font-medium">{employee.employeeId}</div>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10">
+              <AvatarFallback>
+                {employee.name.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="font-medium">{employee.name}</div>
+              <div className="text-sm text-gray-500">{employee.designation}</div>
+              <div className="text-xs text-blue-600 font-mono">ID: {employee.employeeId}</div>
+            </div>
+          </div>
         )
       },
       {
-        key: "name",
-        header: "Name",
+        key: "contact",
+        header: "Contact",
         render: (employee: Employee) => (
-          <div className="font-medium">{employee.name}</div>
-        )
-      },
-      {
-        key: "email",
-        header: "Email",
-        render: (employee: Employee) => (
-          <div className="text-muted-foreground">{employee.email}</div>
-        )
-      },
-      {
-        key: "phone",
-        header: "Phone",
-        render: (employee: Employee) => (
-          <div className="text-sm">{employee.phone}</div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-sm">
+              <Phone className="h-3 w-3" />
+              {employee.phone}
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Mail className="h-3 w-3" />
+              {employee.email}
+            </div>
+          </div>
         )
       },
       {
         key: "department",
         header: "Department",
         render: (employee: Employee) => (
-          <Badge variant="secondary">{employee.department}</Badge>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-sm">
+              <Building className="h-3 w-3" />
+              {employee.department}
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Briefcase className="h-3 w-3" />
+              {employee.role}
+            </div>
+          </div>
+        )
+      },
+      {
+        key: "officeLocation",
+        header: "Office Location",
+        render: (employee: Employee) => (
+          <div className="text-sm">{employee.officeLocation}</div>
         )
       },
     ]
@@ -236,7 +254,7 @@ export function EmployeeTable({
                   {onDelete && (
                     <>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => {
                           setSelectedEmployee(employee)
                           setShowDeleteDialog(true)
@@ -251,7 +269,7 @@ export function EmployeeTable({
                 </>
               )}
               {mode === 'trash' && onRestore && (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => {
                     setSelectedEmployee(employee)
                     setShowRestoreDialog(true)
@@ -285,26 +303,17 @@ export function EmployeeTable({
 
   return (
     <div className="space-y-6">
-      {/* Search and Filters */}
-      <FilterSection
-        search_term={searchTerm}
-        department_filter={departmentFilter}
-        status_filter={statusFilter}
-        sort_by={sortBy}
-        sort_order={sortOrder}
-        mode={mode}
-        on_search_change={onSearchChange}
-        on_department_filter_change={onDepartmentFilterChange}
-        on_status_filter_change={onStatusFilterChange}
-        on_sort_change={onSortChange}
-      />
-
       {/* Main Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{title || (mode === 'active' ? 'Employees' : 'Deleted Employees')}</CardTitle>
+      <Card className="card-hostinger">
+        <CardHeader className="pb-4">
+            <SearchInput
+              placeholder="Search employees..."
+              value={searchTerm}
+              onChange={onSearchChange}
+              debounceDelay={500}
+            />
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <DataTable
             data={employees}
             columns={getColumns()}
@@ -312,24 +321,25 @@ export function EmployeeTable({
             showCard={false}
             isLoading={isLoading}
           />
-          
-          {/* Pagination */}
-          {pagination && (
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalPages={pagination.totalPages}
-              totalItems={pagination.totalEmployees}
-              pageSize={pageSize}
-              hasNextPage={pagination.hasNextPage}
-              hasPrevPage={pagination.hasPrevPage}
-              onPageChange={onPageChange}
-              onPageSizeChange={onPageSizeChange}
-              showPageSizeSelector={true}
-              className="mt-4"
-            />
-          )}
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex justify-center">
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalEmployees}
+            pageSize={pageSize}
+            hasNextPage={pagination.hasNextPage}
+            hasPrevPage={pagination.hasPrevPage}
+            onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+            showPageSizeSelector={true}
+          />
+        </div>
+      )}
 
       {/* Confirmation Dialogs */}
       {mode === 'active' && onDelete && (

@@ -1,4 +1,3 @@
-"use client"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
@@ -7,11 +6,13 @@ import * as yup from "yup"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InputField } from "@/components/common/inputField"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { useAppDispatch } from "@/store/hooks"
 import { useRegisterMutation } from "@/store/api/authApi"
 import { routes } from "@/utils/routes"
+import { UserPlus } from "lucide-react"
 
 const registerSchema = yup.object({
   firstName: yup.string().required("First name is required"),
@@ -69,16 +70,21 @@ export function RegisterForm() {
   }
 
   return (
-    <Card className="w-full max-w-2xl"> {/* wider card for 2-column form */}
+    <Card className="w-full max-w-2xl">
       <CardHeader className="text-center">
+        <div className="flex items-center justify-center mb-4">
+          <div className="p-3 rounded-full bg-primary/10">
+            <UserPlus className="w-8 h-8 text-primary" />
+          </div>
+        </div>
         <CardTitle className="text-2xl">Create Account</CardTitle>
         <CardDescription>Sign up for your Gatekeeper account</CardDescription>
       </CardHeader>
       <CardContent>
         {submitError && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg shadow-sm transition-opacity duration-500 ease-in-out opacity-100 animate-fadeIn">
-            <p className="text-sm font-medium text-red-600">{submitError}</p>
-          </div>
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{submitError}</AlertDescription>
+          </Alert>
         )}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
