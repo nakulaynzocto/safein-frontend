@@ -29,13 +29,13 @@ export function Navbar() {
       // Call the logout API endpoint
       await logoutMutation().unwrap()
       
-      // Clear local state and redirect
+      // Clear local state and redirect to login page
       dispatch(logout())
-      router.push(routes.publicroute.HOME)
+      router.push(routes.publicroute.LOGIN)
     } catch (error) {
-      // Even if API call fails, still clear local state and redirect
+      // Even if API call fails, still clear local state and redirect to login page
       dispatch(logout())
-      router.push(routes.publicroute.HOME)
+      router.push(routes.publicroute.LOGIN)
     }
   }
 
@@ -64,7 +64,7 @@ export function Navbar() {
           {/* Mobile Menu + Logo */}
           <div className="flex items-center gap-4">
             <MobileSidebar />
-            <Link href={routes.privateroute.DASHBOARD} className="flex items-center space-x-2" prefetch={true}>
+            {/* <Link href={routes.privateroute.DASHBOARD} className="flex items-center space-x-2" prefetch={true}>
               <Image
                 src="/aynzo-logo.svg"
                 alt="Aynzo Logo"
@@ -72,7 +72,7 @@ export function Navbar() {
                 height={32}
                 className="h-15 w-15"
               />
-            </Link>
+            </Link> */}
           </div>
 
           {/* Navigation Items */}

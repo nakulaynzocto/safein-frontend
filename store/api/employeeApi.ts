@@ -87,6 +87,7 @@ export const employeeApi = baseApi.injectEndpoints({
               { type: 'Employee', id: 'LIST' },
             ]
           : [{ type: 'Employee', id: 'LIST' }],
+      keepUnusedDataFor: 300, // Keep data for 5 minutes
     }),
 
 

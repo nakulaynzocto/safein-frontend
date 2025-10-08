@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { InputField } from "@/components/common/inputField"
 import { SelectField } from "@/components/common/selectField"
-import { Textarea } from "@/components/ui/textarea"
+import { TextareaField } from "@/components/common/textareaField"
 import { DatePicker } from "@/components/common/datePicker"
 import { TimePicker } from "@/components/common/timePicker"
 import { AppointmentDetails } from "@/store/api/appointmentApi"
@@ -16,11 +16,12 @@ import { useGetEmployeesQuery } from "@/store/api/employeeApi"
 import { Calendar, Clock, MapPin, FileText, User } from "lucide-react"
 
 const appointmentDetailsSchema = yup.object({
+  employeeId: yup.string().required("Please select an employee"),
   purpose: yup.string().required("Purpose of visit is required"),
   scheduledDate: yup.string().required("Scheduled date is required").test(
     'not-past-date',
     'Scheduled date cannot be in the past',
-    function(value) {
+    function (value) {
       if (!value) return false
       const selectedDate = new Date(value)
       const today = new Date()
@@ -43,11 +44,11 @@ interface AppointmentDetailsStepProps {
   disabled?: boolean
 }
 
-export function AppointmentDetailsStep({ 
-  onComplete, 
-  initialData, 
-  onEmployeeSelect, 
-  disabled = false 
+export function AppointmentDetailsStep({
+  onComplete,
+  initialData,
+  onEmployeeSelect,
+  disabled = false
 }: AppointmentDetailsStepProps) {
   const { data: employeesData } = useGetEmployeesQuery()
   const employees = employeesData?.employees || []
@@ -62,6 +63,7 @@ export function AppointmentDetailsStep({
   } = useForm<AppointmentDetailsFormData>({
     resolver: yupResolver(appointmentDetailsSchema),
     defaultValues: {
+      employeeId: selectedEmployee || "",
       purpose: initialData?.purpose || "",
       scheduledDate: initialData?.scheduledDate || "",
       scheduledTime: initialData?.scheduledTime || "",
@@ -93,10 +95,13 @@ export function AppointmentDetailsStep({
     { value: "Other", label: "Other" },
   ]
 
-  const employeeOptions = employees.map((emp) => ({
-    value: emp._id,
-    label: `${emp.name} - ${emp.department}`,
-  }))
+  const employeeOptions = employees
+    .filter((emp) => emp.status === "Active")
+    .map((emp) => ({
+      value: emp._id,
+      label: `${emp.name} - ${emp.department}`,
+    }))
+
 
   const onSubmit = (data: AppointmentDetailsFormData) => {
     const appointmentDetails: AppointmentDetails = {
@@ -112,6 +117,7 @@ export function AppointmentDetailsStep({
 
   const handleEmployeeChange = (employeeId: string) => {
     setSelectedEmployee(employeeId)      // keep local state
+    setValue("employeeId", employeeId)   // update form value
     onEmployeeSelect(employeeId)
   }
 
@@ -137,14 +143,16 @@ export function AppointmentDetailsStep({
           </CardTitle>
         </CardHeader>
         <CardContent>
-        <SelectField
-  label="Select Employee"
-  placeholder="Choose employee to meet"
-  options={employeeOptions}
-  value={selectedEmployee}              // ✅ controlled value
-  onChange={handleEmployeeChange}
-  error={errors?.employeeId?.message}   // optional validation
-/>
+          <SelectField
+            label="Select Employee"
+            placeholder="Choose employee to meet"
+            options={employeeOptions}
+            value={watch("employeeId") || selectedEmployee}
+            onChange={handleEmployeeChange}
+            error={errors?.employeeId?.message}
+            name="employeeId"
+            required
+          />
         </CardContent>
       </Card>
 
@@ -159,21 +167,23 @@ export function AppointmentDetailsStep({
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Scheduled Date</label>
               <DatePicker
+                label="Scheduled Date"
                 value={watch("scheduledDate") || ""}
                 onChange={(e) => setValue("scheduledDate", e.target.value)}
                 placeholder="Select date"
                 error={errors.scheduledDate?.message}
+                required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Scheduled Time</label>
               <TimePicker
+                label="Scheduled Time"
                 value={watch("scheduledTime") || ""}
                 onChange={(e) => setValue("scheduledTime", e.target.value)}
                 placeholder="Select time"
                 error={errors.scheduledTime?.message}
+                required
               />
             </div>
             <SelectField
@@ -183,6 +193,7 @@ export function AppointmentDetailsStep({
               error={errors.duration?.message}
               value={watch("duration")?.toString() || ""}
               onChange={(value) => setValue("duration", parseInt(value))}
+              required
             />
             <SelectField
               label="Meeting Room"
@@ -191,6 +202,7 @@ export function AppointmentDetailsStep({
               error={errors.meetingRoom?.message}
               value={watch("meetingRoom") || ""}
               onChange={(value) => setValue("meetingRoom", value)}
+              required
             />
           </div>
         </CardContent>
@@ -205,18 +217,20 @@ export function AppointmentDetailsStep({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Textarea
-            placeholder="Describe the purpose of the visit in detail..."
-            className="min-h-[100px]"
-            {...register("purpose")}
-          />
-          {errors.purpose && (
-            <p className="text-sm text-red-500">{errors.purpose.message}</p>
-          )}
-          
           <div>
-            <label className="block text-sm font-medium mb-2">Additional Notes (Optional)</label>
-            <Textarea
+            <TextareaField
+              label="Purpose of Visit"
+              placeholder="Describe the purpose of the visit in detail..."
+              className="min-h-[100px]"
+              {...register("purpose")}
+              error={errors.purpose?.message}
+              required
+            />
+          </div>
+
+          <div>
+            <TextareaField
+              label="Additional Notes (Optional)"
               placeholder="Any additional notes or special requirements..."
               className="min-h-[80px]"
               {...register("notes")}

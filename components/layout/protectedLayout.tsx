@@ -5,7 +5,6 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { initializeAuth } from "@/store/slices/authSlice"
-import { useCheckCompanyExistsQuery } from "@/store/api/companyApi"
 import { routes } from "@/utils/routes"
 import { Navbar } from "./navbar"
 import { Sidebar } from "./sidebar"
@@ -22,20 +21,9 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
   const [isClient, setIsClient] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
-  const [shouldShowLayout, setShouldShowLayout] = useState(true)
 
   // Current path
   const currentPath = typeof window !== "undefined" ? window.location.pathname : ""
-
-  // API to check if company exists
-  const {
-    data: companyCheck,
-    isLoading: companyCheckLoading,
-    error: companyCheckError,
-  } = useCheckCompanyExistsQuery(undefined, {
-    skip: !isAuthenticated || !token || currentPath === routes.privateroute.COMPANYCREATE,
-    refetchOnMountOrArgChange: false,
-  })
 
   // Initialize authentication
   useEffect(() => {
@@ -51,45 +39,6 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     }
   }, [isInitialized, isAuthenticated, token, router])
 
-  // Check company existence and handle redirects
-  useEffect(() => {
-    if (isAuthenticated && token && !companyCheckLoading) {
-      const path = window.location.pathname
-
-      if (companyCheck) {
-        const companyExists = companyCheck.exists
-
-        // STRICT: If company does not exist → only allow /company/create
-        if (!companyExists) {
-          if (path !== routes.privateroute.COMPANYCREATE) {
-            router.push(routes.privateroute.COMPANYCREATE)
-          }
-          setShouldShowLayout(false)
-        }
-        // If company exists but user is on /company/create → redirect to dashboard
-        else if (companyExists && path === routes.privateroute.COMPANYCREATE) {
-          router.push(routes.privateroute.DASHBOARD)
-          setShouldShowLayout(true)
-        } else {
-          // Normal case → company exists and valid route
-          setShouldShowLayout(true)
-        }
-      }
-      // If API error → treat as "no company" and force /company/create
-      else if (companyCheckError) {
-        if (path !== routes.privateroute.COMPANYCREATE) {
-          router.push(routes.privateroute.COMPANYCREATE)
-        }
-        setShouldShowLayout(false)
-      }
-    }
-  }, [isAuthenticated, token, companyCheck, companyCheckLoading, companyCheckError, router])
-
-  // Show spinner during company check loading (except on /company/create)
-  const shouldShowCompanyCheckLoading =
-    companyCheckLoading &&
-    currentPath !== routes.privateroute.COMPANYCREATE &&
-    !companyCheckError
 
   // ====== Render Logic ======
 
@@ -111,23 +60,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     )
   }
 
-  // Company existence check loading
-  if (shouldShowCompanyCheckLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
-  }
 
-  // If layout should not show (e.g., company create page)
-  if (!shouldShowLayout) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
-  }
 
   // Default Layout
   return (

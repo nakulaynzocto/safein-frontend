@@ -103,7 +103,7 @@ export function AppointmentsTable({
   ]
 
   return (
-    <Card className="card-hostinger">
+    <Card className="card-hostinger p-4">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-lg font-medium">
           <Calendar className="h-5 w-5" />

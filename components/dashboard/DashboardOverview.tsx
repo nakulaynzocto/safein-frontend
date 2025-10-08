@@ -7,14 +7,25 @@ import { useGetEmployeesQuery } from "@/store/api/employeeApi"
 import { routes } from "@/utils/routes"
 import { DashboardHeader } from "./dashboardHeader"
 import { StatsGrid } from "./statsGrid"
-import { AppointmentsTable } from "./appointmentsTable"
+import { AppointmentsTable } from "./AppointmentsTable"
 import { QuickActions } from "./quickActions"
+import { DashboardCharts } from "./dashboardCharts"
 import { calculateAppointmentStats, getRecentAppointments, getTodaysAppointments } from "./dashboardUtils"
 
 export function DashboardOverview() {
   const router = useRouter()
-  const { data: appointmentsData, isLoading: appointmentsLoading } = useGetAppointmentsQuery()
-  const { data: employeesData, isLoading: employeesLoading } = useGetEmployeesQuery()
+  
+  // Use optimized queries with caching
+  const { data: appointmentsData, isLoading: appointmentsLoading } = useGetAppointmentsQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+    refetchOnFocus: false,
+  })
+  
+  const { data: employeesData, isLoading: employeesLoading } = useGetEmployeesQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+    refetchOnFocus: false,
+  })
+  
   const { user } = useAppSelector((state) => state.auth)
 
   // Extract appointments array from the API response
@@ -23,10 +34,6 @@ export function DashboardOverview() {
 
   // Calculate statistics
   const stats = calculateAppointmentStats(appointments)
-  const statsWithEmployees = {
-    ...stats,
-    totalEmployees: employees.length,
-  }
 
   // Get filtered appointments
   const recentAppointments = getRecentAppointments(appointments, 5)
@@ -37,7 +44,14 @@ export function DashboardOverview() {
       <DashboardHeader userName={user?.name} />
 
       {/* Statistics Cards */}
-      <StatsGrid stats={statsWithEmployees} />
+      <StatsGrid stats={stats} />
+
+      {/* Image-Type Charts */}
+      <DashboardCharts 
+        appointmentsData={appointments}
+        employeesData={employees}
+        visitorsData={[]} // Add visitor data when available
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Today's Appointments */}

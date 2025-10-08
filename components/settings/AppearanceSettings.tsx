@@ -54,13 +54,14 @@ export function AppearanceSettings({ register, errors, control }: AppearanceSett
           control={control}
           rules={{ required: "Theme is required" }}
           render={({ field }) => (
-            <SelectField
-              label="Theme"
-              options={themeOptions}
-              value={field.value}
-              onChange={field.onChange}
-              error={errors.theme?.message}
-            />
+              <SelectField
+                label="Theme"
+                options={themeOptions}
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.theme?.message}
+                required
+              />
           )}
         />
         
@@ -69,13 +70,14 @@ export function AppearanceSettings({ register, errors, control }: AppearanceSett
           control={control}
           rules={{ required: "Language is required" }}
           render={({ field }) => (
-            <SelectField
-              label="Language"
-              options={languageOptions}
-              value={field.value}
-              onChange={field.onChange}
-              error={errors.language?.message}
-            />
+              <SelectField
+                label="Language"
+                options={languageOptions}
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.language?.message}
+                required
+              />
           )}
         />
         
@@ -84,13 +86,14 @@ export function AppearanceSettings({ register, errors, control }: AppearanceSett
           control={control}
           rules={{ required: "Date format is required" }}
           render={({ field }) => (
-            <SelectField
-              label="Date Format"
-              options={dateFormatOptions}
-              value={field.value}
-              onChange={field.onChange}
-              error={errors.dateFormat?.message}
-            />
+              <SelectField
+                label="Date Format"
+                options={dateFormatOptions}
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.dateFormat?.message}
+                required
+              />
           )}
         />
         
@@ -99,13 +102,14 @@ export function AppearanceSettings({ register, errors, control }: AppearanceSett
           control={control}
           rules={{ required: "Time format is required" }}
           render={({ field }) => (
-            <SelectField
-              label="Time Format"
-              options={timeFormatOptions}
-              value={field.value}
-              onChange={field.onChange}
-              error={errors.timeFormat?.message}
-            />
+              <SelectField
+                label="Time Format"
+                options={timeFormatOptions}
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.timeFormat?.message}
+                required
+              />
           )}
         />
       </div>

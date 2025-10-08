@@ -151,7 +151,7 @@ export function MobileSidebar({ className }: MobileSidebarProps) {
         <div className="flex h-full flex-col bg-white">
           {/* Header */}
           <div className="flex h-16 items-center justify-between px-6 border-b border-gray-200">
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <Image
                 src="/aynzo-logo.svg"
                 alt="Aynzo Logo"
@@ -159,7 +159,7 @@ export function MobileSidebar({ className }: MobileSidebarProps) {
                 height={32}
                 className="h-15 w-15"
               />
-            </div>
+            </div> */}
           </div>
 
           {/* Navigation */}

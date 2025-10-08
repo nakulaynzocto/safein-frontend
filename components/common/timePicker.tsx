@@ -9,13 +9,19 @@ interface TimePickerProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
   error?: string
   helperText?: string
+  required?: boolean
 }
 
 const TimePicker = forwardRef<HTMLInputElement, TimePickerProps>(
-  ({ className, label, error, helperText, ...props }, ref) => {
+  ({ className, label, error, helperText, required = false, ...props }, ref) => {
     return (
       <div className="space-y-2">
-        {label && <label className="text-sm font-medium text-foreground">{label}</label>}
+        {label && (
+          <label className="text-sm font-medium text-foreground">
+            {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </label>
+        )}
         <input
           type="time"
           className={cn(

@@ -236,7 +236,7 @@ export function AppointmentBookingFlow() {
   return (
     <div className="space-y-6">
       {/* Progress Bar */}
-      <Card className="card-hostinger">
+      <Card className="card-hostinger p-4">
         <CardContent className="pt-4 pb-4">
           <div className="space-y-4">
             <div className="flex justify-between text-sm text-gray-600">
@@ -249,7 +249,7 @@ export function AppointmentBookingFlow() {
       </Card>
 
       {/* Steps Navigation */}
-      <Card className="card-hostinger">
+      <Card className="card-hostinger p-4">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg font-medium">Booking Steps</CardTitle>
         </CardHeader>
@@ -306,7 +306,7 @@ export function AppointmentBookingFlow() {
       </Card>
 
       {/* Current Step Content */}
-      <Card className="card-hostinger">
+      <Card className="card-hostinger p-4">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg font-medium">
             <Badge variant="default" className="text-sm px-3 py-1">
@@ -325,7 +325,7 @@ export function AppointmentBookingFlow() {
 
       {/* Navigation Buttons */}
       {currentStep > 1 && (
-        <Card className="card-hostinger">
+        <Card className="card-hostinger p-4">
           <CardContent className="pt-4 pb-4">
             <div className="flex justify-between">
               <Button

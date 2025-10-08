@@ -7,7 +7,7 @@ import * as yup from "yup"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { InputField } from "@/components/common/inputField"
-import { Textarea } from "@/components/ui/textarea"
+import { TextareaField } from "@/components/common/textareaField"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { SecurityDetails } from "@/store/api/appointmentApi"
@@ -15,12 +15,21 @@ import { Shield, Badge, CheckCircle, FileText } from "lucide-react"
 
 const securityDetailsSchema = yup.object({
   badgeIssued: yup.boolean().required(),
-  badgeNumber: yup.string().required('Badge number is required'),
+  badgeNumber: yup.string().when('badgeIssued', {
+    is: true,
+    then: (schema) => schema.required('Badge number is required when badge is issued'),
+    otherwise: (schema) => schema.optional(),
+  }),
   securityClearance: yup.boolean().required(),
   securityNotes: yup.string().required('Security notes are required'),
 })
 
-type SecurityDetailsFormData = yup.InferType<typeof securityDetailsSchema>
+type SecurityDetailsFormData = {
+  badgeIssued: boolean
+  badgeNumber?: string
+  securityClearance: boolean
+  securityNotes: string
+}
 
 interface SecurityDetailsStepProps {
   onComplete: (data: SecurityDetails) => void
@@ -43,7 +52,6 @@ export function SecurityDetailsStep({
     watch,
     setValue,
   } = useForm<SecurityDetailsFormData>({
-    resolver: yupResolver(securityDetailsSchema),
     defaultValues: {
       badgeIssued: initialData?.badgeIssued || false,
       badgeNumber: initialData?.badgeNumber || "",
@@ -55,7 +63,7 @@ export function SecurityDetailsStep({
   const onSubmit = (data: SecurityDetailsFormData) => {
     const securityDetails: SecurityDetails = {
       badgeIssued: data.badgeIssued,
-      badgeNumber: data.badgeNumber,
+      badgeNumber: data.badgeNumber || "",
       securityClearance: data.securityClearance,
       securityNotes: data.securityNotes,
     }
@@ -65,6 +73,9 @@ export function SecurityDetailsStep({
   const handleBadgeIssuedChange = (checked: boolean) => {
     setBadgeIssued(checked)
     setValue("badgeIssued", checked)
+    if (!checked) {
+      setValue("badgeNumber", "")
+    }
   }
 
   const handleSecurityClearanceChange = (checked: boolean) => {
@@ -103,12 +114,15 @@ export function SecurityDetailsStep({
             <Label htmlFor="badge-issued">Badge has been issued to visitor</Label>
           </div>
 
-          <InputField
-            label="Badge Number"
-            placeholder="Enter badge number"
-            error={errors.badgeNumber?.message}
-            {...register("badgeNumber")}
-          />
+          {badgeIssued && (
+            <InputField
+              label="Badge Number"
+              placeholder="Enter badge number"
+              error={errors.badgeNumber?.message}
+              {...register("badgeNumber")}
+              required
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -153,17 +167,14 @@ export function SecurityDetailsStep({
         </CardHeader>
         <CardContent>
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Security Notes <span className="text-red-500">*</span>
-            </label>
-            <Textarea
+            <TextareaField
+              label="Security Notes"
               placeholder="Enter security notes, observations, or special instructions..."
               className="min-h-[100px]"
               {...register("securityNotes")}
+              error={errors.securityNotes?.message}
+              required
             />
-            {errors.securityNotes && (
-              <p className="text-sm text-red-500 mt-1">{errors.securityNotes.message}</p>
-            )}
           </div>
         </CardContent>
       </Card>

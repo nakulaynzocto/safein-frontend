@@ -304,7 +304,7 @@ export function EmployeeTable({
   return (
     <div className="space-y-6">
       {/* Main Table */}
-      <Card className="card-hostinger">
+      <Card className="card-hostinger p-4">
         <CardHeader className="pb-4">
             <SearchInput
               placeholder="Search employees..."
@@ -318,6 +318,14 @@ export function EmployeeTable({
             data={employees}
             columns={getColumns()}
             emptyMessage={`No ${mode === 'active' ? 'employees' : 'deleted employees'} found`}
+            emptyData={{
+              title: mode === 'active' ? 'No employees yet' : 'No deleted employees',
+              description: mode === 'active' 
+                ? 'Add your first employee to get started.'
+                : 'Trash is empty.',
+              primaryActionLabel: mode === 'active' ? 'Add Employee' : undefined,
+            }}
+            onPrimaryAction={mode === 'active' ? () => router.push('/employee/create') : undefined}
             showCard={false}
             isLoading={isLoading}
           />

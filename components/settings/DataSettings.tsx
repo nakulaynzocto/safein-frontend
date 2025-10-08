@@ -69,6 +69,7 @@ export function DataSettings({ register, errors, watch, setValue, control }: Dat
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.backupFrequency?.message}
+                  required
                 />
               )}
             />
@@ -87,6 +88,7 @@ export function DataSettings({ register, errors, watch, setValue, control }: Dat
                 value={field.value}
                 onChange={field.onChange}
                 error={errors.dataRetention?.message}
+                required
               />
             )}
           />

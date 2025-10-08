@@ -95,7 +95,7 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
   return (
     <div className="space-y-6">
       {/* Search Form */}
-      <Card className="card-hostinger">
+      <Card className="card-hostinger p-4">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg font-medium">
             <Search className="h-5 w-5" />
@@ -113,6 +113,7 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
                 placeholder="Enter phone number"
                 error={errors.phone?.message}
                 {...register("phone")}
+                required
               />
               <InputField
                 label="Email Address"
@@ -120,6 +121,7 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
                 placeholder="Enter email address"
                 error={errors.email?.message}
                 {...register("email")}
+                required
               />
             </div>
             {errors?.root?.message && (

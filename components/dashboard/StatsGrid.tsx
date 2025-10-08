@@ -1,21 +1,15 @@
 "use client"
 
-import { Calendar, CalendarCheck, CalendarX, CheckCircle, Users } from "lucide-react"
+import { Calendar, CalendarCheck, CalendarX, CheckCircle } from "lucide-react"
 import { StatCard } from "./statCard"
 import { AppointmentStats } from "./dashboardUtils"
 
 interface StatsGridProps {
-  stats: AppointmentStats & { totalEmployees: number }
+  stats: AppointmentStats
 }
 
 export function StatsGrid({ stats }: StatsGridProps) {
   const statCards = [
-    {
-      title: "Total Appointments",
-      value: stats.totalAppointments,
-      icon: Calendar,
-      description: "All time appointments",
-    },
     {
       title: "Pending",
       value: stats.pendingAppointments,
@@ -40,16 +34,10 @@ export function StatsGrid({ stats }: StatsGridProps) {
       icon: Calendar,
       description: "Scheduled for today",
     },
-    {
-      title: "Total Employees",
-      value: stats.totalEmployees,
-      icon: Users,
-      description: "Active employees",
-    },
   ]
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {statCards.map((card) => (
         <StatCard
           key={card.title}

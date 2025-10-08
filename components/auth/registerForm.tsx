@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InputField } from "@/components/common/inputField"
+import { SelectField } from "@/components/common/selectField"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { useAppDispatch } from "@/store/hooks"
 import { useRegisterMutation } from "@/store/api/authApi"
@@ -40,6 +41,8 @@ export function RegisterForm() {
     register: registerField,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
   } = useForm<RegisterFormData>({
     resolver: yupResolver(registerSchema),
   })
@@ -93,6 +96,7 @@ export function RegisterForm() {
               placeholder="Enter your first name"
               error={errors.firstName?.message}
               {...registerField("firstName")}
+              required
             />
 
             <InputField
@@ -100,6 +104,7 @@ export function RegisterForm() {
               placeholder="Enter your last name"
               error={errors.lastName?.message}
               {...registerField("lastName")}
+              required
             />
 
             <InputField
@@ -108,6 +113,7 @@ export function RegisterForm() {
               placeholder="Enter your email"
               error={errors.email?.message}
               {...registerField("email")}
+              required
             />
 
             <InputField
@@ -115,6 +121,7 @@ export function RegisterForm() {
               placeholder="Enter your phone number"
               error={errors.phoneNumber?.message}
               {...registerField("phoneNumber")}
+              required
             />
 
             <InputField
@@ -122,23 +129,22 @@ export function RegisterForm() {
               type="date"
               error={errors.dateOfBirth?.message}
               {...registerField("dateOfBirth")}
+              required
             />
 
-            <div>
-              <label className="block text-sm font-medium">Gender</label>
-              <select
-                className="mt-1 block w-full rounded-md border border-input bg-background p-2 text-sm"
-                {...registerField("gender")}
-              >
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-              {errors.gender?.message && (
-                <p className="text-sm text-red-500">{errors.gender.message}</p>
-              )}
-            </div>
+            <SelectField
+              label="Gender"
+              placeholder="Select gender"
+              options={[
+                { value: "male", label: "Male" },
+                { value: "female", label: "Female" },
+                { value: "other", label: "Other" }
+              ]}
+              error={errors.gender?.message}
+              value={watch("gender") || ""}
+              onChange={(value) => setValue("gender", value as "male" | "female" | "other")}
+              required
+            />
 
             <InputField
               label="Password"
@@ -146,6 +152,7 @@ export function RegisterForm() {
               placeholder="Create a password"
               error={errors.password?.message}
               {...registerField("password")}
+              required
             />
 
             <InputField
@@ -154,6 +161,7 @@ export function RegisterForm() {
               placeholder="Confirm your password"
               error={errors.confirmPassword?.message}
               {...registerField("confirmPassword")}
+              required
             />
           </div>
 

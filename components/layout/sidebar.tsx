@@ -116,18 +116,10 @@ export function Sidebar({ className }: SidebarProps) {
     setExpandedItem(null)
   }, [pathname, collapsed])
 
-  const toggleExpanded = (itemName: string, children?: any[]) => {
+  const toggleExpanded = (itemName: string) => {
     if (collapsed) return // Prevent expansion when collapsed
 
-    const newExpanded = expandedItem === itemName ? null : itemName
-    setExpandedItem(newExpanded)
-
-    if (children && children.length > 0 && newExpanded === itemName) {
-      const activeChild = children.find((child) => child.href === pathname)
-      if (!activeChild) {
-        router.push(children[0].href)
-      }
-    }
+    setExpandedItem(expandedItem === itemName ? null : itemName)
   }
 
   const isActive = (href: string) => pathname === href
@@ -139,53 +131,61 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <div
       className={cn(
-        "flex h-full flex-col sidebar-hostinger transition-all duration-300 overflow-hidden",
+        "flex h-full flex-col sidebar-hostinger transition-all duration-300 ease-in-out overflow-hidden",
         collapsed ? "sidebar-collapsed" : "sidebar-expanded",
         className,
       )}
     >
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
+      <nav className="flex-1 space-y-2 p-2 overflow-y-auto mt-8">
         {navigation.map((item) => {
           if (item.children) {
             const isExpanded = expandedItem === item.name
             const hasActiveChild = isParentActive(item.children)
 
             return (
-              <div key={item.name}>
+              <div key={item.name} className="transition-all duration-300 ease-in-out">
                 <div
-                  onClick={() => toggleExpanded(item.name, item.children)}
+                  onClick={() => toggleExpanded(item.name)}
                   className={cn(
-                    "sidebar-item",
+                    "sidebar-item text-base", // Increased text size
                     hasActiveChild && "active"
                   )}
                 >
                   <item.icon className="sidebar-item-icon" />
                   {!collapsed && (
                     <>
-                      <span className="sidebar-item-text">{item.name}</span>
-                      <ChevronRight className={cn("sidebar-item-arrow", isExpanded && "expanded")} />
+                      <span className="sidebar-item-text font-medium tracking-wide">{item.name}</span>
+                      <ChevronRight className={cn(
+                        "sidebar-item-arrow transition-transform duration-300 ease-in-out",
+                        isExpanded && "expanded"
+                      )} />
                     </>
                   )}
                 </div>
 
-                {!collapsed && isExpanded && (
-                  <div className="sidebar-submenu">
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        prefetch={true}
-                        className={cn(
-                          "sidebar-submenu-item",
-                          isActive(child.href) && "active"
-                        )}
-                      >
-                        <child.icon className="sidebar-submenu-item-icon" />
-                        {child.name}
-                      </Link>
-                    ))}
+                {!collapsed && (
+                  <div className={cn(
+                    "overflow-hidden transition-all duration-300 ease-in-out",
+                    isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                  )}>
+                    <div className="sidebar-submenu">
+                      {item.children.map((child) => (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          prefetch={true}
+                          className={cn(
+                            "sidebar-submenu-item text-sm", // Slightly larger submenu text
+                            isActive(child.href) && "active"
+                          )}
+                        >
+                          <child.icon className="sidebar-submenu-item-icon" />
+                          <span className="font-medium">{child.name}</span>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -198,12 +198,12 @@ export function Sidebar({ className }: SidebarProps) {
               href={item.href!}
               prefetch={true}
               className={cn(
-                "sidebar-item",
+                "sidebar-item text-base", // Increased text size
                 isActive(item.href!) && "active"
               )}
             >
               <item.icon className="sidebar-item-icon" />
-              {!collapsed && <span className="sidebar-item-text">{item.name}</span>}
+              {!collapsed && <span className="sidebar-item-text font-medium tracking-wide">{item.name}</span>}
             </Link>
           )
         })}

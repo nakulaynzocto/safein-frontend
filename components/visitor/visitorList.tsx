@@ -206,7 +206,7 @@ export function VisitorList() {
   if (error) {
     return (
       <div className="space-y-6">
-        <Card className="card-hostinger">
+        <Card className="card-hostinger p-4">
           <CardContent className="flex items-center justify-center py-8">
             <div className="text-center">
               <p className="text-red-500 mb-4">Failed to load visitors</p>
@@ -224,7 +224,7 @@ export function VisitorList() {
   return (
     <div className="space-y-6">
       {/* Header Actions */}
-      <Card className="card-hostinger">
+      <Card className="card-hostinger   p-4">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
@@ -259,7 +259,7 @@ export function VisitorList() {
       </Card>
 
       {/* Visitors Table */}
-      <Card className="card-hostinger">
+      <Card className="card-hostinger p-4">
         <CardHeader className="pb-4">
             <SearchInput
               placeholder="Search visitors..."
@@ -274,6 +274,12 @@ export function VisitorList() {
             data={visitors}
             columns={columns}
             emptyMessage="No visitors found. Try adjusting your search criteria."
+            emptyData={{
+              title: 'No visitors yet',
+              description: 'Register your first visitor to get started.',
+              primaryActionLabel: 'Register Visitor',
+            }}
+            onPrimaryAction={handleAddVisitor}
             showCard={false}
             isLoading={isLoading}
           />

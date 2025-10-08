@@ -52,7 +52,12 @@ export const isPrivateRoute = (path: string): boolean => {
   
   // Check dynamic route patterns
   // Employee edit route: /employee/[id]
-  if (path.startsWith('/employee/') && path !== '/employee/create' && path !== '/employee/list' && path !== '/employee/trash') {
+  if (path.startsWith('/employee/') && path !== EMPLOYEECREATE && path !== EMPLOYEELIST && path !== EMPLOYEETRASH) {
+    return true
+  }
+  
+  // Visitor edit route: /visitor/[id]
+  if (path.startsWith('/visitor/') && path !== VISITORLIST && path !== VISITORREGISTRATION) {
     return true
   }
   

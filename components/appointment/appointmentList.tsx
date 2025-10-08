@@ -31,9 +31,14 @@ export function AppointmentList() {
     pagination,
     isLoading,
     error,
+    isDeleting,
+    isCheckingOut,
+    isApproving,
+    isCancelling,
     deleteAppointment,
-    checkInAppointment,
     checkOutAppointment,
+    approveAppointment,
+    cancelAppointment,
     refresh
   } = useAppointmentOperations({
     initialPage: currentPage,
@@ -55,19 +60,28 @@ export function AppointmentList() {
     }
   }
 
-  const handleCheckIn = async (appointmentId: string) => {
+
+  const handleCheckOut = async (appointmentId: string, notes?: string) => {
     try {
-      await checkInAppointment(appointmentId)
+      await checkOutAppointment(appointmentId, notes)
     } catch (error) {
-      console.error("Check-in error:", error)
+      console.error("Check-out error:", error)
     }
   }
 
-  const handleCheckOut = async (appointmentId: string) => {
+  const handleApprove = async (appointmentId: string) => {
     try {
-      await checkOutAppointment(appointmentId)
+      await approveAppointment(appointmentId)
     } catch (error) {
-      console.error("Check-out error:", error)
+      console.error("Approve error:", error)
+    }
+  }
+
+  const handleCancel = async (appointmentId: string) => {
+    try {
+      await cancelAppointment(appointmentId)
+    } catch (error) {
+      console.error("Cancel error:", error)
     }
   }
 
@@ -116,10 +130,15 @@ export function AppointmentList() {
         onPageSizeChange={setPageSize}
         onSortChange={handleSortChange}
         onDelete={handleDelete}
-        onCheckIn={handleCheckIn}
         onCheckOut={handleCheckOut}
+        onApprove={handleApprove}
+        onCancel={handleCancel}
         onView={handleView}
         onRefresh={refresh}
+        isDeleting={isDeleting}
+        isCheckingOut={isCheckingOut}
+        isApproving={isApproving}
+        isCancelling={isCancelling}
         title="Appointments"
         description="Manage visitor appointments and check-ins"
       />

@@ -86,13 +86,14 @@ export function NotificationSettings({ register, errors, watch, setValue, contro
               control={control}
               rules={{ required: "Reminder time is required" }}
               render={({ field }) => (
-                <SelectField
-                  label="Reminder Time"
-                  options={reminderTimeOptions}
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={errors.reminderTime?.message}
-                />
+                  <SelectField
+                    label="Reminder Time"
+                    options={reminderTimeOptions}
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={errors.reminderTime?.message}
+                    required
+                  />
               )}
             />
           </div>

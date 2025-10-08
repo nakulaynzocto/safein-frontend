@@ -5,7 +5,9 @@ import {
   useDeleteAppointmentMutation,
   useCheckInAppointmentMutation,
   useCheckOutAppointmentMutation,
+  useUpdateAppointmentMutation,
   useRestoreAppointmentMutation,
+  useCancelAppointmentMutation,
   Appointment,
   GetAppointmentsQuery 
 } from '@/store/api/appointmentApi'
@@ -37,9 +39,10 @@ export interface UseAppointmentOperationsReturn {
   // Loading states
   isLoading: boolean
   isDeleting: boolean
-  isCheckingIn: boolean
   isCheckingOut: boolean
+  isApproving: boolean
   isRestoring: boolean
+  isCancelling: boolean
   
   // Error state
   error: any
@@ -68,9 +71,10 @@ export interface UseAppointmentOperationsReturn {
   
   // Appointment operations
   deleteAppointment: (appointmentId: string) => Promise<void>
-  checkInAppointment: (appointmentId: string) => Promise<void>
-  checkOutAppointment: (appointmentId: string) => Promise<void>
+  checkOutAppointment: (appointmentId: string, notes?: string) => Promise<void>
+  approveAppointment: (appointmentId: string) => Promise<void>
   restoreAppointment: (appointmentId: string) => Promise<void>
+  cancelAppointment: (appointmentId: string) => Promise<void>
   
   // Utility functions
   refresh: () => void
@@ -130,9 +134,10 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
   } = useGetAppointmentsQuery(queryParams)
 
   const [deleteAppointmentMutation, { isLoading: isDeleting }] = useDeleteAppointmentMutation()
-  const [checkInAppointmentMutation, { isLoading: isCheckingIn }] = useCheckInAppointmentMutation()
   const [checkOutAppointmentMutation, { isLoading: isCheckingOut }] = useCheckOutAppointmentMutation()
+  const [updateAppointmentMutation, { isLoading: isApproving }] = useUpdateAppointmentMutation()
   const [restoreAppointmentMutation, { isLoading: isRestoring }] = useRestoreAppointmentMutation()
+  const [cancelAppointmentMutation, { isLoading: isCancelling }] = useCancelAppointmentMutation()
 
   // Actions
   const deleteAppointment = async (appointmentId: string): Promise<void> => {
@@ -146,24 +151,28 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     }
   }
 
-  const checkInAppointment = async (appointmentId: string): Promise<void> => {
-    try {
-      await checkInAppointmentMutation({ appointmentId }).unwrap()
-      toast.success('Visitor checked in successfully')
-      refetch()
-    } catch (error) {
-      toast.error('Failed to check in visitor')
-      throw error
-    }
-  }
 
-  const checkOutAppointment = async (appointmentId: string): Promise<void> => {
+  const checkOutAppointment = async (appointmentId: string, notes?: string): Promise<void> => {
     try {
-      await checkOutAppointmentMutation({ appointmentId }).unwrap()
+      await checkOutAppointmentMutation({ appointmentId, notes }).unwrap()
       toast.success('Visitor checked out successfully')
       refetch()
     } catch (error) {
       toast.error('Failed to check out visitor')
+      throw error
+    }
+  }
+
+  const approveAppointment = async (appointmentId: string): Promise<void> => {
+    try {
+      await updateAppointmentMutation({ 
+        id: appointmentId, 
+        status: 'approved' 
+      }).unwrap()
+      toast.success('Appointment approved successfully')
+      refetch()
+    } catch (error) {
+      toast.error('Failed to approve appointment')
       throw error
     }
   }
@@ -175,6 +184,17 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
       refetch()
     } catch (error) {
       toast.error('Failed to restore appointment')
+      throw error
+    }
+  }
+
+  const cancelAppointment = async (appointmentId: string): Promise<void> => {
+    try {
+      await cancelAppointmentMutation(appointmentId).unwrap()
+      toast.success('Appointment cancelled successfully')
+      refetch()
+    } catch (error) {
+      toast.error('Failed to cancel appointment')
       throw error
     }
   }
@@ -245,9 +265,10 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     // Loading states
     isLoading,
     isDeleting,
-    isCheckingIn,
     isCheckingOut,
+    isApproving,
     isRestoring,
+    isCancelling,
     
     // Error state
     error,
@@ -276,9 +297,10 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     
     // Appointment operations
     deleteAppointment,
-    checkInAppointment,
     checkOutAppointment,
+    approveAppointment,
     restoreAppointment,
+    cancelAppointment,
     
     // Utility functions
     refresh,

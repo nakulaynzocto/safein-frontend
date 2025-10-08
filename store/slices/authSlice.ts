@@ -23,6 +23,8 @@ const authSlice = createSlice({
       state.isAuthenticated = false
       if (typeof window !== "undefined") {
         localStorage.removeItem("token")
+        // Also remove cookie
+        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
       }
     },
     setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
@@ -36,6 +38,10 @@ const authSlice = createSlice({
       state.isAuthenticated = true
       if (typeof window !== "undefined") {
         localStorage.setItem("token", action.payload.token)
+        // Also set cookie for middleware access
+        const expires = new Date()
+        expires.setDate(expires.getDate() + 7) // 7 days
+        document.cookie = `token=${action.payload.token}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`
       }
     },
     setUser: (state, action: PayloadAction<User>) => {
@@ -50,8 +56,14 @@ const authSlice = createSlice({
         if (token && token !== 'undefined' && token.length > 10) {
           state.token = token
           state.isAuthenticated = true
+          // Also ensure cookie is set for middleware access
+          const expires = new Date()
+          expires.setDate(expires.getDate() + 7) // 7 days
+          document.cookie = `token=${token}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`
         } else {
           localStorage.removeItem("token")
+          // Also remove cookie
+          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
         }
       }
     },

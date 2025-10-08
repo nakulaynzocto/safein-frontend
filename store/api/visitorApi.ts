@@ -175,6 +175,7 @@ export const visitorApi = baseApi.injectEndpoints({
               { type: 'Visitor' as const, id: 'LIST' },
             ]
           : [{ type: 'Visitor' as const, id: 'LIST' }],
+      keepUnusedDataFor: 300, // Keep data for 5 minutes
     }),
 
     getVisitor: builder.query<Visitor, string>({

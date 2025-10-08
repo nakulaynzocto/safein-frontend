@@ -85,14 +85,33 @@ export function AppointmentForm() {
     try {
       const selectedEmployee = employees.find((emp) => emp._id === data.employeeId)
       const appointmentData = {
-        ...data,
-        employeeName: selectedEmployee?.name || "",
-        // aadhaarPhoto,
+        appointmentId: `APT${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
+        employeeId: data.employeeId,
+        visitorId: "temp-visitor-id", // This should be created first
+        appointmentDetails: {
+          purpose: data.purpose,
+          scheduledDate: data.appointmentDate,
+          scheduledTime: data.appointmentTime,
+          duration: 60, // Default 1 hour
+          meetingRoom: "Main Conference Room",
+          notes: data.notes || ""
+        },
+        securityDetails: {
+          badgeIssued: false,
+          badgeNumber: "",
+          securityClearance: false,
+          securityNotes: ""
+        },
+        notifications: {
+          smsSent: false,
+          emailSent: false,
+          whatsappSent: false,
+          reminderSent: false
+        }
       }
       await createAppointment(appointmentData).unwrap()
       showSuccess("Appointment created successfully")
       reset()
-      // setAadhaarPhoto(null)
       router.push(routes.privateroute.APPOINTMENTLIST)
     } catch (error: any) {
       const errorMessage = error?.data?.message || error?.message || "Failed to create appointment"
@@ -161,6 +180,7 @@ export function AppointmentForm() {
                   placeholder="Enter visitor's full name"
                   error={errors.visitorName?.message}
                   {...register("visitorName")}
+                  required
                 />
                 <InputField
                   label="Email Address"
@@ -168,12 +188,14 @@ export function AppointmentForm() {
                   placeholder="Enter visitor's email"
                   error={errors.visitorEmail?.message}
                   {...register("visitorEmail")}
+                  required
                 />
                 <InputField
                   label="Phone Number"
                   placeholder="Enter visitor's phone number"
                   error={errors.visitorPhone?.message}
                   {...register("visitorPhone")}
+                  required
                 />
                 <InputField
                   label="Aadhaar Number (Optional)"
@@ -198,22 +220,27 @@ export function AppointmentForm() {
                   error={errors.employeeId?.message}
                   value={watch("employeeId") || ""}
                   onChange={(value) => setValue("employeeId", value)}
+                  name="employeeId"
+                  required
                 />
                 <InputField
                   label="Purpose of Visit"
                   placeholder="Brief description of the visit purpose"
                   error={errors.purpose?.message}
                   {...register("purpose")}
+                  required
                 />
                 <DatePicker
                   label="Appointment Date"
                   error={errors.appointmentDate?.message}
                   {...register("appointmentDate")}
+                  required
                 />
                 <TimePicker
                   label="Appointment Time"
                   error={errors.appointmentTime?.message}
                   {...register("appointmentTime")}
+                  required
                 />
               </div>
               <div>

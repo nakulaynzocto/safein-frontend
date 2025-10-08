@@ -9,7 +9,7 @@ export interface Appointment {
   visitor?: VisitorDetails // Populated visitor details
   accompaniedBy?: AccompaniedBy
   appointmentDetails: AppointmentDetails
-  status: 'pending' | 'approved' | 'rejected' | 'completed' | 'checked-out' | 'scheduled'
+  status: 'pending' | 'approved' | 'rejected' | 'completed'
   checkInTime?: string
   checkOutTime?: string
   actualDuration?: number
@@ -107,6 +107,7 @@ export interface UpdateAppointmentRequest {
   appointmentDate?: string
   appointmentTime?: string
   notes?: string
+  status?: Appointment['status']
 }
 
 export interface UpdateAppointmentStatusRequest {
@@ -200,6 +201,7 @@ export const appointmentApi = baseApi.injectEndpoints({
               { type: 'Appointment', id: 'LIST' },
             ]
           : [{ type: 'Appointment', id: 'LIST' }],
+      keepUnusedDataFor: 300, // Keep data for 5 minutes
     }),
 
     getAppointment: builder.query<Appointment, string>({
@@ -327,6 +329,23 @@ export const appointmentApi = baseApi.injectEndpoints({
       ],
     }),
 
+    cancelAppointment: builder.mutation<Appointment, string>({
+      query: (id) => ({
+        url: `/appointments/${id}/cancel`,
+        method: 'PUT',
+      }),
+      transformResponse: (response: any) => {
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
+      invalidatesTags: (result, error, id) => [
+        { type: 'Appointment', id },
+        { type: 'Appointment', id: 'LIST' },
+      ],
+    }),
+
     getAppointmentsByEmployee: builder.query<AppointmentListResponse, { employeeId: string } & GetAppointmentsQuery>({
       query: ({ employeeId, ...params }) => {
         const queryParams = createUrlParams(params)
@@ -384,6 +403,7 @@ export const {
   useCheckOutAppointmentMutation,
   useBulkUpdateAppointmentsMutation,
   useRestoreAppointmentMutation,
+  useCancelAppointmentMutation,
   
   useGetAppointmentStatsQuery,
 } = appointmentApi

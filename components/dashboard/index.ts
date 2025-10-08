@@ -4,5 +4,7 @@ export { StatsGrid } from './statsGrid'
 export { StatCard } from './statCard'
 export { AppointmentsTable } from './appointmentsTable'
 export { QuickActions } from './quickActions'
+export { DashboardCharts } from './dashboardCharts'
+export { ImageChart } from './imageCharts'
 export * from './dashboardUtils'
 

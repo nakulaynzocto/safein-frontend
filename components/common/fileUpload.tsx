@@ -1,53 +1,65 @@
 "use client"
 
+import type * as React from "react"
 import { useState, useRef } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { Upload, X, FileImage } from "lucide-react"
+import { Upload, X, FileImage, File } from "lucide-react"
 
-interface FileUploadProps {
-  label?: string
+type FileUploadProps = {
   accept?: string
-  maxSize?: number // in MB
-  error?: string
-  value?: File | null
   onChange?: (file: File | null) => void
   className?: string
-  placeholder?: string
+  label?: string
+  error?: string
+  required?: boolean
+  maxSize?: number // in MB
+  disabled?: boolean
 }
 
-export function FileUpload({
+export function FileUpload({ 
+  accept, 
+  onChange, 
+  className, 
   label,
-  accept = "image/*",
-  maxSize = 5, // 5MB default
   error,
-  value,
-  onChange,
-  className,
-  placeholder = "Click to upload or drag and drop"
+  required,
+  maxSize = 5, // Default 5MB
+  disabled = false
 }: FileUploadProps) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [dragActive, setDragActive] = useState(false)
-  const [preview, setPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleFile = (file: File) => {
-    if (file.size > maxSize * 1024 * 1024) {
-      alert(`File size must be less than ${maxSize}MB`)
-      return
-    }
-
-    onChange?.(file)
-    
-    // Create preview for images
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setPreview(e.target?.result as string)
+  const handleFileChange = (file: File | null) => {
+    if (file) {
+      // Validate file size
+      if (file.size > maxSize * 1024 * 1024) {
+        alert(`File size must be less than ${maxSize}MB`)
+        return
       }
-      reader.readAsDataURL(file)
+      
+      // Validate file type if accept is specified
+      if (accept && !accept.split(',').some(type => {
+        const cleanType = type.trim()
+        if (cleanType.startsWith('.')) {
+          return file.name.toLowerCase().endsWith(cleanType.toLowerCase())
+        }
+        return file.type.match(cleanType.replace('*', '.*'))
+      })) {
+        alert(`File type not allowed. Accepted types: ${accept}`)
+        return
+      }
     }
+    
+    setSelectedFile(file)
+    onChange?.(file)
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null
+    handleFileChange(file)
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -65,125 +77,118 @@ export function FileUpload({
     e.stopPropagation()
     setDragActive(false)
     
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0])
+    if (disabled) return
+    
+    const file = e.dataTransfer.files?.[0] ?? null
+    handleFileChange(file)
+  }
+
+  const handleClick = () => {
+    if (!disabled) {
+      fileInputRef.current?.click()
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0])
-    }
-  }
-
-  const removeFile = () => {
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedFile(null)
     onChange?.(null)
-    setPreview(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
   }
 
-  const openFileDialog = () => {
-    fileInputRef.current?.click()
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
+  const getFileIcon = (file: File) => {
+    if (file.type.startsWith('image/')) {
+      return <FileImage className="w-4 h-4" />
+    }
+    return <File className="w-4 h-4" />
   }
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className="space-y-1.5">
       {label && (
-        <Label className="text-sm font-medium text-foreground">
-          {label}
-        </Label>
+        <label className="text-sm font-medium">
+          {label} {required && <span className="text-destructive">*</span>}
+        </label>
       )}
       
       <div
         className={cn(
-          "relative border-2 border-dashed rounded-lg p-6 transition-colors",
-          dragActive ? "border-primary bg-primary/5" : "border-border",
-          error ? "border-destructive" : "",
-          "hover:border-primary/50 cursor-pointer"
+          "relative border-2 border-dashed rounded-lg transition-all duration-200 cursor-pointer",
+          dragActive && !disabled
+            ? "border-primary bg-primary/5"
+            : selectedFile
+              ? "border-green-300 bg-green-50"
+              : error
+                ? "border-destructive bg-destructive/5"
+                : "border-gray-300 hover:border-gray-400",
+          disabled && "opacity-50 cursor-not-allowed",
+          className
         )}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        onClick={openFileDialog}
+        onClick={handleClick}
       >
         <input
           ref={fileInputRef}
           type="file"
           accept={accept}
-          onChange={handleChange}
+          onChange={handleInputChange}
+          disabled={disabled}
           className="hidden"
         />
         
-        {value ? (
-          <div className="space-y-4">
-            {preview ? (
-              <div className="space-y-2">
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="w-full h-32 object-cover rounded-md"
-                />
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <FileImage className="h-4 w-4" />
-                    <span>{value.name}</span>
-                    <span>({(value.size / 1024 / 1024).toFixed(2)} MB)</span>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      removeFile()
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+        {selectedFile ? (
+          <div className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {getFileIcon(selectedFile)}
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
+                  <p className="text-xs text-gray-500">{formatFileSize(selectedFile.size)}</p>
                 </div>
               </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <FileImage className="h-4 w-4" />
-                  <span>{value.name}</span>
-                  <span>({(value.size / 1024 / 1024).toFixed(2)} MB)</span>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    removeFile()
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleRemove}
+                className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         ) : (
-          <div className="text-center space-y-2">
-            <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
-            <div className="text-sm text-muted-foreground">
-              {placeholder}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Max file size: {maxSize}MB
-            </div>
+          <div className="p-6 text-center">
+            <Upload className={cn(
+              "w-8 h-8 mx-auto mb-2",
+              dragActive ? "text-primary" : "text-gray-400"
+            )} />
+            <p className="text-sm font-medium text-gray-900 mb-1">
+              {dragActive ? "Drop file here" : "Click to upload or drag and drop"}
+            </p>
+            <p className="text-xs text-gray-500">
+              {accept ? `Accepted formats: ${accept}` : "Any file type"} • Max {maxSize}MB
+            </p>
           </div>
         )}
       </div>
       
       {error && (
-        <p className="text-sm text-destructive">{error}</p>
+        <p className="text-destructive text-xs leading-5">{error}</p>
       )}
     </div>
   )
 }
-

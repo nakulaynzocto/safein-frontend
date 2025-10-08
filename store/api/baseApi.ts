@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { RootState } from '../store'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4010/api/v1'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1'
 
 export const baseApi = createApi({
   reducerPath: 'api',
@@ -21,4 +21,9 @@ export const baseApi = createApi({
   }),
   tagTypes: ['User', 'Employee', 'Appointment', 'Company', 'Visitor'],
   endpoints: () => ({}),
+  // Global configuration to prevent unnecessary refetches
+  refetchOnMountOrArgChange: false,
+  refetchOnFocus: false,
+  refetchOnReconnect: false,
+  keepUnusedDataFor: 300, // Keep data for 5 minutes
 })

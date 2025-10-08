@@ -25,11 +25,14 @@ import {
   RefreshCw,
   Phone,
   Mail,
-  Building
+  Building,
+  CheckCircle,
+  X
 } from "lucide-react"
 import { Appointment } from "@/store/api/appointmentApi"
 import { SearchInput } from "@/components/common/searchInput"
 import { AppointmentDetailsDialog } from "./appointmentDetailsDialog"
+import { CheckOutDialog } from "./checkOutDialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,16 +65,30 @@ export interface AppointmentTableProps {
   onRestore?: (appointmentId: string) => void
   onBulkRestore?: (appointmentIds: string[]) => void
   onView?: (appointment: Appointment) => void
-  onCheckIn?: (appointmentId: string) => void
-  onCheckOut?: (appointmentId: string) => void
+  onCheckOut?: (appointmentId: string, notes?: string) => void
+  onApprove?: (appointmentId: string) => void
+  onCancel?: (appointmentId: string) => void
   isDeleting?: boolean
   isRestoring?: boolean
-  isCheckingIn?: boolean
   isCheckingOut?: boolean
+  isApproving?: boolean
+  isCancelling?: boolean
   onRefresh?: () => void
   showHeader?: boolean
   title?: string
   description?: string
+  statusFilter?: string
+  employeeFilter?: string
+  dateFrom?: string
+  dateTo?: string
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+  onStatusFilterChange?: (value: string) => void
+  onEmployeeFilterChange?: (value: string) => void
+  onDateFromChange?: (value: string) => void
+  onDateToChange?: (value: string) => void
+  onPageSizeChange?: (value: number) => void
+  onSortChange?: (field: string) => void
 }
 
 export function AppointmentTable({
@@ -92,12 +109,14 @@ export function AppointmentTable({
   onRestore,
   onBulkRestore,
   onView,
-  onCheckIn,
   onCheckOut,
+  onApprove,
+  onCancel,
   isDeleting = false,
   isRestoring = false,
-  isCheckingIn = false,
   isCheckingOut = false,
+  isApproving = false,
+  isCancelling = false,
   onRefresh,
   showHeader = true,
   title,
@@ -108,8 +127,9 @@ export function AppointmentTable({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showRestoreDialog, setShowRestoreDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
-  const [showCheckInDialog, setShowCheckInDialog] = useState(false)
   const [showCheckOutDialog, setShowCheckOutDialog] = useState(false)
+  const [showApproveDialog, setShowApproveDialog] = useState(false)
+  const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
 
   // Selection handlers
@@ -144,17 +164,25 @@ export function AppointmentTable({
     setSelectedAppointment(null)
   }
 
-  const handleCheckIn = async () => {
-    if (!selectedAppointment || !onCheckIn) return
-    await onCheckIn(selectedAppointment._id)
-    setShowCheckInDialog(false)
+
+  const handleCheckOut = async (appointmentId: string, notes?: string) => {
+    if (!onCheckOut) return
+    await onCheckOut(appointmentId, notes)
+    setShowCheckOutDialog(false)
     setSelectedAppointment(null)
   }
 
-  const handleCheckOut = async () => {
-    if (!selectedAppointment || !onCheckOut) return
-    await onCheckOut(selectedAppointment._id)
-    setShowCheckOutDialog(false)
+  const handleApprove = async () => {
+    if (!selectedAppointment || !onApprove) return
+    await onApprove(selectedAppointment._id)
+    setShowApproveDialog(false)
+    setSelectedAppointment(null)
+  }
+
+  const handleCancel = async () => {
+    if (!selectedAppointment || !onCancel) return
+    await onCancel(selectedAppointment._id)
+    setShowCancelDialog(false)
     setSelectedAppointment(null)
   }
 
@@ -306,19 +334,32 @@ export function AppointmentTable({
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
-                  {appointment.status === 'approved' && onCheckIn && (
+                  {appointment.status === 'pending' && onApprove && (
                     <DropdownMenuItem 
                       onClick={() => {
                         setSelectedAppointment(appointment)
-                        setShowCheckInDialog(true)
+                        setShowApproveDialog(true)
                       }}
-                      disabled={isCheckingIn}
+                      disabled={isApproving}
                     >
-                      <Clock className="mr-2 h-4 w-4" />
-                      Check In
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Approve
                     </DropdownMenuItem>
                   )}
-                  {appointment.status === 'completed' && onCheckOut && (
+                  {(appointment.status === 'pending' || appointment.status === 'approved') && onCancel && (
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        setSelectedAppointment(appointment)
+                        setShowCancelDialog(true)
+                      }}
+                      disabled={isCancelling}
+                      className="text-destructive"
+                    >
+                      <X className="mr-2 h-4 w-4" />
+                      Cancel
+                    </DropdownMenuItem>
+                  )}
+                  {appointment.status === 'approved' && onCheckOut && (
                     <DropdownMenuItem 
                       onClick={() => {
                         setSelectedAppointment(appointment)
@@ -371,7 +412,7 @@ export function AppointmentTable({
   if (error) {
     return (
       <div className="space-y-6">
-        <Card className="card-hostinger">
+        <Card className="card-hostinger p-4">
           <CardContent className="flex items-center justify-center py-8">
             <div className="text-center">
               <p className="text-red-500 mb-4">Failed to load appointments</p>
@@ -389,7 +430,7 @@ export function AppointmentTable({
   return (
     <div className="space-y-6">
       {/* Header Actions */}
-      <Card className="card-hostinger">
+      <Card className="card-hostinger p-4">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
@@ -426,7 +467,7 @@ export function AppointmentTable({
       </Card>
 
       {/* Main Table */}
-      <Card className="card-hostinger">
+      <Card className="card-hostinger p-4 ">
         <CardHeader className="pb-4">
             <SearchInput
               placeholder="Search appointments..."
@@ -440,6 +481,14 @@ export function AppointmentTable({
             data={appointments}
             columns={getColumns()}
             emptyMessage={`No ${mode === 'active' ? 'appointments' : 'deleted appointments'} found. Try adjusting your search criteria.`}
+            emptyData={{
+              title: mode === 'active' ? 'No appointments yet' : 'No deleted appointments',
+              description: mode === 'active'
+                ? 'Get started by scheduling your first appointment.'
+                : 'Trash is empty.',
+              primaryActionLabel: mode === 'active' ? 'Schedule Appointment' : undefined,
+            }}
+            onPrimaryAction={mode === 'active' ? handleScheduleAppointment : undefined}
             showCard={false}
             isLoading={isLoading}
           />
@@ -486,27 +535,38 @@ export function AppointmentTable({
         />
       )}
 
-      {mode === 'active' && onCheckIn && (
+
+      {mode === 'active' && onApprove && (
         <ConfirmationDialog
-          open={showCheckInDialog}
-          onOpenChange={setShowCheckInDialog}
-          title="Check In Appointment"
-          description={`Are you sure you want to check in visitor ${selectedAppointment?.visitor?.name} for appointment ${selectedAppointment?.appointmentId}?`}
-          onConfirm={handleCheckIn}
-          confirmText={isCheckingIn ? "Checking In..." : "Check In"}
+          open={showApproveDialog}
+          onOpenChange={setShowApproveDialog}
+          title="Approve Appointment"
+          description={`Are you sure you want to approve appointment ${selectedAppointment?.appointmentId}? This will change the status to approved.`}
+          onConfirm={handleApprove}
+          confirmText={isApproving ? "Approving..." : "Approve"}
           variant="default"
         />
       )}
 
-      {mode === 'active' && onCheckOut && (
+      {mode === 'active' && onCancel && (
         <ConfirmationDialog
+          open={showCancelDialog}
+          onOpenChange={setShowCancelDialog}
+          title="Cancel Appointment"
+          description={`Are you sure you want to cancel appointment ${selectedAppointment?.appointmentId}? This will change the status to cancelled and cannot be undone.`}
+          onConfirm={handleCancel}
+          confirmText={isCancelling ? "Cancelling..." : "Cancel"}
+          variant="destructive"
+        />
+      )}
+
+      {mode === 'active' && onCheckOut && (
+        <CheckOutDialog
+          appointment={selectedAppointment}
           open={showCheckOutDialog}
-          onOpenChange={setShowCheckOutDialog}
-          title="Check Out Appointment"
-          description={`Are you sure you want to check out visitor ${selectedAppointment?.visitor?.name} for appointment ${selectedAppointment?.appointmentId}? `}
+          onClose={() => setShowCheckOutDialog(false)}
           onConfirm={handleCheckOut}
-          confirmText={isCheckingOut ? "Checking Out..." : "Check Out"}
-          variant="default"
+          isLoading={isCheckingOut}
         />
       )}
 

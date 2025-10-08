@@ -15,7 +15,10 @@ import { Badge } from "@/components/ui/badge"
 
 export function ProfilePageContent() {
   const [isEditing, setIsEditing] = useState(false)
-  const { data: profile, isLoading, error } = useGetProfileQuery()
+  const { data: profile, isLoading, error } = useGetProfileQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+    refetchOnFocus: false,
+  })
   const [updateProfile] = useUpdateProfileMutation()
 
   const handleProfileUpdate = async (data: any) => {

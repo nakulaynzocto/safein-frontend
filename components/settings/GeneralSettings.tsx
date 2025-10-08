@@ -40,6 +40,7 @@ export function GeneralSettings({ register, errors, control }: GeneralSettingsPr
           placeholder="Enter company name"
           {...register("companyName", { required: "Company name is required" })}
           error={errors.companyName?.message}
+          required
         />
         
         <InputField
@@ -54,6 +55,7 @@ export function GeneralSettings({ register, errors, control }: GeneralSettingsPr
             }
           })}
           error={errors.companyEmail?.message}
+          required
         />
         
         <InputField
@@ -82,6 +84,7 @@ export function GeneralSettings({ register, errors, control }: GeneralSettingsPr
               value={field.value}
               onChange={field.onChange}
               error={errors.timezone?.message}
+              required
             />
           )}
         />

@@ -63,13 +63,14 @@ export function SecuritySettings({ register, errors, watch, setValue, control }:
             control={control}
             rules={{ required: "Session timeout is required" }}
             render={({ field }) => (
-              <SelectField
-                label="Session Timeout"
-                options={sessionTimeoutOptions}
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.sessionTimeout?.message}
-              />
+                <SelectField
+                  label="Session Timeout"
+                  options={sessionTimeoutOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.sessionTimeout?.message}
+                  required
+                />
             )}
           />
           
@@ -78,13 +79,14 @@ export function SecuritySettings({ register, errors, watch, setValue, control }:
             control={control}
             rules={{ required: "Password expiry is required" }}
             render={({ field }) => (
-              <SelectField
-                label="Password Expiry"
-                options={passwordExpiryOptions}
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.passwordExpiry?.message}
-              />
+                <SelectField
+                  label="Password Expiry"
+                  options={passwordExpiryOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.passwordExpiry?.message}
+                  required
+                />
             )}
           />
         </div>

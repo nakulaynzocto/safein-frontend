@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { InputField } from "@/components/common/inputField"
 import { SelectField } from "@/components/common/selectField"
+import { DatePicker } from "@/components/common/datePicker"
 import { FileUpload } from "@/components/common/fileUpload"
 import { User, Upload, Save, X } from "lucide-react"
 import { User as UserType } from "@/store/api/authApi"
@@ -125,7 +126,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                 onChange={handleImageUpload}
                 accept="image/*"
                 className="flex-1"
-                placeholder="Upload Photo"
+                label="Upload Photo"
               />
             </div>
             {errors.profilePicture && (
@@ -157,17 +158,13 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                 {...register("phoneNumber")}
                 error={errors.phoneNumber?.message}
               />
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Date of Birth</label>
-                <input
-                  type="date"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  {...register("dateOfBirth")}
-                />
-                {errors.dateOfBirth && (
-                  <p className="text-sm text-destructive">{errors.dateOfBirth.message}</p>
-                )}
-              </div>
+              <DatePicker
+                label="Date of Birth"
+                placeholder="Select your date of birth"
+                {...register("dateOfBirth")}
+                error={errors.dateOfBirth?.message}
+                required
+              />
               <SelectField
                 label="Gender"
                 placeholder="Select your gender"

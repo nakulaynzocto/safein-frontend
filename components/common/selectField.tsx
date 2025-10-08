@@ -20,11 +20,12 @@ interface SelectFieldProps
   onChange?: (value: string) => void
   value?: string
   name?: string
+  required?: boolean
 }
 
 const SelectField = forwardRef<any, SelectFieldProps>(
   (
-    { className, label, error, helperText, options, placeholder, value, onChange, name, ...props },
+    { className, label, error, helperText, options, placeholder, value, onChange, name, required = false, ...props },
     ref
   ) => {
     const selectedOption: Option | null =
@@ -43,6 +44,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(
         {label && (
           <label htmlFor={name ?? stableId} className="text-sm font-medium text-foreground">
             {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
           </label>
         )}
         <Select

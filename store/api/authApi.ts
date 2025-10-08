@@ -89,6 +89,7 @@ export const authApi = baseApi.injectEndpoints({
     getCurrentUser: builder.query<User, void>({
       query: () => '/users/me',
       providesTags: ['User'],
+      keepUnusedDataFor: 300, // Keep data for 5 minutes
     }),
     logout: builder.mutation<void, void>({
       query: () => ({
@@ -108,6 +109,7 @@ export const authApi = baseApi.injectEndpoints({
         return response
       },
       providesTags: ['User'],
+      keepUnusedDataFor: 300, // Keep data for 5 minutes
     }),
 
 

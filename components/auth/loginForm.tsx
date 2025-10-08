@@ -10,9 +10,9 @@ import { InputField } from "@/components/common/inputField"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { useAppDispatch } from "@/store/hooks"
 import { useLoginMutation } from "@/store/api/authApi"
-import { useCheckCompanyExistsQuery } from "@/store/api/companyApi"
 import { setCredentials } from "@/store/slices/authSlice"
 import { routes } from "@/utils/routes"
+import { checkCompanyExists } from "@/utils/companyUtils"
 import { showError, showSuccess } from "@/utils/toaster"
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
@@ -64,28 +64,11 @@ export function LoginForm() {
       
       // Check if company exists after successful login
       try {
+        const companyResult = await checkCompanyExists(result.token)
         
-        const companyCheckResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/companies/exists`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${result.token}`,
-            'Content-Type': 'application/json',
-          },
-        })
-        
-        
-        if (companyCheckResponse.ok) {
-          const companyData = await companyCheckResponse.json()
-          const companyExists = companyData.success ? companyData.data?.exists : false
-          
-          if (companyExists) {
-            router.push(routes.privateroute.DASHBOARD)
-          } else {
-            router.push(routes.privateroute.COMPANYCREATE)
-          }
+        if (companyResult.exists) {
+          router.push(routes.privateroute.DASHBOARD)
         } else {
-          const errorData = await companyCheckResponse.json()
-          // If company check fails (401, 404, etc.), assume no company exists and redirect to creation
           router.push(routes.privateroute.COMPANYCREATE)
         }
       } catch (companyError) {
@@ -123,6 +106,7 @@ export function LoginForm() {
             type="email"
             placeholder="Enter your email"
             error={errors.email?.message}
+            required
             {...register("email")}
           />
 
@@ -131,6 +115,7 @@ export function LoginForm() {
             type="password"
             placeholder="Enter your password"
             error={errors.password?.message}
+            required
             {...register("password")}
           />
 

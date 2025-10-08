@@ -290,12 +290,14 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
                   placeholder="Enter employee ID (e.g., EMP001)"
                   error={errors.employeeId?.message}
                   {...register("employeeId", { onChange: clearGeneralError })}
+                  required
                 />
                 <InputField
                   label="Full Name"
                   placeholder="Enter employee's full name"
                   error={errors.name?.message}
                   {...register("name")}
+                  required
                 />
               </div>
 
@@ -306,12 +308,14 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
                   placeholder="Enter email address"
                   error={errors.email?.message}
                   {...register("email", { onChange: clearGeneralError })}
+                  required
                 />
                 <InputField
                   label="Phone Number"
                   placeholder="Enter phone number"
                   error={errors.phone?.message}
                   {...register("phone", { onChange: clearGeneralError })}
+                  required
                 />
               </div>
 
@@ -348,6 +352,7 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
                       value={field.value}
                       onChange={(val) => field.onChange(val)}
                       error={errors.department?.message}
+                      required
                     />
                   )}
                 />
@@ -357,6 +362,7 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
                   placeholder="Enter job designation"
                   error={errors.designation?.message}
                   {...register("designation")}
+                  required
                 />
               </div>
 
@@ -366,6 +372,7 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
                   placeholder="Enter job role"
                   error={errors.role?.message}
                   {...register("role")}
+                  required
                 />
 
                 <InputField
@@ -373,6 +380,7 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
                   placeholder="Enter office location"
                   error={errors.officeLocation?.message}
                   {...register("officeLocation")}
+                  required
                 />
               </div>
 

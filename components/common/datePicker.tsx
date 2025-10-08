@@ -10,17 +10,23 @@ interface DatePickerProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string
   helperText?: string
   minDate?: string
+  required?: boolean
 }
 
 const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
-  ({ className, label, error, helperText, minDate, ...props }, ref) => {
+  ({ className, label, error, helperText, minDate, required = false, ...props }, ref) => {
     // Set default minDate to today if not provided
     const today = new Date().toISOString().split('T')[0]
     const minDateValue = minDate || today
 
     return (
       <div className="space-y-2">
-        {label && <label className="text-sm font-medium text-foreground">{label}</label>}
+        {label && (
+          <label className="text-sm font-medium text-foreground">
+            {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </label>
+        )}
         <input
           type="date"
           min={minDateValue}

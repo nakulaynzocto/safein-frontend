@@ -209,6 +209,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                   placeholder="Enter name"
                   error={errors.name?.message}
                   {...register("name")}
+                  required
                 />
                 <InputField
                   label="Email"
@@ -216,24 +217,28 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                   placeholder="Enter email address"
                   error={errors.email?.message}
                   {...register("email")}
+                  required
                 />
                 <InputField
                   label="Phone"
                   placeholder="Enter phone number"
                   error={errors.phone?.message}
                   {...register("phone")}
+                  required
                 />
                 <InputField
                   label="Company"
                   placeholder="Enter company name"
                   error={errors.company?.message}
                   {...register("company")}
+                  required
                 />
                 <InputField
                   label="Designation"
                   placeholder="Enter designation"
                   error={errors.designation?.message}
                   {...register("designation")}
+                  required
                 />
               </div>
             </div>
@@ -250,30 +255,35 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                   placeholder="Enter street address"
                   error={errors.address?.street?.message}
                   {...register("address.street")}
+                  required
                 />
                 <InputField
                   label="City"
                   placeholder="Enter city"
                   error={errors.address?.city?.message}
                   {...register("address.city")}
+                  required
                 />
                 <InputField
                   label="State"
                   placeholder="Enter state"
                   error={errors.address?.state?.message}
                   {...register("address.state")}
+                  required
                 />
                 <InputField
                   label="Country"
                   placeholder="Enter country"
                   error={errors.address?.country?.message}
                   {...register("address.country")}
+                  required
                 />
                 <InputField
                   label="Zip Code"
                   placeholder="Enter zip code"
                   error={errors.address?.zipCode?.message}
                   {...register("address.zipCode")}
+                  required
                 />
               </div>
             </div>
@@ -292,12 +302,14 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                   error={errors.idProof?.type?.message}
                   value={watch("idProof.type") || ""}
                   onChange={(value) => setValue("idProof.type", value)}
+                  required
                 />
                 <InputField
                   label="ID Proof Number"
                   placeholder="Enter ID proof number"
                   error={errors.idProof?.number?.message}
                   {...register("idProof.number")}
+                  required
                 />
               </div>
 
