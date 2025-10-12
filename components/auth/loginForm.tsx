@@ -12,8 +12,7 @@ import { useAppDispatch } from "@/store/hooks"
 import { useLoginMutation } from "@/store/api/authApi"
 import { setCredentials } from "@/store/slices/authSlice"
 import { routes } from "@/utils/routes"
-import { checkCompanyExists } from "@/utils/companyUtils"
-import { showError, showSuccess } from "@/utils/toaster"
+import { showErrorToast, showSuccessToast } from "@/utils/toast"
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { LogIn } from "lucide-react"
@@ -43,7 +42,7 @@ export function LoginForm() {
   useEffect(() => {
     const message = searchParams.get('message')
     if (message) {
-      showSuccess(message)
+      showSuccessToast(message)
       const newUrl = new URL(window.location.href)
       newUrl.searchParams.delete('message')
       window.history.replaceState({}, '', newUrl.toString())
@@ -62,19 +61,8 @@ export function LoginForm() {
       dispatch(setCredentials(result))
       setErrorMessage(null)
       
-      // Check if company exists after successful login
-      try {
-        const companyResult = await checkCompanyExists(result.token)
-        
-        if (companyResult.exists) {
-          router.push(routes.privateroute.DASHBOARD)
-        } else {
-          router.push(routes.privateroute.COMPANYCREATE)
-        }
-      } catch (companyError) {
-        // If company check fails, redirect to company creation
-        router.push(routes.privateroute.COMPANYCREATE)
-      }
+      // Redirect to dashboard after successful login
+      router.push(routes.privateroute.DASHBOARD)
     } catch (error: any) {
       const message = error?.data?.message || error?.message || "Login failed"
       setErrorMessage(message) 

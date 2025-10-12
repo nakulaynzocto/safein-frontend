@@ -30,6 +30,10 @@ import {
   X
 } from "lucide-react"
 import { Appointment } from "@/store/api/appointmentApi"
+import { 
+  useApproveAppointmentMutation, 
+  useRejectAppointmentMutation 
+} from "@/store/api/appointmentApi"
 import { SearchInput } from "@/components/common/searchInput"
 import { AppointmentDetailsDialog } from "./appointmentDetailsDialog"
 import { CheckOutDialog } from "./checkOutDialog"
@@ -40,6 +44,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu"
+import { showSuccessToast, showErrorToast } from "@/utils/toast"
+import { routes } from "@/utils/routes"
 
 export interface AppointmentTableProps {
   appointments: Appointment[]
@@ -123,6 +129,10 @@ export function AppointmentTable({
 }: AppointmentTableProps) {
   const router = useRouter()
   
+  // API mutations
+  const [approveAppointment, { isLoading: isApprovingMutation }] = useApproveAppointmentMutation()
+  const [rejectAppointment, { isLoading: isRejectingMutation }] = useRejectAppointmentMutation()
+  
   // Dialog states
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showRestoreDialog, setShowRestoreDialog] = useState(false)
@@ -172,11 +182,26 @@ export function AppointmentTable({
     setSelectedAppointment(null)
   }
 
-  const handleApprove = async () => {
-    if (!selectedAppointment || !onApprove) return
-    await onApprove(selectedAppointment._id)
-    setShowApproveDialog(false)
-    setSelectedAppointment(null)
+  const handleApprove = async (appointmentId: string) => {
+    try {
+      await approveAppointment(appointmentId).unwrap()
+      showSuccessToast('Appointment approved successfully!')
+      onApprove?.(appointmentId)
+    } catch (error) {
+      console.error('Failed to approve appointment:', error)
+      showErrorToast('Failed to approve appointment')
+    }
+  }
+
+  const handleReject = async (appointmentId: string) => {
+    try {
+      await rejectAppointment(appointmentId).unwrap()
+      showSuccessToast('Appointment rejected successfully!')
+      onCancel?.(appointmentId) // Using onCancel for rejection
+    } catch (error) {
+      console.error('Failed to reject appointment:', error)
+      showErrorToast('Failed to reject appointment')
+    }
   }
 
   const handleCancel = async () => {
@@ -193,7 +218,7 @@ export function AppointmentTable({
 
   // Handle schedule appointment
   const handleScheduleAppointment = () => {
-    router.push('/appointment/create')
+    router.push(routes.privateroute.APPOINTMENTCREATE)
   }
 
   // Define columns based on mode
@@ -334,17 +359,24 @@ export function AppointmentTable({
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
-                  {appointment.status === 'pending' && onApprove && (
-                    <DropdownMenuItem 
-                      onClick={() => {
-                        setSelectedAppointment(appointment)
-                        setShowApproveDialog(true)
-                      }}
-                      disabled={isApproving}
-                    >
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Approve
-                    </DropdownMenuItem>
+                  {appointment.status === 'pending' && (
+                    <>
+                      <DropdownMenuItem 
+                        onClick={() => handleApprove(appointment._id)}
+                        disabled={isApprovingMutation}
+                      >
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Approve
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => handleReject(appointment._id)}
+                        disabled={isRejectingMutation}
+                        className="text-destructive"
+                      >
+                        <X className="mr-2 h-4 w-4" />
+                        Reject
+                      </DropdownMenuItem>
+                    </>
                   )}
                   {(appointment.status === 'pending' || appointment.status === 'approved') && onCancel && (
                     <DropdownMenuItem 
@@ -542,7 +574,7 @@ export function AppointmentTable({
           onOpenChange={setShowApproveDialog}
           title="Approve Appointment"
           description={`Are you sure you want to approve appointment ${selectedAppointment?.appointmentId}? This will change the status to approved.`}
-          onConfirm={handleApprove}
+          onConfirm={() => selectedAppointment && handleApprove(selectedAppointment._id)}
           confirmText={isApproving ? "Approving..." : "Approve"}
           variant="default"
         />

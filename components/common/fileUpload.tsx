@@ -5,7 +5,7 @@ import { useState, useRef } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { Upload, X, FileImage, File } from "lucide-react"
+import { showErrorToast } from "@/utils/toast"
 
 type FileUploadProps = {
   accept?: string
@@ -36,7 +36,7 @@ export function FileUpload({
     if (file) {
       // Validate file size
       if (file.size > maxSize * 1024 * 1024) {
-        alert(`File size must be less than ${maxSize}MB`)
+        showErrorToast(`File size must be less than ${maxSize}MB`)
         return
       }
       
@@ -48,7 +48,7 @@ export function FileUpload({
         }
         return file.type.match(cleanType.replace('*', '.*'))
       })) {
-        alert(`File type not allowed. Accepted types: ${accept}`)
+        showErrorToast(`File type not allowed. Accepted types: ${accept}`)
         return
       }
     }

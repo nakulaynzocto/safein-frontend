@@ -5,11 +5,7 @@ export interface User {
   email: string
   name: string
   role: string
-  firstName?: string
-  lastName?: string
-  phoneNumber?: string
-  dateOfBirth?: string
-  gender?: "male" | "female" | "other"
+  companyName: string
   profilePicture?: string
   department?: string
   designation?: string
@@ -28,22 +24,32 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  firstName: string
-  lastName: string
+  companyName: string
   email: string
-  phoneNumber: string
-  dateOfBirth: string
-  gender: "male" | "female" | "other"
   password: string
 }
 
+export interface VerifyOtpRequest {
+  email: string
+  otp: string
+}
+
+export interface ResendOtpRequest {
+  email: string
+}
+
+export interface RegisterResponse {
+  message: string
+  email: string
+  otpSent: boolean
+}
+
 export interface UpdateProfileRequest {
-  firstName?: string
-  lastName?: string
-  phoneNumber?: string
-  dateOfBirth?: string
-  gender?: "male" | "female" | "other"
+  companyName?: string
   profilePicture?: string
+  department?: string
+  designation?: string
+  employeeId?: string
 }
 
 export interface AuthResponse {
@@ -70,7 +76,7 @@ export const authApi = baseApi.injectEndpoints({
     }),
 
 
-    register: builder.mutation<User, RegisterRequest>({
+    register: builder.mutation<RegisterResponse, RegisterRequest>({
       query: (userData) => ({
         url: '/users/register',
         method: 'POST',
@@ -82,7 +88,35 @@ export const authApi = baseApi.injectEndpoints({
         }
         return response
       },
+    }),
+
+    verifyOtp: builder.mutation<AuthResponse, VerifyOtpRequest>({
+      query: (otpData) => ({
+        url: '/users/verify-otp',
+        method: 'POST',
+        body: otpData,
+      }),
+      transformResponse: (response: any) => {
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
       invalidatesTags: ['User'],
+    }),
+
+    resendOtp: builder.mutation<{ message: string }, ResendOtpRequest>({
+      query: (emailData) => ({
+        url: '/users/resend-otp',
+        method: 'POST',
+        body: emailData,
+      }),
+      transformResponse: (response: any) => {
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
     }),
 
 
@@ -133,6 +167,8 @@ export const authApi = baseApi.injectEndpoints({
 export const {
   useLoginMutation,
   useRegisterMutation,
+  useVerifyOtpMutation,
+  useResendOtpMutation,
   useGetCurrentUserQuery,
   useLogoutMutation,
   useGetProfileQuery,

@@ -13,7 +13,7 @@ import { ImageUploadField } from "@/components/common/imageUploadField"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { CreateVisitorRequest, useCreateVisitorMutation, useGetVisitorStatsQuery } from "@/store/api/visitorApi"
 import { User, MapPin, CreditCard, Camera, CheckCircle, Users } from "lucide-react"
-import { toast } from "sonner"
+import { showSuccessToast, showErrorToast } from "@/utils/toast"
 
 const visitorDetailsSchema = yup.object({
   name: yup.string().required("Name is required"),
@@ -125,7 +125,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
         console.log("Creating visitor via API...")
         const result = await createVisitor(visitorData).unwrap()
         console.log("Visitor created successfully:", result)
-        toast.success("Visitor registered successfully!")
+        showSuccessToast("Visitor registered successfully!")
         reset()
         if (onComplete) {
           onComplete(visitorData)
@@ -141,7 +141,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
       console.error("Error creating visitor:", error)
       const errorMessage = error?.data?.message || error?.message || "Failed to register visitor"
       setGeneralError(errorMessage)
-      toast.error(errorMessage)
+      showErrorToast(errorMessage)
     }
   }
 

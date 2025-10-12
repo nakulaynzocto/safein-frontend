@@ -10,7 +10,7 @@ import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { EmptyState } from "@/components/common/emptyState"
 import { ProfileCard } from "./profileCard"
 import { InfoCard } from "./infoCard"
-import { formatDate, formatValue, formatGender } from "./profileUtils"
+import { formatDate, formatValue } from "./profileUtils"
 import { Badge } from "@/components/ui/badge"
 
 export function ProfilePageContent() {
@@ -77,15 +77,12 @@ export function ProfilePageContent() {
             <div className="space-y-6">
               <InfoCard
                 icon={User}
-                title="Personal Information"
-                description="Your basic personal details"
+                title="Account Information"
+                description="Your basic account details"
                 fields={[
-                  { label: "First Name", value: formatValue(profile.firstName) },
-                  { label: "Last Name", value: formatValue(profile.lastName) },
                   { label: "Email", value: profile.email },
-                  { label: "Phone Number", value: formatValue(profile.phoneNumber) },
-                  { label: "Date of Birth", value: formatDate(profile.dateOfBirth) },
-                  { label: "Gender", value: formatGender(profile.gender) },
+                  { label: "Company Name", value: profile.companyName },
+                  { label: "Role", value: profile.role },
                 ]}
               />
               <InfoCard
@@ -93,7 +90,6 @@ export function ProfilePageContent() {
                 title="Professional Information"
                 description="Your work-related details"
                 fields={[
-                  { label: "Role", value: profile.role },
                   { label: "Department", value: formatValue(profile.department) },
                   { label: "Designation", value: formatValue(profile.designation) },
                   { label: "Employee ID", value: formatValue(profile.employeeId) },

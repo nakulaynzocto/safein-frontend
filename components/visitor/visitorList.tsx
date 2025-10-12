@@ -35,7 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu"
-import { toast } from "sonner"
+import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { useRouter } from "next/navigation"
 import { routes } from "@/utils/routes"
 
@@ -180,10 +180,10 @@ export function VisitorList() {
   const handleDeleteVisitor = async (visitorId: string) => {
     try {
       await deleteVisitor(visitorId).unwrap()
-      toast.success("Visitor deleted successfully!")
+      showSuccessToast("Visitor deleted successfully!")
       refetch()
     } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to delete visitor")
+      showErrorToast(error?.data?.message || "Failed to delete visitor")
     }
   }
 

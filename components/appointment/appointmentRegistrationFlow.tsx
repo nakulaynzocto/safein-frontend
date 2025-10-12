@@ -20,7 +20,7 @@ import {
 } from "@/store/api/appointmentApi"
 import { useCreateAppointmentMutation } from "@/store/api/appointmentApi"
 import { useCreateVisitorMutation } from "@/store/api/visitorApi"
-import { showSuccess, showError } from "@/utils/toaster"
+import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
 import { generateId } from "@/utils/helpers"
 
@@ -95,9 +95,9 @@ export function appointmentRegistrationFlow() {
           setVisitorId(createdVisitor._id)
           setVisitorDetails(data)
           setAccompaniedBy(accompaniedByData)
-          showSuccess("Visitor created successfully!")
+          showSuccessToast("Visitor created successfully!")
         } catch (error: any) {
-          showError(error?.data?.message || "Failed to create visitor")
+          showErrorToast(error?.data?.message || "Failed to create visitor")
           return // Don't proceed if visitor creation fails
         }
         break
@@ -130,7 +130,7 @@ export function appointmentRegistrationFlow() {
 
   const handleFinalSubmit = async () => {
     if (!visitorId || !appointmentDetails || !securityDetails || !notifications || !employeeId) {
-      showError("Please complete all steps before submitting")
+      showErrorToast("Please complete all steps before submitting")
       return
     }
 
@@ -146,10 +146,10 @@ export function appointmentRegistrationFlow() {
       }
 
       await createAppointment(payload).unwrap()
-      showSuccess("Visitor registration completed successfully!")
+      showSuccessToast("Visitor registration completed successfully!")
       router.push(routes.privateroute.APPOINTMENTLIST)
     } catch (error: any) {
-      showError(error?.data?.message || "Failed to register visitor")
+      showErrorToast(error?.data?.message || "Failed to register visitor")
     }
   }
 

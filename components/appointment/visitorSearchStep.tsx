@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Search, User, Phone, Mail, Building, MapPin, CheckCircle } from "lucide-react"
 import { VisitorDetails } from "@/store/api/appointmentApi"
 import { useSearchVisitorsMutation, Visitor } from "@/store/api/visitorApi"
-import { toast } from "sonner"
+import { showSuccessToast, showErrorToast, showInfoToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
 
 // ✅ Custom validation: at least one of phone or email required
@@ -61,15 +61,15 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
       
       if (result.found) {
         setSearchResults(result.visitors)
-        toast.success(result.message)
+        showSuccessToast(result.message)
       } else {
         setSearchResults([])
-        toast.info(result.message)
+        showInfoToast(result.message)
       }
     } catch (error: any) {
       console.error("Search failed:", error)
       setSearchResults([])
-      toast.error(error?.data?.message || "Failed to search visitors")
+      showErrorToast(error?.data?.message || "Failed to search visitors")
     }
   }
 

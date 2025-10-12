@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useForm } from "react-hook-form"
-import { showSuccess, showError } from "@/utils/toaster"
+import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { GeneralSettings } from "@/components/settings/generalSettings"
 import { NotificationSettings } from "@/components/settings/notificationSettings"
 import { SecuritySettings } from "@/components/settings/securitySettings"
@@ -23,9 +23,9 @@ export function SettingsForm() {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
-      showSuccess("Settings saved successfully")
+      showSuccessToast("Settings saved successfully")
     } catch (error: any) {
-      showError(error?.message || "Failed to save settings")
+      showErrorToast(error?.message || "Failed to save settings")
     } finally {
       setIsLoading(false)
     }
@@ -33,7 +33,7 @@ export function SettingsForm() {
 
   const handleReset = () => {
     reset(defaultSettings)
-    showSuccess("Settings reset to default values")
+    showSuccessToast("Settings reset to default values")
   }
 
   return (

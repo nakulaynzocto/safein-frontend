@@ -17,7 +17,7 @@ import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { FileUpload } from "@/components/common/fileUpload"
 import { useCreateAppointmentMutation } from "@/store/api/appointmentApi"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
-import { showSuccess, showError } from "@/utils/toaster"
+import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
 import { Calendar, User, CheckCircle } from "lucide-react"
 
@@ -110,13 +110,13 @@ export function AppointmentForm() {
         }
       }
       await createAppointment(appointmentData).unwrap()
-      showSuccess("Appointment created successfully")
+      showSuccessToast("Appointment created successfully")
       reset()
       router.push(routes.privateroute.APPOINTMENTLIST)
     } catch (error: any) {
       const errorMessage = error?.data?.message || error?.message || "Failed to create appointment"
       setGeneralError(errorMessage)
-      showError(errorMessage)
+      showErrorToast(errorMessage)
     }
   }
 

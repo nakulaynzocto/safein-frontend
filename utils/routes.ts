@@ -4,11 +4,15 @@ export const routes = {
     HOME: "/",
     LOGIN: "/login",
     REGISTER: "/register",
+    FEATURES: "/features",
+    PRICING: "/pricing",
+    CONTACT: "/contact",
+    HELP: "/help",
   },
 
   privateroute: {
-    COMPANYCREATE: "/company/create",
     DASHBOARD: "/dashboard",
+    NOTIFICATIONS: "/dashboard/notifications",
     PROFILE: "/profile",
     SETTINGS: "/settings",
     EMPLOYEECREATE: "/employee/create",
@@ -18,6 +22,7 @@ export const routes = {
     APPOINTMENTCREATE: "/appointment/create",
     APPOINTMENTLIST: "/appointment/list",
     APPOINTMENTTRASH: "/appointment/trash",
+    APPOINTMENTEDIT: "/appointment/[id]", // Dynamic route pattern
     VISITORLIST: "/visitor/list",
     VISITORREGISTRATION: "/visitor/register",
     VISITOREDIT: "/visitor/[id]", // Dynamic route pattern
@@ -52,12 +57,17 @@ export const isPrivateRoute = (path: string): boolean => {
   
   // Check dynamic route patterns
   // Employee edit route: /employee/[id]
-  if (path.startsWith('/employee/') && path !== EMPLOYEECREATE && path !== EMPLOYEELIST && path !== EMPLOYEETRASH) {
+  if (path.startsWith('/employee/') && path !== routes.privateroute.EMPLOYEECREATE && path !== routes.privateroute.EMPLOYEELIST && path !== routes.privateroute.EMPLOYEETRASH) {
+    return true
+  }
+  
+  // Appointment edit route: /appointment/[id]
+  if (path.startsWith('/appointment/') && path !== routes.privateroute.APPOINTMENTCREATE && path !== routes.privateroute.APPOINTMENTLIST && path !== routes.privateroute.APPOINTMENTTRASH) {
     return true
   }
   
   // Visitor edit route: /visitor/[id]
-  if (path.startsWith('/visitor/') && path !== VISITORLIST && path !== VISITORREGISTRATION) {
+  if (path.startsWith('/visitor/') && path !== routes.privateroute.VISITORLIST && path !== routes.privateroute.VISITORREGISTRATION) {
     return true
   }
   

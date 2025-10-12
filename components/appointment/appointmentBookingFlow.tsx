@@ -20,7 +20,7 @@ import {
   CreateAppointmentRequest 
 } from "@/store/api/appointmentApi"
 import { useCreateAppointmentMutation } from "@/store/api/appointmentApi"
-import { showSuccess, showError } from "@/utils/toaster"
+import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
 import { generateId } from "@/utils/helpers"
 
@@ -92,7 +92,7 @@ export function AppointmentBookingFlow() {
     setVisitorDetails(visitor)
     setCompletedSteps(prev => [...prev, 1])
     setCurrentStep(2)
-    showSuccess("Visitor found! Proceeding to appointment details.")
+    showSuccessToast("Visitor found! Proceeding to appointment details.")
   }
 
   const handleStepComplete = (stepId: number, data: any, accompaniedByData?: any) => {
@@ -147,7 +147,7 @@ export function AppointmentBookingFlow() {
 
   const handleFinalSubmit = async () => {
     if (!visitorId || !appointmentDetails || !securityDetails || !notifications || !employeeId) {
-      showError("Please complete all steps before submitting")
+      showErrorToast("Please complete all steps before submitting")
       return
     }
 
@@ -163,10 +163,10 @@ export function AppointmentBookingFlow() {
       }
 
       await createAppointment(payload).unwrap()
-      showSuccess("Appointment booked successfully!")
+      showSuccessToast("Appointment booked successfully!")
       router.push(routes.privateroute.APPOINTMENTLIST)
     } catch (error: any) {
-      showError(error?.data?.message || "Failed to book appointment")
+      showErrorToast(error?.data?.message || "Failed to book appointment")
     }
   }
 

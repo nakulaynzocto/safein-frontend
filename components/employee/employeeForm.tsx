@@ -12,42 +12,25 @@ import { InputField } from "@/components/common/inputField"
 import { SelectField } from "@/components/common/selectField"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQuery, useGetEmployeeStatsQuery } from "@/store/api/employeeApi"
-import { showSuccess, showError } from "@/utils/toaster"
+import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
 
 // ✅ Validation schema
 const employeeSchema = yup.object({
-  employeeId: yup.string()
-    .required("Employee ID is required")
-    .matches(/^[A-Z0-9]+$/, "Employee ID must contain only uppercase letters and numbers")
-    .min(2, "Employee ID must be at least 2 characters")
-    .max(20, "Employee ID cannot exceed 20 characters"),
   name: yup.string().required("Name is required").min(2, "Name must be at least 2 characters").max(100, "Name cannot exceed 100 characters"),
   email: yup.string().email("Invalid email address").required("Email is required"),
   phone: yup.string()
     .required("Phone number is required")
     .matches(/^[\+]?[1-9][\d]{0,15}$/, "Please enter a valid phone number"),
-  whatsapp: yup.string()
-    .optional()
-    .matches(/^[\+]?[1-9][\d]{0,15}$/, "Please enter a valid WhatsApp number")
-    .nullable(),
   department: yup.string().required("Department is required").min(2, "Department must be at least 2 characters").max(50, "Department cannot exceed 50 characters"),
-  designation: yup.string().required("Designation is required").min(2, "Designation must be at least 2 characters").max(50, "Designation cannot exceed 50 characters"),
-  role: yup.string().required("Role is required").min(2, "Role must be at least 2 characters").max(100, "Role cannot exceed 100 characters"),
-  officeLocation: yup.string().required("Office location is required").min(2, "Office location must be at least 2 characters").max(100, "Office location cannot exceed 100 characters"),
   status: yup.string().oneOf(['Active', 'Inactive']).default('Active'),
 })
 
 type EmployeeFormData = {
-  employeeId: string
   name: string
   email: string
   phone: string
-  whatsapp?: string | null
   department: string
-  designation: string
-  role: string
-  officeLocation: string
   status: 'Active' | 'Inactive'
 }
 
@@ -104,15 +87,10 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
   } = useForm({
     resolver: yupResolver(employeeSchema),
     defaultValues: {
-      employeeId: "",
       name: "",
       email: "",
       phone: "",
-      whatsapp: "",
       department: "",
-      designation: "",
-      role: "",
-      officeLocation: "",
       status: "Active",
     },
   })
@@ -121,15 +99,10 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
   useEffect(() => {
     if (isEditMode && employeeData) {
       reset({
-        employeeId: employeeData.employeeId,
         name: employeeData.name,
         email: employeeData.email,
         phone: employeeData.phone,
-        whatsapp: employeeData.whatsapp || "",
         department: employeeData.department,
-        designation: employeeData.designation,
-        role: employeeData.role,
-        officeLocation: employeeData.officeLocation,
         status: employeeData.status,
       })
     }
@@ -148,16 +121,15 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
       setGeneralError(null)
       
       const employeeData = {
-        ...data,
-        whatsapp: data.whatsapp || undefined
+        ...data
       }
       
       if (isEditMode) {
         await updateEmployee({ id: employeeId!, ...employeeData }).unwrap()
-        showSuccess("Employee updated successfully")
+        showSuccessToast("Employee updated successfully")
       } else {
         await createEmployee(employeeData).unwrap()
-        showSuccess("Employee created successfully")
+        showSuccessToast("Employee created successfully")
       }
       
       reset()
@@ -181,11 +153,6 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
           setError('email', {
             type: 'server',
             message: 'Email address is already registered'
-          })
-        } else if (message.includes('employee id') && message.includes('already exists')) {
-          setError('employeeId', {
-            type: 'server',
-            message: 'Employee ID is already taken'
           })
         } else if (message.includes('phone') && message.includes('already exists')) {
           setError('phone', {
@@ -286,22 +253,12 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
 
               <div className="grid gap-6 md:grid-cols-2">
                 <InputField
-                  label="Employee ID"
-                  placeholder="Enter employee ID (e.g., EMP001)"
-                  error={errors.employeeId?.message}
-                  {...register("employeeId", { onChange: clearGeneralError })}
-                  required
-                />
-                <InputField
                   label="Full Name"
                   placeholder="Enter employee's full name"
                   error={errors.name?.message}
                   {...register("name")}
                   required
                 />
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2">
                 <InputField
                   label="Email Address"
                   type="email"
@@ -310,21 +267,15 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
                   {...register("email", { onChange: clearGeneralError })}
                   required
                 />
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2">
                 <InputField
                   label="Phone Number"
                   placeholder="Enter phone number"
                   error={errors.phone?.message}
                   {...register("phone", { onChange: clearGeneralError })}
                   required
-                />
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2">
-                <InputField
-                  label="WhatsApp Number"
-                  placeholder="Enter WhatsApp number (optional)"
-                  error={errors.whatsapp?.message}
-                  {...register("whatsapp")}
                 />
                 <div /> {/* Empty column for alignment */}
               </div>
@@ -357,34 +308,6 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
                   )}
                 />
 
-                <InputField
-                  label="Designation"
-                  placeholder="Enter job designation"
-                  error={errors.designation?.message}
-                  {...register("designation")}
-                  required
-                />
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2">
-                <InputField
-                  label="Role"
-                  placeholder="Enter job role"
-                  error={errors.role?.message}
-                  {...register("role")}
-                  required
-                />
-
-                <InputField
-                  label="Office Location"
-                  placeholder="Enter office location"
-                  error={errors.officeLocation?.message}
-                  {...register("officeLocation")}
-                  required
-                />
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2">
                 <Controller
                   name="status"
                   control={control}
@@ -399,7 +322,6 @@ export function EmployeeForm({ employeeId }: EmployeeFormProps) {
                     />
                   )}
                 />
-                <div /> {/* Empty column for alignment */}
               </div>
             </div>
 

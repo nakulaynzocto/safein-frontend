@@ -346,6 +346,40 @@ export const appointmentApi = baseApi.injectEndpoints({
       ],
     }),
 
+    approveAppointment: builder.mutation<Appointment, string>({
+      query: (id) => ({
+        url: `/appointments/${id}/approve`,
+        method: 'PUT',
+      }),
+      transformResponse: (response: any) => {
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
+      invalidatesTags: (result, error, id) => [
+        { type: 'Appointment', id },
+        { type: 'Appointment', id: 'LIST' },
+      ],
+    }),
+
+    rejectAppointment: builder.mutation<Appointment, string>({
+      query: (id) => ({
+        url: `/appointments/${id}/reject`,
+        method: 'PUT',
+      }),
+      transformResponse: (response: any) => {
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
+      invalidatesTags: (result, error, id) => [
+        { type: 'Appointment', id },
+        { type: 'Appointment', id: 'LIST' },
+      ],
+    }),
+
     getAppointmentsByEmployee: builder.query<AppointmentListResponse, { employeeId: string } & GetAppointmentsQuery>({
       query: ({ employeeId, ...params }) => {
         const queryParams = createUrlParams(params)
@@ -404,6 +438,8 @@ export const {
   useBulkUpdateAppointmentsMutation,
   useRestoreAppointmentMutation,
   useCancelAppointmentMutation,
+  useApproveAppointmentMutation,
+  useRejectAppointmentMutation,
   
   useGetAppointmentStatsQuery,
 } = appointmentApi

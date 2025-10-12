@@ -5,14 +5,10 @@ import { Employee } from "@/store/api/employeeApi"
 
 // JSON configuration for employee details
 const employee_details_config = [
-  { key: "employeeId", label: "Employee ID" },
   { key: "name", label: "Name" },
   { key: "email", label: "Email" },
   { key: "phone", label: "Phone" },
   { key: "department", label: "Department" },
-  { key: "designation", label: "Designation" },
-  { key: "role", label: "Role" },
-  { key: "officeLocation", label: "Office Location" },
   { key: "status", label: "Status", mode: "active" },
   { key: "deletedAt", label: "Deleted At", mode: "trash", format: (value: string) => format(new Date(value), "MMM dd, yyyy 'at' HH:mm") },
 ]

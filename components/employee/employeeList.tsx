@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/common/pageHeader"
 import { EmployeeTable } from "./employeeTable"
 import { useGetEmployeesQuery, useDeleteEmployeeMutation } from "@/store/api/employeeApi"
-import { showSuccess, showError } from "@/utils/toaster"
+import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { UserPlus, Archive } from "lucide-react"
 import { routes } from "@/utils/routes"
 import { useDebounce } from "@/hooks/useDebounce"
@@ -43,9 +43,9 @@ export function EmployeeList() {
   const handleDelete = async (employeeId: string) => {
     try {
       await deleteEmployee(employeeId).unwrap()
-      showSuccess("Employee deleted successfully")
+      showSuccessToast("Employee deleted successfully")
     } catch (error) {
-      showError("Failed to delete employee")
+      showErrorToast("Failed to delete employee")
       console.error("Delete error:", error)
     }
   }

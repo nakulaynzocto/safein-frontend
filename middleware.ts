@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { routes } from './utils/routes'
-import { checkCompanyExists, shouldRedirectForCompanyExistence } from './utils/companyUtils'
 
 // Helper function to check if a path matches a route pattern
 function matchesRoute(pathname: string, routeList: string[]): boolean {
@@ -111,30 +110,6 @@ export async function middleware(request: NextRequest) {
   if (!isAuthenticated && isPrivateRoute(pathname)) {
     // Redirect to login using the route constant
     return NextResponse.redirect(new URL(routes.publicroute.LOGIN, request.url))
-  }
-  
-  // COMPANY EXISTENCE CHECK for authenticated users accessing private routes
-  // Only check for specific routes that need company existence validation
-  if (isAuthenticated && isPrivateRoute(pathname)) {
-    // Skip company check for routes that don't need it
-    const skipCompanyCheckRoutes = [
-      routes.privateroute.PROFILE,
-      routes.privateroute.SETTINGS,
-    ]
-    
-    if (skipCompanyCheckRoutes.includes(pathname as any)) {
-      return NextResponse.next()
-    }
-    
-    const companyResult = await checkCompanyExists(token)
-    const { shouldRedirect, redirectTo } = shouldRedirectForCompanyExistence(companyResult.exists, pathname)
-    
-    if (shouldRedirect && redirectTo) {
-      return NextResponse.redirect(new URL(redirectTo, request.url))
-    }
-    
-    // Allow access if no redirect needed
-    return NextResponse.next()
   }
   
   // Allow the request to proceed

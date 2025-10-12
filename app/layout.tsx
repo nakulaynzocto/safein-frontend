@@ -7,8 +7,8 @@ import { Suspense } from "react"
 import { ErrorBoundary } from "@/components/common/errorBoundary"
 
 export const metadata: Metadata = {
-  title: "Gatekeeper - Visitor Appointment System",
-  description: "Professional visitor appointment management system",
+  title: "SafeIn - SafeIn Appointment System",
+  description: "Professional SafeIn appointment management system",
   generator: "v0.app",
 }
 

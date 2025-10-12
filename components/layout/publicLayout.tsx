@@ -62,9 +62,9 @@ export function PublicLayout({ children }: PublicLayoutProps) {
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="h-6 w-6 rounded bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-xs">G</span>
+                <span className="text-primary-foreground font-bold text-xs">S</span>
               </div>
-              <span className="text-sm text-muted-foreground">© 2024 Gatekeeper. All rights reserved.</span>
+              <span className="text-sm text-muted-foreground">© 2024 SafeIn. All rights reserved.</span>
             </div>
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
               <a href="#" className="text-sm text-muted-foreground hover:text-foreground">

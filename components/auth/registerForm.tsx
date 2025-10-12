@@ -3,25 +3,22 @@ import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InputField } from "@/components/common/inputField"
-import { SelectField } from "@/components/common/selectField"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { useAppDispatch } from "@/store/hooks"
-import { useRegisterMutation } from "@/store/api/authApi"
+import { useRegisterMutation, useVerifyOtpMutation, useResendOtpMutation } from "@/store/api/authApi"
+import { setCredentials } from "@/store/slices/authSlice"
 import { routes } from "@/utils/routes"
-import { UserPlus } from "lucide-react"
+import { showSuccessToast, showErrorToast } from "@/utils/toast"
+import { CheckCircle, Mail, UserPlus, ArrowLeft } from "lucide-react"
 
 const registerSchema = yup.object({
-  firstName: yup.string().required("First name is required"),
-  lastName: yup.string().required("Last name is required"),
+  companyName: yup.string().required("Company name is required"),
   email: yup.string().email("Invalid email address").required("Email is required"),
-  phoneNumber: yup.string().required("Phone number is required"),
-  dateOfBirth: yup.date().required("Date of birth is required"),
-  gender: yup.string().oneOf(["male", "female", "other"], "Invalid gender").required("Gender is required"),
   password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
   confirmPassword: yup
     .string()
@@ -29,156 +26,336 @@ const registerSchema = yup.object({
     .required("Please confirm your password"),
 })
 
+const otpSchema = yup.object({
+  otp: yup.string().required("OTP is required").length(6, "OTP must be 6 digits"),
+})
+
 type RegisterFormData = yup.InferType<typeof registerSchema>
+type OtpFormData = yup.InferType<typeof otpSchema>
+
+type RegistrationStep = 'form' | 'otp' | 'success'
 
 export function RegisterForm() {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const [register, { isLoading }] = useRegisterMutation()
+  const [verifyOtp, { isLoading: isVerifyingOtp }] = useVerifyOtpMutation()
+  const [resendOtp, { isLoading: isResendingOtp }] = useResendOtpMutation()
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [currentStep, setCurrentStep] = useState<RegistrationStep>('form')
+  const [userEmail, setUserEmail] = useState<string>('')
+  const [otpError, setOtpError] = useState<string | null>(null)
+  const [user, setUser] = useState<any>(null)
+  const [token, setToken] = useState<string | null>(null)
+
+  // Debug current step changes
+  useEffect(() => {
+    console.log('Current step changed to:', currentStep)
+  }, [currentStep])
 
   const {
     register: registerField,
     handleSubmit,
     formState: { errors },
-    watch,
-    setValue,
+    getValues,
   } = useForm<RegisterFormData>({
     resolver: yupResolver(registerSchema),
   })
 
+  const {
+    register: registerOtpField,
+    handleSubmit: handleOtpSubmit,
+    formState: { errors: otpErrors },
+  } = useForm<OtpFormData>({
+    resolver: yupResolver(otpSchema),
+  })
+
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      setSubmitError(null) // Clear any previous errors
+      setSubmitError(null)
+      console.log('Starting registration with data:', data)
       const { confirmPassword, ...registerData } = data
-      // Convert dateOfBirth to string format
-      const formattedData = {
-        ...registerData,
-        dateOfBirth: registerData.dateOfBirth.toISOString().split('T')[0]
-      }
-      const result = await register(formattedData).unwrap()
-
-      router.push(`${routes.publicroute.LOGIN}?message=Registration successful. Please login to continue.`)
+      
+      // Send registration request (this should trigger OTP sending)
+      console.log('Calling register API with:', registerData)
+      const result = await register(registerData).unwrap()
+      console.log('Register API response:', result)
+      
+      // Move to OTP step
+      console.log('Setting user email and moving to OTP step')
+      setUserEmail(data.email)
+      setCurrentStep('otp')
+      console.log('Current step set to:', 'otp')
     } catch (error: any) {
+      console.error('Registration error:', error)
       let errorMessage = "Registration failed"
-
+      
       if (error?.data?.message) {
         errorMessage = error.data.message
       } else if (error?.message) {
         errorMessage = error.message
       }
       setSubmitError(errorMessage)
-      // showError(errorMessage)
+    }
+  }
+
+  const onOtpSubmit = async (data: OtpFormData) => {
+    try {
+      setOtpError(null)
+      
+      const result = await verifyOtp({
+        email: userEmail,
+        otp: data.otp
+      }).unwrap()
+      
+      // Store user data and token
+      setUser(result.user)
+      setToken(result.token)
+      
+      setCurrentStep('success')
+    } catch (error: any) {
+      let errorMessage = "OTP verification failed. Please try again."
+      
+      if (error?.data?.message) {
+        errorMessage = error.data.message
+      } else if (error?.message) {
+        errorMessage = error.message
+      }
+      
+      // Handle specific OTP errors
+      if (errorMessage.includes('expired')) {
+        errorMessage = "OTP expired. Click Resend OTP."
+      } else if (errorMessage.includes('incorrect') || errorMessage.includes('invalid')) {
+        errorMessage = "OTP incorrect. Please try again."
+      }
+      
+      setOtpError(errorMessage)
+    }
+  }
+
+  const handleResendOtp = async () => {
+    try {
+      setOtpError(null)
+      
+      const result = await resendOtp({
+        email: userEmail
+      }).unwrap()
+      
+      // Show success message
+      setOtpError(null)
+      showSuccessToast("OTP resent to your email")
+    } catch (error: any) {
+      let errorMessage = "Failed to resend OTP. Please try again."
+      
+      if (error?.data?.message) {
+        errorMessage = error.data.message
+      } else if (error?.message) {
+        errorMessage = error.message
+      }
+      
+      setOtpError(errorMessage)
+    }
+  }
+
+  const handleBackToForm = () => {
+    setCurrentStep('form')
+    setOtpError(null)
+  }
+
+  const handleGoToLogin = () => {
+    router.push(`${routes.publicroute.LOGIN}?message=Registration successful. Please login to continue.`)
+  }
+
+  const handleGoToDashboard = () => {
+    // Store the user data and token in Redux/auth state
+    if (user && token) {
+      dispatch(setCredentials({ user, token }))
+      router.push(routes.privateroute.DASHBOARD)
+    } else {
+      // Fallback to login if no user data
+      handleGoToLogin()
     }
   }
 
   return (
-    <Card className="w-full max-w-2xl">
+    <Card className="w-full max-w-md">
       <CardHeader className="text-center">
         <div className="flex items-center justify-center mb-4">
           <div className="p-3 rounded-full bg-primary/10">
-            <UserPlus className="w-8 h-8 text-primary" />
+            {currentStep === 'success' ? (
+              <CheckCircle className="w-8 h-8 text-green-600" />
+            ) : currentStep === 'otp' ? (
+              <Mail className="w-8 h-8 text-primary" />
+            ) : (
+              <UserPlus className="w-8 h-8 text-primary" />
+            )}
           </div>
         </div>
-        <CardTitle className="text-2xl">Create Account</CardTitle>
-        <CardDescription>Sign up for your Gatekeeper account</CardDescription>
+        <CardTitle className="text-2xl">
+          {currentStep === 'success' ? 'Registration Complete!' : 
+           currentStep === 'otp' ? 'Verify Your Email' : 
+           'Create Account'}
+        </CardTitle>
+        <CardDescription>
+          {currentStep === 'success' ? 'Your account has been successfully created' :
+           currentStep === 'otp' ? 'Enter the OTP sent to your email' :
+           'Sign up for your SafeIn account'}
+        </CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Error Messages */}
         {submitError && (
           <Alert variant="destructive" className="mb-4">
             <AlertDescription>{submitError}</AlertDescription>
           </Alert>
         )}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField
-              label="First Name"
-              placeholder="Enter your first name"
-              error={errors.firstName?.message}
-              {...registerField("firstName")}
-              required
-            />
+        
+        {otpError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{otpError}</AlertDescription>
+          </Alert>
+        )}
 
-            <InputField
-              label="Last Name"
-              placeholder="Enter your last name"
-              error={errors.lastName?.message}
-              {...registerField("lastName")}
-              required
-            />
+        {/* Success Message */}
+        {currentStep === 'success' && (
+          <Alert className="mb-4 border-green-200 bg-green-50">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              OTP verified — your account has been created.
+            </AlertDescription>
+          </Alert>
+        )}
 
-            <InputField
-              label="Email"
-              type="email"
-              placeholder="Enter your email"
-              error={errors.email?.message}
-              {...registerField("email")}
-              required
-            />
+        {/* OTP Sent Message */}
+        {currentStep === 'otp' && (
+          <Alert className="mb-4 border-blue-200 bg-blue-50">
+            <Mail className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              OTP sent to {userEmail}. Please enter it below to complete registration.
+            </AlertDescription>
+          </Alert>
+        )}
 
-            <InputField
-              label="Phone Number"
-              placeholder="Enter your phone number"
-              error={errors.phoneNumber?.message}
-              {...registerField("phoneNumber")}
-              required
-            />
+        {/* Registration Form */}
+        {currentStep === 'form' && (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-4">
+              <InputField
+                label="Company Name"
+                placeholder="Enter your company name"
+                error={errors.companyName?.message}
+                {...registerField("companyName")}
+                required
+              />
 
-            <InputField
-              label="Date of Birth"
-              type="date"
-              error={errors.dateOfBirth?.message}
-              {...registerField("dateOfBirth")}
-              required
-            />
+              <InputField
+                label="Email"
+                type="email"
+                placeholder="Enter your email"
+                error={errors.email?.message}
+                {...registerField("email")}
+                required
+              />
 
-            <SelectField
-              label="Gender"
-              placeholder="Select gender"
-              options={[
-                { value: "male", label: "Male" },
-                { value: "female", label: "Female" },
-                { value: "other", label: "Other" }
-              ]}
-              error={errors.gender?.message}
-              value={watch("gender") || ""}
-              onChange={(value) => setValue("gender", value as "male" | "female" | "other")}
-              required
-            />
+              <InputField
+                label="Password"
+                type="password"
+                placeholder="Create a password"
+                error={errors.password?.message}
+                {...registerField("password")}
+                required
+              />
 
-            <InputField
-              label="Password"
-              type="password"
-              placeholder="Create a password"
-              error={errors.password?.message}
-              {...registerField("password")}
-              required
-            />
+              <InputField
+                label="Confirm Password"
+                type="password"
+                placeholder="Confirm your password"
+                error={errors.confirmPassword?.message}
+                {...registerField("confirmPassword")}
+                required
+              />
+            </div>
 
-            <InputField
-              label="Confirm Password"
-              type="password"
-              placeholder="Confirm your password"
-              error={errors.confirmPassword?.message}
-              {...registerField("confirmPassword")}
-              required
-            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+              Register
+            </Button>
+          </form>
+        )}
+
+        {/* OTP Verification Form */}
+        {currentStep === 'otp' && (
+          <div className="space-y-6">
+            <Button
+              variant="ghost"
+              onClick={handleBackToForm}
+              className="mb-4"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Registration
+            </Button>
+
+            <form onSubmit={handleOtpSubmit(onOtpSubmit)} className="space-y-6">
+              <InputField
+                label="OTP"
+                placeholder="Enter OTP"
+                error={otpErrors.otp?.message}
+                {...registerOtpField("otp")}
+                required
+                maxLength={6}
+              />
+
+              <Button type="submit" className="w-full" disabled={isVerifyingOtp}>
+                {isVerifyingOtp ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+                Verify OTP
+              </Button>
+            </form>
+
+            <div className="text-center">
+              <Button 
+                variant="link" 
+                onClick={handleResendOtp} 
+                className="text-sm"
+                disabled={isResendingOtp}
+              >
+                {isResendingOtp ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+                Didn't receive OTP? Resend
+              </Button>
+            </div>
           </div>
+        )}
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-            Create Account
-          </Button>
-        </form>
+        {/* Success Step */}
+        {currentStep === 'success' && (
+          <div className="space-y-6">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 mb-4">
+                Your account has been created successfully! You can now access your dashboard or login later.
+              </p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button onClick={handleGoToDashboard} className="flex-1">
+                Go to Dashboard
+              </Button>
+              <Button variant="outline" onClick={handleGoToLogin} className="flex-1">
+                Login Later
+              </Button>
+            </div>
+          </div>
+        )}
 
-        <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link href={routes.publicroute.LOGIN} className="text-primary hover:underline" prefetch={true}>
-              Sign in
-            </Link>
-          </p>
-        </div>
+        {/* Login Link */}
+        {currentStep === 'form' && (
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              Already have an account?{" "}
+              <Link href={routes.publicroute.LOGIN} className="text-primary hover:underline" prefetch={true}>
+                Sign in
+              </Link>
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

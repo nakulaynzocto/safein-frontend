@@ -3,15 +3,10 @@ import { createUrlParams } from '@/utils/helpers'
 
 export interface Employee {
   _id: string
-  employeeId: string
   name: string
   email: string
   phone: string
-  whatsapp?: string
   department: string
-  designation: string
-  role: string
-  officeLocation: string
   status: 'Active' | 'Inactive'
   isDeleted: boolean
   deletedAt?: string
@@ -20,15 +15,10 @@ export interface Employee {
 }
 
 export interface CreateEmployeeRequest {
-  employeeId: string
   name: string
   email: string
   phone: string
-  whatsapp?: string
   department: string
-  designation: string
-  role: string
-  officeLocation: string
   status?: 'Active' | 'Inactive'
 }
 
@@ -37,11 +27,7 @@ export interface UpdateEmployeeRequest {
   name?: string
   email?: string
   phone?: string
-  whatsapp?: string
   department?: string
-  designation?: string
-  role?: string
-  officeLocation?: string
   status?: 'Active' | 'Inactive'
 }
 

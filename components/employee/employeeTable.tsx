@@ -39,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu"
 import { Input } from "../ui/input"
+import { routes } from "@/utils/routes"
 
 export interface EmployeeTableProps {
   employees: Employee[]
@@ -157,8 +158,7 @@ export function EmployeeTable({
             </Avatar>
             <div>
               <div className="font-medium">{employee.name}</div>
-              <div className="text-sm text-gray-500">{employee.designation}</div>
-              <div className="text-xs text-blue-600 font-mono">ID: {employee.employeeId}</div>
+              <div className="text-sm text-gray-500">{employee.department}</div>
             </div>
           </div>
         )
@@ -183,23 +183,10 @@ export function EmployeeTable({
         key: "department",
         header: "Department",
         render: (employee: Employee) => (
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-sm">
-              <Building className="h-3 w-3" />
-              {employee.department}
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Briefcase className="h-3 w-3" />
-              {employee.role}
-            </div>
+          <div className="flex items-center gap-2 text-sm">
+            <Building className="h-3 w-3" />
+            {employee.department}
           </div>
-        )
-      },
-      {
-        key: "officeLocation",
-        header: "Office Location",
-        render: (employee: Employee) => (
-          <div className="text-sm">{employee.officeLocation}</div>
         )
       },
     ]
@@ -325,7 +312,7 @@ export function EmployeeTable({
                 : 'Trash is empty.',
               primaryActionLabel: mode === 'active' ? 'Add Employee' : undefined,
             }}
-            onPrimaryAction={mode === 'active' ? () => router.push('/employee/create') : undefined}
+            onPrimaryAction={mode === 'active' ? () => router.push(routes.privateroute.EMPLOYEECREATE) : undefined}
             showCard={false}
             isLoading={isLoading}
           />

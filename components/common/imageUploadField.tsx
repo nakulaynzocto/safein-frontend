@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Label } from "@/components/ui/label"
+import { showErrorToast } from "@/utils/toast"
 
 interface ImageUploadFieldProps {
   name: string
@@ -65,8 +66,7 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
         setValue(name, "", { shouldValidate: true })
         setPreviewImage(null)
         setUploadSuccess(false)
-        // You could show a toast notification here
-        alert(error instanceof Error ? error.message : "Failed to upload image")
+        showErrorToast(error instanceof Error ? error.message : "Failed to upload image")
       } finally {
         setIsUploading(false)
       }

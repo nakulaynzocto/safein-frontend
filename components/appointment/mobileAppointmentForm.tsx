@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { MobileForm, MobileInput, MobileTextarea, MobileSelect, MobileFormActions } from "@/components/common/mobileForm"
 import { useGetEmployeesQuery, useCreateAppointmentMutation } from "@/store/api"
-import { showSuccess, showError } from "@/utils/toaster"
+import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { routes } from "@/utils/routes"
 
@@ -49,10 +49,10 @@ export function MobileAppointmentForm() {
   const onSubmit = async (data: AppointmentFormData) => {
     try {
       await createAppointment(data).unwrap()
-      showSuccess("Appointment created successfully!")
+      showSuccessToast("Appointment created successfully!")
       router.push(routes.privateroute.APPOINTMENTLIST)
     } catch (error: any) {
-      showError(error?.data?.message || error?.message || "Failed to create appointment")
+      showErrorToast(error?.data?.message || error?.message || "Failed to create appointment")
     }
   }
 

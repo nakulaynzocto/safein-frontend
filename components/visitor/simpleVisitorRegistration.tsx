@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { VisitorDetailsStep } from "./visitorRegister"
 import { VisitorDetails } from "@/store/api/appointmentApi"
-import { showSuccess, showError } from "@/utils/toaster"
+import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
 import { User, ArrowLeft } from "lucide-react"
 
@@ -24,12 +24,12 @@ export function SimpleVisitorRegistration() {
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       setVisitorDetails(data)
-      showSuccess("Visitor registered successfully!")
+      showSuccessToast("Visitor registered successfully!")
       
       // Redirect to appointment booking or visitor list
       router.push(routes.privateroute.APPOINTMENTLIST)
     } catch (error: any) {
-      showError(error?.message || "Failed to register visitor")
+      showErrorToast(error?.message || "Failed to register visitor")
     } finally {
       setIsSubmitting(false)
     }

@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Mail, Phone, Calendar, Users } from "lucide-react"
-import { getUserInitials, formatDate, formatValue, formatGender } from "./profileUtils"
+import { Mail, Building, MapPin } from "lucide-react"
+import { getUserInitials, formatValue } from "./profileUtils"
 
 export function ProfileCard({ profile }: { profile: any }) {
   return (
@@ -17,14 +17,12 @@ export function ProfileCard({ profile }: { profile: any }) {
               <AvatarImage src={profile.profilePicture} alt="Profile" />
             )}
             <AvatarFallback className="text-2xl">
-              {getUserInitials(profile.firstName, profile.lastName)}
+              {getUserInitials(profile.name, profile.companyName)}
             </AvatarFallback>
           </Avatar>
         </div>
         <CardTitle className="text-xl">
-          {profile.firstName && profile.lastName
-            ? `${profile.firstName} ${profile.lastName}`
-            : profile.name ?? "User"}
+          {profile.companyName || profile.name || "User"}
         </CardTitle>
         <CardDescription className="flex items-center justify-center gap-2">
           <Mail className="h-4 w-4" />
@@ -43,19 +41,19 @@ export function ProfileCard({ profile }: { profile: any }) {
 
         <div className="space-y-3 text-sm">
           <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Phone:</span>
-            <span>{formatValue(profile.phoneNumber)}</span>
+            <Building className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Company:</span>
+            <span>{formatValue(profile.companyName)}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Birth Date:</span>
-            <span>{formatDate(profile.dateOfBirth)}</span>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Department:</span>
+            <span>{formatValue(profile.department)}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Gender:</span>
-            <span>{formatGender(profile.gender)}</span>
+            <Building className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Designation:</span>
+            <span>{formatValue(profile.designation)}</span>
           </div>
         </div>
       </CardContent>
