@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/dropdownMenu"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
+import { NewAppointmentModal } from "./NewAppointmentModal"
 
 export interface AppointmentTableProps {
   appointments: Appointment[]
@@ -140,6 +141,8 @@ export function AppointmentTable({
   const [showCheckOutDialog, setShowCheckOutDialog] = useState(false)
   const [showApproveDialog, setShowApproveDialog] = useState(false)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
 
   // Selection handlers
@@ -216,9 +219,26 @@ export function AppointmentTable({
     setShowViewDialog(true)
   }
 
+  const handleEdit = (appointment: Appointment) => {
+    setEditingAppointment(appointment)
+    setShowEditModal(true)
+  }
+
+  const handleAppointmentUpdated = () => {
+    setShowEditModal(false)
+    setEditingAppointment(null)
+    onRefresh?.()
+  }
+
   // Handle schedule appointment
   const handleScheduleAppointment = () => {
     router.push(routes.privateroute.APPOINTMENTCREATE)
+  }
+
+  // Handle appointment created successfully
+  const handleAppointmentCreated = () => {
+    // Refresh the appointment list by calling onRefresh
+    onRefresh?.()
   }
 
   // Define columns based on mode
@@ -355,7 +375,7 @@ export function AppointmentTable({
               )}
               {mode === 'active' && (
                 <>
-                  <DropdownMenuItem onClick={() => router.push(`/appointment/${appointment._id}`)}>
+                  <DropdownMenuItem onClick={() => handleEdit(appointment)}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
@@ -485,13 +505,15 @@ export function AppointmentTable({
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
               {mode === 'active' && (
-                <Button 
-                  onClick={handleScheduleAppointment}
-                  className="btn-hostinger btn-hostinger-primary flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Schedule Appointment
-                </Button>
+                <NewAppointmentModal 
+                  onSuccess={handleAppointmentCreated}
+                  trigger={
+                    <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-2">
+                      <Plus className="h-4 w-4" />
+                      Schedule Appointment
+                    </Button>
+                  }
+                />
               )}
             </div>
           </div>
@@ -520,7 +542,9 @@ export function AppointmentTable({
                 : 'Trash is empty.',
               primaryActionLabel: mode === 'active' ? 'Schedule Appointment' : undefined,
             }}
-            onPrimaryAction={mode === 'active' ? handleScheduleAppointment : undefined}
+            onPrimaryAction={mode === 'active' ? () => {
+              // This will be handled by the modal trigger
+            } : undefined}
             showCard={false}
             isLoading={isLoading}
           />
@@ -609,6 +633,16 @@ export function AppointmentTable({
         open={showViewDialog}
         on_close={() => setShowViewDialog(false)}
       />
+
+      {/* Edit Appointment Modal */}
+      {editingAppointment && (
+        <NewAppointmentModal
+          appointmentId={editingAppointment._id}
+          open={showEditModal}
+          onOpenChange={setShowEditModal}
+          onSuccess={handleAppointmentUpdated}
+        />
+      )}
     </div>
   )
 }

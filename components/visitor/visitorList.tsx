@@ -38,9 +38,10 @@ import {
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { useRouter } from "next/navigation"
 import { routes } from "@/utils/routes"
+import { NewVisitorModal } from "./NewVisitorModal"
 
 // Define columns outside component to avoid recreation
-const createColumns = (handleDeleteVisitor: (id: string) => void) => [
+const createColumns = (handleDeleteVisitor: (id: string) => void, handleEditVisitor: (visitor: Visitor) => void) => [
   {
     key: "visitor",
     header: "Visitor",
@@ -134,7 +135,7 @@ const createColumns = (handleDeleteVisitor: (id: string) => void) => [
               <Eye className="mr-2 h-4 w-4" />
               View Details
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleEditVisitor(visitor)}>
               <Edit className="mr-2 h-4 w-4" />
               Edit
             </DropdownMenuItem>
@@ -158,6 +159,7 @@ export function VisitorList() {
   const [searchTerm, setSearchTerm] = useState("")
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
+  const [editingVisitor, setEditingVisitor] = useState<Visitor | null>(null)
   
   // API query parameters
   const queryParams: GetVisitorsQuery = {
@@ -197,11 +199,28 @@ export function VisitorList() {
     router.push(routes.privateroute.VISITORREGISTRATION)
   }
 
+  // Handle visitor created successfully
+  const handleVisitorCreated = () => {
+    // Refresh the visitor list by refetching the query
+    refetch()
+  }
+
+  // Handle edit visitor
+  const handleEditVisitor = (visitor: Visitor) => {
+    setEditingVisitor(visitor)
+  }
+
+  // Handle visitor updated successfully
+  const handleVisitorUpdated = () => {
+    setEditingVisitor(null)
+    refetch()
+  }
+
   const visitors = visitorsData?.visitors || []
   const pagination = visitorsData?.pagination
   
-  // Create columns with delete handler
-  const columns = createColumns(handleDeleteVisitor)
+  // Create columns with delete and edit handlers
+  const columns = createColumns(handleDeleteVisitor, handleEditVisitor)
 
   if (error) {
     return (
@@ -246,13 +265,15 @@ export function VisitorList() {
               >
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
-              <Button 
-                onClick={handleAddVisitor}
-                className="btn-hostinger btn-hostinger-primary flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Add Visitor
-              </Button>
+              <NewVisitorModal 
+                onSuccess={handleVisitorCreated}
+                trigger={
+                  <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Visitor
+                  </Button>
+                }
+              />
             </div>
           </div>
         </CardHeader>
@@ -300,6 +321,15 @@ export function VisitorList() {
           />
         </div>
       )}
+
+      {/* Edit Visitor Modal */}
+      <NewVisitorModal
+        visitorId={editingVisitor?._id}
+        open={!!editingVisitor}
+        onOpenChange={(open) => !open && setEditingVisitor(null)}
+        onSuccess={handleVisitorUpdated}
+        trigger={<div />} // Hidden trigger since we control the modal programmatically
+      />
     </div>
   )
 }

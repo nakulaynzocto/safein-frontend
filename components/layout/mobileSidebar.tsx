@@ -34,61 +34,18 @@ const navigation = [
   },
   {
     name: "Employees",
+    href: routes.privateroute.EMPLOYEELIST,
     icon: Users,
-    children: [
-      {
-        name: "All Employees",
-        href: routes.privateroute.EMPLOYEELIST,
-        icon: Users,
-      },
-      {
-        name: "Add Employee",
-        href: routes.privateroute.EMPLOYEECREATE,
-        icon: UserPlus,
-      },
-      {
-        name: "Trash",
-        href: routes.privateroute.EMPLOYEETRASH,
-        icon: Trash2,
-      },
-    ],
   },
   {
-    name: "Visitor Registration",
-    icon: UserCheck,
-    children: [
-      {
-        name: "All Visitors",
-        href: routes.privateroute.VISITORLIST,
-        icon: Users,
-      },
-      {
-        name: "Register Visitor",
-        href: routes.privateroute.VISITORREGISTRATION,
-        icon: UserPlus,
-      },
-    ],
+    name: "Visitors",
+    href: routes.privateroute.VISITORLIST,
+    icon: UserPlus,
   },
   {
     name: "Appointments",
+    href: routes.privateroute.APPOINTMENTLIST,
     icon: Calendar,
-    children: [
-      {
-        name: "All Appointments",
-        href: routes.privateroute.APPOINTMENTLIST,
-        icon: Calendar,
-      },
-      {
-        name: "Create Appointment",
-        href: routes.privateroute.APPOINTMENTCREATE,
-        icon: CalendarPlus,
-      },
-      {
-        name: "Trash",
-        href: routes.privateroute.APPOINTMENTTRASH,
-        icon: Trash2,
-      },
-    ],
   },
   {
     name: "Settings",

@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { useRouter } from "next/navigation"
 import { useAppSelector } from "@/store/hooks"
 import { useGetAppointmentsQuery } from "@/store/api/appointmentApi"
@@ -10,10 +11,12 @@ import { StatsGrid } from "./statsGrid"
 import { AppointmentsTable } from "./AppointmentsTable"
 import { QuickActions } from "./quickActions"
 import { DashboardCharts } from "./dashboardCharts"
+import { NewAppointmentModal } from "@/components/appointment/NewAppointmentModal"
 import { calculateAppointmentStats, getRecentAppointments, getTodaysAppointments } from "./dashboardUtils"
 
 export function DashboardOverview() {
   const router = useRouter()
+  const [showAppointmentModal, setShowAppointmentModal] = React.useState(false)
   
   // Use optimized queries with caching
   const { data: appointmentsData, isLoading: appointmentsLoading } = useGetAppointmentsQuery(undefined, {
@@ -38,6 +41,16 @@ export function DashboardOverview() {
   // Get filtered appointments
   const recentAppointments = getRecentAppointments(appointments, 5)
   const todaysAppointments = getTodaysAppointments(appointments)
+
+  // Handle appointment creation
+  const handleScheduleAppointment = () => {
+    setShowAppointmentModal(true)
+  }
+
+  const handleAppointmentCreated = () => {
+    setShowAppointmentModal(false)
+    // The appointments data will be refetched automatically due to RTK Query cache invalidation
+  }
 
   return (
     <div className="space-y-6">
@@ -65,7 +78,7 @@ export function DashboardOverview() {
             description: "You don't have any appointments scheduled for today.",
             primaryActionLabel: "Schedule Appointment",
           }}
-          onPrimaryAction={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
+          onPrimaryAction={handleScheduleAppointment}
         />
 
         {/* Recent Appointments */}
@@ -86,6 +99,14 @@ export function DashboardOverview() {
 
       {/* Quick Actions */}
       <QuickActions />
+
+      {/* Appointment Modal */}
+      <NewAppointmentModal
+        open={showAppointmentModal}
+        onOpenChange={setShowAppointmentModal}
+        onSuccess={handleAppointmentCreated}
+        trigger={<div />} // Hidden trigger since we control the modal programmatically
+      />
     </div>
   )
 }

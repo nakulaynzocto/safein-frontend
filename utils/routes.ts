@@ -15,7 +15,6 @@ export const routes = {
     NOTIFICATIONS: "/dashboard/notifications",
     PROFILE: "/profile",
     SETTINGS: "/settings",
-    EMPLOYEECREATE: "/employee/create",
     EMPLOYEELIST: "/employee/list",
     EMPLOYEETRASH: "/employee/trash",
     EMPLOYEEEDIT: "/employee/[id]", // Dynamic route pattern
@@ -57,7 +56,7 @@ export const isPrivateRoute = (path: string): boolean => {
   
   // Check dynamic route patterns
   // Employee edit route: /employee/[id]
-  if (path.startsWith('/employee/') && path !== routes.privateroute.EMPLOYEECREATE && path !== routes.privateroute.EMPLOYEELIST && path !== routes.privateroute.EMPLOYEETRASH) {
+  if (path.startsWith('/employee/') && path !== routes.privateroute.EMPLOYEELIST && path !== routes.privateroute.EMPLOYEETRASH) {
     return true
   }
   

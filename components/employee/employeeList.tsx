@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/common/pageHeader"
 import { EmployeeTable } from "./employeeTable"
+import { NewEmployeeModal } from "./NewEmployeeModal"
 import { useGetEmployeesQuery, useDeleteEmployeeMutation } from "@/store/api/employeeApi"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { UserPlus, Archive } from "lucide-react"
@@ -78,16 +79,24 @@ export function EmployeeList() {
     }
   }
 
+  const handleEmployeeCreated = () => {
+    // Refresh the employee list by refetching the query
+    // The query will automatically refetch when the modal closes
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Employees" description="Manage your organization's employees">
         <div className="flex gap-2">
-          <Button asChild>
-            <Link href={routes.privateroute.EMPLOYEECREATE} prefetch={true}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add Employee
-            </Link>
-          </Button>
+          <NewEmployeeModal 
+            onSuccess={handleEmployeeCreated}
+            trigger={
+              <Button>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Add Employee
+              </Button>
+            }
+          />
         </div>
       </PageHeader>
 
@@ -100,20 +109,13 @@ export function EmployeeList() {
         
         // Filters and pagination
         searchTerm={search}
-        departmentFilter={departmentFilter}
-        statusFilter={statusFilter}
         currentPage={currentPage}
         pageSize={pageSize}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
         
         // Actions
         onSearchChange={handleSearchChange}
-        onDepartmentFilterChange={handleDepartmentFilterChange}
-        onStatusFilterChange={handleStatusFilterChange}
         onPageChange={setCurrentPage}
         onPageSizeChange={setPageSize}
-        onSortChange={handleSortChange}
         
         // Table configuration
         mode="active"

@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/dropdownMenu"
 import { Input } from "../ui/input"
 import { routes } from "@/utils/routes"
+import { NewEmployeeModal } from "./NewEmployeeModal"
 
 export interface EmployeeTableProps {
   employees: Employee[]
@@ -105,6 +106,7 @@ export function EmployeeTable({
   const [showRestoreDialog, setShowRestoreDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
 
   // Selection handlers
   const handleSelectAll = (checked: boolean) => {
@@ -141,6 +143,17 @@ export function EmployeeTable({
   const handleView = (employee: Employee) => {
     setSelectedEmployee(employee)
     setShowViewDialog(true)
+  }
+
+  // Handle edit employee
+  const handleEditEmployee = (employee: Employee) => {
+    setEditingEmployee(employee)
+  }
+
+  // Handle employee updated successfully
+  const handleEmployeeUpdated = () => {
+    setEditingEmployee(null)
+    onRefresh?.()
   }
 
   // Define columns based on mode
@@ -234,7 +247,7 @@ export function EmployeeTable({
               )}
               {mode === 'active' && (
                 <>
-                  <DropdownMenuItem onClick={() => router.push(`/employee/${employee._id}`)}>
+                  <DropdownMenuItem onClick={() => handleEditEmployee(employee)}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
@@ -301,21 +314,45 @@ export function EmployeeTable({
             />
         </CardHeader>
         <CardContent className="p-0">
-          <DataTable
-            data={employees}
-            columns={getColumns()}
-            emptyMessage={`No ${mode === 'active' ? 'employees' : 'deleted employees'} found`}
-            emptyData={{
-              title: mode === 'active' ? 'No employees yet' : 'No deleted employees',
-              description: mode === 'active' 
-                ? 'Add your first employee to get started.'
-                : 'Trash is empty.',
-              primaryActionLabel: mode === 'active' ? 'Add Employee' : undefined,
-            }}
-            onPrimaryAction={mode === 'active' ? () => router.push(routes.privateroute.EMPLOYEECREATE) : undefined}
-            showCard={false}
-            isLoading={isLoading}
-          />
+          {employees.length === 0 && !isLoading ? (
+            // Custom empty state with modal
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <div className="text-center space-y-4">
+                <div className="p-4 rounded-full bg-gray-100 mx-auto w-fit">
+                  <User className="h-12 w-12 text-gray-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {mode === 'active' ? 'No employees yet' : 'No deleted employees'}
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {mode === 'active' 
+                      ? 'Add your first employee to get started.'
+                      : 'Trash is empty.'
+                    }
+                  </p>
+                </div>
+                {mode === 'active' && (
+                  <NewEmployeeModal
+                    trigger={
+                      <Button className="mt-4">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Employee
+                      </Button>
+                    }
+                  />
+                )}
+              </div>
+            </div>
+          ) : (
+            <DataTable
+              data={employees}
+              columns={getColumns()}
+              emptyMessage={`No ${mode === 'active' ? 'employees' : 'deleted employees'} found`}
+              showCard={false}
+              isLoading={isLoading}
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -367,6 +404,15 @@ export function EmployeeTable({
         mode={mode}
         open={showViewDialog}
         on_close={() => setShowViewDialog(false)}
+      />
+
+      {/* Edit Employee Modal */}
+      <NewEmployeeModal
+        employeeId={editingEmployee?._id}
+        open={!!editingEmployee}
+        onOpenChange={(open: boolean) => !open && setEditingEmployee(null)}
+        onSuccess={handleEmployeeUpdated}
+        trigger={<div />} // Hidden trigger since we control the modal programmatically
       />
     </div>
   )
