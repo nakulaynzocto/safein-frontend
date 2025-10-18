@@ -23,8 +23,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans">
-        {/* Navigation Progress Bar */}
-        <NavigationProgress />
+        {/* Navigation Progress Bar - wrapped in Suspense */}
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         
         {/* Route Optimizer for faster navigation */}
         <RouteOptimizer />
