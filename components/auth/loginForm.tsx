@@ -79,7 +79,7 @@ export function LoginForm() {
           </div>
         </div>
         <CardTitle className="text-2xl">Welcome Back</CardTitle>
-        <CardDescription>Sign in to your Gatekeeper account</CardDescription>
+        <CardDescription>Sign in to your SafeIn account</CardDescription>
       </CardHeader>
       <CardContent>
         {/* Display error message */}

@@ -16,9 +16,11 @@ import { NotificationCard } from "@/components/common/notificationCard"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { PageHeader } from "@/components/common/pageHeader"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
+import { ProtectedLayout } from "@/components/layout/protectedLayout"
 
-export default function NotificationsPage() {
+function NotificationsPageContent() {
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   
   // API hooks
   const { data: appointmentsData, isLoading, error, refetch } = useGetAppointmentsQuery({
@@ -60,8 +62,17 @@ export default function NotificationsPage() {
     }
   }
   
-  const handleRefresh = () => {
-    refetch()
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    try {
+      await refetch()
+      showSuccessToast('Notifications refreshed successfully!')
+    } catch (error) {
+      console.error('Failed to refresh notifications:', error)
+      showErrorToast('Failed to refresh notifications')
+    } finally {
+      setIsRefreshing(false)
+    }
   }
   
   if (isLoading) {
@@ -83,7 +94,7 @@ export default function NotificationsPage() {
   }
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <PageHeader 
         title="Notifications" 
@@ -93,15 +104,15 @@ export default function NotificationsPage() {
           onClick={handleRefresh} 
           variant="outline" 
           size="sm"
-          disabled={isProcessing}
+          disabled={isProcessing || isRefreshing}
         >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
         </Button>
       </PageHeader>
       
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
@@ -124,7 +135,7 @@ export default function NotificationsPage() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="sm:col-span-2 lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Rejected Today</CardTitle>
             <XCircle className="h-4 w-4 text-muted-foreground" />
@@ -157,14 +168,14 @@ export default function NotificationsPage() {
               </h2>
             </div>
             
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {pendingAppointments.map((appointment) => (
                 <NotificationCard
                   key={appointment._id}
                   appointment={appointment}
                   onApprove={handleApprove}
                   onReject={handleReject}
-                  isProcessing={isProcessing}
+                  isProcessing={isProcessing || isRefreshing}
                 />
               ))}
             </div>
@@ -172,5 +183,13 @@ export default function NotificationsPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function NotificationsPage() {
+  return (
+    <ProtectedLayout>
+      <NotificationsPageContent />
+    </ProtectedLayout>
   )
 }

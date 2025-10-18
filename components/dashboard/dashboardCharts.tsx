@@ -16,53 +16,150 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
     { value: appointmentsData.filter(apt => apt.status === 'pending').length, label: 'Pending', color: '#F59E0B', icon: Clock },
     { value: appointmentsData.filter(apt => apt.status === 'approved').length, label: 'Approved', color: '#10B981', icon: Calendar },
     { value: appointmentsData.filter(apt => apt.status === 'completed').length, label: 'Completed', color: '#3B82F6', icon: Activity },
-    { value: appointmentsData.filter(apt => apt.status === 'cancelled').length, label: 'Cancelled', color: '#EF4444', icon: Clock },
+    { value: appointmentsData.filter(apt => apt.status === 'rejected').length, label: 'Rejected', color: '#EF4444', icon: Clock },
   ]
 
-  const monthlyTrendData = [
-    { value: 45, label: 'Jan' },
-    { value: 52, label: 'Feb' },
-    { value: 38, label: 'Mar' },
-    { value: 67, label: 'Apr' },
-    { value: 73, label: 'May' },
-    { value: 89, label: 'Jun' },
-    { value: 95, label: 'Jul' },
-    { value: 78, label: 'Aug' },
-  ]
+  // Generate monthly trend data from appointments
+  const generateMonthlyTrendData = () => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const currentMonth = new Date().getMonth()
+    const monthlyData = []
+    
+    for (let i = 0; i < 8; i++) {
+      const monthIndex = (currentMonth - 7 + i + 12) % 12
+      const monthName = months[monthIndex]
+      
+      // Count appointments for this month
+      const monthAppointments = appointmentsData.filter(apt => {
+        const aptDate = new Date(apt.appointmentDetails?.scheduledDate || apt.createdAt)
+        return aptDate.getMonth() === monthIndex
+      }).length
+      
+      monthlyData.push({ value: monthAppointments, label: monthName })
+    }
+    
+    return monthlyData
+  }
 
-  const visitorTypeData = [
-    { value: 120, label: 'Business', color: '#3B82F6', icon: Users },
-    { value: 85, label: 'Personal', color: '#10B981', icon: Users },
-    { value: 45, label: 'Delivery', color: '#F59E0B', icon: MapPin },
-    { value: 32, label: 'Maintenance', color: '#8B5CF6', icon: Activity },
-  ]
+  const monthlyTrendData = generateMonthlyTrendData()
 
-  const hourlyDistributionData = [
-    { value: 12, label: '9 AM' },
-    { value: 25, label: '10 AM' },
-    { value: 38, label: '11 AM' },
-    { value: 45, label: '12 PM' },
-    { value: 52, label: '1 PM' },
-    { value: 48, label: '2 PM' },
-    { value: 35, label: '3 PM' },
-    { value: 28, label: '4 PM' },
-    { value: 18, label: '5 PM' },
-  ]
+  // Generate visitor type data from visitors
+  const generateVisitorTypeData = () => {
+    const visitorTypes: { [key: string]: number } = {}
+    
+    visitorsData.forEach(visitor => {
+      const purpose = visitor.designation || 'General'
+      visitorTypes[purpose] = (visitorTypes[purpose] || 0) + 1
+    })
+    
+    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444']
+    let colorIndex = 0
+    
+    return Object.entries(visitorTypes).map(([type, count]) => ({
+      value: count as number,
+      label: type,
+      color: colors[colorIndex++ % colors.length],
+      icon: Users
+    }))
+  }
 
-  const departmentData = [
-    { value: 45, label: 'HR', color: '#3B82F6' },
-    { value: 38, label: 'IT', color: '#10B981' },
-    { value: 32, label: 'Finance', color: '#F59E0B' },
-    { value: 28, label: 'Marketing', color: '#EF4444' },
-    { value: 22, label: 'Operations', color: '#8B5CF6' },
-  ]
+  const visitorTypeData = generateVisitorTypeData()
 
-  const performanceMetricsData = [
-    { value: 85, label: 'Q1', color: '#3B82F6' },
-    { value: 92, label: 'Q2', color: '#10B981' },
-    { value: 78, label: 'Q3', color: '#F59E0B' },
-    { value: 96, label: 'Q4', color: '#EF4444' },
-  ]
+  // Generate hourly distribution from appointments
+  const generateHourlyDistributionData = () => {
+    const hourlyData = Array.from({ length: 9 }, (_, i) => {
+      const hour = 9 + i
+      const hourLabel = hour <= 12 ? `${hour} AM` : `${hour - 12} PM`
+      
+      const hourAppointments = appointmentsData.filter(apt => {
+        const aptTime = apt.appointmentDetails?.scheduledTime
+        if (!aptTime) return false
+        
+        const [hours] = aptTime.split(':').map(Number)
+        return hours === hour
+      }).length
+      
+      return { value: hourAppointments, label: hourLabel }
+    })
+    
+    return hourlyData
+  }
+
+  const hourlyDistributionData = generateHourlyDistributionData()
+
+  // Generate department data from employees
+  const generateDepartmentData = () => {
+    const departmentCounts: { [key: string]: number } = {}
+    
+    employeesData.forEach(employee => {
+      const dept = employee.department || 'Other'
+      departmentCounts[dept] = (departmentCounts[dept] || 0) + 1
+    })
+    
+    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
+    let colorIndex = 0
+    
+    return Object.entries(departmentCounts)
+      .sort(([,a], [,b]) => (b as number) - (a as number))
+      .slice(0, 5)
+      .map(([dept, count]) => ({
+        value: count as number,
+        label: dept,
+        color: colors[colorIndex++ % colors.length]
+      }))
+  }
+
+  const departmentData = generateDepartmentData()
+
+  // Generate quarterly performance data from appointments
+  const generatePerformanceData = (): Array<{ value: number; label: string; color: string }> => {
+    const quarters = ['Q1', 'Q2', 'Q3', 'Q4']
+    const currentYear = new Date().getFullYear()
+    const performanceData: Array<{ value: number; label: string; color: string }> = []
+    
+    quarters.forEach((quarter, index) => {
+      const startMonth = index * 3
+      const endMonth = startMonth + 2
+      
+      const quarterAppointments = appointmentsData.filter(apt => {
+        const aptDate = new Date(apt.appointmentDetails?.scheduledDate || apt.createdAt)
+        const month = aptDate.getMonth()
+        const year = aptDate.getFullYear()
+        
+        return year === currentYear && month >= startMonth && month <= endMonth
+      }).length
+      
+      performanceData.push({
+        value: quarterAppointments,
+        label: quarter,
+        color: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'][index]
+      })
+    })
+    
+    return performanceData
+  }
+
+  const performanceMetricsData = generatePerformanceData()
+
+  // Calculate real-time metrics
+  const activeVisitors = appointmentsData.filter(apt => 
+    apt.status === 'approved' && apt.checkInTime && !apt.checkOutTime
+  ).length
+
+  const todaysAppointments = appointmentsData.filter(apt => {
+    const aptDate = new Date(apt.appointmentDetails?.scheduledDate || apt.createdAt)
+    const today = new Date()
+    return aptDate.toDateString() === today.toDateString()
+  }).length
+
+  const averageWaitTime = appointmentsData
+    .filter(apt => apt.checkInTime && apt.checkOutTime)
+    .reduce((total, apt) => {
+      const checkIn = new Date(apt.checkInTime)
+      const checkOut = new Date(apt.checkOutTime)
+      const duration = (checkOut.getTime() - checkIn.getTime()) / (1000 * 60) // minutes
+      return total + duration
+    }, 0) / Math.max(appointmentsData.filter(apt => apt.checkInTime && apt.checkOutTime).length, 1)
 
   return (
     <div className="space-y-6">
@@ -135,7 +232,7 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
                     <p className="text-sm text-gray-600">Currently in building</p>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-blue-600">12</div>
+                <div className="text-2xl font-bold text-blue-600">{activeVisitors}</div>
               </div>
               
               <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
@@ -148,7 +245,7 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
                     <p className="text-sm text-gray-600">Scheduled meetings</p>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-green-600">28</div>
+                <div className="text-2xl font-bold text-green-600">{todaysAppointments}</div>
               </div>
               
               <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg">
@@ -161,7 +258,7 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
                     <p className="text-sm text-gray-600">Minutes per visitor</p>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-orange-600">8.5</div>
+                <div className="text-2xl font-bold text-orange-600">{averageWaitTime.toFixed(1)}</div>
               </div>
             </div>
           </CardContent>

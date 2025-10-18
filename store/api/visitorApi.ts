@@ -8,14 +8,11 @@ export interface Visitor {
   name: string
   email: string
   phone: string
-  company: string
-  designation: string
   address: {
     street: string
     city: string
     state: string
     country: string
-    zipCode: string
   }
   idProof: {
     type: string
@@ -46,14 +43,11 @@ export interface CreateVisitorRequest {
   name: string
   email: string
   phone: string
-  company: string
-  designation: string
   address: {
     street: string
     city: string
     state: string
     country: string
-    zipCode: string
   }
   idProof: {
     type: string
@@ -67,8 +61,6 @@ export interface UpdateVisitorRequest {
   name?: string
   email?: string
   phone?: string
-  company?: string
-  designation?: string
   address?: {
     street?: string
     city?: string
@@ -88,8 +80,6 @@ export interface GetVisitorsQuery {
   page?: number
   limit?: number
   search?: string
-  company?: string
-  designation?: string
   city?: string
   state?: string
   country?: string
@@ -112,10 +102,6 @@ export interface VisitorListResponse {
 export interface VisitorStats {
   totalVisitors: number
   deletedVisitors: number
-  visitorsByCompany: Array<{
-    company: string
-    count: number
-  }>
   visitorsByCity: Array<{
     city: string
     count: number
@@ -136,8 +122,6 @@ export interface VisitorStats {
 
 export interface BulkUpdateVisitorsRequest {
   visitorIds: string[]
-  company?: string
-  designation?: string
 }
 
 export const visitorApi = baseApi.injectEndpoints({

@@ -17,7 +17,6 @@ import {
   FileText,
   PlayCircle,
   Users,
-  Settings,
   Calendar,
   Shield
 } from "lucide-react"
@@ -46,17 +45,6 @@ export default function HelpPage() {
         "SafeIn registration process",
         "User roles and permissions",
         "Bulk user import"
-      ]
-    },
-    {
-      icon: Settings,
-      title: "System Configuration",
-      description: "Configure your system settings and preferences",
-      articles: [
-        "Company profile setup",
-        "Notification preferences",
-        "Security settings",
-        "Integration setup"
       ]
     },
     {
@@ -135,7 +123,7 @@ export default function HelpPage() {
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Hero Section */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#555879' }}>
+      <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
             How can we help you?
@@ -165,7 +153,7 @@ export default function HelpPage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
               Get Support
             </h2>
-            <p className="text-lg" style={{ color: '#555879' }}>
+            <p className="text-lg" style={{ color: '#2c5aa0' }}>
               Choose the support option that works best for you
             </p>
           </div>
@@ -180,7 +168,7 @@ export default function HelpPage() {
                   <CardTitle className="text-lg" style={{ color: '#161718' }}>
                     {option.title}
                   </CardTitle>
-                  <CardDescription style={{ color: '#555879' }}>
+                  <CardDescription style={{ color: '#2c5aa0' }}>
                     {option.description}
                   </CardDescription>
                 </CardHeader>
@@ -206,7 +194,7 @@ export default function HelpPage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
               Browse by Category
             </h2>
-            <p className="text-lg" style={{ color: '#555879' }}>
+            <p className="text-lg" style={{ color: '#2c5aa0' }}>
               Find help organized by topic
             </p>
           </div>
@@ -221,14 +209,14 @@ export default function HelpPage() {
                   <CardTitle className="text-lg" style={{ color: '#161718' }}>
                     {category.title}
                   </CardTitle>
-                  <CardDescription style={{ color: '#555879' }}>
+                  <CardDescription style={{ color: '#2c5aa0' }}>
                     {category.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
                     {category.articles.map((article, articleIndex) => (
-                      <li key={articleIndex} className="text-sm" style={{ color: '#555879' }}>
+                      <li key={articleIndex} className="text-sm" style={{ color: '#2c5aa0' }}>
                         • {article}
                       </li>
                     ))}
@@ -255,7 +243,7 @@ export default function HelpPage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
               Popular Articles
             </h2>
-            <p className="text-lg" style={{ color: '#555879' }}>
+            <p className="text-lg" style={{ color: '#2c5aa0' }}>
               Most frequently viewed help articles
             </p>
           </div>
@@ -296,7 +284,7 @@ export default function HelpPage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
               Still need help?
             </h2>
-            <p className="text-lg mb-8" style={{ color: '#555879' }}>
+            <p className="text-lg mb-8" style={{ color: '#2c5aa0' }}>
               Can't find what you're looking for? Our support team is here to help you succeed.
             </p>
             
@@ -305,7 +293,7 @@ export default function HelpPage() {
                 <Mail className="h-5 w-5" style={{ color: '#3882a5' }} />
                 <div className="text-left">
                   <p className="font-medium" style={{ color: '#161718' }}>Email Support</p>
-                  <p className="text-sm" style={{ color: '#555879' }}>support@safein.com</p>
+                  <p className="text-sm" style={{ color: '#2c5aa0' }}>support@safein.com</p>
                 </div>
               </div>
               
@@ -313,7 +301,7 @@ export default function HelpPage() {
                 <Phone className="h-5 w-5" style={{ color: '#3882a5' }} />
                 <div className="text-left">
                   <p className="font-medium" style={{ color: '#161718' }}>Phone Support</p>
-                  <p className="text-sm" style={{ color: '#555879' }}>+1 (555) 123-4567</p>
+                  <p className="text-sm" style={{ color: '#2c5aa0' }}>+1 (555) 123-4567</p>
                 </div>
               </div>
               
@@ -321,7 +309,7 @@ export default function HelpPage() {
                 <MessageSquare className="h-5 w-5" style={{ color: '#3882a5' }} />
                 <div className="text-left">
                   <p className="font-medium" style={{ color: '#161718' }}>Live Chat</p>
-                  <p className="text-sm" style={{ color: '#555879' }}>Available 24/7</p>
+                  <p className="text-sm" style={{ color: '#2c5aa0' }}>Available 24/7</p>
                 </div>
               </div>
             </div>
@@ -330,7 +318,7 @@ export default function HelpPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#555879' }}>
+      <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
         <div className="container mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Get Started?

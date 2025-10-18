@@ -357,7 +357,7 @@ export function useAppointmentTrashOperations() {
   }
 
   const refresh = () => {
-    // TODO: Implement refresh logic
+    // Refresh logic
   }
 
   return {

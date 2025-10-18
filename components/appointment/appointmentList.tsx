@@ -17,7 +17,6 @@ export function AppointmentList() {
   // State for pagination and filtering
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
-  const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
   const [employeeFilter, setEmployeeFilter] = useState("")
   const [dateFrom, setDateFrom] = useState("")
@@ -39,11 +38,12 @@ export function AppointmentList() {
     checkOutAppointment,
     approveAppointment,
     cancelAppointment,
-    refresh
+    refresh,
+    setSearchTerm,
+    searchTerm
   } = useAppointmentOperations({
     initialPage: currentPage,
     initialLimit: pageSize,
-    initialSearch: search,
     initialStatus: statusFilter,
     initialEmployeeId: employeeFilter,
     initialDateFrom: dateFrom,
@@ -112,7 +112,7 @@ export function AppointmentList() {
         pagination={pagination || undefined}
         isLoading={isLoading}
         error={error}
-        searchTerm={search}
+        searchTerm={searchTerm}
         statusFilter={statusFilter}
         employeeFilter={employeeFilter}
         dateFrom={dateFrom}
@@ -121,7 +121,7 @@ export function AppointmentList() {
         pageSize={pageSize}
         sortBy={sortBy}
         sortOrder={sortOrder}
-        onSearchChange={setSearch}
+        onSearchChange={setSearchTerm}
         onStatusFilterChange={handleStatusFilterChange}
         onEmployeeFilterChange={handleEmployeeFilterChange}
         onDateFromChange={setDateFrom}
@@ -132,13 +132,11 @@ export function AppointmentList() {
         onDelete={handleDelete}
         onCheckOut={handleCheckOut}
         onApprove={handleApprove}
-        onCancel={handleCancel}
         onView={handleView}
         onRefresh={refresh}
         isDeleting={isDeleting}
         isCheckingOut={isCheckingOut}
         isApproving={isApproving}
-        isCancelling={isCancelling}
         title="Appointments"
         description="Manage visitor appointments and check-ins"
       />

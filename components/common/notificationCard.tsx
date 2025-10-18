@@ -50,8 +50,8 @@ export function NotificationCard({ appointment, onApprove, onReject, isProcessin
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-3">
+    <Card className="w-full h-full flex flex-col mx-2 sm:mx-0">
+      <CardHeader className="pb-3 px-4 sm:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {getStatusIcon(appointment.status)}
@@ -61,7 +61,7 @@ export function NotificationCard({ appointment, onApprove, onReject, isProcessin
             {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
           </Badge>
         </div>
-        <CardDescription className="text-sm">
+        <CardDescription className="text-sm mt-2">
           {appointment.status === 'pending' 
             ? "You have a new appointment request. Please review and click Approve or Reject."
             : appointment.status === 'approved'
@@ -71,52 +71,57 @@ export function NotificationCard({ appointment, onApprove, onReject, isProcessin
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="space-y-3">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <div className="min-w-0">
-              <p className="text-sm font-medium">Visitor</p>
-              <p className="text-sm text-muted-foreground truncate">{appointment.visitor?.name || 'N/A'}</p>
+      <CardContent className="space-y-4 flex-1 px-4 sm:px-6 pb-4 sm:pb-6">
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            <User className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-gray-900">Visitor</p>
+              <p className="text-sm text-gray-600 truncate">{appointment.visitor?.name || 'N/A'}</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <div className="min-w-0">
-              <p className="text-sm font-medium">Date</p>
-              <p className="text-sm text-muted-foreground">{formatDate(appointment.appointmentDetails.scheduledDate)}</p>
+          <div className="flex items-start gap-3">
+            <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-gray-900">Date</p>
+              <p className="text-sm text-gray-600">{formatDate(appointment.appointmentDetails.scheduledDate)}</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <ClockIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <div className="min-w-0">
-              <p className="text-sm font-medium">Time</p>
-              <p className="text-sm text-muted-foreground">{appointment.appointmentDetails.scheduledTime}</p>
+          <div className="flex items-start gap-3">
+            <ClockIcon className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-gray-900">Time</p>
+              <p className="text-sm text-gray-600">{appointment.appointmentDetails.scheduledTime}</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <div className="min-w-0">
-              <p className="text-sm font-medium">Employee</p>
-              <p className="text-sm text-muted-foreground truncate">{appointment.employeeId}</p>
+          <div className="flex items-start gap-3">
+            <User className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-gray-900">Employee</p>
+              <p className="text-sm text-gray-600 truncate">
+                {typeof appointment.employeeId === 'string' 
+                  ? appointment.employeeId 
+                  : appointment.employee?.name || 'N/A'
+                }
+              </p>
             </div>
           </div>
         </div>
         
-        <div className="pt-2 border-t">
-          <p className="text-sm font-medium mb-1">Purpose</p>
-          <p className="text-sm text-muted-foreground line-clamp-2">{appointment.appointmentDetails.purpose}</p>
+        <div className="pt-4 border-t border-gray-200">
+          <p className="text-sm font-medium text-gray-900 mb-2">Purpose</p>
+          <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">{appointment.appointmentDetails.purpose}</p>
         </div>
         
         {appointment.status === 'pending' && (
-          <div className="flex flex-col sm:flex-row gap-2 pt-3">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4 mt-auto">
             <Button 
               onClick={() => onApprove(appointment._id)} 
               disabled={isProcessing}
-              className="flex-1"
+              className="flex-1 h-10"
               size="sm"
             >
               <CheckCircle className="h-4 w-4 mr-2" />
@@ -125,7 +130,7 @@ export function NotificationCard({ appointment, onApprove, onReject, isProcessin
             <Button 
               onClick={() => onReject(appointment._id)} 
               disabled={isProcessing}
-              className="flex-1"
+              className="flex-1 h-10"
               variant="destructive"
               size="sm"
             >

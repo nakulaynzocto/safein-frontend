@@ -6,7 +6,6 @@ import { CreateVisitorRequest } from "@/store/api/visitorApi"
 
 export default function VisitorRegistrationPage() {
   const handleVisitorComplete = (visitorData: CreateVisitorRequest) => {
-    console.log("Visitor registered:", visitorData)
     // You can add additional logic here, such as redirecting to a success page
   }
 

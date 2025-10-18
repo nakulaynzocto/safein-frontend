@@ -146,7 +146,7 @@ function BarChart({ data }: { data: ImageChartProps['data'] }) {
     )
   }
 
-  const maxValue = Math.max(...data.map(item => item.value))
+  const maxValue = data.length > 0 ? Math.max(...data.map(item => item.value || 0)) : 1
   const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
   
   return (
@@ -193,14 +193,16 @@ function LineChart({ data }: { data: ImageChartProps['data'] }) {
     )
   }
 
-  const maxValue = Math.max(...data.map(item => item.value))
+  const maxValue = data.length > 0 ? Math.max(...data.map(item => item.value || 0)) : 1
   const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
   
   // Generate SVG path for line
   const points = data.map((item, index) => {
-    const x = (index / (data.length - 1)) * 100
+    const x = data.length === 1 ? 50 : (index / (data.length - 1)) * 100
     const y = maxValue > 0 ? 100 - (item.value / maxValue) * 100 : 100
-    return `${x},${y}`
+    const validX = isNaN(x) ? 50 : x
+    const validY = isNaN(y) ? 50 : y
+    return `${validX},${validY}`
   }).join(' ')
   
   return (
@@ -230,13 +232,15 @@ function LineChart({ data }: { data: ImageChartProps['data'] }) {
         
         {/* Data points */}
         {data.map((item, index) => {
-          const x = (index / (data.length - 1)) * 100
+          const x = data.length === 1 ? 50 : (index / (data.length - 1)) * 100
           const y = maxValue > 0 ? 100 - (item.value / maxValue) * 100 : 100
+          const validX = isNaN(x) ? 50 : x
+          const validY = isNaN(y) ? 50 : y
           return (
             <circle
               key={index}
-              cx={x}
-              cy={y}
+              cx={validX}
+              cy={validY}
               r="2"
               fill="#3B82F6"
               className="transition-all duration-500 ease-in-out hover:r-3"
@@ -269,14 +273,16 @@ function AreaChart({ data }: { data: ImageChartProps['data'] }) {
     )
   }
 
-  const maxValue = Math.max(...data.map(item => item.value))
+  const maxValue = data.length > 0 ? Math.max(...data.map(item => item.value || 0)) : 1
   const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
   
   // Generate SVG path for area
   const points = data.map((item, index) => {
-    const x = (index / (data.length - 1)) * 100
+    const x = data.length === 1 ? 50 : (index / (data.length - 1)) * 100
     const y = maxValue > 0 ? 100 - (item.value / maxValue) * 100 : 100
-    return `${x},${y}`
+    const validX = isNaN(x) ? 50 : x
+    const validY = isNaN(y) ? 50 : y
+    return `${validX},${validY}`
   }).join(' ')
   
   const areaPath = `M 0,100 L ${points} L 100,100 Z`
@@ -346,7 +352,7 @@ function ScatterChart({ data }: { data: ImageChartProps['data'] }) {
     )
   }
 
-  const maxValue = Math.max(...data.map(item => item.value))
+  const maxValue = data.length > 0 ? Math.max(...data.map(item => item.value || 0)) : 1
   const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
   
   return (
@@ -378,16 +384,22 @@ function ScatterChart({ data }: { data: ImageChartProps['data'] }) {
         
         {/* Scatter points */}
         {data.map((item, index) => {
-          const x = (index / (data.length - 1)) * 100
+          // Handle edge case when data.length is 1 to avoid division by zero
+          const x = data.length === 1 ? 50 : (index / (data.length - 1)) * 100
           const y = maxValue > 0 ? 100 - (item.value / maxValue) * 100 : 100
           const radius = maxValue > 0 ? Math.max(2, Math.min(8, (item.value / maxValue) * 6 + 2)) : 2
+          
+          // Ensure all values are valid numbers
+          const validX = isNaN(x) ? 50 : x
+          const validY = isNaN(y) ? 50 : y
+          const validRadius = isNaN(radius) ? 4 : radius
           
           return (
             <circle
               key={index}
-              cx={x}
-              cy={y}
-              r={radius}
+              cx={validX}
+              cy={validY}
+              r={validRadius}
               fill={item.color || colors[index % colors.length]}
               className="transition-all duration-500 ease-in-out hover:r-10"
             />

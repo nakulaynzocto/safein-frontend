@@ -14,11 +14,12 @@ import { VisitorDetails } from "@/store/api/appointmentApi"
 import { useSearchVisitorsMutation, Visitor } from "@/store/api/visitorApi"
 import { showSuccessToast, showErrorToast, showInfoToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
+import { NewVisitorModal } from "@/components/visitor/NewVisitorModal"
 
 // ✅ Custom validation: at least one of phone or email required
 const searchSchema = yup.object({
-  phone: yup.string().nullable(),
-  email: yup.string().email("Invalid email address").nullable(),
+  phone: yup.string().optional(),
+  email: yup.string().email("Invalid email address").optional(),
 }).test("at-least-one", "Either phone or email is required", (value) => {
   return !!(value.phone || value.email)
 })
@@ -33,6 +34,7 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
   const router = useRouter()
   const [searchResults, setSearchResults] = useState<Visitor[]>([])
   const [hasSearched, setHasSearched] = useState(false)
+  const [showVisitorModal, setShowVisitorModal] = useState(false)
 
   const [searchVisitors, { isLoading: isSearching }] = useSearchVisitorsMutation()
 
@@ -42,7 +44,10 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
     formState: { errors },
     watch,
   } = useForm<SearchFormData>({
-    resolver: yupResolver(searchSchema),
+    defaultValues: {
+      phone: "",
+      email: "",
+    },
   })
 
   const phoneValue = watch("phone")
@@ -50,6 +55,11 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
 
   const handleSearch = async (data: SearchFormData) => {
     setHasSearched(true)
+
+    // Manual validation
+    if (!data.phone && !data.email) {
+      return
+    }
 
     try {
       const searchData = {
@@ -79,17 +89,19 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
       name: visitor.name,
       email: visitor.email,
       phone: visitor.phone,
-      company: visitor.company,
-      designation: visitor.designation,
-      address: visitor.address,
-      idProof: visitor.idProof,
-      photo: visitor.photo || "",
+      company: "", // Visitor interface doesn't have company field
+      purposeOfVisit: "", // Default purpose
     }
     onVisitorFound(visitor._id, visitorDetails)
   }
 
   const handleNewVisitor = () => {
-    router.push(routes.privateroute.VISITORREGISTRATION)
+    setShowVisitorModal(true)
+  }
+
+  const handleVisitorCreated = () => {
+    setShowVisitorModal(false)
+    // Optionally refresh search results or show success message
   }
 
   return (
@@ -189,7 +201,6 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold text-lg">{visitor.name}</h3>
-                          <Badge variant="secondary">{visitor.designation}</Badge>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
                           <div className="flex items-center gap-2">
@@ -199,10 +210,6 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
                           <div className="flex items-center gap-2">
                             <Mail className="h-4 w-4" />
                             {visitor.email}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Building className="h-4 w-4" />
-                            {visitor.company}
                           </div>
                           <div className="flex items-center gap-2">
                             <MapPin className="h-4 w-4" />
@@ -248,6 +255,14 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* New Visitor Modal */}
+      <NewVisitorModal
+        open={showVisitorModal}
+        onOpenChange={setShowVisitorModal}
+        onSuccess={handleVisitorCreated}
+        trigger={<div />} // Hidden trigger since we control the modal programmatically
+      />
     </div>
   )
 }

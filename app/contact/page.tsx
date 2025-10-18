@@ -81,7 +81,7 @@ export default function ContactPage() {
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Hero Section */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#555879' }}>
+      <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
             Get in Touch
@@ -100,7 +100,7 @@ export default function ContactPage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
               Contact Information
             </h2>
-            <p className="text-lg" style={{ color: '#555879' }}>
+            <p className="text-lg" style={{ color: '#2c5aa0' }}>
               Multiple ways to reach our team
             </p>
           </div>
@@ -115,12 +115,12 @@ export default function ContactPage() {
                   <CardTitle className="text-lg" style={{ color: '#161718' }}>
                     {info.title}
                   </CardTitle>
-                  <CardDescription style={{ color: '#555879' }}>
+                  <CardDescription style={{ color: '#2c5aa0' }}>
                     {info.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm mb-4 whitespace-pre-line" style={{ color: '#555879' }}>
+                  <p className="text-sm mb-4 whitespace-pre-line" style={{ color: '#2c5aa0' }}>
                     {info.details}
                   </p>
                   {info.action && (
@@ -148,7 +148,7 @@ export default function ContactPage() {
               <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
                 Send us a Message
               </h2>
-              <p className="text-lg" style={{ color: '#555879' }}>
+              <p className="text-lg" style={{ color: '#2c5aa0' }}>
                 Fill out the form below and we'll get back to you within 24 hours
               </p>
             </div>
@@ -244,7 +244,7 @@ export default function ContactPage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
               Contact by Department
             </h2>
-            <p className="text-lg" style={{ color: '#555879' }}>
+            <p className="text-lg" style={{ color: '#2c5aa0' }}>
               Reach out to the right team for faster assistance
             </p>
           </div>
@@ -259,7 +259,7 @@ export default function ContactPage() {
                   <CardTitle className="text-xl" style={{ color: '#161718' }}>
                     {dept.title}
                   </CardTitle>
-                  <CardDescription className="text-base" style={{ color: '#555879' }}>
+                  <CardDescription className="text-base" style={{ color: '#2c5aa0' }}>
                     {dept.description}
                   </CardDescription>
                 </CardHeader>
@@ -271,7 +271,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium" style={{ color: '#161718' }}>Response Time:</p>
-                      <p className="text-sm" style={{ color: '#555879' }}>{dept.response}</p>
+                      <p className="text-sm" style={{ color: '#2c5aa0' }}>{dept.response}</p>
                     </div>
                     <Button 
                       variant="outline" 
@@ -293,7 +293,7 @@ export default function ContactPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#555879' }}>
+      <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
         <div className="container mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Get Started?

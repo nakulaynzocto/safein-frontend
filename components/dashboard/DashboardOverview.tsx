@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation"
 import { useAppSelector } from "@/store/hooks"
 import { useGetAppointmentsQuery } from "@/store/api/appointmentApi"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
+import { useGetVisitorsQuery } from "@/store/api/visitorApi"
 import { routes } from "@/utils/routes"
-import { DashboardHeader } from "./dashboardHeader"
+import { DashboardHeader } from "./DashboardHeader"
 import { StatsGrid } from "./statsGrid"
 import { AppointmentsTable } from "./AppointmentsTable"
-import { QuickActions } from "./quickActions"
+import { QuickActions } from "./QuickActions"
 import { DashboardCharts } from "./dashboardCharts"
 import { NewAppointmentModal } from "@/components/appointment/NewAppointmentModal"
 import { calculateAppointmentStats, getRecentAppointments, getTodaysAppointments } from "./dashboardUtils"
@@ -29,11 +30,17 @@ export function DashboardOverview() {
     refetchOnFocus: false,
   })
   
+  const { data: visitorsData, isLoading: visitorsLoading } = useGetVisitorsQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+    refetchOnFocus: false,
+  })
+  
   const { user } = useAppSelector((state) => state.auth)
 
   // Extract appointments array from the API response
   const appointments = appointmentsData?.appointments || []
   const employees = employeesData?.employees || []
+  const visitors = visitorsData?.visitors || []
 
   // Calculate statistics
   const stats = calculateAppointmentStats(appointments)
@@ -63,7 +70,7 @@ export function DashboardOverview() {
       <DashboardCharts 
         appointmentsData={appointments}
         employeesData={employees}
-        visitorsData={[]} // Add visitor data when available
+        visitorsData={visitors}
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -73,10 +80,11 @@ export function DashboardOverview() {
           description="Appointments scheduled for today"
           data={todaysAppointments}
           isLoading={appointmentsLoading}
+          showDateTime={true}
           emptyData={{
-            title: "No appointments scheduled for today",
-            description: "You don't have any appointments scheduled for today.",
-            primaryActionLabel: "Schedule Appointment",
+            title: "No appointments today",
+            description: "No appointments are scheduled for today.",
+            primaryActionLabel: "Schedule Appointment"
           }}
           onPrimaryAction={handleScheduleAppointment}
         />
@@ -84,16 +92,16 @@ export function DashboardOverview() {
         {/* Recent Appointments */}
         <AppointmentsTable
           title="Recent Appointments"
-          description="Latest appointment requests"
+          description="Latest appointment activities"
           data={recentAppointments}
           isLoading={appointmentsLoading}
           showDateTime={true}
           emptyData={{
             title: "No recent appointments",
-            description: "You don't have any recent appointments.",
-            primaryActionLabel: "View All Appointments",
+            description: "No recent appointment activities found.",
+            primaryActionLabel: "Schedule Appointment"
           }}
-          onPrimaryAction={() => router.push(routes.privateroute.APPOINTMENTLIST)}
+          onPrimaryAction={handleScheduleAppointment}
         />
       </div>
 
@@ -105,7 +113,7 @@ export function DashboardOverview() {
         open={showAppointmentModal}
         onOpenChange={setShowAppointmentModal}
         onSuccess={handleAppointmentCreated}
-        trigger={<div />} // Hidden trigger since we control the modal programmatically
+        triggerButton={<div />} // Hidden trigger since we control the modal programmatically
       />
     </div>
   )

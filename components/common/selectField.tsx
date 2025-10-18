@@ -63,11 +63,11 @@ const SelectField = forwardRef<any, SelectFieldProps>(
               ...base,
               minHeight: "2.5rem",
               borderRadius: "0.375rem",
-              borderColor: error ? "hsl(var(--destructive))" : "hsl(var(--border))",
+              borderColor: error ? "hsl(var(--destructive))" : "#e0e0e0",
               backgroundColor: "hsl(var(--input))",
               boxShadow: state.isFocused ? `0 0 0 2px hsl(var(--ring))` : undefined,
               "&:hover": {
-                borderColor: error ? "hsl(var(--destructive))" : "hsl(var(--border))",
+                borderColor: error ? "hsl(var(--destructive))" : "#e0e0e0",
               },
             }),
             placeholder: (base) => ({ ...base, color: "hsl(var(--muted-foreground))" }),

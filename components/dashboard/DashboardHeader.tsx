@@ -16,7 +16,7 @@ export function DashboardHeader({ userName }: DashboardHeaderProps) {
     <PageHeader title={`Hi, ${userName || "User"}!`}>
       <div className="flex gap-2">
         <NewAppointmentModal
-          trigger={
+          triggerButton={
             <Button>
               <CalendarPlus className="mr-2 h-4 w-4" />
               New Appointment

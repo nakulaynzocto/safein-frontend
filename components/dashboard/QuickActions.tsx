@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Calendar, CalendarPlus, UserPlus, Users } from "lucide-react"
 import { routes } from "@/utils/routes"
 import { NewEmployeeModal } from "@/components/employee/NewEmployeeModal"
+import { NewAppointmentModal } from "@/components/appointment/NewAppointmentModal"
 
 interface QuickAction {
   href: string
@@ -14,11 +15,6 @@ interface QuickAction {
 }
 
 const quickActions: QuickAction[] = [
-  {
-    href: routes.privateroute.APPOINTMENTCREATE,
-    icon: CalendarPlus,
-    label: "Create Appointment",
-  },
   {
     href: routes.privateroute.APPOINTMENTLIST,
     icon: Calendar,
@@ -40,6 +36,22 @@ export function QuickActions() {
       </CardHeader>
       <CardContent>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {/* Create Appointment Modal */}
+          <NewAppointmentModal
+            triggerButton={
+              <Button
+                className="h-20 flex-col bg-transparent"
+                variant="outline"
+                asChild
+              >
+                <div>
+                  <CalendarPlus className="h-6 w-6 mb-2" />
+                  Create Appointment
+                </div>
+              </Button>
+            }
+          />
+
           {quickActions.map((action) => (
             <Button
               key={action.href}
@@ -60,9 +72,12 @@ export function QuickActions() {
               <Button
                 className="h-20 flex-col bg-transparent"
                 variant="outline"
+                asChild
               >
-                <UserPlus className="h-6 w-6 mb-2" />
-                Add Employee
+                <div>
+                  <UserPlus className="h-6 w-6 mb-2" />
+                  Add Employee
+                </div>
               </Button>
             }
           />

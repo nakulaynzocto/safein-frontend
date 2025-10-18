@@ -5,6 +5,7 @@ export interface Appointment {
   _id: string
   appointmentId: string
   employeeId: string
+  employee?: EmployeeDetails // Populated employee details
   visitorId: string // Reference to Visitor
   visitor?: VisitorDetails // Populated visitor details
   accompaniedBy?: AccompaniedBy
@@ -23,25 +24,21 @@ export interface Appointment {
   updatedAt: string
 }
 
+export interface EmployeeDetails {
+  _id: string
+  name: string
+  email: string
+  phone: string
+  department: string
+  designation: string
+}
+
 export interface VisitorDetails {
   name: string
   email: string
   phone: string
   company: string
-  designation: string
-  address: {
-    street: string
-    city: string
-    state: string
-    country: string
-    zipCode: string
-  }
-  idProof: {
-    type: string
-    number: string
-    image: string
-  }
-  photo: string
+  purposeOfVisit: string
 }
 
 export interface AccompaniedBy {

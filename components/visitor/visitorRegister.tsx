@@ -19,14 +19,11 @@ const visitorDetailsSchema = yup.object({
   name: yup.string().required("Name is required"),
   email: yup.string().email("Invalid email address").required("Email is required"),
   phone: yup.string().required("Phone number is required"),
-  company: yup.string().required("Company is required"),
-  designation: yup.string().required("Designation is required"),
   address: yup.object({
     street: yup.string().required("Street address is required"),
     city: yup.string().required("City is required"),
     state: yup.string().required("State is required"),
     country: yup.string().required("Country is required"),
-    zipCode: yup.string().required("Zip code is required"),
   }),
   idProof: yup.object({
     type: yup.string().required("ID proof type is required"),
@@ -39,7 +36,7 @@ const visitorDetailsSchema = yup.object({
 type VisitorDetailsFormData = yup.InferType<typeof visitorDetailsSchema>
 
 interface VisitorRegisterProps {
-  onComplete?: (data: CreateVisitorRequest) => void
+  onComplete?: (data: CreateVisitorRequest, visitorId?: string) => void
   initialData?: CreateVisitorRequest | null
   standalone?: boolean
 }
@@ -65,14 +62,11 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
       name: initialData?.name || "",
       email: initialData?.email || "",
       phone: initialData?.phone || "",
-      company: initialData?.company || "",
-      designation: initialData?.designation || "",
       address: {
         street: initialData?.address?.street || "",
         city: initialData?.address?.city || "",
         state: initialData?.address?.state || "",
         country: initialData?.address?.country || "",
-        zipCode: initialData?.address?.zipCode || "",
       },
       idProof: {
         type: initialData?.idProof?.type || "",
@@ -99,7 +93,6 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
   }
 
   const onSubmit = async (data: VisitorDetailsFormData): Promise<void> => {
-    console.log("Form submitted with data:", data)
     setGeneralError(null)
     
     try {
@@ -118,24 +111,18 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
         photo: data.photo || undefined,
       }
 
-      console.log("Prepared visitor data:", visitorData)
-
+      // Always create visitor via API
+      const result = await createVisitor(visitorData).unwrap()
+      
       if (standalone) {
-        // If standalone, create visitor directly
-        console.log("Creating visitor via API...")
-        const result = await createVisitor(visitorData).unwrap()
-        console.log("Visitor created successfully:", result)
+        // If standalone, show success message and reset form
         showSuccessToast("Visitor registered successfully!")
         reset()
-        if (onComplete) {
-          onComplete(visitorData)
-        }
-      } else {
-        // If not standalone, just pass data to parent
-        console.log("Passing data to parent component")
-        if (onComplete) {
-          onComplete(visitorData)
-        }
+      }
+      
+      // Always call onComplete callback with the created visitor data and ID
+      if (onComplete) {
+        onComplete(visitorData, result._id)
       }
     } catch (error: any) {
       console.error("Error creating visitor:", error)
@@ -226,20 +213,6 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                   {...register("phone")}
                   required
                 />
-                <InputField
-                  label="Company"
-                  placeholder="Enter company name"
-                  error={errors.company?.message}
-                  {...register("company")}
-                  required
-                />
-                <InputField
-                  label="Designation"
-                  placeholder="Enter designation"
-                  error={errors.designation?.message}
-                  {...register("designation")}
-                  required
-                />
               </div>
             </div>
 
@@ -276,13 +249,6 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                   placeholder="Enter country"
                   error={errors.address?.country?.message}
                   {...register("address.country")}
-                  required
-                />
-                <InputField
-                  label="Zip Code"
-                  placeholder="Enter zip code"
-                  error={errors.address?.zipCode?.message}
-                  {...register("address.zipCode")}
                   required
                 />
               </div>

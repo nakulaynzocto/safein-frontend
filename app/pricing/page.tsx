@@ -107,7 +107,7 @@ export default function PricingPage() {
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Hero Section */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#555879' }}>
+      <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
             Simple, Transparent Pricing
@@ -148,7 +148,7 @@ export default function PricingPage() {
                     </span>
                     <span className="text-gray-500 ml-2">{plan.period}</span>
                   </div>
-                  <CardDescription className="text-base mt-4" style={{ color: '#555879' }}>
+                  <CardDescription className="text-base mt-4" style={{ color: '#2c5aa0' }}>
                     {plan.description}
                   </CardDescription>
                 </CardHeader>
@@ -157,7 +157,7 @@ export default function PricingPage() {
                     {plan.features.map((feature, featureIndex) => (
                       <div key={featureIndex} className="flex items-center">
                         <Check className="h-5 w-5 mr-3" style={{ color: '#3882a5' }} />
-                        <span className="text-sm" style={{ color: '#555879' }}>{feature}</span>
+                        <span className="text-sm" style={{ color: '#2c5aa0' }}>{feature}</span>
                       </div>
                     ))}
                     {plan.limitations.map((limitation, limitationIndex) => (
@@ -192,21 +192,21 @@ export default function PricingPage() {
             <h2 className="text-3xl font-bold mb-4" style={{ color: '#161718' }}>
               Save 20% with Annual Billing
             </h2>
-            <p className="text-lg mb-8" style={{ color: '#555879' }}>
+            <p className="text-lg mb-8" style={{ color: '#2c5aa0' }}>
               Choose annual billing and save 20% on all plans. Plus, get priority support and exclusive features.
             </p>
             <div className="grid md:grid-cols-3 gap-6 text-center">
               <div className="p-6 bg-white rounded-lg">
                 <div className="text-2xl font-bold" style={{ color: '#3882a5' }}>20%</div>
-                <div className="text-sm" style={{ color: '#555879' }}>Annual Discount</div>
+                <div className="text-sm" style={{ color: '#2c5aa0' }}>Annual Discount</div>
               </div>
               <div className="p-6 bg-white rounded-lg">
                 <div className="text-2xl font-bold" style={{ color: '#3882a5' }}>Priority</div>
-                <div className="text-sm" style={{ color: '#555879' }}>Support Access</div>
+                <div className="text-sm" style={{ color: '#2c5aa0' }}>Support Access</div>
               </div>
               <div className="p-6 bg-white rounded-lg">
                 <div className="text-2xl font-bold" style={{ color: '#3882a5' }}>Free</div>
-                <div className="text-sm" style={{ color: '#555879' }}>Setup & Migration</div>
+                <div className="text-sm" style={{ color: '#2c5aa0' }}>Setup & Migration</div>
               </div>
             </div>
           </div>
@@ -220,7 +220,7 @@ export default function PricingPage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
               Frequently Asked Questions
             </h2>
-            <p className="text-lg" style={{ color: '#555879' }}>
+            <p className="text-lg" style={{ color: '#2c5aa0' }}>
               Get answers to common questions about our pricing and plans
             </p>
           </div>
@@ -231,7 +231,7 @@ export default function PricingPage() {
                 <h3 className="font-semibold mb-3" style={{ color: '#161718' }}>
                   {faq.question}
                 </h3>
-                <p className="text-sm" style={{ color: '#555879' }}>
+                <p className="text-sm" style={{ color: '#2c5aa0' }}>
                   {faq.answer}
                 </p>
               </div>
@@ -241,7 +241,7 @@ export default function PricingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#555879' }}>
+      <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
         <div className="container mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Get Started?

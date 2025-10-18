@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { initializeAuth } from "@/store/slices/authSlice"
 import { routes } from "@/utils/routes"
@@ -16,14 +16,15 @@ interface ProtectedLayoutProps {
 
 export function ProtectedLayout({ children }: ProtectedLayoutProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const dispatch = useAppDispatch()
   const { isAuthenticated, token } = useAppSelector((state) => state.auth)
 
   const [isClient, setIsClient] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
 
-  // Current path
-  const currentPath = typeof window !== "undefined" ? window.location.pathname : ""
+  // Check if sidebar should be hidden for specific pages
+  const shouldHideSidebar = pathname === routes.privateroute.NOTIFICATIONS
 
   // Initialize authentication
   useEffect(() => {
@@ -53,11 +54,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
   // Not authenticated → redirecting
   if (!isAuthenticated) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
+    return null // Don't show loading, just redirect
   }
 
 
@@ -67,10 +64,12 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     <div className="h-screen flex flex-col overflow-hidden">
       <Navbar />
       <div className="flex flex-1 overflow-hidden">
-        {/* Desktop Sidebar */}
-        <div className="hidden md:block flex-shrink-0">
-          <Sidebar />
-        </div>
+        {/* Desktop Sidebar - conditionally rendered */}
+        {!shouldHideSidebar && (
+          <div className="flex-shrink-0">
+            <Sidebar />
+          </div>
+        )}
         {/* Main content */}
         <main className="flex-1 overflow-y-auto bg-background">
           <div className="container mx-auto p-4 md:p-6">{children}</div>

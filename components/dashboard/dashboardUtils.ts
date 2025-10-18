@@ -47,7 +47,7 @@ export function calculateAppointmentStats(appointments: Appointment[]): Appointm
       }
       
       // Count today's appointments
-      const appointmentDate = new Date(appointment.appointmentDate)
+      const appointmentDate = new Date(appointment.appointmentDetails?.scheduledDate || appointment.appointmentDate)
       const appointmentDateOnly = new Date(
         appointmentDate.getFullYear(),
         appointmentDate.getMonth(),
@@ -92,7 +92,7 @@ export function getTodaysAppointments(appointments: Appointment[]): Appointment[
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   
   return appointments.filter((appointment) => {
-    const appointmentDate = new Date(appointment.appointmentDate)
+    const appointmentDate = new Date(appointment.appointmentDetails?.scheduledDate || appointment.appointmentDate)
     const appointmentDateOnly = new Date(
       appointmentDate.getFullYear(),
       appointmentDate.getMonth(),

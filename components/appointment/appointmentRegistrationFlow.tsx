@@ -84,7 +84,6 @@ export function appointmentRegistrationFlow() {
   const progressPercentage = (completedSteps.length / steps.length) * 100
 
   const handleStepComplete = async (stepId: number, data: any, accompaniedByData?: any) => {
-    console.log(`Step ${stepId} completed with data:`, data)
     
     // Store step data first
     switch (stepId) {
@@ -116,7 +115,6 @@ export function appointmentRegistrationFlow() {
     setCompletedSteps(prev => {
       if (!prev.includes(stepId)) {
         const newCompleted = [...prev, stepId].sort()
-        console.log('Updated completed steps:', newCompleted)
         return newCompleted
       }
       return prev

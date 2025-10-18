@@ -46,17 +46,13 @@ export default function HomePage() {
 
   // Show loading if user is authenticated (will redirect)
   if (isAuthenticated) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
+    return null // Don't show loading, just redirect
   }
 
   return (
     <PublicLayout>
       {/* Hero Section */}
-      <section className="relative py-20" style={{ backgroundColor: '#555879' }}>
+      <section className="relative py-20" style={{ backgroundColor: '#3882a5' }}>
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -178,7 +174,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: '#161718' }}>
               Smart Solutions for Modern Businesses
             </h2>
-            <p className="text-xl max-w-3xl mx-auto" style={{ color: '#555879' }}>
+            <p className="text-xl max-w-3xl mx-auto" style={{ color: '#2c5aa0' }}>
               Our comprehensive SafeIn management platform is designed to meet the evolving needs 
               of modern organizations, providing security, efficiency, and peace of mind.
             </p>
@@ -193,21 +189,21 @@ export default function HomePage() {
                   <div className="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-lg" style={{ backgroundColor: '#3882a5' }}>1</div>
                   <h3 className="text-3xl font-bold" style={{ color: '#161718' }}>Quick Registration</h3>
                 </div>
-                <p className="text-lg mb-6" style={{ color: '#555879' }}>
+                <p className="text-lg mb-6" style={{ color: '#2c5aa0' }}>
                   Sign up in seconds with our streamlined registration process. Just provide your basic information and you're ready to start managing visitors professionally.
                 </p>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#555879' }}>No complex forms or lengthy verification</span>
+                    <span style={{ color: '#2c5aa0' }}>No complex forms or lengthy verification</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#555879' }}>Instant account activation</span>
+                    <span style={{ color: '#2c5aa0' }}>Instant account activation</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#555879' }}>Free 3-day trial included</span>
+                    <span style={{ color: '#2c5aa0' }}>Free 3-day trial included</span>
                   </div>
                 </div>
               </div>
@@ -250,21 +246,21 @@ export default function HomePage() {
                   <div className="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-lg" style={{ backgroundColor: '#3882a5' }}>2</div>
                   <h3 className="text-3xl font-bold" style={{ color: '#161718' }}>Powerful Dashboard</h3>
                 </div>
-                <p className="text-lg mb-6" style={{ color: '#555879' }}>
+                <p className="text-lg mb-6" style={{ color: '#2c5aa0' }}>
                   Access your comprehensive dashboard with real-time visitor analytics, appointment management, and security insights all in one place.
                 </p>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#555879' }}>Real-time visitor tracking</span>
+                    <span style={{ color: '#2c5aa0' }}>Real-time visitor tracking</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#555879' }}>Advanced analytics and reports</span>
+                    <span style={{ color: '#2c5aa0' }}>Advanced analytics and reports</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#555879' }}>Customizable dashboard widgets</span>
+                    <span style={{ color: '#2c5aa0' }}>Customizable dashboard widgets</span>
                   </div>
                 </div>
               </div>
@@ -277,21 +273,21 @@ export default function HomePage() {
                   <div className="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-lg" style={{ backgroundColor: '#3882a5' }}>3</div>
                   <h3 className="text-3xl font-bold" style={{ color: '#161718' }}>Easy Appointment Booking</h3>
                 </div>
-                <p className="text-lg mb-6" style={{ color: '#555879' }}>
+                <p className="text-lg mb-6" style={{ color: '#2c5aa0' }}>
                   Create and manage SafeIn appointments with our intuitive booking system. Streamline your SafeIn management process with automated notifications and scheduling.
                 </p>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#555879' }}>One-click appointment creation</span>
+                    <span style={{ color: '#2c5aa0' }}>One-click appointment creation</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#555879' }}>Automated email notifications</span>
+                    <span style={{ color: '#2c5aa0' }}>Automated email notifications</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#555879' }}>Calendar integration</span>
+                    <span style={{ color: '#2c5aa0' }}>Calendar integration</span>
                   </div>
                 </div>
               </div>
@@ -334,21 +330,21 @@ export default function HomePage() {
                   <div className="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-lg" style={{ backgroundColor: '#3882a5' }}>4</div>
                   <h3 className="text-3xl font-bold" style={{ color: '#161718' }}>Complete Team Control</h3>
                 </div>
-                <p className="text-lg mb-6" style={{ color: '#555879' }}>
+                <p className="text-lg mb-6" style={{ color: '#2c5aa0' }}>
                   Manage your entire team with role-based access control, employee directories, and comprehensive staff management tools.
                 </p>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#555879' }}>Role-based permissions</span>
+                    <span style={{ color: '#2c5aa0' }}>Role-based permissions</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#555879' }}>Employee directory management</span>
+                    <span style={{ color: '#2c5aa0' }}>Employee directory management</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#555879' }}>Access control and security</span>
+                    <span style={{ color: '#2c5aa0' }}>Access control and security</span>
                   </div>
                 </div>
               </div>
@@ -364,7 +360,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: '#161718' }}>
               Choose Your Perfect Plan
               </h2>
-            <p className="text-xl max-w-3xl mx-auto" style={{ color: '#555879' }}>
+            <p className="text-xl max-w-3xl mx-auto" style={{ color: '#2c5aa0' }}>
               Flexible subscription plans designed to scale with your business needs. 
               Start with our basic plan and upgrade as you grow.
             </p>
@@ -520,7 +516,7 @@ export default function HomePage() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-20" style={{ backgroundColor: '#555879' }}>
+      <section className="py-20" style={{ backgroundColor: '#3882a5' }}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">Why Choose Our Platform?</h2>
@@ -580,7 +576,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: '#161718' }}>
               Testimonials That Speak for Us
             </h2>
-            <p className="text-xl" style={{ color: '#555879' }}>
+            <p className="text-xl" style={{ color: '#2c5aa0' }}>
               See what our clients have to say about their experience with our platform
             </p>
           </div>
@@ -659,7 +655,7 @@ export default function HomePage() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-20" style={{ backgroundColor: '#555879' }}>
+      <section className="py-20" style={{ backgroundColor: '#3882a5' }}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">Get in Touch with Us</h2>
@@ -737,7 +733,7 @@ export default function HomePage() {
           <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: '#161718' }}>
             Ready to Transform Your SafeIn Management?
           </h2>
-          <p className="text-xl mb-8 max-w-3xl mx-auto" style={{ color: '#555879' }}>
+          <p className="text-xl mb-8 max-w-3xl mx-auto" style={{ color: '#2c5aa0' }}>
             Join thousands of organizations already using our platform to streamline their SafeIn management processes. 
             Start your free 3-day trial today - no credit card required!
           </p>

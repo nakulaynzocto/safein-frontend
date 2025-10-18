@@ -42,11 +42,7 @@ export default function RegisterPage() {
 
   // Show loading if user is authenticated (will redirect)
   if (isAuthenticated) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
+    return null // Don't show loading, just redirect
   }
 
   return (

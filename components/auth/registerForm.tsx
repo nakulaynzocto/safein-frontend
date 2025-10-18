@@ -50,7 +50,7 @@ export function RegisterForm() {
 
   // Debug current step changes
   useEffect(() => {
-    console.log('Current step changed to:', currentStep)
+    // Current step changed
   }, [currentStep])
 
   const {
@@ -73,19 +73,14 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setSubmitError(null)
-      console.log('Starting registration with data:', data)
       const { confirmPassword, ...registerData } = data
       
       // Send registration request (this should trigger OTP sending)
-      console.log('Calling register API with:', registerData)
       const result = await register(registerData).unwrap()
-      console.log('Register API response:', result)
       
       // Move to OTP step
-      console.log('Setting user email and moving to OTP step')
       setUserEmail(data.email)
       setCurrentStep('otp')
-      console.log('Current step set to:', 'otp')
     } catch (error: any) {
       console.error('Registration error:', error)
       let errorMessage = "Registration failed"

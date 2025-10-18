@@ -67,7 +67,6 @@ export function EmployeeTrashTable({ onRefresh }: EmployeeTrashTableProps) {
 
   const handleView = (employee: any) => {
     // View functionality is handled by the EmployeeTable component
-    console.log("View employee:", employee)
   }
 
   return (

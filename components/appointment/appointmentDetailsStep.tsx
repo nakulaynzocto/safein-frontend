@@ -32,7 +32,7 @@ const appointmentDetailsSchema = yup.object({
   scheduledTime: yup.string().required("Scheduled time is required"),
   duration: yup.number().min(15, "Duration must be at least 15 minutes").required("Duration is required"),
   meetingRoom: yup.string().required("Meeting room is required"),
-  notes: yup.string().optional().default(""),
+  notes: yup.string().notRequired().default(""),
 })
 
 type AppointmentDetailsFormData = yup.InferType<typeof appointmentDetailsSchema>

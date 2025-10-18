@@ -93,7 +93,7 @@ export default function FeaturesPage() {
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
         {/* Hero Section */}
-        <section className="py-20 px-4" style={{ backgroundColor: '#555879' }}>
+        <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
           <div className="container mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
               Powerful Features for Modern SafeIn Management
@@ -120,7 +120,7 @@ export default function FeaturesPage() {
               <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
                 Core Features
               </h2>
-              <p className="text-lg" style={{ color: '#555879' }}>
+              <p className="text-lg" style={{ color: '#2c5aa0' }}>
                 Everything you need to manage visitors professionally and efficiently
               </p>
             </div>
@@ -135,14 +135,14 @@ export default function FeaturesPage() {
                     <CardTitle className="text-xl" style={{ color: '#161718' }}>
                       {feature.title}
                     </CardTitle>
-                    <CardDescription className="text-base" style={{ color: '#555879' }}>
+                    <CardDescription className="text-base" style={{ color: '#2c5aa0' }}>
                       {feature.description}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
                       {feature.benefits.map((benefit, benefitIndex) => (
-                        <li key={benefitIndex} className="flex items-center text-sm" style={{ color: '#555879' }}>
+                        <li key={benefitIndex} className="flex items-center text-sm" style={{ color: '#2c5aa0' }}>
                           <CheckCircle className="h-4 w-4 mr-2" style={{ color: '#3882a5' }} />
                           {benefit}
                         </li>
@@ -162,7 +162,7 @@ export default function FeaturesPage() {
               <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
                 Additional Benefits
               </h2>
-              <p className="text-lg" style={{ color: '#555879' }}>
+              <p className="text-lg" style={{ color: '#2c5aa0' }}>
                 Extra features that make your SafeIn management even better
               </p>
             </div>
@@ -177,7 +177,7 @@ export default function FeaturesPage() {
                     <h3 className="font-semibold mb-2" style={{ color: '#161718' }}>
                       {feature.title}
                     </h3>
-                    <p className="text-sm" style={{ color: '#555879' }}>
+                    <p className="text-sm" style={{ color: '#2c5aa0' }}>
                       {feature.description}
                     </p>
                   </div>
@@ -188,7 +188,7 @@ export default function FeaturesPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 px-4" style={{ backgroundColor: '#555879' }}>
+        <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
           <div className="container mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
               Ready to Transform Your SafeIn Management?

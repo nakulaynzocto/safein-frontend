@@ -41,11 +41,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
 
   // Don't render anything if not authenticated (will redirect)
   if (!isAuthenticated) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
+    return null // Don't show loading, just redirect
   }
 
   return <>{children}</>

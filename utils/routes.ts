@@ -14,7 +14,7 @@ export const routes = {
     DASHBOARD: "/dashboard",
     NOTIFICATIONS: "/dashboard/notifications",
     PROFILE: "/profile",
-    SETTINGS: "/settings",
+    EMPLOYEECREATE: "/employee/create",
     EMPLOYEELIST: "/employee/list",
     EMPLOYEETRASH: "/employee/trash",
     EMPLOYEEEDIT: "/employee/[id]", // Dynamic route pattern

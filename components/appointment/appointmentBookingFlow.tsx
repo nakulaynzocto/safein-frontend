@@ -95,14 +95,17 @@ export function AppointmentBookingFlow() {
     showSuccessToast("Visitor found! Proceeding to appointment details.")
   }
 
-  const handleStepComplete = (stepId: number, data: any, accompaniedByData?: any) => {
-    console.log(`Step ${stepId} completed with data:`, data)
+  const handleStepComplete = (stepId: number, data: any, accompaniedByData?: any, createdVisitorId?: string) => {
     
     // Store step data first
     switch (stepId) {
       case 1:
         setVisitorDetails(data)
         setAccompaniedBy(accompaniedByData)
+        // If visitor was created, store the ID
+        if (createdVisitorId) {
+          setVisitorId(createdVisitorId)
+        }
         break
       case 2:
         setAppointmentDetails(data)
@@ -119,7 +122,6 @@ export function AppointmentBookingFlow() {
     setCompletedSteps(prev => {
       if (!prev.includes(stepId)) {
         const newCompleted = [...prev, stepId].sort()
-        console.log('Updated completed steps:', newCompleted)
         return newCompleted
       }
       return prev
@@ -141,7 +143,7 @@ export function AppointmentBookingFlow() {
     if (currentStep < steps.length && completedSteps.includes(currentStep)) {
       setCurrentStep(currentStep + 1)
     } else {
-      console.log(`Cannot proceed to next step. Current: ${currentStep}, Completed: ${completedSteps}`)
+      // Cannot proceed to next step
     }
   }
 
@@ -190,7 +192,7 @@ export function AppointmentBookingFlow() {
           // Show visitor details form for editing/confirming
           return (
             <VisitorDetailsStep
-              onComplete={(data: VisitorDetails, accompaniedByData?: any) => handleStepComplete(1, data, accompaniedByData)}
+              onComplete={(data: VisitorDetails, accompaniedByData?: any, visitorId?: string) => handleStepComplete(1, data, accompaniedByData, visitorId)}
               initialData={visitorDetails}
             />
           )

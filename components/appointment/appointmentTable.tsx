@@ -12,14 +12,12 @@ import { Pagination } from "@/components/common/pagination"
 import { StatusBadge } from "@/components/common/statusBadge"
 import { format } from "date-fns"
 import { 
-  Edit, 
   Trash2, 
   Eye,
   RotateCcw,
   Clock,
   LogOut,
   Calendar,
-  User,
   MoreVertical,
   Plus,
   RefreshCw,
@@ -74,12 +72,10 @@ export interface AppointmentTableProps {
   onView?: (appointment: Appointment) => void
   onCheckOut?: (appointmentId: string, notes?: string) => void
   onApprove?: (appointmentId: string) => void
-  onCancel?: (appointmentId: string) => void
   isDeleting?: boolean
   isRestoring?: boolean
   isCheckingOut?: boolean
   isApproving?: boolean
-  isCancelling?: boolean
   onRefresh?: () => void
   showHeader?: boolean
   title?: string
@@ -118,12 +114,10 @@ export function AppointmentTable({
   onView,
   onCheckOut,
   onApprove,
-  onCancel,
   isDeleting = false,
   isRestoring = false,
   isCheckingOut = false,
   isApproving = false,
-  isCancelling = false,
   onRefresh,
   showHeader = true,
   title,
@@ -140,10 +134,27 @@ export function AppointmentTable({
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [showCheckOutDialog, setShowCheckOutDialog] = useState(false)
   const [showApproveDialog, setShowApproveDialog] = useState(false)
-  const [showCancelDialog, setShowCancelDialog] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
+  
+  // Loading states for individual appointments
+  const [loadingAppointments, setLoadingAppointments] = useState<Set<string>>(new Set())
+
+  // Helper functions for loading state management
+  const setAppointmentLoading = (appointmentId: string, isLoading: boolean) => {
+    setLoadingAppointments(prev => {
+      const newSet = new Set(prev)
+      if (isLoading) {
+        newSet.add(appointmentId)
+      } else {
+        newSet.delete(appointmentId)
+      }
+      return newSet
+    })
+  }
+
+  const isAppointmentLoading = (appointmentId: string) => {
+    return loadingAppointments.has(appointmentId)
+  }
 
   // Selection handlers
   const handleSelectAll = (checked: boolean) => {
@@ -180,38 +191,39 @@ export function AppointmentTable({
 
   const handleCheckOut = async (appointmentId: string, notes?: string) => {
     if (!onCheckOut) return
-    await onCheckOut(appointmentId, notes)
-    setShowCheckOutDialog(false)
-    setSelectedAppointment(null)
+    setAppointmentLoading(appointmentId, true)
+    try {
+      await onCheckOut(appointmentId, notes)
+      setShowCheckOutDialog(false)
+      setSelectedAppointment(null)
+    } finally {
+      setAppointmentLoading(appointmentId, false)
+    }
   }
 
   const handleApprove = async (appointmentId: string) => {
+    setAppointmentLoading(appointmentId, true)
     try {
       await approveAppointment(appointmentId).unwrap()
       showSuccessToast('Appointment approved successfully!')
       onApprove?.(appointmentId)
     } catch (error) {
-      console.error('Failed to approve appointment:', error)
       showErrorToast('Failed to approve appointment')
+    } finally {
+      setAppointmentLoading(appointmentId, false)
     }
   }
 
   const handleReject = async (appointmentId: string) => {
+    setAppointmentLoading(appointmentId, true)
     try {
       await rejectAppointment(appointmentId).unwrap()
       showSuccessToast('Appointment rejected successfully!')
-      onCancel?.(appointmentId) // Using onCancel for rejection
     } catch (error) {
-      console.error('Failed to reject appointment:', error)
       showErrorToast('Failed to reject appointment')
+    } finally {
+      setAppointmentLoading(appointmentId, false)
     }
-  }
-
-  const handleCancel = async () => {
-    if (!selectedAppointment || !onCancel) return
-    await onCancel(selectedAppointment._id)
-    setShowCancelDialog(false)
-    setSelectedAppointment(null)
   }
 
   const handleView = (appointment: Appointment) => {
@@ -219,21 +231,6 @@ export function AppointmentTable({
     setShowViewDialog(true)
   }
 
-  const handleEdit = (appointment: Appointment) => {
-    setEditingAppointment(appointment)
-    setShowEditModal(true)
-  }
-
-  const handleAppointmentUpdated = () => {
-    setShowEditModal(false)
-    setEditingAppointment(null)
-    onRefresh?.()
-  }
-
-  // Handle schedule appointment
-  const handleScheduleAppointment = () => {
-    router.push(routes.privateroute.APPOINTMENTCREATE)
-  }
 
   // Handle appointment created successfully
   const handleAppointmentCreated = () => {
@@ -257,62 +254,81 @@ export function AppointmentTable({
       {
         key: "visitorName",
         header: "Visitor",
-        render: (appointment: Appointment) => (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={appointment.visitor?.photo} alt={appointment.visitor?.name || "Visitor"} />
-              <AvatarFallback>
-                {(appointment.visitor?.name || "V").split(' ').map(n => n[0]).join('')}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="font-medium">{appointment.visitor?.name || "N/A"}</div>
-              <div className="text-sm text-gray-500">{appointment.visitor?.designation || "N/A"}</div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Phone className="h-3 w-3" />
-                {appointment.visitor?.phone || "N/A"}
+        render: (appointment: Appointment) => {
+          // Handle both possible data structures
+          const visitor = (appointment as any).visitorId || appointment.visitor;
+          const visitorName = visitor?.name || "Unknown Visitor";
+          const visitorPhone = visitor?.phone || "N/A";
+          const visitorCompany = visitor?.company || "";
+          
+          return (
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={visitor?.photo} alt={visitorName} />
+                <AvatarFallback>
+                  {visitorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="font-medium">{visitorName}</div>
+                <div className="text-sm text-gray-500">{visitorCompany || "N/A"}</div>
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <Phone className="h-3 w-3" />
+                  {visitorPhone}
+                </div>
               </div>
             </div>
-          </div>
-        ),
+          );
+        },
       },
       {
         key: "employeeName",
         header: "Meeting With",
         render: (appointment: Appointment) => {
-          // Handle case where employeeId might be an object or string
-          let employeeName = "N/A"
-          if (typeof appointment.employeeId === 'string') {
-            employeeName = appointment.employeeId
-          } else if (typeof appointment.employeeId === 'object' && appointment.employeeId !== null) {
-            employeeName = (appointment.employeeId as any).name || (appointment.employeeId as any).employeeId || "N/A"
-          }
+          // Handle both possible data structures
+          const employee = (appointment as any).employeeId || appointment.employee;
+          const employeeName = employee?.name || "Unknown Employee";
+          const employeeEmail = employee?.email || "N/A";
+          const employeeDepartment = employee?.department || "";
+          
           return (
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-sm">
-                <User className="h-3 w-3" />
-                {employeeName}
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarFallback className="bg-blue-100 text-blue-600">
+                  {employeeName.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="font-medium">{employeeName}</div>
+                <div className="text-sm text-gray-500">{employeeDepartment || "N/A"}</div>
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <Mail className="h-3 w-3" />
+                  {employeeEmail}
+                </div>
               </div>
             </div>
-          )
+          );
         },
       },
       {
         key: "purpose",
         header: "Purpose",
-        render: (appointment: Appointment) => (
-          <div className="space-y-1">
-            <div className="text-sm max-w-[200px] truncate" title={appointment.appointmentDetails?.purpose || "N/A"}>
-              {appointment.appointmentDetails?.purpose || "N/A"}
-            </div>
-            {appointment.visitor?.company && (
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Building className="h-3 w-3" />
-                {appointment.visitor.company}
+        render: (appointment: Appointment) => {
+          const visitor = (appointment as any).visitorId || appointment.visitor;
+          return (
+            <div className="space-y-1">
+              <div className="text-sm max-w-[200px] truncate" title={appointment.appointmentDetails?.purpose || "N/A"}>
+                {appointment.appointmentDetails?.purpose || "N/A"}
               </div>
-            )}
-          </div>
-        ),
+              {appointment.appointmentDetails?.meetingRoom && (
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <Building className="h-3 w-3" />
+                  {appointment.appointmentDetails.meetingRoom}
+                </div>
+              )}
+            </div>
+          );
+        },
       },
       {
         key: "appointmentDate",
@@ -321,7 +337,10 @@ export function AppointmentTable({
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-3 w-3" />
-              {appointment.appointmentDetails?.scheduledDate ? format(new Date(appointment.appointmentDetails.scheduledDate), "MMM dd, yyyy") : "N/A"}
+              {appointment.appointmentDetails?.scheduledDate ? (() => {
+                const date = new Date(appointment.appointmentDetails.scheduledDate);
+                return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM dd, yyyy");
+              })() : "N/A"}
             </div>
             <div className="text-xs text-gray-500">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
           </div>
@@ -331,6 +350,16 @@ export function AppointmentTable({
         key: "status",
         header: "Status",
         render: (appointment: Appointment) => {
+          // Show loading spinner if appointment is being processed
+          if (isAppointmentLoading(appointment._id)) {
+            return (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                <span className="text-sm text-gray-500">Processing...</span>
+              </div>
+            )
+          }
+          
           // Ensure status is a string, not an object
           const status = typeof appointment.status === 'string' ? appointment.status : 'pending'
           return <StatusBadge status={status} />
@@ -345,9 +374,15 @@ export function AppointmentTable({
         header: "Deleted At",
         render: (appointment: Appointment) => (
           <div className="text-sm">
-            <div>{format(new Date(appointment.deletedAt!), "MMM dd, yyyy")}</div>
+            <div>{(() => {
+              const date = new Date(appointment.deletedAt!);
+              return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM dd, yyyy");
+            })()}</div>
             <div className="text-muted-foreground">
-              {format(new Date(appointment.deletedAt!), "HH:mm")}
+              {(() => {
+                const date = new Date(appointment.deletedAt!);
+                return isNaN(date.getTime()) ? "Invalid Time" : format(date, "HH:mm");
+              })()}
             </div>
           </div>
         ),
@@ -375,22 +410,18 @@ export function AppointmentTable({
               )}
               {mode === 'active' && (
                 <>
-                  <DropdownMenuItem onClick={() => handleEdit(appointment)}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit
-                  </DropdownMenuItem>
                   {appointment.status === 'pending' && (
                     <>
                       <DropdownMenuItem 
                         onClick={() => handleApprove(appointment._id)}
-                        disabled={isApprovingMutation}
+                        disabled={isApprovingMutation || isAppointmentLoading(appointment._id)}
                       >
                         <CheckCircle className="mr-2 h-4 w-4" />
                         Approve
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         onClick={() => handleReject(appointment._id)}
-                        disabled={isRejectingMutation}
+                        disabled={isRejectingMutation || isAppointmentLoading(appointment._id)}
                         className="text-destructive"
                       >
                         <X className="mr-2 h-4 w-4" />
@@ -398,26 +429,13 @@ export function AppointmentTable({
                       </DropdownMenuItem>
                     </>
                   )}
-                  {(appointment.status === 'pending' || appointment.status === 'approved') && onCancel && (
-                    <DropdownMenuItem 
-                      onClick={() => {
-                        setSelectedAppointment(appointment)
-                        setShowCancelDialog(true)
-                      }}
-                      disabled={isCancelling}
-                      className="text-destructive"
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Cancel
-                    </DropdownMenuItem>
-                  )}
                   {appointment.status === 'approved' && onCheckOut && (
                     <DropdownMenuItem 
                       onClick={() => {
                         setSelectedAppointment(appointment)
                         setShowCheckOutDialog(true)
                       }}
-                      disabled={isCheckingOut}
+                      disabled={isCheckingOut || isAppointmentLoading(appointment._id)}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Check Out
@@ -507,7 +525,7 @@ export function AppointmentTable({
               {mode === 'active' && (
                 <NewAppointmentModal 
                   onSuccess={handleAppointmentCreated}
-                  trigger={
+                  triggerButton={
                     <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-2">
                       <Plus className="h-4 w-4" />
                       Schedule Appointment
@@ -604,18 +622,6 @@ export function AppointmentTable({
         />
       )}
 
-      {mode === 'active' && onCancel && (
-        <ConfirmationDialog
-          open={showCancelDialog}
-          onOpenChange={setShowCancelDialog}
-          title="Cancel Appointment"
-          description={`Are you sure you want to cancel appointment ${selectedAppointment?.appointmentId}? This will change the status to cancelled and cannot be undone.`}
-          onConfirm={handleCancel}
-          confirmText={isCancelling ? "Cancelling..." : "Cancel"}
-          variant="destructive"
-        />
-      )}
-
       {mode === 'active' && onCheckOut && (
         <CheckOutDialog
           appointment={selectedAppointment}
@@ -633,16 +639,6 @@ export function AppointmentTable({
         open={showViewDialog}
         on_close={() => setShowViewDialog(false)}
       />
-
-      {/* Edit Appointment Modal */}
-      {editingAppointment && (
-        <NewAppointmentModal
-          appointmentId={editingAppointment._id}
-          open={showEditModal}
-          onOpenChange={setShowEditModal}
-          onSuccess={handleAppointmentUpdated}
-        />
-      )}
     </div>
   )
 }

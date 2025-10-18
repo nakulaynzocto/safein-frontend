@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useDebounce } from "@/hooks/useDebounce"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { SearchInput } from "@/components/common/searchInput"
@@ -55,7 +56,6 @@ const createColumns = (handleDeleteVisitor: (id: string) => void, handleEditVisi
         </Avatar>
         <div>
           <div className="font-medium">{visitor.name}</div>
-          <div className="text-sm text-gray-500">{visitor.designation}</div>
           {visitor.visitorId && (
             <div className="text-xs text-blue-600 font-mono">ID: {visitor.visitorId}</div>
           )}
@@ -86,7 +86,7 @@ const createColumns = (handleDeleteVisitor: (id: string) => void, handleEditVisi
       <div className="space-y-1">
         <div className="flex items-center gap-2 text-sm">
           <Building className="h-3 w-3" />
-          {visitor.company}
+          N/A
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <MapPin className="h-3 w-3" />
@@ -157,9 +157,17 @@ const createColumns = (handleDeleteVisitor: (id: string) => void, handleEditVisi
 export function VisitorList() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [editingVisitor, setEditingVisitor] = useState<Visitor | null>(null)
+  const [showVisitorModal, setShowVisitorModal] = useState(false)
+  
+  // Debounce search input to prevent excessive API calls
+  const debouncedSearchTerm = useDebounce(searchTerm, 500)
+  
+  // Reset to first page when debounced search changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [debouncedSearchTerm])
   
   // API query parameters
   const queryParams: GetVisitorsQuery = {
@@ -194,15 +202,18 @@ export function VisitorList() {
     refetch()
   }
 
-  // Handle add visitor
-  const handleAddVisitor = () => {
-    router.push(routes.privateroute.VISITORREGISTRATION)
-  }
+  // Handle add visitor - now handled by modal trigger
 
   // Handle visitor created successfully
   const handleVisitorCreated = () => {
+    setShowVisitorModal(false)
     // Refresh the visitor list by refetching the query
     refetch()
+  }
+
+  // Handle opening visitor modal
+  const handleOpenVisitorModal = () => {
+    setShowVisitorModal(true)
   }
 
   // Handle edit visitor
@@ -286,7 +297,6 @@ export function VisitorList() {
               placeholder="Search visitors..."
               value={searchTerm}
               onChange={setSearchTerm}
-              onDebouncedChange={setDebouncedSearchTerm}
               debounceDelay={500}
             />
         </CardHeader>
@@ -300,7 +310,7 @@ export function VisitorList() {
               description: 'Register your first visitor to get started.',
               primaryActionLabel: 'Register Visitor',
             }}
-            onPrimaryAction={handleAddVisitor}
+            onPrimaryAction={handleOpenVisitorModal}
             showCard={false}
             isLoading={isLoading}
           />
@@ -328,6 +338,14 @@ export function VisitorList() {
         open={!!editingVisitor}
         onOpenChange={(open) => !open && setEditingVisitor(null)}
         onSuccess={handleVisitorUpdated}
+        trigger={<div />} // Hidden trigger since we control the modal programmatically
+      />
+
+      {/* Add Visitor Modal */}
+      <NewVisitorModal
+        open={showVisitorModal}
+        onOpenChange={setShowVisitorModal}
+        onSuccess={handleVisitorCreated}
         trigger={<div />} // Hidden trigger since we control the modal programmatically
       />
     </div>

@@ -13,7 +13,6 @@ import {
   LayoutDashboard,
   Users, 
   Calendar, 
-  Settings, 
   ChevronRight,
   UserPlus,
   CalendarPlus,
@@ -46,11 +45,6 @@ const navigation = [
     name: "Appointments",
     href: routes.privateroute.APPOINTMENTLIST,
     icon: Calendar,
-  },
-  {
-    name: "Settings",
-    href: routes.privateroute.SETTINGS,
-    icon: Settings,
   },
 ]
 
