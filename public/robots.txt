@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /
+
+# Disallow private/admin pages
+Disallow: /dashboard/
+Disallow: /appointment/
+Disallow: /visitor/
+Disallow: /employee/
+Disallow: /profile/
+Disallow: /settings/
+Disallow: /trash/
+Disallow: /email-action/
+
+# Allow important public pages
+Allow: /
+Allow: /register
+Allow: /login
+Allow: /contact
+Allow: /pricing
+Allow: /features
+Allow: /help
+
+# Sitemap location
+Sitemap: http://safein.aynzo.com/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1
