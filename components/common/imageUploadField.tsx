@@ -49,21 +49,6 @@ const supportsCamera = (): boolean => {
   return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
 }
 
-// Check camera permissions
-const checkCameraPermission = async (): Promise<boolean> => {
-  try {
-    if (!navigator.permissions) {
-      return true // Assume permission is available if permissions API is not supported
-    }
-    
-    const permission = await navigator.permissions.query({ name: 'camera' as PermissionName })
-    return permission.state === 'granted'
-  } catch (error) {
-    console.log('Permission check failed:', error)
-    return true // Assume permission is available if check fails
-  }
-}
-
 export function ImageUploadField({ name, label, register, setValue, errors, initialUrl }: ImageUploadFieldProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(initialUrl || null)
   const [isUploading, setIsUploading] = useState(false)
@@ -103,81 +88,24 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
   const startCamera = async (facingMode: 'user' | 'environment' = 'environment') => {
     try {
       setIsCapturing(true)
-      
-      // Check if camera is supported
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Camera not supported on this device')
-      }
-      
-      // Request camera permission with specific constraints
-      const constraints = {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { 
-          facingMode: { ideal: facingMode },
-          width: { ideal: 1280, min: 640 },
-          height: { ideal: 720, min: 480 }
-        },
-        audio: false
-      }
-      
-      console.log('Requesting camera access with constraints:', constraints)
-      
-      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
-      
-      console.log('Camera access granted, stream:', mediaStream)
+          facingMode,
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      })
       
       setStream(mediaStream)
       setShowCamera(true)
       setShowOptions(false)
       
-      // Wait for video to load
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream
-        
-        // Wait for video metadata to load
-        videoRef.current.onloadedmetadata = () => {
-          console.log('Video metadata loaded')
-          videoRef.current?.play().catch(err => {
-            console.error('Error playing video:', err)
-            showErrorToast('Error starting camera preview')
-          })
-        }
-        
-        videoRef.current.onerror = (error) => {
-          console.error('Video error:', error)
-          showErrorToast('Error loading camera preview')
-        }
       }
-      
-    } catch (error: any) {
+    } catch (error) {
       console.error('Camera access failed:', error)
-      
-      let errorMessage = 'Failed to access camera'
-      
-      if (error.name === 'NotAllowedError') {
-        errorMessage = 'Camera permission denied. Please allow camera access and try again.'
-      } else if (error.name === 'NotFoundError') {
-        errorMessage = 'No camera found on this device.'
-      } else if (error.name === 'NotSupportedError') {
-        errorMessage = 'Camera not supported on this device.'
-      } else if (error.name === 'NotReadableError') {
-        errorMessage = 'Camera is being used by another application.'
-      } else if (error.name === 'OverconstrainedError') {
-        errorMessage = 'Camera constraints cannot be satisfied.'
-      } else if (error.name === 'SecurityError') {
-        errorMessage = 'Camera access blocked for security reasons. Please use HTTPS.'
-      } else if (error.message) {
-        errorMessage = error.message
-      }
-      
-      showErrorToast(errorMessage)
-      
-      // Clean up any partial state
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop())
-        setStream(null)
-      }
-      setShowCamera(false)
-      
+      showErrorToast('Failed to access camera. Please check permissions.')
     } finally {
       setIsCapturing(false)
     }
@@ -428,18 +356,6 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
                   Camera not supported on this device
                 </p>
               )}
-              
-              {cameraSupported && (
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                  <h4 className="text-sm font-semibold text-blue-800 mb-2">Camera Tips:</h4>
-                  <ul className="text-xs text-blue-700 space-y-1">
-                    <li>• Make sure camera permission is allowed</li>
-                    <li>• Use HTTPS for camera access</li>
-                    <li>• Close other apps using camera</li>
-                    <li>• Try refreshing if camera shows blank</li>
-                  </ul>
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -462,24 +378,12 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
                 </div>
                 
                 <div className="relative bg-black rounded-lg overflow-hidden mb-4">
-                  {isCapturing ? (
-                    <div className="w-full h-64 flex items-center justify-center">
-                      <div className="text-center text-white">
-                        <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent mx-auto mb-4"></div>
-                        <p>Starting camera...</p>
-                        <p className="text-sm text-gray-300 mt-2">Please allow camera access</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      muted
-                      className="w-full h-64 object-cover"
-                      style={{ transform: 'scaleX(-1)' }} // Mirror the video for better UX
-                    />
-                  )}
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    className="w-full h-64 object-cover"
+                  />
                   <canvas
                     ref={canvasRef}
                     className="hidden"
@@ -490,11 +394,10 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
                   <Button
                     type="button"
                     onClick={capturePhoto}
-                    disabled={isCapturing}
                     className="flex-1 flex items-center justify-center gap-2"
                   >
                     <CameraIcon className="w-4 h-4" />
-                    {isCapturing ? 'Starting Camera...' : 'Capture Photo'}
+                    Capture Photo
                   </Button>
                   <Button
                     type="button"
@@ -504,12 +407,6 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
                   >
                     Cancel
                   </Button>
-                </div>
-                
-                <div className="mt-3 text-center">
-                  <p className="text-xs text-gray-500">
-                    Make sure camera permission is allowed in your browser settings
-                  </p>
                 </div>
               </div>
             </div>
