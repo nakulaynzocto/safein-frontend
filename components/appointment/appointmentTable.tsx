@@ -498,27 +498,28 @@ export function AppointmentTable({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header Actions */}
-      <Card className="card-hostinger p-4">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-                <Calendar className="h-5 w-5" />
-                {title || (mode === 'active' ? 'Appointment Management' : 'Deleted Appointments')}
+      <Card className="card-hostinger p-3 sm:p-4">
+        <CardHeader className="pb-3 sm:pb-4 px-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl font-semibold">
+                <Calendar className="h-5 w-5 flex-shrink-0" />
+                <span className="truncate">{title || (mode === 'active' ? 'Appointment Management' : 'Deleted Appointments')}</span>
               </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-xs sm:text-sm text-gray-600 mt-1 break-words">
                 {mode === 'active' ? 'Manage and view all scheduled appointments' : 'View and restore deleted appointments'}
-                {pagination && ` (${pagination.totalAppointments} total appointments)`}
+                {pagination && ` (${pagination.totalAppointments} total)`}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
               <Button 
                 onClick={onRefresh}
                 variant="outline"
                 size="sm"
                 disabled={isLoading}
+                className="flex-shrink-0"
               >
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
@@ -526,9 +527,10 @@ export function AppointmentTable({
                 <NewAppointmentModal 
                   onSuccess={handleAppointmentCreated}
                   triggerButton={
-                    <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-2">
-                      <Plus className="h-4 w-4" />
-                      Schedule Appointment
+                    <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                      <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">Schedule Appointment</span>
+                      <span className="sm:hidden">Schedule</span>
                     </Button>
                   }
                 />
@@ -539,13 +541,14 @@ export function AppointmentTable({
       </Card>
 
       {/* Main Table */}
-      <Card className="card-hostinger p-4 ">
-        <CardHeader className="pb-4">
+      <Card className="card-hostinger p-3 sm:p-4 overflow-hidden">
+        <CardHeader className="pb-3 sm:pb-4 px-0">
             <SearchInput
               placeholder="Search appointments..."
               value={searchTerm}
               onChange={onSearchChange}
               debounceDelay={500}
+              className="w-full"
             />
         </CardHeader>
         <CardContent className="p-0">
