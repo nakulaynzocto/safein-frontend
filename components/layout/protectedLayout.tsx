@@ -64,9 +64,9 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     <div className="h-screen flex flex-col overflow-hidden">
       <Navbar />
       <div className="flex flex-1 overflow-hidden">
-        {/* Desktop Sidebar - conditionally rendered */}
+        {/* Desktop Sidebar - hidden on small screens, shown only on md and above */}
         {!shouldHideSidebar && (
-          <div className="flex-shrink-0">
+          <div className="hidden md:block flex-shrink-0">
             <Sidebar />
           </div>
         )}

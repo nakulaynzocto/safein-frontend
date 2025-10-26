@@ -17,6 +17,7 @@ import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { logout, initializeAuth } from "@/store/slices/authSlice"
 import { useLogoutMutation } from "@/store/api/authApi"
 import { routes } from "@/utils/routes"
+import { MobileSidebar } from "./mobileSidebar"
 import {
   User,
   LogOut,
@@ -34,7 +35,6 @@ import {
   Mail,
   Bell,
 } from "lucide-react"
-import { MobileSidebar } from "./mobileSidebar"
 import { useState, useEffect } from "react"
 
 export function Navbar() {
@@ -142,6 +142,10 @@ export function Navbar() {
           <div className="flex items-center space-x-3">
             {isActuallyAuthenticated ? (
               <>
+                {/* Mobile Menu Button - only for authenticated users */}
+                <div className="md:hidden">
+                  <MobileSidebar />
+                </div>
                 {/* Help Button */}
                 <Button variant="ghost" size="sm" className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg">
                   <HelpCircle className="h-4 w-4" />
@@ -217,18 +221,18 @@ export function Navbar() {
                 <Button asChild className="px-6 py-2 text-sm font-semibold text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105" style={{ backgroundColor: '#3882a5' }}>
                   <Link href={routes.publicroute.REGISTER} prefetch={true}>Start Free Trial</Link>
                 </Button>
+                
+                {/* Mobile Menu Button - only for unauthenticated users */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="lg:hidden p-2 rounded-lg transition-all duration-200 hover:bg-gray-100/80"
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                >
+                  {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </Button>
               </>
             )}
-
-            {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="lg:hidden p-2 rounded-lg transition-all duration-200 hover:bg-gray-100/80"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
           </div>
         </div>
 
