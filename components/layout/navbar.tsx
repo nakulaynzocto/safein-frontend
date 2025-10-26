@@ -90,15 +90,13 @@ export function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           {/* Logo and Brand */}
-          <div className="flex items-center gap-4">
-            <Link href={isActuallyAuthenticated ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex items-center space-x-3 group" prefetch={true}>
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl" style={{ backgroundColor: '#3882a5' }}>
-                <Shield className="h-7 w-7 text-white" />
-              </div>
-              <div className="hidden sm:block">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">SafeIn</h1>
-                <p className="text-xs font-medium" style={{ color: '#555879' }}>Security Management</p>
-              </div>
+          <div className="flex items-center">
+            <Link href={isActuallyAuthenticated ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex-shrink-0" prefetch={true}>
+              <img 
+                src="/aynzo-logo.svg" 
+                alt="Aynzo Logo" 
+                className="h-12 w-auto"
+              />
             </Link>
           </div>
 
@@ -106,6 +104,12 @@ export function Navbar() {
           <div className="hidden lg:flex items-center space-x-1">
             {!isActuallyAuthenticated && (
               <>
+                <Button variant="ghost" asChild className="relative px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg group">
+                  <Link href={routes.publicroute.HOME} prefetch={true}>
+                    <span className="relative z-10">Home</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  </Link>
+                </Button>
                 <Button variant="ghost" asChild className="relative px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg group">
                   <Link href={routes.publicroute.FEATURES} prefetch={true}>
                     <span className="relative z-10">Features</span>
@@ -234,6 +238,14 @@ export function Navbar() {
             <div className="px-4 pt-4 pb-6 space-y-2">
               {!isActuallyAuthenticated && (
                 <>
+                  <Link
+                    href={routes.publicroute.HOME}
+                    className="block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 hover:bg-gray-100/80 hover:scale-105"
+                    style={{ color: '#161718' }}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Home
+                  </Link>
                   <Link
                     href={routes.publicroute.FEATURES}
                     className="block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 hover:bg-gray-100/80 hover:scale-105"

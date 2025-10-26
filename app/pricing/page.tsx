@@ -11,66 +11,89 @@ import Link from "next/link"
 export default function PricingPage() {
   const plans = [
     {
-      name: "Starter",
-      price: "$29",
-      period: "per month",
-      description: "Perfect for small businesses getting started with SafeIn management",
+      name: "Free Trial",
+      price: "₹0",
+      period: "3 Days Only",
+      description: "Experience full SafeIn features for 3 days",
       popular: false,
       features: [
-        "Up to 100 visitors per month",
-        "Basic appointment scheduling",
-        "SafeIn registration",
-        "Email notifications",
-        "Basic reporting",
-        "Mobile responsive",
-        "Email support"
+        "Full SafeIn features access",
+        "Test visitor tracking",
+        "Photo capture & ID verification",
+        "Real-time notifications",
+        "No credit card required"
       ],
       limitations: [
-        "No SMS notifications",
-        "No advanced analytics",
-        "No custom branding"
+        "Limited to 3 days",
+        "No priority support"
       ]
     },
     {
-      name: "Professional",
-      price: "$79",
+      name: "Premium - 1 Month",
+      originalPricePerMonth: "₹8,499",
+      price: "₹8,499",
       period: "per month",
-      description: "Ideal for growing businesses with advanced SafeIn management needs",
+      description: "Monthly billing at ₹8,499/month",
+      popular: false,
+      features: [
+        "Unlimited visitor tracking",
+        "Aadhaar & ID verification",
+        "Real-time email & SMS alerts",
+        "Photo capture & smart logs",
+        "Secure cloud storage",
+        "24/7 priority support",
+        "Advanced analytics & reporting",
+        "Custom branding options",
+        "API access",
+        "Multi-location support"
+      ],
+      limitations: []
+    },
+    {
+      name: "Premium - 3 Months",
+      originalPrice: "₹25,497",
+      originalPricePerMonth: "₹8,499",
+      price: "₹24,222",
+      pricePerMonth: "₹8,074",
+      period: "for 3 months",
+      discountNote: "5% OFF",
+      description: "Save 5% with 3-month billing",
       popular: true,
       features: [
-        "Up to 500 visitors per month",
-        "Advanced appointment scheduling",
-        "SafeIn registration with photos",
-        "Email & SMS notifications",
+        "Unlimited visitor tracking",
+        "Aadhaar & ID verification",
+        "Real-time email & SMS alerts",
+        "Photo capture & smart logs",
+        "Secure cloud storage",
+        "24/7 priority support",
         "Advanced analytics & reporting",
-        "Custom SafeIn badges",
-        "Integration with calendar systems",
-        "Priority email support",
-        "Custom branding options"
+        "Custom branding options",
+        "API access",
+        "Multi-location support"
       ],
-      limitations: [
-        "No API access",
-        "No white-label solution"
-      ]
+      limitations: []
     },
     {
-      name: "Enterprise",
-      price: "$199",
-      period: "per month",
-      description: "Complete solution for large organizations with complex requirements",
+      name: "Premium - 12 Months",
+      originalPrice: "₹101,988",
+      originalPricePerMonth: "₹8,499",
+      price: "₹91,790",
+      pricePerMonth: "₹7,649",
+      period: "billed annually",
+      discountNote: "10% OFF",
+      description: "Save 10% with annual billing - Best value!",
       popular: false,
       features: [
-        "Unlimited visitors",
-        "All Professional features",
-        "Multi-location support",
-        "Advanced security features",
-        "API access & integrations",
-        "White-label solution",
-        "Custom workflows",
-        "Dedicated account manager",
-        "24/7 phone support",
-        "SLA guarantee",
-        "Custom training sessions"
+        "Unlimited visitor tracking",
+        "Aadhaar & ID verification",
+        "Real-time email & SMS alerts",
+        "Photo capture & smart logs",
+        "Secure cloud storage",
+        "24/7 priority support",
+        "Advanced analytics & reporting",
+        "Custom branding options",
+        "API access",
+        "Multi-location support"
       ],
       limitations: []
     }
@@ -90,8 +113,8 @@ export default function PricingPage() {
       answer: "We accept all major credit cards (Visa, MasterCard, American Express) and PayPal for your convenience."
     },
     {
-      question: "Do you offer discounts for annual plans?",
-      answer: "Yes, we offer a 20% discount when you choose annual billing instead of monthly billing."
+      question: "Do you offer discounts for longer billing periods?",
+      answer: "Yes, Premium plan offers 10% discount for 3-month billing and 15% discount for 12-month billing. 1-month billing has no discount."
     },
     {
       question: "Is there a free trial?",
@@ -107,7 +130,7 @@ export default function PricingPage() {
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Hero Section */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
+      <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
             Simple, Transparent Pricing
@@ -128,7 +151,7 @@ export default function PricingPage() {
       {/* Pricing Plans */}
       <section className="py-20 px-4">
         <div className="container mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
             {plans.map((plan, index) => (
               <Card key={index} className={`relative ${plan.popular ? 'border-2 shadow-lg scale-105' : ''}`} style={plan.popular ? { borderColor: '#3882a5' } : {}}>
                 {plan.popular && (
@@ -143,10 +166,26 @@ export default function PricingPage() {
                     {plan.name}
                   </CardTitle>
                   <div className="mt-4">
+                    {plan.originalPrice && (
+                      <div className="mb-2">
+                        <span className="text-lg line-through text-gray-400">{plan.originalPrice}</span>
+                        {plan.discountNote && (
+                          <Badge className="ml-2 bg-green-500 text-white">{plan.discountNote}</Badge>
+                        )}
+                      </div>
+                    )}
                     <span className="text-4xl font-bold" style={{ color: '#3882a5' }}>
                       {plan.price}
                     </span>
-                    <span className="text-gray-500 ml-2">{plan.period}</span>
+                    <div className="mt-2">
+                      <span className="text-gray-500">{plan.period}</span>
+                    </div>
+                    {plan.pricePerMonth && (
+                      <div className="text-sm text-gray-600 mt-2">
+                        <span className="text-gray-400">Effective: </span>
+                        <span className="font-semibold" style={{ color: '#3882a5' }}>{plan.pricePerMonth}/month</span>
+                      </div>
+                    )}
                   </div>
                   <CardDescription className="text-base mt-4" style={{ color: '#2c5aa0' }}>
                     {plan.description}
@@ -185,28 +224,36 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Annual Discount */}
+      {/* Pricing Summary */}
       <section className="py-16 px-4" style={{ backgroundColor: '#d1d8e2' }}>
         <div className="container mx-auto text-center">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold mb-4" style={{ color: '#161718' }}>
-              Save 20% with Annual Billing
+              Pricing Summary
             </h2>
             <p className="text-lg mb-8" style={{ color: '#2c5aa0' }}>
-              Choose annual billing and save 20% on all plans. Plus, get priority support and exclusive features.
+              Premium plan total cost comparison
             </p>
             <div className="grid md:grid-cols-3 gap-6 text-center">
-              <div className="p-6 bg-white rounded-lg">
-                <div className="text-2xl font-bold" style={{ color: '#3882a5' }}>20%</div>
-                <div className="text-sm" style={{ color: '#2c5aa0' }}>Annual Discount</div>
+              <div className="p-6 bg-white rounded-lg shadow-sm">
+                <div className="text-2xl font-bold mb-2" style={{ color: '#3882a5' }}>1 Month</div>
+                <div className="text-3xl font-bold mb-2">₹8,499</div>
+                <div className="text-sm text-gray-500" style={{ color: '#2c5aa0' }}>per month</div>
+                <div className="text-lg mt-3 font-semibold" style={{ color: '#3882a5' }}>Total: ₹8,499</div>
               </div>
-              <div className="p-6 bg-white rounded-lg">
-                <div className="text-2xl font-bold" style={{ color: '#3882a5' }}>Priority</div>
-                <div className="text-sm" style={{ color: '#2c5aa0' }}>Support Access</div>
+              <div className="p-6 bg-white rounded-lg shadow-lg border-2" style={{ borderColor: '#3882a5' }}>
+                <div className="text-2xl font-bold mb-2" style={{ color: '#3882a5' }}>3 Months</div>
+                <div className="text-lg line-through text-gray-400 mb-1">₹25,497</div>
+                <div className="text-3xl font-bold mb-2">₹24,222</div>
+                <div className="text-sm text-gray-500" style={{ color: '#2c5aa0' }}>₹8,074/month effective</div>
+                <Badge className="mt-2 bg-green-500 text-white">Save ₹1,275 (5% OFF)</Badge>
               </div>
-              <div className="p-6 bg-white rounded-lg">
-                <div className="text-2xl font-bold" style={{ color: '#3882a5' }}>Free</div>
-                <div className="text-sm" style={{ color: '#2c5aa0' }}>Setup & Migration</div>
+              <div className="p-6 bg-white rounded-lg shadow-sm border-2" style={{ borderColor: '#3882a5' }}>
+                <div className="text-2xl font-bold mb-2" style={{ color: '#3882a5' }}>12 Months</div>
+                <div className="text-lg line-through text-gray-400 mb-1">₹101,988</div>
+                <div className="text-3xl font-bold mb-2">₹91,790</div>
+                <div className="text-sm text-gray-500" style={{ color: '#2c5aa0' }}>₹7,649/month effective</div>
+                <Badge className="mt-2 bg-green-500 text-white">Save ₹10,198 (10% OFF)</Badge>
               </div>
             </div>
           </div>
@@ -241,7 +288,7 @@ export default function PricingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
+      <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
         <div className="container mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Get Started?

@@ -52,8 +52,8 @@ export default function HomePage() {
   return (
     <PublicLayout>
       {/* Hero Section */}
-      <section className="relative py-20" style={{ backgroundColor: '#3882a5' }}>
-        <div className="absolute inset-0 bg-black/10"></div>
+      <section className="relative py-20" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
+        <div className="absolute inset-0 bg-black/5"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Side - Main Content */}
@@ -65,7 +65,7 @@ export default function HomePage() {
                 <span className="text-gray-300">1000+ Happy Clients</span>
               </div>
               <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-                Transform Your SafeIn Management Today
+                Transform Your Visitor Management with SafeIn
           </h1>
               <p className="text-xl mb-8 leading-relaxed text-gray-300">
                 Get your SafeIn management system set up online with our expert assistance. 
@@ -127,10 +127,9 @@ export default function HomePage() {
                 <CardTitle className="text-xl">SafeIn Appointment Booking</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-gray-600 mb-4">
+                <CardDescription className="text-gray-600">
                   Streamline visitor appointments with our advanced booking system
                 </CardDescription>
-                <Button variant="outline" className="w-full">Explore</Button>
               </CardContent>
             </Card>
             
@@ -142,10 +141,9 @@ export default function HomePage() {
                 <CardTitle className="text-xl">Employee Management</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-gray-600 mb-4">
+                <CardDescription className="text-gray-600">
                   Comprehensive staff directory with role-based access control
                 </CardDescription>
-                <Button variant="outline" className="w-full">Explore</Button>
               </CardContent>
             </Card>
             
@@ -157,10 +155,9 @@ export default function HomePage() {
                 <CardTitle className="text-xl">Security Analytics</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-gray-600 mb-4">
+                <CardDescription className="text-gray-600">
                   Advanced security monitoring and visitor pattern analysis
                 </CardDescription>
-                <Button variant="outline" className="w-full">Explore</Button>
               </CardContent>
             </Card>
           </div>
@@ -359,155 +356,212 @@ export default function HomePage() {
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: '#161718' }}>
               Choose Your Perfect Plan
-              </h2>
+            </h2>
             <p className="text-xl max-w-3xl mx-auto" style={{ color: '#2c5aa0' }}>
-              Flexible subscription plans designed to scale with your business needs. 
-              Start with our basic plan and upgrade as you grow.
+              Premium features at ₹8,499/month. Save 5% with 3-month billing or 10% with annual billing.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Basic Plan */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            {/* Free Trial */}
             <Card className="relative border-2 hover:shadow-lg transition-shadow">
               <CardHeader className="text-center pb-4">
-                <CardTitle className="text-2xl font-bold text-gray-900">Basic</CardTitle>
+                <CardTitle className="text-xl font-bold text-gray-900">Free Trial</CardTitle>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-gray-900">$29</span>
-                  <span className="text-gray-600">/month</span>
+                  <span className="text-3xl font-bold text-gray-900">₹0</span>
+                  <div className="text-sm text-gray-600 mt-2">3 Days Only</div>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Perfect for small offices</p>
+                <p className="text-xs text-gray-600 mt-2">Experience full features</p>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">Up to 50 visitors/month</span>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Full feature access</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">Basic appointment booking</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Test visitor tracking</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">Email notifications</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Photo capture & ID verification</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">Basic reporting</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Real-time notifications</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">Email support</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">No credit card required</span>
                   </div>
                 </div>
-                <Button className="w-full mt-6" variant="outline" asChild>
+                <Button className="w-full mt-4" variant="outline" asChild>
+                  <Link href={routes.publicroute.REGISTER}>Start Free Trial</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Premium 1 Month */}
+            <Card className="relative border-2 hover:shadow-lg transition-shadow">
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-xl font-bold text-gray-900">1 Month</CardTitle>
+                <div className="mt-4">
+                  <span className="text-3xl font-bold" style={{ color: '#3882a5' }}>₹8,499</span>
+                  <span className="text-gray-600 text-sm">/month</span>
+                </div>
+                <p className="text-xs text-gray-600 mt-2">Month-to-month billing</p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Unlimited visitor tracking</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Aadhaar & ID verification</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Email & SMS alerts</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Photo capture & smart logs</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Secure cloud storage</span>
+                  </div>
+                </div>
+                <Button className="w-full mt-4" variant="outline" asChild>
                   <Link href={routes.publicroute.REGISTER}>Get Started</Link>
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Professional Plan */}
+            {/* Premium 3 Months */}
             <Card className="relative border-2 hover:shadow-lg transition-shadow" style={{ borderColor: '#3882a5' }}>
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <Badge className="text-white px-4 py-1" style={{ backgroundColor: '#3882a5' }}>Most Popular</Badge>
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="text-white px-3 py-0.5 text-xs" style={{ backgroundColor: '#3882a5' }}>Popular</Badge>
               </div>
               <CardHeader className="text-center pb-4">
-                <CardTitle className="text-2xl font-bold text-gray-900">Professional</CardTitle>
+                <CardTitle className="text-xl font-bold text-gray-900">3 Months</CardTitle>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-gray-900">$79</span>
-                  <span className="text-gray-600">/month</span>
+                  <div className="text-lg line-through text-gray-400 mb-1">₹25,497</div>
+                  <div className="flex items-center justify-center gap-1">
+                    <Badge className="bg-green-500 text-white text-xs">5% OFF</Badge>
+                  </div>
+                  <span className="text-3xl font-bold" style={{ color: '#3882a5' }}>₹24,222</span>
+                  <div className="text-xs text-gray-600 mt-1">₹8,074/month</div>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Ideal for growing businesses</p>
+                <p className="text-xs text-gray-600 mt-2">Save ₹1,275</p>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">Up to 200 visitors/month</span>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Unlimited visitor tracking</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">Advanced appointment booking</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Aadhaar & ID verification</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">SMS & Email notifications</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Email & SMS alerts</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">Advanced analytics</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Photo capture & smart logs</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">Priority support</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">API access</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Secure cloud storage</span>
                   </div>
                 </div>
-                <Button className="w-full mt-6 text-white" style={{ backgroundColor: '#3882a5' }} asChild>
+                <Button className="w-full mt-4 text-white" style={{ backgroundColor: '#3882a5' }} asChild>
                   <Link href={routes.publicroute.REGISTER}>Get Started</Link>
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Enterprise Plan */}
-            <Card className="relative border-2 hover:shadow-lg transition-shadow">
+            {/* Premium 12 Months */}
+            <Card className="relative border-2 hover:shadow-lg transition-shadow border-yellow-400">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-yellow-500 text-white px-3 py-0.5 text-xs animate-pulse">Best Value</Badge>
+              </div>
               <CardHeader className="text-center pb-4">
-                <CardTitle className="text-2xl font-bold text-gray-900">Enterprise</CardTitle>
+                <CardTitle className="text-xl font-bold text-gray-900">12 Months</CardTitle>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-gray-900">$199</span>
-                  <span className="text-gray-600">/month</span>
+                  <div className="text-lg line-through text-gray-400 mb-1">₹101,988</div>
+                  <div className="flex items-center justify-center gap-1">
+                    <Badge className="bg-green-500 text-white text-xs">10% OFF</Badge>
+                  </div>
+                  <span className="text-3xl font-bold" style={{ color: '#3882a5' }}>₹91,790</span>
+                  <div className="text-xs text-gray-600 mt-1">₹7,649/month</div>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">For large organizations</p>
+                <p className="text-xs text-gray-600 mt-2">Save ₹10,198</p>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">Unlimited visitors</span>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Unlimited visitors</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">Custom appointment workflows</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Aadhaar & ID verification</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">Multi-channel notifications</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Email & SMS alerts</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">Custom reporting</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Photo capture & smart logs</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">24/7 dedicated support</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-gray-700">White-label solution</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Secure cloud storage</span>
                   </div>
                 </div>
-                <Button className="w-full mt-6" variant="outline" asChild>
-                  <Link href={routes.publicroute.REGISTER}>Contact Sales</Link>
-              </Button>
+                <Button className="w-full mt-4 text-white" style={{ backgroundColor: '#3882a5' }} asChild>
+                  <Link href={routes.publicroute.REGISTER}>Get Started</Link>
+                </Button>
               </CardContent>
             </Card>
           </div>
           
-          {/* Annual Discount Notice */}
+          {/* All Plans Features */}
           <div className="text-center mt-12">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto">
-              <h3 className="text-xl font-semibold text-blue-900 mb-2">Save More with Annual Plans</h3>
-              <div className="flex justify-center gap-8 text-sm">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-900">3 Months</div>
-                  <div className="text-blue-700">Save 10%</div>
+            <div className="bg-white rounded-lg p-6 max-w-4xl mx-auto shadow-sm">
+              <h3 className="text-lg font-semibold mb-4" style={{ color: '#161718' }}>All Premium Plans Include</h3>
+              <div className="grid md:grid-cols-3 gap-4 text-sm">
+                <div className="flex items-center gap-2 justify-center">
+                  <Check className="h-4 w-4 text-green-500" />
+                  <span className="text-gray-700">24/7 Priority Support</span>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-900">12 Months</div>
-                  <div className="text-blue-700">Save 20%</div>
+                <div className="flex items-center gap-2 justify-center">
+                  <Check className="h-4 w-4 text-green-500" />
+                  <span className="text-gray-700">Advanced Analytics</span>
+                </div>
+                <div className="flex items-center gap-2 justify-center">
+                  <Check className="h-4 w-4 text-green-500" />
+                  <span className="text-gray-700">Custom Branding</span>
+                </div>
+                <div className="flex items-center gap-2 justify-center">
+                  <Check className="h-4 w-4 text-green-500" />
+                  <span className="text-gray-700">API Access</span>
+                </div>
+                <div className="flex items-center gap-2 justify-center">
+                  <Check className="h-4 w-4 text-green-500" />
+                  <span className="text-gray-700">Multi-location Support</span>
+                </div>
+                <div className="flex items-center gap-2 justify-center">
+                  <Check className="h-4 w-4 text-green-500" />
+                  <span className="text-gray-700">Secure Cloud Storage</span>
                 </div>
               </div>
             </div>
@@ -516,12 +570,12 @@ export default function HomePage() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-20" style={{ backgroundColor: '#3882a5' }}>
+      <section className="py-20" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Why Choose Our Platform?</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">Why Choose SafeIn?</h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              We're committed to providing the best SafeIn management solution with unmatched security and reliability.
+              We're committed to providing the best visitor management solution with unmatched security and reliability.
             </p>
           </div>
           
@@ -553,17 +607,6 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-semibold mb-2 text-white">Always Available</h3>
               <p className="text-gray-300">99.9% uptime guarantee</p>
-            </div>
-          </div>
-          
-          {/* Trust Indicators */}
-            <div className="text-center">
-            <p className="text-gray-300 mb-8">Trusted by organizations worldwide</p>
-            <div className="flex justify-center items-center gap-8 opacity-60">
-              <div className="text-2xl font-bold">ISO 27001</div>
-              <div className="text-2xl font-bold">SOC 2</div>
-              <div className="text-2xl font-bold">GDPR</div>
-              <div className="text-2xl font-bold">HIPAA</div>
             </div>
           </div>
         </div>
@@ -655,7 +698,7 @@ export default function HomePage() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-20" style={{ backgroundColor: '#3882a5' }}>
+      <section className="py-20" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">Get in Touch with Us</h2>
@@ -683,7 +726,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <p className="font-semibold text-white">Email</p>
-                    <p className="text-gray-300">support@visitorapp.com</p>
+                    <p className="text-gray-300">support@aynzo.com</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -692,18 +735,9 @@ export default function HomePage() {
                   </div>
                   <div>
                     <p className="font-semibold text-white">Phone</p>
-                    <p className="text-gray-300">+1 (555) 123-4567</p>
+                    <p className="text-gray-300">+91 86999 66076</p>
                   </div>
               </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#3882a5' }}>
-                    <MapPin className="h-6 w-6 text-white" />
-            </div>
-                  <div>
-                    <p className="font-semibold text-white">Address</p>
-                    <p className="text-gray-300">123 Business Ave, Suite 100<br />New York, NY 10001</p>
-              </div>
-            </div>
               </div>
             </div>
             
@@ -723,27 +757,6 @@ export default function HomePage() {
           </div>
               </CardContent>
             </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA Section */}
-      <section className="py-20" style={{ backgroundColor: '#d1d8e2' }}>
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: '#161718' }}>
-            Ready to Transform Your SafeIn Management?
-          </h2>
-          <p className="text-xl mb-8 max-w-3xl mx-auto" style={{ color: '#2c5aa0' }}>
-            Join thousands of organizations already using our platform to streamline their SafeIn management processes. 
-            Start your free 3-day trial today - no credit card required!
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="px-8 py-3 text-lg text-white" style={{ backgroundColor: '#3882a5' }} asChild>
-              <Link href={routes.publicroute.REGISTER}>Start Free Trial</Link>
-            </Button>
-            <Button size="lg" variant="outline" className="px-8 py-3 text-lg" asChild>
-              <Link href={routes.publicroute.LOGIN}>Sign In</Link>
-          </Button>
           </div>
         </div>
       </section>

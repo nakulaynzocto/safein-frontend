@@ -27,22 +27,15 @@ export default function ContactPage() {
       icon: Mail,
       title: "Email Support",
       description: "Get help via email",
-      details: "support@safein.com",
-      action: "mailto:support@safein.com"
+      details: "support@aynzo.com",
+      action: "mailto:support@aynzo.com"
     },
     {
       icon: Phone,
       title: "Phone Support",
       description: "Call us directly",
-      details: "+1 (555) 123-4567",
-      action: "tel:+15551234567"
-    },
-    {
-      icon: MapPin,
-      title: "Office Location",
-      description: "Visit our headquarters",
-      details: "123 Business Ave, Suite 100\nNew York, NY 10001",
-      action: "https://maps.google.com"
+      details: "+91 86999 66076",
+      action: "tel:+918699966076"
     },
     {
       icon: Clock,
@@ -58,21 +51,21 @@ export default function ContactPage() {
       icon: Headphones,
       title: "Technical Support",
       description: "Get help with technical issues, setup, and troubleshooting",
-      email: "support@safein.com",
+      email: "support@aynzo.com",
       response: "Response within 2 hours"
     },
     {
       icon: Users,
       title: "Customer Success",
       description: "Learn how to maximize your visitor management system",
-      email: "success@safein.com",
+      email: "success@aynzo.com",
       response: "Response within 4 hours"
     },
     {
       icon: Briefcase,
       title: "Sales & Partnerships",
       description: "Discuss pricing, enterprise solutions, and partnerships",
-      email: "sales@safein.com",
+      email: "sales@aynzo.com",
       response: "Response within 1 hour"
     }
   ]
@@ -81,7 +74,7 @@ export default function ContactPage() {
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Hero Section */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
+      <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
             Get in Touch
@@ -105,7 +98,7 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <div className="grid md:grid-cols-3 gap-6 mb-16">
             {contactInfo.map((info, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
@@ -293,7 +286,7 @@ export default function ContactPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
+      <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
         <div className="container mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Get Started?

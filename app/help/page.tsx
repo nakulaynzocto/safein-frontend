@@ -104,13 +104,6 @@ export default function HelpPage() {
       color: "#3882a5"
     },
     {
-      icon: MessageSquare,
-      title: "Live Chat",
-      description: "Chat with our support team in real-time",
-      action: "Start Chat",
-      color: "#3882a5"
-    },
-    {
       icon: Phone,
       title: "Phone Support",
       description: "Call us for immediate assistance",
@@ -123,7 +116,7 @@ export default function HelpPage() {
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Hero Section */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
+      <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
             How can we help you?
@@ -158,7 +151,7 @@ export default function HelpPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             {supportOptions.map((option, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
@@ -199,7 +192,7 @@ export default function HelpPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {helpCategories.map((category, index) => (
               <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
@@ -277,48 +270,8 @@ export default function HelpPage() {
         </div>
       </section>
 
-      {/* Quick Contact */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#d1d8e2' }}>
-        <div className="container mx-auto">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
-              Still need help?
-            </h2>
-            <p className="text-lg mb-8" style={{ color: '#2c5aa0' }}>
-              Can't find what you're looking for? Our support team is here to help you succeed.
-            </p>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="flex items-center justify-center space-x-3 p-4 bg-white rounded-lg">
-                <Mail className="h-5 w-5" style={{ color: '#3882a5' }} />
-                <div className="text-left">
-                  <p className="font-medium" style={{ color: '#161718' }}>Email Support</p>
-                  <p className="text-sm" style={{ color: '#2c5aa0' }}>support@safein.com</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-center space-x-3 p-4 bg-white rounded-lg">
-                <Phone className="h-5 w-5" style={{ color: '#3882a5' }} />
-                <div className="text-left">
-                  <p className="font-medium" style={{ color: '#161718' }}>Phone Support</p>
-                  <p className="text-sm" style={{ color: '#2c5aa0' }}>+1 (555) 123-4567</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-center space-x-3 p-4 bg-white rounded-lg">
-                <MessageSquare className="h-5 w-5" style={{ color: '#3882a5' }} />
-                <div className="text-left">
-                  <p className="font-medium" style={{ color: '#161718' }}>Live Chat</p>
-                  <p className="text-sm" style={{ color: '#2c5aa0' }}>Available 24/7</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
+      <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
         <div className="container mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Get Started?

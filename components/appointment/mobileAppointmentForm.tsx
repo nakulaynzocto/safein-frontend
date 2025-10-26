@@ -86,7 +86,7 @@ export function MobileAppointmentForm() {
       <MobileInput
         label="Phone Number"
         type="tel"
-        placeholder="+1 (555) 123-4567"
+        placeholder="+91 86999 66076"
         error={errors.visitorPhone?.message}
         required
         {...register("visitorPhone")}

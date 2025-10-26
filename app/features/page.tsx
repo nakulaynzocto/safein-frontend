@@ -93,7 +93,7 @@ export default function FeaturesPage() {
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
         {/* Hero Section */}
-        <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
+        <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
           <div className="container mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
               Powerful Features for Modern SafeIn Management
@@ -106,8 +106,8 @@ export default function FeaturesPage() {
               <Button size="lg" className="text-white" style={{ backgroundColor: '#3882a5' }} asChild>
                 <Link href={routes.publicroute.REGISTER}>Start Free Trial</Link>
               </Button>
-              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900">
-                <Link href="#contact">Contact Sales</Link>
+              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900" asChild>
+                <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>
               </Button>
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function FeaturesPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 px-4" style={{ backgroundColor: '#3882a5' }}>
+        <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
           <div className="container mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
               Ready to Transform Your SafeIn Management?
