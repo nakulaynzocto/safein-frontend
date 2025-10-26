@@ -21,7 +21,7 @@ export const baseSEOConfig = {
   creator: "SafeIn",
   publisher: "SafeIn",
   themeColor: "#3882a5",
-  twitterHandle: "@safein",
+  twitterHandle: "@aynzo",
 }
 
 // Page-specific SEO configurations
@@ -305,11 +305,11 @@ export function generateStructuredData(pageKey: keyof typeof pageSEOConfig) {
         "mainEntity": {
           "@type": "Organization",
           "name": baseSEOConfig.siteName,
-          "contactPoint": {
+            "contactPoint": {
             "@type": "ContactPoint",
-            "telephone": "+1-555-123-4567",
+            "telephone": "+91-86999-66076",
             "contactType": "customer service",
-            "email": "support@safein.app"
+            "email": "support@aynzo.com"
           }
         }
       }

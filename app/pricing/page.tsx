@@ -99,33 +99,6 @@ export default function PricingPage() {
     }
   ]
 
-  const faqs = [
-    {
-      question: "Can I change my plan anytime?",
-      answer: "Yes, you can upgrade or downgrade your plan at any time. Changes will be prorated and reflected in your next billing cycle."
-    },
-    {
-      question: "Is there a setup fee?",
-      answer: "No, there are no setup fees. You only pay the monthly subscription fee for your chosen plan."
-    },
-    {
-      question: "What payment methods do you accept?",
-      answer: "We accept all major credit cards (Visa, MasterCard, American Express) and PayPal for your convenience."
-    },
-    {
-      question: "Do you offer discounts for longer billing periods?",
-      answer: "Yes, Premium plan offers 10% discount for 3-month billing and 15% discount for 12-month billing. 1-month billing has no discount."
-    },
-    {
-      question: "Is there a free trial?",
-      answer: "Yes, we offer a 3-day free trial with full access to all features. No credit card required to start."
-    },
-    {
-      question: "What happens if I exceed my visitor limit?",
-      answer: "We'll notify you when you're approaching your limit. You can upgrade your plan or purchase additional visitor credits."
-    }
-  ]
-
   return (
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -256,33 +229,6 @@ export default function PricingPage() {
                 <Badge className="mt-2 bg-green-500 text-white">Save ₹10,198 (10% OFF)</Badge>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
-              Frequently Asked Questions
-            </h2>
-            <p className="text-lg" style={{ color: '#2c5aa0' }}>
-              Get answers to common questions about our pricing and plans
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {faqs.map((faq, index) => (
-              <div key={index} className="p-6 bg-white rounded-lg shadow-sm">
-                <h3 className="font-semibold mb-3" style={{ color: '#161718' }}>
-                  {faq.question}
-                </h3>
-                <p className="text-sm" style={{ color: '#2c5aa0' }}>
-                  {faq.answer}
-                </p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
