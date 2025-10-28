@@ -3,44 +3,80 @@ import type { RootState } from '../store'
 import { logout } from '../slices/authSlice'
 import { routes } from '../../utils/routes'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4010/api/v1'
 
-// Custom base query with 401 handling
+// Custom base query with 401 handling and timeout
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
-  let result = await fetchBaseQuery({
-    baseUrl: API_BASE_URL,
-    prepareHeaders: (headers, { getState }) => {
-      const state = getState() as RootState
-      const token = state.auth.token
-      
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`)
-      }
-      
-      headers.set('Content-Type', 'application/json')
-      return headers
-    },
-  })(args, api, extraOptions)
+  try {
+    const result = await fetchBaseQuery({
+      baseUrl: API_BASE_URL,
+      timeout: 10000, // 10 second timeout
+      prepareHeaders: (headers, { getState }) => {
+        const state = getState() as RootState
+        const token = state.auth.token
+        
+        if (token) {
+          headers.set('Authorization', `Bearer ${token}`)
+        }
+        
+        // Only set JSON content type if body is not FormData
+        if (args.body instanceof FormData) {
+          // Don't set Content-Type for FormData - let browser set it with boundary
+        } else {
+          headers.set('Content-Type', 'application/json')
+        }
+        
+        return headers
+      },
+    })(args, api, extraOptions)
 
-  if (result.error && result.error.status === 401) {
-    const isLoginRequest = args && args.url && args.url.includes(routes.publicroute.LOGIN)
-    
-    if (!isLoginRequest) {
-      api.dispatch(logout())
+    // Handle 401 errors
+    if (result.error && result.error.status === 401) {
+      const isLoginRequest = args && args.url && args.url.includes(routes.publicroute.LOGIN)
       
-      if (typeof window !== 'undefined') {
-        import('sonner').then(({ toast }) => {
-          toast.error('Session expired. Please login again.')
-        })
+      if (!isLoginRequest) {
+        api.dispatch(logout())
+        
+        if (typeof window !== 'undefined') {
+          import('sonner').then(({ toast }) => {
+            toast.error('Session expired. Please login again.')
+          })
 
-        setTimeout(() => {
-          window.location.href = routes.publicroute.LOGIN
-        }, 1000)
+          setTimeout(() => {
+            window.location.href = routes.publicroute.LOGIN
+          }, 1000)
+        }
       }
     }
-  }
 
-  return result
+    // Handle 404 and other errors
+    if (result.error && (result.error.status === 404 || result.error.status === 500)) {
+      // Don't show error toast for expected 404s or specific endpoints
+      const shouldSilence = args?.url?.includes('/stats') || 
+                           args?.url?.includes('/trashed')
+      
+      if (!shouldSilence && typeof window !== 'undefined') {
+        // Check if it's a JSON parse error (usually means HTML was returned)
+        const errorData = result.error.data as any
+        if (errorData && typeof errorData === 'string' && errorData.includes('<!DOCTYPE')) {
+          console.error('API returned HTML instead of JSON - backend route may be missing')
+        }
+      }
+    }
+
+    return result
+  } catch (error: any) {
+    // Handle network errors
+    if (typeof window !== 'undefined') {
+      console.error('Network error:', error)
+    }
+    return {
+      error: {
+        status: 'FETCH_ERROR' as const,
+        error: error.message || 'Network error occurred',
+      },
+    }
+  }
 }
 
 export const baseApi = createApi({

@@ -33,7 +33,7 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
         }
       }}
     >
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl bg-white dark:bg-gray-900">
         <DialogHeader>
           <DialogTitle>Employee Details</DialogTitle>
         </DialogHeader>

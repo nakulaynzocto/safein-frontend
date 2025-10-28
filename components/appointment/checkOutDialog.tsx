@@ -74,7 +74,7 @@ export function CheckOutDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-white dark:bg-gray-900">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <LogOut className="h-5 w-5" />

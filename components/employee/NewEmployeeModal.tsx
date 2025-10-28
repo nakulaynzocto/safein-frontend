@@ -215,7 +215,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
         {trigger || defaultTrigger}
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl bg-white dark:bg-gray-900">
         <DialogHeader>
           {/* Header with reference image + title, aligned like the screenshot */}
           <div className="flex items-center gap-3">

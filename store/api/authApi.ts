@@ -59,7 +59,7 @@ export interface AuthResponse {
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-
+    
     login: builder.mutation<AuthResponse, LoginRequest>({
       query: (credentials) => ({
         url: '/users/login',

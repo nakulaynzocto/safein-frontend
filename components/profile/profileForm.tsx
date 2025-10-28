@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { InputField } from "@/components/common/inputField"
 import { FileUpload } from "@/components/common/fileUpload"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
+import { useUploadFileMutation } from "@/store/api"
 
 const profileSchema = z.object({
   companyName: z.string().min(2, "Company name must be at least 2 characters").max(100, "Company name cannot exceed 100 characters"),
@@ -29,6 +30,7 @@ interface ProfileFormProps {
 export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [profileImage, setProfileImage] = useState<string | null>(profile.profilePicture || null)
+  const [uploadFile] = useUploadFileMutation()
 
   const {
     register,
@@ -63,23 +65,15 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
   const handleImageUpload = async (file: File | null) => {
     if (!file) return
 
-    const formData = new FormData()
-    formData.append("file", file)
-
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!res.ok) throw new Error("Upload failed")
-
-      const { url } = await res.json()
-      setProfileImage(url)
-      setValue("profilePicture", url)
+      // Upload using RTK Query
+      const result = await uploadFile({ file }).unwrap()
+      
+      setProfileImage(result.url)
+      setValue("profilePicture", result.url)
       showSuccessToast("Profile picture uploaded successfully!")
-    } catch (err) {
-      showErrorToast("Failed to upload profile picture")
+    } catch (err: any) {
+      showErrorToast(err?.data?.message || err?.message || "Failed to upload profile picture")
     }
   }
 

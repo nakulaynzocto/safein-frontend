@@ -104,13 +104,15 @@ export function NewVisitorModal({
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitted },
     reset,
     setValue,
     clearErrors,
+    watch,
   } = useForm({
     resolver: yupResolver(visitorSchema),
-    mode: "onBlur",
+    mode: "onSubmit",
+    reValidateMode: "onChange",
     defaultValues: {
       name: "",
       email: "",
@@ -233,7 +235,7 @@ export function NewVisitorModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
 
-      <DialogContent className="sm:max-w-3xl max-h-[95vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-3xl max-h-[95vh] overflow-y-auto bg-white dark:bg-gray-900">
         <DialogHeader>
           <DialogTitle className="text-xl">
             {isEditMode ? "Edit Visitor" : "Register New Visitor"}
@@ -425,10 +427,12 @@ export function NewVisitorModal({
                       ID Proof Document
                     </h4>
                     <ImageUploadField
+                      key={`idProof-${visitorId}-${visitorData?.idProof?.image}`}
                       name="idProof.image"
                       register={register}
                       setValue={setValue}
                       errors={errors.idProof?.image}
+                      initialUrl={visitorData?.idProof?.image}
                     />
                   </div>
 
@@ -438,10 +442,12 @@ export function NewVisitorModal({
                       Visitor Photo
                     </h4>
                     <ImageUploadField
+                      key={`photo-${visitorId}-${visitorData?.photo}`}
                       name="photo"
                       register={register}
                       setValue={setValue}
                       errors={errors.photo}
+                      initialUrl={visitorData?.photo}
                     />
                   </div>
                 </div>

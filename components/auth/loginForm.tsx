@@ -29,7 +29,8 @@ export function LoginForm() {
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
   const [login, { isLoading }] = useLoginMutation()
-  const [errorMessage, setErrorMessage] = useState<string | null>(null) // State to hold error message
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   const {
     register,
@@ -60,14 +61,28 @@ export function LoginForm() {
       
       dispatch(setCredentials(result))
       setErrorMessage(null)
+      setIsRedirecting(true)
       
-      // Redirect to dashboard after successful login
-      router.push(routes.privateroute.DASHBOARD)
+      // Small delay for UX, then redirect
+      setTimeout(() => {
+        router.push(routes.privateroute.DASHBOARD)
+      }, 500)
     } catch (error: any) {
       const message = error?.data?.message || error?.message || "Login failed"
       setErrorMessage(message) 
-      // showError(message)
     }
+  }
+
+  // Show loading overlay during redirect
+  if (isRedirecting) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <LoadingSpinner size="lg" />
+          <p className="mt-4 text-sm text-muted-foreground">Redirecting to dashboard...</p>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (

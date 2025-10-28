@@ -14,28 +14,52 @@ import { QuickActions } from "./QuickActions"
 import { DashboardCharts } from "./dashboardCharts"
 import { NewAppointmentModal } from "@/components/appointment/NewAppointmentModal"
 import { calculateAppointmentStats, getRecentAppointments, getTodaysAppointments } from "./dashboardUtils"
+import { DashboardSkeleton } from "@/components/common/tableSkeleton"
 
 export function DashboardOverview() {
   const router = useRouter()
   const [showAppointmentModal, setShowAppointmentModal] = React.useState(false)
+  const [retryCount, setRetryCount] = React.useState(0)
+  const [loadingTimeout, setLoadingTimeout] = React.useState(false)
   
-  // Use optimized queries with caching
-  const { data: appointmentsData, isLoading: appointmentsLoading } = useGetAppointmentsQuery(undefined, {
-    refetchOnMountOrArgChange: false,
+  // Use optimized queries with caching and error handling
+  const { data: appointmentsData, isLoading: appointmentsLoading, error: appointmentsError, refetch: refetchAppointments } = useGetAppointmentsQuery(undefined, {
+    refetchOnMountOrArgChange: true,
     refetchOnFocus: false,
+    skip: false,
   })
   
-  const { data: employeesData, isLoading: employeesLoading } = useGetEmployeesQuery(undefined, {
-    refetchOnMountOrArgChange: false,
+  const { data: employeesData, isLoading: employeesLoading, error: employeesError, refetch: refetchEmployees } = useGetEmployeesQuery(undefined, {
+    refetchOnMountOrArgChange: true,
     refetchOnFocus: false,
+    skip: false,
   })
   
-  const { data: visitorsData, isLoading: visitorsLoading } = useGetVisitorsQuery(undefined, {
-    refetchOnMountOrArgChange: false,
+  const { data: visitorsData, isLoading: visitorsLoading, error: visitorsError, refetch: refetchVisitors } = useGetVisitorsQuery(undefined, {
+    refetchOnMountOrArgChange: true,
     refetchOnFocus: false,
+    skip: false,
   })
   
   const { user } = useAppSelector((state) => state.auth)
+
+  // Show skeleton during initial load only
+  const isLoading = appointmentsLoading || employeesLoading || visitorsLoading
+  
+  // Check if any data exists to avoid infinite loading
+  const hasData = appointmentsData || employeesData || visitorsData
+  const shouldShowSkeleton = isLoading && !hasData && retryCount < 2
+  
+  // Set timeout for loading state (max 15 seconds)
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        setLoadingTimeout(true)
+      }
+    }, 15000)
+    
+    return () => clearTimeout(timer)
+  }, [isLoading])
 
   // Extract appointments array from the API response
   const appointments = appointmentsData?.appointments || []
@@ -57,6 +81,72 @@ export function DashboardOverview() {
   const handleAppointmentCreated = () => {
     setShowAppointmentModal(false)
     // The appointments data will be refetched automatically due to RTK Query cache invalidation
+  }
+
+  // Show error message if any query fails
+  const hasError = appointmentsError || employeesError || visitorsError
+  
+  // Retry function
+  const handleRetry = () => {
+    setRetryCount(retryCount + 1)
+    refetchAppointments()
+    refetchEmployees()
+    refetchVisitors()
+  }
+  
+  // Show skeleton during initial loading or retry
+  if (shouldShowSkeleton && !hasError && !loadingTimeout) {
+    return <DashboardSkeleton />
+  }
+  
+  // Show timeout message if loading takes too long
+  if (loadingTimeout && isLoading && !hasData && !hasError) {
+    return (
+      <div className="space-y-6">
+        <DashboardHeader userName={user?.name} />
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-yellow-800 mb-2">Loading is taking longer than expected</h3>
+          <p className="text-yellow-600 mb-4">
+            The dashboard is taking longer to load than usual. This may be due to network issues or server response delays.
+          </p>
+          <button 
+            onClick={handleRetry} 
+            className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 mr-4"
+          >
+            Retry
+          </button>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-yellow-700 text-white rounded hover:bg-yellow-800"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    )
+  }
+  
+  // Show error message if there's an error and no data
+  if (hasError && !hasData) {
+    return (
+      <div className="space-y-6">
+        <DashboardHeader userName={user?.name} />
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-red-800 mb-2">Failed to load dashboard data</h3>
+          <p className="text-red-600 mb-4">
+            {appointmentsError && `Appointments: ${(appointmentsError as any)?.data?.message || 'Failed to load'}`}
+            {employeesError && `\nEmployees: ${(employeesError as any)?.data?.message || 'Failed to load'}`}
+            {visitorsError && `\nVisitors: ${(visitorsError as any)?.data?.message || 'Failed to load'}`}
+          </p>
+          <button 
+            onClick={handleRetry} 
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (

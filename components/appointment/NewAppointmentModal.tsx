@@ -268,7 +268,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
         {triggerButton || defaultTrigger}
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
             {isEditMode ? "Edit Appointment" : "Schedule New Appointment"}

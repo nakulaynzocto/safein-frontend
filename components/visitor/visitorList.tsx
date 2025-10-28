@@ -9,6 +9,7 @@ import { DataTable } from "@/components/common/dataTable"
 import { Pagination } from "@/components/common/pagination"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ConfirmationDialog } from "@/components/common/confirmationDialog"
 import { 
   Plus, 
   Eye, 
@@ -40,9 +41,14 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { useRouter } from "next/navigation"
 import { routes } from "@/utils/routes"
 import { NewVisitorModal } from "./NewVisitorModal"
+import { VisitorDetailsDialog } from "./visitorDetailsDialog"
 
 // Define columns outside component to avoid recreation
-const createColumns = (handleDeleteVisitor: (id: string) => void, handleEditVisitor: (visitor: Visitor) => void) => [
+const createColumns = (
+  handleDeleteClick: (visitor: Visitor) => void, 
+  handleEditVisitor: (visitor: Visitor) => void,
+  handleViewVisitor: (visitor: Visitor) => void
+) => [
   {
     key: "visitor",
     header: "Visitor",
@@ -131,7 +137,7 @@ const createColumns = (handleDeleteVisitor: (id: string) => void, handleEditVisi
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleViewVisitor(visitor)}>
               <Eye className="mr-2 h-4 w-4" />
               View Details
             </DropdownMenuItem>
@@ -142,7 +148,7 @@ const createColumns = (handleDeleteVisitor: (id: string) => void, handleEditVisi
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               className="text-destructive"
-              onClick={() => handleDeleteVisitor(visitor._id)}
+              onClick={() => handleDeleteClick(visitor)}
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
@@ -160,6 +166,9 @@ export function VisitorList() {
   const [currentPage, setCurrentPage] = useState(1)
   const [editingVisitor, setEditingVisitor] = useState<Visitor | null>(null)
   const [showVisitorModal, setShowVisitorModal] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showViewDialog, setShowViewDialog] = useState(false)
+  const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null)
   
   // Debounce search input to prevent excessive API calls
   const debouncedSearchTerm = useDebounce(searchTerm, 500)
@@ -184,13 +193,23 @@ export function VisitorList() {
     refetch 
   } = useGetVisitorsQuery(queryParams)
   
-  const [deleteVisitor] = useDeleteVisitorMutation()
+  const [deleteVisitor, { isLoading: isDeleting }] = useDeleteVisitorMutation()
 
-  // Handle delete visitor
-  const handleDeleteVisitor = async (visitorId: string) => {
+  // Handle delete click - shows confirmation dialog
+  const handleDeleteClick = (visitor: Visitor) => {
+    setSelectedVisitor(visitor)
+    setShowDeleteDialog(true)
+  }
+
+  // Handle actual delete - called after confirmation
+  const handleDeleteVisitor = async () => {
+    if (!selectedVisitor) return
+    
     try {
-      await deleteVisitor(visitorId).unwrap()
+      await deleteVisitor(selectedVisitor._id).unwrap()
       showSuccessToast("Visitor deleted successfully!")
+      setShowDeleteDialog(false)
+      setSelectedVisitor(null)
       refetch()
     } catch (error: any) {
       showErrorToast(error?.data?.message || "Failed to delete visitor")
@@ -221,6 +240,12 @@ export function VisitorList() {
     setEditingVisitor(visitor)
   }
 
+  // Handle view visitor
+  const handleViewVisitor = (visitor: Visitor) => {
+    setSelectedVisitor(visitor)
+    setShowViewDialog(true)
+  }
+
   // Handle visitor updated successfully
   const handleVisitorUpdated = () => {
     setEditingVisitor(null)
@@ -230,16 +255,21 @@ export function VisitorList() {
   const visitors = visitorsData?.visitors || []
   const pagination = visitorsData?.pagination
   
-  // Create columns with delete and edit handlers
-  const columns = createColumns(handleDeleteVisitor, handleEditVisitor)
+  // Create columns with delete, edit, and view handlers
+  const columns = createColumns(handleDeleteClick, handleEditVisitor, handleViewVisitor)
 
   if (error) {
+    const errorMessage = (error as any)?.data?.message || 
+                        (error as any)?.error || 
+                        'Failed to load visitors'
+    
     return (
       <div className="space-y-6">
         <Card className="card-hostinger p-4">
           <CardContent className="flex items-center justify-center py-8">
             <div className="text-center">
-              <p className="text-red-500 mb-4">Failed to load visitors</p>
+              <p className="text-red-500 mb-2">Failed to load visitors</p>
+              <p className="text-sm text-gray-500 mb-4">{errorMessage}</p>
               <Button onClick={handleRefresh} className="btn-hostinger btn-hostinger-primary">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Retry
@@ -347,6 +377,27 @@ export function VisitorList() {
         onOpenChange={setShowVisitorModal}
         onSuccess={handleVisitorCreated}
         trigger={<div />} // Hidden trigger since we control the modal programmatically
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Visitor"
+        description={`Are you sure you want to delete ${selectedVisitor?.name}? This will move the visitor to trash.`}
+        onConfirm={handleDeleteVisitor}
+        confirmText={isDeleting ? "Deleting..." : "Delete"}
+        variant="destructive"
+      />
+
+      {/* View Visitor Details Dialog */}
+      <VisitorDetailsDialog
+        visitor={selectedVisitor}
+        open={showViewDialog}
+        onClose={() => {
+          setShowViewDialog(false)
+          setSelectedVisitor(null)
+        }}
       />
     </div>
   )

@@ -39,7 +39,7 @@ export default function RootLayout({
             </NavigationProgressProvider>
           </Suspense>
         </ErrorBoundary>
-        <Analytics />
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   )

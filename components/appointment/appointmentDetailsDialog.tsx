@@ -91,7 +91,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
         }
       }}
     >
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl bg-white dark:bg-gray-900">
         <DialogHeader>
           <DialogTitle>Appointment Details</DialogTitle>
         </DialogHeader>

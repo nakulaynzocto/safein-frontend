@@ -26,7 +26,7 @@ export function EmployeeList() {
   const debouncedSearch = useDebounce(search, 500)
   
   // API query with parameters
-  const { data: employeeData, isLoading, error } = useGetEmployeesQuery({
+  const { data: employeeData, isLoading, error, refetch } = useGetEmployeesQuery({
     page: currentPage,
     limit: pageSize,
     search: debouncedSearch || undefined,
@@ -45,10 +45,15 @@ export function EmployeeList() {
     try {
       await deleteEmployee(employeeId).unwrap()
       showSuccessToast("Employee deleted successfully")
+      refetch() // Refresh the employee list after deletion
     } catch (error) {
       showErrorToast("Failed to delete employee")
       console.error("Delete error:", error)
     }
+  }
+
+  const handleRefresh = () => {
+    refetch()
   }
 
   // Reset to first page when debounced search changes
@@ -124,6 +129,7 @@ export function EmployeeList() {
         // Actions
         onDelete={handleDelete}
         onView={(employee) => {}}
+        onRefresh={handleRefresh}
         
         // Loading states
         isDeleting={isDeleting}

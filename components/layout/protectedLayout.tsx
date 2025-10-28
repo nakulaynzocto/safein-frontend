@@ -26,14 +26,14 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
   // Check if sidebar should be hidden for specific pages
   const shouldHideSidebar = pathname === routes.privateroute.NOTIFICATIONS
 
-  // Initialize authentication
+  // Initialize authentication on mount
   useEffect(() => {
     setIsClient(true)
     dispatch(initializeAuth())
     setIsInitialized(true)
   }, [dispatch])
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated after initialization
   useEffect(() => {
     if (isInitialized && !isAuthenticated && !token) {
       router.push(routes.publicroute.LOGIN)
@@ -43,25 +43,25 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
   // ====== Render Logic ======
 
-  // Hydration/auth initialization
+  // Show loading during hydration and auth initialization
   if (!isClient || !isInitialized) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center bg-background">
         <LoadingSpinner size="lg" />
       </div>
     )
   }
 
-  // Not authenticated → redirecting
-  if (!isAuthenticated) {
-    return null // Don't show loading, just redirect
+  // Not authenticated → redirecting (will redirect in useEffect)
+  if (!isAuthenticated || !token) {
+    return null
   }
 
 
 
   // Default Layout
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden bg-background">
       <Navbar />
       <div className="flex flex-1 overflow-hidden">
         {/* Desktop Sidebar - hidden on small screens, shown only on md and above */}

@@ -4,196 +4,134 @@ import { useState, useRef, useEffect } from "react"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { showErrorToast, showSuccessToast } from "@/utils/toast"
-import { Camera, Upload, Image as ImageIcon, X, CheckCircle, Smartphone, FolderOpen, RotateCcw, CameraIcon } from "lucide-react"
+import { Image as ImageIcon, X, CheckCircle } from "lucide-react"
+import { useUploadFileMutation } from "@/store/api"
 
 interface ImageUploadFieldProps {
   name: string
-  label: string
+  label?: string
   register: any
   setValue: any
   errors?: any
   initialUrl?: string
 }
 
-// Function to upload image and return a URL
-async function uploadImage(file: File): Promise<string> {
-  try {
-    // Validate file size (5MB limit)
+export function ImageUploadField({ name, register, setValue, errors, initialUrl }: ImageUploadFieldProps) {
+  const [previewImage, setPreviewImage] = useState<string | null>(initialUrl || null)
+  const [uploadSuccess, setUploadSuccess] = useState(false)
+  const [isImageLoading, setIsImageLoading] = useState(false)
+  const [imageError, setImageError] = useState(false)
+  const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation()
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputId = `${name}-file-input`
+
+  const validateFile = (file: File): void => {
     const maxSize = 5 * 1024 * 1024 // 5MB
     if (file.size > maxSize) {
       throw new Error("File size exceeds 5MB limit")
     }
-
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       throw new Error("Only image files are allowed")
     }
-
-    const formData = new FormData()
-    formData.append("file", file)
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    })
-    if (!response.ok) throw new Error("Image upload failed")
-    const data = await response.json()
-    return data.url
-  } catch (error) {
-    console.error("Error uploading image:", error)
-    throw new Error("Failed to upload image")
   }
-}
-
-// Check if device supports camera
-const supportsCamera = (): boolean => {
-  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
-}
-
-export function ImageUploadField({ name, label, register, setValue, errors, initialUrl }: ImageUploadFieldProps) {
-  const [previewImage, setPreviewImage] = useState<string | null>(initialUrl || null)
-  const [isUploading, setIsUploading] = useState(false)
-  const [uploadSuccess, setUploadSuccess] = useState(false)
-  const [showOptions, setShowOptions] = useState(false)
-  const [showCamera, setShowCamera] = useState(false)
-  const [cameraSupported, setCameraSupported] = useState(false)
-  const [stream, setStream] = useState<MediaStream | null>(null)
-  const [capturedImage, setCapturedImage] = useState<string | null>(null)
-  const [isCapturing, setIsCapturing] = useState(false)
-  
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const fileInputId = `${name}-file-input`
-
-  useEffect(() => {
-    setCameraSupported(supportsCamera())
-  }, [])
-
-  // Clean up camera stream when component unmounts or camera closes
-  useEffect(() => {
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop())
-      }
-    }
-  }, [stream])
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      await processFile(file, "Uploaded from gallery")
+      await processFile(file)
     }
   }
 
-  const startCamera = async (facingMode: 'user' | 'environment' = 'environment') => {
+  const processFile = async (file: File) => {
     try {
-      setIsCapturing(true)
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          facingMode,
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
-      })
-      
-      setStream(mediaStream)
-      setShowCamera(true)
-      setShowOptions(false)
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream
-      }
-    } catch (error) {
-      console.error('Camera access failed:', error)
-      showErrorToast('Failed to access camera. Please check permissions.')
-    } finally {
-      setIsCapturing(false)
-    }
-  }
-
-  const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop())
-      setStream(null)
-    }
-    setShowCamera(false)
-    setCapturedImage(null)
-  }
-
-  const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current
-      const canvas = canvasRef.current
-      const context = canvas.getContext('2d')
-      
-      if (context) {
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
-        context.drawImage(video, 0, 0)
-        
-        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8)
-        setCapturedImage(imageDataUrl)
-        
-        // Stop camera after capture
-        stopCamera()
-      }
-    }
-  }
-
-  const uploadCapturedPhoto = async () => {
-    if (capturedImage && canvasRef.current) {
-      try {
-        setIsUploading(true)
-        
-        // Convert data URL to File
-        const response = await fetch(capturedImage)
-        const blob = await response.blob()
-        const file = new File([blob], `camera-capture-${Date.now()}.jpg`, {
-          type: 'image/jpeg'
-        })
-        
-        await processFile(file, "Photo captured and uploaded")
-        setCapturedImage(null)
-      } catch (error) {
-        console.error('Upload failed:', error)
-        showErrorToast('Failed to upload captured photo')
-      } finally {
-        setIsUploading(false)
-      }
-    }
-  }
-
-  const processFile = async (file: File, successMessage: string) => {
-    try {
-      setIsUploading(true)
+      // Reset states
+      setImageError(false)
+      setIsImageLoading(true)
       setUploadSuccess(false)
-      setShowOptions(false)
       
-      const url = await uploadImage(file)
-      setValue(name, url, { shouldValidate: true })
-      setPreviewImage(URL.createObjectURL(file))
+      // Validate file
+      validateFile(file)
+      
+      // Show immediate preview with local file
+      const localPreview = URL.createObjectURL(file)
+      setPreviewImage(localPreview)
+      
+      // Upload using RTK Query
+      const result = await uploadFile({ file }).unwrap()
+      
+      // Extract URL from the result
+      const uploadedUrl = result?.url
+      if (!uploadedUrl) {
+        throw new Error('No URL returned from upload')
+      }
+      
+      // Use the uploaded URL from server for preview
+      setValue(name, uploadedUrl, { shouldValidate: true })
+      
+      // Small delay to let the image start loading before revoking blob URL
+      setTimeout(() => {
+        URL.revokeObjectURL(localPreview)
+      }, 100)
+      
+      // Set the server URL as preview - keep loading state active
+      setPreviewImage(uploadedUrl)
+      
+      // Don't set loading to false here - let handleImageLoad do it when image actually loads
       setUploadSuccess(true)
-      showSuccessToast(`${successMessage} successfully!`)
+      showSuccessToast("Image uploaded successfully!")
       
       // Reset success state after 3 seconds
       setTimeout(() => setUploadSuccess(false), 3000)
-    } catch (error) {
+      
+    } catch (error: any) {
       console.error("Image processing failed:", error)
       setValue(name, "", { shouldValidate: true })
       setPreviewImage(null)
       setUploadSuccess(false)
-      showErrorToast(error instanceof Error ? error.message : "Failed to process image")
+      setImageError(true)
+      
+      // Clean up any preview URLs
+      if (previewImage && !initialUrl) {
+        URL.revokeObjectURL(previewImage)
+      }
+      
+      showErrorToast(error?.data?.message || error?.message || "Failed to upload image")
     } finally {
-      setIsUploading(false)
+      setIsImageLoading(false)
+    }
+  }
+
+  const handleImageLoad = () => {
+    setIsImageLoading(false)
+    setImageError(false)
+  }
+
+  const handleImageError = (e: any) => {
+    setIsImageLoading(false)
+    setImageError(true)
+    
+    // If there's an error loading the server image, clear the value
+    if (previewImage && previewImage.startsWith('http')) {
+      setValue(name, "", { shouldValidate: true })
+      setPreviewImage(null)
     }
   }
 
   const handleClearFile = () => {
     setValue(name, "", { shouldValidate: true })
+    
+    // Clean up preview URL if it's not the initial URL from props
+    if (previewImage && previewImage !== initialUrl) {
+      // Check if it's a blob URL before revoking
+      if (previewImage.startsWith('blob:')) {
+        URL.revokeObjectURL(previewImage)
+      }
+    }
+    
     setPreviewImage(null)
     setUploadSuccess(false)
-    setShowOptions(false)
-    setCapturedImage(null)
+    setImageError(false)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -203,45 +141,81 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
     fileInputRef.current?.click()
   }
 
-  const toggleOptions = () => {
-    setShowOptions(!showOptions)
-  }
-
   // Clean up object URL to prevent memory leaks
   useEffect(() => {
     return () => {
-      if (previewImage && !initialUrl) {
+      if (previewImage && previewImage.startsWith('blob:') && previewImage !== initialUrl) {
         URL.revokeObjectURL(previewImage)
       }
-      if (capturedImage) {
-        URL.revokeObjectURL(capturedImage)
-      }
     }
-  }, [previewImage, initialUrl, capturedImage])
+  }, [previewImage, initialUrl])
+
+  // Reset image error when preview changes
+  useEffect(() => {
+    setImageError(false)
+  }, [previewImage])
+
+  // Update preview when initialUrl changes (for edit mode)
+  useEffect(() => {
+    if (initialUrl && initialUrl !== previewImage) {
+      setPreviewImage(initialUrl)
+      setValue(name, initialUrl, { shouldValidate: true })
+    } else if (!initialUrl && previewImage && previewImage.startsWith('http')) {
+      // Clear preview if initialUrl is cleared
+      setPreviewImage(null)
+      setValue(name, '', { shouldValidate: true })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialUrl])
 
   return (
     <div className="space-y-3">
-      <Label className="text-sm font-medium text-gray-700">{label}</Label>
       <div className="flex flex-col gap-3">
         {previewImage ? (
           <div className="relative group">
-            <div className={`relative w-40 h-40 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 border-2 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 ${
-              uploadSuccess ? 'border-green-300 bg-green-50' : 'border-gray-200'
+            <div className={`relative w-40 h-40 flex items-center justify-center border-2 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 ${
+              uploadSuccess ? 'border-green-300 bg-white' : 
+              imageError ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
             }`}>
-              <img
-                src={previewImage}
-                alt={label}
-                className="max-w-full max-h-full object-cover rounded-lg"
-                onError={() => {
-                  setValue(name, "", { shouldValidate: true })
-                  setPreviewImage(null)
-                }}
-              />
+              {isImageLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 z-10">
+                  <div className="flex flex-col items-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-200 border-t-blue-500"></div>
+                    <span className="text-xs text-blue-600 mt-2">Loading...</span>
+                  </div>
+                </div>
+              )}
+              
+              {imageError ? (
+                <div className="flex flex-col items-center justify-center text-red-500 p-4">
+                  <ImageIcon className="w-8 h-8 mb-2" />
+                  <span className="text-sm text-center">Failed to load image</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={triggerFileInput}
+                    className="mt-2 text-xs"
+                  >
+                    Try Again
+                  </Button>
+                </div>
+              ) : (
+                <img
+                  key={previewImage}
+                  src={previewImage}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                  onLoad={handleImageLoad}
+                  onError={handleImageError}
+                />
+              )}
+              
               {/* Overlay on hover */}
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-xl"></div>
+              <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-xl"></div>
               
               {/* Success indicator */}
-              {uploadSuccess && (
+              {uploadSuccess && !imageError && (
                 <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1 animate-bounce">
                   <CheckCircle className="w-3 h-3" />
                 </div>
@@ -263,7 +237,7 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={toggleOptions}
+                onClick={triggerFileInput}
                 disabled={isUploading}
                 className="text-xs px-3 py-2"
               >
@@ -283,11 +257,11 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
                     <div className="animate-spin rounded-full h-8 w-8 border-3 border-blue-200"></div>
                     <div className="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent absolute top-0 left-0"></div>
                   </div>
-                  <span className="text-sm text-blue-600 mt-3 font-medium animate-pulse">Processing...</span>
+                  <span className="text-sm text-blue-600 mt-3 font-medium animate-pulse">Uploading...</span>
                   <span className="text-xs text-blue-500 mt-1">Please wait</span>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center" onClick={toggleOptions}>
+                <div className="flex flex-col items-center justify-center" onClick={triggerFileInput}>
                   <div className="w-12 h-12 bg-gray-200 group-hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors duration-200">
                     <ImageIcon className="w-6 h-6 text-gray-500 group-hover:text-blue-600 transition-colors duration-200" />
                   </div>
@@ -299,164 +273,6 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
                   </span>
                 </div>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* Upload Options Modal */}
-        {showOptions && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
-              <h3 className="text-lg font-semibold mb-4 text-center">Choose Upload Method</h3>
-              <div className="space-y-3">
-                <Button
-                  type="button"
-                  onClick={triggerFileInput}
-                  className="w-full flex items-center justify-center gap-3 py-3"
-                  disabled={isUploading}
-                >
-                  <FolderOpen className="w-5 h-5" />
-                  Upload from Gallery
-                </Button>
-                {cameraSupported && (
-                  <>
-                    <Button
-                      type="button"
-                      onClick={() => startCamera('environment')}
-                      variant="outline"
-                      className="w-full flex items-center justify-center gap-3 py-3"
-                      disabled={isUploading || isCapturing}
-                    >
-                      <Camera className="w-5 h-5" />
-                      {isCapturing ? 'Opening Camera...' : 'Take Photo (Rear Camera)'}
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => startCamera('user')}
-                      variant="outline"
-                      className="w-full flex items-center justify-center gap-3 py-3"
-                      disabled={isUploading || isCapturing}
-                    >
-                      <Smartphone className="w-5 h-5" />
-                      {isCapturing ? 'Opening Camera...' : 'Take Photo (Front Camera)'}
-                    </Button>
-                  </>
-                )}
-                <Button
-                  type="button"
-                  onClick={() => setShowOptions(false)}
-                  variant="ghost"
-                  className="w-full py-2"
-                >
-                  Cancel
-                </Button>
-              </div>
-              {!cameraSupported && (
-                <p className="text-xs text-gray-500 mt-3 text-center">
-                  Camera not supported on this device
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Camera Modal */}
-        {showCamera && (
-          <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-              <div className="p-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold">Camera</h3>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={stopCamera}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-                
-                <div className="relative bg-black rounded-lg overflow-hidden mb-4">
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    className="w-full h-64 object-cover"
-                  />
-                  <canvas
-                    ref={canvasRef}
-                    className="hidden"
-                  />
-                </div>
-                
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    onClick={capturePhoto}
-                    className="flex-1 flex items-center justify-center gap-2"
-                  >
-                    <CameraIcon className="w-4 h-4" />
-                    Capture Photo
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={stopCamera}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Captured Photo Preview */}
-        {capturedImage && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-              <div className="p-4">
-                <h3 className="text-lg font-semibold mb-4 text-center">Captured Photo</h3>
-                
-                <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-4">
-                  <img
-                    src={capturedImage}
-                    alt="Captured photo"
-                    className="w-full h-64 object-cover"
-                  />
-                </div>
-                
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    onClick={uploadCapturedPhoto}
-                    disabled={isUploading}
-                    className="flex-1 flex items-center justify-center gap-2"
-                  >
-                    {isUploading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4" />
-                        Upload Photo
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setCapturedImage(null)}
-                    className="flex-1"
-                  >
-                    Retake
-                  </Button>
-                </div>
-              </div>
             </div>
           </div>
         )}

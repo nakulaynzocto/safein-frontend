@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from "react"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { showErrorToast, showSuccessToast } from "@/utils/toast"
-import { Camera, Upload, Image as ImageIcon, X, CheckCircle, Smartphone, FolderOpen } from "lucide-react"
+import { Image as ImageIcon, X, CheckCircle } from "lucide-react"
+import { useUploadFileMutation } from "@/store/api"
 
 interface ImageUploadFieldProps {
   name: string
@@ -15,91 +16,54 @@ interface ImageUploadFieldProps {
   initialUrl?: string
 }
 
-// Function to upload image and return a URL
-async function uploadImage(file: File): Promise<string> {
-  try {
-    // Validate file size (5MB limit)
+export function ImageUploadField({ name, label, register, setValue, errors, initialUrl }: ImageUploadFieldProps) {
+  const [previewImage, setPreviewImage] = useState<string | null>(initialUrl || null)
+  const [uploadSuccess, setUploadSuccess] = useState(false)
+  const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation()
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputId = `${name}-file-input`
+
+  const validateFile = (file: File): void => {
     const maxSize = 5 * 1024 * 1024 // 5MB
     if (file.size > maxSize) {
       throw new Error("File size exceeds 5MB limit")
     }
-
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       throw new Error("Only image files are allowed")
     }
-
-    const formData = new FormData()
-    formData.append("file", file)
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    })
-    if (!response.ok) throw new Error("Image upload failed")
-    const data = await response.json()
-    return data.url
-  } catch (error) {
-    console.error("Error uploading image:", error)
-    throw new Error("Failed to upload image")
   }
-}
-
-// Check if device supports camera
-const supportsCamera = () => {
-  return navigator.mediaDevices && navigator.mediaDevices.getUserMedia
-}
-
-export function ImageUploadField({ name, label, register, setValue, errors, initialUrl }: ImageUploadFieldProps) {
-  const [previewImage, setPreviewImage] = useState<string | null>(initialUrl || null)
-  const [isUploading, setIsUploading] = useState(false)
-  const [uploadSuccess, setUploadSuccess] = useState(false)
-  const [showOptions, setShowOptions] = useState(false)
-  const [cameraSupported, setCameraSupported] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const cameraInputRef = useRef<HTMLInputElement>(null)
-  const fileInputId = `${name}-file-input`
-  const cameraInputId = `${name}-camera-input`
-
-  useEffect(() => {
-    setCameraSupported(supportsCamera())
-  }, [])
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      await processFile(file, "Uploaded from gallery")
+      await processFile(file)
     }
   }
 
-  const handleCameraCapture = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      await processFile(file, "Photo captured")
-    }
-  }
-
-  const processFile = async (file: File, successMessage: string) => {
+  const processFile = async (file: File) => {
     try {
-      setIsUploading(true)
-      setUploadSuccess(false)
-      setShowOptions(false)
+      // Validate file
+      validateFile(file)
       
-      const url = await uploadImage(file)
-      setValue(name, url, { shouldValidate: true })
+      setUploadSuccess(false)
+      
+      // Upload using RTK Query
+      const result = await uploadFile({ file }).unwrap()
+      
+      setValue(name, result.url, { shouldValidate: true })
       setPreviewImage(URL.createObjectURL(file))
       setUploadSuccess(true)
-      showSuccessToast(`${successMessage} successfully!`)
+      showSuccessToast("Image uploaded successfully!")
       
       // Reset success state after 3 seconds
       setTimeout(() => setUploadSuccess(false), 3000)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Image processing failed:", error)
       setValue(name, "", { shouldValidate: true })
       setPreviewImage(null)
       setUploadSuccess(false)
-      showErrorToast(error instanceof Error ? error.message : "Failed to process image")
-    } finally {
-      setIsUploading(false)
+      showErrorToast(error?.data?.message || error?.message || "Failed to upload image")
     }
   }
 
@@ -107,25 +71,13 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
     setValue(name, "", { shouldValidate: true })
     setPreviewImage(null)
     setUploadSuccess(false)
-    setShowOptions(false)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
-    }
-    if (cameraInputRef.current) {
-      cameraInputRef.current.value = ""
     }
   }
 
   const triggerFileInput = () => {
     fileInputRef.current?.click()
-  }
-
-  const triggerCameraInput = () => {
-    cameraInputRef.current?.click()
-  }
-
-  const toggleOptions = () => {
-    setShowOptions(!showOptions)
   }
 
   // Clean up object URL to prevent memory leaks
@@ -156,7 +108,7 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
                 }}
               />
               {/* Overlay on hover */}
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-xl"></div>
+              <div className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-xl"></div>
               
               {/* Success indicator */}
               {uploadSuccess && (
@@ -181,7 +133,7 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={toggleOptions}
+                onClick={triggerFileInput}
                 disabled={isUploading}
                 className="text-xs px-3 py-2"
               >
@@ -205,7 +157,7 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
                   <span className="text-xs text-blue-500 mt-1">Please wait</span>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center" onClick={toggleOptions}>
+                <div className="flex flex-col items-center justify-center" onClick={triggerFileInput}>
                   <div className="w-12 h-12 bg-gray-200 group-hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors duration-200">
                     <ImageIcon className="w-6 h-6 text-gray-500 group-hover:text-blue-600 transition-colors duration-200" />
                   </div>
@@ -221,52 +173,7 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
           </div>
         )}
 
-        {/* Upload Options Modal */}
-        {showOptions && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
-              <h3 className="text-lg font-semibold mb-4 text-center">Choose Upload Method</h3>
-              <div className="space-y-3">
-                <Button
-                  type="button"
-                  onClick={triggerFileInput}
-                  className="w-full flex items-center justify-center gap-3 py-3"
-                  disabled={isUploading}
-                >
-                  <FolderOpen className="w-5 h-5" />
-                  Upload from Gallery
-                </Button>
-                {cameraSupported && (
-                  <Button
-                    type="button"
-                    onClick={triggerCameraInput}
-                    variant="outline"
-                    className="w-full flex items-center justify-center gap-3 py-3"
-                    disabled={isUploading}
-                  >
-                    <Camera className="w-5 h-5" />
-                    Take Photo
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  onClick={() => setShowOptions(false)}
-                  variant="ghost"
-                  className="w-full py-2"
-                >
-                  Cancel
-                </Button>
-              </div>
-              {!cameraSupported && (
-                <p className="text-xs text-gray-500 mt-3 text-center">
-                  Camera not supported on this device
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Hidden file inputs */}
+        {/* Hidden file input */}
         <input
           id={fileInputId}
           type="file"
@@ -275,16 +182,6 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
           onChange={handleFileChange}
           disabled={isUploading}
           ref={fileInputRef}
-        />
-        <input
-          id={cameraInputId}
-          type="file"
-          className="hidden"
-          accept="image/*"
-          capture="environment"
-          onChange={handleCameraCapture}
-          disabled={isUploading}
-          ref={cameraInputRef}
         />
       </div>
       {errors && (
