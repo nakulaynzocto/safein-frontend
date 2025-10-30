@@ -33,6 +33,7 @@ import {
   useRejectAppointmentMutation 
 } from "@/store/api/appointmentApi"
 import { SearchInput } from "@/components/common/searchInput"
+import DateRangePicker from "@/components/common/dateRangePicker"
 import { AppointmentDetailsDialog } from "./appointmentDetailsDialog"
 import { CheckOutDialog } from "./checkOutDialog"
 import {
@@ -121,8 +122,11 @@ export function AppointmentTable({
   onRefresh,
   showHeader = true,
   title,
+  onDateFromChange,
+  onDateToChange,
 }: AppointmentTableProps) {
   const router = useRouter()
+  const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false)
   
   // API mutations
   const [approveAppointment, { isLoading: isApprovingMutation }] = useApproveAppointmentMutation()
@@ -543,13 +547,16 @@ export function AppointmentTable({
       {/* Main Table */}
       <Card className="card-hostinger p-3 sm:p-4 overflow-hidden">
         <CardHeader className="pb-3 sm:pb-4 px-0">
-            <SearchInput
-              placeholder="Search appointments..."
-              value={searchTerm}
-              onChange={onSearchChange}
-              debounceDelay={500}
-              className="w-full"
-            />
+            <div className="flex items-center justify-between gap-3">
+              <SearchInput
+                placeholder="Search appointments..."
+                value={searchTerm}
+                onChange={onSearchChange}
+                debounceDelay={500}
+                className="w-full"
+              />
+              <DateRangePicker onDateRangeChange={(r) => { onDateFromChange?.(r.startDate || ""); onDateToChange?.(r.endDate || ""); onPageChange?.(1); }} />
+            </div>
         </CardHeader>
         <CardContent className="p-0">
           <DataTable
@@ -564,7 +571,7 @@ export function AppointmentTable({
               primaryActionLabel: mode === 'active' ? 'Schedule Appointment' : undefined,
             }}
             onPrimaryAction={mode === 'active' ? () => {
-              // This will be handled by the modal trigger
+              setShowNewAppointmentModal(true)
             } : undefined}
             showCard={false}
             isLoading={isLoading}
@@ -642,6 +649,16 @@ export function AppointmentTable({
         open={showViewDialog}
         on_close={() => setShowViewDialog(false)}
       />
+
+      {/* New Appointment Modal - opened from empty state button */}
+      {mode === 'active' && (
+        <NewAppointmentModal
+          open={showNewAppointmentModal}
+          onOpenChange={setShowNewAppointmentModal}
+          onSuccess={handleAppointmentCreated}
+          triggerButton={<div />}
+        />
+      )}
     </div>
   )
 }

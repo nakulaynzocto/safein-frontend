@@ -72,9 +72,9 @@ export default function ContactPage() {
 
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
+      <section className="py-20 px-4 bg-hero-gradient">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
             Get in Touch
@@ -90,10 +90,10 @@ export default function ContactPage() {
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 heading-main">
               Contact Information
             </h2>
-            <p className="text-lg" style={{ color: '#2c5aa0' }}>
+            <p className="text-lg text-accent">
               Multiple ways to reach our team
             </p>
           </div>
@@ -102,25 +102,25 @@ export default function ContactPage() {
             {contactInfo.map((info, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#98c7dd' }}>
-                    <info.icon className="h-6 w-6" style={{ color: '#3882a5' }} />
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4 bg-brand-tint">
+                    <info.icon className="h-6 w-6 text-brand-strong" />
                   </div>
-                  <CardTitle className="text-lg" style={{ color: '#161718' }}>
+                  <CardTitle className="text-lg text-brand">
                     {info.title}
                   </CardTitle>
-                  <CardDescription style={{ color: '#2c5aa0' }}>
+                  <CardDescription className="text-accent">
                     {info.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm mb-4 whitespace-pre-line" style={{ color: '#2c5aa0' }}>
+                  <p className="text-sm mb-4 whitespace-pre-line text-accent">
                     {info.details}
                   </p>
                   {info.action && (
                     <Button 
                       variant="outline" 
                       size="sm"
-                      style={{ borderColor: '#3882a5', color: '#3882a5' }}
+                      className="border-brand text-brand-strong hover:!text-white"
                       asChild
                     >
                       <Link href={info.action}>Contact Us</Link>
@@ -134,14 +134,14 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Form */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#d1d8e2' }}>
+      <section className="py-20 px-4 bg-white">
         <div className="container mx-auto">
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 heading-main">
                 Send us a Message
               </h2>
-              <p className="text-lg" style={{ color: '#2c5aa0' }}>
+              <p className="text-lg text-accent">
                 Fill out the form below and we'll get back to you within 24 hours
               </p>
             </div>
@@ -149,28 +149,20 @@ export default function ContactPage() {
             <Card className="shadow-lg">
               <CardContent className="p-8">
                 <form className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <Label htmlFor="firstName" style={{ color: '#161718' }}>First Name</Label>
-                      <Input 
-                        id="firstName" 
-                        placeholder="Enter your first name"
-                        className="mt-2"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="lastName" style={{ color: '#161718' }}>Last Name</Label>
-                      <Input 
-                        id="lastName" 
-                        placeholder="Enter your last name"
-                        className="mt-2"
-                      />
-                    </div>
+                  {/* Name */}
+                  <div>
+                    <Label htmlFor="name" className="text-brand">Name</Label>
+                    <Input 
+                      id="name" 
+                      placeholder="Enter your full name"
+                      className="mt-2"
+                    />
                   </div>
-                  
+
+                  {/* Email and Phone */}
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <Label htmlFor="email" style={{ color: '#161718' }}>Email Address</Label>
+                      <Label htmlFor="email" className="text-brand">Email Address</Label>
                       <Input 
                         id="email" 
                         type="email"
@@ -179,7 +171,7 @@ export default function ContactPage() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone" style={{ color: '#161718' }}>Phone Number</Label>
+                      <Label htmlFor="phone" className="text-brand">Phone Number</Label>
                       <Input 
                         id="phone" 
                         placeholder="Enter your phone number"
@@ -188,26 +180,9 @@ export default function ContactPage() {
                     </div>
                   </div>
 
+                  {/* Message */}
                   <div>
-                    <Label htmlFor="company" style={{ color: '#161718' }}>Company Name</Label>
-                    <Input 
-                      id="company" 
-                      placeholder="Enter your company name"
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="subject" style={{ color: '#161718' }}>Subject</Label>
-                    <Input 
-                      id="subject" 
-                      placeholder="What can we help you with?"
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="message" style={{ color: '#161718' }}>Message</Label>
+                    <Label htmlFor="message" className="text-brand">Message</Label>
                     <Textarea 
                       id="message" 
                       placeholder="Tell us more about your inquiry..."
@@ -217,8 +192,7 @@ export default function ContactPage() {
 
                   <Button 
                     type="submit" 
-                    className="w-full text-white" 
-                    style={{ backgroundColor: '#3882a5' }}
+                    className="w-full text-white bg-brand"
                   >
                     Send Message
                     <Send className="ml-2 h-4 w-4" />
@@ -234,10 +208,10 @@ export default function ContactPage() {
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 heading-main">
               Contact by Department
             </h2>
-            <p className="text-lg" style={{ color: '#2c5aa0' }}>
+            <p className="text-lg text-accent">
               Reach out to the right team for faster assistance
             </p>
           </div>
@@ -246,30 +220,30 @@ export default function ContactPage() {
             {departments.map((dept, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#98c7dd' }}>
-                    <dept.icon className="h-6 w-6" style={{ color: '#3882a5' }} />
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4 bg-brand-tint">
+                    <dept.icon className="h-6 w-6 text-brand-strong" />
                   </div>
-                  <CardTitle className="text-xl" style={{ color: '#161718' }}>
+                  <CardTitle className="text-xl text-brand">
                     {dept.title}
                   </CardTitle>
-                  <CardDescription className="text-base" style={{ color: '#2c5aa0' }}>
+                  <CardDescription className="text-base text-accent">
                     {dept.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <p className="text-sm font-medium" style={{ color: '#161718' }}>Email:</p>
-                      <p className="text-sm" style={{ color: '#3882a5' }}>{dept.email}</p>
+                      <p className="text-sm font-medium text-brand">Email:</p>
+                      <p className="text-sm text-brand-strong">{dept.email}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium" style={{ color: '#161718' }}>Response Time:</p>
-                      <p className="text-sm" style={{ color: '#2c5aa0' }}>{dept.response}</p>
+                      <p className="text-sm font-medium text-brand">Response Time:</p>
+                      <p className="text-sm text-accent">{dept.response}</p>
                     </div>
                     <Button 
                       variant="outline" 
                       size="sm"
-                      style={{ borderColor: '#3882a5', color: '#3882a5' }}
+                      className="border-brand text-brand-strong hover:!text-white"
                       asChild
                     >
                       <Link href={`mailto:${dept.email}`}>
@@ -286,7 +260,7 @@ export default function ContactPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
+      <section className="py-20 px-4 bg-hero-gradient">
         <div className="container mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Get Started?
@@ -295,13 +269,13 @@ export default function ContactPage() {
             Don't wait - start managing your visitors more efficiently today with our free trial.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-white" style={{ backgroundColor: '#3882a5' }} asChild>
+            <Button size="lg" className="text-white bg-brand" asChild>
               <Link href={routes.publicroute.REGISTER}>
                 Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900">
+            <Button size="lg" variant="outline" className="text-gray-900 border-white hover:bg-white hover:text-gray-900">
               <Link href={routes.publicroute.PRICING}>View Pricing</Link>
             </Button>
           </div>

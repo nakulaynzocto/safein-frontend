@@ -11,8 +11,21 @@ import {
   MapPin, 
   CreditCard, 
   Calendar,
-  Building
+  Building,
+  ExternalLink
 } from "lucide-react"
+
+// JSON configuration for visitor details
+const visitor_details_config = [
+  { key: "name", label: "Full Name", icon: User },
+  { key: "email", label: "Email", icon: Mail },
+  { key: "phone", label: "Phone", icon: Phone },
+  { key: "createdAt", label: "Registered On", icon: Calendar, format: (value: string) => {
+    if (!value) return "N/A";
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM dd, yyyy 'at' HH:mm");
+  }},
+]
 
 interface VisitorDetailsDialogProps {
   visitor: Visitor | null
@@ -23,6 +36,14 @@ interface VisitorDetailsDialogProps {
 export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsDialogProps) {
   if (!visitor) return null
 
+  // Helper function to get field value
+  const getFieldValue = (key: string): string => {
+    const value = visitor[key as keyof Visitor];
+    if (typeof value === 'string') return value;
+    if (typeof value === 'boolean') return value.toString();
+    return 'N/A';
+  };
+
   return (
     <Dialog 
       open={open} 
@@ -32,12 +53,13 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
         }
       }}
     >
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900">
+      <DialogContent className="max-w-3xl bg-white dark:bg-gray-900">
         <DialogHeader>
           <DialogTitle className="text-2xl">Visitor Details</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
+        <div className="max-h-[65vh] overflow-y-auto pr-2">
+          <div className="space-y-6">
           {/* Header with Photo */}
           <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border">
             <Avatar className="h-20 w-20">
@@ -63,37 +85,21 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
               Personal Information
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Full Name</div>
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <span>{visitor.name}</span>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Email</div>
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="break-all">{visitor.email}</span>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Phone</div>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{visitor.phone}</span>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Registered On</div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{format(new Date(visitor.createdAt), "MMM dd, yyyy 'at' HH:mm")}</span>
-                </div>
-              </div>
+              {visitor_details_config.map(({ key, label, icon: Icon, format }) => {
+                const value = getFieldValue(key);
+                
+                return (
+                  <div key={key} className="space-y-2">
+                    <div className="text-sm font-medium text-muted-foreground">{label}</div>
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-muted-foreground" />
+                      <span className={key === 'email' ? 'break-all' : ''}>
+                        {format && value ? format(value as string) : value}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -131,33 +137,30 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
               
               <div className="space-y-2">
                 <div className="text-sm font-medium text-muted-foreground">ID Number</div>
-                <div className="font-mono">{visitor.idProof.number}</div>
+                {visitor.idProof.image ? (
+                  <button
+                    onClick={() => window.open(visitor.idProof.image, '_blank')}
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-mono"
+                  >
+                    <span>{visitor.idProof.number}</span>
+                    <ExternalLink className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <div className="font-mono">{visitor.idProof.number}</div>
+                )}
               </div>
             </div>
-            
-            {visitor.idProof.image && (
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">ID Image</div>
-                <div className="relative w-full max-w-md">
-                  <img 
-                    src={visitor.idProof.image} 
-                    alt="ID Proof" 
-                    className="rounded-lg border w-full h-auto object-contain"
-                  />
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-2 pt-4 border-t">
+          <div className="flex justify-end pt-4 border-t">
             <Button 
               type="button" 
-              variant="outline"
               onClick={onClose}
             >
               Close
             </Button>
+          </div>
           </div>
         </div>
       </DialogContent>

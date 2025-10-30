@@ -19,7 +19,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SelectField } from "@/components/common/selectField";
+import { CountryStateCitySelect } from "@/components/common/countryStateCity";
 import { ImageUploadField } from "@/components/common/imageUploadField";
+import { PhoneInputField } from "@/components/common/phoneInputField";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import {
   CreateVisitorRequest,
@@ -235,20 +237,21 @@ export function NewVisitorModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
 
-      <DialogContent className="sm:max-w-3xl max-h-[95vh] overflow-y-auto bg-white dark:bg-gray-900">
+      <DialogContent className="sm:max-w-3xl bg-white dark:bg-gray-900">
         <DialogHeader>
           <DialogTitle className="text-xl">
             {isEditMode ? "Edit Visitor" : "Register New Visitor"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {isEditMode && isLoadingVisitor ? (
-            <div className="flex items-center justify-center h-32">
-              <LoadingSpinner size="lg" />
-            </div>
-          ) : (
-            <>
+        <div className="max-h-[65vh] overflow-y-auto overflow-x-visible pr-2">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {isEditMode && isLoadingVisitor ? (
+              <div className="flex items-center justify-center h-32">
+                <LoadingSpinner size="lg" />
+              </div>
+            ) : (
+              <>
               {generalError && (
                 <Alert variant="destructive">
                   <AlertDescription>{generalError}</AlertDescription>
@@ -256,7 +259,7 @@ export function NewVisitorModal({
               )}
 
               <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-64 sm:mb-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name *</Label>
                     <Input
@@ -288,79 +291,48 @@ export function NewVisitorModal({
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number *</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      {...register("phone", { onChange: clearGeneralError })}
-                      placeholder="Enter phone number"
-                      className={errors.phone ? "border-destructive" : ""}
-                    />
-                    {errors.phone && (
-                      <span className="text-sm text-destructive">
-                        {errors.phone.message}
-                      </span>
+                  <Controller
+                    name="phone"
+                    control={control}
+                    render={({ field }) => (
+                      <PhoneInputField
+                        id="phone"
+                        label="Phone Number"
+                        value={field.value}
+                        onChange={(value) => {
+                          field.onChange(value);
+                          clearGeneralError();
+                        }}
+                        error={errors.phone?.message}
+                        required
+                        placeholder="Enter phone number"
+                        defaultCountry="in"
+                      />
                     )}
-                  </div>
+                  />
                 </div>
               </div>
 
               {/* Address Information */}
               <div className="space-y-4">
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="address.city">City *</Label>
-                    <Input
-                      id="address.city"
-                      {...register("address.city")}
-                      placeholder="Enter city"
-                      className={
-                        errors.address?.city ? "border-destructive" : ""
-                      }
-                    />
-                    {errors.address?.city && (
-                      <span className="text-sm text-destructive">
-                        {errors.address.city.message}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="address.state">State *</Label>
-                    <Input
-                      id="address.state"
-                      {...register("address.state")}
-                      placeholder="Enter state"
-                      className={
-                        errors.address?.state ? "border-destructive" : ""
-                      }
-                    />
-                    {errors.address?.state && (
-                      <span className="text-sm text-destructive">
-                        {errors.address.state.message}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="address.country">Country *</Label>
-                    <Input
-                      id="address.country"
-                      {...register("address.country")}
-                      placeholder="Enter country"
-                      className={
-                        errors.address?.country ? "border-destructive" : ""
-                      }
-                    />
-                    {errors.address?.country && (
-                      <span className="text-sm text-destructive">
-                        {errors.address.country.message}
-                      </span>
-                    )}
-                  </div>
-                </div>
+                <CountryStateCitySelect
+                  value={{
+                    country: watch("address.country") || "",
+                    state: watch("address.state") || "",
+                    city: watch("address.city") || "",
+                  }}
+                  onChange={(v) => {
+                    setValue("address.country", v.country)
+                    setValue("address.state", v.state)
+                    setValue("address.city", v.city)
+                  }}
+                  errors={{
+                    country: errors.address?.country?.message as string,
+                    state: errors.address?.state?.message as string,
+                    city: errors.address?.city?.message as string,
+                  }}
+                />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-2">
@@ -482,6 +454,7 @@ export function NewVisitorModal({
             </>
           )}
         </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

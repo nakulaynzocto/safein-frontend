@@ -21,6 +21,13 @@ export function EmployeeList() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [sortBy, setSortBy] = useState("createdAt")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
+  const [dateRange, setDateRange] = useState<{ startDate: string | null; endDate: string | null }>(() => {
+    if (typeof window !== 'undefined') {
+      const raw = localStorage.getItem('dateRange')
+      return raw ? JSON.parse(raw) : { startDate: null, endDate: null }
+    }
+    return { startDate: null, endDate: null }
+  })
   
   // Debounce search input to prevent excessive API calls
   const debouncedSearch = useDebounce(search, 500)
@@ -34,6 +41,8 @@ export function EmployeeList() {
     status: statusFilter && statusFilter !== "all" ? statusFilter as "Active" | "Inactive" : undefined,
     sortBy,
     sortOrder,
+    startDate: dateRange.startDate || undefined,
+    endDate: dateRange.endDate || undefined,
   })
   
   const [deleteEmployee, { isLoading: isDeleting }] = useDeleteEmployeeMutation()
@@ -125,6 +134,8 @@ export function EmployeeList() {
         // Table configuration
         mode="active"
         showSelection={false}
+        onDateFromChange={(v) => { setDateRange(prev => ({ ...prev, startDate: v || null })); setCurrentPage(1) }}
+        onDateToChange={(v) => { setDateRange(prev => ({ ...prev, endDate: v || null })); setCurrentPage(1) }}
         
         // Actions
         onDelete={handleDelete}

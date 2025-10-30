@@ -114,9 +114,9 @@ export default function HelpPage() {
 
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
+      <section className="py-20 px-4 bg-hero-gradient">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
             How can we help you?
@@ -143,10 +143,10 @@ export default function HelpPage() {
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 heading-main">
               Get Support
             </h2>
-            <p className="text-lg" style={{ color: '#2c5aa0' }}>
+            <p className="text-lg text-accent">
               Choose the support option that works best for you
             </p>
           </div>
@@ -155,13 +155,13 @@ export default function HelpPage() {
             {supportOptions.map((option, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#98c7dd' }}>
-                    <option.icon className="h-6 w-6" style={{ color: option.color }} />
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4 bg-brand-tint">
+                    <option.icon className="h-6 w-6 text-brand-strong" />
                   </div>
-                  <CardTitle className="text-lg" style={{ color: '#161718' }}>
+                  <CardTitle className="text-lg text-brand">
                     {option.title}
                   </CardTitle>
-                  <CardDescription style={{ color: '#2c5aa0' }}>
+                  <CardDescription className="text-accent">
                     {option.description}
                   </CardDescription>
                 </CardHeader>
@@ -169,7 +169,7 @@ export default function HelpPage() {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    style={{ borderColor: option.color, color: option.color }}
+                    className="border-brand text-brand-strong"
                   >
                     {option.action}
                   </Button>
@@ -181,13 +181,13 @@ export default function HelpPage() {
       </section>
 
       {/* Help Categories */}
-      <section className="py-20 px-4" style={{ backgroundColor: '#d1d8e2' }}>
+      <section className="py-20 px-4 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 heading-main">
               Browse by Category
             </h2>
-            <p className="text-lg" style={{ color: '#2c5aa0' }}>
+            <p className="text-lg text-accent">
               Find help organized by topic
             </p>
           </div>
@@ -196,20 +196,20 @@ export default function HelpPage() {
             {helpCategories.map((category, index) => (
               <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4" style={{ backgroundColor: '#98c7dd' }}>
-                    <category.icon className="h-6 w-6" style={{ color: '#3882a5' }} />
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 bg-brand-tint">
+                    <category.icon className="h-6 w-6 text-brand-strong" />
                   </div>
-                  <CardTitle className="text-lg" style={{ color: '#161718' }}>
+                  <CardTitle className="text-lg text-brand">
                     {category.title}
                   </CardTitle>
-                  <CardDescription style={{ color: '#2c5aa0' }}>
+                  <CardDescription className="text-accent">
                     {category.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
                     {category.articles.map((article, articleIndex) => (
-                      <li key={articleIndex} className="text-sm" style={{ color: '#2c5aa0' }}>
+                      <li key={articleIndex} className="text-sm text-accent">
                         • {article}
                       </li>
                     ))}
@@ -218,7 +218,7 @@ export default function HelpPage() {
                     variant="outline" 
                     size="sm" 
                     className="mt-4 w-full"
-                    style={{ borderColor: '#3882a5', color: '#3882a5' }}
+                    className="mt-4 w-full border-brand text-brand-strong"
                   >
                     View All Articles
                   </Button>
@@ -233,10 +233,10 @@ export default function HelpPage() {
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 heading-main">
               Popular Articles
             </h2>
-            <p className="text-lg" style={{ color: '#2c5aa0' }}>
+            <p className="text-lg text-accent">
               Most frequently viewed help articles
             </p>
           </div>
@@ -251,14 +251,13 @@ export default function HelpPage() {
                     </Badge>
                     <span className="text-xs text-gray-500">{article.readTime}</span>
                   </div>
-                  <h3 className="font-semibold mb-2" style={{ color: '#161718' }}>
+                  <h3 className="font-semibold mb-2 text-brand">
                     {article.title}
                   </h3>
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="p-0 h-auto text-sm"
-                    style={{ color: '#3882a5' }}
+                    className="p-0 h-auto text-sm text-brand-strong"
                   >
                     Read Article
                     <ArrowRight className="ml-1 h-3 w-3" />
@@ -271,7 +270,7 @@ export default function HelpPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
+      <section className="py-20 px-4 bg-hero-gradient">
         <div className="container mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Get Started?
@@ -280,7 +279,7 @@ export default function HelpPage() {
             Start your free trial today and see how easy SafeIn management can be.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-white" style={{ backgroundColor: '#3882a5' }} asChild>
+            <Button size="lg" className="text-white bg-brand" asChild>
               <Link href={routes.publicroute.REGISTER}>
                 Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />

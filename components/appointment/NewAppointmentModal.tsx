@@ -23,12 +23,13 @@ import { SelectField } from "@/components/common/selectField"
 import { DatePicker } from "@/components/common/datePicker"
 import { TimePicker } from "@/components/common/timePicker"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
+import { ImageUploadField } from "@/components/common/imageUploadField"
 import { useCreateAppointmentMutation, useGetAppointmentQuery, useUpdateAppointmentMutation } from "@/store/api/appointmentApi"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
 import { useGetVisitorsQuery, Visitor } from "@/store/api/visitorApi"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
-import { Calendar, User } from "lucide-react"
+import { Calendar, User, Car } from "lucide-react"
 
 // Validation schema
 const appointmentSchema = yup.object({
@@ -66,6 +67,8 @@ const appointmentSchema = yup.object({
     return true
   }),
   notes: yup.string().optional().default(""),
+  vehicleNumber: yup.string().optional().default(""),
+  vehiclePhoto: yup.string().optional().default(""),
 })
 
 type AppointmentFormData = yup.InferType<typeof appointmentSchema>
@@ -139,6 +142,8 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
       appointmentDate: "",
       appointmentTime: "",
       notes: "",
+      vehicleNumber: "",
+      vehiclePhoto: "",
     },
   })
 
@@ -167,6 +172,8 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
           new Date(appointmentDetails.scheduledDate).toISOString().split('T')[0] : "",
         appointmentTime: appointmentDetails?.scheduledTime || "",
         notes: appointmentDetails?.notes || "",
+        vehicleNumber: appointmentDetails?.vehicleNumber || "",
+        vehiclePhoto: appointmentDetails?.vehiclePhoto || "",
       })
     }
   }, [isEditMode, existingAppointment, open, reset])
@@ -202,7 +209,9 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
             scheduledTime: data.appointmentTime,
             duration: existingAppointment?.appointmentDetails?.duration || 60,
             meetingRoom: existingAppointment?.appointmentDetails?.meetingRoom || "Main Conference Room",
-            notes: data.notes || ""
+            notes: data.notes || "",
+            vehicleNumber: data.vehicleNumber || "",
+            vehiclePhoto: data.vehiclePhoto || ""
           }
         }
         await updateAppointment({ id: appointmentId, ...updateData }).unwrap()
@@ -218,7 +227,9 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
             scheduledTime: data.appointmentTime,
             duration: 60,
             meetingRoom: "Main Conference Room",
-            notes: data.notes || ""
+            notes: data.notes || "",
+            vehicleNumber: data.vehicleNumber || "",
+            vehiclePhoto: data.vehiclePhoto || ""
           },
           visitorDetails: {
             name: data.visitorName,
@@ -268,16 +279,11 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
         {triggerButton || defaultTrigger}
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900">
+      <DialogContent className="sm:max-w-2xl bg-white dark:bg-gray-900">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
             {isEditMode ? "Edit Appointment" : "Schedule New Appointment"}
           </DialogTitle>
-          <DialogDescription>
-            {isEditMode 
-              ? "Update the appointment information."
-              : "Fill in the details to schedule a new appointment."}
-          </DialogDescription>
         </DialogHeader>
 
         {isEditMode && isLoadingAppointment ? (
@@ -286,7 +292,8 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
             <span className="ml-2 text-sm text-gray-600">Loading appointment details...</span>
           </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="max-h-[60vh] overflow-y-auto pr-2">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {generalError && (
               <Alert variant="destructive">
                 <AlertDescription>
@@ -295,58 +302,49 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
               </Alert>
             )}
 
-            {/* Visitor Selection */}
-            <div className="space-y-2">
-              <Label className="font-medium">Visitor</Label>
-              <Controller
-                name="visitorId"
-                control={control}
-                render={({ field }) => (
-                  <SelectField
-                    placeholder="Select visitor"
-                    options={visitorOptions}
-                    value={field.value}
-                    onChange={(val) => {
-                      field.onChange(val)
-                      handleVisitorSelect(val)
-                    }}
-                    error={errors.visitorId?.message}
-                  />
-                )}
-              />
+            {/* Visitor and Employee Selection - One Row */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {/* Visitor Selection */}
+              <div className="space-y-2">
+                <Label className="font-medium">Visitor</Label>
+                <Controller
+                  name="visitorId"
+                  control={control}
+                  render={({ field }) => (
+                    <SelectField
+                      placeholder="Select visitor"
+                      options={visitorOptions}
+                      value={field.value}
+                      onChange={(val) => {
+                        field.onChange(val)
+                        handleVisitorSelect(val)
+                      }}
+                      error={errors.visitorId?.message}
+                    />
+                  )}
+                />
+              </div>
+
+              {/* Employee Selection */}
+              <div className="space-y-2">
+                <Label className="font-medium">Employee to Meet</Label>
+                <Controller
+                  name="employeeId"
+                  control={control}
+                  render={({ field }) => (
+                    <SelectField
+                      placeholder="Select employee"
+                      options={employeeOptions}
+                      value={field.value}
+                      onChange={(val) => field.onChange(val)}
+                      error={errors.employeeId?.message}
+                    />
+                  )}
+                />
+              </div>
             </div>
 
-            {/* Employee Selection */}
-            <div className="space-y-2">
-              <Label className="font-medium">Employee to Meet</Label>
-              <Controller
-                name="employeeId"
-                control={control}
-                render={({ field }) => (
-                  <SelectField
-                    placeholder="Select employee"
-                    options={employeeOptions}
-                    value={field.value}
-                    onChange={(val) => field.onChange(val)}
-                    error={errors.employeeId?.message}
-                  />
-                )}
-              />
-            </div>
 
-            {/* Purpose */}
-            <div className="space-y-2">
-              <Label htmlFor="purpose" className="font-medium">Purpose of Visit</Label>
-              <Textarea
-                id="purpose"
-                {...register("purpose")}
-                placeholder="Brief description of the visit purpose"
-                className={errors.purpose ? "border-destructive" : ""}
-              />
-              {errors.purpose && (
-                <span className="text-sm text-destructive">{errors.purpose.message}</span>
-              )}
-            </div>
 
             {/* Date and Time */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -393,6 +391,58 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
               </div>
             </div>
 
+            {/* Purpose */}
+            <div className="space-y-2">
+              <Label htmlFor="purpose" className="font-medium">Purpose of Visit</Label>
+              <Textarea
+                id="purpose"
+                {...register("purpose")}
+                placeholder="Brief description of the visit purpose"
+                className={errors.purpose ? "border-destructive" : ""}
+              />
+              {errors.purpose && (
+                <span className="text-sm text-destructive">{errors.purpose.message}</span>
+              )}
+            </div>
+
+            {/* Vehicle Information (Optional) */}
+            <div className="space-y-4 pt-4 border-t">
+              <div className="flex items-center gap-2 mb-2">
+                <Car className="h-5 w-5" />
+                <h3 className="font-semibold">Vehicle Information (Optional)</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                {/* Vehicle Number */}
+                <div className="space-y-2">
+                  <Label htmlFor="vehicleNumber" className="font-medium">
+                    Vehicle Number
+                    <span className="text-muted-foreground text-xs ml-2">(Optional)</span>
+                  </Label>
+                  <Input
+                    id="vehicleNumber"
+                    {...register("vehicleNumber")}
+                    placeholder="e.g., DL01AB1234"
+                    className={errors.vehicleNumber ? "border-destructive" : ""}
+                  />
+                  {errors.vehicleNumber && (
+                    <span className="text-sm text-destructive">{errors.vehicleNumber.message}</span>
+                  )}
+                </div>
+
+                {/* Vehicle Photo */}
+                <div className="flex items-start justify-center md:justify-start">
+                  <ImageUploadField
+                    name="vehiclePhoto"
+                    label="Vehicle Photo (Optional)"
+                    register={register}
+                    setValue={setValue}
+                    errors={errors}
+                    initialUrl={watch("vehiclePhoto")}
+                  />
+                </div>
+              </div>
+            </div>
 
             <DialogFooter>
               <Button 
@@ -422,6 +472,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
               </Button>
             </DialogFooter>
           </form>
+          </div>
         )}
       </DialogContent>
     </Dialog>

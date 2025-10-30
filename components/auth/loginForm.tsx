@@ -15,7 +15,7 @@ import { routes } from "@/utils/routes"
 import { showErrorToast, showSuccessToast } from "@/utils/toast"
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
-import { LogIn } from "lucide-react"
+// icon removed per request
 
 const loginSchema = yup.object({
   email: yup.string().email("Invalid email address").required("Email is required"),
@@ -88,11 +88,6 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <div className="flex items-center justify-center mb-4">
-          <div className="p-3 rounded-full bg-primary/10">
-            <LogIn className="w-8 h-8 text-primary" />
-          </div>
-        </div>
         <CardTitle className="text-2xl">Welcome Back</CardTitle>
         <CardDescription>Sign in to your SafeIn account</CardDescription>
       </CardHeader>

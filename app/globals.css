@@ -4,25 +4,25 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated color palette to match visitor appointment system design */
-  --background: #d1d8e2;
+  /* Aynzo-aligned palette for Safein */
+  --background: #ffffff;            /* page background */
   --foreground: #161718;
   --card: #ffffff;
   --card-foreground: #161718;
   --popover: #ffffff;
   --popover-foreground: #161718;
-  --primary: #3882a5;
+  --primary: #074463;               /* deep brand blue */
   --primary-foreground: #ffffff;
   --primary-light: #98c7dd;
-  --secondary: #555879;
-  --secondary-foreground: #ffffff;
-  --muted: #f1f5f9;
+  --secondary: #e9eff6;             /* light panels */
+  --secondary-foreground: #074463;
+  --muted: #e9eff6;
   --muted-foreground: #6b7280;
-  --accent: #d5d6d8;
-  --accent-foreground: #3882a5;
+  --accent: #3882a5;                /* highlight */
+  --accent-foreground: #ffffff;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #e0e0e0;
+  --border: #e5e7eb;
   --input: #ffffff;
   --ring: rgba(56, 130, 165, 0.5);
   --chart-1: oklch(0.646 0.222 41.116);
@@ -375,4 +375,81 @@
   .sidebar-expanded {
     width: 256px;
   }
+}
+
+/* Image hover pop animation utilities (Aynzo style) */
+.hover-image-pop {
+  transition: transform 0.3s ease, filter 0.3s ease;
+  transform: translateZ(0);
+}
+
+.hover-image-pop:hover {
+  transform: translateY(-6px) scale(1.06);
+  filter: drop-shadow(0 10px 22px rgba(7, 68, 99, 0.18));
+}
+
+/* Trigger children with a parent hover (use class `image-pop-group` on the card, and `group-image-pop` on the image) */
+.group-image-pop {
+  transition: transform 0.3s ease, filter 0.3s ease;
+  transform: translateZ(0);
+}
+
+.image-pop-group:hover .group-image-pop {
+  transform: translateY(-6px) scale(1.06);
+  filter: drop-shadow(0 10px 22px rgba(7, 68, 99, 0.18));
+}
+
+/* Apply pop to images inside hostinger cards when card is hovered (opt-in via `hover-image-in-card`) */
+.card-hostinger .hover-image-in-card {
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.card-hostinger:hover .hover-image-in-card {
+  transform: translateY(-6px) scale(1.06);
+  filter: drop-shadow(0 10px 22px rgba(7, 68, 99, 0.18));
+}
+
+/* Fallback: animate any <img> inside card on card hover (no extra class needed) */
+.card-hostinger img {
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.card-hostinger:hover img {
+  transform: translateY(-6px) scale(1.04);
+  filter: drop-shadow(0 8px 18px rgba(7, 68, 99, 0.15));
+}
+
+/* Hero title animation */
+@keyframes fadeUp {
+  0% { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-hero-title {
+  animation: fadeUp 600ms ease-out both;
+}
+
+/* Brand utilities */
+.bg-hero-gradient { background: linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95)); }
+.text-brand { color: #074463; }
+.text-accent { color: #2c5aa0; }
+.text-brand-strong { color: #3882a5; }
+.bg-brand { background-color: #3882a5; }
+.bg-brand-tint { background-color: #98c7dd; }
+.border-brand { border-color: #3882a5; }
+
+/* Main heading utility to ensure consistent dark blue across the site */
+.heading-main { color: #074463; }
+
+/* Dashboard hero animation utilities */
+@keyframes floatY {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float-slow { animation: floatY 8s ease-in-out infinite; }
+
+.dash-glow {
+  filter: drop-shadow(0 15px 40px rgba(7,68,99,0.25)) drop-shadow(0 8px 20px rgba(56,130,165,0.25));
 }

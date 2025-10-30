@@ -16,7 +16,7 @@ interface ImageUploadFieldProps {
   initialUrl?: string
 }
 
-export function ImageUploadField({ name, register, setValue, errors, initialUrl }: ImageUploadFieldProps) {
+export function ImageUploadField({ name, label, register, setValue, errors, initialUrl }: ImageUploadFieldProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(initialUrl || null)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [isImageLoading, setIsImageLoading] = useState(false)
@@ -170,13 +170,21 @@ export function ImageUploadField({ name, register, setValue, errors, initialUrl 
 
   return (
     <div className="space-y-3">
+      {/* Render label if provided */}
+      {label && (
+        <Label className="text-sm font-medium text-gray-700">{label}</Label>
+      )}
+      
       <div className="flex flex-col gap-3">
         {previewImage ? (
           <div className="relative group">
-            <div className={`relative w-40 h-40 flex items-center justify-center border-2 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 ${
-              uploadSuccess ? 'border-green-300 bg-white' : 
-              imageError ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
-            }`}>
+            <div 
+              className={`relative w-40 h-40 flex items-center justify-center border-2 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
+                uploadSuccess ? 'border-green-300 bg-white' : 
+                imageError ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white hover:border-blue-400'
+              }`}
+              onClick={!isUploading ? triggerFileInput : undefined}
+            >
               {isImageLoading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 z-10">
                   <div className="flex flex-col items-center">
@@ -190,15 +198,7 @@ export function ImageUploadField({ name, register, setValue, errors, initialUrl 
                 <div className="flex flex-col items-center justify-center text-red-500 p-4">
                   <ImageIcon className="w-8 h-8 mb-2" />
                   <span className="text-sm text-center">Failed to load image</span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={triggerFileInput}
-                    className="mt-2 text-xs"
-                  >
-                    Try Again
-                  </Button>
+                  <span className="text-xs text-gray-500 mt-2">Click to retry</span>
                 </div>
               ) : (
                 <img
@@ -211,44 +211,33 @@ export function ImageUploadField({ name, register, setValue, errors, initialUrl 
                 />
               )}
               
-              {/* Overlay on hover */}
-              <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-xl"></div>
+              {/* Cross icon at top-right to remove image */}
+              {!imageError && !isImageLoading && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleClearFile()
+                  }}
+                  disabled={isUploading}
+                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20"
+                  title="Remove image"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
               
               {/* Success indicator */}
               {uploadSuccess && !imageError && (
-                <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1 animate-bounce">
+                <div className="absolute top-2 left-2 bg-green-500 text-white rounded-full p-1 animate-bounce">
                   <CheckCircle className="w-3 h-3" />
                 </div>
               )}
             </div>
-            <div className="flex gap-2 mt-3">
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                onClick={handleClearFile}
-                disabled={isUploading}
-                className="text-xs px-3 py-2"
-              >
-                <X className="w-3 h-3 mr-1" />
-                Remove
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={triggerFileInput}
-                disabled={isUploading}
-                className="text-xs px-3 py-2"
-              >
-                <ImageIcon className="w-3 h-3 mr-1" />
-                Change
-              </Button>
-            </div>
           </div>
         ) : (
           <div className="relative">
-            <div className={`flex flex-col items-center justify-center w-40 h-40 border-2 border-dashed rounded-xl cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-100 transition-all duration-200 group ${
+            <div className={`flex flex-col items-center justify-center w-30 h-30 border-2 border-dashed rounded-xl cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-100 transition-all duration-200 group ${
               isUploading ? "border-blue-400 bg-blue-50" : "border-gray-300 hover:border-blue-400"
             }`}>
               {isUploading ? (
@@ -289,10 +278,7 @@ export function ImageUploadField({ name, register, setValue, errors, initialUrl 
         />
       </div>
       {errors && (
-        <div className="flex items-center gap-2 text-red-600 text-sm">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+        <div className="text-red-600 text-sm">
           {errors.message}
         </div>
       )}

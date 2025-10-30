@@ -120,8 +120,8 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     search: debouncedSearch || undefined,
     status: (statusFilter as Appointment['status']) || undefined,
     employeeId: employeeFilter || undefined,
-    dateFrom: dateFrom || undefined,
-    dateTo: dateTo || undefined,
+    startDate: dateFrom || undefined,
+    endDate: dateTo || undefined,
     sortBy,
     sortOrder
   }

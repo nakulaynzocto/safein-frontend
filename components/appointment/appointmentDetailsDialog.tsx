@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { Appointment } from "@/store/api/appointmentApi"
+import { ExternalLink } from "lucide-react"
 
 // JSON configuration for appointment details
 const appointment_details_config = [
@@ -20,12 +21,13 @@ const appointment_details_config = [
   { key: "appointmentTime", label: "Appointment Time" },
   { key: "status", label: "Status", mode: "active" },
   { key: "notes", label: "Notes", optional: true },
-  { key: "checkInTime", label: "Check In Time", mode: "active", optional: true, format: (value: string) => {
+  { key: "vehicleNumber", label: "Vehicle Number", optional: true },
+  { key: "createdAt", label: "Created At", mode: "active", format: (value: string) => {
     if (!value) return "Not checked in";
     const date = new Date(value);
     return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM dd, yyyy 'at' HH:mm");
   }},
-  { key: "checkOutTime", label: "Check Out Time", mode: "active", optional: true, format: (value: string) => {
+  { key: "checkOutTime", label: "Check Out Time", mode: "active", showOnlyForCompleted: true, format: (value: string) => {
     if (!value) return "Not checked out";
     const date = new Date(value);
     return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM dd, yyyy 'at' HH:mm");
@@ -66,6 +68,14 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
         return appointment.appointmentDetails?.scheduledTime || 'N/A';
       case 'notes':
         return appointment.appointmentDetails?.notes || 'N/A';
+      case 'vehicleNumber':
+        return appointment.appointmentDetails?.vehicleNumber || '';
+      case 'vehiclePhoto':
+        return appointment.appointmentDetails?.vehiclePhoto || '';
+      case 'checkInTime':
+        return appointment.checkInTime || null;
+      case 'checkOutTime':
+        return appointment.checkOutTime || null;
       default:
         return appointment[key as keyof Appointment] || 'N/A';
     }
@@ -97,12 +107,16 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
         </DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            {appointment_details_config.map(({ key, label, mode: field_mode, format, optional }) => {
+            {appointment_details_config.map(({ key, label, mode: field_mode, format, optional, showOnlyForCompleted }: any) => {
               if (field_mode && field_mode !== mode) return null
+              
+              // Only show checkOutTime if status is completed
+              if (showOnlyForCompleted && appointment.status !== 'completed') return null
+              
               const value = getFieldValue(key)
               
-              // Skip optional fields if they don't have values
-              if (optional && !value) return null
+              // Skip optional fields if they don't have values (except checkInTime and checkOutTime)
+              if (optional && !value && key !== 'checkInTime' && key !== 'checkOutTime') return null
               
               return (
                 <div key={key} className="space-y-2">
@@ -112,6 +126,14 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
                       <Badge variant={getStatusBadgeVariant(value as string)}>
                         {value}
                       </Badge>
+                    ) : key === 'vehicleNumber' && appointment.appointmentDetails?.vehiclePhoto ? (
+                      <button
+                        onClick={() => window.open(appointment.appointmentDetails?.vehiclePhoto, '_blank')}
+                        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                      >
+                        <span>{value}</span>
+                        <ExternalLink className="h-4 w-4" />
+                      </button>
                     ) : (
                       format && value ? format(value as string) : value || 'N/A'
                     )}
@@ -121,17 +143,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
             })}
           </div>
           
-          {/* Additional info for active appointments */}
-          {mode === 'active' && (
-            <div className="border-t pt-4">
-              <div className="text-sm text-muted-foreground">
-                <div>Created: {format(new Date(appointment.createdAt), "MMM dd, yyyy 'at' HH:mm")}</div>
-                <div>Last Updated: {format(new Date(appointment.updatedAt), "MMM dd, yyyy 'at' HH:mm")}</div>
-              </div>
-            </div>
-          )}
-          
-          <div className="flex justify-end pt-4">
+          <div className="flex justify-end pt-4 border-t">
             <Button 
               type="button" 
               onClick={on_close}

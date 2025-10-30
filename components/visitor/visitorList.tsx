@@ -5,6 +5,7 @@ import { useDebounce } from "@/hooks/useDebounce"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { SearchInput } from "@/components/common/searchInput"
+import DateRangePicker from "@/components/common/dateRangePicker"
 import { DataTable } from "@/components/common/dataTable"
 import { Pagination } from "@/components/common/pagination"
 import { Badge } from "@/components/ui/badge"
@@ -18,7 +19,6 @@ import {
   Phone, 
   Mail, 
   MapPin,
-  Building,
   Calendar,
   User,
   MoreVertical,
@@ -86,18 +86,12 @@ const createColumns = (
     )
   },
   {
-    key: "company",
-    header: "Company",
+    key: "address",
+    header: "Address",
     render: (visitor: Visitor) => (
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-sm">
-          <Building className="h-3 w-3" />
-          N/A
-        </div>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <MapPin className="h-3 w-3" />
-          {visitor.address.city}, {visitor.address.state}
-        </div>
+      <div className="flex items-center gap-2 text-sm text-gray-500">
+        <MapPin className="h-3 w-3" />
+        {visitor.address.city}, {visitor.address.state}
       </div>
     )
   },
@@ -163,6 +157,13 @@ const createColumns = (
 export function VisitorList() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
+  const [dateRange, setDateRange] = useState<{ startDate: string | null; endDate: string | null }>(() => {
+    if (typeof window !== 'undefined') {
+      const raw = localStorage.getItem('dateRange')
+      return raw ? JSON.parse(raw) : { startDate: null, endDate: null }
+    }
+    return { startDate: null, endDate: null }
+  })
   const [currentPage, setCurrentPage] = useState(1)
   const [editingVisitor, setEditingVisitor] = useState<Visitor | null>(null)
   const [showVisitorModal, setShowVisitorModal] = useState(false)
@@ -183,6 +184,8 @@ export function VisitorList() {
     page: currentPage,
     limit: 10,
     search: debouncedSearchTerm || undefined,
+    startDate: dateRange.startDate || undefined,
+    endDate: dateRange.endDate || undefined,
   }
 
   // API hooks
@@ -323,12 +326,16 @@ export function VisitorList() {
       {/* Visitors Table */}
       <Card className="card-hostinger p-4">
         <CardHeader className="pb-4">
+          <div className="flex items-center gap-3 justify-between">
             <SearchInput
               placeholder="Search visitors..."
               value={searchTerm}
               onChange={setSearchTerm}
               debounceDelay={500}
+              className="w-full"
             />
+            <DateRangePicker onDateRangeChange={(r) => { setDateRange(r); setCurrentPage(1); }} />
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <DataTable

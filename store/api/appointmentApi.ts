@@ -59,6 +59,8 @@ export interface AppointmentDetails {
   duration: number
   meetingRoom: string
   notes: string
+  vehicleNumber?: string // Optional vehicle number
+  vehiclePhoto?: string // Optional vehicle photo URL
 }
 
 export interface SecurityDetails {
@@ -117,8 +119,8 @@ export interface GetAppointmentsQuery {
   search?: string
   status?: Appointment['status']
   employeeId?: string
-  dateFrom?: string
-  dateTo?: string
+  startDate?: string
+  endDate?: string
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 }

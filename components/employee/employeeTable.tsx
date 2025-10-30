@@ -30,6 +30,7 @@ import {
 } from "lucide-react"
 import { Employee } from "@/store/api/employeeApi"
 import { SearchInput } from "@/components/common/searchInput"
+import DateRangePicker from "@/components/common/dateRangePicker"
 import { EmployeeDetailsDialog } from "./employeeDetailsDialog"
 import {
   DropdownMenu,
@@ -73,6 +74,8 @@ export interface EmployeeTableProps {
   showHeader?: boolean
   title?: string
   description?: string
+  onDateFromChange?: (value: string) => void
+  onDateToChange?: (value: string) => void
 }
 
 export function EmployeeTable({
@@ -99,6 +102,8 @@ export function EmployeeTable({
   onRefresh,
   showHeader = true,
   title,
+  onDateFromChange,
+  onDateToChange,
 }: EmployeeTableProps) {
   const router = useRouter()
   // Dialog states
@@ -306,12 +311,16 @@ export function EmployeeTable({
       {/* Main Table */}
       <Card className="card-hostinger p-4">
         <CardHeader className="pb-4">
+          <div className="flex items-center justify-between gap-3">
             <SearchInput
               placeholder="Search employees..."
               value={searchTerm}
               onChange={onSearchChange}
               debounceDelay={500}
+              className="w-full"
             />
+            <DateRangePicker onDateRangeChange={(r) => { onDateFromChange?.(r.startDate || ""); onDateToChange?.(r.endDate || ""); }} />
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           {employees.length === 0 && !isLoading ? (

@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { SelectField } from "@/components/common/selectField"
+import { PhoneInputField } from "@/components/common/phoneInputField"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQuery } from "@/store/api/employeeApi"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
@@ -219,24 +220,11 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
         <DialogHeader>
           {/* Header with reference image + title, aligned like the screenshot */}
           <div className="flex items-center gap-3">
-            {/* Using provided image as the section icon per instructions */}
-            <img
-              src="/images/personal-information.png"
-              alt="Personal information header reference"
-              className="h-6 w-6 rounded-sm object-cover"
-            />
+
             <div>
               <DialogTitle className="text-xl">
                 {isEditMode ? "Edit Employee" : "Personal Information"}
               </DialogTitle>
-              <DialogDescription className="text-muted-foreground">
-                {isEditMode 
-                  ? "Update the personal and professional details of this team member."
-                  : "Add basic details for the employee. Fields marked with"
-                }
-                {!isEditMode && <span className="px-1 text-destructive">*</span>}
-                {!isEditMode && " are required."}
-              </DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -296,21 +284,26 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
               </div>
 
               {/* Second row: Phone Number full width */}
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="phone" className="font-medium">
-                  Phone Number <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  {...register("phone", { onChange: clearGeneralError })}
-                  placeholder="Enter phone number"
-                  aria-required="true"
-                  className={errors.phone ? "border-destructive" : ""}
+              <div className="mb-64 sm:mb-0">
+                <Controller
+                  name="phone"
+                  control={control}
+                  render={({ field }) => (
+                    <PhoneInputField
+                      id="phone"
+                      label="Phone Number"
+                      value={field.value}
+                      onChange={(value) => {
+                        field.onChange(value);
+                        clearGeneralError();
+                      }}
+                      error={errors.phone?.message}
+                      required
+                      placeholder="Enter phone number"
+                      defaultCountry="in"
+                    />
+                  )}
                 />
-                {errors.phone && (
-                  <span className="text-sm text-destructive">{errors.phone.message}</span>
-                )}
               </div>
             </div>
 
@@ -333,13 +326,17 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
                       <Label className="font-medium">
                         Department <span className="text-destructive">*</span>
                       </Label>
-                      <SelectField
-                        placeholder="Select department"
-                        options={departments}
-                        value={field.value}
-                        onChange={(val) => field.onChange(val)}
-                        error={errors.department?.message}
+                      <Input
+                        id="department"
+                        placeholder="Enter department"
+                        value={field.value || ""}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        aria-required="true"
+                        className={errors.department ? "border-destructive" : ""}
                       />
+                      {errors.department && (
+                        <span className="text-sm text-destructive">{errors.department.message}</span>
+                      )}
                     </div>
                   )}
                 />

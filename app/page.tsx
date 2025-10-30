@@ -53,8 +53,7 @@ export default function HomePage() {
   return (
     <PublicLayout>
       {/* Hero Section */}
-      <section className="relative py-20" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
-        <div className="absolute inset-0 bg-black/5"></div>
+      <section className="relative py-20 bg-hero-gradient">
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Side - Main Content */}
@@ -65,7 +64,7 @@ export default function HomePage() {
                 <span className="text-gray-300">•</span>
                 <span className="text-gray-300">1000+ Happy Clients</span>
               </div>
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+              <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight text-white animate-hero-title">
                 Transform Your Visitor Management with SafeIn
           </h1>
               <p className="text-xl mb-8 leading-relaxed text-gray-300">
@@ -74,40 +73,41 @@ export default function HomePage() {
               </p>
               
               {/* Free Trial Badge */}
-              <div className="inline-flex items-center gap-2 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6" style={{ backgroundColor: '#3882a5' }}>
+              <div className="inline-flex items-center gap-2 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6 bg-brand">
                 <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                FREE 3-Day Trial - No Credit Card Required
+                FREE 3-Day Trial
               </div>
               
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="text-white font-semibold py-3" style={{ backgroundColor: '#3882a5' }} asChild>
+              <div className="flex flex-col sm:flex-row gap-4 justify-start">
+                <Button size="lg" className="text-white font-semibold py-3 bg-brand" asChild>
                   <Link href={routes.publicroute.REGISTER}>Start Free Trial</Link>
             </Button>
-                <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900">
+                <Button size="lg" variant="outline" className="text-gray-900 border-white hover:bg-white hover:text-gray-900">
                   <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>
             </Button>
               </div>
             </div>
             
-            {/* Right Side - Hero Image */}
-            <div className="relative">
+            {/* Right Side - Animated Dashboard Preview (using original image) */}
+            <div className="relative lg:max-w-[620px] lg:ml-auto">
+              <div className="absolute -inset-6 blur-3xl opacity-30 bg-white/40 rounded-2xl"></div>
               <Image
                 src="/home/visitor-appointment-management.jpg"
                 alt="SafeIn Appointment Management"
-                width={600}
-                height={400}
-                className="rounded-lg shadow-2xl"
+                width={520}
+                height={320}
+                className="rounded-xl shadow-2xl dash-glow animate-float-slow"
                 priority
               />
-              <div className="absolute -bottom-6 -left-6 bg-white rounded-lg shadow-lg p-4">
+              <div className="absolute -bottom-5 -left-5 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-white/40">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">Secure & Reliable</p>
-                    <p className="text-sm text-gray-600">24/7 Protection</p>
+                    <p className="font-semibold text-gray-900">Live dashboard preview</p>
+                    <p className="text-xs text-gray-600">What your team will see</p>
                   </div>
                 </div>
               </div>
@@ -117,13 +117,13 @@ export default function HomePage() {
       </section>
 
       {/* Service Highlights */}
-      <section className="py-16" style={{ backgroundColor: '#d1d8e2' }}>
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="text-center hover:shadow-lg transition-shadow">
               <CardHeader>
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#98c7dd' }}>
-                  <Calendar className="h-8 w-8" style={{ color: '#3882a5' }} />
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-brand-tint">
+                  <Calendar className="h-8 w-8 text-brand-strong" />
               </div>
                 <CardTitle className="text-xl">SafeIn Appointment Booking</CardTitle>
               </CardHeader>
@@ -136,8 +136,8 @@ export default function HomePage() {
             
             <Card className="text-center hover:shadow-lg transition-shadow">
               <CardHeader>
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#98c7dd' }}>
-                  <Users className="h-8 w-8" style={{ color: '#3882a5' }} />
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-brand-tint">
+                  <Users className="h-8 w-8 text-brand-strong" />
             </div>
                 <CardTitle className="text-xl">Employee Management</CardTitle>
               </CardHeader>
@@ -150,8 +150,8 @@ export default function HomePage() {
             
             <Card className="text-center hover:shadow-lg transition-shadow">
               <CardHeader>
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#98c7dd' }}>
-                  <Shield className="h-8 w-8" style={{ color: '#3882a5' }} />
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-brand-tint">
+                  <Shield className="h-8 w-8 text-brand-strong" />
             </div>
                 <CardTitle className="text-xl">Security Analytics</CardTitle>
               </CardHeader>
@@ -166,13 +166,13 @@ export default function HomePage() {
       </section>
 
       {/* Smart Solutions Section */}
-      <section className="py-20" style={{ backgroundColor: '#d1d8e2' }}>
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: '#161718' }}>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-brand">
               Smart Solutions for Modern Businesses
             </h2>
-            <p className="text-xl max-w-3xl mx-auto" style={{ color: '#2c5aa0' }}>
+            <p className="text-xl max-w-3xl mx-auto text-accent">
               Our comprehensive SafeIn management platform is designed to meet the evolving needs 
               of modern organizations, providing security, efficiency, and peace of mind.
             </p>
@@ -184,39 +184,39 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div className="order-2 lg:order-1">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-lg" style={{ backgroundColor: '#3882a5' }}>1</div>
-                  <h3 className="text-3xl font-bold" style={{ color: '#161718' }}>Quick Registration</h3>
+                  <div className="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-lg bg-brand">1</div>
+                  <h3 className="text-3xl font-bold text-brand">Quick Registration</h3>
                 </div>
-                <p className="text-lg mb-6" style={{ color: '#2c5aa0' }}>
+                <p className="text-lg mb-6 text-accent">
                   Sign up in seconds with our streamlined registration process. Just provide your basic information and you're ready to start managing visitors professionally.
                 </p>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#2c5aa0' }}>No complex forms or lengthy verification</span>
+                    <span className="text-base font-medium text-brand">No complex forms or lengthy verification</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#2c5aa0' }}>Instant account activation</span>
+                    <span className="text-base font-medium text-brand">Instant account activation</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#2c5aa0' }}>Free 3-day trial included</span>
+                    <span className="text-base font-medium text-brand">Free 3-day trial included</span>
                   </div>
                 </div>
               </div>
-              <div className="order-1 lg:order-2 relative">
+              <div className="order-1 lg:order-2 relative image-pop-group">
                 <Image
                   src="/home/authentication-security.jpg"
                   alt="Registration Process"
                   width={600}
                   height={400}
-                  className="rounded-lg shadow-xl"
+                  className="rounded-lg shadow-xl group-image-pop"
                 />
-                <div className="absolute -bottom-4 -right-4 bg-white rounded-lg shadow-lg p-3">
+                <div className="absolute -bottom-4 -right-4 bg-white rounded-lg shadow-md p-2 border border-slate-200">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span className="text-sm font-semibold" style={{ color: '#161718' }}>Registration Complete</span>
+                    <span className="text-sm font-medium text-brand">Registration Complete</span>
                   </div>
                 </div>
               </div>
@@ -224,41 +224,41 @@ export default function HomePage() {
 
             {/* Step 2: Dashboard Setup */}
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="relative">
+            <div className="relative image-pop-group">
               <Image
                 src="/home/aashboard-analytics.jpg"
                 alt="Dashboard Analytics"
                 width={600}
                 height={400}
-                  className="rounded-lg shadow-xl"
+                  className="rounded-lg shadow-xl group-image-pop"
                 />
                 <div className="absolute -top-4 -left-4 bg-white rounded-lg shadow-lg p-3">
                   <div className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4" style={{ color: '#3882a5' }} />
+                    <BarChart3 className="h-4 w-4 text-brand-strong" />
                     <span className="text-sm font-semibold" style={{ color: '#161718' }}>Real-time Analytics</span>
                   </div>
                 </div>
               </div>
               <div>
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-lg" style={{ backgroundColor: '#3882a5' }}>2</div>
-                  <h3 className="text-3xl font-bold" style={{ color: '#161718' }}>Powerful Dashboard</h3>
+                  <div className="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-lg bg-brand">2</div>
+                  <h3 className="text-3xl font-bold text-brand">Powerful Dashboard</h3>
                 </div>
-                <p className="text-lg mb-6" style={{ color: '#2c5aa0' }}>
+                <p className="text-lg mb-6 text-accent">
                   Access your comprehensive dashboard with real-time visitor analytics, appointment management, and security insights all in one place.
                 </p>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#2c5aa0' }}>Real-time visitor tracking</span>
+                    <span className="text-accent">Real-time visitor tracking</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#2c5aa0' }}>Advanced analytics and reports</span>
+                    <span className="text-accent">Advanced analytics and reports</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#2c5aa0' }}>Customizable dashboard widgets</span>
+                    <span className="text-accent">Customizable dashboard widgets</span>
                   </div>
                 </div>
               </div>
@@ -268,39 +268,39 @@ export default function HomePage() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div className="order-2 lg:order-1">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-lg" style={{ backgroundColor: '#3882a5' }}>3</div>
-                  <h3 className="text-3xl font-bold" style={{ color: '#161718' }}>Easy Appointment Booking</h3>
+                  <div className="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-lg bg-brand">3</div>
+                  <h3 className="text-3xl font-bold text-brand">Easy Appointment Booking</h3>
                 </div>
-                <p className="text-lg mb-6" style={{ color: '#2c5aa0' }}>
+                <p className="text-lg mb-6 text-accent">
                   Create and manage SafeIn appointments with our intuitive booking system. Streamline your SafeIn management process with automated notifications and scheduling.
                 </p>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#2c5aa0' }}>One-click appointment creation</span>
+                    <span className="text-accent">One-click appointment creation</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#2c5aa0' }}>Automated email notifications</span>
+                    <span className="text-accent">Automated email notifications</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#2c5aa0' }}>Calendar integration</span>
+                    <span className="text-accent">Calendar integration</span>
                   </div>
                 </div>
               </div>
-              <div className="order-1 lg:order-2 relative">
+              <div className="order-1 lg:order-2 relative image-pop-group">
                 <Image
                   src="/home/visitor-appointment-management.jpg"
                   alt="Appointment Management"
                   width={600}
                   height={400}
-                  className="rounded-lg shadow-xl"
+                  className="rounded-lg shadow-xl group-image-pop"
                 />
-                <div className="absolute -bottom-4 -right-4 bg-white rounded-lg shadow-lg p-3">
+                <div className="absolute -bottom-4 -right-4 bg-white rounded-lg shadow-md p-2 border border-slate-200">
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" style={{ color: '#3882a5' }} />
-                    <span className="text-sm font-semibold" style={{ color: '#161718' }}>Appointment Scheduled</span>
+                    <Calendar className="h-4 w-4 text-brand-strong" />
+                    <span className="text-sm font-medium text-brand">Appointment Scheduled</span>
                   </div>
                 </div>
               </div>
@@ -308,41 +308,41 @@ export default function HomePage() {
 
             {/* Step 4: Staff Management */}
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div className="relative">
+              <div className="relative image-pop-group">
                 <Image
                   src="/home/staff-listing-role-management.jpg"
                   alt="Staff Management"
                   width={600}
                   height={400}
-                  className="rounded-lg shadow-xl"
+                  className="rounded-lg shadow-xl group-image-pop"
                 />
                 <div className="absolute -top-4 -left-4 bg-white rounded-lg shadow-lg p-3">
                   <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" style={{ color: '#3882a5' }} />
-                    <span className="text-sm font-semibold" style={{ color: '#161718' }}>Team Management</span>
+                    <Users className="h-4 w-4 text-brand-strong" />
+                    <span className="text-sm font-medium text-brand">Team Management</span>
                   </div>
                 </div>
               </div>
               <div>
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-lg" style={{ backgroundColor: '#3882a5' }}>4</div>
-                  <h3 className="text-3xl font-bold" style={{ color: '#161718' }}>Complete Team Control</h3>
+                  <div className="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-lg bg-brand">4</div>
+                  <h3 className="text-3xl font-bold text-brand">Complete Team Control</h3>
                 </div>
-                <p className="text-lg mb-6" style={{ color: '#2c5aa0' }}>
+                <p className="text-lg mb-6 text-accent">
                   Manage your entire team with role-based access control, employee directories, and comprehensive staff management tools.
                 </p>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#2c5aa0' }}>Role-based permissions</span>
+                    <span className="text-accent">Role-based permissions</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#2c5aa0' }}>Employee directory management</span>
+                    <span className="text-accent">Employee directory management</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span style={{ color: '#2c5aa0' }}>Access control and security</span>
+                    <span className="text-accent">Access control and security</span>
                   </div>
                 </div>
               </div>
@@ -352,13 +352,13 @@ export default function HomePage() {
       </section>
 
       {/* Subscription Plans Section */}
-      <section className="py-20" style={{ backgroundColor: '#d1d8e2' }}>
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: '#161718' }}>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-brand">
               Choose Your Perfect Plan
             </h2>
-            <p className="text-xl max-w-3xl mx-auto" style={{ color: '#2c5aa0' }}>
+            <p className="text-xl max-w-3xl mx-auto text-accent">
               Premium features at ₹8,499/month. Save 5% with 3-month billing or 10% with annual billing.
             </p>
           </div>
@@ -408,7 +408,7 @@ export default function HomePage() {
               <CardHeader className="text-center pb-4">
                 <CardTitle className="text-xl font-bold text-gray-900">1 Month</CardTitle>
                 <div className="mt-4">
-                  <span className="text-3xl font-bold" style={{ color: '#3882a5' }}>₹8,499</span>
+                  <span className="text-3xl font-bold text-brand-strong">₹8,499</span>
                   <span className="text-gray-600 text-sm">/month</span>
                 </div>
                 <p className="text-xs text-gray-600 mt-2">Month-to-month billing</p>
@@ -425,7 +425,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Email & SMS alerts</span>
+                    <span className="text-sm text-gray-700">Real-time email & SMS alerts</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
@@ -443,9 +443,9 @@ export default function HomePage() {
             </Card>
 
             {/* Premium 3 Months */}
-            <Card className="relative border-2 hover:shadow-lg transition-shadow" style={{ borderColor: '#3882a5' }}>
+            <Card className="relative border-2 hover:shadow-lg transition-shadow border-brand">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="text-white px-3 py-0.5 text-xs" style={{ backgroundColor: '#3882a5' }}>Popular</Badge>
+                <Badge className="text-white px-3 py-0.5 text-xs bg-brand">Popular</Badge>
               </div>
               <CardHeader className="text-center pb-4">
                 <CardTitle className="text-xl font-bold text-gray-900">3 Months</CardTitle>
@@ -454,7 +454,7 @@ export default function HomePage() {
                   <div className="flex items-center justify-center gap-1">
                     <Badge className="bg-green-500 text-white text-xs">5% OFF</Badge>
                   </div>
-                  <span className="text-3xl font-bold" style={{ color: '#3882a5' }}>₹24,222</span>
+                  <span className="text-3xl font-bold text-brand-strong">₹24,222</span>
                   <div className="text-xs text-gray-600 mt-1">₹8,074/month</div>
                 </div>
                 <p className="text-xs text-gray-600 mt-2">Save ₹1,275</p>
@@ -471,7 +471,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Email & SMS alerts</span>
+                    <span className="text-sm text-gray-700">Real-time email & SMS alerts</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
@@ -482,7 +482,7 @@ export default function HomePage() {
                     <span className="text-sm text-gray-700">Secure cloud storage</span>
                   </div>
                 </div>
-                <Button className="w-full mt-4 text-white" style={{ backgroundColor: '#3882a5' }} asChild>
+                <Button className="w-full mt-4 text-white bg-brand" asChild>
                   <Link href={routes.publicroute.REGISTER}>Get Started</Link>
                 </Button>
               </CardContent>
@@ -500,7 +500,7 @@ export default function HomePage() {
                   <div className="flex items-center justify-center gap-1">
                     <Badge className="bg-green-500 text-white text-xs">10% OFF</Badge>
                   </div>
-                  <span className="text-3xl font-bold" style={{ color: '#3882a5' }}>₹91,790</span>
+                  <span className="text-3xl font-bold text-brand-strong">₹91,790</span>
                   <div className="text-xs text-gray-600 mt-1">₹7,649/month</div>
                 </div>
                 <p className="text-xs text-gray-600 mt-2">Save ₹10,198</p>
@@ -517,7 +517,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Email & SMS alerts</span>
+                    <span className="text-sm text-gray-700">Real-time email & SMS alerts</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
@@ -528,7 +528,7 @@ export default function HomePage() {
                     <span className="text-sm text-gray-700">Secure cloud storage</span>
                   </div>
                 </div>
-                <Button className="w-full mt-4 text-white" style={{ backgroundColor: '#3882a5' }} asChild>
+                <Button className="w-full mt-4 text-white bg-brand" asChild>
                   <Link href={routes.publicroute.REGISTER}>Get Started</Link>
                 </Button>
               </CardContent>
@@ -538,7 +538,7 @@ export default function HomePage() {
           {/* All Plans Features */}
           <div className="text-center mt-12">
             <div className="bg-white rounded-lg p-6 max-w-4xl mx-auto shadow-sm">
-              <h3 className="text-lg font-semibold mb-4" style={{ color: '#161718' }}>All Premium Plans Include</h3>
+              <h3 className="text-lg font-semibold mb-4 text-brand">All Premium Plans Include</h3>
               <div className="grid md:grid-cols-3 gap-4 text-sm">
                 <div className="flex items-center gap-2 justify-center">
                   <Check className="h-4 w-4 text-green-500" />
@@ -571,56 +571,56 @@ export default function HomePage() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-20" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Why Choose SafeIn?</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-brand">Why Choose SafeIn?</h2>
+            <p className="text-lg md:text-xl text-accent max-w-3xl mx-auto">
               We're committed to providing the best visitor management solution with unmatched security and reliability.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#3882a5' }}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-brand">
                 <Zap className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-white">Fast Setup</h3>
-              <p className="text-gray-300">Get started in minutes, not days</p>
+              <h3 className="text-xl font-semibold mb-1 text-brand">Fast Setup</h3>
+              <p className="text-sm md:text-base text-accent">Get started in minutes, not days</p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#3882a5' }}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-brand">
                 <Shield className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-white">Secure</h3>
-              <p className="text-gray-300">Enterprise-grade security</p>
+              <h3 className="text-xl font-semibold mb-1 text-brand">Secure</h3>
+              <p className="text-sm md:text-base text-accent">Enterprise-grade security</p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#3882a5' }}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-brand">
                 <Users className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-white">Expert Support</h3>
-              <p className="text-gray-300">24/7 customer assistance</p>
+              <h3 className="text-xl font-semibold mb-1 text-brand">Expert Support</h3>
+              <p className="text-sm md:text-base text-accent">24/7 customer assistance</p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#3882a5' }}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-brand">
                 <Clock className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-white">Always Available</h3>
-              <p className="text-gray-300">99.9% uptime guarantee</p>
+              <h3 className="text-xl font-semibold mb-1 text-brand">Always Available</h3>
+              <p className="text-sm md:text-base text-accent">99.9% uptime guarantee</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20" style={{ backgroundColor: '#d1d8e2' }}>
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: '#161718' }}>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 heading-main">
               Testimonials That Speak for Us
             </h2>
-            <p className="text-xl" style={{ color: '#2c5aa0' }}>
+            <p className="text-xl text-accent">
               See what our clients have to say about their experience with our platform
             </p>
           </div>
@@ -699,10 +699,10 @@ export default function HomePage() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-20" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
+      <section className="py-20 bg-hero-gradient">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Get in Touch with Us</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Get in Touch with Us</h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Have questions? Our expert team is here to help you choose the perfect solution for your needs.
             </p>
@@ -713,7 +713,7 @@ export default function HomePage() {
               <h3 className="text-2xl font-semibold mb-6">Contact Information</h3>
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#3882a5' }}>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center bg-brand">
                     <Clock className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -722,7 +722,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#3882a5' }}>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center bg-brand">
                     <Mail className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -731,7 +731,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#3882a5' }}>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center bg-brand">
                     <Phone className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -749,10 +749,10 @@ export default function HomePage() {
                   Ready to transform your SafeIn management? Contact our team to learn more about our solutions.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button className="text-white" style={{ backgroundColor: '#3882a5' }} asChild>
+                  <Button className="text-white bg-brand" asChild>
                     <Link href={routes.publicroute.CONTACT}>Contact Us</Link>
                   </Button>
-                  <Button variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900" asChild>
+                  <Button variant="outline" className="text-gray-900 border-white hover:bg-white hover:text-gray-900" asChild>
                     <Link href={routes.publicroute.PRICING}>View Pricing</Link>
                   </Button>
           </div>

@@ -43,11 +43,22 @@ export function Navbar() {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth)
   const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
 
   // Initialize authentication on component mount
   useEffect(() => {
     dispatch(initializeAuth())
   }, [dispatch])
+
+  // -like navbar behavior: overlay on hero, solid on scroll
+  useEffect(() => {
+    const onScroll = () => {
+      setIsScrolled(window.scrollY > 10)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   // Check if user is actually authenticated (fallback check)
   const isActuallyAuthenticated = isAuthenticated || (typeof window !== "undefined" && localStorage.getItem("token"))
@@ -85,8 +96,18 @@ export function Navbar() {
     return "U"
   }
 
+  const linkTextClass = isScrolled ? 'text-gray-900' : 'text-white'
+  const linkHoverBgClass = isScrolled ? 'hover:bg-gray-100/80' : 'hover:bg-white/10'
+  const ctaBtnClass = isScrolled ? 'text-white bg-brand' : 'text-brand-strong bg-white'
+
   return (
-    <nav className="bg-white/90 backdrop-blur-md border-b border-gray-200/30 shadow-lg sticky top-0 z-50 transition-all duration-300">
+    <nav
+      className={`${
+        isScrolled
+          ? 'bg-white/90 border-b border-gray-200/30 shadow-lg backdrop-blur-md'
+          : 'bg-hero-gradient border-transparent shadow-none backdrop-blur-0'
+      } sticky top-0 z-50 transition-all duration-300`}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           {/* Logo and Brand */}
@@ -95,7 +116,7 @@ export function Navbar() {
               <img 
                 src="/aynzo-logo.svg" 
                 alt="Aynzo Logo" 
-                className="h-12 w-auto"
+                className={`h-12 w-auto ${isScrolled ? '' : 'filter invert-[0] brightness-110 contrast-110'}`}
               />
             </Link>
           </div>
@@ -104,34 +125,34 @@ export function Navbar() {
           <div className="hidden lg:flex items-center space-x-1">
             {!isActuallyAuthenticated && (
               <>
-                <Button variant="ghost" asChild className="relative px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg group">
+                <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
                   <Link href={routes.publicroute.HOME} prefetch={true}>
                     <span className="relative z-10">Home</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isScrolled ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
                   </Link>
                 </Button>
-                <Button variant="ghost" asChild className="relative px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg group">
+                <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
                   <Link href={routes.publicroute.FEATURES} prefetch={true}>
                     <span className="relative z-10">Features</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isScrolled ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
                   </Link>
                 </Button>
-                <Button variant="ghost" asChild className="relative px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg group">
+                <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
                   <Link href={routes.publicroute.PRICING} prefetch={true}>
                     <span className="relative z-10">Pricing</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isScrolled ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
                   </Link>
                 </Button>
-                <Button variant="ghost" asChild className="relative px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg group">
+                <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
                   <Link href={routes.publicroute.CONTACT} prefetch={true}>
                     <span className="relative z-10">Contact</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isScrolled ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
                   </Link>
                 </Button>
-                <Button variant="ghost" asChild className="relative px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg group">
+                <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
                   <Link href={routes.publicroute.HELP} prefetch={true}>
                     <span className="relative z-10">Help</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isScrolled ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
                   </Link>
                 </Button>
               </>
@@ -215,10 +236,10 @@ export function Navbar() {
             ) : (
               <>
                 {/* Public Actions */}
-                <Button variant="ghost" asChild className="hidden sm:flex px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg">
-                  <Link href={routes.publicroute.LOGIN} prefetch={true}>Login</Link>
+                <Button variant="ghost" asChild className={`hidden sm:flex px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkTextClass}`}>
+                  <Link href={routes.publicroute.LOGIN} prefetch={true}>Sign in</Link>
                 </Button>
-                <Button asChild className="px-6 py-2 text-sm font-semibold text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105" style={{ backgroundColor: '#3882a5' }}>
+                <Button asChild className={`px-6 py-2 text-sm font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 ${ctaBtnClass}`}>
                   <Link href={routes.publicroute.REGISTER} prefetch={true}>Start Free Trial</Link>
                 </Button>
                 
@@ -289,12 +310,11 @@ export function Navbar() {
                       style={{ color: '#161718' }}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      Login
+                      Sign in
                     </Link>
                     <Link
                       href={routes.publicroute.REGISTER}
-                      className="block px-4 py-3 rounded-lg text-base font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg"
-                      style={{ backgroundColor: '#3882a5' }}
+                      className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-200 hover:scale-105 shadow-lg ${ctaBtnClass}`}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Start Free Trial

@@ -14,15 +14,17 @@ import { Appointment } from "@/store/api/appointmentApi"
 export function AppointmentList() {
   const router = useRouter()
   
-  // State for pagination and filtering
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [statusFilter, setStatusFilter] = useState("")
-  const [employeeFilter, setEmployeeFilter] = useState("")
-  const [dateFrom, setDateFrom] = useState("")
-  const [dateTo, setDateTo] = useState("")
-  const [sortBy, setSortBy] = useState("createdAt")
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
+  // Single local state object for initial filters/pagination
+  const [initials, setInitials] = useState({
+    page: 1,
+    limit: 10,
+    status: "",
+    employeeId: "",
+    dateFrom: "",
+    dateTo: "",
+    sortBy: "createdAt",
+    sortOrder: 'desc' as 'asc' | 'desc',
+  })
   
   // Use the custom hook for appointment operations
   const {
@@ -40,16 +42,32 @@ export function AppointmentList() {
     cancelAppointment,
     refresh,
     setSearchTerm,
-    searchTerm
+    searchTerm,
+    setCurrentPage,
+    setPageSize,
+    setStatusFilter,
+    setEmployeeFilter,
+    setDateFrom,
+    setDateTo,
+    setSortBy,
+    setSortOrder,
+    statusFilter,
+    employeeFilter,
+    dateFrom,
+    dateTo,
+    currentPage,
+    pageSize,
+    sortBy,
+    sortOrder,
   } = useAppointmentOperations({
-    initialPage: currentPage,
-    initialLimit: pageSize,
-    initialStatus: statusFilter,
-    initialEmployeeId: employeeFilter,
-    initialDateFrom: dateFrom,
-    initialDateTo: dateTo,
-    initialSortBy: sortBy,
-    initialSortOrder: sortOrder
+    initialPage: initials.page,
+    initialLimit: initials.limit,
+    initialStatus: initials.status,
+    initialEmployeeId: initials.employeeId,
+    initialDateFrom: initials.dateFrom,
+    initialDateTo: initials.dateTo,
+    initialSortBy: initials.sortBy,
+    initialSortOrder: initials.sortOrder,
   })
 
   const handleDelete = async (appointmentId: string) => {
@@ -90,18 +108,23 @@ export function AppointmentList() {
   }
 
   const handleStatusFilterChange = (value: string) => {
-    setStatusFilter(value === "all" ? "" : value)
+    const next = value === "all" ? "" : value
+    setInitials(prev => ({ ...prev, status: next, page: 1 }))
+    setStatusFilter(next)
     setCurrentPage(1)
   }
 
   const handleEmployeeFilterChange = (value: string) => {
-    setEmployeeFilter(value === "all" ? "" : value)
+    const next = value === "all" ? "" : value
+    setInitials(prev => ({ ...prev, employeeId: next, page: 1 }))
+    setEmployeeFilter(next)
     setCurrentPage(1)
   }
 
   const handleSortChange = (field: string) => {
+    setInitials(prev => ({ ...prev, sortBy: field }))
     setSortBy(field)
-    setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
   }
 
   return (

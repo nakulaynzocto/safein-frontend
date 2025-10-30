@@ -17,3 +17,4 @@ export function SEOStructuredData({ pageKey }: SEOStructuredDataProps) {
   )
 }
 
+

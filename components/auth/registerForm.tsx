@@ -14,7 +14,7 @@ import { useRegisterMutation, useVerifyOtpMutation, useResendOtpMutation } from 
 import { setCredentials } from "@/store/slices/authSlice"
 import { routes } from "@/utils/routes"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
-import { CheckCircle, Mail, UserPlus, ArrowLeft } from "lucide-react"
+import { CheckCircle, Mail, ArrowLeft } from "lucide-react"
 
 const registerSchema = yup.object({
   companyName: yup.string().required("Company name is required"),
@@ -175,17 +175,6 @@ export function RegisterForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <div className="flex items-center justify-center mb-4">
-          <div className="p-3 rounded-full bg-primary/10">
-            {currentStep === 'success' ? (
-              <CheckCircle className="w-8 h-8 text-green-600" />
-            ) : currentStep === 'otp' ? (
-              <Mail className="w-8 h-8 text-primary" />
-            ) : (
-              <UserPlus className="w-8 h-8 text-primary" />
-            )}
-          </div>
-        </div>
         <CardTitle className="text-2xl">
           {currentStep === 'success' ? 'Registration Complete!' : 
            currentStep === 'otp' ? 'Verify Your Email' : 

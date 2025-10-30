@@ -91,9 +91,9 @@ export default function FeaturesPage() {
 
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <div className="min-h-screen bg-white">
         {/* Hero Section */}
-        <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
+        <section className="py-20 px-4 bg-hero-gradient">
           <div className="container mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
               Powerful Features for Modern SafeIn Management
@@ -103,10 +103,10 @@ export default function FeaturesPage() {
               with cutting-edge features designed for efficiency and security.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-white" style={{ backgroundColor: '#3882a5' }} asChild>
+              <Button size="lg" className="text-white bg-brand" asChild>
                 <Link href={routes.publicroute.REGISTER}>Start Free Trial</Link>
               </Button>
-              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900" asChild>
+              <Button size="lg" variant="outline" className="text-gray-900 border-white hover:bg-white hover:text-gray-900" asChild>
                 <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>
               </Button>
             </div>
@@ -117,10 +117,10 @@ export default function FeaturesPage() {
         <section className="py-20 px-4">
           <div className="container mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 heading-main">
                 Core Features
               </h2>
-              <p className="text-lg" style={{ color: '#2c5aa0' }}>
+              <p className="text-lg text-accent">
                 Everything you need to manage visitors professionally and efficiently
               </p>
             </div>
@@ -129,21 +129,21 @@ export default function FeaturesPage() {
               {features.map((feature, index) => (
                 <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
                   <CardHeader>
-                    <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4" style={{ backgroundColor: '#98c7dd' }}>
-                      <feature.icon className="h-6 w-6" style={{ color: '#3882a5' }} />
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 bg-brand-tint">
+                      <feature.icon className="h-6 w-6 text-brand-strong" />
                     </div>
-                    <CardTitle className="text-xl" style={{ color: '#161718' }}>
+                    <CardTitle className="text-xl text-brand">
                       {feature.title}
                     </CardTitle>
-                    <CardDescription className="text-base" style={{ color: '#2c5aa0' }}>
+                    <CardDescription className="text-base text-accent">
                       {feature.description}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
                       {feature.benefits.map((benefit, benefitIndex) => (
-                        <li key={benefitIndex} className="flex items-center text-sm" style={{ color: '#2c5aa0' }}>
-                          <CheckCircle className="h-4 w-4 mr-2" style={{ color: '#3882a5' }} />
+                        <li key={benefitIndex} className="flex items-center text-sm text-accent">
+                          <CheckCircle className="h-4 w-4 mr-2 text-brand-strong" />
                           {benefit}
                         </li>
                       ))}
@@ -156,13 +156,13 @@ export default function FeaturesPage() {
         </section>
 
         {/* Additional Features */}
-        <section className="py-20 px-4" style={{ backgroundColor: '#d1d8e2' }}>
+        <section className="py-20 px-4 bg-white">
           <div className="container mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#161718' }}>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 heading-main">
                 Additional Benefits
               </h2>
-              <p className="text-lg" style={{ color: '#2c5aa0' }}>
+              <p className="text-lg text-accent">
                 Extra features that make your SafeIn management even better
               </p>
             </div>
@@ -170,14 +170,14 @@ export default function FeaturesPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {additionalFeatures.map((feature, index) => (
                 <div key={index} className="flex items-start space-x-4 p-6 bg-white rounded-lg shadow-sm">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#98c7dd' }}>
-                    <feature.icon className="h-5 w-5" style={{ color: '#3882a5' }} />
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-brand-tint">
+                    <feature.icon className="h-5 w-5 text-brand-strong" />
                   </div>
                   <div>
-                    <h3 className="font-semibold mb-2" style={{ color: '#161718' }}>
+                    <h3 className="font-semibold mb-2 text-brand">
                       {feature.title}
                     </h3>
-                    <p className="text-sm" style={{ color: '#2c5aa0' }}>
+                    <p className="text-sm text-accent">
                       {feature.description}
                     </p>
                   </div>
@@ -188,7 +188,7 @@ export default function FeaturesPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 px-4" style={{ background: 'linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95))' }}>
+        <section className="py-20 px-4 bg-hero-gradient">
           <div className="container mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
               Ready to Transform Your SafeIn Management?
@@ -197,13 +197,13 @@ export default function FeaturesPage() {
               Join thousands of businesses that trust our platform for their SafeIn management needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-white" style={{ backgroundColor: '#3882a5' }} asChild>
+              <Button size="lg" className="text-white bg-brand" asChild>
                 <Link href={routes.publicroute.REGISTER}>
                   Start Free Trial
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900">
+              <Button size="lg" variant="outline" className="text-gray-900 border-white hover:bg-white hover:text-gray-900">
                 <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>
               </Button>
             </div>
