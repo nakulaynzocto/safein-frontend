@@ -59,17 +59,28 @@ export function LoginForm() {
         throw new Error('No valid token received from server')
       }
       
+      // Validate user data
+      if (!result.user) {
+        throw new Error('No user data received from server')
+      }
+      
+      // Set credentials in Redux store
       dispatch(setCredentials(result))
       setErrorMessage(null)
       setIsRedirecting(true)
       
-      // Small delay for UX, then redirect
-      setTimeout(() => {
-        router.push(routes.privateroute.DASHBOARD)
-      }, 500)
+      // Wait for state to sync and ensure cookie is set
+      // Use a small delay to ensure localStorage and cookies are set
+      await new Promise(resolve => setTimeout(resolve, 200))
+      
+      // Use replace to avoid adding login to history and ensure clean navigation
+      // Use window.location for full page reload to ensure all state is properly initialized
+      // This prevents race conditions with auth state checking
+      window.location.replace(routes.privateroute.DASHBOARD)
     } catch (error: any) {
       const message = error?.data?.message || error?.message || "Login failed"
-      setErrorMessage(message) 
+      setErrorMessage(message)
+      setIsRedirecting(false)
     }
   }
 

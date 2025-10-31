@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 770.04 531.31">
+  <defs>
+    <style>
+      .cls-1 {
+        letter-spacing: .03em;
+      }
+
+      .cls-2 {
+        fill: url(#linear-gradient-2);
+      }
+
+      .cls-3 {
+        font-family: Poppins-SemiBold, Poppins;
+        font-size: 25px;
+        font-weight: 600;
+        letter-spacing: .3em;
+      }
+
+      .cls-4 {
+        fill: #3982ac;
+      }
+
+      .cls-5 {
+        letter-spacing: .07em;
+      }
+
+      .cls-6 {
+        fill: none;
+      }
+
+      .cls-7 {
+        fill: url(#linear-gradient);
+      }
+
+      .cls-8 {
+        fill: #3982a5;
+        font-family: Montserrat-Bold, Montserrat;
+        font-size: 100px;
+        font-weight: 700;
+      }
+
+      .cls-9 {
+        fill: #231f20;
+      }
+
+      .cls-10 {
+        letter-spacing: .06em;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="276.65" y1="186.62" x2="276.39" y2="353.06" gradientTransform="translate(299.94 -146.28) rotate(60)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#014563"/>
+      <stop offset="1" stop-color="#3982ac"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="333.15" y1="152.15" x2="558.12" y2="152.15" gradientTransform="matrix(1, 0, 0, 1, 0, 0)" xlink:href="#linear-gradient"/>
+  </defs>
+  <text class="cls-3" transform="translate(0 516.49)"><tspan x="0" y="0">CRAFTING TOMORROW’S DIGITAL LEGACY </tspan></text>
+  <text class="cls-8" transform="translate(180.21 448.52)"><tspan class="cls-1" x="0" y="0">A</tspan><tspan class="cls-10" x="79.3" y="0">Y</tspan><tspan class="cls-5" x="153.2" y="0">N</tspan><tspan class="cls-10" x="241" y="0">Z</tspan><tspan class="cls-5" x="314.4" y="0">O</tspan></text>
+  <line class="cls-9" x1="553.65" y1="324.12" x2="553.37" y2="323.7"/>
+  <line class="cls-9" x1="428.11" y1="109.15" x2="425.6" y2="105.39"/>
+  <path class="cls-6" d="m360.65,235.12c-.12.46-.24.91-.34,1.36"/>
+  <rect class="cls-7" x="146.15" y="150.62" width="261" height="72" rx="36" ry="36" transform="translate(-23.29 332.89) rotate(-60)"/>
+  <path class="cls-4" d="m338.97,201.19l-45.74-79.23c-9.9-17.15-3.97-39.28,13.18-49.18h0c17.15-9.9,39.28-3.97,49.18,13.18l85.57,146.66s-72,18-102.18-31.43Z"/>
+  <path class="cls-2" d="m490.97,286.33L333.15,7.62s67.82-29.29,99,27l121.18,215.71c9.9,17.15,3.97,39.28-13.18,49.18h0c-17.15,9.9-39.28,3.97-49.18-13.18Z"/>
+</svg>
+
+

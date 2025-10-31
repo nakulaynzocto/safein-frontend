@@ -36,7 +36,8 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
   // Redirect to login if not authenticated after initialization
   useEffect(() => {
     if (isInitialized && !isAuthenticated && !token) {
-      router.push(routes.publicroute.LOGIN)
+      // Use replace to avoid adding to history
+      router.replace(routes.publicroute.LOGIN)
     }
   }, [isInitialized, isAuthenticated, token, router])
 
@@ -52,9 +53,13 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     )
   }
 
-  // Not authenticated → redirecting (will redirect in useEffect)
+  // Not authenticated → show loading while redirecting (prevents blank screen)
   if (!isAuthenticated || !token) {
-    return null
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
   }
 
 

@@ -23,6 +23,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false
       if (typeof window !== "undefined") {
         localStorage.removeItem("token")
+        localStorage.removeItem("user")
         // Also remove cookie
         document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
       }
@@ -33,11 +34,18 @@ const authSlice = createSlice({
         return
       }
       
+      // Validate user data
+      if (!action.payload.user) {
+        return
+      }
+      
       state.user = action.payload.user
       state.token = action.payload.token
       state.isAuthenticated = true
       if (typeof window !== "undefined") {
         localStorage.setItem("token", action.payload.token)
+        // Store user data to restore on page reload
+        localStorage.setItem("user", JSON.stringify(action.payload.user))
         // Also set cookie for middleware access
         const expires = new Date()
         expires.setDate(expires.getDate() + 7) // 7 days
@@ -51,17 +59,33 @@ const authSlice = createSlice({
     initializeAuth: (state) => {
       if (typeof window !== "undefined") {
         const token = localStorage.getItem("token")
+        const userStr = localStorage.getItem("user")
         
         // Validate token before using it
         if (token && token !== 'undefined' && token.length > 10) {
           state.token = token
           state.isAuthenticated = true
+          
+          // Restore user data if available
+          if (userStr) {
+            try {
+              const user = JSON.parse(userStr)
+              if (user && user.id && user.email) {
+                state.user = user
+              }
+            } catch (e) {
+              // Invalid user data, remove it
+              localStorage.removeItem("user")
+            }
+          }
+          
           // Also ensure cookie is set for middleware access
           const expires = new Date()
           expires.setDate(expires.getDate() + 7) // 7 days
           document.cookie = `token=${token}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`
         } else {
           localStorage.removeItem("token")
+          localStorage.removeItem("user")
           // Also remove cookie
           document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
         }
