@@ -116,23 +116,23 @@ export default function HelpPage() {
     <PublicLayout>
       <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="py-20 px-4 bg-hero-gradient">
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-hero-gradient">
         <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight px-2 sm:px-0">
             How can we help you?
           </h1>
-          <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-2 sm:px-0">
             Find answers to your questions, learn new features, and get the most out of your 
             SafeIn management system with our comprehensive help resources.
           </p>
           
           {/* Search Bar */}
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto px-4 sm:px-0">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
               <Input 
-                placeholder="Search for help articles, guides, and tutorials..."
-                className="pl-12 pr-4 py-3 text-lg bg-white/10 border-white/20 text-white placeholder:text-gray-300"
+                placeholder="Search for help articles..."
+                className="pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-sm sm:text-base md:text-lg bg-white/10 border-white/20 text-white placeholder:text-gray-300"
               />
             </div>
           </div>
@@ -217,7 +217,6 @@ export default function HelpPage() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="mt-4 w-full"
                     className="mt-4 w-full border-brand text-brand-strong"
                   >
                     View All Articles
@@ -270,22 +269,22 @@ export default function HelpPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-hero-gradient">
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-hero-gradient">
         <div className="container mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6 leading-tight px-2 sm:px-0">
             Ready to Get Started?
           </h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">
             Start your free trial today and see how easy SafeIn management can be.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-white bg-brand" asChild>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
+            <Button size="lg" className="text-white bg-brand py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto" asChild>
               <Link href={routes.publicroute.REGISTER}>
                 Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900">
+            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900 py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto">
               <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>
             </Button>
           </div>

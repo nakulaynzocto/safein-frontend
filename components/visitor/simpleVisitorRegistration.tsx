@@ -19,14 +19,14 @@ export function SimpleVisitorRegistration() {
     try {
       setIsSubmitting(true)
       
-      // Here you would typically save the visitor details to your database
-      // For now, we'll just simulate the process
+
+
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       setVisitorDetails(data)
       showSuccessToast("Visitor registered successfully!")
       
-      // Redirect to appointment booking or visitor list
+
       router.push(routes.privateroute.APPOINTMENTLIST)
     } catch (error: any) {
       showErrorToast(error?.message || "Failed to register visitor")

@@ -74,12 +74,12 @@ export default function ContactPage() {
     <PublicLayout>
       <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="py-20 px-4 bg-hero-gradient">
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-hero-gradient">
         <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight px-2 sm:px-0">
             Get in Touch
           </h1>
-          <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-2 sm:px-0">
             Have questions about our visitor management system? We're here to help. 
             Reach out to our team and we'll get back to you as soon as possible.
           </p>

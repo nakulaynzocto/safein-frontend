@@ -46,7 +46,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
   const [createVisitor, { isLoading, isSuccess }] = useCreateVisitorMutation()
   const [generalError, setGeneralError] = useState<string | null>(null)
   
-  // Fetch visitor stats for dynamic count
+
   const { data: visitorStats, isLoading: isLoadingStats } = useGetVisitorStatsQuery()
 
   const {
@@ -85,7 +85,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
     { value: "other", label: "Other" },
   ]
 
-  // Clear general error when user starts typing
+
   const clearGeneralError = () => {
     if (generalError) {
       setGeneralError(null)
@@ -111,16 +111,16 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
         photo: data.photo || undefined,
       }
 
-      // Always create visitor via API
+
       const result = await createVisitor(visitorData).unwrap()
       
       if (standalone) {
-        // If standalone, show success message and reset form
+
         showSuccessToast("Visitor registered successfully!")
         reset()
       }
       
-      // Always call onComplete callback with the created visitor data and ID
+
       if (onComplete) {
         onComplete(visitorData, result._id)
       }
@@ -132,7 +132,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
     }
   }
 
-  // Show loading state
+
   if (isLoading) {
     return (
       <div className="w-full max-w-7xl mx-auto space-y-6">
@@ -350,5 +350,5 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
   )
 }
 
-// Export both components for backward compatibility
+
 export { VisitorRegister as VisitorDetailsStep }

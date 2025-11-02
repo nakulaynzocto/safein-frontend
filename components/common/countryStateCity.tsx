@@ -35,7 +35,7 @@ export function CountryStateCitySelect({ value, onChange, errors }: Props) {
         options={states}
         value={value.state}
         onChange={(state) => onChange({ ...value, state, city: "" })}
-        disabled={!value.country}
+        isDisabled={!value.country}
         error={errors?.state}
       />
       <SelectField
@@ -43,12 +43,13 @@ export function CountryStateCitySelect({ value, onChange, errors }: Props) {
         options={cities}
         value={value.city}
         onChange={(city) => onChange({ ...value, city })}
-        disabled={!value.country || !value.state}
+        isDisabled={!value.country || !value.state}
         error={errors?.city}
       />
     </div>
   )
 }
+
 
 
 

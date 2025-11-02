@@ -47,9 +47,6 @@ export interface RegisterResponse {
 export interface UpdateProfileRequest {
   companyName?: string
   profilePicture?: string
-  department?: string
-  designation?: string
-  employeeId?: string
 }
 
 export interface AuthResponse {
@@ -67,10 +64,21 @@ export const authApi = baseApi.injectEndpoints({
         body: credentials,
       }),
       transformResponse: (response: any) => {
+        let data = response
         if (response.success && response.data) {
-          return response.data
+          data = response.data
         }
-        return response
+        
+        // Normalize user data in response
+        if (data && data.user) {
+          data.user = {
+            ...data.user,
+            id: data.user.id || data.user._id || data.user.id,
+            profilePicture: data.user.profilePicture || '',
+          }
+        }
+        
+        return data
       },
       invalidatesTags: ['User'],
     }),
@@ -97,10 +105,21 @@ export const authApi = baseApi.injectEndpoints({
         body: otpData,
       }),
       transformResponse: (response: any) => {
+        let data = response
         if (response.success && response.data) {
-          return response.data
+          data = response.data
         }
-        return response
+        
+        // Normalize user data in response
+        if (data && data.user) {
+          data.user = {
+            ...data.user,
+            id: data.user.id || data.user._id || data.user.id,
+            profilePicture: data.user.profilePicture || '',
+          }
+        }
+        
+        return data
       },
       invalidatesTags: ['User'],
     }),
@@ -122,6 +141,22 @@ export const authApi = baseApi.injectEndpoints({
 
     getCurrentUser: builder.query<User, void>({
       query: () => '/users/me',
+      transformResponse: (response: any) => {
+        let userData = response
+        if (response.success && response.data) {
+          userData = response.data
+        }
+        
+        // Normalize user data: map _id to id and ensure profilePicture
+        if (userData && typeof userData === 'object') {
+          return {
+            ...userData,
+            id: userData.id || userData._id,
+            profilePicture: userData.profilePicture || '',
+          }
+        }
+        return userData
+      },
       providesTags: ['User'],
       keepUnusedDataFor: 300, // Keep data for 5 minutes
     }),
@@ -137,10 +172,21 @@ export const authApi = baseApi.injectEndpoints({
     getProfile: builder.query<User, void>({
       query: () => '/users/profile',
       transformResponse: (response: any) => {
+        let userData = response
         if (response.success && response.data) {
-          return response.data
+          userData = response.data
         }
-        return response
+        
+        // Normalize user data: map _id to id and ensure profilePicture
+        if (userData && typeof userData === 'object') {
+          const normalized = {
+            ...userData,
+            id: userData.id || userData._id,
+            profilePicture: userData.profilePicture || '',
+          }
+          return normalized
+        }
+        return userData
       },
       providesTags: ['User'],
       keepUnusedDataFor: 300, // Keep data for 5 minutes
@@ -148,13 +194,55 @@ export const authApi = baseApi.injectEndpoints({
 
 
     updateProfile: builder.mutation<User, UpdateProfileRequest>({
-      query: (profileData) => ({
-        url: '/users/profile',
-        method: 'PUT',
-        body: profileData,
-      }),
+      query: (profileData) => {
+        // Ensure only allowed fields are sent - explicitly filter the body
+        const cleanBody: UpdateProfileRequest = {}
+        
+        if (profileData.companyName && typeof profileData.companyName === 'string') {
+          cleanBody.companyName = profileData.companyName
+        }
+        
+        if (profileData.profilePicture && typeof profileData.profilePicture === 'string') {
+          cleanBody.profilePicture = profileData.profilePicture
+        }
+        
+        // Verify it's serializable (no circular refs)
+        try {
+          JSON.stringify(cleanBody)
+        } catch (e) {
+          console.error("Profile data contains circular reference:", e)
+          throw new Error("Invalid profile data")
+        }
+        
+        return {
+          url: '/users/profile',
+          method: 'PUT',
+          body: cleanBody,
+        }
+      },
       transformResponse: (response: any) => {
-        if (response.success && response.data) {
+        // Handle API response structure
+        let userData = response
+        if (response && typeof response === 'object') {
+          if (response.success && response.data) {
+            userData = response.data
+          }
+        }
+        
+        // Normalize user data: map _id to id and ensure profilePicture
+        if (userData && typeof userData === 'object') {
+          const normalized = {
+            ...userData,
+            id: userData.id || userData._id,
+            profilePicture: userData.profilePicture || '',
+          }
+          return normalized
+        }
+        return userData
+      },
+      transformErrorResponse: (response: any) => {
+        // Ensure error response is properly formatted
+        if (response?.data) {
           return response.data
         }
         return response

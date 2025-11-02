@@ -103,20 +103,20 @@ export default function PricingPage() {
     <PublicLayout>
       <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="py-20 px-4 bg-hero-gradient">
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-hero-gradient">
         <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight px-2 sm:px-0">
             Simple, Transparent Pricing
           </h1>
-          <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-2 sm:px-0">
             Choose the perfect plan for your business. All plans include our core SafeIn management features 
             with a 3-day free trial and no setup fees.
           </p>
-          <div className="flex items-center justify-center gap-2 text-yellow-400 mb-4">
-            <Star className="h-5 w-5 fill-current" />
-            <span className="text-lg font-semibold">4.9/5 Rating</span>
-            <span className="text-gray-300">•</span>
-            <span className="text-gray-300">1000+ Happy Clients</span>
+          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-yellow-400 mb-4 px-2 sm:px-0">
+            <Star className="h-4 w-4 sm:h-5 sm:w-5 fill-current" />
+            <span className="text-sm sm:text-base md:text-lg font-semibold">4.9/5 Rating</span>
+            <span className="text-gray-300 hidden sm:inline">•</span>
+            <span className="text-gray-300 text-sm sm:text-base md:text-lg">1000+ Happy Clients</span>
           </div>
         </div>
       </section>

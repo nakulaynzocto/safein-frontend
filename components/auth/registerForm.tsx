@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InputField } from "@/components/common/inputField"
-import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { useAppDispatch } from "@/store/hooks"
 import { useRegisterMutation, useVerifyOtpMutation, useResendOtpMutation } from "@/store/api/authApi"
 import { setCredentials } from "@/store/slices/authSlice"
@@ -20,10 +19,6 @@ const registerSchema = yup.object({
   companyName: yup.string().required("Company name is required"),
   email: yup.string().email("Invalid email address").required("Email is required"),
   password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref("password")], "Passwords must match")
-    .required("Please confirm your password"),
 })
 
 const otpSchema = yup.object({
@@ -48,9 +43,7 @@ export function RegisterForm() {
   const [user, setUser] = useState<any>(null)
   const [token, setToken] = useState<string | null>(null)
 
-  // Debug current step changes
   useEffect(() => {
-    // Current step changed
   }, [currentStep])
 
   const {
@@ -73,16 +66,11 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setSubmitError(null)
-      const { confirmPassword, ...registerData } = data
+      const result = await register(data).unwrap()
       
-      // Send registration request (this should trigger OTP sending)
-      const result = await register(registerData).unwrap()
-      
-      // Move to OTP step
       setUserEmail(data.email)
       setCurrentStep('otp')
     } catch (error: any) {
-      console.error('Registration error:', error)
       let errorMessage = "Registration failed"
       
       if (error?.data?.message) {
@@ -103,7 +91,6 @@ export function RegisterForm() {
         otp: data.otp
       }).unwrap()
       
-      // Store user data and token
       setUser(result.user)
       setToken(result.token)
       
@@ -117,7 +104,6 @@ export function RegisterForm() {
         errorMessage = error.message
       }
       
-      // Handle specific OTP errors
       if (errorMessage.includes('expired')) {
         errorMessage = "OTP expired. Click Resend OTP."
       } else if (errorMessage.includes('incorrect') || errorMessage.includes('invalid')) {
@@ -136,7 +122,6 @@ export function RegisterForm() {
         email: userEmail
       }).unwrap()
       
-      // Show success message
       setOtpError(null)
       showSuccessToast("OTP resent to your email")
     } catch (error: any) {
@@ -162,12 +147,10 @@ export function RegisterForm() {
   }
 
   const handleGoToDashboard = () => {
-    // Store the user data and token in Redux/auth state
     if (user && token) {
       dispatch(setCredentials({ user, token }))
       router.push(routes.privateroute.DASHBOARD)
     } else {
-      // Fallback to login if no user data
       handleGoToLogin()
     }
   }
@@ -175,15 +158,22 @@ export function RegisterForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">
+        <div className="flex justify-center mb-4">
+          <img
+            src="/aynzo-logo.svg"
+            alt="Aynzo Logo"
+            className="h-10 w-auto"
+          />
+        </div>
+        <CardTitle className="text-2xl text-brand">
           {currentStep === 'success' ? 'Registration Complete!' : 
            currentStep === 'otp' ? 'Verify Your Email' : 
-           'Create Account'}
+           'Sign Up'}
         </CardTitle>
         <CardDescription>
           {currentStep === 'success' ? 'Your account has been successfully created' :
            currentStep === 'otp' ? 'Enter the OTP sent to your email' :
-           'Sign up for your SafeIn account'}
+           'Sign up for your account'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -249,20 +239,10 @@ export function RegisterForm() {
                 {...registerField("password")}
                 required
               />
-
-              <InputField
-                label="Confirm Password"
-                type="password"
-                placeholder="Confirm your password"
-                error={errors.confirmPassword?.message}
-                {...registerField("confirmPassword")}
-                required
-              />
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-              Register
+              {isLoading ? "Registering..." : "Register"}
             </Button>
           </form>
         )}
@@ -290,8 +270,7 @@ export function RegisterForm() {
               />
 
               <Button type="submit" className="w-full" disabled={isVerifyingOtp}>
-                {isVerifyingOtp ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-                Verify OTP
+                {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
               </Button>
             </form>
 
@@ -302,8 +281,7 @@ export function RegisterForm() {
                 className="text-sm"
                 disabled={isResendingOtp}
               >
-                {isResendingOtp ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-                Didn't receive OTP? Resend
+                {isResendingOtp ? "Resending..." : "Didn't receive OTP? Resend"}
               </Button>
             </div>
           </div>

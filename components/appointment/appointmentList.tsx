@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -70,42 +70,42 @@ export function AppointmentList() {
     initialSortOrder: initials.sortOrder,
   })
 
-  const handleDelete = async (appointmentId: string) => {
+  const handleDelete = useCallback(async (appointmentId: string) => {
     try {
       await deleteAppointment(appointmentId)
     } catch (error) {
       console.error("Delete error:", error)
     }
-  }
+  }, [deleteAppointment])
 
 
-  const handleCheckOut = async (appointmentId: string, notes?: string) => {
+  const handleCheckOut = useCallback(async (appointmentId: string, notes?: string) => {
     try {
       await checkOutAppointment(appointmentId, notes)
     } catch (error) {
       console.error("Check-out error:", error)
     }
-  }
+  }, [checkOutAppointment])
 
-  const handleApprove = async (appointmentId: string) => {
+  const handleApprove = useCallback(async (appointmentId: string) => {
     try {
       await approveAppointment(appointmentId)
     } catch (error) {
       console.error("Approve error:", error)
     }
-  }
+  }, [approveAppointment])
 
-  const handleCancel = async (appointmentId: string) => {
+  const handleCancel = useCallback(async (appointmentId: string) => {
     try {
       await cancelAppointment(appointmentId)
     } catch (error) {
       console.error("Cancel error:", error)
     }
-  }
+  }, [cancelAppointment])
 
-  const handleView = (appointment: Appointment) => {
+  const handleView = useCallback((appointment: Appointment) => {
     router.push(`/appointment/${appointment._id}`)
-  }
+  }, [router])
 
   const handleStatusFilterChange = (value: string) => {
     const next = value === "all" ? "" : value

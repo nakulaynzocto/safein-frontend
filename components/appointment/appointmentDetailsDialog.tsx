@@ -5,7 +5,6 @@ import { format } from "date-fns"
 import { Appointment } from "@/store/api/appointmentApi"
 import { ExternalLink } from "lucide-react"
 
-// JSON configuration for appointment details
 const appointment_details_config = [
   { key: "appointmentId", label: "Appointment ID" },
   { key: "visitorName", label: "Visitor Name" },
@@ -49,7 +48,6 @@ interface AppointmentDetailsDialogProps {
 export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: AppointmentDetailsDialogProps) {
   if (!appointment) return null
 
-  // Helper function to get field value with proper data structure handling
   const getFieldValue = (key: string) => {
     switch (key) {
       case 'visitorName':
@@ -110,12 +108,10 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
             {appointment_details_config.map(({ key, label, mode: field_mode, format, optional, showOnlyForCompleted }: any) => {
               if (field_mode && field_mode !== mode) return null
               
-              // Only show checkOutTime if status is completed
               if (showOnlyForCompleted && appointment.status !== 'completed') return null
               
               const value = getFieldValue(key)
               
-              // Skip optional fields if they don't have values (except checkInTime and checkOutTime)
               if (optional && !value && key !== 'checkInTime' && key !== 'checkOutTime') return null
               
               return (

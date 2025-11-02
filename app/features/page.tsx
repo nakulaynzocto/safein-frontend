@@ -93,20 +93,20 @@ export default function FeaturesPage() {
     <PublicLayout>
       <div className="min-h-screen bg-white">
         {/* Hero Section */}
-        <section className="py-20 px-4 bg-hero-gradient">
+        <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-hero-gradient">
           <div className="container mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight px-2 sm:px-0">
               Powerful Features for Modern SafeIn Management
             </h1>
-            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-2 sm:px-0">
               Discover how our comprehensive SafeIn management system can transform your business operations 
               with cutting-edge features designed for efficiency and security.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-white bg-brand" asChild>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
+              <Button size="lg" className="text-white bg-brand py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto" asChild>
                 <Link href={routes.publicroute.REGISTER}>Start Free Trial</Link>
               </Button>
-              <Button size="lg" variant="outline" className="text-gray-900 border-white hover:bg-white hover:text-gray-900" asChild>
+              <Button size="lg" variant="outline" className="text-gray-900 border-white hover:bg-white hover:text-gray-900 py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto" asChild>
                 <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>
               </Button>
             </div>

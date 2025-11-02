@@ -15,7 +15,7 @@ import {
   ExternalLink
 } from "lucide-react"
 
-// JSON configuration for visitor details
+
 const visitor_details_config = [
   { key: "name", label: "Full Name", icon: User },
   { key: "email", label: "Email", icon: Mail },
@@ -36,7 +36,7 @@ interface VisitorDetailsDialogProps {
 export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsDialogProps) {
   if (!visitor) return null
 
-  // Helper function to get field value
+
   const getFieldValue = (key: string): string => {
     const value = visitor[key as keyof Visitor];
     if (typeof value === 'string') return value;

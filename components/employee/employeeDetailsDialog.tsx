@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { Employee } from "@/store/api/employeeApi"
 
-// JSON configuration for employee details
+
 const employee_details_config = [
   { key: "name", label: "Name" },
   { key: "email", label: "Email" },
@@ -27,7 +27,7 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
     <Dialog 
       open={open} 
       onOpenChange={(isOpen) => {
-        // When the dialog closes (isOpen=false), trigger on_close to clear employee
+
         if (!isOpen) {
           on_close()
         }

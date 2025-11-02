@@ -1,13 +1,26 @@
 "use client"
 
+import React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Mail, Building, MapPin } from "lucide-react"
-import { getUserInitials, formatValue } from "./profileUtils"
+import { Mail } from "lucide-react"
+import { getUserInitials } from "./profileUtils"
 
-export function ProfileCard({ profile }: { profile: any }) {
+interface ProfileCardProps {
+  profile: {
+    profilePicture?: string
+    name?: string
+    companyName?: string
+    email?: string
+    role?: string
+  }
+}
+
+export const ProfileCard = React.memo(function ProfileCard({ profile }: ProfileCardProps) {
+  const initials = getUserInitials(profile.name, profile.companyName)
+  const displayName = profile.companyName || profile.name || "User"
+  
   return (
     <Card>
       <CardHeader className="text-center">
@@ -17,12 +30,12 @@ export function ProfileCard({ profile }: { profile: any }) {
               <AvatarImage src={profile.profilePicture} alt="Profile" />
             )}
             <AvatarFallback className="text-2xl">
-              {getUserInitials(profile.name, profile.companyName)}
+              {initials}
             </AvatarFallback>
           </Avatar>
         </div>
         <CardTitle className="text-xl">
-          {profile.companyName || profile.name || "User"}
+          {displayName}
         </CardTitle>
         <CardDescription className="flex items-center justify-center gap-2">
           <Mail className="h-4 w-4" />
@@ -36,27 +49,7 @@ export function ProfileCard({ profile }: { profile: any }) {
             {profile.role}
           </Badge>
         </div>
-
-        <Separator />
-
-        <div className="space-y-3 text-sm">
-          <div className="flex items-center gap-2">
-            <Building className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Company:</span>
-            <span>{formatValue(profile.companyName)}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Department:</span>
-            <span>{formatValue(profile.department)}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Building className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Designation:</span>
-            <span>{formatValue(profile.designation)}</span>
-          </div>
-        </div>
       </CardContent>
     </Card>
   )
-}
+})

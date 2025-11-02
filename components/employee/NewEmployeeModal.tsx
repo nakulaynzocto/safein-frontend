@@ -25,7 +25,6 @@ import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQue
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
 
-// ✅ Validation schema
 const employeeSchema = yup.object({
   name: yup.string().required("Name is required").min(2, "Name must be at least 2 characters").max(100, "Name cannot exceed 100 characters"),
   email: yup.string().email("Invalid email address").required("Email is required"),
@@ -44,7 +43,6 @@ type EmployeeFormData = {
   status: 'Active' | 'Inactive'
 }
 
-// ✅ Department options
 const departments = [
   { value: "Engineering", label: "Engineering" },
   { value: "Human Resources", label: "Human Resources" },
@@ -59,7 +57,6 @@ const departments = [
   { value: "Product Management", label: "Product Management" },
 ]
 
-// ✅ Status options
 const statusOptions = [
   { value: "Active", label: "Active" },
   { value: "Inactive", label: "Inactive" },
@@ -77,7 +74,6 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
   const router = useRouter()
   const [internalOpen, setInternalOpen] = React.useState(false)
   
-  // Use controlled open if provided, otherwise use internal state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
   const setOpen = onOpenChange || setInternalOpen
   const [createEmployee, { isLoading: isCreating }] = useCreateEmployeeMutation()
@@ -87,7 +83,6 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
   const isEditMode = !!employeeId
   const isLoading = isCreating || isUpdating
   
-  // Fetch employee data for editing
   const { data: employeeData, isLoading: isLoadingEmployee } = useGetEmployeeQuery(employeeId!, {
     skip: !isEditMode
   })
@@ -111,7 +106,6 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
     },
   })
 
-  // Update form when employee data is loaded
   React.useEffect(() => {
     if (isEditMode && employeeData) {
       reset({
@@ -124,7 +118,6 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
     }
   }, [isEditMode, employeeData, reset])
 
-  // Reset form when modal opens/closes
   React.useEffect(() => {
     if (!open) {
       reset()
@@ -133,7 +126,6 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
     }
   }, [open, reset, clearErrors])
 
-  // Clear general error when user starts typing
   const clearGeneralError = () => {
     if (generalError) {
       setGeneralError(null)
@@ -142,7 +134,6 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
 
   const onSubmit = async (data: EmployeeFormData) => {
     try {
-      // Clear any previous general errors
       setGeneralError(null)
       
       const employeeData = {
@@ -160,17 +151,13 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
       setOpen(false)
       reset()
       
-      // Call onSuccess callback if provided
       if (onSuccess) {
         onSuccess()
       } else {
-        // Default behavior - navigate to employee list
         router.push(routes.privateroute.EMPLOYEELIST)
       }
     } catch (error: any) {
-      // Handle field-specific validation errors from backend
       if (error?.data?.errors && Array.isArray(error.data.errors)) {
-        // Set field-specific errors
         error.data.errors.forEach((fieldError: any) => {
           if (fieldError.field && fieldError.message) {
             setError(fieldError.field, {
@@ -180,7 +167,6 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
           }
         })
       } else if (error?.data?.message) {
-        // Handle specific field errors from backend (e.g., duplicate email)
         const message = error.data.message.toLowerCase()
         if (message.includes('email') && message.includes('already exists')) {
           setError('email', {
@@ -193,11 +179,9 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
             message: 'Phone number is already registered'
           })
         } else {
-          // Set general error for other errors
           setGeneralError(error.data.message)
         }
       } else {
-        // Set general error for network or other errors
         const errorMessage = error?.message || "Failed to create employee"
         setGeneralError(errorMessage)
       }
@@ -218,7 +202,6 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
 
       <DialogContent className="sm:max-w-2xl bg-white dark:bg-gray-900">
         <DialogHeader>
-          {/* Header with reference image + title, aligned like the screenshot */}
           <div className="flex items-center gap-3">
 
             <div>
@@ -229,14 +212,12 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
           </div>
         </DialogHeader>
 
-        {/* Show loading state when fetching employee data for editing */}
         {isEditMode && isLoadingEmployee ? (
           <div className="flex items-center justify-center h-32">
             <LoadingSpinner size="lg" />
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="mt-2">
-            {/* General Error Display */}
             {generalError && (
               <Alert variant="destructive" className="mb-4">
                 <AlertDescription>
@@ -245,9 +226,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
               </Alert>
             )}
 
-            {/* Personal Information */}
             <div className="space-y-4">
-              {/* First row: Full Name (left) and Email Address (right) */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="name" className="font-medium">
@@ -283,7 +262,6 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
                 </div>
               </div>
 
-              {/* Second row: Phone Number full width */}
               <div className="mb-64 sm:mb-0">
                 <Controller
                   name="phone"
@@ -307,7 +285,6 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
               </div>
             </div>
 
-            {/* Professional Information */}
             <div className="space-y-4 mt-6">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <svg className="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">

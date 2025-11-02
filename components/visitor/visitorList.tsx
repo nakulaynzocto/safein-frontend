@@ -43,7 +43,6 @@ import { routes } from "@/utils/routes"
 import { NewVisitorModal } from "./NewVisitorModal"
 import { VisitorDetailsDialog } from "./visitorDetailsDialog"
 
-// Define columns outside component to avoid recreation
 const createColumns = (
   handleDeleteClick: (visitor: Visitor) => void, 
   handleEditVisitor: (visitor: Visitor) => void,
@@ -171,15 +170,12 @@ export function VisitorList() {
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null)
   
-  // Debounce search input to prevent excessive API calls
   const debouncedSearchTerm = useDebounce(searchTerm, 500)
   
-  // Reset to first page when debounced search changes
   useEffect(() => {
     setCurrentPage(1)
   }, [debouncedSearchTerm])
   
-  // API query parameters
   const queryParams: GetVisitorsQuery = {
     page: currentPage,
     limit: 10,
@@ -188,7 +184,6 @@ export function VisitorList() {
     endDate: dateRange.endDate || undefined,
   }
 
-  // API hooks
   const { 
     data: visitorsData, 
     isLoading, 
@@ -198,13 +193,11 @@ export function VisitorList() {
   
   const [deleteVisitor, { isLoading: isDeleting }] = useDeleteVisitorMutation()
 
-  // Handle delete click - shows confirmation dialog
   const handleDeleteClick = (visitor: Visitor) => {
     setSelectedVisitor(visitor)
     setShowDeleteDialog(true)
   }
 
-  // Handle actual delete - called after confirmation
   const handleDeleteVisitor = async () => {
     if (!selectedVisitor) return
     
@@ -219,37 +212,28 @@ export function VisitorList() {
     }
   }
 
-  // Handle refresh
   const handleRefresh = () => {
     refetch()
   }
 
-  // Handle add visitor - now handled by modal trigger
-
-  // Handle visitor created successfully
   const handleVisitorCreated = () => {
     setShowVisitorModal(false)
-    // Refresh the visitor list by refetching the query
     refetch()
   }
 
-  // Handle opening visitor modal
   const handleOpenVisitorModal = () => {
     setShowVisitorModal(true)
   }
 
-  // Handle edit visitor
   const handleEditVisitor = (visitor: Visitor) => {
     setEditingVisitor(visitor)
   }
 
-  // Handle view visitor
   const handleViewVisitor = (visitor: Visitor) => {
     setSelectedVisitor(visitor)
     setShowViewDialog(true)
   }
 
-  // Handle visitor updated successfully
   const handleVisitorUpdated = () => {
     setEditingVisitor(null)
     refetch()
@@ -258,7 +242,6 @@ export function VisitorList() {
   const visitors = visitorsData?.visitors || []
   const pagination = visitorsData?.pagination
   
-  // Create columns with delete, edit, and view handlers
   const columns = createColumns(handleDeleteClick, handleEditVisitor, handleViewVisitor)
 
   if (error) {

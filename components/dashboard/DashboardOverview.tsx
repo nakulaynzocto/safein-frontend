@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useMemo, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useAppSelector } from "@/store/hooks"
 import { useGetAppointmentsQuery } from "@/store/api/appointmentApi"
@@ -22,7 +23,6 @@ export function DashboardOverview() {
   const [retryCount, setRetryCount] = React.useState(0)
   const [loadingTimeout, setLoadingTimeout] = React.useState(false)
   
-  // Use optimized queries with caching and error handling
   const { data: appointmentsData, isLoading: appointmentsLoading, error: appointmentsError, refetch: refetchAppointments } = useGetAppointmentsQuery(undefined, {
     refetchOnMountOrArgChange: true,
     refetchOnFocus: false,
@@ -43,14 +43,11 @@ export function DashboardOverview() {
   
   const { user } = useAppSelector((state) => state.auth)
 
-  // Show skeleton during initial load only
   const isLoading = appointmentsLoading || employeesLoading || visitorsLoading
   
-  // Check if any data exists to avoid infinite loading
   const hasData = appointmentsData || employeesData || visitorsData
   const shouldShowSkeleton = isLoading && !hasData && retryCount < 2
   
-  // Set timeout for loading state (max 15 seconds)
   React.useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoading) {
@@ -61,45 +58,36 @@ export function DashboardOverview() {
     return () => clearTimeout(timer)
   }, [isLoading])
 
-  // Extract appointments array from the API response
-  const appointments = appointmentsData?.appointments || []
-  const employees = employeesData?.employees || []
-  const visitors = visitorsData?.visitors || []
+  const appointments = useMemo(() => appointmentsData?.appointments || [], [appointmentsData?.appointments])
+  const employees = useMemo(() => employeesData?.employees || [], [employeesData?.employees])
+  const visitors = useMemo(() => visitorsData?.visitors || [], [visitorsData?.visitors])
 
-  // Calculate statistics
-  const stats = calculateAppointmentStats(appointments)
+  const stats = useMemo(() => calculateAppointmentStats(appointments), [appointments])
 
-  // Get filtered appointments
-  const recentAppointments = getRecentAppointments(appointments, 5)
-  const todaysAppointments = getTodaysAppointments(appointments)
+  const recentAppointments = useMemo(() => getRecentAppointments(appointments, 5), [appointments])
+  const todaysAppointments = useMemo(() => getTodaysAppointments(appointments), [appointments])
 
-  // Handle appointment creation
-  const handleScheduleAppointment = () => {
+  const handleScheduleAppointment = useCallback(() => {
     setShowAppointmentModal(true)
-  }
+  }, [])
 
-  const handleAppointmentCreated = () => {
+  const handleAppointmentCreated = useCallback(() => {
     setShowAppointmentModal(false)
-    // The appointments data will be refetched automatically due to RTK Query cache invalidation
-  }
+  }, [])
 
-  // Show error message if any query fails
-  const hasError = appointmentsError || employeesError || visitorsError
+  const hasError = useMemo(() => appointmentsError || employeesError || visitorsError, [appointmentsError, employeesError, visitorsError])
   
-  // Retry function
-  const handleRetry = () => {
-    setRetryCount(retryCount + 1)
+  const handleRetry = useCallback(() => {
+    setRetryCount((prev) => prev + 1)
     refetchAppointments()
     refetchEmployees()
     refetchVisitors()
-  }
+  }, [refetchAppointments, refetchEmployees, refetchVisitors])
   
-  // Show skeleton during initial loading or retry
   if (shouldShowSkeleton && !hasError && !loadingTimeout) {
     return <DashboardSkeleton />
   }
   
-  // Show timeout message if loading takes too long
   if (loadingTimeout && isLoading && !hasData && !hasError) {
     return (
       <div className="space-y-6">
@@ -126,7 +114,6 @@ export function DashboardOverview() {
     )
   }
   
-  // Show error message if there's an error and no data
   if (hasError && !hasData) {
     return (
       <div className="space-y-6">

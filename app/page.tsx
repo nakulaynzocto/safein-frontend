@@ -10,8 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { PublicLayout } from "@/components/layout/publicLayout"
-import { LoadingSpinner } from "@/components/common/loadingSpinner"
-import { Calendar, Users, Shield, Clock, CheckCircle, UserCheck, ArrowRight, Building2, Globe, Award, Heart, Zap, Star, Phone, Mail, MapPin, MessageCircle, Download, Play, ChevronRight, Check, BarChart3 } from "lucide-react"
+import { Calendar, Users, Shield, Clock, CheckCircle, UserCheck, ArrowRight, Building2, Globe, Award, Heart, Zap, Star, Phone, Mail, MapPin, MessageCircle, Download, Play, ChevronRight, Check, BarChart3, X } from "lucide-react"
 import Link from "next/link"
 
 export default function HomePage() {
@@ -29,85 +28,158 @@ export default function HomePage() {
     setIsInitialized(true)
   }, [dispatch])
 
-  // Redirect authenticated users to dashboard
-  useEffect(() => {
-    if (isInitialized && isAuthenticated && token) {
-      router.push(routes.privateroute.DASHBOARD)
+  // Pricing plans - same as pricing page
+  const plans = [
+    {
+      name: "Free Trial",
+      price: "₹0",
+      period: "3 Days Only",
+      description: "Experience full SafeIn features for 3 days",
+      popular: false,
+      features: [
+        "Full SafeIn features access",
+        "Test visitor tracking",
+        "Photo capture & ID verification",
+        "Real-time notifications",
+        "No credit card required"
+      ],
+      limitations: [
+        "Limited to 3 days",
+        "No priority support"
+      ]
+    },
+    {
+      name: "Premium - 1 Month",
+      originalPricePerMonth: "₹8,499",
+      price: "₹8,499",
+      period: "per month",
+      description: "Monthly billing at ₹8,499/month",
+      popular: false,
+      features: [
+        "Unlimited visitor tracking",
+        "Aadhaar & ID verification",
+        "Real-time email & SMS alerts",
+        "Photo capture & smart logs",
+        "Secure cloud storage",
+        "24/7 priority support",
+        "Advanced analytics & reporting",
+        "Custom branding options",
+        "API access",
+        "Multi-location support"
+      ],
+      limitations: []
+    },
+    {
+      name: "Premium - 3 Months",
+      originalPrice: "₹25,497",
+      originalPricePerMonth: "₹8,499",
+      price: "₹24,222",
+      pricePerMonth: "₹8,074",
+      period: "for 3 months",
+      discountNote: "5% OFF",
+      description: "Save 5% with 3-month billing",
+      popular: true,
+      features: [
+        "Unlimited visitor tracking",
+        "Aadhaar & ID verification",
+        "Real-time email & SMS alerts",
+        "Photo capture & smart logs",
+        "Secure cloud storage",
+        "24/7 priority support",
+        "Advanced analytics & reporting",
+        "Custom branding options",
+        "API access",
+        "Multi-location support"
+      ],
+      limitations: []
+    },
+    {
+      name: "Premium - 12 Months",
+      originalPrice: "₹101,988",
+      originalPricePerMonth: "₹8,499",
+      price: "₹91,790",
+      pricePerMonth: "₹7,649",
+      period: "billed annually",
+      discountNote: "10% OFF",
+      description: "Save 10% with annual billing - Best value!",
+      popular: false,
+      features: [
+        "Unlimited visitor tracking",
+        "Aadhaar & ID verification",
+        "Real-time email & SMS alerts",
+        "Photo capture & smart logs",
+        "Secure cloud storage",
+        "24/7 priority support",
+        "Advanced analytics & reporting",
+        "Custom branding options",
+        "API access",
+        "Multi-location support"
+      ],
+      limitations: []
     }
-  }, [isInitialized, isAuthenticated, token, router])
+  ]
 
-  // Show loading during hydration and auth initialization
-  if (!isClient || !isInitialized) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
-  }
+  // Redirect authenticated users to dashboard (handled in PublicLayout)
 
-  // Show loading if user is authenticated (will redirect)
-  if (isAuthenticated) {
-    return null // Don't show loading, just redirect
-  }
-
+  // Always render - PublicLayout handles loading states to prevent white screen
   return (
     <PublicLayout>
       {/* Hero Section */}
-      <section className="relative py-20 bg-hero-gradient">
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <section className="relative py-12 sm:py-16 md:py-20 bg-hero-gradient">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left Side - Main Content */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                <span className="text-yellow-400 font-semibold">4.9/5 Rating</span>
-                <span className="text-gray-300">•</span>
-                <span className="text-gray-300">1000+ Happy Clients</span>
+            <div className="text-center lg:text-left">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-4 sm:mb-6">
+                <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400 fill-current" />
+                <span className="text-sm sm:text-base text-yellow-400 font-semibold">4.9/5 Rating</span>
+                <span className="text-gray-300 hidden sm:inline">•</span>
+                <span className="text-gray-300 text-sm sm:text-base">1000+ Happy Clients</span>
               </div>
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight text-white animate-hero-title">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight text-white animate-hero-title px-2 sm:px-0">
                 Transform Your Visitor Management with SafeIn
           </h1>
-              <p className="text-xl mb-8 leading-relaxed text-gray-300">
+              <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 leading-relaxed text-gray-300 px-2 sm:px-0">
                 Get your SafeIn management system set up online with our expert assistance. 
                 Start with our free 3-day trial and experience the power of our comprehensive visitor appointment platform.
               </p>
               
               {/* Free Trial Badge */}
-              <div className="inline-flex items-center gap-2 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6 bg-brand">
-                <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+              <div className="inline-flex items-center gap-2 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6 bg-brand">
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-pulse"></span>
                 FREE 3-Day Trial
               </div>
               
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-start">
-                <Button size="lg" className="text-white font-semibold py-3 bg-brand" asChild>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start w-full sm:w-auto">
+                <Button size="lg" className="text-white font-semibold py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base bg-brand w-full sm:w-auto" asChild>
                   <Link href={routes.publicroute.REGISTER}>Start Free Trial</Link>
             </Button>
-                <Button size="lg" variant="outline" className="text-gray-900 border-white hover:bg-white hover:text-gray-900">
+                <Button size="lg" variant="outline" className="text-gray-900 border-white hover:bg-white hover:text-gray-900 py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto" asChild>
                   <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>
             </Button>
               </div>
             </div>
             
             {/* Right Side - Animated Dashboard Preview (using original image) */}
-            <div className="relative lg:max-w-[620px] lg:ml-auto">
-              <div className="absolute -inset-6 blur-3xl opacity-30 bg-white/40 rounded-2xl"></div>
+            <div className="relative mt-8 lg:mt-0 lg:max-w-[620px] lg:ml-auto order-first lg:order-last">
+              <div className="absolute -inset-4 sm:-inset-6 blur-3xl opacity-30 bg-white/40 rounded-2xl"></div>
               <Image
                 src="/home/visitor-appointment-management.jpg"
                 alt="SafeIn Appointment Management"
                 width={520}
                 height={320}
-                className="rounded-xl shadow-2xl dash-glow animate-float-slow"
+                className="rounded-xl shadow-2xl dash-glow animate-float-slow w-full h-auto"
                 priority
               />
-              <div className="absolute -bottom-5 -left-5 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-white/40">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
+              <div className="absolute -bottom-3 sm:-bottom-5 -left-3 sm:-left-5 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-2 sm:p-3 border border-white/40 max-w-[200px] sm:max-w-none">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Live dashboard preview</p>
-                    <p className="text-xs text-gray-600">What your team will see</p>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-900 text-xs sm:text-sm">Live dashboard preview</p>
+                    <p className="text-xs text-gray-600 hidden sm:block">What your team will see</p>
                   </div>
                 </div>
               </div>
@@ -352,220 +424,86 @@ export default function HomePage() {
       </section>
 
       {/* Subscription Plans Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
+      <section className="py-20 px-4 bg-white">
+        <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-brand">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 heading-main">
               Choose Your Perfect Plan
             </h2>
-            <p className="text-xl max-w-3xl mx-auto text-accent">
-              Premium features at ₹8,499/month. Save 5% with 3-month billing or 10% with annual billing.
+            <p className="text-lg md:text-xl max-w-3xl mx-auto text-accent">
+              Choose the perfect plan for your business. All plans include our core SafeIn management features 
+              with a 3-day free trial and no setup fees.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-            {/* Free Trial */}
-            <Card className="relative border-2 hover:shadow-lg transition-shadow">
-              <CardHeader className="text-center pb-4">
-                <CardTitle className="text-xl font-bold text-gray-900">Free Trial</CardTitle>
-                <div className="mt-4">
-                  <span className="text-3xl font-bold text-gray-900">₹0</span>
-                  <div className="text-sm text-gray-600 mt-2">3 Days Only</div>
-                </div>
-                <p className="text-xs text-gray-600 mt-2">Experience full features</p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Full feature access</span>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+            {plans.map((plan, index) => (
+              <Card key={index} className={`relative ${plan.popular ? 'border-2 border-brand shadow-lg scale-105' : ''}`}>
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <Badge className="px-4 py-1 text-white bg-brand">
+                      Most Popular
+                    </Badge>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Test visitor tracking</span>
+                )}
+                <CardHeader className="text-center pb-8">
+                  <CardTitle className="text-2xl font-bold text-brand">
+                    {plan.name}
+                  </CardTitle>
+                  <div className="mt-4">
+                    {plan.originalPrice && (
+                      <div className="mb-2">
+                        <span className="text-lg line-through text-gray-400">{plan.originalPrice}</span>
+                        {plan.discountNote && (
+                          <Badge className="ml-2 bg-green-500 text-white">{plan.discountNote}</Badge>
+                        )}
+                      </div>
+                    )}
+                    <span className="text-4xl font-bold text-brand-strong">
+                      {plan.price}
+                    </span>
+                    <div className="mt-2">
+                      <span className="text-gray-500">{plan.period}</span>
+                    </div>
+                    {plan.pricePerMonth && (
+                      <div className="text-sm text-gray-600 mt-2">
+                        <span className="text-gray-400">Effective: </span>
+                        <span className="font-semibold text-brand-strong">{plan.pricePerMonth}/month</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Photo capture & ID verification</span>
+                  <CardDescription className="text-base mt-4 text-accent">
+                    {plan.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 mb-8">
+                    {plan.features.map((feature, featureIndex) => (
+                      <div key={featureIndex} className="flex items-center">
+                        <Check className="h-5 w-5 mr-3 text-brand-strong" />
+                        <span className="text-sm text-accent">{feature}</span>
+                      </div>
+                    ))}
+                    {plan.limitations.map((limitation, limitationIndex) => (
+                      <div key={limitationIndex} className="flex items-center opacity-60">
+                        <X className="h-5 w-5 mr-3 text-gray-400" />
+                        <span className="text-sm text-gray-400">{limitation}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Real-time notifications</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">No credit card required</span>
-                  </div>
-                </div>
-                <Button className="w-full mt-4" variant="outline" asChild>
-                  <Link href={routes.publicroute.REGISTER}>Start Free Trial</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Premium 1 Month */}
-            <Card className="relative border-2 hover:shadow-lg transition-shadow">
-              <CardHeader className="text-center pb-4">
-                <CardTitle className="text-xl font-bold text-gray-900">1 Month</CardTitle>
-                <div className="mt-4">
-                  <span className="text-3xl font-bold text-brand-strong">₹8,499</span>
-                  <span className="text-gray-600 text-sm">/month</span>
-                </div>
-                <p className="text-xs text-gray-600 mt-2">Month-to-month billing</p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Unlimited visitor tracking</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Aadhaar & ID verification</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Real-time email & SMS alerts</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Photo capture & smart logs</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Secure cloud storage</span>
-                  </div>
-                </div>
-                <Button className="w-full mt-4" variant="outline" asChild>
-                  <Link href={routes.publicroute.REGISTER}>Get Started</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Premium 3 Months */}
-            <Card className="relative border-2 hover:shadow-lg transition-shadow border-brand">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="text-white px-3 py-0.5 text-xs bg-brand">Popular</Badge>
-              </div>
-              <CardHeader className="text-center pb-4">
-                <CardTitle className="text-xl font-bold text-gray-900">3 Months</CardTitle>
-                <div className="mt-4">
-                  <div className="text-lg line-through text-gray-400 mb-1">₹25,497</div>
-                  <div className="flex items-center justify-center gap-1">
-                    <Badge className="bg-green-500 text-white text-xs">5% OFF</Badge>
-                  </div>
-                  <span className="text-3xl font-bold text-brand-strong">₹24,222</span>
-                  <div className="text-xs text-gray-600 mt-1">₹8,074/month</div>
-                </div>
-                <p className="text-xs text-gray-600 mt-2">Save ₹1,275</p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Unlimited visitor tracking</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Aadhaar & ID verification</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Real-time email & SMS alerts</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Photo capture & smart logs</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Secure cloud storage</span>
-                  </div>
-                </div>
-                <Button className="w-full mt-4 text-white bg-brand" asChild>
-                  <Link href={routes.publicroute.REGISTER}>Get Started</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Premium 12 Months */}
-            <Card className="relative border-2 hover:shadow-lg transition-shadow border-yellow-400">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-yellow-500 text-white px-3 py-0.5 text-xs animate-pulse">Best Value</Badge>
-              </div>
-              <CardHeader className="text-center pb-4">
-                <CardTitle className="text-xl font-bold text-gray-900">12 Months</CardTitle>
-                <div className="mt-4">
-                  <div className="text-lg line-through text-gray-400 mb-1">₹101,988</div>
-                  <div className="flex items-center justify-center gap-1">
-                    <Badge className="bg-green-500 text-white text-xs">10% OFF</Badge>
-                  </div>
-                  <span className="text-3xl font-bold text-brand-strong">₹91,790</span>
-                  <div className="text-xs text-gray-600 mt-1">₹7,649/month</div>
-                </div>
-                <p className="text-xs text-gray-600 mt-2">Save ₹10,198</p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Unlimited visitors</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Aadhaar & ID verification</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Real-time email & SMS alerts</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Photo capture & smart logs</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">Secure cloud storage</span>
-                  </div>
-                </div>
-                <Button className="w-full mt-4 text-white bg-brand" asChild>
-                  <Link href={routes.publicroute.REGISTER}>Get Started</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-          
-          {/* All Plans Features */}
-          <div className="text-center mt-12">
-            <div className="bg-white rounded-lg p-6 max-w-4xl mx-auto shadow-sm">
-              <h3 className="text-lg font-semibold mb-4 text-brand">All Premium Plans Include</h3>
-              <div className="grid md:grid-cols-3 gap-4 text-sm">
-                <div className="flex items-center gap-2 justify-center">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span className="text-gray-700">24/7 Priority Support</span>
-                </div>
-                <div className="flex items-center gap-2 justify-center">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span className="text-gray-700">Advanced Analytics</span>
-                </div>
-                <div className="flex items-center gap-2 justify-center">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span className="text-gray-700">Custom Branding</span>
-                </div>
-                <div className="flex items-center gap-2 justify-center">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span className="text-gray-700">API Access</span>
-                </div>
-                <div className="flex items-center gap-2 justify-center">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span className="text-gray-700">Multi-location Support</span>
-                </div>
-                <div className="flex items-center gap-2 justify-center">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span className="text-gray-700">Secure Cloud Storage</span>
-                </div>
-              </div>
-            </div>
+                  <Button 
+                    className={`w-full ${plan.popular ? 'text-white bg-brand' : ''}`} 
+                    variant={plan.popular ? 'default' : 'outline'}
+                    asChild
+                  >
+                    <Link href={routes.publicroute.REGISTER}>
+                      Start Free Trial
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>

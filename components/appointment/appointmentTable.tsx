@@ -25,7 +25,9 @@ import {
   Mail,
   Building,
   CheckCircle,
-  X
+  X,
+  Edit,
+  CalendarClock
 } from "lucide-react"
 import { Appointment } from "@/store/api/appointmentApi"
 import { 
@@ -127,6 +129,7 @@ export function AppointmentTable({
 }: AppointmentTableProps) {
   const router = useRouter()
   const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false)
+  const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null)
   
   // API mutations
   const [approveAppointment, { isLoading: isApprovingMutation }] = useApproveAppointmentMutation()
@@ -235,14 +238,83 @@ export function AppointmentTable({
     setShowViewDialog(true)
   }
 
+  const handleEdit = (appointment: Appointment) => {
+    setEditingAppointmentId(appointment._id)
+    setShowNewAppointmentModal(true)
+  }
 
-  // Handle appointment created successfully
+  const handleReschedule = (appointment: Appointment) => {
+    handleEdit(appointment)
+  }
+
+  const isAppointmentDatePast = (appointment: Appointment): boolean => {
+    if (!appointment.appointmentDetails?.scheduledDate) return false
+    
+    try {
+      let scheduledDateTime = new Date(appointment.appointmentDetails.scheduledDate)
+      const dateStr = appointment.appointmentDetails.scheduledDate
+      const hasTimeInDate = dateStr.includes('T') || /\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(dateStr)
+      
+      if (appointment.appointmentDetails.scheduledTime && !hasTimeInDate) {
+        const timeStr = appointment.appointmentDetails.scheduledTime.trim()
+        let hours = 0
+        let minutes = 0
+        
+        if (timeStr.includes(':')) {
+          const timeParts = timeStr.split(':')
+          hours = parseInt(timeParts[0], 10) || 0
+          const minutesPart = timeParts[1] ? timeParts[1].trim() : '0'
+          if (minutesPart.includes('AM') || minutesPart.includes('PM')) {
+            const mins = minutesPart.replace(/[APM]/gi, '').trim()
+            minutes = parseInt(mins, 10) || 0
+            if (minutesPart.toUpperCase().includes('PM') && hours !== 12) {
+              hours += 12
+            }
+            if (minutesPart.toUpperCase().includes('AM') && hours === 12) {
+              hours = 0
+            }
+          } else {
+            minutes = parseInt(minutesPart, 10) || 0
+          }
+        } else {
+          hours = parseInt(timeStr.replace(/[APM]/gi, '').trim(), 10) || 0
+          if (timeStr.toUpperCase().includes('PM') && hours !== 12) {
+            hours += 12
+          }
+          if (timeStr.toUpperCase().includes('AM') && hours === 12) {
+            hours = 0
+          }
+        }
+        
+        if (hours < 0 || hours > 23) hours = 0
+        if (minutes < 0 || minutes > 59) minutes = 0
+        scheduledDateTime.setHours(hours, minutes, 0, 0)
+      } else if (!hasTimeInDate && !appointment.appointmentDetails.scheduledTime) {
+        scheduledDateTime.setHours(23, 59, 59, 0)
+      }
+      
+      const now = new Date()
+      return scheduledDateTime < now
+    } catch (error) {
+      console.error('Error checking appointment date:', error)
+      try {
+        const appointmentDate = new Date(appointment.appointmentDetails.scheduledDate)
+        const now = new Date()
+        now.setHours(0, 0, 0, 0)
+        appointmentDate.setHours(0, 0, 0, 0)
+        return appointmentDate < now
+      } catch (e) {
+        return false
+      }
+    }
+  }
+
   const handleAppointmentCreated = () => {
-    // Refresh the appointment list by calling onRefresh
+    setEditingAppointmentId(null)
+    setShowNewAppointmentModal(false)
     onRefresh?.()
   }
 
-  // Define columns based on mode
   const getColumns = () => {
     const baseColumns = [
       {
@@ -259,7 +331,6 @@ export function AppointmentTable({
         key: "visitorName",
         header: "Visitor",
         render: (appointment: Appointment) => {
-          // Handle both possible data structures
           const visitor = (appointment as any).visitorId || appointment.visitor;
           const visitorName = visitor?.name || "Unknown Visitor";
           const visitorPhone = visitor?.phone || "N/A";
@@ -289,7 +360,6 @@ export function AppointmentTable({
         key: "employeeName",
         header: "Meeting With",
         render: (appointment: Appointment) => {
-          // Handle both possible data structures
           const employee = (appointment as any).employeeId || appointment.employee;
           const employeeName = employee?.name || "Unknown Employee";
           const employeeEmail = employee?.email || "N/A";
@@ -354,7 +424,6 @@ export function AppointmentTable({
         key: "status",
         header: "Status",
         render: (appointment: Appointment) => {
-          // Show loading spinner if appointment is being processed
           if (isAppointmentLoading(appointment._id)) {
             return (
               <div className="flex items-center gap-2">
@@ -364,14 +433,28 @@ export function AppointmentTable({
             )
           }
           
-          // Ensure status is a string, not an object
           const status = typeof appointment.status === 'string' ? appointment.status : 'pending'
+          const isPast = isAppointmentDatePast(appointment)
+          
+          if (isPast && status === 'pending') {
+            return (
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-white text-blue-500 border-blue-500 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-600"
+                onClick={() => handleReschedule(appointment)}
+              >
+                <CalendarClock className="mr-1 h-3 w-3 text-blue-500" />
+                Reschedule
+              </Button>
+            )
+          }
+          
           return <StatusBadge status={status} />
         },
       },
     ]
 
-    // Add mode-specific columns
     if (mode === 'trash') {
       baseColumns.push({
         key: "deletedAt",
@@ -393,7 +476,6 @@ export function AppointmentTable({
       })
     }
 
-    // Add actions column
     baseColumns.push({
       key: "actions",
       header: "Actions",
@@ -406,62 +488,107 @@ export function AppointmentTable({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              {onView && (
-                <DropdownMenuItem onClick={() => handleView(appointment)}>
-                  <Eye className="mr-2 h-4 w-4" />
-                  View Details
-                </DropdownMenuItem>
-              )}
-              {mode === 'active' && (
-                <>
-                  {appointment.status === 'pending' && (
-                    <>
-                      <DropdownMenuItem 
-                        onClick={() => handleApprove(appointment._id)}
-                        disabled={isApprovingMutation || isAppointmentLoading(appointment._id)}
-                      >
-                        <CheckCircle className="mr-2 h-4 w-4" />
-                        Approve
+              {mode === 'active' && (() => {
+                const status = typeof appointment.status === 'string' ? appointment.status : 'pending'
+                const isPast = isAppointmentDatePast(appointment)
+                const isReschedule = isPast && status === 'pending'
+                
+                return (
+                  <>
+                    {onView && (
+                      <DropdownMenuItem onClick={() => handleView(appointment)}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        View Details
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => handleReject(appointment._id)}
-                        disabled={isRejectingMutation || isAppointmentLoading(appointment._id)}
-                        className="text-destructive"
-                      >
-                        <X className="mr-2 h-4 w-4" />
-                        Reject
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                  {appointment.status === 'approved' && onCheckOut && (
-                    <DropdownMenuItem 
-                      onClick={() => {
-                        setSelectedAppointment(appointment)
-                        setShowCheckOutDialog(true)
-                      }}
-                      disabled={isCheckingOut || isAppointmentLoading(appointment._id)}
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Check Out
-                    </DropdownMenuItem>
-                  )}
-                  {onDelete && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={() => {
-                          setSelectedAppointment(appointment)
-                          setShowDeleteDialog(true)
-                        }}
-                        className="text-destructive"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                </>
-              )}
+                    )}
+                    
+                    {(status === 'rejected' || status === 'completed') && (
+                      null
+                    )}
+                    
+                    {status === 'approved' && (
+                      <>
+                        {onCheckOut && (
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setSelectedAppointment(appointment)
+                              setShowCheckOutDialog(true)
+                            }}
+                            disabled={isCheckingOut || isAppointmentLoading(appointment._id)}
+                          >
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Check Out
+                          </DropdownMenuItem>
+                        )}
+                      </>
+                    )}
+                    
+                    {isReschedule && (
+                      <>
+                        <DropdownMenuItem onClick={() => handleEdit(appointment)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        {onDelete && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={() => {
+                                setSelectedAppointment(appointment)
+                                setShowDeleteDialog(true)
+                              }}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </>
+                    )}
+                    
+                    {status === 'pending' && !isPast && (
+                      <>
+                        <DropdownMenuItem onClick={() => handleEdit(appointment)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => handleReject(appointment._id)}
+                          disabled={isRejectingMutation || isAppointmentLoading(appointment._id)}
+                          className="text-destructive"
+                        >
+                          <X className="mr-2 h-4 w-4" />
+                          Reject
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleApprove(appointment._id)}
+                          disabled={isApprovingMutation || isAppointmentLoading(appointment._id)}
+                        >
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          Approve
+                        </DropdownMenuItem>
+                        {onDelete && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={() => {
+                                setSelectedAppointment(appointment)
+                                setShowDeleteDialog(true)
+                              }}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </>
+                )
+              })()}
               {mode === 'trash' && onRestore && (
                 <DropdownMenuItem 
                   onClick={() => {
@@ -503,7 +630,6 @@ export function AppointmentTable({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header Actions */}
       <Card className="card-hostinger p-3 sm:p-4">
         <CardHeader className="pb-3 sm:pb-4 px-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -544,7 +670,6 @@ export function AppointmentTable({
         </CardHeader>
       </Card>
 
-      {/* Main Table */}
       <Card className="card-hostinger p-3 sm:p-4 overflow-hidden">
         <CardHeader className="pb-3 sm:pb-4 px-0">
             <div className="flex items-center justify-between gap-3">
@@ -579,7 +704,6 @@ export function AppointmentTable({
         </CardContent>
       </Card>
 
-      {/* Pagination */}
       {pagination && pagination.totalPages > 1 && (
         <div className="flex justify-center">
           <Pagination
@@ -594,7 +718,6 @@ export function AppointmentTable({
         </div>
       )}
 
-      {/* Confirmation Dialogs */}
       {mode === 'active' && onDelete && (
         <ConfirmationDialog
           open={showDeleteDialog}
@@ -642,7 +765,6 @@ export function AppointmentTable({
         />
       )}
 
-      {/* View Details Dialog */}
       <AppointmentDetailsDialog
         appointment={selectedAppointment}
         mode={mode}
@@ -650,11 +772,16 @@ export function AppointmentTable({
         on_close={() => setShowViewDialog(false)}
       />
 
-      {/* New Appointment Modal - opened from empty state button */}
       {mode === 'active' && (
         <NewAppointmentModal
+          appointmentId={editingAppointmentId || undefined}
           open={showNewAppointmentModal}
-          onOpenChange={setShowNewAppointmentModal}
+          onOpenChange={(open) => {
+            setShowNewAppointmentModal(open)
+            if (!open) {
+              setEditingAppointmentId(null)
+            }
+          }}
           onSuccess={handleAppointmentCreated}
           triggerButton={<div />}
         />

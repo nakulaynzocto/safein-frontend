@@ -10,7 +10,6 @@ export interface AppointmentStats {
 }
 
 export function calculateAppointmentStats(appointments: Appointment[]): AppointmentStats {
-  // Safety check: ensure appointments is an array
   if (!Array.isArray(appointments)) {
     return {
       totalAppointments: 0,
@@ -29,7 +28,6 @@ export function calculateAppointmentStats(appointments: Appointment[]): Appointm
     (acc, appointment) => {
       acc.totalAppointments++
       
-      // Count by status
       switch (appointment.status) {
         case 'pending':
           acc.pendingAppointments++
@@ -46,7 +44,6 @@ export function calculateAppointmentStats(appointments: Appointment[]): Appointm
           break
       }
       
-      // Count today's appointments
       const appointmentDate = new Date(appointment.appointmentDetails?.scheduledDate || appointment.appointmentDate)
       const appointmentDateOnly = new Date(
         appointmentDate.getFullYear(),

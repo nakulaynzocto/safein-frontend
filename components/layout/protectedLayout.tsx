@@ -8,7 +8,6 @@ import { initializeAuth } from "@/store/slices/authSlice"
 import { routes } from "@/utils/routes"
 import { Navbar } from "./navbar"
 import { Sidebar } from "./sidebar"
-import { LoadingSpinner } from "@/components/common/loadingSpinner"
 
 interface ProtectedLayoutProps {
   children: React.ReactNode
@@ -23,61 +22,40 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
   const [isClient, setIsClient] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
 
-  // Check if sidebar should be hidden for specific pages
   const shouldHideSidebar = pathname === routes.privateroute.NOTIFICATIONS
 
-  // Initialize authentication on mount
   useEffect(() => {
     setIsClient(true)
     dispatch(initializeAuth())
     setIsInitialized(true)
   }, [dispatch])
 
-  // Redirect to login if not authenticated after initialization
   useEffect(() => {
     if (isInitialized && !isAuthenticated && !token) {
-      // Use replace to avoid adding to history
       router.replace(routes.publicroute.LOGIN)
     }
   }, [isInitialized, isAuthenticated, token, router])
 
-
-  // ====== Render Logic ======
-
-  // Show loading during hydration and auth initialization
-  if (!isClient || !isInitialized) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
-  }
-
-  // Not authenticated → show loading while redirecting (prevents blank screen)
-  if (!isAuthenticated || !token) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
-  }
-
-
-
-  // Default Layout
+  // Don't return null - always show layout to prevent white screen during navigation
+  // If not authenticated, router.replace will handle redirect
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
       <Navbar />
       <div className="flex flex-1 overflow-hidden">
-        {/* Desktop Sidebar - hidden on small screens, shown only on md and above */}
         {!shouldHideSidebar && (
           <div className="hidden md:block flex-shrink-0">
             <Sidebar />
           </div>
         )}
-        {/* Main content */}
         <main className="flex-1 overflow-y-auto bg-background">
-          <div className="container mx-auto p-4 md:p-6">{children}</div>
+          <div className="container mx-auto p-4 md:p-6">
+            {(!isClient || !isInitialized || !isAuthenticated || !token) ? (
+              // Minimal placeholder during auth check - prevents white screen
+              <div className="min-h-[60vh]" />
+            ) : (
+              children
+            )}
+          </div>
         </main>
       </div>
     </div>

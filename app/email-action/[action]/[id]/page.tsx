@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useApproveAppointmentMutation, useRejectAppointmentMutation } from '@/store/api/appointmentApi'
 import { useAppSelector } from '@/store/hooks'
-import { LoadingSpinner } from '@/components/common/loadingSpinner'
 import { showSuccessToast, showErrorToast } from '@/utils/toast'
 import { routes } from '@/utils/routes'
 
@@ -47,7 +46,6 @@ export default function EmailActionPage() {
           showErrorToast('Invalid action')
         }
       } catch (error) {
-        console.error('Error processing appointment action:', error)
         setStatus('error')
         setMessage('There was an error processing your request. Please try again.')
         showErrorToast('Failed to process appointment action')
@@ -68,19 +66,7 @@ export default function EmailActionPage() {
   }
 
   if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
-          <LoadingSpinner size="lg" className="mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Processing Your Request...
-          </h2>
-          <p className="text-gray-600">
-            Please wait while we {action === 'approve' ? 'approve' : 'reject'} your appointment.
-          </p>
-        </div>
-      </div>
-    )
+    return null
   }
 
   if (status === 'auth-required') {

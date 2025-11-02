@@ -13,7 +13,6 @@ import { routes } from "@/utils/routes"
 import { useDebounce } from "@/hooks/useDebounce"
 
 export function EmployeeList() {
-  // State for pagination and filtering
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [search, setSearch] = useState("")
@@ -29,10 +28,8 @@ export function EmployeeList() {
     return { startDate: null, endDate: null }
   })
   
-  // Debounce search input to prevent excessive API calls
   const debouncedSearch = useDebounce(search, 500)
   
-  // API query with parameters
   const { data: employeeData, isLoading, error, refetch } = useGetEmployeesQuery({
     page: currentPage,
     limit: pageSize,
@@ -54,7 +51,7 @@ export function EmployeeList() {
     try {
       await deleteEmployee(employeeId).unwrap()
       showSuccessToast("Employee deleted successfully")
-      refetch() // Refresh the employee list after deletion
+      refetch()
     } catch (error) {
       showErrorToast("Failed to delete employee")
       console.error("Delete error:", error)
@@ -65,7 +62,6 @@ export function EmployeeList() {
     refetch()
   }
 
-  // Reset to first page when debounced search changes
   useEffect(() => {
     setCurrentPage(1)
   }, [debouncedSearch])
@@ -76,12 +72,12 @@ export function EmployeeList() {
 
   const handleDepartmentFilterChange = (value: string) => {
     setDepartmentFilter(value)
-    setCurrentPage(1) // Reset to first page when filtering
+    setCurrentPage(1)
   }
 
   const handleStatusFilterChange = (value: string) => {
     setStatusFilter(value)
-    setCurrentPage(1) // Reset to first page when filtering
+    setCurrentPage(1)
   }
 
   const handleSortChange = (field: string) => {
@@ -94,8 +90,6 @@ export function EmployeeList() {
   }
 
   const handleEmployeeCreated = () => {
-    // Refresh the employee list by refetching the query
-    // The query will automatically refetch when the modal closes
   }
 
   return (
@@ -115,37 +109,24 @@ export function EmployeeList() {
       </PageHeader>
 
       <EmployeeTable
-        // Data
         employees={employees}
         pagination={pagination}
         isLoading={isLoading}
         error={error}
-        
-        // Filters and pagination
         searchTerm={search}
         currentPage={currentPage}
         pageSize={pageSize}
-        
-        // Actions
         onSearchChange={handleSearchChange}
         onPageChange={setCurrentPage}
         onPageSizeChange={setPageSize}
-        
-        // Table configuration
         mode="active"
         showSelection={false}
         onDateFromChange={(v) => { setDateRange(prev => ({ ...prev, startDate: v || null })); setCurrentPage(1) }}
         onDateToChange={(v) => { setDateRange(prev => ({ ...prev, endDate: v || null })); setCurrentPage(1) }}
-        
-        // Actions
         onDelete={handleDelete}
         onView={(employee) => {}}
         onRefresh={handleRefresh}
-        
-        // Loading states
         isDeleting={isDeleting}
-        
-        // Optional props
         showHeader={false}
       />
     </div>

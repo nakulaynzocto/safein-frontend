@@ -49,12 +49,10 @@ export function ImageChart({ title, description, data, type = 'donut', className
   )
 }
 
-// Donut Chart Component
 function DonutChart({ data }: { data: ImageChartProps['data'] }) {
   const total = data.reduce((sum, item) => sum + item.value, 0)
   const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
   
-  // Handle empty data case
   if (total === 0 || data.length === 0) {
     return (
       <div className="relative w-full h-64 flex items-center justify-center">
@@ -132,9 +130,7 @@ function DonutChart({ data }: { data: ImageChartProps['data'] }) {
   )
 }
 
-// Bar Chart Component
 function BarChart({ data }: { data: ImageChartProps['data'] }) {
-  // Handle empty data case
   if (data.length === 0) {
     return (
       <div className="w-full h-64 flex items-center justify-center text-gray-400">
@@ -179,9 +175,7 @@ function BarChart({ data }: { data: ImageChartProps['data'] }) {
   )
 }
 
-// Line Chart Component
 function LineChart({ data }: { data: ImageChartProps['data'] }) {
-  // Handle empty data case
   if (data.length === 0) {
     return (
       <div className="w-full h-64 flex items-center justify-center text-gray-400">
@@ -196,7 +190,6 @@ function LineChart({ data }: { data: ImageChartProps['data'] }) {
   const maxValue = data.length > 0 ? Math.max(...data.map(item => item.value || 0)) : 1
   const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
   
-  // Generate SVG path for line
   const points = data.map((item, index) => {
     const x = data.length === 1 ? 50 : (index / (data.length - 1)) * 100
     const y = maxValue > 0 ? 100 - (item.value / maxValue) * 100 : 100
@@ -259,9 +252,7 @@ function LineChart({ data }: { data: ImageChartProps['data'] }) {
   )
 }
 
-// Area Chart Component
 function AreaChart({ data }: { data: ImageChartProps['data'] }) {
-  // Handle empty data case
   if (data.length === 0) {
     return (
       <div className="w-full h-64 flex items-center justify-center text-gray-400">
@@ -276,7 +267,6 @@ function AreaChart({ data }: { data: ImageChartProps['data'] }) {
   const maxValue = data.length > 0 ? Math.max(...data.map(item => item.value || 0)) : 1
   const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
   
-  // Generate SVG path for area
   const points = data.map((item, index) => {
     const x = data.length === 1 ? 50 : (index / (data.length - 1)) * 100
     const y = maxValue > 0 ? 100 - (item.value / maxValue) * 100 : 100
@@ -338,9 +328,7 @@ function AreaChart({ data }: { data: ImageChartProps['data'] }) {
   )
 }
 
-// Scatter Chart Component
 function ScatterChart({ data }: { data: ImageChartProps['data'] }) {
-  // Handle empty data case
   if (data.length === 0) {
     return (
       <div className="w-full h-64 flex items-center justify-center text-gray-400">
@@ -384,12 +372,10 @@ function ScatterChart({ data }: { data: ImageChartProps['data'] }) {
         
         {/* Scatter points */}
         {data.map((item, index) => {
-          // Handle edge case when data.length is 1 to avoid division by zero
           const x = data.length === 1 ? 50 : (index / (data.length - 1)) * 100
           const y = maxValue > 0 ? 100 - (item.value / maxValue) * 100 : 100
           const radius = maxValue > 0 ? Math.max(2, Math.min(8, (item.value / maxValue) * 6 + 2)) : 2
           
-          // Ensure all values are valid numbers
           const validX = isNaN(x) ? 50 : x
           const validY = isNaN(y) ? 50 : y
           const validRadius = isNaN(radius) ? 4 : radius

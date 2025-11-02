@@ -12,10 +12,10 @@ import {
   DropdownMenuGroup,
   DropdownMenuLabel,
 } from "@/components/ui/dropdownMenu"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
-import { logout, initializeAuth } from "@/store/slices/authSlice"
-import { useLogoutMutation } from "@/store/api/authApi"
+import { logout, initializeAuth, setUser } from "@/store/slices/authSlice"
+import { useLogoutMutation, useGetProfileQuery } from "@/store/api/authApi"
 import { routes } from "@/utils/routes"
 import { MobileSidebar } from "./mobileSidebar"
 import {
@@ -35,56 +35,87 @@ import {
   Mail,
   Bell,
 } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 
 export function Navbar() {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const { user, isAuthenticated } = useAppSelector((state) => state.auth)
+  const { user: authUser, isAuthenticated } = useAppSelector((state) => state.auth)
   const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+  const [clientAuthState, setClientAuthState] = useState(false)
 
-  // Initialize authentication on component mount
+  // Fetch latest user profile to get updated profilePicture
+  const { data: profileUser } = useGetProfileQuery(undefined, {
+    skip: !isAuthenticated,
+    refetchOnMountOrArgChange: true,
+  })
+
+  // Use profileUser if available, otherwise fall back to authUser
+  const user = profileUser || authUser
+
+  // Mark as mounted after hydration to prevent SSR/client mismatch
+  useEffect(() => {
+    setIsMounted(true)
+    // Check localStorage only on client
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token")
+      setClientAuthState(!!token)
+    }
+  }, [])
+
+  // Update auth state when profile is fetched
+  useEffect(() => {
+    if (profileUser && profileUser.id) {
+      dispatch(setUser(profileUser))
+      // Also update localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(profileUser))
+      }
+    }
+  }, [profileUser, dispatch])
+
   useEffect(() => {
     dispatch(initializeAuth())
   }, [dispatch])
 
-  // -like navbar behavior: overlay on hero, solid on scroll
   useEffect(() => {
+    if (!isMounted) return
+    
     const onScroll = () => {
       setIsScrolled(window.scrollY > 10)
     }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [isMounted])
 
-  // Check if user is actually authenticated (fallback check)
-  const isActuallyAuthenticated = isAuthenticated || (typeof window !== "undefined" && localStorage.getItem("token"))
+  // Only use localStorage check after mounting to prevent hydration mismatch
+  // During SSR, only use Redux state
+  const isActuallyAuthenticated = isMounted 
+    ? (isAuthenticated || clientAuthState)
+    : isAuthenticated
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
-      // Call the logout API endpoint
       await logoutMutation().unwrap()
-
-      // Clear local state and redirect to login page
       dispatch(logout())
       router.push(routes.publicroute.LOGIN)
     } catch (error) {
-      // Even if API call fails, still clear local state and redirect to login page
       dispatch(logout())
       router.push(routes.publicroute.LOGIN)
     }
-  }
+  }, [logoutMutation, dispatch, router])
 
-  const handleAvatarClick = () => {
+  const handleAvatarClick = useCallback(() => {
     router.push(routes.privateroute.PROFILE)
-  }
+  }, [router])
 
   const getUserInitials = (name?: string, companyName?: string) => {
     if (companyName) {
-      return companyName.substring(0, 2).toUpperCase()
+      return companyName.substring(0, 1).toUpperCase()
     }
     if (name) {
       return name
@@ -92,18 +123,22 @@ export function Navbar() {
         .map((n) => n[0])
         .join("")
         .toUpperCase()
+        .substring(0, 1)
     }
     return "U"
   }
 
-  const linkTextClass = isScrolled ? 'text-gray-900' : 'text-white'
-  const linkHoverBgClass = isScrolled ? 'hover:bg-gray-100/80' : 'hover:bg-white/10'
-  const ctaBtnClass = isScrolled ? 'text-white bg-brand' : 'text-brand-strong bg-white'
+  // During SSR, only check auth state. After mount, include scroll state to prevent hydration mismatch
+  const shouldShowWhiteNavbar = isActuallyAuthenticated || (isMounted && isScrolled)
+  const linkTextClass = shouldShowWhiteNavbar ? 'text-gray-900' : 'text-white'
+  const linkHoverBgClass = shouldShowWhiteNavbar ? 'hover:bg-gray-100/80' : 'hover:bg-white/10'
+  const ctaBtnClass = shouldShowWhiteNavbar ? 'text-white bg-brand' : 'text-brand-strong bg-white'
+  const userInitials = user ? getUserInitials(user.name, user.companyName) : "U"
 
   return (
     <nav
       className={`${
-        isScrolled
+        shouldShowWhiteNavbar
           ? 'bg-white/90 border-b border-gray-200/30 shadow-lg backdrop-blur-md'
           : 'bg-hero-gradient border-transparent shadow-none backdrop-blur-0'
       } sticky top-0 z-50 transition-all duration-300`}
@@ -116,7 +151,7 @@ export function Navbar() {
               <img 
                 src="/aynzo-logo.svg" 
                 alt="Aynzo Logo" 
-                className={`h-12 w-auto ${isScrolled ? '' : 'filter invert-[0] brightness-110 contrast-110'}`}
+                className={`h-12 w-auto ${shouldShowWhiteNavbar ? '' : 'filter invert-[0] brightness-110 contrast-110'}`}
               />
             </Link>
           </div>
@@ -128,31 +163,31 @@ export function Navbar() {
                 <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
                   <Link href={routes.publicroute.HOME} prefetch={true}>
                     <span className="relative z-10">Home</span>
-                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isScrolled ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
+                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
                   </Link>
                 </Button>
                 <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
                   <Link href={routes.publicroute.FEATURES} prefetch={true}>
                     <span className="relative z-10">Features</span>
-                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isScrolled ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
+                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
                   </Link>
                 </Button>
                 <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
                   <Link href={routes.publicroute.PRICING} prefetch={true}>
                     <span className="relative z-10">Pricing</span>
-                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isScrolled ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
+                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
                   </Link>
                 </Button>
                 <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
                   <Link href={routes.publicroute.CONTACT} prefetch={true}>
                     <span className="relative z-10">Contact</span>
-                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isScrolled ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
+                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
                   </Link>
                 </Button>
                 <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
                   <Link href={routes.publicroute.HELP} prefetch={true}>
                     <span className="relative z-10">Help</span>
-                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isScrolled ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
+                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
                   </Link>
                 </Button>
               </>
@@ -182,8 +217,11 @@ export function Navbar() {
                       onClick={handleAvatarClick}
                     >
                       <Avatar className="h-10 w-10 ring-2 ring-gray-200 hover:ring-blue-300 transition-all duration-200">
+                        {user?.profilePicture && user.profilePicture.trim() !== "" && (
+                          <AvatarImage src={user.profilePicture} alt={user.companyName || "User"} />
+                        )}
                         <AvatarFallback className="text-white font-semibold shadow-lg" style={{ backgroundColor: '#3882a5' }}>
-                          {user ? getUserInitials(user.name, user.companyName) : "U"}
+                          {userInitials}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -191,8 +229,11 @@ export function Navbar() {
                   <DropdownMenuContent className="w-64 p-2 shadow-xl border-gray-200/50" align="end" forceMount>
                     <div className="flex items-center justify-start gap-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-lg mb-2">
                       <Avatar className="h-10 w-10">
+                        {user?.profilePicture && user.profilePicture.trim() !== "" && (
+                          <AvatarImage src={user.profilePicture} alt={user.companyName || "User"} />
+                        )}
                         <AvatarFallback className="text-white font-semibold" style={{ backgroundColor: '#3882a5' }}>
-                          {user ? getUserInitials(user.name, user.companyName) : "U"}
+                          {userInitials}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col space-y-1 leading-none">

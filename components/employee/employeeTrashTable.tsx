@@ -11,7 +11,7 @@ interface EmployeeTrashTableProps {
 export function EmployeeTrashTable({ onRefresh }: EmployeeTrashTableProps) {
   const [selectedItems, setSelectedItems] = useState<string[]>([])
 
-  // Use custom hook for employee trash operations
+
   const {
     employees,
     pagination,
@@ -66,18 +66,18 @@ export function EmployeeTrashTable({ onRefresh }: EmployeeTrashTableProps) {
   }
 
   const handleView = (employee: any) => {
-    // View functionality is handled by the EmployeeTable component
+
   }
 
   return (
     <EmployeeTable
-      // Data
+
       employees={employees}
       pagination={pagination || undefined}
       isLoading={isLoading}
       error={error}
       
-      // Filters and pagination
+
       searchTerm={searchTerm}
       departmentFilter={departmentFilter}
       currentPage={currentPage}
@@ -85,28 +85,28 @@ export function EmployeeTrashTable({ onRefresh }: EmployeeTrashTableProps) {
       sortBy={sortBy}
       sortOrder={sortOrder}
       
-      // Actions
+
       onSearchChange={handleSearchChange}
       onDepartmentFilterChange={handleDepartmentFilterChange}
       onPageChange={setCurrentPage}
       onPageSizeChange={setPageSize}
       onSortChange={handleSortChange}
       
-      // Table configuration
+
       mode="trash"
       showSelection={true}
       selectedItems={selectedItems}
       onSelectionChange={setSelectedItems}
       
-      // Actions
+
       onRestore={handleRestore}
       onBulkRestore={handleBulkRestore}
       onView={handleView}
       
-      // Loading states
+
       isRestoring={isRestoring}
       
-      // Optional props
+
       showHeader={false}
       title="Deleted Employees"
     />

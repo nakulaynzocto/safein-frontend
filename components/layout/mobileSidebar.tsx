@@ -54,7 +54,6 @@ export function MobileSidebar({ className }: MobileSidebarProps) {
   const [open, setOpen] = useState(false)
   const [expandedItem, setExpandedItem] = useState<string | null>(null)
 
-  // Automatically expand the parent category based on current pathname
   useEffect(() => {
     for (const item of navigation) {
       if (item.children) {

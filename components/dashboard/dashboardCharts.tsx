@@ -11,7 +11,6 @@ interface DashboardChartsProps {
 }
 
 export function DashboardCharts({ appointmentsData = [], employeesData = [], visitorsData = [] }: DashboardChartsProps) {
-  // Process data for different chart types
   const appointmentStatusData = [
     { value: appointmentsData.filter(apt => apt.status === 'pending').length, label: 'Pending', color: '#F59E0B', icon: Clock },
     { value: appointmentsData.filter(apt => apt.status === 'approved').length, label: 'Approved', color: '#10B981', icon: Calendar },
@@ -19,7 +18,6 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
     { value: appointmentsData.filter(apt => apt.status === 'rejected').length, label: 'Rejected', color: '#EF4444', icon: Clock },
   ]
 
-  // Generate monthly trend data from appointments
   const generateMonthlyTrendData = () => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     const currentMonth = new Date().getMonth()
@@ -29,7 +27,6 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
       const monthIndex = (currentMonth - 7 + i + 12) % 12
       const monthName = months[monthIndex]
       
-      // Count appointments for this month
       const monthAppointments = appointmentsData.filter(apt => {
         const aptDate = new Date(apt.appointmentDetails?.scheduledDate || apt.createdAt)
         return aptDate.getMonth() === monthIndex
@@ -43,7 +40,6 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
 
   const monthlyTrendData = generateMonthlyTrendData()
 
-  // Generate visitor type data from visitors
   const generateVisitorTypeData = () => {
     const visitorTypes: { [key: string]: number } = {}
     
@@ -65,7 +61,6 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
 
   const visitorTypeData = generateVisitorTypeData()
 
-  // Generate hourly distribution from appointments
   const generateHourlyDistributionData = () => {
     const hourlyData = Array.from({ length: 9 }, (_, i) => {
       const hour = 9 + i
@@ -87,7 +82,6 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
 
   const hourlyDistributionData = generateHourlyDistributionData()
 
-  // Generate department data from employees
   const generateDepartmentData = () => {
     const departmentCounts: { [key: string]: number } = {}
     
@@ -111,7 +105,6 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
 
   const departmentData = generateDepartmentData()
 
-  // Generate quarterly performance data from appointments
   const generatePerformanceData = (): Array<{ value: number; label: string; color: string }> => {
     const quarters = ['Q1', 'Q2', 'Q3', 'Q4']
     const currentYear = new Date().getFullYear()
@@ -141,7 +134,6 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
 
   const performanceMetricsData = generatePerformanceData()
 
-  // Calculate real-time metrics
   const activeVisitors = appointmentsData.filter(apt => 
     apt.status === 'approved' && apt.checkInTime && !apt.checkOutTime
   ).length

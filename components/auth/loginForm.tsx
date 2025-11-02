@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InputField } from "@/components/common/inputField"
-import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { useAppDispatch } from "@/store/hooks"
 import { useLoginMutation } from "@/store/api/authApi"
 import { setCredentials } from "@/store/slices/authSlice"
@@ -15,7 +14,6 @@ import { routes } from "@/utils/routes"
 import { showErrorToast, showSuccessToast } from "@/utils/toast"
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
-// icon removed per request
 
 const loginSchema = yup.object({
   email: yup.string().email("Invalid email address").required("Email is required"),
@@ -54,28 +52,20 @@ export function LoginForm() {
     try {
       const result = await login(data).unwrap()
       
-      // Check if token exists and is valid
       if (!result.token || result.token === 'undefined') {
         throw new Error('No valid token received from server')
       }
       
-      // Validate user data
       if (!result.user) {
         throw new Error('No user data received from server')
       }
       
-      // Set credentials in Redux store
       dispatch(setCredentials(result))
       setErrorMessage(null)
       setIsRedirecting(true)
       
-      // Wait for state to sync and ensure cookie is set
-      // Use a small delay to ensure localStorage and cookies are set
       await new Promise(resolve => setTimeout(resolve, 200))
       
-      // Use replace to avoid adding login to history and ensure clean navigation
-      // Use window.location for full page reload to ensure all state is properly initialized
-      // This prevents race conditions with auth state checking
       window.location.replace(routes.privateroute.DASHBOARD)
     } catch (error: any) {
       const message = error?.data?.message || error?.message || "Login failed"
@@ -84,26 +74,24 @@ export function LoginForm() {
     }
   }
 
-  // Show loading overlay during redirect
   if (isRedirecting) {
-    return (
-      <Card className="w-full max-w-md">
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <LoadingSpinner size="lg" />
-          <p className="mt-4 text-sm text-muted-foreground">Redirecting to dashboard...</p>
-        </CardContent>
-      </Card>
-    )
+    return null
   }
 
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Welcome Back</CardTitle>
-        <CardDescription>Sign in to your SafeIn account</CardDescription>
+        <div className="flex justify-center mb-4">
+          <img
+            src="/aynzo-logo.svg"
+            alt="Aynzo Logo"
+            className="h-10 w-auto"
+          />
+        </div>
+        <CardTitle className="text-2xl text-brand">Welcome Back</CardTitle>
+        <CardDescription>Sign in to your account</CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Display error message */}
         {errorMessage && (
           <Alert variant="destructive" className="mb-4">
             <AlertDescription>{errorMessage}</AlertDescription>
@@ -129,8 +117,7 @@ export function LoginForm() {
           />
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-            Sign In
+            {isLoading ? "Signing in..." : "Sign In"}
           </Button>
         </form>
 

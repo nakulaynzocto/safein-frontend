@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { initializeAuth } from "@/store/slices/authSlice"
 import { routes } from "@/utils/routes"
-import { LoadingSpinner } from "@/components/common/loadingSpinner"
 
 interface AuthWrapperProps {
   children: React.ReactNode
@@ -30,18 +29,11 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
     }
   }, [isInitialized, isAuthenticated, token, router])
 
-  // Show loading during hydration and auth initialization
-  if (!isClient || !isInitialized) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
-  }
-
-  // Don't render anything if not authenticated (will redirect)
-  if (!isAuthenticated) {
-    return null // Don't show loading, just redirect
+  // Don't return null - always render children to prevent white screen
+  // If not authenticated, router.push will handle redirect
+  // Show minimal placeholder during initialization/auth check
+  if (!isClient || !isInitialized || !isAuthenticated || !token) {
+    return <div className="min-h-[60vh]" />
   }
 
   return <>{children}</>

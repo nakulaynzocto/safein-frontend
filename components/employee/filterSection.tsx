@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 
-// JSON configuration for filters
+
 const filterConfig = {
   departments: [
     { value: "all", label: "All Departments" },

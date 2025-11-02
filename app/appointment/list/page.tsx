@@ -1,10 +1,19 @@
+"use client"
+
+import { Suspense, lazy } from "react"
 import { ProtectedLayout } from "@/components/layout/protectedLayout"
-import { AppointmentList } from "@/components/appointment/appointmentList"
+import { PageSkeleton } from "@/components/common/tableSkeleton"
+
+const AppointmentList = lazy(() => 
+  import("@/components/appointment/appointmentList").then(module => ({ default: module.AppointmentList }))
+)
 
 export default function AppointmentListPage() {
   return (
     <ProtectedLayout>
-      <AppointmentList />
+      <Suspense fallback={<PageSkeleton />}>
+        <AppointmentList />
+      </Suspense>
     </ProtectedLayout>
   )
 }

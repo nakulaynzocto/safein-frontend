@@ -1,19 +1,22 @@
 "use client"
 
+import React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { InfoRow } from "./infoRow"
 
-export function InfoCard({
+interface InfoCardProps {
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  description: string
+  fields: { label: string; value?: string | React.ReactNode }[]
+}
+
+export const InfoCard = React.memo(function InfoCard({
   icon: Icon,
   title,
   description,
   fields,
-}: {
-  icon: any
-  title: string
-  description: string
-  fields: { label: string; value?: string }[]
-}) {
+}: InfoCardProps) {
   return (
     <Card>
       <CardHeader>
@@ -25,9 +28,9 @@ export function InfoCard({
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {fields.map((f, i) => (
-          <InfoRow key={i} label={f.label} value={f.value} />
+          <InfoRow key={i} label={f.label} value={typeof f.value === 'string' ? f.value : f.value as React.ReactNode} />
         ))}
       </CardContent>
     </Card>
   )
-}
+})

@@ -13,7 +13,6 @@ import {
   Appointment 
 } from "@/store/api/appointmentApi"
 import { NotificationCard } from "@/components/common/notificationCard"
-import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { PageHeader } from "@/components/common/pageHeader"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { ProtectedLayout } from "@/components/layout/protectedLayout"
@@ -41,7 +40,6 @@ function NotificationsPageContent() {
       await refetch() // Refresh the list
       showSuccessToast('Appointment approved successfully!')
     } catch (error) {
-      console.error('Failed to approve appointment:', error)
       showErrorToast('Failed to approve appointment')
     } finally {
       setIsProcessing(false)
@@ -55,7 +53,6 @@ function NotificationsPageContent() {
       await refetch() // Refresh the list
       showSuccessToast('Appointment rejected successfully!')
     } catch (error) {
-      console.error('Failed to reject appointment:', error)
       showErrorToast('Failed to reject appointment')
     } finally {
       setIsProcessing(false)
@@ -68,7 +65,6 @@ function NotificationsPageContent() {
       await refetch()
       showSuccessToast('Notifications refreshed successfully!')
     } catch (error) {
-      console.error('Failed to refresh notifications:', error)
       showErrorToast('Failed to refresh notifications')
     } finally {
       setIsRefreshing(false)
@@ -76,11 +72,7 @@ function NotificationsPageContent() {
   }
   
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
+    return null
   }
   
   if (error) {

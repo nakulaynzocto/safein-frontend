@@ -106,14 +106,14 @@ export function EmployeeTable({
   onDateToChange,
 }: EmployeeTableProps) {
   const router = useRouter()
-  // Dialog states
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showRestoreDialog, setShowRestoreDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
 
-  // Selection handlers
+
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       onSelectionChange?.(employees.map(emp => emp._id))
@@ -130,7 +130,7 @@ export function EmployeeTable({
     }
   }
 
-  // Action handlers
+
   const handleDelete = async () => {
     if (!selectedEmployee || !onDelete) return
     await onDelete(selectedEmployee._id)
@@ -150,18 +150,18 @@ export function EmployeeTable({
     setShowViewDialog(true)
   }
 
-  // Handle edit employee
+
   const handleEditEmployee = (employee: Employee) => {
     setEditingEmployee(employee)
   }
 
-  // Handle employee updated successfully
+
   const handleEmployeeUpdated = () => {
     setEditingEmployee(null)
     onRefresh?.()
   }
 
-  // Define columns based on mode
+
   const getColumns = () => {
     const baseColumns = [
       {
@@ -209,7 +209,7 @@ export function EmployeeTable({
       },
     ]
 
-    // Add mode-specific columns
+
     if (mode === 'active') {
       baseColumns.push({
         key: "status",
@@ -231,7 +231,7 @@ export function EmployeeTable({
       })
     }
 
-    // Add actions column
+
     baseColumns.push({
       key: "actions",
       header: "Actions",
@@ -324,7 +324,7 @@ export function EmployeeTable({
         </CardHeader>
         <CardContent className="p-0">
           {employees.length === 0 && !isLoading ? (
-            // Custom empty state with modal
+
             <div className="flex flex-col items-center justify-center py-12 px-4">
               <div className="text-center space-y-4">
                 <div className="p-4 rounded-full bg-gray-100 mx-auto w-fit">

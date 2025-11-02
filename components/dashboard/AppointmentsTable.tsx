@@ -44,7 +44,6 @@ export function AppointmentsTable({
       header: "Visitor",
       sortable: true,
       render: (appointment: any) => {
-        // Handle both possible data structures
         const visitor = appointment.visitorId || appointment.visitor;
         const visitorName = visitor?.name || "Unknown Visitor";
         const visitorPhone = visitor?.phone || "N/A";
@@ -80,7 +79,6 @@ export function AppointmentsTable({
       header: "Meeting With",
       sortable: true,
       render: (appointment: any) => {
-        // Handle both possible data structures
         const employee = appointment.employeeId || appointment.employee;
         const employeeName = employee?.name || "Unknown Employee";
         const employeeEmail = employee?.email || "N/A";

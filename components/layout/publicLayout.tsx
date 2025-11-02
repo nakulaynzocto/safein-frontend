@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { initializeAuth } from "@/store/slices/authSlice"
 import { routes } from "@/utils/routes"
-import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { Navbar } from "./navbar"
 
 interface PublicLayoutProps {
@@ -21,38 +20,31 @@ export function PublicLayout({ children }: PublicLayoutProps) {
   const [isClient, setIsClient] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
 
-  // Initialize authentication
   useEffect(() => {
     setIsClient(true)
     dispatch(initializeAuth())
     setIsInitialized(true)
   }, [dispatch])
 
-  // Redirect authenticated users to dashboard
   useEffect(() => {
     if (isInitialized && isAuthenticated && token) {
       router.push(routes.privateroute.DASHBOARD)
     }
   }, [isInitialized, isAuthenticated, token, router])
 
-  // Show loading during hydration and auth initialization
-  if (!isClient || !isInitialized) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
-  }
-
-  // Show loading if user is authenticated (will redirect)
-  if (isAuthenticated) {
-    return null // Don't show loading, just redirect
-  }
-
+  // Don't return null - always show layout to prevent white screen during navigation
+  // If authenticated, router.push will handle redirect
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 bg-background">{children}</main>
+      <main className="flex-1 bg-background">
+        {(!isClient || !isInitialized || isAuthenticated) ? (
+          // Minimal placeholder during auth check - prevents white screen
+          <div className="min-h-[60vh]" />
+        ) : (
+          children
+        )}
+      </main>
       <footer className="border-t border-border bg-card">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between">
