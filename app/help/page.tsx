@@ -169,7 +169,7 @@ export default function HelpPage() {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    className="border-brand text-brand-strong"
+                    className="border-brand text-brand-strong hover:!text-white"
                   >
                     {option.action}
                   </Button>
@@ -217,7 +217,7 @@ export default function HelpPage() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="mt-4 w-full border-brand text-brand-strong"
+                    className="mt-4 w-full border-brand text-brand-strong hover:!text-white"
                   >
                     View All Articles
                   </Button>
@@ -242,24 +242,24 @@ export default function HelpPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {popularArticles.map((article, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-                <CardContent className="p-6">
+              <Card key={index} className="hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col h-full">
+                <CardContent className="p-6 flex flex-col flex-1">
                   <div className="flex items-start justify-between mb-3">
                     <Badge variant="secondary" className="text-xs">
                       {article.category}
                     </Badge>
                     <span className="text-xs text-gray-500">{article.readTime}</span>
                   </div>
-                  <h3 className="font-semibold mb-2 text-brand">
+                  <h3 className="font-semibold mb-4 text-brand">
                     {article.title}
                   </h3>
                   <Button 
-                    variant="ghost" 
+                    variant="outline" 
                     size="sm" 
-                    className="p-0 h-auto text-sm text-brand-strong"
+                    className="mt-auto border-brand text-brand-strong hover:!text-white transition-all duration-200 group"
                   >
                     Read Article
-                    <ArrowRight className="ml-1 h-3 w-3" />
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                   </Button>
                 </CardContent>
               </Card>
@@ -284,13 +284,13 @@ export default function HelpPage() {
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900 py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto">
+            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900 py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto" asChild>
               <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>
             </Button>
           </div>
         </div>
       </section>
-    </div>
+      </div>
     </PublicLayout>
   )
 }
