@@ -138,6 +138,7 @@ export function appointmentRegistrationFlow() {
         employeeId,
         visitorId,
         accompaniedBy: accompaniedBy || null,
+        checkInTime: new Date().toISOString(), // Auto-set check-in time on creation
         appointmentDetails,
         securityDetails,
         notifications

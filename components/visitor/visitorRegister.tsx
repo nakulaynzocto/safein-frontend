@@ -297,6 +297,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                       setValue={setValue}
                       errors={errors.idProof?.image}
                       initialUrl={initialData?.idProof?.image}
+                      enableImageCapture={true}
                     />
                   </div>
 
@@ -315,6 +316,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                       setValue={setValue}
                       errors={errors.photo}
                       initialUrl={initialData?.photo}
+                      enableImageCapture={true}
                     />
                   </div>
                 </div>

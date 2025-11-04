@@ -21,13 +21,18 @@ const appointment_details_config = [
   { key: "status", label: "Status", mode: "active" },
   { key: "notes", label: "Notes", optional: true },
   { key: "vehicleNumber", label: "Vehicle Number", optional: true },
-  { key: "createdAt", label: "Created At", mode: "active", format: (value: string) => {
+  { key: "checkInTime", label: "Check In Time", mode: "active", format: (value: string) => {
     if (!value) return "Not checked in";
     const date = new Date(value);
     return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM dd, yyyy 'at' HH:mm");
   }},
   { key: "checkOutTime", label: "Check Out Time", mode: "active", showOnlyForCompleted: true, format: (value: string) => {
     if (!value) return "Not checked out";
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM dd, yyyy 'at' HH:mm");
+  }},
+  { key: "createdAt", label: "Created At", mode: "active", format: (value: string) => {
+    if (!value) return "N/A";
     const date = new Date(value);
     return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM dd, yyyy 'at' HH:mm");
   }},

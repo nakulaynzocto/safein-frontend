@@ -45,6 +45,7 @@ export function PhoneInputField({
           name: id,
           required,
           placeholder,
+          'aria-label': label,
         }}
         containerClass="phone-input-container"
         inputClass="phone-input-field"
@@ -79,6 +80,7 @@ export function PhoneInputField({
         searchPlaceholder="Search country"
         preferredCountries={["in", "us", "gb", "ae"]}
         preserveOrder={["preferredCountries"]}
+        specialLabel=""
       />
       </div>
       {error && (

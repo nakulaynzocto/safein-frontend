@@ -183,6 +183,7 @@ export function AppointmentDetailsStep({
                 onChange={(e) => setValue("scheduledTime", e.target.value)}
                 placeholder="Select time"
                 error={errors.scheduledTime?.message}
+                selectedDate={watch("scheduledDate")}
                 required
               />
             </div>

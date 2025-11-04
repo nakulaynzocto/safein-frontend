@@ -85,6 +85,7 @@ export interface CreateAppointmentRequest {
   appointmentDetails: AppointmentDetails
   securityDetails: SecurityDetails
   notifications: NotificationPreferences
+  checkInTime?: string // Optional: Auto-set on creation
 }
 
 // Legacy interface for backward compatibility

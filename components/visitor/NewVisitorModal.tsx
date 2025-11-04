@@ -259,7 +259,7 @@ export function NewVisitorModal({
               )}
 
               <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-64 sm:mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name *</Label>
                     <Input
@@ -405,6 +405,7 @@ export function NewVisitorModal({
                       setValue={setValue}
                       errors={errors.idProof?.image}
                       initialUrl={visitorData?.idProof?.image}
+                      enableImageCapture={true}
                     />
                   </div>
 
@@ -420,6 +421,7 @@ export function NewVisitorModal({
                       setValue={setValue}
                       errors={errors.photo}
                       initialUrl={visitorData?.photo}
+                      enableImageCapture={true}
                     />
                   </div>
                 </div>

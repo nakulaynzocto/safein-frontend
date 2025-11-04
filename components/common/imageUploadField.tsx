@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { showErrorToast, showSuccessToast } from "@/utils/toast"
-import { Image as ImageIcon, X, CheckCircle } from "lucide-react"
+import { Image as ImageIcon, X, CheckCircle, Camera, RotateCw } from "lucide-react"
 import { useUploadFileMutation } from "@/store/api"
 
 interface ImageUploadFieldProps {
@@ -14,16 +14,31 @@ interface ImageUploadFieldProps {
   setValue: any
   errors?: any
   initialUrl?: string
+  enableImageCapture?: boolean
 }
 
-export function ImageUploadField({ name, label, register, setValue, errors, initialUrl }: ImageUploadFieldProps) {
+export function ImageUploadField({ 
+  name, 
+  label, 
+  register, 
+  setValue, 
+  errors, 
+  initialUrl, 
+  enableImageCapture = false 
+}: ImageUploadFieldProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(initialUrl || null)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [isImageLoading, setIsImageLoading] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const [showCaptureOptions, setShowCaptureOptions] = useState(false)
+  const [isCapturing, setIsCapturing] = useState(false)
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment')
   const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation()
   
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
   const fileInputId = `${name}-file-input`
 
   const validateFile = (file: File): void => {
@@ -49,35 +64,30 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
       setImageError(false)
       setIsImageLoading(true)
       setUploadSuccess(false)
+      setPreviewImage(null) // Don't show image until API response
       
       // Validate file
       validateFile(file)
       
-      // Show immediate preview with local file
-      const localPreview = URL.createObjectURL(file)
-      setPreviewImage(localPreview)
-      
-      // Upload using RTK Query
+      // Upload using RTK Query - show loader while uploading
       const result = await uploadFile({ file }).unwrap()
       
-      // Extract URL from the result
+      // Extract URL from the API response structure
+      // RTK Query transformResponse already extracts data, so result is { url, filename, size }
       const uploadedUrl = result?.url
       if (!uploadedUrl) {
         throw new Error('No URL returned from upload')
       }
       
-      // Use the uploaded URL from server for preview
-      setValue(name, uploadedUrl, { shouldValidate: true })
-      
-      // Small delay to let the image start loading before revoking blob URL
-      setTimeout(() => {
-        URL.revokeObjectURL(localPreview)
-      }, 100)
-      
       // Set the server URL as preview - keep loading state active
       setPreviewImage(uploadedUrl)
       
-      // Don't set loading to false here - let handleImageLoad do it when image actually loads
+      // Use the uploaded URL from server for form value
+      setValue(name, uploadedUrl, { shouldValidate: true })
+      
+      // Clear loading state immediately after API success
+      // The image will load in the background, handleImageLoad will handle any errors
+      setIsImageLoading(false)
       setUploadSuccess(true)
       showSuccessToast("Image uploaded successfully!")
       
@@ -90,19 +100,92 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
       setPreviewImage(null)
       setUploadSuccess(false)
       setImageError(true)
-      
-      // Clean up any preview URLs
-      if (previewImage && !initialUrl) {
-        URL.revokeObjectURL(previewImage)
-      }
+      setIsImageLoading(false)
       
       showErrorToast(error?.data?.message || error?.message || "Failed to upload image")
-    } finally {
-      setIsImageLoading(false)
+    }
+    // Note: setIsImageLoading(false) is handled in handleImageLoad when image loads successfully
+  }
+
+  // Camera capture functions
+  const startCamera = async (facing: 'environment' | 'user' = facingMode) => {
+    try {
+      setIsCapturing(true)
+      setShowCaptureOptions(false)
+      
+      // Stop existing stream if any
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop())
+      }
+      
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: facing,
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        } 
+      })
+      
+      streamRef.current = stream
+      setFacingMode(facing)
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        videoRef.current.play()
+      }
+    } catch (error) {
+      console.error("Error accessing camera:", error)
+      showErrorToast("Cannot access camera. Please check permissions.")
+      stopCamera()
+    }
+  }
+
+  const switchCamera = () => {
+    const newFacingMode = facingMode === 'environment' ? 'user' : 'environment'
+    startCamera(newFacingMode)
+  }
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null
+    }
+    setIsCapturing(false)
+  }
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current
+      const canvas = canvasRef.current
+      const context = canvas.getContext('2d')
+      
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      
+      // Draw current video frame to canvas
+      context?.drawImage(video, 0, 0, canvas.width, canvas.height)
+      
+      // Convert canvas to blob and create file
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          // Create a file from the blob
+          const file = new File([blob], `captured-image-${Date.now()}.jpg`, {
+            type: 'image/jpeg'
+          })
+          
+          // Stop camera
+          stopCamera()
+          
+          // Process the captured image
+          await processFile(file)
+        }
+      }, 'image/jpeg', 0.9)
     }
   }
 
   const handleImageLoad = () => {
+    // Image loaded successfully
     setIsImageLoading(false)
     setImageError(false)
   }
@@ -138,7 +221,29 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
   }
 
   const triggerFileInput = () => {
+    if (enableImageCapture) {
+      setShowCaptureOptions(true)
+    } else {
+      fileInputRef.current?.click()
+    }
+  }
+
+  const handleGalleryUpload = () => {
+    setShowCaptureOptions(false)
     fileInputRef.current?.click()
+  }
+
+  const handleCameraUpload = () => {
+    setShowCaptureOptions(false)
+    startCamera()
+  }
+
+  const cancelCapture = () => {
+    setShowCaptureOptions(false)
+  }
+
+  const cancelCamera = () => {
+    stopCamera()
   }
 
   // Clean up object URL to prevent memory leaks
@@ -147,6 +252,7 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
       if (previewImage && previewImage.startsWith('blob:') && previewImage !== initialUrl) {
         URL.revokeObjectURL(previewImage)
       }
+      stopCamera()
     }
   }, [previewImage, initialUrl])
 
@@ -169,38 +275,117 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
   }, [initialUrl])
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 p-[3px]">
       {/* Render label if provided */}
       {label && (
         <Label className="text-sm font-medium text-gray-700">{label}</Label>
       )}
       
       <div className="flex flex-col gap-3">
+        {/* Camera Capture Interface */}
+        {isCapturing && (
+          <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center p-2 sm:p-4">
+            <div className="relative w-full max-w-2xl mx-auto h-full flex flex-col justify-center">
+              <video
+                ref={videoRef}
+                className="w-full h-auto max-h-[85vh] sm:max-h-[80vh] object-contain rounded-lg"
+                autoPlay
+                playsInline
+                muted
+              />
+              <canvas ref={canvasRef} className="hidden" />
+              
+              {/* Camera Flip Button */}
+              <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
+                <Button
+                  onClick={switchCamera}
+                  className="bg-white bg-opacity-90 hover:bg-opacity-100 text-black rounded-full p-2 sm:p-3 shadow-lg"
+                  title={`Switch to ${facingMode === 'environment' ? 'Front' : 'Back'} Camera`}
+                >
+                  <RotateCw className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Button>
+              </div>
+              
+              <div className="absolute bottom-2 sm:bottom-4 left-0 right-0 flex justify-center gap-2 sm:gap-4 px-2">
+                <Button
+                  onClick={capturePhoto}
+                  className="bg-white text-black hover:bg-gray-200 px-4 py-2 sm:px-6 sm:py-3 rounded-full shadow-lg text-sm sm:text-base flex items-center gap-2"
+                >
+                  <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Capture Photo</span>
+                  <span className="sm:hidden">Capture</span>
+                </Button>
+                <Button
+                  onClick={cancelCamera}
+                  className="bg-red-500 text-white hover:bg-red-600 px-4 py-2 sm:px-6 sm:py-3 rounded-full shadow-lg text-sm sm:text-base"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Capture Options Modal */}
+        {showCaptureOptions && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl sm:rounded-lg p-4 sm:p-6 w-full max-w-xs sm:w-80 shadow-2xl">
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Choose Image Source</h3>
+              <div className="space-y-2 sm:space-y-3">
+                <Button
+                  onClick={handleCameraUpload}
+                  className="w-full justify-start bg-blue-500 hover:bg-blue-600 text-white py-3 sm:py-2.5"
+                >
+                  <Camera className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                  <span className="text-sm sm:text-base">Take Photo</span>
+                </Button>
+                <Button
+                  onClick={handleGalleryUpload}
+                  className="w-full justify-start bg-gray-500 hover:bg-gray-600 text-white py-3 sm:py-2.5"
+                >
+                  <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                  <span className="text-sm sm:text-base">Choose from Gallery</span>
+                </Button>
+                <Button
+                  onClick={cancelCapture}
+                  variant="outline"
+                  className="w-full py-3 sm:py-2.5"
+                >
+                  <span className="text-sm sm:text-base">Cancel</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {previewImage ? (
           <div className="relative group">
             <div 
-              className={`relative w-40 h-40 flex items-center justify-center border-2 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer ${
-                uploadSuccess ? 'border-green-300 bg-white' : 
-                imageError ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white hover:border-blue-400'
+              className={`relative w-40 h-40 sm:w-40 sm:h-40 flex items-center justify-center border-2 rounded-xl sm:rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer ${
+                uploadSuccess ? 'border-green-400 bg-white ring-2 ring-green-200' : 
+                imageError ? 'border-red-400 bg-red-50 ring-2 ring-red-200' : 'border-gray-300 bg-white hover:border-blue-500 hover:ring-2 hover:ring-blue-200'
               }`}
-              onClick={!isUploading ? triggerFileInput : undefined}
+              onClick={!isUploading && !isImageLoading ? triggerFileInput : undefined}
             >
-              {isImageLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 z-10">
+              {/* Show loader only while uploading (not after API success) */}
+              {isUploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-95 z-10 rounded-xl">
                   <div className="flex flex-col items-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-200 border-t-blue-500"></div>
-                    <span className="text-xs text-blue-600 mt-2">Loading...</span>
+                    <div className="animate-spin rounded-full h-8 w-8 border-3 border-blue-200 border-t-blue-500"></div>
+                    <span className="text-xs sm:text-sm text-blue-600 mt-3 font-medium">Uploading...</span>
+                    <span className="text-xs text-blue-500 mt-1">Please wait</span>
                   </div>
                 </div>
               )}
               
-              {imageError ? (
-                <div className="flex flex-col items-center justify-center text-red-500 p-4">
-                  <ImageIcon className="w-8 h-8 mb-2" />
-                  <span className="text-sm text-center">Failed to load image</span>
-                  <span className="text-xs text-gray-500 mt-2">Click to retry</span>
+              {/* Show image or error based on state */}
+              {imageError && !isUploading ? (
+                <div className="flex flex-col items-center justify-center text-red-500 p-3 sm:p-4">
+                  <ImageIcon className="w-7 h-7 sm:w-8 sm:h-8 mb-2" />
+                  <span className="text-xs sm:text-sm text-center font-medium">Failed to load</span>
+                  <span className="text-xs text-gray-500 mt-1">Tap to retry</span>
                 </div>
-              ) : (
+              ) : !isUploading && previewImage ? (
                 <img
                   key={previewImage}
                   src={previewImage}
@@ -209,10 +394,10 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
                   onLoad={handleImageLoad}
                   onError={handleImageError}
                 />
-              )}
+              ) : null}
               
               {/* Cross icon at top-right to remove image */}
-              {!imageError && !isImageLoading && (
+              {!imageError && !isImageLoading && !isUploading && (
                 <button
                   type="button"
                   onClick={(e) => {
@@ -220,44 +405,50 @@ export function ImageUploadField({ name, label, register, setValue, errors, init
                     handleClearFile()
                   }}
                   disabled={isUploading}
-                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20"
+                  className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white rounded-full p-1.5 sm:p-1.5 opacity-0 group-hover:opacity-100 sm:opacity-100 transition-opacity duration-200 z-20 shadow-md"
                   title="Remove image"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </button>
               )}
               
               {/* Success indicator */}
-              {uploadSuccess && !imageError && (
-                <div className="absolute top-2 left-2 bg-green-500 text-white rounded-full p-1 animate-bounce">
-                  <CheckCircle className="w-3 h-3" />
+              {uploadSuccess && !imageError && !isImageLoading && !isUploading && (
+                <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 bg-green-500 text-white rounded-full p-1 sm:p-1.5 shadow-md animate-bounce z-20">
+                  <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </div>
               )}
             </div>
           </div>
         ) : (
           <div className="relative">
-            <div className={`flex flex-col items-center justify-center w-30 h-30 border-2 border-dashed rounded-xl cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-100 transition-all duration-200 group ${
-              isUploading ? "border-blue-400 bg-blue-50" : "border-gray-300 hover:border-blue-400"
+            <div className={`flex flex-col items-center justify-center w-full h-40 sm:w-40 sm:h-40 border-2 border-dashed rounded-xl sm:rounded-xl cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-100 transition-all duration-300 group shadow-sm hover:shadow-md ${
+              isUploading ? "border-blue-400 bg-blue-50 ring-2 ring-blue-200" : "border-gray-300 hover:border-blue-400 hover:ring-2 hover:ring-blue-200"
             }`}>
-              {isUploading ? (
-                <div className="flex flex-col items-center justify-center">
+              {isUploading || isImageLoading ? (
+                <div className="flex flex-col items-center justify-center p-4">
                   <div className="relative">
                     <div className="animate-spin rounded-full h-8 w-8 border-3 border-blue-200"></div>
                     <div className="animate-spin rounded-full h-8 w-8 border-3 border-blue-500 border-t-transparent absolute top-0 left-0"></div>
                   </div>
-                  <span className="text-sm text-blue-600 mt-3 font-medium animate-pulse">Uploading...</span>
+                  <span className="text-xs sm:text-sm text-blue-600 mt-3 font-medium animate-pulse">
+                    {isUploading ? "Uploading..." : "Loading..."}
+                  </span>
                   <span className="text-xs text-blue-500 mt-1">Please wait</span>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center" onClick={triggerFileInput}>
-                  <div className="w-12 h-12 bg-gray-200 group-hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors duration-200">
-                    <ImageIcon className="w-6 h-6 text-gray-500 group-hover:text-blue-600 transition-colors duration-200" />
+                <div className="flex flex-col items-center justify-center p-4 sm:p-6" onClick={triggerFileInput}>
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-200 group-hover:bg-blue-200 rounded-full flex items-center justify-center transition-all duration-300 shadow-inner group-hover:shadow-md">
+                    {enableImageCapture ? (
+                      <Camera className="w-6 h-6 sm:w-7 sm:h-7 text-gray-500 group-hover:text-blue-600 transition-colors duration-300" />
+                    ) : (
+                      <ImageIcon className="w-6 h-6 sm:w-7 sm:h-7 text-gray-500 group-hover:text-blue-600 transition-colors duration-300" />
+                    )}
                   </div>
-                  <span className="text-sm text-gray-600 group-hover:text-blue-600 mt-3 font-medium transition-colors duration-200">
-                    Upload Image
+                  <span className="text-xs sm:text-sm text-gray-600 group-hover:text-blue-600 mt-3 sm:mt-4 font-medium transition-colors duration-300 text-center">
+                    {enableImageCapture ? "Take or Upload Photo" : "Upload Image"}
                   </span>
-                  <span className="text-xs text-gray-400 mt-1">
+                  <span className="text-xs text-gray-400 mt-1.5 sm:mt-2 text-center">
                     PNG, JPG up to 5MB
                   </span>
                 </div>

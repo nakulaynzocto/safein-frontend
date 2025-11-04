@@ -221,6 +221,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
           appointmentId: `APT${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
           employeeId: data.employeeId,
           visitorId: data.visitorId,
+          checkInTime: new Date().toISOString(), // Auto-set check-in time on creation
           appointmentDetails: {
             purpose: data.purpose,
             scheduledDate: data.appointmentDate,
@@ -373,18 +374,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                       value={field.value}
                       onChange={field.onChange}
                       error={errors.appointmentTime?.message}
-                      minTime={(() => {
-                        const selectedDate = watch("appointmentDate")
-                        if (selectedDate) {
-                          const today = new Date().toISOString().split('T')[0]
-                          if (selectedDate === today) {
-                            const now = new Date()
-                            now.setHours(now.getHours() + 1)
-                            return now.toTimeString().slice(0, 5)
-                          }
-                        }
-                        return undefined
-                      })()}
+                      selectedDate={watch("appointmentDate")}
                     />
                   )}
                 />
@@ -439,6 +429,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                     setValue={setValue}
                     errors={errors}
                     initialUrl={watch("vehiclePhoto")}
+                    enableImageCapture={true}
                   />
                 </div>
               </div>

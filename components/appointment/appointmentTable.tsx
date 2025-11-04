@@ -26,8 +26,7 @@ import {
   Building,
   CheckCircle,
   X,
-  Edit,
-  CalendarClock
+  Edit
 } from "lucide-react"
 import { Appointment } from "@/store/api/appointmentApi"
 import { 
@@ -243,18 +242,23 @@ export function AppointmentTable({
     setShowNewAppointmentModal(true)
   }
 
-  const handleReschedule = (appointment: Appointment) => {
-    handleEdit(appointment)
-  }
 
   const isAppointmentDatePast = (appointment: Appointment): boolean => {
     if (!appointment.appointmentDetails?.scheduledDate) return false
     
     try {
-      let scheduledDateTime = new Date(appointment.appointmentDetails.scheduledDate)
+      // Parse the scheduled date - get date part only (ignore timezone)
       const dateStr = appointment.appointmentDetails.scheduledDate
-      const hasTimeInDate = dateStr.includes('T') || /\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(dateStr)
+      const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0] // Get just the date part (YYYY-MM-DD)
+      const [year, month, day] = datePart.split('-').map(Number)
       
+      // Create date object in local timezone at midnight (month is 0-indexed)
+      let scheduledDateTime = new Date(year, month - 1, day, 0, 0, 0, 0)
+      
+      // Check if date already has time in it
+      const hasTimeInDate = dateStr.includes('T') && /T\d{2}:\d{2}/.test(dateStr)
+      
+      // If time is separate, combine it with date
       if (appointment.appointmentDetails.scheduledTime && !hasTimeInDate) {
         const timeStr = appointment.appointmentDetails.scheduledTime.trim()
         let hours = 0
@@ -264,7 +268,9 @@ export function AppointmentTable({
           const timeParts = timeStr.split(':')
           hours = parseInt(timeParts[0], 10) || 0
           const minutesPart = timeParts[1] ? timeParts[1].trim() : '0'
+          
           if (minutesPart.includes('AM') || minutesPart.includes('PM')) {
+            // Handle AM/PM format (e.g., "01:26 AM", "02:30 PM")
             const mins = minutesPart.replace(/[APM]/gi, '').trim()
             minutes = parseInt(mins, 10) || 0
             if (minutesPart.toUpperCase().includes('PM') && hours !== 12) {
@@ -274,9 +280,12 @@ export function AppointmentTable({
               hours = 0
             }
           } else {
+            // Handle 24-hour format (e.g., "01:26", "14:30")
+            // "01:26" means 1:26 AM in 24-hour format
             minutes = parseInt(minutesPart, 10) || 0
           }
         } else {
+          // No colon, just hour (e.g., "1", "1 PM")
           hours = parseInt(timeStr.replace(/[APM]/gi, '').trim(), 10) || 0
           if (timeStr.toUpperCase().includes('PM') && hours !== 12) {
             hours += 12
@@ -286,19 +295,41 @@ export function AppointmentTable({
           }
         }
         
+        // Validate hours and minutes
         if (hours < 0 || hours > 23) hours = 0
         if (minutes < 0 || minutes > 59) minutes = 0
+        
+        // Set the time on the scheduled date (in local timezone)
         scheduledDateTime.setHours(hours, minutes, 0, 0)
       } else if (!hasTimeInDate && !appointment.appointmentDetails.scheduledTime) {
+        // If no time specified, set to end of day
         scheduledDateTime.setHours(23, 59, 59, 0)
+      } else if (hasTimeInDate) {
+        // Date already has time, parse it and convert UTC to local
+        const utcDate = new Date(dateStr)
+        // Extract UTC components and create local date
+        scheduledDateTime = new Date(
+          utcDate.getUTCFullYear(),
+          utcDate.getUTCMonth(),
+          utcDate.getUTCDate(),
+          utcDate.getUTCHours(),
+          utcDate.getUTCMinutes(),
+          0
+        )
       }
       
+      // Compare with current time (both in local timezone)
       const now = new Date()
+      
       return scheduledDateTime < now
     } catch (error) {
-      console.error('Error checking appointment date:', error)
       try {
-        const appointmentDate = new Date(appointment.appointmentDetails.scheduledDate)
+        // Fallback: compare dates only
+        const datePart = appointment.appointmentDetails.scheduledDate.includes('T') 
+          ? appointment.appointmentDetails.scheduledDate.split('T')[0] 
+          : appointment.appointmentDetails.scheduledDate.split(' ')[0]
+        const [year, month, day] = datePart.split('-').map(Number)
+        const appointmentDate = new Date(year, month - 1, day)
         const now = new Date()
         now.setHours(0, 0, 0, 0)
         appointmentDate.setHours(0, 0, 0, 0)
@@ -436,18 +467,9 @@ export function AppointmentTable({
           const status = typeof appointment.status === 'string' ? appointment.status : 'pending'
           const isPast = isAppointmentDatePast(appointment)
           
+          // Show "Closed" status if pending and date is past
           if (isPast && status === 'pending') {
-            return (
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white text-blue-500 border-blue-500 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-600"
-                onClick={() => handleReschedule(appointment)}
-              >
-                <CalendarClock className="mr-1 h-3 w-3 text-blue-500" />
-                Reschedule
-              </Button>
-            )
+            return <StatusBadge status="closed" />
           }
           
           return <StatusBadge status={status} />
@@ -488,107 +510,16 @@ export function AppointmentTable({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              {mode === 'active' && (() => {
-                const status = typeof appointment.status === 'string' ? appointment.status : 'pending'
-                const isPast = isAppointmentDatePast(appointment)
-                const isReschedule = isPast && status === 'pending'
-                
-                return (
-                  <>
-                    {onView && (
-                      <DropdownMenuItem onClick={() => handleView(appointment)}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Details
-                      </DropdownMenuItem>
-                    )}
-                    
-                    {(status === 'rejected' || status === 'completed') && (
-                      null
-                    )}
-                    
-                    {status === 'approved' && (
-                      <>
-                        {onCheckOut && (
-                          <DropdownMenuItem 
-                            onClick={() => {
-                              setSelectedAppointment(appointment)
-                              setShowCheckOutDialog(true)
-                            }}
-                            disabled={isCheckingOut || isAppointmentLoading(appointment._id)}
-                          >
-                            <LogOut className="mr-2 h-4 w-4" />
-                            Check Out
-                          </DropdownMenuItem>
-                        )}
-                      </>
-                    )}
-                    
-                    {isReschedule && (
-                      <>
-                        <DropdownMenuItem onClick={() => handleEdit(appointment)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        {onDelete && (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                              onClick={() => {
-                                setSelectedAppointment(appointment)
-                                setShowDeleteDialog(true)
-                              }}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </>
-                    )}
-                    
-                    {status === 'pending' && !isPast && (
-                      <>
-                        <DropdownMenuItem onClick={() => handleEdit(appointment)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          onClick={() => handleReject(appointment._id)}
-                          disabled={isRejectingMutation || isAppointmentLoading(appointment._id)}
-                          className="text-destructive"
-                        >
-                          <X className="mr-2 h-4 w-4" />
-                          Reject
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => handleApprove(appointment._id)}
-                          disabled={isApprovingMutation || isAppointmentLoading(appointment._id)}
-                        >
-                          <CheckCircle className="mr-2 h-4 w-4" />
-                          Approve
-                        </DropdownMenuItem>
-                        {onDelete && (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                              onClick={() => {
-                                setSelectedAppointment(appointment)
-                                setShowDeleteDialog(true)
-                              }}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </>
-                    )}
-                  </>
-                )
-              })()}
+              {mode === 'active' && (
+                <>
+                  {onView && (
+                    <DropdownMenuItem onClick={() => handleView(appointment)}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      View Details
+                    </DropdownMenuItem>
+                  )}
+                </>
+              )}
               {mode === 'trash' && onRestore && (
                 <DropdownMenuItem 
                   onClick={() => {

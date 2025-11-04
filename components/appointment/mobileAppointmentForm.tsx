@@ -48,7 +48,11 @@ export function MobileAppointmentForm() {
 
   const onSubmit = async (data: AppointmentFormData) => {
     try {
-      await createAppointment(data).unwrap()
+      const appointmentData = {
+        ...data,
+        checkInTime: new Date().toISOString() // Auto-set check-in time on creation
+      }
+      await createAppointment(appointmentData).unwrap()
       showSuccessToast("Appointment created successfully!")
       router.push(routes.privateroute.APPOINTMENTLIST)
     } catch (error: any) {

@@ -88,6 +88,7 @@ export function AppointmentForm() {
         appointmentId: `APT${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
         employeeId: data.employeeId,
         visitorId: "temp-visitor-id", // This should be created first
+        checkInTime: new Date().toISOString(), // Auto-set check-in time on creation
         appointmentDetails: {
           purpose: data.purpose,
           scheduledDate: data.appointmentDate,
@@ -240,6 +241,7 @@ export function AppointmentForm() {
                   label="Appointment Time"
                   error={errors.appointmentTime?.message}
                   {...register("appointmentTime")}
+                  selectedDate={watch("appointmentDate")}
                   required
                 />
               </div>

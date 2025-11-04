@@ -322,8 +322,8 @@
 
 .date-range-calendar-day {
   height: 30px !important;
-  width: 30px !important;               /* fixed bubble width */
-  margin: 0 auto !important;            /* center inside grid cell */
+  width: 30px !important;
+  margin: 0 auto !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -335,32 +335,61 @@
   user-select: none !important;
 }
 
-.date-range-calendar-day:hover {
-  background-color: #f3f4f6;
+.date-range-calendar-day:hover:not(.start-end):not(.in-range):not(.hover-range) {
+  background-color: #f3f4f6 !important;
 }
 
 .date-range-calendar-day.other-month {
-  color: #d1d5db;
-  cursor: default;
+  color: #d1d5db !important;
+  cursor: default !important;
 }
 
 .date-range-calendar-day.in-range {
-  /* subtle primary tint across the span */
-  background-color: color-mix(in srgb, var(--color-primary) 18%, transparent) !important;
+  background-color: rgba(37, 99, 235, 0.15) !important;
   color: #1f2937 !important;
 }
 
 .date-range-calendar-day.start-end {
-  /* emphasize endpoints using primary color, avoid white-on-primary if undesired */
-  background-color: transparent !important;
-  color: var(--color-primary) !important;
-  border: 2px solid var(--color-primary) !important;
-  border-radius: 9999px !important;     /* circular bubble */
+  background-color: #2563eb !important;
+  color: white !important;
+  border: 2px solid #2563eb !important;
+  border-radius: 50% !important;
+  font-weight: 600 !important;
+  z-index: 1 !important;
+  position: relative !important;
+}
+
+/* Force visibility - testing */
+.date-range-calendar-day.start-end::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: #2563eb;
+  border-radius: 50%;
+  z-index: -1;
+}
+
+.date-range-calendar-day.start-end:hover {
+  background-color: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+  color: white !important;
 }
 
 .date-range-calendar-day.hover-range {
-  background-color: color-mix(in srgb, var(--color-primary) 25%, transparent) !important;
+  background-color: rgba(37, 99, 235, 0.2) !important;
   color: #111827 !important;
+}
+
+.date-range-calendar-day.start-end.in-range {
+  background-color: #2563eb !important;
+  color: white !important;
+  border: 2px solid #2563eb !important;
+}
+
+.date-range-calendar-day.start-end.hover-range {
+  background-color: #2563eb !important;
+  color: white !important;
+  border: 2px solid #2563eb !important;
 }
 
 .date-range-footer {
@@ -494,4 +523,54 @@
 .phone-input-search:focus {
   outline: none !important;
   border-color: rgb(59 130 246) !important;
+}
+
+/* Hide duplicate labels in phone input */
+.phone-input-container label,
+.phone-input-wrapper label,
+.phone-input-field + label {
+  display: none !important;
+}
+
+/* Remove blur from all dialog elements */
+[data-slot="dialog-overlay"],
+[data-slot="dialog-content"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+
+/* Ensure no blur on dialog backdrop */
+[role="dialog"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+
+/* Mobile-specific blur removal */
+@media (max-width: 768px) {
+  [data-slot="dialog-overlay"],
+  [data-slot="dialog-content"],
+  [role="dialog"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
+
+/* Ensure no blur on mobile devices */
+@media (max-width: 640px) {
+  [data-slot="dialog-overlay"],
+  [data-slot="dialog-content"],
+  [role="dialog"],
+  .dialog-overlay,
+  .dialog-content {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
 }

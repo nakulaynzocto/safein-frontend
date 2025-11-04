@@ -262,7 +262,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
                 </div>
               </div>
 
-              <div className="mb-64 sm:mb-0">
+              <div>
                 <Controller
                   name="phone"
                   control={control}
