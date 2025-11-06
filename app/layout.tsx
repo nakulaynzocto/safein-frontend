@@ -36,17 +36,14 @@ export default function RootLayout({
         {/* Route Optimizer for faster navigation */}
         <RouteOptimizer />
         
-        <NavigationProgressProvider>
-          <Providers>
-            <div className="flex flex-col min-h-screen">
-              <Navbar />
-              <main className="flex-1">
-                {children}
-              </main>
-              <Footer />
-            </div>
-          </Providers>
-        </NavigationProgressProvider>
+        {/* Wrapped children with Error Boundary, Redux Provider and Suspense boundary */}
+        <ErrorBoundary>
+          <Suspense fallback={<div>Loading...</div>}>
+            <NavigationProgressProvider>
+              <Providers>{children}</Providers>
+            </NavigationProgressProvider>
+          </Suspense>
+        </ErrorBoundary>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
