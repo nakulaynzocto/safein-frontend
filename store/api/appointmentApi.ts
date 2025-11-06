@@ -186,7 +186,8 @@ export const appointmentApi = baseApi.injectEndpoints({
     getAppointments: builder.query<AppointmentListResponse, GetAppointmentsQuery | void>({
       query: (params) => {
         const queryParams = createUrlParams(params || {})
-        return `/appointments${queryParams ? `?${queryParams}` : ''}`
+        const populateParams = '_populate=visitor,employee'
+        return `/appointments?${populateParams}${queryParams ? `&${queryParams}` : ''}`
       },
       transformResponse: (response: any) => {
         if (response.success && response.data) {
