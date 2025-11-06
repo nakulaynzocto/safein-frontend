@@ -127,7 +127,7 @@ const socialLinks: SocialLink[] = [
 
 export function Footer() {
   return (
-    <footer className="bg-secondary text-background/90">
+    <footer className="bg-[#074463] text-white/90">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Footer Sections */}
@@ -142,12 +142,12 @@ export function Footer() {
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:text-white transition-colors"
+                        className="text-gray-300 hover:text-white transition-colors"
                       >
                         {link.label}
                       </a>
                     ) : (
-                      <Link href={link.href} className="hover:text-white transition-colors">
+                      <Link href={link.href} className="text-gray-300 hover:text-white transition-colors">
                         {link.label}
                       </Link>
                     )}
@@ -167,7 +167,7 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-background hover:text-white transition-colors"
+                  className="text-gray-300 hover:text-white transition-colors"
                   aria-label={social.name}
                 >
                   <span className="sr-only">{social.name}</span>
