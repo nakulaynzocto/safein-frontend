@@ -94,6 +94,11 @@ export async function middleware(request: NextRequest) {
   // Check if user is authenticated (has valid token)
   const isAuthenticated = token && token !== 'undefined' && token.length > 10
   
+  // Allow /help route for both authenticated and unauthenticated users
+  if (pathname === routes.publicroute.HELP) {
+    return NextResponse.next()
+  }
+  
   // DYNAMIC ROUTE PROTECTION:
   // - Automatically detects all routes from routes.ts
   // - Handles dynamic routes like /employee/[id], /visitor/[id] dynamically

@@ -8,6 +8,8 @@ import { ErrorBoundary } from "@/components/common/errorBoundary"
 import { NavigationProgress } from "@/components/common/navigationProgress"
 import { NavigationProgressProvider } from "@/components/common/navigationProgressProvider"
 import { RouteOptimizer } from "@/components/common/routeOptimizer"
+import { Navbar } from "@/components/layout/navbar"
+import { Footer } from "@/components/layout/footer"
 
 export const metadata: Metadata = {
   title: "SafeIn - SafeIn Appointment System",
@@ -22,6 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/aynzo-logo.png" />
+      </head>
       <body className="font-sans">
         {/* Navigation Progress Bar - wrapped in Suspense */}
         <Suspense fallback={null}>
@@ -31,14 +36,17 @@ export default function RootLayout({
         {/* Route Optimizer for faster navigation */}
         <RouteOptimizer />
         
-        {/* Wrapped children with Error Boundary, Redux Provider and Suspense boundary */}
-        <ErrorBoundary>
-          <Suspense fallback={<div>Loading...</div>}>
-            <NavigationProgressProvider>
-              <Providers>{children}</Providers>
-            </NavigationProgressProvider>
-          </Suspense>
-        </ErrorBoundary>
+        <NavigationProgressProvider>
+          <Providers>
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </Providers>
+        </NavigationProgressProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

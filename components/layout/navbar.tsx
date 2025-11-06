@@ -149,9 +149,9 @@ export function Navbar() {
           <div className="flex items-center">
             <Link href={isActuallyAuthenticated ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex-shrink-0" prefetch={true}>
               <img 
-                src="/aynzo-logo.svg" 
+                src="/aynzo-logo.png" 
                 alt="Aynzo Logo" 
-                className={`h-12 w-auto ${shouldShowWhiteNavbar ? '' : 'filter invert-[0] brightness-110 contrast-110'}`}
+                className={`h-12 w-auto ${shouldShowWhiteNavbar ? '' : 'filter brightness-0 invert'}`}
               />
             </Link>
           </div>
@@ -203,9 +203,11 @@ export function Navbar() {
                   <MobileSidebar />
                 </div>
                 {/* Help Button */}
-                <Button variant="ghost" size="sm" className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg">
-                  <HelpCircle className="h-4 w-4" />
-                  Help
+                <Button variant="ghost" size="sm" asChild className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg">
+                  <Link href={routes.publicroute.HELP} prefetch={true}>
+                    <HelpCircle className="h-4 w-4" />
+                    Help
+                  </Link>
                 </Button>
 
                 {/* User Menu */}

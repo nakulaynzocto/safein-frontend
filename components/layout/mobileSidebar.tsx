@@ -18,7 +18,8 @@ import {
   CalendarPlus,
   Trash2,
   LogOut,
-  UserCheck
+  UserCheck,
+  HelpCircle
 } from "lucide-react"
 
 interface MobileSidebarProps {
@@ -175,7 +176,15 @@ export function MobileSidebar({ className }: MobileSidebarProps) {
           </nav>
 
           {/* Footer */}
-          <div className="border-t border-gray-200 p-4">
+          <div className="border-t border-gray-200 p-4 space-y-2">
+            <Link
+              href={routes.publicroute.HELP}
+              className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+              onClick={() => setOpen(false)}
+            >
+              <HelpCircle className="h-5 w-5" />
+              Help
+            </Link>
             <Button 
               className="btn-hostinger btn-hostinger-secondary w-full justify-start gap-3"
               onClick={() => setOpen(false)}
