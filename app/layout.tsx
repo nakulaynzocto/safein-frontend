@@ -8,8 +8,7 @@ import { ErrorBoundary } from "@/components/common/errorBoundary"
 import { NavigationProgress } from "@/components/common/navigationProgress"
 import { NavigationProgressProvider } from "@/components/common/navigationProgressProvider"
 import { RouteOptimizer } from "@/components/common/routeOptimizer"
-import { Navbar } from "@/components/layout/navbar"
-import { Footer } from "@/components/layout/footer"
+import { PageTransition } from "@/components/common/pageTransition"
 
 export const metadata: Metadata = {
   title: "SafeIn - SafeIn Appointment System",
@@ -23,11 +22,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-smooth">
       <head>
         <link rel="icon" href="/aynzo-logo.png" />
       </head>
-      <body className="font-sans">
+      <body className="font-sans" style={{ backgroundColor: 'var(--background)' }}>
         {/* Navigation Progress Bar - wrapped in Suspense */}
         <Suspense fallback={null}>
           <NavigationProgress />
@@ -38,11 +37,21 @@ export default function RootLayout({
         
         {/* Wrapped children with Error Boundary, Redux Provider and Suspense boundary */}
         <ErrorBoundary>
-          <Suspense fallback={<div>Loading...</div>}>
-            <NavigationProgressProvider>
-              <Providers>{children}</Providers>
-            </NavigationProgressProvider>
-          </Suspense>
+          <NavigationProgressProvider>
+            <Providers>
+              <Suspense fallback={
+                <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--background)' }}>
+                  <div className="animate-spin">
+                    <div className="h-8 w-8 border-4 border-[#3882a5] border-t-transparent rounded-full"></div>
+                  </div>
+                </div>
+              }>
+                <PageTransition>
+                  {children}
+                </PageTransition>
+              </Suspense>
+            </Providers>
+          </NavigationProgressProvider>
         </ErrorBoundary>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

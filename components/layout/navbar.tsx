@@ -35,10 +35,12 @@ import {
   Mail,
   Bell,
 } from "lucide-react"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
+import { usePathname } from "next/navigation"
 
 export function Navbar() {
   const router = useRouter()
+  const pathname = usePathname()
   const dispatch = useAppDispatch()
   const { user: authUser, isAuthenticated } = useAppSelector((state) => state.auth)
   const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation()
@@ -46,11 +48,13 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const [clientAuthState, setClientAuthState] = useState(false)
+  const lastProfileUserRef = useRef<string | null>(null)
 
   // Fetch latest user profile to get updated profilePicture
-  const { data: profileUser } = useGetProfileQuery(undefined, {
+  const { data: profileUser, refetch: refetchProfile } = useGetProfileQuery(undefined, {
     skip: !isAuthenticated,
     refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
   })
 
   // Use profileUser if available, otherwise fall back to authUser
@@ -66,16 +70,62 @@ export function Navbar() {
     }
   }, [])
 
-  // Update auth state when profile is fetched
+  // Update auth state when profile is fetched (only if user data actually changed to prevent infinite loop)
   useEffect(() => {
     if (profileUser && profileUser.id) {
-      dispatch(setUser(profileUser))
-      // Also update localStorage
-      if (typeof window !== "undefined") {
-        localStorage.setItem("user", JSON.stringify(profileUser))
+      // Create a simple hash of user data to detect actual changes
+      const userDataHash = JSON.stringify({
+        id: profileUser.id,
+        profilePicture: profileUser.profilePicture || '',
+        email: profileUser.email,
+        name: profileUser.name,
+        companyName: profileUser.companyName
+      })
+      
+      // Only update if the data has actually changed
+      if (userDataHash !== lastProfileUserRef.current) {
+        lastProfileUserRef.current = userDataHash
+        dispatch(setUser(profileUser))
+        // Also update localStorage
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user", JSON.stringify(profileUser))
+        }
       }
     }
   }, [profileUser, dispatch])
+
+  // Listen for storage events and custom events to update profile when changed
+  useEffect(() => {
+    if (!isMounted) return
+    
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'user' && e.newValue) {
+        try {
+          const updatedUser = JSON.parse(e.newValue)
+          if (updatedUser && updatedUser.id) {
+            // Refetch profile to get latest data
+            refetchProfile()
+          }
+        } catch (err) {
+          console.error('Error parsing user data from storage:', err)
+        }
+      }
+    }
+    
+    const handleProfileUpdate = (e: CustomEvent) => {
+      if (e.detail && e.detail.id) {
+        // Immediately refetch profile when profile is updated
+        refetchProfile()
+      }
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('profileUpdated', handleProfileUpdate as EventListener)
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('profileUpdated', handleProfileUpdate as EventListener)
+    }
+  }, [isMounted, refetchProfile])
 
   useEffect(() => {
     dispatch(initializeAuth())
@@ -130,9 +180,11 @@ export function Navbar() {
 
   // During SSR, only check auth state. After mount, include scroll state to prevent hydration mismatch
   const shouldShowWhiteNavbar = isActuallyAuthenticated || (isMounted && isScrolled)
-  const linkTextClass = shouldShowWhiteNavbar ? 'text-gray-900' : 'text-white'
+  const linkText = shouldShowWhiteNavbar ? 'text-gray-900' : 'text-white'
   const linkHoverBgClass = shouldShowWhiteNavbar ? 'hover:bg-gray-100/80' : 'hover:bg-white/10'
-  const ctaBtnClass = shouldShowWhiteNavbar ? 'text-white bg-brand' : 'text-brand-strong bg-white'
+  const ctaBtn = shouldShowWhiteNavbar
+    ? 'bg-brand text-white hover:bg-brand/90'
+    : 'bg-white text-brand-strong hover:bg-white/90'
   const userInitials = user ? getUserInitials(user.name, user.companyName) : "U"
 
   return (
@@ -157,39 +209,69 @@ export function Navbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center gap-2">
             {!isActuallyAuthenticated && (
               <>
-                <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
-                  <Link href={routes.publicroute.HOME} prefetch={true}>
-                    <span className="relative z-10">Home</span>
-                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
-                  </Link>
-                </Button>
-                <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
-                  <Link href={routes.publicroute.FEATURES} prefetch={true}>
-                    <span className="relative z-10">Features</span>
-                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
-                  </Link>
-                </Button>
-                <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
-                  <Link href={routes.publicroute.PRICING} prefetch={true}>
-                    <span className="relative z-10">Pricing</span>
-                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
-                  </Link>
-                </Button>
-                <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
-                  <Link href={routes.publicroute.CONTACT} prefetch={true}>
-                    <span className="relative z-10">Contact</span>
-                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
-                  </Link>
-                </Button>
-                <Button variant="ghost" asChild className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${linkHoverBgClass} ${linkTextClass} rounded-lg group`}>
-                  <Link href={routes.publicroute.HELP} prefetch={true}>
-                    <span className="relative z-10">Help</span>
-                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : 'bg-white/5'}`}></div>
-                  </Link>
-                </Button>
+                <Link
+                  href={routes.publicroute.HOME}
+                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
+                    pathname === routes.publicroute.HOME
+                      ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
+                      : `border-transparent ${linkText}`
+                  } group transition-colors duration-200 ${linkHoverBgClass}`}
+                  prefetch={true}
+                >
+                  <span className="relative z-10">Home</span>
+                  <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
+                </Link>
+                <Link
+                  href={routes.publicroute.FEATURES}
+                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
+                    pathname === routes.publicroute.FEATURES
+                      ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
+                      : `border-transparent ${linkText}`
+                  } group transition-colors duration-200 ${linkHoverBgClass}`}
+                  prefetch={true}
+                >
+                  <span className="relative z-10">Features</span>
+                  <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
+                </Link>
+                <Link
+                  href={routes.publicroute.PRICING}
+                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
+                    pathname === routes.publicroute.PRICING
+                      ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
+                      : `border-transparent ${linkText}`
+                  } group transition-colors duration-200 ${linkHoverBgClass}`}
+                  prefetch={true}
+                >
+                  <span className="relative z-10">Pricing</span>
+                  <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
+                </Link>
+                <Link
+                  href={routes.publicroute.CONTACT}
+                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
+                    pathname === routes.publicroute.CONTACT
+                      ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
+                      : `border-transparent ${linkText}`
+                  } group transition-colors duration-200 ${linkHoverBgClass}`}
+                  prefetch={true}
+                >
+                  <span className="relative z-10">Contact</span>
+                  <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
+                </Link>
+                <Link
+                  href={routes.publicroute.HELP}
+                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
+                    pathname === routes.publicroute.HELP
+                      ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
+                      : `border-transparent ${linkText}`
+                  } group transition-colors duration-200 ${linkHoverBgClass}`}
+                  prefetch={true}
+                >
+                  <span className="relative z-10">Help</span>
+                  <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
+                </Link>
               </>
             )}
           </div>
@@ -219,9 +301,13 @@ export function Navbar() {
                       onClick={handleAvatarClick}
                     >
                       <Avatar className="h-10 w-10 ring-2 ring-gray-200 hover:ring-blue-300 transition-all duration-200">
-                        {user?.profilePicture && user.profilePicture.trim() !== "" && (
-                          <AvatarImage src={user.profilePicture} alt={user.companyName || "User"} />
-                        )}
+                        {user?.profilePicture && user.profilePicture.trim() !== "" ? (
+                          <AvatarImage 
+                            src={`${user.profilePicture}${user.profilePicture.includes('?') ? '&' : '?'}v=${user.profilePicture.length}`} 
+                            alt={user.companyName || "User"}
+                            key={user.profilePicture}
+                          />
+                        ) : null}
                         <AvatarFallback className="text-white font-semibold shadow-lg" style={{ backgroundColor: '#3882a5' }}>
                           {userInitials}
                         </AvatarFallback>
@@ -231,9 +317,13 @@ export function Navbar() {
                   <DropdownMenuContent className="w-64 p-2 shadow-xl border-gray-200/50" align="end" forceMount>
                     <div className="flex items-center justify-start gap-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-lg mb-2">
                       <Avatar className="h-10 w-10">
-                        {user?.profilePicture && user.profilePicture.trim() !== "" && (
-                          <AvatarImage src={user.profilePicture} alt={user.companyName || "User"} />
-                        )}
+                        {user?.profilePicture && user.profilePicture.trim() !== "" ? (
+                          <AvatarImage 
+                            src={`${user?.profilePicture}${user.profilePicture.includes('?') ? '&' : '?'}v=${user.profilePicture.length}`} 
+                            alt={user?.companyName || "User"}
+                            key={user?.profilePicture}
+                          />
+                        ) : null}
                         <AvatarFallback className="text-white font-semibold" style={{ backgroundColor: '#3882a5' }}>
                           {userInitials}
                         </AvatarFallback>
@@ -279,12 +369,12 @@ export function Navbar() {
             ) : (
               <>
                 {/* Public Actions */}
-                <Button variant="ghost" asChild className={`hidden sm:flex px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkTextClass}`}>
+                <Button variant="ghost" asChild className={`hidden sm:flex px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkText}`}>
                   <Link href={routes.publicroute.LOGIN} prefetch={true}>Sign in</Link>
                 </Button>
-                <Button asChild className={`px-6 py-2 text-sm font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 ${ctaBtnClass}`}>
-                  <Link href={routes.publicroute.REGISTER} prefetch={true}>Start Free Trial</Link>
-                </Button>
+                <Link href={routes.publicroute.REGISTER} className={`hidden sm:flex px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`} prefetch={true}>
+                  Start Free Trial
+                </Link>
                 
                 {/* Mobile Menu Button - only for unauthenticated users */}
                 <Button
@@ -357,7 +447,7 @@ export function Navbar() {
                     </Link>
                     <Link
                       href={routes.publicroute.REGISTER}
-                      className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-200 hover:scale-105 shadow-lg ${ctaBtnClass}`}
+                      className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Start Free Trial

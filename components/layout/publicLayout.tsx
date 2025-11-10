@@ -36,14 +36,25 @@ export function PublicLayout({ children }: PublicLayoutProps) {
   // Don't return null - always show layout to prevent white screen during navigation
   // If authenticated, router.push will handle redirect
   return (
-    <div className="min-h-screen flex flex-col">
+    <div 
+      className="min-h-screen flex flex-col" 
+      style={{ backgroundColor: 'var(--background)' }}
+    >
       <Navbar />
-      <main className="flex-1 bg-background">
+      <main 
+        className="flex-1 transition-opacity duration-200" 
+        style={{ backgroundColor: 'var(--background)' }}
+      >
         {(!isClient || !isInitialized || isAuthenticated) ? (
-          // Minimal placeholder during auth check - prevents white screen
-          <div className="min-h-[60vh]" />
+          // Show content with fade-in to prevent white screen
+          <div 
+            className="min-h-[60vh] animate-pulse opacity-50" 
+            style={{ backgroundColor: 'var(--background)' }}
+          />
         ) : (
-          children
+          <div className="animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
+            {children}
+          </div>
         )}
       </main>
       <Footer />

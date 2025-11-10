@@ -1,9 +1,13 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
+import { usePathname } from "next/navigation"
 import NProgress from "nprogress"
 
 export function NavigationProgressProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+  const previousPathname = useRef(pathname)
+
   useEffect(() => {
     // Configure NProgress
     NProgress.configure({ 
@@ -11,9 +15,27 @@ export function NavigationProgressProvider({ children }: { children: React.React
       trickleSpeed: 200,
       minimum: 0.08,
       easing: 'ease',
-      speed: 500,
+      speed: 300,
     })
+  }, [])
 
+  useEffect(() => {
+    // Detect pathname changes
+    if (previousPathname.current !== pathname) {
+      // Pathname changed, navigation is happening
+      NProgress.start()
+      
+      // Complete progress after a short delay
+      const timer = setTimeout(() => {
+        NProgress.done()
+        previousPathname.current = pathname
+      }, 100)
+
+      return () => clearTimeout(timer)
+    }
+  }, [pathname])
+
+  useEffect(() => {
     // Intercept all link clicks
     const handleClick = (e: MouseEvent) => {
       const target = e.target
@@ -40,17 +62,10 @@ export function NavigationProgressProvider({ children }: { children: React.React
       }
     }
 
-    // Intercept router.push calls
-    const handleBeforeUnload = () => {
-      NProgress.start()
-    }
-
-    document.addEventListener("click", handleClick)
-    window.addEventListener("beforeunload", handleBeforeUnload)
+    document.addEventListener("click", handleClick, true)
 
     return () => {
-      document.removeEventListener("click", handleClick)
-      window.removeEventListener("beforeunload", handleBeforeUnload)
+      document.removeEventListener("click", handleClick, true)
     }
   }, [])
 

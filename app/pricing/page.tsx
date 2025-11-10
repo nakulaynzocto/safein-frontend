@@ -7,97 +7,70 @@ import { Check, X, ArrowRight, Star } from "lucide-react"
 import { routes } from "@/utils/routes"
 import { PublicLayout } from "@/components/layout/publicLayout"
 import Link from "next/link"
+import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan, useCreateCheckoutSessionMutation } from "@/store/api/subscriptionApi"
+import { toast } from "sonner"
+import { useEffect } from "react"
+import { useRouter } from 'next/navigation'
+
+const formatCurrency = (amountInCents: number, currency: string) => {
+  const amountInRupees = amountInCents / 100;
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amountInRupees);
+};
 
 export default function PricingPage() {
-  const plans = [
-    {
-      name: "Free Trial",
-      price: "₹0",
-      period: "3 Days Only",
-      description: "Experience full SafeIn features for 3 days",
-      popular: false,
-      features: [
-        "Full SafeIn features access",
-        "Test visitor tracking",
-        "Photo capture & ID verification",
-        "Real-time notifications",
-        "No credit card required"
-      ],
-      limitations: [
-        "Limited to 3 days",
-        "No priority support"
-      ]
-    },
-    {
-      name: "Premium - 1 Month",
-      originalPricePerMonth: "₹8,499",
-      price: "₹8,499",
-      period: "per month",
-      description: "Monthly billing at ₹8,499/month",
-      popular: false,
-      features: [
-        "Unlimited visitor tracking",
-        "Aadhaar & ID verification",
-        "Real-time email & SMS alerts",
-        "Photo capture & smart logs",
-        "Secure cloud storage",
-        "24/7 priority support",
-        "Advanced analytics & reporting",
-        "Custom branding options",
-        "API access",
-        "Multi-location support"
-      ],
-      limitations: []
-    },
-    {
-      name: "Premium - 3 Months",
-      originalPrice: "₹25,497",
-      originalPricePerMonth: "₹8,499",
-      price: "₹24,222",
-      pricePerMonth: "₹8,074",
-      period: "for 3 months",
-      discountNote: "5% OFF",
-      description: "Save 5% with 3-month billing",
-      popular: true,
-      features: [
-        "Unlimited visitor tracking",
-        "Aadhaar & ID verification",
-        "Real-time email & SMS alerts",
-        "Photo capture & smart logs",
-        "Secure cloud storage",
-        "24/7 priority support",
-        "Advanced analytics & reporting",
-        "Custom branding options",
-        "API access",
-        "Multi-location support"
-      ],
-      limitations: []
-    },
-    {
-      name: "Premium - 12 Months",
-      originalPrice: "₹101,988",
-      originalPricePerMonth: "₹8,499",
-      price: "₹91,790",
-      pricePerMonth: "₹7,649",
-      period: "billed annually",
-      discountNote: "10% OFF",
-      description: "Save 10% with annual billing - Best value!",
-      popular: false,
-      features: [
-        "Unlimited visitor tracking",
-        "Aadhaar & ID verification",
-        "Real-time email & SMS alerts",
-        "Photo capture & smart logs",
-        "Secure cloud storage",
-        "24/7 priority support",
-        "Advanced analytics & reporting",
-        "Custom branding options",
-        "API access",
-        "Multi-location support"
-      ],
-      limitations: []
+  const { data: fetchedSubscriptionPlans, isLoading, error } = useGetAllSubscriptionPlansQuery({ isActive: true });
+  const [createCheckoutSession, { isLoading: isCreatingSession }] = useCreateCheckoutSessionMutation();
+  const router = useRouter();
+
+  const handleSubscribe = async (planId: string, isFreeTrial: boolean = false) => {
+    try {
+      const successUrl = isFreeTrial ? `${window.location.origin}${routes.publicroute.DASHBOARD}` : `${window.location.origin}${routes.publicroute.SUBSCRIPTION_SUCCESS}`;
+      const cancelUrl = `${window.location.origin}${routes.publicroute.SUBSCRIPTION_CANCEL}`;
+
+      const response = await createCheckoutSession({
+        planId,
+        successUrl,
+        cancelUrl,
+      }).unwrap();
+
+      if (response.url) {
+        router.push(response.url);
+      }
+    } catch (err) {
+      console.error('Failed to create checkout session:', err);
+      toast.error('Failed to initiate checkout. Please try again.');
     }
-  ]
+  };
+
+  if (isLoading) {
+    return (
+      <PublicLayout>
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <p className="text-xl text-gray-700">Loading pricing plans...</p>
+        </div>
+      </PublicLayout>
+    );
+  }
+
+  if (error || !fetchedSubscriptionPlans) {
+    return (
+      <PublicLayout>
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <p className="text-xl text-red-500">Error loading pricing plans. Please try again later.</p>
+        </div>
+      </PublicLayout>
+    );
+  }
+
+  // Handle different possible response structures
+  const plans = fetchedSubscriptionPlans?.data?.plans || 
+                fetchedSubscriptionPlans?.plans || 
+                (Array.isArray(fetchedSubscriptionPlans) ? fetchedSubscriptionPlans : []);
 
   return (
     <PublicLayout>
@@ -125,9 +98,9 @@ export default function PricingPage() {
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-            {plans.map((plan, index) => (
-              <Card key={index} className={`relative ${plan.popular ? 'border-2 border-brand shadow-lg scale-105' : ''}`}>
-                {plan.popular && (
+            {plans.map((plan: ISubscriptionPlan, index: number) => (
+              <Card key={plan._id} className={`relative ${plan.isPopular ? 'border-2 border-brand shadow-lg scale-105' : ''}`}>
+                {plan.isPopular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <Badge className="px-4 py-1 text-white bg-brand">
                       Most Popular
@@ -139,24 +112,28 @@ export default function PricingPage() {
                     {plan.name}
                   </CardTitle>
                   <div className="mt-4">
-                    {plan.originalPrice && (
+                    {plan.discountPercentage && plan.discountPercentage > 0 ? (
                       <div className="mb-2">
-                        <span className="text-lg line-through text-gray-400">{plan.originalPrice}</span>
-                        {plan.discountNote && (
-                          <Badge className="ml-2 bg-green-500 text-white">{plan.discountNote}</Badge>
-                        )}
+                        <span className="text-lg line-through text-gray-400">
+                          {formatCurrency(plan.amount / (1 - plan.discountPercentage / 100), plan.currency)}
+                        </span>
+                        <Badge className="ml-2 bg-green-500 text-white">{plan.discountPercentage}% OFF</Badge>
                       </div>
-                    )}
+                    ) : null}
                     <span className="text-4xl font-bold text-brand-strong">
-                      {plan.price}
+                      {plan.planType === 'free' ? '₹0' : formatCurrency(plan.amount, plan.currency)}
                     </span>
                     <div className="mt-2">
-                      <span className="text-gray-500">{plan.period}</span>
+                      <span className="text-gray-500">
+                        {plan.planType === 'free' ? '3 Days Only' : `per ${plan.planType.replace('ly', '')}`}
+                      </span>
                     </div>
-                    {plan.pricePerMonth && (
+                    {plan.monthlyEquivalent && plan.planType !== 'free' && (
                       <div className="text-sm text-gray-600 mt-2">
                         <span className="text-gray-400">Effective: </span>
-                        <span className="font-semibold text-brand-strong">{plan.pricePerMonth}/month</span>
+                        <span className="font-semibold text-brand-strong">
+                          {formatCurrency(plan.monthlyEquivalent, plan.currency)}/month
+                        </span>
                       </div>
                     )}
                   </div>
@@ -172,22 +149,32 @@ export default function PricingPage() {
                         <span className="text-sm text-accent">{feature}</span>
                       </div>
                     ))}
-                    {plan.limitations.map((limitation, limitationIndex) => (
-                      <div key={limitationIndex} className="flex items-center opacity-60">
+                    {(plan.trialDays > 0) && plan.planType === 'free' && (
+                      <div className="flex items-center opacity-60">
                         <X className="h-5 w-5 mr-3 text-gray-400" />
-                        <span className="text-sm text-gray-400">{limitation}</span>
+                        <span className="text-sm text-gray-400">Limited to {plan.trialDays} days</span>
                       </div>
-                    ))}
+                    )}
+                    {/* Add other limitations if they exist in the backend model */}
                   </div>
                   <Button 
-                    className={`w-full ${plan.popular ? 'text-white bg-brand' : ''}`} 
-                    variant={plan.popular ? 'default' : 'outline'}
-                    asChild
+                    className={`w-full ${plan.isPopular ? 'text-white bg-brand' : ''}`} 
+                    variant={plan.isPopular ? 'default' : 'outline'}
+                    asChild={plan.planType === 'free'}
+                    onClick={plan.planType !== 'free' ? () => handleSubscribe(plan._id) : undefined}
+                    disabled={isCreatingSession}
                   >
-                    <Link href={routes.publicroute.REGISTER}>
-                      Start Free Trial
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
+                    {plan.planType === 'free' ? (
+                      <Button onClick={() => handleSubscribe(routes.publicroute.FREE_TRIAL_PLAN_ID, true)} className="w-full text-white bg-brand">
+                        Start Free Trial
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <>
+                        {isCreatingSession ? 'Processing...' : 'Subscribe Now'}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </>
+                    )}
                   </Button>
                 </CardContent>
               </Card>
@@ -207,26 +194,33 @@ export default function PricingPage() {
               Premium plan total cost comparison
             </p>
             <div className="grid md:grid-cols-3 gap-6 text-center">
-              <div className="p-6 bg-white rounded-lg shadow-sm">
-                <div className="text-2xl font-bold mb-2 text-brand-strong">1 Month</div>
-                <div className="text-3xl font-bold mb-2">₹8,499</div>
-                <div className="text-sm text-accent">per month</div>
-                <div className="text-lg mt-3 font-semibold text-brand-strong">Total: ₹8,499</div>
-              </div>
-              <div className="p-6 bg-white rounded-lg shadow-lg border-2 border-brand">
-                <div className="text-2xl font-bold mb-2 text-brand-strong">3 Months</div>
-                <div className="text-lg line-through text-gray-400 mb-1">₹25,497</div>
-                <div className="text-3xl font-bold mb-2">₹24,222</div>
-                <div className="text-sm text-accent">₹8,074/month effective</div>
-                <Badge className="mt-2 bg-green-500 text-white">Save ₹1,275 (5% OFF)</Badge>
-              </div>
-              <div className="p-6 bg-white rounded-lg shadow-sm border-2 border-brand">
-                <div className="text-2xl font-bold mb-2 text-brand-strong">12 Months</div>
-                <div className="text-lg line-through text-gray-400 mb-1">₹101,988</div>
-                <div className="text-3xl font-bold mb-2">₹91,790</div>
-                <div className="text-sm text-accent">₹7,649/month effective</div>
-                <Badge className="mt-2 bg-green-500 text-white">Save ₹10,198 (10% OFF)</Badge>
-              </div>
+              {plans.filter(p => p.planType !== 'free').map((plan, index) => {
+                const originalAmount = plan.amount / (1 - (plan.discountPercentage || 0) / 100);
+                const savedAmount = originalAmount - (plan.amount / 100);
+                return (
+                  <div key={plan._id} className={`p-6 bg-white rounded-lg ${plan.isPopular ? 'shadow-lg border-2 border-brand' : 'shadow-sm'}`}>
+                    <div className="text-2xl font-bold mb-2 text-brand-strong">
+                      {plan.planType === 'monthly' ? '1 Month' : plan.planType === 'quarterly' ? '3 Months' : '12 Months'}
+                    </div>
+                    {plan.discountPercentage && plan.discountPercentage > 0 && (
+                      <div className="text-lg line-through text-gray-400 mb-1">
+                        {formatCurrency(originalAmount * 100, plan.currency)}
+                      </div>
+                    )}
+                    <div className="text-3xl font-bold mb-2">{formatCurrency(plan.amount, plan.currency)}</div>
+                    {plan.monthlyEquivalent && (
+                      <div className="text-sm text-accent">
+                        {formatCurrency(plan.monthlyEquivalent, plan.currency)}/month effective
+                      </div>
+                    )}
+                    {plan.discountPercentage && plan.discountPercentage > 0 && (
+                      <Badge className="mt-2 bg-green-500 text-white">
+                        Save {formatCurrency(savedAmount * 100, plan.currency)} ({plan.discountPercentage}% OFF)
+                      </Badge>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>

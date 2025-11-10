@@ -39,7 +39,10 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
   // Don't return null - always show layout to prevent white screen during navigation
   // If not authenticated, router.replace will handle redirect
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div 
+      className="h-screen flex flex-col overflow-hidden" 
+      style={{ backgroundColor: 'var(--background)' }}
+    >
       <Navbar />
       <div className="flex flex-1 overflow-hidden">
         {!shouldHideSidebar && (
@@ -47,13 +50,21 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
             <Sidebar />
           </div>
         )}
-        <main className="flex-1 overflow-y-auto bg-background">
+        <main 
+          className="flex-1 overflow-y-auto transition-opacity duration-200" 
+          style={{ backgroundColor: 'var(--background)' }}
+        >
           <div className="container mx-auto p-4 md:p-6">
             {(!isClient || !isInitialized || !isAuthenticated || !token) ? (
-              // Minimal placeholder during auth check - prevents white screen
-              <div className="min-h-[60vh]" />
+              // Show content with fade-in to prevent white screen
+              <div 
+                className="min-h-[60vh] animate-pulse opacity-50" 
+                style={{ backgroundColor: 'var(--background)' }}
+              />
             ) : (
-              children
+              <div className="animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
+                {children}
+              </div>
             )}
           </div>
         </main>

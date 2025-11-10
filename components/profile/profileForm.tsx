@@ -50,10 +50,14 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
   // Update form when profile changes
   useEffect(() => {
     if (profile && profile.companyName) {
-      reset(defaultValues)
+      const newDefaultValues = {
+        companyName: profile.companyName || "",
+        profilePicture: profile.profilePicture || "",
+      }
+      reset(newDefaultValues)
       setProfileImage(profile.profilePicture || null)
     }
-  }, [profile, reset, defaultValues])
+  }, [profile, reset])
   
   // Ensure profile has required data
   if (!profile || !profile.companyName) {
@@ -132,9 +136,13 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
             <div className="flex items-center gap-4">
               <div className="relative">
                 <img
-                  src={profileImage || "/placeholder-user.jpg"}
+                  src={profileImage ? `${profileImage}${profileImage.includes('?') ? '&' : '?'}v=${profileImage.length}` : "/placeholder-user.jpg"}
                   alt="Profile"
+                  key={profileImage}
                   className="h-20 w-20 rounded-full object-cover border-2 border-border"
+                  onError={(e) => {
+                    e.currentTarget.src = "/placeholder-user.jpg"
+                  }}
                 />
               </div>
               <FileUpload

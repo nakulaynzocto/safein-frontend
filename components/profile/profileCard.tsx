@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -21,14 +21,27 @@ export const ProfileCard = React.memo(function ProfileCard({ profile }: ProfileC
   const initials = getUserInitials(profile.name, profile.companyName)
   const displayName = profile.companyName || profile.name || "User"
   
+  // Add cache-busting query param only when profilePicture changes
+  const profileImageSrc = useMemo(() => {
+    if (profile.profilePicture && profile.profilePicture.trim() !== "") {
+      // Use the profilePicture URL itself as part of the cache key
+      return `${profile.profilePicture}${profile.profilePicture.includes('?') ? '&' : '?'}v=${profile.profilePicture.length}`
+    }
+    return null
+  }, [profile.profilePicture])
+  
   return (
     <Card>
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
           <Avatar className="h-24 w-24">
-            {profile.profilePicture && (
-              <AvatarImage src={profile.profilePicture} alt="Profile" />
-            )}
+            {profileImageSrc ? (
+              <AvatarImage 
+                src={profileImageSrc} 
+                alt="Profile"
+                key={profile.profilePicture}
+              />
+            ) : null}
             <AvatarFallback className="text-2xl">
               {initials}
             </AvatarFallback>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { routes } from "@/utils/routes"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -12,6 +12,17 @@ import { Badge } from "@/components/ui/badge"
 import { PublicLayout } from "@/components/layout/publicLayout"
 import { Calendar, Users, Shield, Clock, CheckCircle, UserCheck, ArrowRight, Building2, Globe, Award, Heart, Zap, Star, Phone, Mail, MapPin, MessageCircle, Download, Play, ChevronRight, Check, BarChart3, X } from "lucide-react"
 import Link from "next/link"
+import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan } from "@/store/api/subscriptionApi"
+
+const formatCurrency = (amountInCents: number, currency: string) => {
+  const amountInRupees = amountInCents / 100;
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amountInRupees);
+};
 
 export default function HomePage() {
   const router = useRouter()
@@ -21,6 +32,9 @@ export default function HomePage() {
   const [isClient, setIsClient] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
 
+  // Fetch pricing plans dynamically
+  const { data: fetchedSubscriptionPlans, isLoading: isLoadingPlans, error: plansError } = useGetAllSubscriptionPlansQuery({ isActive: true })
+
   // Initialize authentication
   useEffect(() => {
     setIsClient(true)
@@ -28,96 +42,55 @@ export default function HomePage() {
     setIsInitialized(true)
   }, [dispatch])
 
-  // Pricing plans - same as pricing page
-  const plans = [
-    {
-      name: "Free Trial",
-      price: "₹0",
-      period: "3 Days Only",
-      description: "Experience full SafeIn features for 3 days",
-      popular: false,
-      features: [
-        "Full SafeIn features access",
-        "Test visitor tracking",
-        "Photo capture & ID verification",
-        "Real-time notifications",
-        "No credit card required"
-      ],
-      limitations: [
-        "Limited to 3 days",
-        "No priority support"
-      ]
-    },
-    {
-      name: "Premium - 1 Month",
-      originalPricePerMonth: "₹8,499",
-      price: "₹8,499",
-      period: "per month",
-      description: "Monthly billing at ₹8,499/month",
-      popular: false,
-      features: [
-        "Unlimited visitor tracking",
-        "Aadhaar & ID verification",
-        "Real-time email & SMS alerts",
-        "Photo capture & smart logs",
-        "Secure cloud storage",
-        "24/7 priority support",
-        "Advanced analytics & reporting",
-        "Custom branding options",
-        "API access",
-        "Multi-location support"
-      ],
-      limitations: []
-    },
-    {
-      name: "Premium - 3 Months",
-      originalPrice: "₹25,497",
-      originalPricePerMonth: "₹8,499",
-      price: "₹24,222",
-      pricePerMonth: "₹8,074",
-      period: "for 3 months",
-      discountNote: "5% OFF",
-      description: "Save 5% with 3-month billing",
-      popular: true,
-      features: [
-        "Unlimited visitor tracking",
-        "Aadhaar & ID verification",
-        "Real-time email & SMS alerts",
-        "Photo capture & smart logs",
-        "Secure cloud storage",
-        "24/7 priority support",
-        "Advanced analytics & reporting",
-        "Custom branding options",
-        "API access",
-        "Multi-location support"
-      ],
-      limitations: []
-    },
-    {
-      name: "Premium - 12 Months",
-      originalPrice: "₹101,988",
-      originalPricePerMonth: "₹8,499",
-      price: "₹91,790",
-      pricePerMonth: "₹7,649",
-      period: "billed annually",
-      discountNote: "10% OFF",
-      description: "Save 10% with annual billing - Best value!",
-      popular: false,
-      features: [
-        "Unlimited visitor tracking",
-        "Aadhaar & ID verification",
-        "Real-time email & SMS alerts",
-        "Photo capture & smart logs",
-        "Secure cloud storage",
-        "24/7 priority support",
-        "Advanced analytics & reporting",
-        "Custom branding options",
-        "API access",
-        "Multi-location support"
-      ],
-      limitations: []
-    }
-  ]
+  // Transform API plans to match display format
+  const plans = React.useMemo(() => {
+    if (!fetchedSubscriptionPlans) return []
+    
+    // Handle different possible response structures (same as pricing page)
+    const apiPlans = fetchedSubscriptionPlans?.data?.plans || 
+                     (Array.isArray(fetchedSubscriptionPlans) ? fetchedSubscriptionPlans : [])
+
+    return apiPlans.map((plan: ISubscriptionPlan) => {
+      const originalPrice = plan.discountPercentage && plan.discountPercentage > 0
+        ? formatCurrency(plan.amount / (1 - plan.discountPercentage / 100), plan.currency)
+        : null
+      
+      const price = plan.planType === 'free' 
+        ? '₹0' 
+        : formatCurrency(plan.amount, plan.currency)
+      
+      const period = plan.planType === 'free' 
+        ? '3 Days Only'
+        : plan.planType === 'monthly'
+        ? 'per month'
+        : plan.planType === 'quarterly'
+        ? 'for 3 months'
+        : 'billed annually'
+      
+      const pricePerMonth = plan.monthlyEquivalent && plan.planType !== 'free'
+        ? formatCurrency(plan.monthlyEquivalent, plan.currency)
+        : null
+
+      return {
+        _id: plan._id,
+        name: plan.name,
+        price,
+        period,
+        description: plan.description || '',
+        popular: plan.isPopular || false,
+        features: plan.features || [],
+        limitations: plan.planType === 'free' && plan.trialDays 
+          ? [`Limited to ${plan.trialDays} days`]
+          : [],
+        originalPrice,
+        discountNote: plan.discountPercentage && plan.discountPercentage > 0
+          ? `${plan.discountPercentage}% OFF`
+          : null,
+        pricePerMonth,
+        planType: plan.planType
+      }
+    })
+  }, [fetchedSubscriptionPlans])
 
   // Redirect authenticated users to dashboard (handled in PublicLayout)
 
@@ -162,14 +135,14 @@ export default function HomePage() {
             </div>
             
             {/* Right Side - Animated Dashboard Preview (using original image) */}
-            <div className="relative mt-8 lg:mt-0 lg:max-w-[620px] lg:ml-auto order-first lg:order-last">
+            <div className="relative mt-8 lg:mt-0 lg:max-w-[434px] lg:ml-auto order-first lg:order-last">
               <div className="absolute -inset-4 sm:-inset-6 blur-3xl opacity-30 bg-white/40 rounded-2xl"></div>
               <Image
-                src="/home/visitor-appointment-management.jpg"
-                alt="SafeIn Appointment Management"
-                width={520}
-                height={320}
-                className="rounded-xl shadow-2xl dash-glow animate-float-slow w-full h-auto"
+                src="/home/Tranform-your-digital-visitor-management.jpg"
+                alt="Transform Your Digital Visitor Management"
+                width={364}
+                height={224}
+                className="rounded-full shadow-2xl dash-glow animate-float-slow w-full h-auto"
                 priority
               />
               <div className="absolute -bottom-3 sm:-bottom-5 -left-3 sm:-left-5 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-2 sm:p-3 border border-white/40 max-w-[200px] sm:max-w-none">
@@ -279,11 +252,11 @@ export default function HomePage() {
               </div>
               <div className="order-1 lg:order-2 relative image-pop-group">
                 <Image
-                  src="/home/authentication-security.jpg"
-                  alt="Registration Process"
-                  width={600}
-                  height={400}
-                  className="rounded-lg shadow-xl group-image-pop"
+                  src="/home/quick-registeration.jpg"
+                  alt="Quick Registration Process"
+                  width={420}
+                  height={280}
+                  className="rounded-full shadow-xl group-image-pop"
                 />
                 <div className="absolute -bottom-4 -right-4 bg-white rounded-lg shadow-md p-2 border border-slate-200">
                   <div className="flex items-center gap-2">
@@ -298,11 +271,11 @@ export default function HomePage() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="relative image-pop-group">
               <Image
-                src="/home/aashboard-analytics.jpg"
-                alt="Dashboard Analytics"
-                width={600}
-                height={400}
-                  className="rounded-lg shadow-xl group-image-pop"
+                src="/home/powerful-dashboard.jpg"
+                alt="Powerful Dashboard Analytics"
+                width={420}
+                height={280}
+                  className="rounded-full shadow-xl group-image-pop"
                 />
                 <div className="absolute -top-4 -left-4 bg-white rounded-lg shadow-lg p-3">
                   <div className="flex items-center gap-2">
@@ -363,11 +336,11 @@ export default function HomePage() {
               </div>
               <div className="order-1 lg:order-2 relative image-pop-group">
                 <Image
-                  src="/home/visitor-appointment-management.jpg"
-                  alt="Appointment Management"
-                  width={600}
-                  height={400}
-                  className="rounded-lg shadow-xl group-image-pop"
+                  src="/home/easyappointment.jpg"
+                  alt="Easy Appointment Booking System"
+                  width={420}
+                  height={280}
+                  className="rounded-full shadow-xl group-image-pop"
                 />
                 <div className="absolute -bottom-4 -right-4 bg-white rounded-lg shadow-md p-2 border border-slate-200">
                   <div className="flex items-center gap-2">
@@ -382,11 +355,11 @@ export default function HomePage() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div className="relative image-pop-group">
                 <Image
-                  src="/home/staff-listing-role-management.jpg"
-                  alt="Staff Management"
-                  width={600}
-                  height={400}
-                  className="rounded-lg shadow-xl group-image-pop"
+                  src="/home/complete-team-control.jpg"
+                  alt="Complete Team Control"
+                  width={420}
+                  height={280}
+                  className="rounded-full shadow-xl group-image-pop"
                 />
                 <div className="absolute -top-4 -left-4 bg-white rounded-lg shadow-lg p-3">
                   <div className="flex items-center gap-2">
@@ -436,9 +409,22 @@ export default function HomePage() {
             </p>
           </div>
           
+          {isLoadingPlans ? (
+            <div className="flex items-center justify-center py-12">
+              <p className="text-xl text-gray-700">Loading pricing plans...</p>
+            </div>
+          ) : plansError ? (
+            <div className="flex items-center justify-center py-12">
+              <p className="text-xl text-red-500">Error loading pricing plans. Please try again later.</p>
+            </div>
+          ) : plans.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <p className="text-xl text-gray-700">No pricing plans available at the moment.</p>
+            </div>
+          ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-            {plans.map((plan, index) => (
-              <Card key={index} className={`relative ${plan.popular ? 'border-2 border-brand shadow-lg scale-105' : ''}`}>
+              {plans.map((plan) => (
+                <Card key={plan._id || plan.name} className={`relative ${plan.popular ? 'border-2 border-brand shadow-lg scale-105' : ''}`}>
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <Badge className="px-4 py-1 text-white bg-brand">
@@ -505,6 +491,7 @@ export default function HomePage() {
               </Card>
             ))}
           </div>
+          )}
         </div>
       </section>
 

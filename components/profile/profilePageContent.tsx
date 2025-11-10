@@ -18,8 +18,8 @@ export function ProfilePageContent() {
   const dispatch = useAppDispatch()
   const [isEditing, setIsEditing] = useState(false)
   const { data: profile, isLoading, error, refetch } = useGetProfileQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-    refetchOnFocus: false,
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
   })
   const [updateProfile] = useUpdateProfileMutation()
 
@@ -62,7 +62,11 @@ export function ProfilePageContent() {
         // Also update localStorage
         if (typeof window !== "undefined") {
           localStorage.setItem("user", JSON.stringify(result))
+          // Dispatch custom event to notify other components (like navbar) of profile update
+          window.dispatchEvent(new CustomEvent('profileUpdated', { detail: result }))
         }
+        // Force a small delay to ensure state updates propagate
+        await new Promise(resolve => setTimeout(resolve, 100))
       }
       setIsEditing(false)
     } catch (err: any) {

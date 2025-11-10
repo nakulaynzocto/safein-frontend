@@ -8,6 +8,9 @@ export const routes = {
     PRICING: "/pricing",
     CONTACT: "/contact",
     HELP: "/help",
+    SUBSCRIPTION_SUCCESS: "/subscription/success",
+    SUBSCRIPTION_CANCEL: "/subscription/cancel",
+    FREE_TRIAL_PLAN_ID: "FREE_TRIAL_PLAN_ID_PLACEHOLDER", // This should be replaced with the actual ID from the backend
   },
 
   privateroute: {
