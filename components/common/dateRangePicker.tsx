@@ -130,20 +130,7 @@ const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
         const normalizedEnd = endDate ? normalizeDate(endDate) : null;
         const isStart = normalizedStart && normalizedStart.getTime() === normalizedDate.getTime();
         const isEnd = normalizedEnd && normalizedEnd.getTime() === normalizedDate.getTime();
-        const result = isStart || isEnd;
-        
-        // Debug log
-        if (result) {
-            console.log('📍 isStartOrEnd TRUE:', {
-                date: date.toISOString().slice(0, 10),
-                startDate: startDate?.toISOString().slice(0, 10),
-                endDate: endDate?.toISOString().slice(0, 10),
-                isStart,
-                isEnd
-            });
-        }
-        
-        return result;
+        return isStart || isEnd;
     };
 
     const isInHoverRange = (date: Date) => {
@@ -288,29 +275,11 @@ const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
                         inlineStyles.color = '#111827';
                     }
                     
-                    // Debug: Log all selected dates
-                    if (isStartOrEndCheck || isInRangeCheck) {
-                        console.log('🎨 Applying styles:', {
-                            date: date.toISOString().slice(0, 10),
-                            className,
-                            isStartOrEnd: isStartOrEndCheck,
-                            isInRange: isInRangeCheck,
-                            inlineStyles,
-                            tempRange: {
-                                start: tempRange.startDate?.toISOString().slice(0, 10),
-                                end: tempRange.endDate?.toISOString().slice(0, 10)
-                            }
-                        });
-                    }
-                    
                     return (
                         <div
                             key={i}
                             className={className}
-                            onClick={() => {
-                                console.log('🖱️ Date clicked:', date.toISOString().slice(0, 10));
-                                handleDateClick(date);
-                            }}
+                            onClick={() => handleDateClick(date)}
                             onMouseEnter={() => setHoverDate(date)}
                             style={inlineStyles}
                             data-date={date.toISOString().slice(0, 10)}

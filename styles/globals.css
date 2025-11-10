@@ -359,7 +359,6 @@
   position: relative !important;
 }
 
-/* Force visibility - testing */
 .date-range-calendar-day.start-end::before {
   content: '';
   position: absolute;
