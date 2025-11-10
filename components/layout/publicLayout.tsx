@@ -29,30 +29,38 @@ export function PublicLayout({ children }: PublicLayoutProps) {
 
   useEffect(() => {
     if (isInitialized && isAuthenticated && token) {
-      router.push(routes.privateroute.DASHBOARD)
+      // Use replace for smoother navigation
+      router.replace(routes.privateroute.DASHBOARD)
     }
   }, [isInitialized, isAuthenticated, token, router])
 
   // Don't return null - always show layout to prevent white screen during navigation
-  // If authenticated, router.push will handle redirect
+  // If authenticated, router.replace will handle redirect
   return (
     <div 
-      className="min-h-screen flex flex-col" 
+      className="min-h-screen flex flex-col transition-all duration-300" 
       style={{ backgroundColor: 'var(--background)' }}
     >
       <Navbar />
       <main 
-        className="flex-1 transition-opacity duration-200" 
+        className="flex-1 transition-opacity duration-300 ease-in-out" 
         style={{ backgroundColor: 'var(--background)' }}
       >
-        {(!isClient || !isInitialized || isAuthenticated) ? (
-          // Show content with fade-in to prevent white screen
+        {(!isClient || !isInitialized) ? (
+          // Show loading state only during initial load
+          <div 
+            className="min-h-[60vh] animate-pulse opacity-50" 
+            style={{ backgroundColor: 'var(--background)' }}
+          />
+        ) : isAuthenticated && token ? (
+          // Show loading state while redirecting authenticated users
           <div 
             className="min-h-[60vh] animate-pulse opacity-50" 
             style={{ backgroundColor: 'var(--background)' }}
           />
         ) : (
-          <div className="animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
+          // Show content with smooth fade-in for unauthenticated users
+          <div className="animate-fade-in transition-opacity duration-300" style={{ backgroundColor: 'var(--background)' }}>
             {children}
           </div>
         )}

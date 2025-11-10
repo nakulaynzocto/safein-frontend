@@ -150,12 +150,41 @@ export function Navbar() {
 
   const handleLogout = useCallback(async () => {
     try {
-      await logoutMutation().unwrap()
+      // Clear auth state first for immediate UI update
       dispatch(logout())
-      router.push(routes.publicroute.LOGIN)
+      
+      // Call logout API (non-blocking)
+      logoutMutation().unwrap().catch(() => {
+        // Silently handle API errors - logout should proceed regardless
+      })
+      
+      // Clear any cached data
+      if (typeof window !== "undefined") {
+        // Clear all localStorage items related to auth
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+        
+        // Clear session storage if used
+        sessionStorage.clear()
+        
+        // Scroll to top for smooth transition
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+      
+      // Small delay to ensure state is cleared, then smooth redirect to home
+      // Using replace instead of push to avoid adding to history
+      setTimeout(() => {
+        router.replace(routes.publicroute.HOME)
+      }, 150)
     } catch (error) {
+      // Ensure logout state is set even on error
       dispatch(logout())
-      router.push(routes.publicroute.LOGIN)
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+      router.replace(routes.publicroute.HOME)
     }
   }, [logoutMutation, dispatch, router])
 
