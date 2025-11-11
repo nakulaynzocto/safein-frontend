@@ -140,6 +140,7 @@ export function AppointmentTable({
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [showCheckOutDialog, setShowCheckOutDialog] = useState(false)
   const [showApproveDialog, setShowApproveDialog] = useState(false)
+  const [showRejectDialog, setShowRejectDialog] = useState(false)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   
   // Loading states for individual appointments
@@ -213,6 +214,7 @@ export function AppointmentTable({
       await approveAppointment(appointmentId).unwrap()
       showSuccessToast('Appointment approved successfully!')
       onApprove?.(appointmentId)
+      onRefresh?.() // Refresh the list after approval
     } catch (error) {
       showErrorToast('Failed to approve appointment')
     } finally {
@@ -225,6 +227,7 @@ export function AppointmentTable({
     try {
       await rejectAppointment(appointmentId).unwrap()
       showSuccessToast('Appointment rejected successfully!')
+      onRefresh?.() // Refresh the list after rejection
     } catch (error) {
       showErrorToast('Failed to reject appointment')
     } finally {
@@ -501,41 +504,129 @@ export function AppointmentTable({
     baseColumns.push({
       key: "actions",
       header: "Actions",
-      render: (appointment: Appointment) => (
-        <div className="flex justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              {mode === 'active' && (
-                <>
-                  {onView && (
-                    <DropdownMenuItem onClick={() => handleView(appointment)}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      View Details
-                    </DropdownMenuItem>
-                  )}
-                </>
-              )}
-              {mode === 'trash' && onRestore && (
-                <DropdownMenuItem 
-                  onClick={() => {
-                    setSelectedAppointment(appointment)
-                    setShowRestoreDialog(true)
-                  }}
-                  disabled={isRestoring}
-                >
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Restore
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      ),
+      render: (appointment: Appointment) => {
+        const status = typeof appointment.status === 'string' ? appointment.status : 'pending'
+        const isPast = isAppointmentDatePast(appointment)
+        const isPending = status === 'pending' && !isPast
+        const isApproved = status === 'approved'
+        const isRejected = status === 'rejected'
+        
+        return (
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {mode === 'active' && (
+                  <>
+                    {/* View - Always available */}
+                    {onView && (
+                      <DropdownMenuItem onClick={() => handleView(appointment)}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        View Details
+                      </DropdownMenuItem>
+                    )}
+                    
+                    {/* For pending status: Show Approve, Reject, and Edit */}
+                    {isPending && (
+                      <>
+                        <DropdownMenuSeparator />
+                        {onApprove && (
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setSelectedAppointment(appointment)
+                              setShowApproveDialog(true)
+                            }}
+                            disabled={isAppointmentLoading(appointment._id)}
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Approve
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            setSelectedAppointment(appointment)
+                            setShowRejectDialog(true)
+                          }}
+                          disabled={isAppointmentLoading(appointment._id)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <X className="mr-2 h-4 w-4" />
+                          Reject
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEdit(appointment)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    
+                    {/* For approved status: Show Edit and Checkout */}
+                    {isApproved && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleEdit(appointment)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        {onCheckOut && !appointment.checkOutTime && (
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setSelectedAppointment(appointment)
+                              setShowCheckOutDialog(true)
+                            }}
+                            disabled={isCheckingOut}
+                          >
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Check Out
+                          </DropdownMenuItem>
+                        )}
+                      </>
+                    )}
+                    
+                    {/* For rejected status: Only View (no other actions) */}
+                    {isRejected && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleEdit(appointment)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    
+                    {/* For other statuses (closed, completed, etc.): Show Edit if applicable */}
+                    {!isPending && !isApproved && !isRejected && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleEdit(appointment)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </>
+                )}
+                {mode === 'trash' && onRestore && (
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      setSelectedAppointment(appointment)
+                      setShowRestoreDialog(true)
+                    }}
+                    disabled={isRestoring}
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Restore
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )
+      },
     })
 
     return baseColumns
@@ -680,9 +771,31 @@ export function AppointmentTable({
           onOpenChange={setShowApproveDialog}
           title="Approve Appointment"
           description={`Are you sure you want to approve appointment ${selectedAppointment?.appointmentId}? This will change the status to approved.`}
-          onConfirm={() => selectedAppointment && handleApprove(selectedAppointment._id)}
-          confirmText={isApproving ? "Approving..." : "Approve"}
+          onConfirm={() => {
+            if (selectedAppointment) {
+              handleApprove(selectedAppointment._id)
+              setShowApproveDialog(false)
+            }
+          }}
+          confirmText={isApprovingMutation || isAppointmentLoading(selectedAppointment?._id || '') ? "Approving..." : "Approve"}
           variant="default"
+        />
+      )}
+
+      {mode === 'active' && (
+        <ConfirmationDialog
+          open={showRejectDialog}
+          onOpenChange={setShowRejectDialog}
+          title="Reject Appointment"
+          description={`Are you sure you want to reject appointment ${selectedAppointment?.appointmentId}? This will change the status to rejected.`}
+          onConfirm={() => {
+            if (selectedAppointment) {
+              handleReject(selectedAppointment._id)
+              setShowRejectDialog(false)
+            }
+          }}
+          confirmText={isRejectingMutation || isAppointmentLoading(selectedAppointment?._id || '') ? "Rejecting..." : "Reject"}
+          variant="destructive"
         />
       )}
 
