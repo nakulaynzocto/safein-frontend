@@ -126,12 +126,25 @@
   html {
     background-color: var(--background);
     min-height: 100%;
+    /* Prevent white screen during page transitions */
+    transition: background-color 0.3s ease-in-out;
   }
   body {
     @apply bg-background text-foreground;
     font-family: "DM Sans", Roboto, sans-serif;
     font-size: 14px;
     color: #161718;
+    background-color: var(--background);
+    min-height: 100vh;
+    /* Prevent white screen during page transitions */
+    transition: background-color 0.3s ease-in-out;
+    /* Ensure background is always visible */
+    overflow-x: hidden;
+  }
+  
+  /* Prevent white flash during page transitions */
+  #__next,
+  [data-nextjs-scroll-focus-boundary] {
     background-color: var(--background);
     min-height: 100vh;
   }

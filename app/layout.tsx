@@ -26,7 +26,14 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/aynzo-logo.png" />
       </head>
-      <body className="font-sans" style={{ backgroundColor: 'var(--background)' }}>
+      <body 
+        className="font-sans" 
+        style={{ 
+          backgroundColor: 'var(--background)',
+          minHeight: '100vh',
+          transition: 'background-color 0.3s ease-in-out'
+        }}
+      >
         {/* Navigation Progress Bar - wrapped in Suspense */}
         <Suspense fallback={null}>
           <NavigationProgress />
@@ -40,7 +47,14 @@ export default function RootLayout({
           <NavigationProgressProvider>
             <Providers>
               <Suspense fallback={
-                <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--background)' }}>
+                <div 
+                  className="min-h-screen flex items-center justify-center" 
+                  style={{ 
+                    backgroundColor: 'var(--background)',
+                    minHeight: '100vh',
+                    width: '100%'
+                  }}
+                >
                   <div className="animate-spin">
                     <div className="h-8 w-8 border-4 border-[#3882a5] border-t-transparent rounded-full"></div>
                   </div>

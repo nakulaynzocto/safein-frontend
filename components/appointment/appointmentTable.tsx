@@ -512,23 +512,23 @@ export function AppointmentTable({
         const isRejected = status === 'rejected'
         
         return (
-          <div className="flex justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {mode === 'active' && (
-                  <>
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {mode === 'active' && (
+                <>
                     {/* View - Always available */}
-                    {onView && (
-                      <DropdownMenuItem onClick={() => handleView(appointment)}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Details
-                      </DropdownMenuItem>
-                    )}
+                  {onView && (
+                    <DropdownMenuItem onClick={() => handleView(appointment)}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      View Details
+                    </DropdownMenuItem>
+                  )}
                     
                     {/* For pending status: Show Approve, Reject, and Edit */}
                     {isPending && (
@@ -608,23 +608,23 @@ export function AppointmentTable({
                         </DropdownMenuItem>
                       </>
                     )}
-                  </>
-                )}
-                {mode === 'trash' && onRestore && (
-                  <DropdownMenuItem 
-                    onClick={() => {
-                      setSelectedAppointment(appointment)
-                      setShowRestoreDialog(true)
-                    }}
-                    disabled={isRestoring}
-                  >
-                    <RotateCcw className="mr-2 h-4 w-4" />
-                    Restore
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                </>
+              )}
+              {mode === 'trash' && onRestore && (
+                <DropdownMenuItem 
+                  onClick={() => {
+                    setSelectedAppointment(appointment)
+                    setShowRestoreDialog(true)
+                  }}
+                  disabled={isRestoring}
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Restore
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         )
       },
     })

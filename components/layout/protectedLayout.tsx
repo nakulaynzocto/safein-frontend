@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { initializeAuth } from "@/store/slices/authSlice"
@@ -21,22 +21,13 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
   const [isClient, setIsClient] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
-  const initializedRef = useRef(false)
 
   const shouldHideSidebar = pathname === routes.privateroute.NOTIFICATIONS
 
   useEffect(() => {
-    // Only initialize once, not on every navigation
-    if (!initializedRef.current) {
-      setIsClient(true)
-      dispatch(initializeAuth())
-      setIsInitialized(true)
-      initializedRef.current = true
-    } else {
-      // Already initialized, just ensure state is set
-      setIsClient(true)
-      setIsInitialized(true)
-    }
+    setIsClient(true)
+    dispatch(initializeAuth())
+    setIsInitialized(true)
   }, [dispatch])
 
   useEffect(() => {
@@ -65,17 +56,13 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
         >
           <div className="container mx-auto p-4 md:p-6">
             {(!isClient || !isInitialized || !isAuthenticated || !token) ? (
-              // Show loading only on very first load, not during navigation
+              // Show content with fade-in to prevent white screen
               <div 
                 className="min-h-[60vh] animate-pulse opacity-50" 
                 style={{ backgroundColor: 'var(--background)' }}
               />
             ) : (
-              // Show content immediately - no delay for navigation
-              <div 
-                className="transition-opacity duration-200 ease-in-out" 
-                style={{ backgroundColor: 'var(--background)' }}
-              >
+              <div className="animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
                 {children}
               </div>
             )}

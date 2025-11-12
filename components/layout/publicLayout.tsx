@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { initializeAuth } from "@/store/slices/authSlice"
@@ -20,20 +20,11 @@ export function PublicLayout({ children }: PublicLayoutProps) {
   
   const [isClient, setIsClient] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
-  const initializedRef = useRef(false)
 
   useEffect(() => {
-    // Only initialize once, not on every navigation
-    if (!initializedRef.current) {
-      setIsClient(true)
-      dispatch(initializeAuth())
-      setIsInitialized(true)
-      initializedRef.current = true
-    } else {
-      // Already initialized, just ensure state is set
-      setIsClient(true)
-      setIsInitialized(true)
-    }
+    setIsClient(true)
+    dispatch(initializeAuth())
+    setIsInitialized(true)
   }, [dispatch])
 
   useEffect(() => {
@@ -53,10 +44,10 @@ export function PublicLayout({ children }: PublicLayoutProps) {
       <Navbar />
       <main 
         className="flex-1 transition-opacity duration-300 ease-in-out" 
-        style={{ backgroundColor: 'var(--background)' }}
+        style={{ backgroundColor: 'var(--background)', minHeight: 'calc(100vh - 200px)' }}
       >
         {(!isClient || !isInitialized) ? (
-          // Show loading state only during very first load
+          // Show loading state only during initial load - keep background color to prevent white screen
           <div 
             className="min-h-[60vh] animate-pulse opacity-50" 
             style={{ backgroundColor: 'var(--background)' }}
@@ -68,11 +59,8 @@ export function PublicLayout({ children }: PublicLayoutProps) {
             style={{ backgroundColor: 'var(--background)' }}
           />
         ) : (
-          // Show content immediately - no delay for navigation
-          <div 
-            className="transition-opacity duration-200 ease-in-out" 
-            style={{ backgroundColor: 'var(--background)' }}
-          >
+          // Show content immediately - PageTransition handles the transition
+          <div style={{ backgroundColor: 'var(--background)', minHeight: '100%' }}>
             {children}
           </div>
         )}
