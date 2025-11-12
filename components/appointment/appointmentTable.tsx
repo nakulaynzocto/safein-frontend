@@ -510,6 +510,11 @@ export function AppointmentTable({
         const isPending = status === 'pending' && !isPast
         const isApproved = status === 'approved'
         const isRejected = status === 'rejected'
+        const isClosed = status === 'closed'
+        const isCompleted = status === 'completed'
+        
+        // For rejected, approved, closed, and completed: Only show View Details
+        const showOnlyView = isRejected || isApproved || isClosed || isCompleted
         
         return (
         <div className="flex justify-end">
@@ -522,7 +527,7 @@ export function AppointmentTable({
             <DropdownMenuContent align="end" className="w-48">
               {mode === 'active' && (
                 <>
-                    {/* View - Always available */}
+                  {/* View - Always available */}
                   {onView && (
                     <DropdownMenuItem onClick={() => handleView(appointment)}>
                       <Eye className="mr-2 h-4 w-4" />
@@ -530,84 +535,45 @@ export function AppointmentTable({
                     </DropdownMenuItem>
                   )}
                     
-                    {/* For pending status: Show Approve, Reject, and Edit */}
-                    {isPending && (
-                      <>
-                        <DropdownMenuSeparator />
-                        {onApprove && (
-                          <DropdownMenuItem 
-                            onClick={() => {
-                              setSelectedAppointment(appointment)
-                              setShowApproveDialog(true)
-                            }}
-                            disabled={isAppointmentLoading(appointment._id)}
-                          >
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Approve
-                          </DropdownMenuItem>
-                        )}
+                  {/* For pending status: Show Approve, Reject, and Edit */}
+                  {isPending && (
+                    <>
+                      <DropdownMenuSeparator />
+                      {onApprove && (
                         <DropdownMenuItem 
                           onClick={() => {
                             setSelectedAppointment(appointment)
-                            setShowRejectDialog(true)
+                            setShowApproveDialog(true)
                           }}
                           disabled={isAppointmentLoading(appointment._id)}
-                          className="text-red-600 focus:text-red-600"
                         >
-                          <X className="mr-2 h-4 w-4" />
-                          Reject
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          Approve
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(appointment)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                      </>
-                    )}
+                      )}
+                      <DropdownMenuItem 
+                        onClick={() => {
+                          setSelectedAppointment(appointment)
+                          setShowRejectDialog(true)
+                        }}
+                        disabled={isAppointmentLoading(appointment._id)}
+                        className="text-red-600 focus:text-red-600"
+                      >
+                        <X className="mr-2 h-4 w-4" />
+                        Reject
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEdit(appointment)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit
+                      </DropdownMenuItem>
+                    </>
+                  )}
                     
-                    {/* For approved status: Show Edit and Checkout */}
-                    {isApproved && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleEdit(appointment)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        {onCheckOut && !appointment.checkOutTime && (
-                          <DropdownMenuItem 
-                            onClick={() => {
-                              setSelectedAppointment(appointment)
-                              setShowCheckOutDialog(true)
-                            }}
-                            disabled={isCheckingOut}
-                          >
-                            <LogOut className="mr-2 h-4 w-4" />
-                            Check Out
-                          </DropdownMenuItem>
-                        )}
-                      </>
-                    )}
-                    
-                    {/* For rejected status: Only View (no other actions) */}
-                    {isRejected && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleEdit(appointment)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    
-                    {/* For other statuses (closed, completed, etc.): Show Edit if applicable */}
-                    {!isPending && !isApproved && !isRejected && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleEdit(appointment)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                      </>
-                    )}
+                  {/* For rejected, approved, closed, and completed: Only View Details (no other actions) */}
+                  {showOnlyView && (
+                    // No additional actions - only View Details is shown above
+                    null
+                  )}
                 </>
               )}
               {mode === 'trash' && onRestore && (
