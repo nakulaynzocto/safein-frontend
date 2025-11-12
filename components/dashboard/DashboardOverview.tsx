@@ -1,13 +1,10 @@
 "use client"
 
-import * as React from "react"
-import { useMemo, useCallback } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { useAppSelector } from "@/store/hooks"
 import { useGetAppointmentsQuery } from "@/store/api/appointmentApi"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
 import { useGetVisitorsQuery } from "@/store/api/visitorApi"
-import { routes } from "@/utils/routes"
 import { DashboardHeader } from "./DashboardHeader"
 import { StatsGrid } from "./statsGrid"
 import { AppointmentsTable } from "./AppointmentsTable"
@@ -17,11 +14,14 @@ import { NewAppointmentModal } from "@/components/appointment/NewAppointmentModa
 import { calculateAppointmentStats, getRecentAppointments, getTodaysAppointments } from "./dashboardUtils"
 import { DashboardSkeleton } from "@/components/common/tableSkeleton"
 
+/**
+ * DashboardOverview component displays the main dashboard with stats, charts, and appointments
+ * Optimized with useMemo and useCallback for performance
+ */
 export function DashboardOverview() {
-  const router = useRouter()
-  const [showAppointmentModal, setShowAppointmentModal] = React.useState(false)
-  const [retryCount, setRetryCount] = React.useState(0)
-  const [loadingTimeout, setLoadingTimeout] = React.useState(false)
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
+  const [loadingTimeout, setLoadingTimeout] = useState(false)
   
   const { data: appointmentsData, isLoading: appointmentsLoading, error: appointmentsError, refetch: refetchAppointments } = useGetAppointmentsQuery(undefined, {
     refetchOnMountOrArgChange: true,
@@ -48,7 +48,7 @@ export function DashboardOverview() {
   const hasData = appointmentsData || employeesData || visitorsData
   const shouldShowSkeleton = isLoading && !hasData && retryCount < 2
   
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoading) {
         setLoadingTimeout(true)

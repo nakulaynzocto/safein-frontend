@@ -1,13 +1,8 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { PageHeader } from "@/components/common/pageHeader"
 import { useAppointmentOperations } from "@/hooks/useAppointmentOperations"
-import { CalendarPlus, Archive } from "lucide-react"
-import { routes } from "@/utils/routes"
 import { AppointmentTable } from "./appointmentTable"
 import { Appointment } from "@/store/api/appointmentApi"
 
@@ -107,25 +102,25 @@ export function AppointmentList() {
     router.push(`/appointment/${appointment._id}`)
   }, [router])
 
-  const handleStatusFilterChange = (value: string) => {
+  const handleStatusFilterChange = useCallback((value: string) => {
     const next = value === "all" ? "" : value
     setInitials(prev => ({ ...prev, status: next, page: 1 }))
     setStatusFilter(next)
     setCurrentPage(1)
-  }
+  }, [setStatusFilter, setCurrentPage])
 
-  const handleEmployeeFilterChange = (value: string) => {
+  const handleEmployeeFilterChange = useCallback((value: string) => {
     const next = value === "all" ? "" : value
     setInitials(prev => ({ ...prev, employeeId: next, page: 1 }))
     setEmployeeFilter(next)
     setCurrentPage(1)
-  }
+  }, [setEmployeeFilter, setCurrentPage])
 
-  const handleSortChange = (field: string) => {
+  const handleSortChange = useCallback((field: string) => {
     setInitials(prev => ({ ...prev, sortBy: field }))
     setSortBy(field)
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-  }
+  }, [setSortBy, sortOrder])
 
   return (
     <div className="space-y-6">

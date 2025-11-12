@@ -1,5 +1,6 @@
 "use client"
 
+import { memo, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataTable } from "@/components/common/dataTable"
 import { StatusBadge } from "@/components/common/statusBadge"
@@ -29,7 +30,11 @@ interface AppointmentsTableProps {
   onPrimaryAction: () => void
 }
 
-export function AppointmentsTable({
+/**
+ * AppointmentsTable component displays appointments in a table format
+ * Optimized with React.memo and useMemo for column definitions
+ */
+export const AppointmentsTable = memo(function AppointmentsTable({
   title,
   description,
   data,
@@ -38,7 +43,7 @@ export function AppointmentsTable({
   emptyData,
   onPrimaryAction,
 }: AppointmentsTableProps) {
-  const columns = [
+  const columns = useMemo(() => [
     {
       key: "visitorName",
       header: "Visitor",
@@ -184,7 +189,7 @@ export function AppointmentsTable({
       sortable: true,
       render: (appointment: any) => <StatusBadge status={appointment.status} />,
     },
-  ]
+  ], [showDateTime])
 
   return (
     <Card className="card-hostinger p-4">
@@ -209,4 +214,4 @@ export function AppointmentsTable({
       </CardContent>
     </Card>
   )
-}
+})

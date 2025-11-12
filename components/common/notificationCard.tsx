@@ -1,5 +1,6 @@
 "use client"
 
+import { memo, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -13,7 +14,16 @@ interface NotificationCardProps {
   isProcessing?: boolean
 }
 
-export function NotificationCard({ appointment, onApprove, onReject, isProcessing = false }: NotificationCardProps) {
+/**
+ * NotificationCard component displays appointment notification with approve/reject actions
+ * Optimized with React.memo to prevent unnecessary re-renders
+ */
+export const NotificationCard = memo(function NotificationCard({ 
+  appointment, 
+  onApprove, 
+  onReject, 
+  isProcessing = false 
+}: NotificationCardProps) {
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
       weekday: 'long',
@@ -23,8 +33,8 @@ export function NotificationCard({ appointment, onApprove, onReject, isProcessin
     })
   }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
+  const statusIcon = useMemo(() => {
+    switch (appointment.status) {
       case 'pending':
         return <Clock className="h-4 w-4 text-yellow-500" />
       case 'approved':
@@ -34,10 +44,10 @@ export function NotificationCard({ appointment, onApprove, onReject, isProcessin
       default:
         return <Clock className="h-4 w-4 text-gray-500" />
     }
-  }
+  }, [appointment.status])
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const statusColor = useMemo(() => {
+    switch (appointment.status) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800'
       case 'approved':
@@ -47,27 +57,40 @@ export function NotificationCard({ appointment, onApprove, onReject, isProcessin
       default:
         return 'bg-gray-100 text-gray-800'
     }
-  }
+  }, [appointment.status])
+
+  const formattedDate = useMemo(() => formatDate(appointment.appointmentDetails.scheduledDate), [appointment.appointmentDetails.scheduledDate])
+  
+  const description = useMemo(() => {
+    if (appointment.status === 'pending') {
+      return "You have a new appointment request. Please review and click Approve or Reject."
+    }
+    if (appointment.status === 'approved') {
+      return "Appointment approved successfully. The visitor has been notified."
+    }
+    return "Appointment rejected. The visitor has been informed."
+  }, [appointment.status])
+
+  const employeeName = useMemo(() => {
+    return typeof appointment.employeeId === 'string' 
+      ? appointment.employeeId 
+      : appointment.employee?.name || 'N/A'
+  }, [appointment.employeeId, appointment.employee?.name])
 
   return (
     <Card className="w-full h-full flex flex-col mx-2 sm:mx-0">
       <CardHeader className="pb-3 px-4 sm:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {getStatusIcon(appointment.status)}
+            {statusIcon}
             <CardTitle className="text-base">Appointment Request</CardTitle>
           </div>
-          <Badge className={getStatusColor(appointment.status)}>
+          <Badge className={statusColor}>
             {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
           </Badge>
         </div>
         <CardDescription className="text-sm mt-2">
-          {appointment.status === 'pending' 
-            ? "You have a new appointment request. Please review and click Approve or Reject."
-            : appointment.status === 'approved'
-            ? "Appointment approved successfully. The visitor has been notified."
-            : "Appointment rejected. The visitor has been informed."
-          }
+          {description}
         </CardDescription>
       </CardHeader>
       
@@ -85,7 +108,7 @@ export function NotificationCard({ appointment, onApprove, onReject, isProcessin
             <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-900">Date</p>
-              <p className="text-sm text-gray-600">{formatDate(appointment.appointmentDetails.scheduledDate)}</p>
+              <p className="text-sm text-gray-600">{formattedDate}</p>
             </div>
           </div>
           
@@ -101,12 +124,7 @@ export function NotificationCard({ appointment, onApprove, onReject, isProcessin
             <User className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-900">Employee</p>
-              <p className="text-sm text-gray-600 truncate">
-                {typeof appointment.employeeId === 'string' 
-                  ? appointment.employeeId 
-                  : appointment.employee?.name || 'N/A'
-                }
-              </p>
+              <p className="text-sm text-gray-600 truncate">{employeeName}</p>
             </div>
           </div>
         </div>
@@ -142,4 +160,4 @@ export function NotificationCard({ appointment, onApprove, onReject, isProcessin
       </CardContent>
     </Card>
   )
-}
+})

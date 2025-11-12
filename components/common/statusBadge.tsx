@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react"
 import { cn } from "@/lib/utils"
 
 interface StatusBadgeProps {
@@ -7,7 +8,7 @@ interface StatusBadgeProps {
   className?: string
 }
 
-const statusConfig = {
+const STATUS_CONFIG = {
   pending: {
     label: "Pending",
     className: "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -28,10 +29,14 @@ const statusConfig = {
     label: "Closed",
     className: "bg-gray-100 text-gray-800 border-gray-200",
   },
-}
+} as const
 
-export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const config = statusConfig[status] || {
+/**
+ * StatusBadge component displays appointment status with color coding
+ * Optimized with React.memo to prevent unnecessary re-renders
+ */
+export const StatusBadge = memo(function StatusBadge({ status, className }: StatusBadgeProps) {
+  const config = STATUS_CONFIG[status] || {
     label: status,
     className: "bg-gray-100 text-gray-800 border-gray-200",
   }
@@ -47,4 +52,4 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
       {config.label}
     </span>
   )
-}
+})
