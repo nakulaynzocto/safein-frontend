@@ -1,6 +1,6 @@
 "use client"
 
-import { ReactNode } from "react"
+import { memo, type ReactNode } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { GlobeIcon } from "lucide-react"
@@ -14,7 +14,11 @@ interface EmptyStateProps {
   className?: string
 }
 
-export function EmptyState({
+/**
+ * EmptyState component displays an empty state message with optional action
+ * Optimized with React.memo to prevent unnecessary re-renders
+ */
+export const EmptyState = memo(function EmptyState({
   title,
   description = "",
   icon,
@@ -45,4 +49,4 @@ export function EmptyState({
       </CardContent>
     </Card>
   )
-}
+})

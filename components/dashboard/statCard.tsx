@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LucideIcon } from "lucide-react"
 
@@ -14,7 +15,11 @@ interface StatCardProps {
   }
 }
 
-export function StatCard({ title, value, icon: Icon, description, trend }: StatCardProps) {
+/**
+ * StatCard component displays a single statistic with icon and optional trend
+ * Optimized with React.memo to prevent unnecessary re-renders
+ */
+export const StatCard = memo(function StatCard({ title, value, icon: Icon, description, trend }: StatCardProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -41,4 +46,4 @@ export function StatCard({ title, value, icon: Icon, description, trend }: StatC
       </CardContent>
     </Card>
   )
-}
+})

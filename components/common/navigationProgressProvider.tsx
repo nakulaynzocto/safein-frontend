@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, type ReactNode } from "react"
 import { usePathname } from "next/navigation"
 import NProgress from "nprogress"
 
-export function NavigationProgressProvider({ children }: { children: React.ReactNode }) {
+export function NavigationProgressProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const previousPathname = useRef(pathname)
 

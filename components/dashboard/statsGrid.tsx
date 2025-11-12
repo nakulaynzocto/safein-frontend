@@ -1,5 +1,6 @@
 "use client"
 
+import { memo, useMemo } from "react"
 import { Calendar, CalendarCheck, CalendarX, CheckCircle } from "lucide-react"
 import { StatCard } from "./statCard"
 import { AppointmentStats } from "./dashboardUtils"
@@ -8,8 +9,12 @@ interface StatsGridProps {
   stats: AppointmentStats
 }
 
-export function StatsGrid({ stats }: StatsGridProps) {
-  const statCards = [
+/**
+ * StatsGrid component displays statistics cards for appointments
+ * Optimized with React.memo and useMemo for performance
+ */
+export const StatsGrid = memo(function StatsGrid({ stats }: StatsGridProps) {
+  const statCards = useMemo(() => [
     {
       title: "Pending",
       value: stats.pendingAppointments,
@@ -34,7 +39,7 @@ export function StatsGrid({ stats }: StatsGridProps) {
       icon: Calendar,
       description: "Scheduled for today",
     },
-  ]
+  ], [stats.pendingAppointments, stats.approvedAppointments, stats.completedAppointments, stats.todaysAppointments])
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -49,4 +54,4 @@ export function StatsGrid({ stats }: StatsGridProps) {
       ))}
     </div>
   )
-}
+})

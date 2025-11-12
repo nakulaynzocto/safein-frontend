@@ -1,13 +1,13 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, type ReactNode } from "react"
 import { usePathname } from "next/navigation"
 
 /**
  * PageTransition component to prevent white screen during navigation
  * Keeps previous content visible until new page is ready
  */
-export function PageTransition({ children }: { children: React.ReactNode }) {
+export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const [displayChildren, setDisplayChildren] = useState(children)
   const [isTransitioning, setIsTransitioning] = useState(false)

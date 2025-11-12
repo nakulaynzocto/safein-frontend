@@ -1,7 +1,6 @@
 "use client"
 
-import React, { type ReactNode } from "react"
-import { useState } from "react"
+import { type ReactNode, useState, useMemo, useCallback, isValidElement } from "react"
 import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -61,30 +60,32 @@ export function DataTable<T extends Record<string, any>>({
     direction: 'asc' | 'desc'
   }>({ key: null, direction: 'asc' })
 
-  const handleSort = (key: string) => {
+  const handleSort = useCallback((key: string) => {
     if (!enableSorting) return
     
     setSortConfig(prev => ({
       key,
       direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
     }))
-  }
+  }, [enableSorting])
 
   // Ensure data is an array, default to empty array if not
-  const safeData = Array.isArray(data) ? data : []
+  const safeData = useMemo(() => Array.isArray(data) ? data : [], [data])
   
-  const sortedData = enableSorting && sortConfig.key 
-    ? [...safeData].sort((a, b) => {
-        const aValue = a[sortConfig.key as keyof T]
-        const bValue = b[sortConfig.key as keyof T]
-        
-        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1
-        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
-        return 0
-      })
-    : safeData
+  const sortedData = useMemo(() => {
+    if (!enableSorting || !sortConfig.key) return safeData
+    
+    return [...safeData].sort((a, b) => {
+      const aValue = a[sortConfig.key as keyof T]
+      const bValue = b[sortConfig.key as keyof T]
+      
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [safeData, enableSorting, sortConfig])
 
-  const getSortIcon = (columnKey: string, column: Column<T>) => {
+  const getSortIcon = useCallback((columnKey: string, column: Column<T>) => {
     if (!enableSorting || !column.sortable) return null
     
     if (sortConfig.key !== columnKey) {
@@ -94,7 +95,7 @@ export function DataTable<T extends Record<string, any>>({
     return sortConfig.direction === 'asc' 
       ? <ArrowUp className="h-4 w-4" />
       : <ArrowDown className="h-4 w-4" />
-  }
+  }, [enableSorting, sortConfig])
 
   // Show loading skeleton
   if (isLoading) {
@@ -173,9 +174,9 @@ export function DataTable<T extends Record<string, any>>({
                   className={cn("px-4 py-3 text-sm text-foreground", column.className)}
                 >
                   {(() => {
-                    const renderSafeValue = (value: any): React.ReactNode => {
+                    const renderSafeValue = (value: any): ReactNode => {
                       if (value === null || value === undefined) return ""
-                      if (React.isValidElement(value)) return value
+                      if (isValidElement(value)) return value
                       if (typeof value === 'object') {
                         // Handle objects by trying to find a meaningful string representation
                         if (Array.isArray(value)) {

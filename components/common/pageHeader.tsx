@@ -1,6 +1,6 @@
 "use client"
 
-import type { ReactNode } from "react"
+import { memo, type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -11,7 +11,11 @@ interface PageHeaderProps {
   className?: string
 }
 
-export function PageHeader({ title, description, children, className }: PageHeaderProps) {
+/**
+ * PageHeader component displays page title and description with optional actions
+ * Optimized with React.memo to prevent unnecessary re-renders
+ */
+export const PageHeader = memo(function PageHeader({ title, description, children, className }: PageHeaderProps) {
   return (
     <Card className={cn("w-full", className)}>
       <CardContent className="flex items-center justify-between">
@@ -28,4 +32,4 @@ export function PageHeader({ title, description, children, className }: PageHead
       </CardContent>
     </Card>
   )
-}
+})
