@@ -29,9 +29,6 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
     }
   }, [isInitialized, isAuthenticated, token, router])
 
-  // Don't return null - always render children to prevent white screen
-  // If not authenticated, router.push will handle redirect
-  // Show minimal placeholder during initialization/auth check
   if (!isClient || !isInitialized || !isAuthenticated || !token) {
     return <div className="min-h-[60vh]" />
   }

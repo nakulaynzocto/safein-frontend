@@ -35,13 +35,11 @@ export function FileUpload({
 
   const handleFileChange = (file: File | null) => {
     if (file) {
-      // Validate file size
       if (file.size > maxSize * 1024 * 1024) {
         showErrorToast(`File size must be less than ${maxSize}MB`)
         return
       }
       
-      // Validate file type if accept is specified
       if (accept && !accept.split(',').some(type => {
         const cleanType = type.trim()
         if (cleanType.startsWith('.')) {

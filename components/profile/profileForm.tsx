@@ -47,7 +47,6 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     defaultValues,
   })
 
-  // Update form when profile changes
   useEffect(() => {
     if (profile && profile.companyName) {
       const newDefaultValues = {
@@ -59,7 +58,6 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     }
   }, [profile, reset])
   
-  // Ensure profile has required data
   if (!profile || !profile.companyName) {
     return (
       <Card>
@@ -73,17 +71,14 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
   const handleFormSubmit = useCallback(async (data: ProfileFormData) => {
     setIsSubmitting(true)
     try {
-      // Create clean, serializable data object - only send companyName and profilePicture
       const cleanData: { companyName: string; profilePicture?: string } = {
         companyName: data.companyName.trim(),
       }
       
-      // Only include profilePicture if it has a value
       if (data.profilePicture && data.profilePicture.trim() !== "") {
         cleanData.profilePicture = data.profilePicture.trim()
       }
       
-      // Ensure no circular references or extra properties
       const payload = JSON.parse(JSON.stringify(cleanData))
       
       await onSubmit(payload as ProfileFormData)
@@ -100,7 +95,6 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     if (!file) return
 
     try {
-      // Upload using RTK Query
       const result = await uploadFile({ file }).unwrap()
       
       setProfileImage(result.url)

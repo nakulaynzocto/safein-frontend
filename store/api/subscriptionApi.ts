@@ -53,19 +53,15 @@ export const subscriptionApi = baseApi.injectEndpoints({
         method: 'GET',
       }),
       transformResponse: (response: any) => {
-        // Handle the standard backend response format
         if (response && response.success && response.data) {
           return { data: response.data };
         }
-        // If response.data already has the structure we need
         if (response && response.data && response.data.plans) {
           return { data: response.data };
         }
-        // Fallback: if response is already in the correct format
         if (response && response.plans) {
           return { data: { plans: response.plans } };
         }
-        // Last resort: return as-is
         return response;
       },
     }),

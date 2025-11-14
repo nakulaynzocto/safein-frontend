@@ -87,7 +87,6 @@ const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
         setIsOpen(false);
     };
 
-    // Normalize date to midnight for proper comparison
     const normalizeDate = (date: Date) => {
         const normalized = new Date(date);
         normalized.setHours(0, 0, 0, 0);
@@ -207,7 +206,6 @@ const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
         }
     };
 
-    // Load initial state from localStorage
     useEffect(() => {
         const raw = localStorage.getItem('dateRange');
         const saved = raw ? JSON.parse(raw) : null;
@@ -243,7 +241,6 @@ const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
                     const isStartOrEndCheck = isStartOrEnd(date);
                     const isInHoverRangeCheck = isInHoverRange(date);
                     
-                    // Build className and inline styles
                     let className = 'date-range-calendar-day';
                     let inlineStyles: React.CSSProperties = { 
                         height: 30, 

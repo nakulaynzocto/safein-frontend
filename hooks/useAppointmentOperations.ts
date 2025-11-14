@@ -26,7 +26,6 @@ export interface UseAppointmentOperationsOptions {
 }
 
 export interface UseAppointmentOperationsReturn {
-  // Data
   appointments: Appointment[]
   pagination: {
     currentPage: number
@@ -35,19 +34,13 @@ export interface UseAppointmentOperationsReturn {
     hasNextPage: boolean
     hasPrevPage: boolean
   } | null
-  
-  // Loading states
   isLoading: boolean
   isDeleting: boolean
   isCheckingOut: boolean
   isApproving: boolean
   isRestoring: boolean
   isCancelling: boolean
-  
-  // Error state
   error: any
-  
-  // Filters and pagination
   searchTerm: string
   statusFilter: string
   employeeFilter: string
@@ -57,8 +50,6 @@ export interface UseAppointmentOperationsReturn {
   pageSize: number
   sortBy: string
   sortOrder: 'asc' | 'desc'
-  
-  // Actions
   setSearchTerm: (term: string) => void
   setStatusFilter: (status: string) => void
   setEmployeeFilter: (employeeId: string) => void
@@ -68,15 +59,11 @@ export interface UseAppointmentOperationsReturn {
   setPageSize: (size: number) => void
   setSortBy: (field: string) => void
   setSortOrder: (order: 'asc' | 'desc') => void
-  
-  // Appointment operations
   deleteAppointment: (appointmentId: string) => Promise<void>
   checkOutAppointment: (appointmentId: string, notes?: string) => Promise<void>
   approveAppointment: (appointmentId: string) => Promise<void>
   restoreAppointment: (appointmentId: string) => Promise<void>
   cancelAppointment: (appointmentId: string) => Promise<void>
-  
-  // Utility functions
   refresh: () => void
   resetFilters: () => void
 }
@@ -94,7 +81,6 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     initialSortOrder = 'desc'
   } = options
 
-  // Local state
   const [searchTerm, setSearchTerm] = useState(initialSearch)
   const [statusFilter, setStatusFilter] = useState(initialStatus)
   const [employeeFilter, setEmployeeFilter] = useState(initialEmployeeId)
@@ -105,15 +91,12 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
   const [sortBy, setSortBy] = useState(initialSortBy)
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(initialSortOrder)
 
-  // Debounce search input to prevent excessive API calls
   const debouncedSearch = useDebounce(searchTerm, 500)
 
-  // Reset to first page when debounced search changes
   useEffect(() => {
     setCurrentPage(1)
   }, [debouncedSearch])
 
-  // API queries
   const queryParams: GetAppointmentsQuery = {
     page: currentPage,
     limit: pageSize,
@@ -139,7 +122,6 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
   const [restoreAppointmentMutation, { isLoading: isRestoring }] = useRestoreAppointmentMutation()
   const [cancelAppointmentMutation, { isLoading: isCancelling }] = useCancelAppointmentMutation()
 
-  // Actions
   const deleteAppointment = async (appointmentId: string): Promise<void> => {
     try {
       await deleteAppointmentMutation(appointmentId).unwrap()
@@ -214,25 +196,21 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     setSortOrder('desc')
   }
 
-  // Handle search with debouncing
   const handleSearchTerm = (term: string) => {
     setSearchTerm(term)
-    setCurrentPage(1) // Reset to first page when searching
+    setCurrentPage(1)
   }
 
-  // Handle status filter
   const handleStatusFilter = (status: string) => {
     setStatusFilter(status)
-    setCurrentPage(1) // Reset to first page when filtering
+    setCurrentPage(1)
   }
 
-  // Handle employee filter
   const handleEmployeeFilter = (employeeId: string) => {
     setEmployeeFilter(employeeId)
-    setCurrentPage(1) // Reset to first page when filtering
+    setCurrentPage(1)
   }
 
-  // Handle date filters
   const handleDateFrom = (date: string) => {
     setDateFrom(date)
     setCurrentPage(1)
@@ -242,8 +220,6 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     setDateTo(date)
     setCurrentPage(1)
   }
-
-  // Handle sort
   const handleSortBy = (field: string) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
@@ -258,22 +234,15 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
   }
 
   return {
-    // Data
     appointments: appointmentData?.appointments || [],
     pagination: appointmentData?.pagination || null,
-    
-    // Loading states
     isLoading,
     isDeleting,
     isCheckingOut,
     isApproving,
     isRestoring,
     isCancelling,
-    
-    // Error state
     error,
-    
-    // Filters and pagination
     searchTerm,
     statusFilter,
     employeeFilter,
@@ -283,8 +252,6 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     pageSize,
     sortBy,
     sortOrder,
-    
-    // Actions
     setSearchTerm: handleSearchTerm,
     setStatusFilter: handleStatusFilter,
     setEmployeeFilter: handleEmployeeFilter,
@@ -294,25 +261,19 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     setPageSize,
     setSortBy: handleSortBy,
     setSortOrder: handleSortOrder,
-    
-    // Appointment operations
     deleteAppointment,
     checkOutAppointment,
     approveAppointment,
     restoreAppointment,
     cancelAppointment,
-    
-    // Utility functions
     refresh,
     resetFilters
   }
 }
 
-// Hook for appointment trash operations
 export function useAppointmentTrashOperations() {
   const [restoreAppointmentMutation, { isLoading: isRestoring }] = useRestoreAppointmentMutation()
 
-  // State for filters and pagination
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [employeeFilter, setEmployeeFilter] = useState('')
@@ -323,7 +284,6 @@ export function useAppointmentTrashOperations() {
   const [sortBy, setSortBy] = useState('createdAt')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
-  // Mock data for trashed appointments (replace with actual API call)
   const appointments: Appointment[] = []
   const pagination = {
     currentPage: 1,
@@ -357,17 +317,13 @@ export function useAppointmentTrashOperations() {
   }
 
   const refresh = () => {
-    // Refresh logic
   }
 
   return {
-    // Data
     appointments,
     pagination,
     isLoading,
     error,
-    
-    // Filters and pagination
     searchTerm,
     statusFilter,
     employeeFilter,
@@ -377,8 +333,6 @@ export function useAppointmentTrashOperations() {
     pageSize,
     sortBy,
     sortOrder,
-    
-    // Actions
     setSearchTerm,
     setStatusFilter,
     setEmployeeFilter,
@@ -388,8 +342,6 @@ export function useAppointmentTrashOperations() {
     setPageSize,
     setSortBy,
     setSortOrder,
-    
-    // Operations
     restoreAppointment,
     restoreMultipleAppointments,
     isRestoring,

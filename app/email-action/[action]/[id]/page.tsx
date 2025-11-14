@@ -12,7 +12,6 @@ export default function EmailActionPage() {
   const router = useRouter()
   const { action, id } = params as { action: string; id: string }
   
-  // Check authentication
   const { isAuthenticated } = useAppSelector((state) => state.auth)
   
   const [approveAppointment, { isLoading: isApproving }] = useApproveAppointmentMutation()
@@ -21,7 +20,6 @@ export default function EmailActionPage() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    // Check if user is authenticated
     if (!isAuthenticated) {
       setStatus('auth-required')
       setMessage('Please log in to perform this action.')

@@ -69,7 +69,6 @@ export function DataTable<T extends Record<string, any>>({
     }))
   }, [enableSorting])
 
-  // Ensure data is an array, default to empty array if not
   const safeData = useMemo(() => Array.isArray(data) ? data : [], [data])
   
   const sortedData = useMemo(() => {
@@ -97,7 +96,6 @@ export function DataTable<T extends Record<string, any>>({
       : <ArrowDown className="h-4 w-4" />
   }, [enableSorting, sortConfig])
 
-  // Show loading skeleton
   if (isLoading) {
     if (showCard) {
       return (
@@ -120,7 +118,6 @@ export function DataTable<T extends Record<string, any>>({
     }
   }
 
-  // Show empty state
   if (!Array.isArray(data) || data.length === 0) {
     const emptyStateProps = emptyData ? {
       title: emptyData.title,
@@ -178,7 +175,6 @@ export function DataTable<T extends Record<string, any>>({
                       if (value === null || value === undefined) return ""
                       if (isValidElement(value)) return value
                       if (typeof value === 'object') {
-                        // Handle objects by trying to find a meaningful string representation
                         if (Array.isArray(value)) {
                           return value.join(', ')
                         }
@@ -187,7 +183,6 @@ export function DataTable<T extends Record<string, any>>({
                         if (value.label) return String(value.label)
                         if (value.id) return String(value.id)
                         if (value._id) return String(value._id)
-                        // Fallback to JSON if no meaningful property found
                         return "[Object]"
                       }
                       return String(value)
@@ -202,7 +197,6 @@ export function DataTable<T extends Record<string, any>>({
                         return renderSafeValue(value)
                       }
                     } catch (error) {
-                      console.error('Error rendering table cell:', error, { column: column.key, item })
                       return "Error"
                     }
                   })()}

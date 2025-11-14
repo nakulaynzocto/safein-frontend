@@ -25,22 +25,16 @@ export function ProfilePageContent() {
 
   const handleProfileUpdate = useCallback(async (data: any) => {
     try {
-      // Explicitly create a new object with ONLY the allowed fields
-      // This prevents any accidental inclusion of extra properties
       const cleanPayload: UpdateProfileRequest = {}
       
-      // Only set companyName if it exists and is a string
       if (data?.companyName && typeof data.companyName === 'string') {
         cleanPayload.companyName = data.companyName.trim()
       }
       
-      // Only set profilePicture if it exists and is a string
       if (data?.profilePicture && typeof data.profilePicture === 'string' && data.profilePicture.trim() !== "") {
         cleanPayload.profilePicture = data.profilePicture.trim()
       }
       
-      // Verify the payload is clean by stringifying and parsing
-      // This will throw an error if there are circular references
       let finalPayload: UpdateProfileRequest
       try {
         finalPayload = JSON.parse(JSON.stringify(cleanPayload))
@@ -48,29 +42,22 @@ export function ProfilePageContent() {
         throw new Error("Failed to prepare profile data: contains invalid data")
       }
       
-      // Ensure we have at least companyName (required field)
       if (!finalPayload.companyName) {
         throw new Error("Company name is required")
       }
       
       const result = await updateProfile(finalPayload).unwrap()
-      // Refetch profile to get updated data
       await refetch()
-      // Update auth state with new user data
       if (result) {
         dispatch(setUser(result))
-        // Also update localStorage
         if (typeof window !== "undefined") {
           localStorage.setItem("user", JSON.stringify(result))
-          // Dispatch custom event to notify other components (like navbar) of profile update
           window.dispatchEvent(new CustomEvent('profileUpdated', { detail: result }))
         }
-        // Force a small delay to ensure state updates propagate
         await new Promise(resolve => setTimeout(resolve, 100))
       }
       setIsEditing(false)
     } catch (err: any) {
-      // Handle RTK Query error structure
       let errorMessage = "Failed to update profile"
       if (err?.data?.message) {
         errorMessage = err.data.message
@@ -96,14 +83,12 @@ export function ProfilePageContent() {
     setIsEditing((prev) => !prev)
   }
   
-  // Account info fields - simple array, no need for memoization
   const accountInfoFields = [
     { label: "Email", value: profile?.email },
     { label: "Company Name", value: profile?.companyName },
     { label: "Role", value: profile?.role },
   ]
   
-  // Account status fields - simple array, no need for memoization
   const accountStatusFields = [
     {
       label: "Email Verified",

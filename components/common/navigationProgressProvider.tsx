@@ -9,7 +9,6 @@ export function NavigationProgressProvider({ children }: { children: ReactNode }
   const previousPathname = useRef(pathname)
 
   useEffect(() => {
-    // Configure NProgress
     NProgress.configure({ 
       showSpinner: false,
       trickleSpeed: 200,
@@ -20,12 +19,9 @@ export function NavigationProgressProvider({ children }: { children: ReactNode }
   }, [])
 
   useEffect(() => {
-    // Detect pathname changes
     if (previousPathname.current !== pathname) {
-      // Pathname changed, navigation is happening
       NProgress.start()
       
-      // Complete progress after a short delay
       const timer = setTimeout(() => {
         NProgress.done()
         previousPathname.current = pathname
@@ -36,11 +32,9 @@ export function NavigationProgressProvider({ children }: { children: ReactNode }
   }, [pathname])
 
   useEffect(() => {
-    // Intercept all link clicks
     const handleClick = (e: MouseEvent) => {
       const target = e.target
       
-      // Check if target is an Element (has closest method)
       if (!(target instanceof Element)) {
         return
       }
@@ -52,12 +46,10 @@ export function NavigationProgressProvider({ children }: { children: ReactNode }
           const url = new URL(anchor.href)
           const currentUrl = new URL(window.location.href)
           
-          // Only show progress for internal navigation
           if (url.origin === currentUrl.origin && url.pathname !== currentUrl.pathname) {
             NProgress.start()
           }
         } catch (error) {
-          // Ignore invalid URLs
         }
       }
     }

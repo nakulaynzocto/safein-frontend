@@ -13,7 +13,6 @@ export function RouteOptimizer() {
   const pathname = usePathname()
 
   useEffect(() => {
-    // Get all private routes dynamically from routes.ts
     const commonRoutes = [
       routes.privateroute.DASHBOARD,
       routes.privateroute.APPOINTMENTLIST,
@@ -23,7 +22,6 @@ export function RouteOptimizer() {
       routes.privateroute.PROFILE,
     ]
 
-    // Prefetch routes in the background
     commonRoutes.forEach((route) => {
       if (route !== pathname) {
         router.prefetch(route)
@@ -31,12 +29,10 @@ export function RouteOptimizer() {
     })
   }, [pathname, router])
 
-  // Prefetch on hover for visible links
   useEffect(() => {
     const handleMouseEnter = (e: MouseEvent) => {
       const target = e.target
       
-      // Check if target is an Element (has closest method)
       if (!(target instanceof Element)) {
         return
       }
@@ -48,17 +44,14 @@ export function RouteOptimizer() {
           const url = new URL(anchor.href)
           const currentUrl = new URL(window.location.href)
           
-          // Only prefetch internal links
           if (url.origin === currentUrl.origin) {
             router.prefetch(url.pathname)
           }
         } catch (error) {
-          // Ignore invalid URLs
         }
       }
     }
 
-    // Add event listeners for all links
     document.addEventListener("mouseenter", handleMouseEnter, true)
 
     return () => {

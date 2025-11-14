@@ -18,7 +18,6 @@ interface TimePickerProps extends React.InputHTMLAttributes<HTMLInputElement> {
 const TimePicker = forwardRef<HTMLInputElement, TimePickerProps>(
   ({ className, label, error, helperText, required = false, minTime, show5MinuteIntervals = true, selectedDate, value, onChange, ...props }, ref) => {
     
-    // Generate time slots in 5-minute intervals starting from current time
     const generateTimeSlots = useMemo(() => {
       if (!show5MinuteIntervals) return []
       
@@ -26,14 +25,12 @@ const TimePicker = forwardRef<HTMLInputElement, TimePickerProps>(
       const now = new Date()
       const today = now.toISOString().split('T')[0]
       
-      // Check if selected date is today
       const isToday = selectedDate === today
       
       let startHour = 0
       let startMinute = 0
       
       if (isToday) {
-        // Start from current time rounded up to next 5-minute interval
         const currentHour = now.getHours()
         const currentMinute = now.getMinutes()
         const roundedMinute = Math.ceil(currentMinute / 5) * 5
@@ -45,17 +42,14 @@ const TimePicker = forwardRef<HTMLInputElement, TimePickerProps>(
           startMinute = 0
         }
         
-        // If we've passed midnight, return empty slots
         if (startHour >= 24) {
           return []
         }
       } else {
-        // For future dates, start from 00:00
         startHour = 0
         startMinute = 0
       }
       
-      // Generate slots from start time to 23:55
       for (let hour = startHour; hour < 24; hour++) {
         const startMin = hour === startHour ? startMinute : 0
         for (let minute = startMin; minute < 60; minute += 5) {
@@ -67,7 +61,6 @@ const TimePicker = forwardRef<HTMLInputElement, TimePickerProps>(
       return slots
     }, [show5MinuteIntervals, selectedDate])
     
-    // If showing 5-minute intervals and slots are available, use select dropdown
     if (show5MinuteIntervals && generateTimeSlots.length > 0) {
       return (
         <div className="space-y-2">
@@ -100,7 +93,6 @@ const TimePicker = forwardRef<HTMLInputElement, TimePickerProps>(
       )
     }
     
-    // Default time input
     return (
       <div className="space-y-2">
         {label && (

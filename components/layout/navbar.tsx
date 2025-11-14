@@ -50,30 +50,24 @@ export function Navbar() {
   const [clientAuthState, setClientAuthState] = useState(false)
   const lastProfileUserRef = useRef<string | null>(null)
 
-  // Fetch latest user profile to get updated profilePicture
   const { data: profileUser, refetch: refetchProfile } = useGetProfileQuery(undefined, {
     skip: !isAuthenticated,
     refetchOnMountOrArgChange: true,
     refetchOnFocus: true,
   })
 
-  // Use profileUser if available, otherwise fall back to authUser
   const user = profileUser || authUser
 
-  // Mark as mounted after hydration to prevent SSR/client mismatch
   useEffect(() => {
     setIsMounted(true)
-    // Check localStorage only on client
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token")
       setClientAuthState(!!token)
     }
   }, [])
 
-  // Update auth state when profile is fetched (only if user data actually changed to prevent infinite loop)
   useEffect(() => {
     if (profileUser && profileUser.id) {
-      // Create a simple hash of user data to detect actual changes
       const userDataHash = JSON.stringify({
         id: profileUser.id,
         profilePicture: profileUser.profilePicture || '',
@@ -82,11 +76,9 @@ export function Navbar() {
         companyName: profileUser.companyName
       })
       
-      // Only update if the data has actually changed
       if (userDataHash !== lastProfileUserRef.current) {
         lastProfileUserRef.current = userDataHash
         dispatch(setUser(profileUser))
-        // Also update localStorage
         if (typeof window !== "undefined") {
           localStorage.setItem("user", JSON.stringify(profileUser))
         }
@@ -94,7 +86,6 @@ export function Navbar() {
     }
   }, [profileUser, dispatch])
 
-  // Listen for storage events and custom events to update profile when changed
   useEffect(() => {
     if (!isMounted) return
     
@@ -103,18 +94,15 @@ export function Navbar() {
         try {
           const updatedUser = JSON.parse(e.newValue)
           if (updatedUser && updatedUser.id) {
-            // Refetch profile to get latest data
             refetchProfile()
           }
         } catch (err) {
-          console.error('Error parsing user data from storage:', err)
         }
       }
     }
     
     const handleProfileUpdate = (e: CustomEvent) => {
       if (e.detail && e.detail.id) {
-        // Immediately refetch profile when profile is updated
         refetchProfile()
       }
     }
@@ -142,42 +130,28 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [isMounted])
 
-  // Only use localStorage check after mounting to prevent hydration mismatch
-  // During SSR, only use Redux state
   const isActuallyAuthenticated = isMounted 
     ? (isAuthenticated || clientAuthState)
     : isAuthenticated
 
   const handleLogout = useCallback(async () => {
     try {
-      // Clear auth state first for immediate UI update
       dispatch(logout())
       
-      // Call logout API (non-blocking)
       logoutMutation().unwrap().catch(() => {
-        // Silently handle API errors - logout should proceed regardless
       })
       
-      // Clear any cached data
       if (typeof window !== "undefined") {
-        // Clear all localStorage items related to auth
         localStorage.removeItem("token")
         localStorage.removeItem("user")
-        
-        // Clear session storage if used
         sessionStorage.clear()
-        
-        // Scroll to top for smooth transition
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }
       
-      // Small delay to ensure state is cleared, then smooth redirect to home
-      // Using replace instead of push to avoid adding to history
       setTimeout(() => {
         router.replace(routes.publicroute.HOME)
       }, 150)
     } catch (error) {
-      // Ensure logout state is set even on error
       dispatch(logout())
       if (typeof window !== "undefined") {
         localStorage.removeItem("token")
@@ -207,7 +181,6 @@ export function Navbar() {
     return "U"
   }
 
-  // During SSR, only check auth state. After mount, include scroll state to prevent hydration mismatch
   const shouldShowWhiteNavbar = isActuallyAuthenticated || (isMounted && isScrolled)
   const linkText = shouldShowWhiteNavbar ? 'text-gray-900' : 'text-white'
   const linkHoverBgClass = shouldShowWhiteNavbar ? 'hover:bg-gray-100/80' : 'hover:bg-white/10'
@@ -226,7 +199,6 @@ export function Navbar() {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
-          {/* Logo and Brand */}
           <div className="flex items-center">
             <Link href={isActuallyAuthenticated ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex-shrink-0" prefetch={true}>
               <img 
@@ -237,7 +209,6 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-2">
             {!isActuallyAuthenticated && (
               <>
@@ -305,15 +276,12 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Right Side Actions */}
           <div className="flex items-center space-x-3">
             {isActuallyAuthenticated ? (
               <>
-                {/* Mobile Menu Button - only for authenticated users */}
                 <div className="md:hidden">
                   <MobileSidebar />
                 </div>
-                {/* Help Button */}
                 <Button variant="ghost" size="sm" asChild className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg">
                   <Link href={routes.publicroute.HELP} prefetch={true}>
                     <HelpCircle className="h-4 w-4" />
@@ -321,7 +289,6 @@ export function Navbar() {
                   </Link>
                 </Button>
 
-                {/* User Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button 
@@ -397,7 +364,6 @@ export function Navbar() {
               </>
             ) : (
               <>
-                {/* Public Actions */}
                 <Button variant="ghost" asChild className={`hidden sm:flex px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkText}`}>
                   <Link href={routes.publicroute.LOGIN} prefetch={true}>Sign in</Link>
                 </Button>
@@ -405,7 +371,6 @@ export function Navbar() {
                   Start Free Trial
                 </Link>
                 
-                {/* Mobile Menu Button - only for unauthenticated users */}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -419,7 +384,6 @@ export function Navbar() {
           </div>
         </div>
 
-         {/* Mobile Navigation Menu */}
          {isMobileMenuOpen && (
            <div className="lg:hidden border-t border-gray-200/30 bg-white/90 backdrop-blur-md shadow-lg">
             <div className="px-4 pt-4 pb-6 space-y-2">

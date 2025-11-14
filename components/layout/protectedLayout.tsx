@@ -36,8 +36,6 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     }
   }, [isInitialized, isAuthenticated, token, router])
 
-  // Don't return null - always show layout to prevent white screen during navigation
-  // If not authenticated, router.replace will handle redirect
   return (
     <div 
       className="h-screen flex flex-col overflow-hidden" 
@@ -56,7 +54,6 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
         >
           <div className="container mx-auto p-4 md:p-6">
             {(!isClient || !isInitialized || !isAuthenticated || !token) ? (
-              // Show content with fade-in to prevent white screen
               <div 
                 className="min-h-[60vh] animate-pulse opacity-50" 
                 style={{ backgroundColor: 'var(--background)' }}

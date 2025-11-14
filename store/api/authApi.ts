@@ -69,7 +69,6 @@ export const authApi = baseApi.injectEndpoints({
           data = response.data
         }
         
-        // Normalize user data in response
         if (data && data.user) {
           data.user = {
             ...data.user,
@@ -82,7 +81,6 @@ export const authApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ['User'],
     }),
-
 
     register: builder.mutation<RegisterResponse, RegisterRequest>({
       query: (userData) => ({
@@ -110,7 +108,6 @@ export const authApi = baseApi.injectEndpoints({
           data = response.data
         }
         
-        // Normalize user data in response
         if (data && data.user) {
           data.user = {
             ...data.user,
@@ -147,7 +144,6 @@ export const authApi = baseApi.injectEndpoints({
           userData = response.data
         }
         
-        // Normalize user data: map _id to id and ensure profilePicture
         if (userData && typeof userData === 'object') {
           return {
             ...userData,
@@ -158,7 +154,7 @@ export const authApi = baseApi.injectEndpoints({
         return userData
       },
       providesTags: ['User'],
-      keepUnusedDataFor: 300, // Keep data for 5 minutes
+      keepUnusedDataFor: 300,
     }),
     logout: builder.mutation<void, void>({
       query: () => ({
@@ -177,7 +173,6 @@ export const authApi = baseApi.injectEndpoints({
           userData = response.data
         }
         
-        // Normalize user data: map _id to id and ensure profilePicture
         if (userData && typeof userData === 'object') {
           const normalized = {
             ...userData,
@@ -189,13 +184,11 @@ export const authApi = baseApi.injectEndpoints({
         return userData
       },
       providesTags: ['User'],
-      keepUnusedDataFor: 300, // Keep data for 5 minutes
+      keepUnusedDataFor: 300,
     }),
-
 
     updateProfile: builder.mutation<User, UpdateProfileRequest>({
       query: (profileData) => {
-        // Ensure only allowed fields are sent - explicitly filter the body
         const cleanBody: UpdateProfileRequest = {}
         
         if (profileData.companyName && typeof profileData.companyName === 'string') {
@@ -206,11 +199,9 @@ export const authApi = baseApi.injectEndpoints({
           cleanBody.profilePicture = profileData.profilePicture
         }
         
-        // Verify it's serializable (no circular refs)
         try {
           JSON.stringify(cleanBody)
         } catch (e) {
-          console.error("Profile data contains circular reference:", e)
           throw new Error("Invalid profile data")
         }
         
@@ -221,7 +212,6 @@ export const authApi = baseApi.injectEndpoints({
         }
       },
       transformResponse: (response: any) => {
-        // Handle API response structure
         let userData = response
         if (response && typeof response === 'object') {
           if (response.success && response.data) {
@@ -229,7 +219,6 @@ export const authApi = baseApi.injectEndpoints({
           }
         }
         
-        // Normalize user data: map _id to id and ensure profilePicture
         if (userData && typeof userData === 'object') {
           const normalized = {
             ...userData,
@@ -241,7 +230,6 @@ export const authApi = baseApi.injectEndpoints({
         return userData
       },
       transformErrorResponse: (response: any) => {
-        // Ensure error response is properly formatted
         if (response?.data) {
           return response.data
         }

@@ -65,7 +65,6 @@ export function MobileDataTable<T extends Record<string, any>>({
     })
   }
 
-  // Show loading skeleton
   if (isLoading) {
     if (showCard) {
       return (
@@ -88,7 +87,6 @@ export function MobileDataTable<T extends Record<string, any>>({
     }
   }
 
-  // Show empty state
   if (!Array.isArray(data) || data.length === 0) {
     const emptyStateProps = emptyData ? {
       title: emptyData.title,

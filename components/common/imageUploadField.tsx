@@ -60,42 +60,31 @@ export function ImageUploadField({
 
   const processFile = async (file: File) => {
     try {
-      // Reset states
       setImageError(false)
       setIsImageLoading(true)
       setUploadSuccess(false)
-      setPreviewImage(null) // Don't show image until API response
+      setPreviewImage(null)
       
-      // Validate file
       validateFile(file)
       
-      // Upload using RTK Query - show loader while uploading
       const result = await uploadFile({ file }).unwrap()
       
-      // Extract URL from the API response structure
-      // RTK Query transformResponse already extracts data, so result is { url, filename, size }
       const uploadedUrl = result?.url
       if (!uploadedUrl) {
         throw new Error('No URL returned from upload')
       }
       
-      // Set the server URL as preview - keep loading state active
       setPreviewImage(uploadedUrl)
       
-      // Use the uploaded URL from server for form value
       setValue(name, uploadedUrl, { shouldValidate: true })
       
-      // Clear loading state immediately after API success
-      // The image will load in the background, handleImageLoad will handle any errors
       setIsImageLoading(false)
       setUploadSuccess(true)
       showSuccessToast("Image uploaded successfully!")
       
-      // Reset success state after 3 seconds
       setTimeout(() => setUploadSuccess(false), 3000)
       
     } catch (error: any) {
-      console.error("Image processing failed:", error)
       setValue(name, "", { shouldValidate: true })
       setPreviewImage(null)
       setUploadSuccess(false)
@@ -104,16 +93,13 @@ export function ImageUploadField({
       
       showErrorToast(error?.data?.message || error?.message || "Failed to upload image")
     }
-    // Note: setIsImageLoading(false) is handled in handleImageLoad when image loads successfully
   }
 
-  // Camera capture functions
   const startCamera = async (facing: 'environment' | 'user' = facingMode) => {
     try {
       setIsCapturing(true)
       setShowCaptureOptions(false)
       
-      // Stop existing stream if any
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop())
       }
@@ -134,7 +120,6 @@ export function ImageUploadField({
         videoRef.current.play()
       }
     } catch (error) {
-      console.error("Error accessing camera:", error)
       showErrorToast("Cannot access camera. Please check permissions.")
       stopCamera()
     }
@@ -159,25 +144,19 @@ export function ImageUploadField({
       const canvas = canvasRef.current
       const context = canvas.getContext('2d')
       
-      // Set canvas dimensions to match video
       canvas.width = video.videoWidth
       canvas.height = video.videoHeight
       
-      // Draw current video frame to canvas
       context?.drawImage(video, 0, 0, canvas.width, canvas.height)
       
-      // Convert canvas to blob and create file
       canvas.toBlob(async (blob) => {
         if (blob) {
-          // Create a file from the blob
           const file = new File([blob], `captured-image-${Date.now()}.jpg`, {
             type: 'image/jpeg'
           })
           
-          // Stop camera
           stopCamera()
           
-          // Process the captured image
           await processFile(file)
         }
       }, 'image/jpeg', 0.9)
@@ -185,7 +164,6 @@ export function ImageUploadField({
   }
 
   const handleImageLoad = () => {
-    // Image loaded successfully
     setIsImageLoading(false)
     setImageError(false)
   }
@@ -194,7 +172,6 @@ export function ImageUploadField({
     setIsImageLoading(false)
     setImageError(true)
     
-    // If there's an error loading the server image, clear the value
     if (previewImage && previewImage.startsWith('http')) {
       setValue(name, "", { shouldValidate: true })
       setPreviewImage(null)
@@ -204,9 +181,7 @@ export function ImageUploadField({
   const handleClearFile = () => {
     setValue(name, "", { shouldValidate: true })
     
-    // Clean up preview URL if it's not the initial URL from props
     if (previewImage && previewImage !== initialUrl) {
-      // Check if it's a blob URL before revoking
       if (previewImage.startsWith('blob:')) {
         URL.revokeObjectURL(previewImage)
       }
@@ -246,7 +221,6 @@ export function ImageUploadField({
     stopCamera()
   }
 
-  // Clean up object URL to prevent memory leaks
   useEffect(() => {
     return () => {
       if (previewImage && previewImage.startsWith('blob:') && previewImage !== initialUrl) {
@@ -256,18 +230,15 @@ export function ImageUploadField({
     }
   }, [previewImage, initialUrl])
 
-  // Reset image error when preview changes
   useEffect(() => {
     setImageError(false)
   }, [previewImage])
 
-  // Update preview when initialUrl changes (for edit mode)
   useEffect(() => {
     if (initialUrl && initialUrl !== previewImage) {
       setPreviewImage(initialUrl)
       setValue(name, initialUrl, { shouldValidate: true })
     } else if (!initialUrl && previewImage && previewImage.startsWith('http')) {
-      // Clear preview if initialUrl is cleared
       setPreviewImage(null)
       setValue(name, '', { shouldValidate: true })
     }
@@ -276,13 +247,11 @@ export function ImageUploadField({
 
   return (
     <div className="space-y-3 p-[3px]">
-      {/* Render label if provided */}
       {label && (
         <Label className="text-sm font-medium text-gray-700">{label}</Label>
       )}
       
       <div className="flex flex-col gap-3">
-        {/* Camera Capture Interface */}
         {isCapturing && (
           <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center p-2 sm:p-4">
             <div className="relative w-full max-w-2xl mx-auto h-full flex flex-col justify-center">
@@ -295,7 +264,6 @@ export function ImageUploadField({
               />
               <canvas ref={canvasRef} className="hidden" />
               
-              {/* Camera Flip Button */}
               <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
                 <Button
                   onClick={switchCamera}
@@ -326,7 +294,6 @@ export function ImageUploadField({
           </div>
         )}
 
-        {/* Capture Options Modal */}
         {showCaptureOptions && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
             <div className="bg-white rounded-xl sm:rounded-lg p-4 sm:p-6 w-full max-w-xs sm:w-80 shadow-2xl">
@@ -367,7 +334,6 @@ export function ImageUploadField({
               }`}
               onClick={!isUploading && !isImageLoading ? triggerFileInput : undefined}
             >
-              {/* Show loader only while uploading (not after API success) */}
               {isUploading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-95 z-10 rounded-xl">
                   <div className="flex flex-col items-center">
@@ -378,7 +344,6 @@ export function ImageUploadField({
                 </div>
               )}
               
-              {/* Show image or error based on state */}
               {imageError && !isUploading ? (
                 <div className="flex flex-col items-center justify-center text-red-500 p-3 sm:p-4">
                   <ImageIcon className="w-7 h-7 sm:w-8 sm:h-8 mb-2" />
@@ -396,7 +361,6 @@ export function ImageUploadField({
                 />
               ) : null}
               
-              {/* Cross icon at top-right to remove image */}
               {!imageError && !isImageLoading && !isUploading && (
                 <button
                   type="button"
@@ -412,7 +376,6 @@ export function ImageUploadField({
                 </button>
               )}
               
-              {/* Success indicator */}
               {uploadSuccess && !imageError && !isImageLoading && !isUploading && (
                 <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 bg-green-500 text-white rounded-full p-1 sm:p-1.5 shadow-md animate-bounce z-20">
                   <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -457,7 +420,6 @@ export function ImageUploadField({
           </div>
         )}
 
-        {/* Hidden file input */}
         <input
           id={fileInputId}
           type="file"

@@ -15,30 +15,21 @@ export function PageTransition({ children }: { children: ReactNode }) {
   const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const childrenRef = useRef(children)
 
-  // Always keep childrenRef updated
   useEffect(() => {
     childrenRef.current = children
   }, [children])
 
   useEffect(() => {
-    // When pathname changes, start transition
     if (previousPathname.current !== pathname) {
-      // Clear any existing timeout
       if (transitionTimeoutRef.current) {
         clearTimeout(transitionTimeoutRef.current)
       }
 
-      // Start transition - keep old content visible
       setIsTransitioning(true)
       
-      // Use requestAnimationFrame to ensure smooth transition
-      // Then update content after a delay to let Next.js render
       const rafId = requestAnimationFrame(() => {
         transitionTimeoutRef.current = setTimeout(() => {
-          // Update to new content
           setDisplayChildren(childrenRef.current)
-          
-          // Small delay before ending transition for smooth fade
           setTimeout(() => {
             setIsTransitioning(false)
             previousPathname.current = pathname
@@ -55,12 +46,10 @@ export function PageTransition({ children }: { children: ReactNode }) {
         }
       }
     } else {
-      // Pathname hasn't changed, just update children immediately
       setDisplayChildren(children)
     }
   }, [pathname])
 
-  // Always sync displayChildren when not transitioning
   useEffect(() => {
     if (!isTransitioning && previousPathname.current === pathname) {
       setDisplayChildren(children)

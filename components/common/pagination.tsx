@@ -33,18 +33,15 @@ export function Pagination({
   const startItem = ((currentPage - 1) * pageSize) + 1
   const endItem = Math.min(currentPage * pageSize, totalItems)
 
-  // Generate page numbers to show
   const getPageNumbers = () => {
     const pages = []
     const maxVisiblePages = 5
     
     if (totalPages <= maxVisiblePages) {
-      // Show all pages if total is small
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i)
       }
     } else {
-      // Show pages around current page
       const start = Math.max(1, currentPage - 2)
       const end = Math.min(totalPages, currentPage + 2)
       

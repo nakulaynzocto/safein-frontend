@@ -26,7 +26,6 @@ const appointmentSchema = yup.object({
   visitorEmail: yup.string().email("Invalid email address").required("Visitor email is required"),
   visitorPhone: yup.string().required("Visitor phone is required"),
   aadhaarNumber: yup.string().optional().matches(/^\d{12}$/, "Aadhaar number must be 12 digits").default(""),
-  // aadhaarPhoto: yup.mixed().optional().default(null),
   employeeId: yup.string().required("Please select an employee"),
   purpose: yup.string().required("Purpose of visit is required"),
   appointmentDate: yup.string().required("Appointment date is required"),
@@ -42,7 +41,6 @@ export function AppointmentForm() {
   const { data: employeesData } = useGetEmployeesQuery()
   const employees = employeesData?.employees || []
   const [generalError, setGeneralError] = useState<string | null>(null)
-  // const [aadhaarPhoto, setAadhaarPhoto] = useState<File | null>(null)
 
   const {
     register,
@@ -58,7 +56,6 @@ export function AppointmentForm() {
       visitorEmail: "",
       visitorPhone: "",
       aadhaarNumber: "",
-      // aadhaarPhoto: undefined,
       employeeId: "",
       purpose: "",
       appointmentDate: "",
@@ -72,7 +69,6 @@ export function AppointmentForm() {
     label: `${emp.name} - ${emp.department}`,
   }))
 
-  // Clear general error when user starts typing
   const clearGeneralError = () => {
     if (generalError) {
       setGeneralError(null)
@@ -121,7 +117,6 @@ export function AppointmentForm() {
     }
   }
 
-  // Show loading state
   if (isLoading) {
     return (
       <div className="w-full max-w-7xl mx-auto space-y-6">

@@ -62,7 +62,6 @@ export function NotificationsStep({
     }
     onComplete(notifications)
     
-    // If onFinalSubmit is provided, call it to trigger the final submission
     if (onFinalSubmit) {
       onFinalSubmit()
     }

@@ -46,7 +46,6 @@ export function AppointmentTrashTable({ onRefresh }: AppointmentTrashTableProps)
       await restoreAppointment(appointmentId)
       onRefresh?.()
     } catch (error) {
-      console.error("Restore error:", error)
     }
   }
 
@@ -56,19 +55,15 @@ export function AppointmentTrashTable({ onRefresh }: AppointmentTrashTableProps)
       setSelectedItems([])
       onRefresh?.()
     } catch (error) {
-      console.error("Bulk restore error:", error)
     }
   }
 
   return (
     <AppointmentTable
-      // Data
       appointments={appointments}
       pagination={pagination || undefined}
       isLoading={isLoading}
       error={error}
-      
-      // Filters and pagination
       searchTerm={searchTerm}
       statusFilter={statusFilter}
       employeeFilter={employeeFilter}
@@ -86,18 +81,13 @@ export function AppointmentTrashTable({ onRefresh }: AppointmentTrashTableProps)
       onPageChange={setCurrentPage}
       onPageSizeChange={setPageSize}
       onSortChange={setSortBy}
-      
-      // Table configuration
       mode="trash"
       showSelection={true}
       selectedItems={selectedItems}
       onSelectionChange={setSelectedItems}
-      
-      // Actions
       onRestore={handleRestore}
       onBulkRestore={handleBulkRestore}
       isRestoring={isRestoring}
-      
       onRefresh={refresh}
       title="Deleted Appointments"
       description="Manage deleted appointments - restore or permanently delete"

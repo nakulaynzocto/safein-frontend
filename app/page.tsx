@@ -32,21 +32,17 @@ export default function HomePage() {
   const [isClient, setIsClient] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
 
-  // Fetch pricing plans dynamically
   const { data: fetchedSubscriptionPlans, isLoading: isLoadingPlans, error: plansError } = useGetAllSubscriptionPlansQuery({ isActive: true })
 
-  // Initialize authentication
   useEffect(() => {
     setIsClient(true)
     dispatch(initializeAuth())
     setIsInitialized(true)
   }, [dispatch])
 
-  // Transform API plans to match display format
   const plans = React.useMemo(() => {
     if (!fetchedSubscriptionPlans) return []
     
-    // Handle different possible response structures (same as pricing page)
     const apiPlans = fetchedSubscriptionPlans?.data?.plans || 
                      (Array.isArray(fetchedSubscriptionPlans) ? fetchedSubscriptionPlans : [])
 
@@ -92,9 +88,6 @@ export default function HomePage() {
     })
   }, [fetchedSubscriptionPlans])
 
-  // Redirect authenticated users to dashboard (handled in PublicLayout)
-
-  // Always render - PublicLayout handles loading states to prevent white screen
   return (
     <PublicLayout>
       {/* Hero Section */}

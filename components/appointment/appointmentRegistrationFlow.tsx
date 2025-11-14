@@ -37,11 +37,9 @@ export function appointmentRegistrationFlow() {
   const [createAppointment, { isLoading }] = useCreateAppointmentMutation()
   const [createVisitor] = useCreateVisitorMutation()
   
-  // Step management
   const [currentStep, setCurrentStep] = useState(1)
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
   
-  // Form data for each step
   const [visitorId, setVisitorId] = useState<string>("")
   const [visitorDetails, setVisitorDetails] = useState<VisitorDetails | null>(null)
   const [accompaniedBy, setAccompaniedBy] = useState<any>(null)
@@ -85,10 +83,8 @@ export function appointmentRegistrationFlow() {
 
   const handleStepComplete = async (stepId: number, data: any, accompaniedByData?: any) => {
     
-    // Store step data first
     switch (stepId) {
       case 1:
-        // For visitor details, create the visitor first and get the ID
         try {
           const createdVisitor = await createVisitor(data).unwrap()
           setVisitorId(createdVisitor._id)
@@ -111,7 +107,6 @@ export function appointmentRegistrationFlow() {
         break
     }
 
-    // Mark step as completed
     setCompletedSteps(prev => {
       if (!prev.includes(stepId)) {
         const newCompleted = [...prev, stepId].sort()
@@ -120,7 +115,6 @@ export function appointmentRegistrationFlow() {
       return prev
     })
 
-    // Move to next step (only if not the last step)
     if (stepId < steps.length) {
       setCurrentStep(stepId + 1)
     }
@@ -238,7 +232,6 @@ export function appointmentRegistrationFlow() {
                     : "border-muted bg-muted/20 hover:bg-muted/30"
                 }`}
                 onClick={() => {
-                  // Allow clicking on completed steps or current step
                   if (step.completed || step.current) {
                     setCurrentStep(step.id)
                   }

@@ -29,7 +29,7 @@ export default function PricingPage() {
 
   const handleSubscribe = async (planId: string, isFreeTrial: boolean = false) => {
     try {
-      const successUrl = isFreeTrial ? `${window.location.origin}${routes.publicroute.DASHBOARD}` : `${window.location.origin}${routes.publicroute.SUBSCRIPTION_SUCCESS}`;
+      const successUrl = isFreeTrial ? `${window.location.origin}${routes.privateroute.DASHBOARD}` : `${window.location.origin}${routes.publicroute.SUBSCRIPTION_SUCCESS}`;
       const cancelUrl = `${window.location.origin}${routes.publicroute.SUBSCRIPTION_CANCEL}`;
 
       const response = await createCheckoutSession({
@@ -42,7 +42,6 @@ export default function PricingPage() {
         router.push(response.url);
       }
     } catch (err) {
-      console.error('Failed to create checkout session:', err);
       toast.error('Failed to initiate checkout. Please try again.');
     }
   };
@@ -67,10 +66,7 @@ export default function PricingPage() {
     );
   }
 
-  // Handle different possible response structures
-  const plans = fetchedSubscriptionPlans?.data?.plans || 
-                fetchedSubscriptionPlans?.plans || 
-                (Array.isArray(fetchedSubscriptionPlans) ? fetchedSubscriptionPlans : []);
+  const plans = fetchedSubscriptionPlans?.data?.plans || [];
 
   return (
     <PublicLayout>
@@ -149,33 +145,33 @@ export default function PricingPage() {
                         <span className="text-sm text-accent">{feature}</span>
                       </div>
                     ))}
-                    {(plan.trialDays > 0) && plan.planType === 'free' && (
+                    {(plan.trialDays && plan.trialDays > 0) && plan.planType === 'free' && (
                       <div className="flex items-center opacity-60">
                         <X className="h-5 w-5 mr-3 text-gray-400" />
                         <span className="text-sm text-gray-400">Limited to {plan.trialDays} days</span>
                       </div>
                     )}
-                    {/* Add other limitations if they exist in the backend model */}
                   </div>
-                  <Button 
-                    className={`w-full ${plan.isPopular ? 'text-white bg-brand' : ''}`} 
-                    variant={plan.isPopular ? 'default' : 'outline'}
-                    asChild={plan.planType === 'free'}
-                    onClick={plan.planType !== 'free' ? () => handleSubscribe(plan._id) : undefined}
-                    disabled={isCreatingSession}
-                  >
-                    {plan.planType === 'free' ? (
-                      <Button onClick={() => handleSubscribe(routes.publicroute.FREE_TRIAL_PLAN_ID, true)} className="w-full text-white bg-brand">
-                        Start Free Trial
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    ) : (
-                      <>
-                        {isCreatingSession ? 'Processing...' : 'Subscribe Now'}
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
+                  {plan.planType === 'free' ? (
+                    <Button 
+                      onClick={() => handleSubscribe(routes.publicroute.FREE_TRIAL_PLAN_ID, true)} 
+                      className="w-full text-white bg-brand"
+                      disabled={isCreatingSession}
+                    >
+                      Start Free Trial
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button 
+                      className={`w-full ${plan.isPopular ? 'text-white bg-brand' : ''}`} 
+                      variant={plan.isPopular ? 'default' : 'outline'}
+                      onClick={() => handleSubscribe(plan._id)}
+                      disabled={isCreatingSession}
+                    >
+                      {isCreatingSession ? 'Processing...' : 'Subscribe Now'}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}

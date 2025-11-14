@@ -16,7 +16,6 @@ import { showSuccessToast, showErrorToast, showInfoToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
 import { NewVisitorModal } from "@/components/visitor/NewVisitorModal"
 
-// ✅ Custom validation: at least one of phone or email required
 const searchSchema = yup.object({
   phone: yup.string().optional(),
   email: yup.string().email("Invalid email address").optional(),
@@ -56,7 +55,6 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
   const handleSearch = async (data: SearchFormData) => {
     setHasSearched(true)
 
-    // Manual validation
     if (!data.phone && !data.email) {
       return
     }
@@ -77,20 +75,18 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
         showInfoToast(result.message)
       }
     } catch (error: any) {
-      console.error("Search failed:", error)
       setSearchResults([])
       showErrorToast(error?.data?.message || "Failed to search visitors")
     }
   }
 
   const handleSelectVisitor = (visitor: Visitor) => {
-    // Convert Visitor to VisitorDetails format
     const visitorDetails: VisitorDetails = {
       name: visitor.name,
       email: visitor.email,
       phone: visitor.phone,
-      company: "", // Visitor interface doesn't have company field
-      purposeOfVisit: "", // Default purpose
+      company: "",
+      purposeOfVisit: "",
     }
     onVisitorFound(visitor._id, visitorDetails)
   }
@@ -101,12 +97,10 @@ export function VisitorSearchStep({ onVisitorFound }: VisitorSearchStepProps) {
 
   const handleVisitorCreated = () => {
     setShowVisitorModal(false)
-    // Optionally refresh search results or show success message
   }
 
   return (
     <div className="space-y-6">
-      {/* Search Form */}
       <Card className="card-hostinger p-4">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg font-medium">

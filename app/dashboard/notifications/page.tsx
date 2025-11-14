@@ -21,7 +21,6 @@ function NotificationsPageContent() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   
-  // API hooks
   const { data: appointmentsData, isLoading, error, refetch } = useGetAppointmentsQuery({
     status: 'pending',
     limit: 50,

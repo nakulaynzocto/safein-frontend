@@ -37,11 +37,9 @@ export function AppointmentBookingFlow() {
   const router = useRouter()
   const [createAppointment, { isLoading }] = useCreateAppointmentMutation()
   
-  // Step management
   const [currentStep, setCurrentStep] = useState(1)
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
   
-  // Form data for each step
   const [visitorId, setVisitorId] = useState<string>("")
   const [visitorDetails, setVisitorDetails] = useState<VisitorDetails | null>(null)
   const [accompaniedBy, setAccompaniedBy] = useState<any>(null)
@@ -97,12 +95,10 @@ export function AppointmentBookingFlow() {
 
   const handleStepComplete = (stepId: number, data: any, accompaniedByData?: any, createdVisitorId?: string) => {
     
-    // Store step data first
     switch (stepId) {
       case 1:
         setVisitorDetails(data)
         setAccompaniedBy(accompaniedByData)
-        // If visitor was created, store the ID
         if (createdVisitorId) {
           setVisitorId(createdVisitorId)
         }
@@ -118,7 +114,6 @@ export function AppointmentBookingFlow() {
         break
     }
 
-    // Mark step as completed
     setCompletedSteps(prev => {
       if (!prev.includes(stepId)) {
         const newCompleted = [...prev, stepId].sort()
@@ -127,7 +122,6 @@ export function AppointmentBookingFlow() {
       return prev
     })
 
-    // Move to next step (only if not the last step)
     if (stepId < steps.length) {
       setCurrentStep(stepId + 1)
     }
@@ -142,8 +136,6 @@ export function AppointmentBookingFlow() {
   const handleNextStep = () => {
     if (currentStep < steps.length && completedSteps.includes(currentStep)) {
       setCurrentStep(currentStep + 1)
-    } else {
-      // Cannot proceed to next step
     }
   }
 
@@ -190,7 +182,6 @@ export function AppointmentBookingFlow() {
     switch (currentStep) {
       case 1:
         if (visitorDetails) {
-          // Show visitor details form for editing/confirming
           return (
             <VisitorDetailsStep
               onComplete={(data: VisitorDetails, accompaniedByData?: any, visitorId?: string) => handleStepComplete(1, data, accompaniedByData, visitorId)}
@@ -198,7 +189,6 @@ export function AppointmentBookingFlow() {
             />
           )
         } else {
-          // Show search form
           return (
             <VisitorSearchStep
               onVisitorFound={handleVisitorFound}
@@ -269,7 +259,6 @@ export function AppointmentBookingFlow() {
                     : "border-muted bg-muted/20 hover:bg-muted/30"
                 }`}
                 onClick={() => {
-                  // Allow clicking on completed steps or current step
                   if (step.completed || step.current) {
                     setCurrentStep(step.id)
                   }

@@ -28,11 +28,9 @@ export const uploadApi = baseApi.injectEndpoints({
         }
       },
       transformResponse: (response: any) => {
-        // Handle ResponseUtil format: {success: true, data: {...}}
         if (response && response.success && response.data) {
           return response.data
         }
-        // If response is already the data object
         if (response && response.url && !response.success) {
           return response
         }

@@ -130,11 +130,9 @@ export function AppointmentTable({
   const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false)
   const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null)
   
-  // API mutations
   const [approveAppointment, { isLoading: isApprovingMutation }] = useApproveAppointmentMutation()
   const [rejectAppointment, { isLoading: isRejectingMutation }] = useRejectAppointmentMutation()
   
-  // Dialog states
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showRestoreDialog, setShowRestoreDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
@@ -143,10 +141,8 @@ export function AppointmentTable({
   const [showRejectDialog, setShowRejectDialog] = useState(false)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   
-  // Loading states for individual appointments
   const [loadingAppointments, setLoadingAppointments] = useState<Set<string>>(new Set())
 
-  // Helper functions for loading state management
   const setAppointmentLoading = (appointmentId: string, isLoading: boolean) => {
     setLoadingAppointments(prev => {
       const newSet = new Set(prev)
@@ -163,7 +159,6 @@ export function AppointmentTable({
     return loadingAppointments.has(appointmentId)
   }
 
-  // Selection handlers
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       onSelectionChange?.(appointments.map(apt => apt._id))
@@ -180,7 +175,6 @@ export function AppointmentTable({
     }
   }
 
-  // Action handlers
   const handleDelete = async () => {
     if (!selectedAppointment || !onDelete) return
     await onDelete(selectedAppointment._id)
@@ -250,18 +244,14 @@ export function AppointmentTable({
     if (!appointment.appointmentDetails?.scheduledDate) return false
     
     try {
-      // Parse the scheduled date - get date part only (ignore timezone)
       const dateStr = appointment.appointmentDetails.scheduledDate
-      const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0] // Get just the date part (YYYY-MM-DD)
+      const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0]
       const [year, month, day] = datePart.split('-').map(Number)
       
-      // Create date object in local timezone at midnight (month is 0-indexed)
       let scheduledDateTime = new Date(year, month - 1, day, 0, 0, 0, 0)
       
-      // Check if date already has time in it
       const hasTimeInDate = dateStr.includes('T') && /T\d{2}:\d{2}/.test(dateStr)
       
-      // If time is separate, combine it with date
       if (appointment.appointmentDetails.scheduledTime && !hasTimeInDate) {
         const timeStr = appointment.appointmentDetails.scheduledTime.trim()
         let hours = 0
@@ -273,7 +263,6 @@ export function AppointmentTable({
           const minutesPart = timeParts[1] ? timeParts[1].trim() : '0'
           
           if (minutesPart.includes('AM') || minutesPart.includes('PM')) {
-            // Handle AM/PM format (e.g., "01:26 AM", "02:30 PM")
             const mins = minutesPart.replace(/[APM]/gi, '').trim()
             minutes = parseInt(mins, 10) || 0
             if (minutesPart.toUpperCase().includes('PM') && hours !== 12) {
@@ -283,12 +272,9 @@ export function AppointmentTable({
               hours = 0
             }
           } else {
-            // Handle 24-hour format (e.g., "01:26", "14:30")
-            // "01:26" means 1:26 AM in 24-hour format
             minutes = parseInt(minutesPart, 10) || 0
           }
         } else {
-          // No colon, just hour (e.g., "1", "1 PM")
           hours = parseInt(timeStr.replace(/[APM]/gi, '').trim(), 10) || 0
           if (timeStr.toUpperCase().includes('PM') && hours !== 12) {
             hours += 12
@@ -298,19 +284,14 @@ export function AppointmentTable({
           }
         }
         
-        // Validate hours and minutes
         if (hours < 0 || hours > 23) hours = 0
         if (minutes < 0 || minutes > 59) minutes = 0
         
-        // Set the time on the scheduled date (in local timezone)
         scheduledDateTime.setHours(hours, minutes, 0, 0)
       } else if (!hasTimeInDate && !appointment.appointmentDetails.scheduledTime) {
-        // If no time specified, set to end of day
         scheduledDateTime.setHours(23, 59, 59, 0)
       } else if (hasTimeInDate) {
-        // Date already has time, parse it and convert UTC to local
         const utcDate = new Date(dateStr)
-        // Extract UTC components and create local date
         scheduledDateTime = new Date(
           utcDate.getUTCFullYear(),
           utcDate.getUTCMonth(),
@@ -321,13 +302,11 @@ export function AppointmentTable({
         )
       }
       
-      // Compare with current time (both in local timezone)
       const now = new Date()
       
       return scheduledDateTime < now
     } catch (error) {
       try {
-        // Fallback: compare dates only
         const datePart = appointment.appointmentDetails.scheduledDate.includes('T') 
           ? appointment.appointmentDetails.scheduledDate.split('T')[0] 
           : appointment.appointmentDetails.scheduledDate.split(' ')[0]
@@ -470,7 +449,6 @@ export function AppointmentTable({
           const status = typeof appointment.status === 'string' ? appointment.status : 'pending'
           const isPast = isAppointmentDatePast(appointment)
           
-          // Show "Closed" status if pending and date is past
           if (isPast && status === 'pending') {
             return <StatusBadge status="closed" />
           }
@@ -513,7 +491,6 @@ export function AppointmentTable({
         const isClosed = status === 'closed'
         const isCompleted = status === 'completed'
         
-        // For rejected, approved, closed, and completed: Only show View Details
         const showOnlyView = isRejected || isApproved || isClosed || isCompleted
         
         return (
@@ -527,7 +504,6 @@ export function AppointmentTable({
             <DropdownMenuContent align="end" className="w-48">
               {mode === 'active' && (
                 <>
-                  {/* View - Always available */}
                   {onView && (
                     <DropdownMenuItem onClick={() => handleView(appointment)}>
                       <Eye className="mr-2 h-4 w-4" />
@@ -535,7 +511,6 @@ export function AppointmentTable({
                     </DropdownMenuItem>
                   )}
                     
-                  {/* For pending status: Show Approve, Reject, and Edit */}
                   {isPending && (
                     <>
                       <DropdownMenuSeparator />
@@ -569,9 +544,7 @@ export function AppointmentTable({
                     </>
                   )}
                     
-                  {/* For rejected, approved, closed, and completed: Only View Details (no other actions) */}
                   {showOnlyView && (
-                    // No additional actions - only View Details is shown above
                     null
                   )}
                 </>

@@ -21,10 +21,8 @@ export const ProfileCard = React.memo(function ProfileCard({ profile }: ProfileC
   const initials = getUserInitials(profile.name, profile.companyName)
   const displayName = profile.companyName || profile.name || "User"
   
-  // Add cache-busting query param only when profilePicture changes
   const profileImageSrc = useMemo(() => {
     if (profile.profilePicture && profile.profilePicture.trim() !== "") {
-      // Use the profilePicture URL itself as part of the cache key
       return `${profile.profilePicture}${profile.profilePicture.includes('?') ? '&' : '?'}v=${profile.profilePicture.length}`
     }
     return null

@@ -15,7 +15,6 @@ interface DatePickerProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
   ({ className, label, error, helperText, minDate, required = false, ...props }, ref) => {
-    // Set default minDate to today if not provided
     const today = new Date().toISOString().split('T')[0]
     const minDateValue = minDate || today
 

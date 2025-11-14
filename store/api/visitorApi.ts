@@ -1,7 +1,6 @@
 import { baseApi } from './baseApi'
 import { createUrlParams } from '@/utils/helpers'
 
-// Visitor interfaces matching the backend types
 export interface Visitor {
   _id: string
   visitorId?: string // Add visitorId field

@@ -29,13 +29,10 @@ export function PublicLayout({ children }: PublicLayoutProps) {
 
   useEffect(() => {
     if (isInitialized && isAuthenticated && token) {
-      // Use replace for smoother navigation
       router.replace(routes.privateroute.DASHBOARD)
     }
   }, [isInitialized, isAuthenticated, token, router])
 
-  // Don't return null - always show layout to prevent white screen during navigation
-  // If authenticated, router.replace will handle redirect
   return (
     <div 
       className="min-h-screen flex flex-col transition-all duration-300" 
@@ -47,19 +44,16 @@ export function PublicLayout({ children }: PublicLayoutProps) {
         style={{ backgroundColor: 'var(--background)', minHeight: 'calc(100vh - 200px)' }}
       >
         {(!isClient || !isInitialized) ? (
-          // Show loading state only during initial load - keep background color to prevent white screen
           <div 
             className="min-h-[60vh] animate-pulse opacity-50" 
             style={{ backgroundColor: 'var(--background)' }}
           />
         ) : isAuthenticated && token ? (
-          // Show loading state while redirecting authenticated users
           <div 
             className="min-h-[60vh] animate-pulse opacity-50" 
             style={{ backgroundColor: 'var(--background)' }}
           />
         ) : (
-          // Show content immediately - PageTransition handles the transition
           <div style={{ backgroundColor: 'var(--background)', minHeight: '100%' }}>
             {children}
           </div>

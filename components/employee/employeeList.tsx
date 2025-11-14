@@ -54,7 +54,6 @@ export function EmployeeList() {
       refetch()
     } catch (error) {
       showErrorToast("Failed to delete employee")
-      console.error("Delete error:", error)
     }
   }
 

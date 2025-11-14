@@ -4,7 +4,6 @@ import { Search } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
 
-// JSON configuration for appointment filters
 const appointmentFilterConfig = {
   statuses: [
     { value: "all", label: "All Status" },
@@ -61,7 +60,6 @@ export function AppointmentFilterSection({
   onDateToChange,
   onSortChange,
 }: AppointmentFilterSectionProps) {
-  // Fetch employees for dynamic listing
   const { data: employeesData } = useGetEmployeesQuery()
   const employees = employeesData?.employees || []
   return (

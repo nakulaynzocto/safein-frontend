@@ -9,7 +9,6 @@ import { Appointment } from "@/store/api/appointmentApi"
 export function AppointmentList() {
   const router = useRouter()
   
-  // Single local state object for initial filters/pagination
   const [initials, setInitials] = useState({
     page: 1,
     limit: 10,
@@ -21,7 +20,6 @@ export function AppointmentList() {
     sortOrder: 'desc' as 'asc' | 'desc',
   })
   
-  // Use the custom hook for appointment operations
   const {
     appointments,
     pagination,
@@ -69,16 +67,13 @@ export function AppointmentList() {
     try {
       await deleteAppointment(appointmentId)
     } catch (error) {
-      console.error("Delete error:", error)
     }
   }, [deleteAppointment])
-
 
   const handleCheckOut = useCallback(async (appointmentId: string, notes?: string) => {
     try {
       await checkOutAppointment(appointmentId, notes)
     } catch (error) {
-      console.error("Check-out error:", error)
     }
   }, [checkOutAppointment])
 
@@ -86,7 +81,6 @@ export function AppointmentList() {
     try {
       await approveAppointment(appointmentId)
     } catch (error) {
-      console.error("Approve error:", error)
     }
   }, [approveAppointment])
 
@@ -94,7 +88,6 @@ export function AppointmentList() {
     try {
       await cancelAppointment(appointmentId)
     } catch (error) {
-      console.error("Cancel error:", error)
     }
   }, [cancelAppointment])
 

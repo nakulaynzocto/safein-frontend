@@ -64,7 +64,6 @@ export function CheckOutDialog({
       await onConfirm(appointment.appointmentId, data.notes || undefined)
       handleClose()
     } catch (error) {
-      console.error("Check-out error:", error)
     } finally {
       setIsSubmitting(false)
     }

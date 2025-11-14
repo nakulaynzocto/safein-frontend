@@ -10,11 +10,9 @@ export default function SubscriptionSuccessPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // In a real application, you would verify the session ID with your backend
-    // and activate the subscription here. For this example, we'll just redirect.
     const timer = setTimeout(() => {
       router.push(routes.privateroute.DASHBOARD);
-    }, 3000); // Redirect to dashboard after 3 seconds
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, [router]);

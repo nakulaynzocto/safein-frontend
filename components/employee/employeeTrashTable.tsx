@@ -52,7 +52,6 @@ export function EmployeeTrashTable({ onRefresh }: EmployeeTrashTableProps) {
       await restoreEmployee(employeeId)
       onRefresh?.()
     } catch (error) {
-      console.error("Restore error:", error)
     }
   }
 
@@ -61,7 +60,6 @@ export function EmployeeTrashTable({ onRefresh }: EmployeeTrashTableProps) {
       await restoreMultipleEmployees(employeeIds)
       onRefresh?.()
     } catch (error) {
-      console.error("Bulk restore error:", error)
     }
   }
 

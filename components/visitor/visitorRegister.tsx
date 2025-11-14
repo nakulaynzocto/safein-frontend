@@ -125,7 +125,6 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
         onComplete(visitorData, result._id)
       }
     } catch (error: any) {
-      console.error("Error creating visitor:", error)
       const errorMessage = error?.data?.message || error?.message || "Failed to register visitor"
       setGeneralError(errorMessage)
       showErrorToast(errorMessage)
