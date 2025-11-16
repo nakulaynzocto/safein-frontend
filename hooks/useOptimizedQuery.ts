@@ -66,7 +66,10 @@ export function useOptimizedQuery<T>(
     if (isNavigating && 'isLoading' in result && 'data' in result) {
       if (result.data && !result.isLoading) {
         result.isLoading = false
-        result.isFetching = false
+        // isFetching may not exist on all query result types
+        if ('isFetching' in result) {
+          (result as any).isFetching = false
+        }
       }
     }
 

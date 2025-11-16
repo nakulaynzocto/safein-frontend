@@ -72,7 +72,17 @@ const TimePicker = forwardRef<HTMLInputElement, TimePickerProps>(
           )}
           <select
             value={value as string || ""}
-            onChange={onChange as React.ChangeEventHandler<HTMLSelectElement>}
+            onChange={(e) => {
+              if (onChange) {
+                // Create a synthetic event compatible with HTMLInputElement
+                const syntheticEvent = {
+                  ...e,
+                  target: e.target as unknown as HTMLInputElement,
+                  currentTarget: e.currentTarget as unknown as HTMLInputElement,
+                } as React.ChangeEvent<HTMLInputElement>
+                onChange(syntheticEvent)
+              }
+            }}
             className={cn(
               "flex h-10 w-full rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
               error && "border-destructive focus:ring-destructive",

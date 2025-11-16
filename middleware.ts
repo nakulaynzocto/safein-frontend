@@ -73,12 +73,33 @@ export async function middleware(request: NextRequest) {
   
   const isAuthenticated = token && token !== 'undefined' && token.length > 10
   
-  if (pathname === routes.publicroute.HELP) {
+  // Always allow these public pages (authenticated or not)
+  const alwaysAllowedPages = [
+    routes.publicroute.PRICING,
+    routes.publicroute.HELP,
+    routes.publicroute.HOME,
+    routes.publicroute.FEATURES,
+    routes.publicroute.CONTACT,
+  ]
+  
+  if (alwaysAllowedPages.some(page => pathname === page || pathname.startsWith(`${page}/`))) {
     return NextResponse.next()
   }
   
+  // Allow authenticated users to access subscription-plan and subscription-success pages
+  const subscriptionPages = [
+    routes.publicroute.SUBSCRIPTION_PLAN,
+    routes.publicroute.SUBSCRIPTION_SUCCESS,
+    routes.publicroute.SUBSCRIPTION_CANCEL,
+  ]
+  
   if (isAuthenticated && isPublicRoute(pathname)) {
-    return NextResponse.redirect(new URL(routes.privateroute.DASHBOARD, request.url))
+    // Allow access to subscription pages
+    if (subscriptionPages.some(page => pathname === page)) {
+      return NextResponse.next()
+    }
+    // For other public routes, redirect to subscription-plan (it will check subscription and redirect to dashboard if active)
+    return NextResponse.redirect(new URL(routes.publicroute.SUBSCRIPTION_PLAN, request.url))
   }
   
   if (!isAuthenticated && isPrivateRoute(pathname)) {

@@ -11,16 +11,7 @@ import { useAppSelector } from "@/store/hooks"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { routes } from "@/utils/routes"
-
-const formatCurrency = (amountInCents: number, currency: string) => {
-  const amountInRupees = amountInCents / 100;
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amountInRupees);
-};
+import { formatCurrency } from "@/utils/helpers"
 
 interface PricingModalProps {
   open: boolean;

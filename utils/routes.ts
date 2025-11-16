@@ -8,8 +8,11 @@ export const routes = {
     PRICING: "/pricing",
     CONTACT: "/contact",
     HELP: "/help",
+    SUBSCRIPTION_PLAN: "/subscription-plan",
     SUBSCRIPTION_SUCCESS: "/subscription/success",
     SUBSCRIPTION_CANCEL: "/subscription/cancel",
+    FORGOT_PASSWORD: "/forgot-password",
+    RESET_PASSWORD: "/reset-password",
     FREE_TRIAL_PLAN_ID: "FREE_TRIAL_PLAN_ID_PLACEHOLDER", // This should be replaced with the actual ID from the backend
   },
 

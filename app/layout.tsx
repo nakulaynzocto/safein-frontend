@@ -9,6 +9,7 @@ import { NavigationProgress } from "@/components/common/navigationProgress"
 import { NavigationProgressProvider } from "@/components/common/navigationProgressProvider"
 import { RouteOptimizer } from "@/components/common/routeOptimizer"
 import { PageTransition } from "@/components/common/pageTransition"
+import { GlobalPageLoader } from "@/components/common/globalPageLoader"
 
 export const metadata: Metadata = {
   title: "SafeIn - SafeIn Appointment System",
@@ -34,6 +35,9 @@ export default function RootLayout({
           transition: 'background-color 0.3s ease-in-out'
         }}
       >
+        {/* Global Page Loader - Shows on all page reloads */}
+        <GlobalPageLoader />
+        
         {/* Navigation Progress Bar - wrapped in Suspense */}
         <Suspense fallback={null}>
           <NavigationProgress />

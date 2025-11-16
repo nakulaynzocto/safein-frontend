@@ -280,7 +280,7 @@ export default function HelpPage() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
             <Button size="lg" className="text-white bg-brand py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto" asChild>
               <Link href={routes.publicroute.REGISTER}>
-                Start Free Trial
+                Start 3 Day Trial
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
             </Button>

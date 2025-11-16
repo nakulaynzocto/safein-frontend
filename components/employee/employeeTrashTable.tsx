@@ -77,7 +77,8 @@ export function EmployeeTrashTable({ onRefresh }: EmployeeTrashTableProps) {
       
 
       searchTerm={searchTerm}
-      departmentFilter={departmentFilter}
+      // departmentFilter prop removed as it's not part of EmployeeTableProps
+      // departmentFilter={departmentFilter}
       currentPage={currentPage}
       pageSize={pageSize}
       sortBy={sortBy}

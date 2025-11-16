@@ -13,16 +13,7 @@ import { PublicLayout } from "@/components/layout/publicLayout"
 import { Calendar, Users, Shield, Clock, CheckCircle, UserCheck, ArrowRight, Building2, Globe, Award, Heart, Zap, Star, Phone, Mail, MapPin, MessageCircle, Download, Play, ChevronRight, Check, BarChart3, X } from "lucide-react"
 import Link from "next/link"
 import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan } from "@/store/api/subscriptionApi"
-
-const formatCurrency = (amountInCents: number, currency: string) => {
-  const amountInRupees = amountInCents / 100;
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: currency.toUpperCase(),
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amountInRupees);
-};
+import { formatCurrency } from "@/utils/helpers"
 
 export default function HomePage() {
   const router = useRouter()
@@ -51,9 +42,7 @@ export default function HomePage() {
         ? formatCurrency(plan.amount / (1 - plan.discountPercentage / 100), plan.currency)
         : null
       
-      const price = plan.planType === 'free' 
-        ? '₹0' 
-        : formatCurrency(plan.amount, plan.currency)
+      const price = formatCurrency(plan.amount, plan.currency)
       
       const period = plan.planType === 'free' 
         ? '3 Days Only'
@@ -88,6 +77,31 @@ export default function HomePage() {
     })
   }, [fetchedSubscriptionPlans])
 
+  const handlePlanSelection = (plan: { _id: string; planType: string }) => {
+    // Send user to subscription-plan page with the selected plan preset
+    const nextPath = `${routes.publicroute.SUBSCRIPTION_PLAN}?planId=${plan._id}`
+
+    if (!isAuthenticated) {
+      // Send user to login first, then back to pricing with plan info
+      const encodedNext = encodeURIComponent(nextPath)
+      router.push(`${routes.publicroute.LOGIN}?next=${encodedNext}`)
+    } else {
+      // Already authenticated – go directly to pricing where checkout will resume
+      router.push(nextPath)
+    }
+  }
+
+  const handleHeroFreeTrialClick = () => {
+    // Hero free trial – send user to subscription-plan (free plan will be selected there)
+    const nextPath = `${routes.publicroute.SUBSCRIPTION_PLAN}`
+    if (!isAuthenticated) {
+      const encodedNext = encodeURIComponent(nextPath)
+      router.push(`${routes.publicroute.LOGIN}?next=${encodedNext}`)
+    } else {
+      router.push(nextPath)
+    }
+  }
+
   return (
     <PublicLayout>
       {/* Hero Section */}
@@ -110,7 +124,7 @@ export default function HomePage() {
                 Start with our free 3-day trial and experience the power of our comprehensive visitor appointment platform.
               </p>
               
-              {/* Free Trial Badge */}
+              {/* 3 Day Trial Badge */}
               <div className="inline-flex items-center gap-2 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6 bg-brand">
                 <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-pulse"></span>
                 FREE 3-Day Trial
@@ -118,9 +132,23 @@ export default function HomePage() {
               
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start w-full sm:w-auto">
-                <Button size="lg" className="text-white font-semibold py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base bg-brand w-full sm:w-auto" asChild>
-                  <Link href={routes.publicroute.REGISTER}>Start Free Trial</Link>
+                {isAuthenticated && token ? (
+                  <Button
+                    size="lg"
+                    className="text-white font-semibold py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base bg-brand w-full sm:w-auto"
+                    asChild
+                  >
+                    <Link href={routes.publicroute.SUBSCRIPTION_PLAN}>My Account</Link>
+                  </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    className="text-white font-semibold py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base bg-brand w-full sm:w-auto"
+                    onClick={handleHeroFreeTrialClick}
+                  >
+                    Start 3 Day Trial
             </Button>
+                )}
                 <Button size="lg" variant="outline" className="text-gray-900 border-white hover:bg-white hover:text-gray-900 py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto" asChild>
                   <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>
             </Button>
@@ -473,12 +501,14 @@ export default function HomePage() {
                   <Button 
                     className={`w-full ${plan.popular ? 'text-white bg-brand' : ''}`} 
                     variant={plan.popular ? 'default' : 'outline'}
-                    asChild
+                    onClick={() => handlePlanSelection(plan)}
                   >
-                    <Link href={routes.publicroute.REGISTER}>
-                      Start Free Trial
+                    {isAuthenticated && token 
+                      ? "My Account" 
+                      : plan.planType === "free" 
+                        ? "Start 3 Day Trial" 
+                        : "Subscribe Now"}
                       <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
                   </Button>
                 </CardContent>
               </Card>

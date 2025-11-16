@@ -1,37 +1,23 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useAppSelector, useAppDispatch } from "@/store/hooks"
-import { initializeAuth } from "@/store/slices/authSlice"
-import { routes } from "@/utils/routes"
 import { Navbar } from "./navbar"
 import { Footer } from "./footer"
+import { useAuthSubscription } from "@/hooks/useAuthSubscription"
 
 interface PublicLayoutProps {
   children: React.ReactNode
 }
 
 export function PublicLayout({ children }: PublicLayoutProps) {
-  const router = useRouter()
-  const dispatch = useAppDispatch()
-  const { isAuthenticated, token } = useAppSelector((state) => state.auth)
-  
-  const [isClient, setIsClient] = useState(false)
-  const [isInitialized, setIsInitialized] = useState(false)
-
-  useEffect(() => {
-    setIsClient(true)
-    dispatch(initializeAuth())
-    setIsInitialized(true)
-  }, [dispatch])
-
-  useEffect(() => {
-    if (isInitialized && isAuthenticated && token) {
-      router.replace(routes.privateroute.DASHBOARD)
-    }
-  }, [isInitialized, isAuthenticated, token, router])
+  // Use centralized hook for all auth and subscription logic
+  const {
+    isClient,
+    isInitialized,
+    isAuthenticated,
+    token,
+    isAllowedPageForAuthenticated,
+  } = useAuthSubscription()
 
   return (
     <div 
@@ -48,12 +34,14 @@ export function PublicLayout({ children }: PublicLayoutProps) {
             className="min-h-[60vh] animate-pulse opacity-50" 
             style={{ backgroundColor: 'var(--background)' }}
           />
-        ) : isAuthenticated && token ? (
+        ) : isAuthenticated && token && !isAllowedPageForAuthenticated ? (
+          // Show loading for authenticated users on pages they shouldn't access (they should be redirected)
           <div 
             className="min-h-[60vh] animate-pulse opacity-50" 
             style={{ backgroundColor: 'var(--background)' }}
           />
         ) : (
+          // Show content for: unauthenticated users OR allowed pages (even if authenticated)
           <div style={{ backgroundColor: 'var(--background)', minHeight: '100%' }}>
             {children}
           </div>

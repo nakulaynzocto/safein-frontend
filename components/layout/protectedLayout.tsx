@@ -1,40 +1,28 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
-import { useRouter, usePathname } from "next/navigation"
-import { useAppSelector, useAppDispatch } from "@/store/hooks"
-import { initializeAuth } from "@/store/slices/authSlice"
-import { routes } from "@/utils/routes"
 import { Navbar } from "./navbar"
 import { Sidebar } from "./sidebar"
+import { useAuthSubscription } from "@/hooks/useAuthSubscription"
 
 interface ProtectedLayoutProps {
   children: React.ReactNode
 }
 
 export function ProtectedLayout({ children }: ProtectedLayoutProps) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const dispatch = useAppDispatch()
-  const { isAuthenticated, token } = useAppSelector((state) => state.auth)
-
-  const [isClient, setIsClient] = useState(false)
-  const [isInitialized, setIsInitialized] = useState(false)
-
-  const shouldHideSidebar = pathname === routes.privateroute.NOTIFICATIONS
-
-  useEffect(() => {
-    setIsClient(true)
-    dispatch(initializeAuth())
-    setIsInitialized(true)
-  }, [dispatch])
-
-  useEffect(() => {
-    if (isInitialized && !isAuthenticated && !token) {
-      router.replace(routes.publicroute.LOGIN)
-    }
-  }, [isInitialized, isAuthenticated, token, router])
+  // Use centralized hook for all auth and subscription logic
+  const {
+    isClient,
+    isInitialized,
+    isAuthenticated,
+    token,
+    shouldShowSidebar,
+    shouldShowContent,
+    isLoading,
+    isCurrentRoutePrivate,
+    isSubscriptionPage,
+    hasActiveSubscription,
+  } = useAuthSubscription()
 
   return (
     <div 
@@ -43,7 +31,8 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     >
       <Navbar />
       <div className="flex flex-1 overflow-hidden">
-        {!shouldHideSidebar && (
+        {/* Only show sidebar if user has active subscription AND token */}
+        {shouldShowSidebar && (
           <div className="hidden md:block flex-shrink-0">
             <Sidebar />
           </div>
@@ -53,15 +42,23 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
           style={{ backgroundColor: 'var(--background)' }}
         >
           <div className="container mx-auto p-4 md:p-6">
-            {(!isClient || !isInitialized || !isAuthenticated || !token) ? (
+            {isLoading ? (
+              // Show loading state
               <div 
                 className="min-h-[60vh] animate-pulse opacity-50" 
                 style={{ backgroundColor: 'var(--background)' }}
               />
-            ) : (
+            ) : shouldShowContent ? (
+              // Show content if conditions are met
               <div className="animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
                 {children}
               </div>
+            ) : (
+              // Default: show loading
+              <div 
+                className="min-h-[60vh] animate-pulse opacity-50" 
+                style={{ backgroundColor: 'var(--background)' }}
+              />
             )}
           </div>
         </main>

@@ -104,7 +104,7 @@ export default function FeaturesPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
               <Button size="lg" className="text-white bg-brand py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto" asChild>
-                <Link href={routes.publicroute.REGISTER}>Start Free Trial</Link>
+                <Link href={routes.publicroute.REGISTER}>Start 3 Day Trial</Link>
               </Button>
               <Button size="lg" variant="outline" className="text-gray-900 border-white hover:bg-white hover:text-gray-900 py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto" asChild>
                 <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>
@@ -199,7 +199,7 @@ export default function FeaturesPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="text-white bg-brand" asChild>
                 <Link href={routes.publicroute.REGISTER}>
-                  Start Free Trial
+                  Start 3 Day Trial
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>

@@ -221,7 +221,7 @@ export function generatePageMetadata(pageKey: keyof typeof pageSEOConfig): Metad
       title: pageConfig.title,
       description: pageConfig.description,
       siteName: baseSEOConfig.siteName,
-      images: pageConfig.openGraph?.images || [
+      images: (pageConfig as any).openGraph?.images || [
         {
           url: "/og-image.jpg",
           width: 1200,
@@ -234,7 +234,7 @@ export function generatePageMetadata(pageKey: keyof typeof pageSEOConfig): Metad
       card: 'summary_large_image',
       title: pageConfig.title,
       description: pageConfig.description,
-      images: pageConfig.twitter?.images || ['/twitter-image.jpg'],
+      images: (pageConfig as any).twitter?.images || ['/twitter-image.jpg'],
       creator: baseSEOConfig.twitterHandle,
     },
     robots: pageConfig.robots,

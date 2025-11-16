@@ -42,6 +42,7 @@ import {
 import { Input } from "../ui/input"
 import { routes } from "@/utils/routes"
 import { NewEmployeeModal } from "./NewEmployeeModal"
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 
 export interface EmployeeTableProps {
   employees: Employee[]
@@ -76,6 +77,7 @@ export interface EmployeeTableProps {
   description?: string
   onDateFromChange?: (value: string) => void
   onDateToChange?: (value: string) => void
+  hasReachedLimit?: boolean
 }
 
 export function EmployeeTable({
@@ -104,6 +106,7 @@ export function EmployeeTable({
   title,
   onDateFromChange,
   onDateToChange,
+  hasReachedLimit = false,
 }: EmployeeTableProps) {
   const router = useRouter()
 
@@ -112,6 +115,7 @@ export function EmployeeTable({
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
 
   const handleSelectAll = (checked: boolean) => {
@@ -342,14 +346,29 @@ export function EmployeeTable({
                   </p>
                 </div>
                 {mode === 'active' && (
-                  <NewEmployeeModal
-                    trigger={
-                      <Button className="mt-4">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Employee
-                      </Button>
-                    }
-                  />
+                  <>
+                    {hasReachedLimit ? (
+                      <>
+                        <Button className="mt-4" onClick={() => setShowUpgradeModal(true)}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Upgrade Plan
+                        </Button>
+                        <UpgradePlanModal
+                          isOpen={showUpgradeModal}
+                          onClose={() => setShowUpgradeModal(false)}
+                        />
+                      </>
+                    ) : (
+                      <NewEmployeeModal
+                        trigger={
+                          <Button className="mt-4">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Employee
+                          </Button>
+                        }
+                      />
+                    )}
+                  </>
                 )}
               </div>
             </div>

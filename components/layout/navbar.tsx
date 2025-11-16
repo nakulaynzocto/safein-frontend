@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/dropdownMenu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
-import { logout, initializeAuth, setUser } from "@/store/slices/authSlice"
+import { logout, setUser } from "@/store/slices/authSlice"
 import { useLogoutMutation, useGetProfileQuery } from "@/store/api/authApi"
 import { routes } from "@/utils/routes"
 import { MobileSidebar } from "./mobileSidebar"
+import { useAuthSubscription } from "@/hooks/useAuthSubscription"
+import { useNavbarScrollStyle } from "@/hooks/useScrollStyle"
 import {
   User,
   LogOut,
@@ -34,6 +36,7 @@ import {
   Phone,
   Mail,
   Bell,
+  CreditCard,
 } from "lucide-react"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { usePathname } from "next/navigation"
@@ -42,13 +45,32 @@ export function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const dispatch = useAppDispatch()
-  const { user: authUser, isAuthenticated } = useAppSelector((state) => state.auth)
+  const { user: authUser } = useAppSelector((state) => state.auth)
   const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
-  const [clientAuthState, setClientAuthState] = useState(false)
   const lastProfileUserRef = useRef<string | null>(null)
+
+  // Use centralized hook for auth and subscription checks
+  const {
+    isAuthenticated,
+    token,
+    shouldShowPrivateNavbar,
+    canAccessDashboard,
+    isSubscriptionPage,
+  } = useAuthSubscription()
+
+  // Use scroll-based styling hook for navbar
+  const {
+    shouldShowWhiteNavbar,
+    linkText,
+    linkHoverBgClass,
+    ctaBtn,
+  } = useNavbarScrollStyle({
+    isAuthenticated: shouldShowPrivateNavbar,
+    isMounted,
+    threshold: 10,
+  })
 
   const { data: profileUser, refetch: refetchProfile } = useGetProfileQuery(undefined, {
     skip: !isAuthenticated,
@@ -60,10 +82,6 @@ export function Navbar() {
 
   useEffect(() => {
     setIsMounted(true)
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token")
-      setClientAuthState(!!token)
-    }
   }, [])
 
   useEffect(() => {
@@ -115,24 +133,21 @@ export function Navbar() {
     }
   }, [isMounted, refetchProfile])
 
-  useEffect(() => {
-    dispatch(initializeAuth())
-  }, [dispatch])
-
-  useEffect(() => {
-    if (!isMounted) return
-    
-    const onScroll = () => {
-      setIsScrolled(window.scrollY > 10)
-    }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [isMounted])
-
-  const isActuallyAuthenticated = isMounted 
-    ? (isAuthenticated || clientAuthState)
-    : isAuthenticated
+  // Determine if user is authenticated (for UI display purposes)
+  // Show private navbar UI only if: hasActiveSubscription AND token exists
+  const isActuallyAuthenticated = shouldShowPrivateNavbar
+  
+  // For hiding Sign In button: check if user is simply logged in (has token)
+  const isLoggedIn = isAuthenticated && token
+  
+  // Show profile dropdown if:
+  // 1. User is on subscription-plan page AND logged in (has token) - show dropdown even if user data is loading
+  // 2. OR user has active subscription (shouldShowPrivateNavbar) AND has user data
+  // Otherwise show "My Account" button
+  const shouldShowProfileDropdown = isAuthenticated && token && (
+    (isSubscriptionPage) || 
+    (shouldShowPrivateNavbar && user)
+  )
 
   const handleLogout = useCallback(async () => {
     try {
@@ -181,12 +196,6 @@ export function Navbar() {
     return "U"
   }
 
-  const shouldShowWhiteNavbar = isActuallyAuthenticated || (isMounted && isScrolled)
-  const linkText = shouldShowWhiteNavbar ? 'text-gray-900' : 'text-white'
-  const linkHoverBgClass = shouldShowWhiteNavbar ? 'hover:bg-gray-100/80' : 'hover:bg-white/10'
-  const ctaBtn = shouldShowWhiteNavbar
-    ? 'bg-brand text-white hover:bg-brand/90'
-    : 'bg-white text-brand-strong hover:bg-white/90'
   const userInitials = user ? getUserInitials(user.name, user.companyName) : "U"
 
   return (
@@ -200,7 +209,7 @@ export function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <div className="flex items-center">
-            <Link href={isActuallyAuthenticated ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex-shrink-0" prefetch={true}>
+            <Link href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex-shrink-0" prefetch={true}>
               <img 
                 src="/aynzo-logo.png" 
                 alt="Aynzo Logo" 
@@ -277,17 +286,21 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-3">
-            {isActuallyAuthenticated ? (
+            {shouldShowProfileDropdown ? (
               <>
-                <div className="md:hidden">
-                  <MobileSidebar />
-                </div>
-                <Button variant="ghost" size="sm" asChild className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg">
-                  <Link href={routes.publicroute.HELP} prefetch={true}>
-                    <HelpCircle className="h-4 w-4" />
-                    Help
-                  </Link>
-                </Button>
+                {isActuallyAuthenticated && (
+                  <>
+                    <div className="md:hidden">
+                      <MobileSidebar />
+                    </div>
+                    <Button variant="ghost" size="sm" asChild className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg">
+                      <Link href={routes.publicroute.HELP} prefetch={true}>
+                        <HelpCircle className="h-4 w-4" />
+                        Help
+                      </Link>
+                    </Button>
+                  </>
+                )}
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -332,24 +345,38 @@ export function Navbar() {
                       </div>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                      <Link href={routes.privateroute.DASHBOARD} className="flex items-center" prefetch={true}>
-                        <BarChart3 className="mr-3 h-4 w-4" />
-                        Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                      <Link href={routes.privateroute.NOTIFICATIONS} className="flex items-center" prefetch={true}>
-                        <Bell className="mr-3 h-4 w-4" />
-                        Notifications
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                      <Link href={routes.privateroute.PROFILE} className="flex items-center" prefetch={true}>
-                        <UserCircle className="mr-3 h-4 w-4" />
-                        Profile
-                      </Link>
-                    </DropdownMenuItem>
+                    {isActuallyAuthenticated ? (
+                      <>
+                        <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                          <Link href={routes.privateroute.DASHBOARD} className="flex items-center" prefetch={true}>
+                            <BarChart3 className="mr-3 h-4 w-4" />
+                            Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                          <Link href={routes.privateroute.NOTIFICATIONS} className="flex items-center" prefetch={true}>
+                            <Bell className="mr-3 h-4 w-4" />
+                            Notifications
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                        <Link href={routes.publicroute.SUBSCRIPTION_PLAN} className="flex items-center" prefetch={true}>
+                          <CreditCard className="mr-3 h-4 w-4" />
+                          Subscription Plan
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    {/* Profile option - Always visible when dropdown is shown */}
+                    {!isSubscriptionPage && (
+                      <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                        <Link href={routes.privateroute.PROFILE} className="flex items-center" prefetch={true}>
+                          <UserCircle className="mr-3 h-4 w-4" />
+                          Profile
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       onClick={handleLogout} 
@@ -364,12 +391,24 @@ export function Navbar() {
               </>
             ) : (
               <>
-                <Button variant="ghost" asChild className={`hidden sm:flex px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkText}`}>
-                  <Link href={routes.publicroute.LOGIN} prefetch={true}>Sign in</Link>
-                </Button>
-                <Link href={routes.publicroute.REGISTER} className={`hidden sm:flex px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`} prefetch={true}>
-                  Start Free Trial
-                </Link>
+                {!isLoggedIn ? (
+                  <>
+                    <Button variant="ghost" asChild className={`hidden sm:flex px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkText}`}>
+                      <Link href={routes.publicroute.LOGIN} prefetch={true}>Sign in</Link>
+                    </Button>
+                    <Link href={routes.publicroute.REGISTER} className={`hidden sm:flex px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`} prefetch={true}>
+                      Start 3 Day Trial
+                    </Link>
+                  </>
+                ) : (
+                  <Link 
+                    href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN} 
+                    className={`hidden sm:flex px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`} 
+                    prefetch={true}
+                  >
+                    My Account
+                  </Link>
+                )}
                 
                 <Button
                   variant="ghost"
@@ -387,7 +426,7 @@ export function Navbar() {
          {isMobileMenuOpen && (
            <div className="lg:hidden border-t border-gray-200/30 bg-white/90 backdrop-blur-md shadow-lg">
             <div className="px-4 pt-4 pb-6 space-y-2">
-              {!isActuallyAuthenticated && (
+              {!isLoggedIn && (
                 <>
                   <Link
                     href={routes.publicroute.HOME}
@@ -430,21 +469,33 @@ export function Navbar() {
                     Help
                   </Link>
                   <div className="pt-4 border-t border-gray-200/50">
-                    <Link
-                      href={routes.publicroute.LOGIN}
-                      className="block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 hover:bg-gray-100/80"
-                      style={{ color: '#161718' }}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Sign in
-                    </Link>
-                    <Link
-                      href={routes.publicroute.REGISTER}
-                      className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Start Free Trial
-                    </Link>
+                    {!isLoggedIn ? (
+                      <>
+                        <Link
+                          href={routes.publicroute.LOGIN}
+                          className="block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 hover:bg-gray-100/80"
+                          style={{ color: '#161718' }}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Sign in
+                        </Link>
+                        <Link
+                          href={routes.publicroute.REGISTER}
+                          className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Start 3 Day Trial
+                        </Link>
+                      </>
+                    ) : (
+                      <Link
+                        href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN}
+                        className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        My Account
+                      </Link>
+                    )}
                   </div>
                 </>
               )}

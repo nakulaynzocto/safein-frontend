@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
@@ -32,6 +32,7 @@ type RegistrationStep = 'form' | 'otp' | 'success'
 
 export function RegisterForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const dispatch = useAppDispatch()
   const [register, { isLoading }] = useRegisterMutation()
   const [verifyOtp, { isLoading: isVerifyingOtp }] = useVerifyOtpMutation()
@@ -93,8 +94,15 @@ export function RegisterForm() {
       
       setUser(result.user)
       setToken(result.token)
+      dispatch(setCredentials({ user: result.user, token: result.token }))
       
       setCurrentStep('success')
+      // After successful verification, honour `next` param if present.
+      // If no next is provided, send the user to the subscription-plan page so they can choose a plan,
+      // instead of giving direct dashboard access without a subscription.
+      const next = searchParams.get('next')
+      const target = next || routes.publicroute.SUBSCRIPTION_PLAN
+      router.push(target)
     } catch (error: any) {
       let errorMessage = "OTP verification failed. Please try again."
       
@@ -147,12 +155,10 @@ export function RegisterForm() {
   }
 
   const handleGoToDashboard = () => {
-    if (user && token) {
-      dispatch(setCredentials({ user, token }))
-      router.push(routes.privateroute.DASHBOARD)
-    } else {
-      handleGoToLogin()
-    }
+    // On success, always send users to subscription-plan to pick/confirm a plan first.
+    const next = searchParams.get('next')
+    const target = next || routes.publicroute.SUBSCRIPTION_PLAN
+    router.push(target)
   }
 
   return (

@@ -100,8 +100,9 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
         name: data.name,
         email: data.email,
         phone: data.phone,
-        company: data.company,
-        designation: data.designation,
+        // company and designation are not part of CreateVisitorRequest
+        // company: data.company,
+        // designation: data.designation,
         address: data.address,
         idProof: {
           type: data.idProof.type,

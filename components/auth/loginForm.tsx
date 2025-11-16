@@ -65,8 +65,14 @@ export function LoginForm() {
       setIsRedirecting(true)
       
       await new Promise(resolve => setTimeout(resolve, 200))
-      
-      window.location.replace(routes.privateroute.DASHBOARD)
+
+      // According to documentation: After login, check subscription status
+      // If no active subscription, redirect to subscription-plan page
+      // If we were sent here with a `next` param, use that; otherwise go to subscription-plan
+      const next = searchParams.get('next')
+      // Always redirect to subscription-plan first (it will check subscription and redirect to dashboard if active)
+      const target = next || routes.publicroute.SUBSCRIPTION_PLAN
+      window.location.replace(target)
     } catch (error: any) {
       const message = error?.data?.message || error?.message || "Login failed"
       setErrorMessage(message)
@@ -115,6 +121,15 @@ export function LoginForm() {
             required
             {...register("password")}
           />
+
+          <div className="flex items-center justify-end">
+            <Link
+              href={routes.publicroute.FORGOT_PASSWORD}
+              className="text-sm text-primary hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Signing in..." : "Sign In"}

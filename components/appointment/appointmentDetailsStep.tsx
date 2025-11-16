@@ -110,7 +110,7 @@ export function AppointmentDetailsStep({
       scheduledTime: data.scheduledTime,
       duration: data.duration,
       meetingRoom: data.meetingRoom,
-      notes: data.notes,
+      notes: data.notes || '',
     }
     onComplete(appointmentDetails)
   }

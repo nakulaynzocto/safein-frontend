@@ -5,11 +5,12 @@ import { routes } from '../../utils/routes'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4010/api/v1'
 
+// Custom base query with 401 handling and timeout
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   try {
     const result = await fetchBaseQuery({
       baseUrl: API_BASE_URL,
-      timeout: 10000,
+      timeout: 10000, // 10 second timeout
       prepareHeaders: (headers, { getState }) => {
         const state = getState() as RootState
         const token = state.auth.token
@@ -18,7 +19,9 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
           headers.set('Authorization', `Bearer ${token}`)
         }
         
+        // Only set JSON content type if body is not FormData
         if (args.body instanceof FormData) {
+          // Don't set Content-Type for FormData - let browser set it with boundary
         } else {
           headers.set('Content-Type', 'application/json')
         }
@@ -27,6 +30,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
       },
     })(args, api, extraOptions)
 
+    // Handle 401 errors
     if (result.error && result.error.status === 401) {
       const isLoginRequest = args && args.url && args.url.includes(routes.publicroute.LOGIN)
       
@@ -45,19 +49,27 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
       }
     }
 
+    // Handle 404 and other errors
     if (result.error && (result.error.status === 404 || result.error.status === 500)) {
+      // Don't show error toast for expected 404s or specific endpoints
       const shouldSilence = args?.url?.includes('/stats') || 
                            args?.url?.includes('/trashed')
       
       if (!shouldSilence && typeof window !== 'undefined') {
+        // Check if it's a JSON parse error (usually means HTML was returned)
         const errorData = result.error.data as any
         if (errorData && typeof errorData === 'string' && errorData.includes('<!DOCTYPE')) {
+          console.error('API returned HTML instead of JSON - backend route may be missing')
         }
       }
     }
 
     return result
   } catch (error: any) {
+    // Handle network errors
+    if (typeof window !== 'undefined') {
+      console.error('Network error:', error)
+    }
     return {
       error: {
         status: 'FETCH_ERROR' as const,
@@ -70,7 +82,11 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['User', 'Employee', 'Appointment', 'Company', 'Visitor', 'Subscription'],
+  // NOTE:
+  // - 'User' + 'Subscription' are used by userSubscriptionApi
+  // - Other tags are used by their respective feature APIs
+  // If you introduce new cache tags, add them here.
+  tagTypes: ['User', 'Employee', 'Appointment', 'Company', 'Visitor', 'Subscription', 'SubscriptionPlan'],
   endpoints: () => ({}),
   refetchOnMountOrArgChange: false,
   refetchOnFocus: false,

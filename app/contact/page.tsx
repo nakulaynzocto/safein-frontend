@@ -271,7 +271,7 @@ export default function ContactPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-white bg-brand" asChild>
               <Link href={routes.publicroute.REGISTER}>
-                Start Free Trial
+                Start 3 Day Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>

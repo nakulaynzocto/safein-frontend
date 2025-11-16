@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +11,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { routes } from "@/utils/routes";
+import {
+  useGetAllSubscriptionPlansQuery,
+  ISubscriptionPlan,
+} from "@/store/api/subscriptionApi";
+import { useCreateCheckoutSessionMutation } from "@/store/api/subscriptionApi";
+import { toast } from "sonner";
+import { formatCurrency } from "@/utils/helpers";
 
 interface UpgradePlanModalProps {
   isOpen: boolean;
@@ -18,28 +26,137 @@ interface UpgradePlanModalProps {
 
 export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
   const router = useRouter();
+  const { data, isLoading } = useGetAllSubscriptionPlansQuery({ isActive: true });
+  const [createCheckoutSession, { isLoading: isCreating }] =
+    useCreateCheckoutSessionMutation();
 
-  const handleUpgradeClick = () => {
-    router.push(routes.privateroute.PRICING); // Redirect to pricing page
-    onClose();
+  const plans: ISubscriptionPlan[] = data?.data?.plans || [];
+  const paidPlans = plans.filter((plan) => plan.planType !== "free");
+
+  // Selected plan in the modal. Start with no selection, then auto-select first paid plan when data loads.
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // If we have paid plans and nothing selected yet, auto-select the first plan
+    if (!isLoading && paidPlans.length > 0 && !selectedPlanId) {
+      setSelectedPlanId(paidPlans[0]._id);
+    }
+  }, [isLoading, paidPlans, selectedPlanId]);
+
+  const startingPriceText =
+    paidPlans.length > 0
+      ? formatCurrency(
+          Math.min(...paidPlans.map((p) => p.amount)),
+          paidPlans[0].currency || "INR"
+        )
+      : null;
+
+  const handleUpgradeClick = async () => {
+    try {
+      if (!selectedPlanId) {
+        toast.error("Please select a plan to continue.");
+        return;
+      }
+
+      const successUrl = `${window.location.origin}${routes.publicroute.SUBSCRIPTION_SUCCESS}`;
+      const cancelUrl = `${window.location.origin}${routes.publicroute.SUBSCRIPTION_CANCEL}`;
+
+      const response = await createCheckoutSession({
+        planId: selectedPlanId,
+        successUrl,
+        cancelUrl,
+      }).unwrap();
+
+      if (response.url) {
+        router.push(response.url);
+        onClose();
+      } else {
+        toast.error("Failed to start checkout. Please try again.");
+      }
+    } catch (error: any) {
+      const message =
+        error?.data?.message || error?.message || "Failed to start checkout.";
+      toast.error(message);
+    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Upgrade Your Plan</DialogTitle>
-          <DialogDescription>
-            You&apos;ve reached your trial limit. Please upgrade to a paid plan to continue using full features.
+          <DialogTitle className="text-xl font-semibold">
+            Upgrade Your Plan
+          </DialogTitle>
+          <DialogDescription className="text-sm">
+            You&apos;ve reached your trial limit. Please upgrade to a paid plan to
+            continue using full features.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex justify-end space-x-2 mt-4">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleUpgradeClick}>
-            Upgrade Now
-          </Button>
+
+        <div className="mt-4 space-y-4">
+          {!isLoading && startingPriceText && (
+            <div className="rounded-md bg-blue-50 border border-blue-100 px-4 py-3 text-sm text-blue-800">
+              Paid plans start from{" "}
+              <span className="font-semibold">{startingPriceText}</span>.
+            </div>
+          )}
+
+          {!isLoading && paidPlans.length > 0 && (
+            <div className="space-y-2 max-h-56 overflow-y-auto border rounded-md px-3 py-2 bg-slate-50">
+              {paidPlans.map((plan) => {
+                const isSelected = selectedPlanId === plan._id;
+                return (
+                  <button
+                    key={plan._id}
+                    type="button"
+                    onClick={() => setSelectedPlanId(plan._id)}
+                    className={`w-full flex items-center justify-between text-xs sm:text-sm py-2 px-2 rounded-md text-left transition ${
+                      isSelected
+                        ? "bg-brand/10 border border-brand text-slate-900"
+                        : "hover:bg-slate-100 border border-transparent text-slate-800"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`h-3 w-3 rounded-full border ${
+                          isSelected
+                            ? "border-brand bg-brand"
+                            : "border-slate-400 bg-white"
+                        }`}
+                      />
+                      <div className="font-medium">
+                        {plan.name}
+                        {plan.isPopular && (
+                          <span className="ml-2 rounded-full bg-brand/10 text-brand px-2 py-0.5 text-[10px] uppercase tracking-wide">
+                            Popular
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-slate-700">
+                      {formatCurrency(plan.amount, plan.currency)}{" "}
+                      <span className="text-[11px] text-slate-500">
+                        / {plan.planType.replace("ly", "")}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {isLoading && (
+            <div className="text-xs text-muted-foreground">Loading plans...</div>
+          )}
+
+          <div className="flex justify-end space-x-2 pt-2">
+            <Button variant="outline" onClick={onClose} disabled={isCreating}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpgradeClick} disabled={isCreating || !selectedPlanId}>
+              {isCreating ? "Processing..." : "Upgrade Now"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

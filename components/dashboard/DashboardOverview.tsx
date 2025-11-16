@@ -13,6 +13,8 @@ import { DashboardCharts } from "./dashboardCharts"
 import { NewAppointmentModal } from "@/components/appointment/NewAppointmentModal"
 import { calculateAppointmentStats, getRecentAppointments, getTodaysAppointments } from "./dashboardUtils"
 import { DashboardSkeleton } from "@/components/common/tableSkeleton"
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
+import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 
 /**
  * DashboardOverview component displays the main dashboard with stats, charts, and appointments
@@ -20,6 +22,7 @@ import { DashboardSkeleton } from "@/components/common/tableSkeleton"
  */
 export function DashboardOverview() {
   const [showAppointmentModal, setShowAppointmentModal] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   const [loadingTimeout, setLoadingTimeout] = useState(false)
   
@@ -40,7 +43,8 @@ export function DashboardOverview() {
     refetchOnFocus: false,
     skip: false,
   })
-  
+
+  const { data: trialStatus } = useGetTrialLimitsStatusQuery()
   const { user } = useAppSelector((state) => state.auth)
 
   const isLoading = appointmentsLoading || employeesLoading || visitorsLoading
@@ -67,9 +71,16 @@ export function DashboardOverview() {
   const recentAppointments = useMemo(() => getRecentAppointments(appointments, 5), [appointments])
   const todaysAppointments = useMemo(() => getTodaysAppointments(appointments), [appointments])
 
+  const hasReachedAppointmentLimit =
+    trialStatus?.data?.isTrial && trialStatus.data.limits.appointments.reached
+
   const handleScheduleAppointment = useCallback(() => {
-    setShowAppointmentModal(true)
-  }, [])
+    if (hasReachedAppointmentLimit) {
+      setShowUpgradeModal(true)
+    } else {
+      setShowAppointmentModal(true)
+    }
+  }, [hasReachedAppointmentLimit])
 
   const handleAppointmentCreated = useCallback(() => {
     setShowAppointmentModal(false)
@@ -161,7 +172,7 @@ export function DashboardOverview() {
           emptyData={{
             title: "No appointments today",
             description: "No appointments are scheduled for today.",
-            primaryActionLabel: "Schedule Appointment"
+            primaryActionLabel: hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment",
           }}
           onPrimaryAction={handleScheduleAppointment}
         />
@@ -176,7 +187,7 @@ export function DashboardOverview() {
           emptyData={{
             title: "No recent appointments",
             description: "No recent appointment activities found.",
-            primaryActionLabel: "Schedule Appointment"
+            primaryActionLabel: hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment",
           }}
           onPrimaryAction={handleScheduleAppointment}
         />
@@ -191,6 +202,10 @@ export function DashboardOverview() {
         onOpenChange={setShowAppointmentModal}
         onSuccess={handleAppointmentCreated}
         triggerButton={<div />} // Hidden trigger since we control the modal programmatically
+      />
+      <UpgradePlanModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
       />
     </div>
   )

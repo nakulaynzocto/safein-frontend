@@ -48,9 +48,34 @@ export function MobileAppointmentForm() {
 
   const onSubmit = async (data: AppointmentFormData) => {
     try {
-      const appointmentData = {
-        ...data,
-        checkInTime: new Date().toISOString() // Auto-set check-in time on creation
+      // Convert simple form data to CreateAppointmentRequest format
+      const appointmentData: any = {
+        appointmentId: `APT-${Date.now()}`,
+        employeeId: data.employeeId,
+        visitorId: '', // Will be created by backend if not provided
+        appointmentDetails: {
+          purpose: data.purpose,
+          scheduledDate: data.appointmentDate,
+          scheduledTime: data.appointmentTime,
+          duration: 60, // Default 60 minutes
+          meetingRoom: '',
+          notes: data.notes || '',
+        },
+        securityDetails: {
+          badgeIssued: false,
+          badgeNumber: '',
+          securityClearance: false,
+          securityNotes: '',
+        },
+        notifications: {
+          email: true,
+          sms: true,
+        },
+        checkInTime: new Date().toISOString(),
+        // Legacy fields for backward compatibility
+        visitorName: data.visitorName,
+        visitorEmail: data.visitorEmail,
+        visitorPhone: data.visitorPhone,
       }
       await createAppointment(appointmentData).unwrap()
       showSuccessToast("Appointment created successfully!")

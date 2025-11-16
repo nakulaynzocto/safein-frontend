@@ -14,7 +14,7 @@ interface FooterSection {
 interface SocialLink {
   name: string
   href: string
-  icon: JSX.Element
+  icon: React.ReactElement
 }
 
 const footerSections: FooterSection[] = [

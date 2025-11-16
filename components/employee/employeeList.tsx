@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/common/pageHeader"
 import { EmployeeTable } from "./employeeTable"
 import { NewEmployeeModal } from "./NewEmployeeModal"
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
+import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 import { useGetEmployeesQuery, useDeleteEmployeeMutation } from "@/store/api/employeeApi"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { UserPlus, Archive } from "lucide-react"
@@ -29,6 +31,8 @@ export function EmployeeList() {
   })
   
   const debouncedSearch = useDebounce(search, 500)
+  const { data: trialStatus, refetch: refetchTrialLimits } = useGetTrialLimitsStatusQuery()
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   
   const { data: employeeData, isLoading, error, refetch } = useGetEmployeesQuery({
     page: currentPage,
@@ -47,11 +51,14 @@ export function EmployeeList() {
   const employees = employeeData?.employees || []
   const pagination = employeeData?.pagination
 
+  const hasReachedEmployeeLimit = trialStatus?.data?.isTrial && trialStatus.data.limits.employees.reached
+
   const handleDelete = async (employeeId: string) => {
     try {
       await deleteEmployee(employeeId).unwrap()
       showSuccessToast("Employee deleted successfully")
       refetch()
+      refetchTrialLimits()
     } catch (error) {
       showErrorToast("Failed to delete employee")
     }
@@ -89,21 +96,36 @@ export function EmployeeList() {
   }
 
   const handleEmployeeCreated = () => {
+    refetch()
+    refetchTrialLimits()
   }
 
   return (
     <div className="space-y-6">
       <PageHeader title="Employees" description="Manage your organization's employees">
         <div className="flex gap-2">
-          <NewEmployeeModal 
-            onSuccess={handleEmployeeCreated}
-            trigger={
-              <Button>
+          {hasReachedEmployeeLimit ? (
+            <>
+              <Button onClick={() => setShowUpgradeModal(true)}>
                 <UserPlus className="mr-2 h-4 w-4" />
-                Add Employee
+                Upgrade to Add More
               </Button>
-            }
-          />
+              <UpgradePlanModal 
+                isOpen={showUpgradeModal}
+                onClose={() => setShowUpgradeModal(false)}
+              />
+            </>
+          ) : (
+            <NewEmployeeModal 
+              onSuccess={handleEmployeeCreated}
+              trigger={
+                <Button>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Add Employee
+                </Button>
+              }
+            />
+          )}
         </div>
       </PageHeader>
 
@@ -119,6 +141,7 @@ export function EmployeeList() {
         onPageChange={setCurrentPage}
         onPageSizeChange={setPageSize}
         mode="active"
+        hasReachedLimit={hasReachedEmployeeLimit}
         showSelection={false}
         onDateFromChange={(v) => { setDateRange(prev => ({ ...prev, startDate: v || null })); setCurrentPage(1) }}
         onDateToChange={(v) => { setDateRange(prev => ({ ...prev, endDate: v || null })); setCurrentPage(1) }}

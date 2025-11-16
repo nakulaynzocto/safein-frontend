@@ -7,42 +7,24 @@ import { Check, X, ArrowRight, Star } from "lucide-react"
 import { routes } from "@/utils/routes"
 import { PublicLayout } from "@/components/layout/publicLayout"
 import Link from "next/link"
-import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan, useCreateCheckoutSessionMutation } from "@/store/api/subscriptionApi"
+import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan } from "@/store/api/subscriptionApi"
 import { toast } from "sonner"
-import { useEffect } from "react"
-import { useRouter } from 'next/navigation'
-
-const formatCurrency = (amountInCents: number, currency: string) => {
-  const amountInRupees = amountInCents / 100;
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amountInRupees);
-};
+import { useRouter } from "next/navigation"
+import { useAppSelector } from "@/store/hooks"
+import { formatCurrency } from "@/utils/helpers"
 
 export default function PricingPage() {
   const { data: fetchedSubscriptionPlans, isLoading, error } = useGetAllSubscriptionPlansQuery({ isActive: true });
-  const [createCheckoutSession, { isLoading: isCreatingSession }] = useCreateCheckoutSessionMutation();
   const router = useRouter();
-
-  const handleSubscribe = async (planId: string, isFreeTrial: boolean = false) => {
-    try {
-      const successUrl = isFreeTrial ? `${window.location.origin}${routes.privateroute.DASHBOARD}` : `${window.location.origin}${routes.publicroute.SUBSCRIPTION_SUCCESS}`;
-      const cancelUrl = `${window.location.origin}${routes.publicroute.SUBSCRIPTION_CANCEL}`;
-
-      const response = await createCheckoutSession({
-        planId,
-        successUrl,
-        cancelUrl,
-      }).unwrap();
-
-      if (response.url) {
-        router.push(response.url);
-      }
-    } catch (err) {
-      toast.error('Failed to initiate checkout. Please try again.');
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const handleGoToSubscriptionPlan = (plan: ISubscriptionPlan) => {
+    const nextPath = `${routes.publicroute.SUBSCRIPTION_PLAN}?planId=${plan._id}`;
+    if (!isAuthenticated) {
+      toast.error("Please login to continue");
+      const encodedNext = encodeURIComponent(nextPath);
+      router.push(`${routes.publicroute.LOGIN}?next=${encodedNext}`);
+    } else {
+      router.push(nextPath);
     }
   };
 
@@ -117,11 +99,11 @@ export default function PricingPage() {
                       </div>
                     ) : null}
                     <span className="text-4xl font-bold text-brand-strong">
-                      {plan.planType === 'free' ? '₹0' : formatCurrency(plan.amount, plan.currency)}
+                      {formatCurrency(plan.amount, plan.currency)}
                     </span>
                     <div className="mt-2">
                       <span className="text-gray-500">
-                        {plan.planType === 'free' ? '3 Days Only' : `per ${plan.planType.replace('ly', '')}`}
+                        {plan.planType === 'free' ? 'Card verification - 3 Days Trial (Non-refundable)' : `per ${plan.planType.replace('ly', '')}`}
                       </span>
                     </div>
                     {plan.monthlyEquivalent && plan.planType !== 'free' && (
@@ -152,26 +134,14 @@ export default function PricingPage() {
                       </div>
                     )}
                   </div>
-                  {plan.planType === 'free' ? (
-                    <Button 
-                      onClick={() => handleSubscribe(routes.publicroute.FREE_TRIAL_PLAN_ID, true)} 
-                      className="w-full text-white bg-brand"
-                      disabled={isCreatingSession}
-                    >
-                      Start Free Trial
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <Button 
-                      className={`w-full ${plan.isPopular ? 'text-white bg-brand' : ''}`} 
-                      variant={plan.isPopular ? 'default' : 'outline'}
-                      onClick={() => handleSubscribe(plan._id)}
-                      disabled={isCreatingSession}
-                    >
-                      {isCreatingSession ? 'Processing...' : 'Subscribe Now'}
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  )}
+                  <Button 
+                    className={`w-full ${plan.planType === 'free' || plan.isPopular ? 'text-white bg-brand' : ''}`} 
+                    variant={plan.planType === 'free' || plan.isPopular ? 'default' : 'outline'}
+                    onClick={() => handleGoToSubscriptionPlan(plan)}
+                  >
+                    {plan.planType === 'free' ? 'Start 3 Day Trial' : 'Subscribe Now'}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -283,7 +253,7 @@ export default function PricingPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-white bg-brand" asChild>
               <Link href={routes.publicroute.REGISTER}>
-                Start Free Trial
+                Start 3 Day Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>

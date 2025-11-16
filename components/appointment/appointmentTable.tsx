@@ -47,6 +47,8 @@ import {
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
 import { NewAppointmentModal } from "./NewAppointmentModal"
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
+import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 
 export interface AppointmentTableProps {
   appointments: Appointment[]
@@ -129,6 +131,8 @@ export function AppointmentTable({
   const router = useRouter()
   const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false)
   const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null)
+  const { data: trialStatus, refetch: refetchTrialLimits } = useGetTrialLimitsStatusQuery()
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   
   const [approveAppointment, { isLoading: isApprovingMutation }] = useApproveAppointmentMutation()
   const [rejectAppointment, { isLoading: isRejectingMutation }] = useRejectAppointmentMutation()
@@ -158,6 +162,11 @@ export function AppointmentTable({
   const isAppointmentLoading = (appointmentId: string) => {
     return loadingAppointments.has(appointmentId)
   }
+
+  const hasReachedAppointmentLimit = trialStatus?.data?.isTrial && trialStatus.data.limits.appointments.reached
+  const emptyPrimaryLabel = mode === 'active'
+    ? hasReachedAppointmentLimit ? 'Upgrade Plan' : 'Schedule Appointment'
+    : undefined
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -326,6 +335,7 @@ export function AppointmentTable({
     setEditingAppointmentId(null)
     setShowNewAppointmentModal(false)
     onRefresh?.()
+    refetchTrialLimits()
   }
 
   const getColumns = () => {
@@ -488,10 +498,11 @@ export function AppointmentTable({
         const isPending = status === 'pending' && !isPast
         const isApproved = status === 'approved'
         const isRejected = status === 'rejected'
-        const isClosed = status === 'closed'
+        // Removed 'closed' status check as it's not a valid status type
+        // const isClosed = status === 'closed'
         const isCompleted = status === 'completed'
         
-        const showOnlyView = isRejected || isApproved || isClosed || isCompleted
+        const showOnlyView = isRejected || isApproved || isCompleted
         
         return (
         <div className="flex justify-end">
@@ -615,16 +626,35 @@ export function AppointmentTable({
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
               {mode === 'active' && (
-                <NewAppointmentModal 
-                  onSuccess={handleAppointmentCreated}
-                  triggerButton={
-                    <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                      <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-                      <span className="hidden sm:inline">Schedule Appointment</span>
-                      <span className="sm:hidden">Schedule</span>
-                    </Button>
-                  }
-                />
+                <>
+                  {hasReachedAppointmentLimit ? (
+                    <>
+                      <Button 
+                        className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                        onClick={() => setShowUpgradeModal(true)}
+                      >
+                        <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Upgrade to Schedule More</span>
+                        <span className="sm:hidden">Upgrade</span>
+                      </Button>
+                      <UpgradePlanModal 
+                        isOpen={showUpgradeModal}
+                        onClose={() => setShowUpgradeModal(false)}
+                      />
+                    </>
+                  ) : (
+                    <NewAppointmentModal 
+                      onSuccess={handleAppointmentCreated}
+                      triggerButton={
+                        <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                          <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="hidden sm:inline">Schedule Appointment</span>
+                          <span className="sm:hidden">Schedule</span>
+                        </Button>
+                      }
+                    />
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -654,10 +684,14 @@ export function AppointmentTable({
               description: mode === 'active'
                 ? 'Get started by scheduling your first appointment.'
                 : 'Trash is empty.',
-              primaryActionLabel: mode === 'active' ? 'Schedule Appointment' : undefined,
+              primaryActionLabel: emptyPrimaryLabel,
             }}
             onPrimaryAction={mode === 'active' ? () => {
-              setShowNewAppointmentModal(true)
+              if (hasReachedAppointmentLimit) {
+                setShowUpgradeModal(true)
+              } else {
+                setShowNewAppointmentModal(true)
+              }
             } : undefined}
             showCard={false}
             isLoading={isLoading}

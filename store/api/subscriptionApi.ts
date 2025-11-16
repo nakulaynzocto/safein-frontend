@@ -45,6 +45,11 @@ interface CreateCheckoutSessionResponse {
   sessionId?: string;
 }
 
+interface CreateFreeVerificationSessionRequest {
+  successUrl: string;
+  cancelUrl: string;
+}
+
 export const subscriptionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllSubscriptionPlans: builder.query<GetAllSubscriptionPlansResponse, GetAllSubscriptionPlansQueryArgs>({
@@ -78,6 +83,9 @@ export const subscriptionApi = baseApi.injectEndpoints({
         return response;
       },
     }),
+
+    // Removed createFreeVerificationSession - now using single createCheckoutSession route
+    // Free plans are handled automatically by the backend based on planType
   }),
 });
 

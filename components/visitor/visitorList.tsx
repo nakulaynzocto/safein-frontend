@@ -41,6 +41,8 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { useRouter } from "next/navigation"
 import { routes } from "@/utils/routes"
 import { NewVisitorModal } from "./NewVisitorModal"
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
+import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 import { VisitorDetailsDialog } from "./visitorDetailsDialog"
 
 const createColumns = (
@@ -169,6 +171,8 @@ export function VisitorList() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null)
+  const { data: trialStatus, refetch: refetchTrialLimits } = useGetTrialLimitsStatusQuery()
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   
   const debouncedSearchTerm = useDebounce(searchTerm, 500)
   
@@ -207,6 +211,7 @@ export function VisitorList() {
       setShowDeleteDialog(false)
       setSelectedVisitor(null)
       refetch()
+      refetchTrialLimits()
     } catch (error: any) {
       showErrorToast(error?.data?.message || "Failed to delete visitor")
     }
@@ -219,6 +224,7 @@ export function VisitorList() {
   const handleVisitorCreated = () => {
     setShowVisitorModal(false)
     refetch()
+    refetchTrialLimits()
   }
 
   const handleOpenVisitorModal = () => {
@@ -241,8 +247,16 @@ export function VisitorList() {
 
   const visitors = visitorsData?.visitors || []
   const pagination = visitorsData?.pagination
-  
   const columns = createColumns(handleDeleteClick, handleEditVisitor, handleViewVisitor)
+  const hasReachedVisitorLimit = trialStatus?.data?.isTrial && trialStatus.data.limits.visitors.reached
+  const emptyPrimaryLabel = hasReachedVisitorLimit ? 'Upgrade Plan' : 'Register Visitor'
+  const handlePrimaryAction = () => {
+    if (hasReachedVisitorLimit) {
+      setShowUpgradeModal(true)
+    } else {
+      handleOpenVisitorModal()
+    }
+  }
 
   if (error) {
     const errorMessage = (error as any)?.data?.message || 
@@ -292,15 +306,31 @@ export function VisitorList() {
               >
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
-              <NewVisitorModal 
-                onSuccess={handleVisitorCreated}
-                trigger={
-                  <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-2">
+              {hasReachedVisitorLimit ? (
+                <>
+                  <Button 
+                    className="btn-hostinger btn-hostinger-primary flex items-center gap-2"
+                    onClick={() => setShowUpgradeModal(true)}
+                  >
                     <Plus className="h-4 w-4" />
-                    Add Visitor
+                    Upgrade to Add More
                   </Button>
-                }
-              />
+                  <UpgradePlanModal
+                    isOpen={showUpgradeModal}
+                    onClose={() => setShowUpgradeModal(false)}
+                  />
+                </>
+              ) : (
+                <NewVisitorModal 
+                  onSuccess={handleVisitorCreated}
+                  trigger={
+                    <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-2">
+                      <Plus className="h-4 w-4" />
+                      Add Visitor
+                    </Button>
+                  }
+                />
+              )}
             </div>
           </div>
         </CardHeader>
@@ -328,9 +358,9 @@ export function VisitorList() {
             emptyData={{
               title: 'No visitors yet',
               description: 'Register your first visitor to get started.',
-              primaryActionLabel: 'Register Visitor',
+              primaryActionLabel: emptyPrimaryLabel,
             }}
-            onPrimaryAction={handleOpenVisitorModal}
+            onPrimaryAction={handlePrimaryAction}
             showCard={false}
             isLoading={isLoading}
           />
