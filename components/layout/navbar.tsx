@@ -210,9 +210,12 @@ export function Navbar() {
         <div className="flex h-20 items-center justify-between">
           <div className="flex items-center">
             <Link href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex-shrink-0" prefetch={true}>
-              <img 
+              <Image 
                 src="/aynzo-logo.png" 
                 alt="Aynzo Logo" 
+                width={120}
+                height={48}
+                priority
                 className={`h-12 w-auto ${shouldShowWhiteNavbar ? '' : 'filter brightness-0 invert'}`}
               />
             </Link>

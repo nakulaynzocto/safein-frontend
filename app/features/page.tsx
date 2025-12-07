@@ -20,6 +20,7 @@ import {
 import { routes } from "@/utils/routes"
 import { PublicLayout } from "@/components/layout/publicLayout"
 import Link from "next/link"
+import { PageSEOHead } from "@/components/seo/pageSEOHead"
 
 export default function FeaturesPage() {
   const features = [
@@ -90,8 +91,22 @@ export default function FeaturesPage() {
   ]
 
   return (
-    <PublicLayout>
-      <div className="min-h-screen bg-white">
+    <>
+      <PageSEOHead
+        title="Features"
+        description="Discover SafeIn's powerful features for visitor management, appointment scheduling, and security analytics."
+        keywords={[
+          "features",
+          "capabilities",
+          "visitor management features",
+          "appointment system features",
+          "SafeIn features",
+          "security features"
+        ]}
+        url="https://safein.aynzo.com/features"
+      />
+      <PublicLayout>
+        <div className="min-h-screen bg-white">
         {/* Hero Section */}
         <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-hero-gradient">
           <div className="container mx-auto text-center">
@@ -211,5 +226,6 @@ export default function FeaturesPage() {
         </section>
       </div>
     </PublicLayout>
+    </>
   )
 }

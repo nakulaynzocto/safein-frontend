@@ -20,8 +20,11 @@ import {
 import Link from "next/link"
 import { routes } from "@/utils/routes"
 import { PublicLayout } from "@/components/layout/publicLayout"
+import { PageSEOHead } from "@/components/seo/pageSEOHead"
+import { generateStructuredData } from "@/lib/seoHelpers"
 
 export default function ContactPage() {
+  const contactStructuredData = generateStructuredData("contact")
   const contactInfo = [
     {
       icon: Mail,
@@ -71,7 +74,23 @@ export default function ContactPage() {
   ]
 
   return (
-    <PublicLayout>
+    <>
+      <PageSEOHead
+        title="Contact Us"
+        description="Get in touch with SafeIn support team for assistance with visitor management and appointment scheduling solutions."
+        keywords={[
+          "contact",
+          "support",
+          "help",
+          "visitor management support",
+          "appointment system help",
+          "SafeIn contact",
+          "customer service"
+        ]}
+        url="https://safein.aynzo.com/contact"
+        structuredData={contactStructuredData}
+      />
+      <PublicLayout>
       <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-hero-gradient">
@@ -281,7 +300,8 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
-    </div>
+      </div>
     </PublicLayout>
+    </>
   )
 }

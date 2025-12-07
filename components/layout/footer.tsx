@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 
 interface FooterLink {
   label: string
@@ -129,6 +130,18 @@ export function Footer() {
   return (
     <footer className="bg-[#074463] text-white/90">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        {/* Logo Section */}
+        <div className="mb-8 pb-8 border-b border-white/10">
+          <Link href="/" className="inline-block">
+            <Image 
+              src="/aynzo-logo.png" 
+              alt="Aynzo Logo" 
+              width={120}
+              height={48}
+              className="h-10 w-auto brightness-0 invert"
+            />
+          </Link>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Footer Sections */}
           {footerSections.map((section) => (

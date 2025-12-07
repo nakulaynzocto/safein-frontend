@@ -14,8 +14,6 @@ import { Calendar, Users, Shield, Clock, CheckCircle, UserCheck, ArrowRight, Bui
 import Link from "next/link"
 import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan } from "@/store/api/subscriptionApi"
 import { formatCurrency } from "@/utils/helpers"
-import { PageSEOHead } from "@/components/seo/pageSEOHead"
-import { generateStructuredData } from "@/lib/seoHelpers"
 
 export default function HomePage() {
   const router = useRouter()
@@ -104,31 +102,8 @@ export default function HomePage() {
     }
   }
 
-  const homeStructuredData = generateStructuredData("home")
-
   return (
-    <>
-      <PageSEOHead
-        title="SafeIn - Professional Visitor Management & Appointment System"
-        description="Transform your visitor management with SafeIn's comprehensive appointment scheduling system. Streamline check-ins, manage visitors, and enhance security with our professional platform. Start your free 3-day trial today!"
-        keywords={[
-          "visitor management system",
-          "appointment scheduling software",
-          "visitor check-in system",
-          "security management platform",
-          "visitor registration",
-          "appointment booking",
-          "visitor tracking",
-          "business security",
-          "visitor analytics",
-          "SafeIn management",
-          "Aynzo",
-          "digital solutions"
-        ]}
-        url="https://safein.aynzo.com"
-        structuredData={homeStructuredData}
-      />
-      <PublicLayout>
+    <PublicLayout>
       {/* Hero Section */}
       <section className="relative py-12 sm:py-16 md:py-20 bg-hero-gradient">
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
@@ -735,6 +710,5 @@ export default function HomePage() {
         </div>
       </section>
     </PublicLayout>
-    </>
   )
 }

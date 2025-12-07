@@ -12,8 +12,11 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { useAppSelector } from "@/store/hooks"
 import { formatCurrency } from "@/utils/helpers"
+import { PageSEOHead } from "@/components/seo/pageSEOHead"
+import { generateStructuredData } from "@/lib/seoHelpers"
 
 export default function PricingPage() {
+  const pricingStructuredData = generateStructuredData("pricing")
   const { data: fetchedSubscriptionPlans, isLoading, error } = useGetAllSubscriptionPlansQuery({ isActive: true });
   const router = useRouter();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -51,8 +54,24 @@ export default function PricingPage() {
   const plans = fetchedSubscriptionPlans?.data?.plans || [];
 
   return (
-    <PublicLayout>
-      <div className="min-h-screen bg-white">
+    <>
+      <PageSEOHead
+        title="Pricing Plans"
+        description="Choose the perfect SafeIn plan for your business. Flexible pricing options for visitor management and appointment scheduling."
+        keywords={[
+          "pricing",
+          "plans",
+          "subscription",
+          "visitor management pricing",
+          "appointment system cost",
+          "SafeIn pricing",
+          "business plans"
+        ]}
+        url="https://safein.aynzo.com/pricing"
+        structuredData={pricingStructuredData}
+      />
+      <PublicLayout>
+        <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-hero-gradient">
         <div className="container mx-auto text-center">
@@ -265,5 +284,6 @@ export default function PricingPage() {
       </section>
     </div>
     </PublicLayout>
+    </>
   )
 }

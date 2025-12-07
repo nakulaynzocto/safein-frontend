@@ -12,9 +12,68 @@ import { PageTransition } from "@/components/common/pageTransition"
 import { GlobalPageLoader } from "@/components/common/globalPageLoader"
 
 export const metadata: Metadata = {
-  title: "SafeIn - SafeIn Appointment System",
-  description: "Professional SafeIn appointment management system",
-  generator: "v0.app",
+  title: "SafeIn - Professional Visitor Management & Appointment System | Aynzo",
+  description: "Transform your visitor management with SafeIn's comprehensive appointment scheduling system. Streamline check-ins, manage visitors, and enhance security with our professional platform. Start your free 3-day trial today!",
+  keywords: [
+    "visitor management system",
+    "appointment scheduling software",
+    "visitor check-in system",
+    "security management platform",
+    "visitor registration",
+    "appointment booking",
+    "visitor tracking",
+    "business security",
+    "visitor analytics",
+    "SafeIn management",
+    "Aynzo",
+    "digital solutions"
+  ],
+  authors: [{ name: "Aynzo" }],
+  creator: "Aynzo",
+  publisher: "Aynzo",
+  robots: {
+    index: true,
+    follow: true,
+  },
+  generator: "Next.js",
+  icons: {
+    icon: [
+      { url: "/aynzo-logo.png", sizes: "any", type: "image/png" },
+      { url: "/aynzo-logo.png", sizes: "32x32", type: "image/png" },
+      { url: "/aynzo-logo.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [
+      { url: "/aynzo-logo.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/aynzo-logo.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://safein.aynzo.com",
+    siteName: "SafeIn by Aynzo",
+    title: "SafeIn - Professional Visitor Management & Appointment System",
+    description: "Transform your visitor management with SafeIn's comprehensive appointment scheduling system. Streamline check-ins, manage visitors, and enhance security with our professional platform.",
+    images: [
+      {
+        url: "https://safein.aynzo.com/aynzo-logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Aynzo Logo - SafeIn Visitor Management System",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SafeIn - Professional Visitor Management & Appointment System",
+    description: "Transform your visitor management with SafeIn's comprehensive appointment scheduling system.",
+    images: ["https://safein.aynzo.com/aynzo-logo.png"],
+    creator: "@aynzo",
+  },
+  metadataBase: new URL("https://safein.aynzo.com"),
+  alternates: {
+    canonical: "https://safein.aynzo.com",
+  },
 }
 
 export default function RootLayout({
@@ -25,7 +84,62 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        <link rel="icon" href="/aynzo-logo.png" />
+        <link rel="icon" href="/aynzo-logo.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/aynzo-logo.png" />
+        <link rel="shortcut icon" href="/aynzo-logo.png" type="image/png" />
+        {/* Structured Data for Organization Logo (Google Search) */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Aynzo",
+              "url": "https://aynzo.com",
+              "logo": "https://safein.aynzo.com/aynzo-logo.png",
+              "sameAs": [
+                "https://www.facebook.com/profile.php?id=61579388700386",
+                "https://www.instagram.com/aynzo.world",
+                "https://x.com/aynzoworld",
+                "https://www.youtube.com/channel/UC7lY7bl4eALJv4oUwXpfGMg",
+                "https://www.linkedin.com/company/aynzo/"
+              ],
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "+91-86999-66076",
+                "contactType": "customer service",
+                "email": "support@aynzo.com"
+              }
+            }),
+          }}
+        />
+        {/* WebSite Structured Data with Logo */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "SafeIn by Aynzo",
+              "url": "https://safein.aynzo.com",
+              "publisher": {
+                "@type": "Organization",
+                "name": "Aynzo",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://safein.aynzo.com/aynzo-logo.png",
+                  "width": 1200,
+                  "height": 630
+                }
+              },
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://safein.aynzo.com/search?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            }),
+          }}
+        />
       </head>
       <body 
         className="font-sans" 

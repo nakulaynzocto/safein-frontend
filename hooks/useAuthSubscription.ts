@@ -7,15 +7,7 @@ import { initializeAuth } from "@/store/slices/authSlice"
 import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionApi"
 import { routes, isPrivateRoute } from "@/utils/routes"
 
-/**
- * Comprehensive hook for managing authentication and subscription state
- * Provides all necessary checks and conditions for:
- * - Authentication status (token, user, isAuthenticated)
- * - Subscription status (active subscription check)
- * - Dashboard access control
- * - Navbar/Sidebar visibility
- * - Route protection logic
- */
+
 export function useAuthSubscription() {
   const router = useRouter()
   const pathname = usePathname()

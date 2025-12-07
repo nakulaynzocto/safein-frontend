@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { PublicLayout } from "@/components/layout/publicLayout"
+import { PageSEOHead } from "@/components/seo/pageSEOHead"
 
 export default function HelpPage() {
   const helpCategories = [
@@ -113,8 +114,23 @@ export default function HelpPage() {
   ]
 
   return (
-    <PublicLayout>
-      <div className="min-h-screen bg-white">
+    <>
+      <PageSEOHead
+        title="Help & Support"
+        description="Get help with SafeIn visitor management system. Find guides, tutorials, and support resources."
+        keywords={[
+          "help",
+          "support",
+          "documentation",
+          "tutorials",
+          "guides",
+          "visitor management help",
+          "SafeIn support"
+        ]}
+        url="https://safein.aynzo.com/help"
+      />
+      <PublicLayout>
+        <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-hero-gradient">
         <div className="container mx-auto text-center">
@@ -292,5 +308,6 @@ export default function HelpPage() {
       </section>
       </div>
     </PublicLayout>
+    </>
   )
 }
