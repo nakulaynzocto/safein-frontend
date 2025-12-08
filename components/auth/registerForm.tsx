@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InputField } from "@/components/common/inputField"
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/inputOtp"
 import { useAppDispatch } from "@/store/hooks"
 import { useRegisterMutation, useVerifyOtpMutation, useResendOtpMutation } from "@/store/api/authApi"
 import { setCredentials } from "@/store/slices/authSlice"
@@ -56,10 +57,13 @@ export function RegisterForm() {
     resolver: yupResolver(registerSchema),
   })
 
+  const [otpValue, setOtpValue] = useState<string>('')
+
   const {
     register: registerOtpField,
     handleSubmit: handleOtpSubmit,
     formState: { errors: otpErrors },
+    setValue: setOtpValueForm,
   } = useForm<OtpFormData>({
     resolver: yupResolver(otpSchema),
   })
@@ -87,9 +91,17 @@ export function RegisterForm() {
     try {
       setOtpError(null)
       
+      // Use otpValue state if form data is empty (for OTP component)
+      const otpToVerify = data.otp || otpValue
+      
+      if (!otpToVerify || otpToVerify.length !== 6) {
+        setOtpError("Please enter a valid 6-digit OTP")
+        return
+      }
+      
       const result = await verifyOtp({
         email: userEmail,
-        otp: data.otp
+        otp: otpToVerify
       }).unwrap()
       
       setUser(result.user)
@@ -148,6 +160,49 @@ export function RegisterForm() {
   const handleBackToForm = () => {
     setCurrentStep('form')
     setOtpError(null)
+    setOtpValue('')
+  }
+
+  const handleOtpChange = async (value: string) => {
+    setOtpValue(value)
+    setOtpValueForm('otp', value, { shouldValidate: true })
+    
+    // Auto-verify when 6 digits are entered
+    if (value.length === 6) {
+      try {
+        setOtpError(null)
+        const result = await verifyOtp({
+          email: userEmail,
+          otp: value
+        }).unwrap()
+        
+        setUser(result.user)
+        setToken(result.token)
+        dispatch(setCredentials({ user: result.user, token: result.token }))
+        
+        setCurrentStep('success')
+        const next = searchParams.get('next')
+        const target = next || routes.publicroute.SUBSCRIPTION_PLAN
+        router.push(target)
+      } catch (error: any) {
+        let errorMessage = "OTP verification failed. Please try again."
+        
+        if (error?.data?.message) {
+          errorMessage = error.data.message
+        } else if (error?.message) {
+          errorMessage = error.message
+        }
+        
+        if (errorMessage.includes('expired')) {
+          errorMessage = "OTP expired. Click Resend OTP."
+        } else if (errorMessage.includes('incorrect') || errorMessage.includes('invalid')) {
+          errorMessage = "OTP incorrect. Please try again."
+        }
+        
+        setOtpError(errorMessage)
+        setOtpValue('') // Clear OTP on error
+      }
+    }
   }
 
   const handleGoToLogin = () => {
@@ -266,16 +321,39 @@ export function RegisterForm() {
             </Button>
 
             <form onSubmit={handleOtpSubmit(onOtpSubmit)} className="space-y-6">
-              <InputField
-                label="OTP"
-                placeholder="Enter OTP"
-                error={otpErrors.otp?.message}
-                {...registerOtpField("otp")}
-                required
-                maxLength={6}
-              />
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Enter Verification Code
+                </label>
+                <div className="flex justify-center">
+                  <InputOTP
+                    maxLength={6}
+                    value={otpValue}
+                    onChange={handleOtpChange}
+                    containerClassName="gap-2 md:gap-3"
+                  >
+                    <InputOTPGroup className="gap-2 md:gap-3">
+                      <InputOTPSlot index={0} className="h-12 w-12 md:h-14 md:w-14 text-lg md:text-xl font-semibold border-2 rounded-lg transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20" />
+                      <InputOTPSlot index={1} className="h-12 w-12 md:h-14 md:w-14 text-lg md:text-xl font-semibold border-2 rounded-lg transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20" />
+                      <InputOTPSlot index={2} className="h-12 w-12 md:h-14 md:w-14 text-lg md:text-xl font-semibold border-2 rounded-lg transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20" />
+                      <InputOTPSlot index={3} className="h-12 w-12 md:h-14 md:w-14 text-lg md:text-xl font-semibold border-2 rounded-lg transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20" />
+                      <InputOTPSlot index={4} className="h-12 w-12 md:h-14 md:w-14 text-lg md:text-xl font-semibold border-2 rounded-lg transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20" />
+                      <InputOTPSlot index={5} className="h-12 w-12 md:h-14 md:w-14 text-lg md:text-xl font-semibold border-2 rounded-lg transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20" />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+                {otpErrors.otp?.message && (
+                  <p className="text-sm text-destructive mt-1">{otpErrors.otp.message}</p>
+                )}
+                {otpError && (
+                  <p className="text-sm text-destructive mt-1">{otpError}</p>
+                )}
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Enter the 6-digit code sent to your email
+                </p>
+              </div>
 
-              <Button type="submit" className="w-full" disabled={isVerifyingOtp}>
+              <Button type="submit" className="w-full" disabled={isVerifyingOtp || otpValue.length !== 6}>
                 {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
               </Button>
             </form>
