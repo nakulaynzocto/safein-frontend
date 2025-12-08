@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { usePathname } from "next/navigation"
 import { Navbar } from "./navbar"
 import { Footer } from "./footer"
 import { useAuthSubscription } from "@/hooks/useAuthSubscription"
@@ -10,6 +11,8 @@ interface PublicLayoutProps {
 }
 
 export function PublicLayout({ children }: PublicLayoutProps) {
+  const pathname = usePathname()
+  
   // Use centralized hook for all auth and subscription logic
   const {
     isClient,
@@ -19,15 +22,22 @@ export function PublicLayout({ children }: PublicLayoutProps) {
     isAllowedPageForAuthenticated,
   } = useAuthSubscription()
 
+  // Define auth routes where navbar and footer should be hidden
+  const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password']
+  
+  // Dynamically check if current route is an auth route
+  const shouldHideNavbar = authRoutes.includes(pathname)
+  const shouldHideFooter = authRoutes.includes(pathname)
+
   return (
     <div 
       className="min-h-screen flex flex-col transition-all duration-300" 
       style={{ backgroundColor: 'var(--background)' }}
     >
-      <Navbar />
+      {!shouldHideNavbar && <Navbar />}
       <main 
         className="flex-1 transition-opacity duration-300 ease-in-out" 
-        style={{ backgroundColor: 'var(--background)', minHeight: 'calc(100vh - 200px)' }}
+        style={{ backgroundColor: 'var(--background)', minHeight: shouldHideNavbar ? '100vh' : 'calc(100vh - 200px)' }}
       >
         {(!isClient || !isInitialized) ? (
           <div 
@@ -47,7 +57,7 @@ export function PublicLayout({ children }: PublicLayoutProps) {
           </div>
         )}
       </main>
-      <Footer />
+      {!shouldHideFooter && <Footer />}
     </div>
   )
 }
