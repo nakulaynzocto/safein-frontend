@@ -131,6 +131,31 @@ export default function SubscriptionPlanPage() {
     }
   }, [isAuthenticated, token, user, router])
 
+  // Show loader while checking subscription status or loading plans
+  // Also show loader if user has active subscription (will redirect to dashboard)
+  if (isSubscriptionLoading || (isLoadingPlans && plans.length === 0) || hasActiveSubscription) {
+    return (
+      <PublicLayout>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center space-y-4">
+                <div className="animate-spin mx-auto h-10 w-10 border-4 border-[#3882a5] border-t-transparent rounded-full"></div>
+                <p className="text-muted-foreground text-sm">
+                  {hasActiveSubscription 
+                    ? 'Redirecting to dashboard...' 
+                    : isSubscriptionLoading 
+                    ? 'Checking subscription status...' 
+                    : 'Loading subscription plans...'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </PublicLayout>
+    )
+  }
+
   return (
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">

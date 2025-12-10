@@ -28,7 +28,6 @@ export function LoginForm() {
   const searchParams = useSearchParams()
   const [login, { isLoading }] = useLoginMutation()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [isRedirecting, setIsRedirecting] = useState(false)
 
   const {
     register,
@@ -62,26 +61,19 @@ export function LoginForm() {
       
       dispatch(setCredentials(result))
       setErrorMessage(null)
-      setIsRedirecting(true)
       
-      await new Promise(resolve => setTimeout(resolve, 200))
-
       // According to documentation: After login, check subscription status
       // If no active subscription, redirect to subscription-plan page
       // If we were sent here with a `next` param, use that; otherwise go to subscription-plan
       const next = searchParams.get('next')
       // Always redirect to subscription-plan first (it will check subscription and redirect to dashboard if active)
+      // No need for separate loader here - subscription-plan page will show loader
       const target = next || routes.publicroute.SUBSCRIPTION_PLAN
       window.location.replace(target)
     } catch (error: any) {
       const message = error?.data?.message || error?.message || "Login failed"
       setErrorMessage(message)
-      setIsRedirecting(false)
     }
-  }
-
-  if (isRedirecting) {
-    return null
   }
 
   return (
