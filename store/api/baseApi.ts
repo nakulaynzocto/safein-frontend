@@ -33,8 +33,9 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
     // Handle 401 errors
     if (result.error && result.error.status === 401) {
       const isLoginRequest = args && args.url && args.url.includes(routes.publicroute.LOGIN)
+      const isLogoutRequest = args && args.url && args.url.includes('/logout')
       
-      if (!isLoginRequest) {
+      if (!isLoginRequest && !isLogoutRequest) {
         api.dispatch(logout())
         
         if (typeof window !== 'undefined') {

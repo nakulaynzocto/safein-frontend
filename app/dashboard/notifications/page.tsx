@@ -22,11 +22,17 @@ function NotificationsPageContent() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   
-  const { data: appointmentsData, isLoading, error, refetch } = useGetAppointmentsQuery({
-    status: 'pending',
-    limit: 50,
-    page: 1
-  })
+  const { data: appointmentsData, isLoading, error, refetch } = useGetAppointmentsQuery(
+    {
+      status: 'pending',
+      limit: 20,
+      page: 1
+    },
+    {
+      refetchOnMountOrArgChange: true,
+      pollingInterval: 30000, // Auto-refresh every 30 seconds
+    }
+  )
   
   const [approveAppointment] = useApproveAppointmentMutation()
   const [rejectAppointment] = useRejectAppointmentMutation()
@@ -56,7 +62,8 @@ function NotificationsPageContent() {
     setIsProcessing(true)
     try {
       await approveAppointment(appointmentId).unwrap()
-      await refetch() // Refresh the list
+      // Cache invalidation will automatically refresh, but we also manually refetch to ensure immediate update
+      await refetch()
       showSuccessToast('Appointment approved successfully!')
     } catch (error) {
       showErrorToast('Failed to approve appointment')
@@ -69,7 +76,8 @@ function NotificationsPageContent() {
     setIsProcessing(true)
     try {
       await rejectAppointment(appointmentId).unwrap()
-      await refetch() // Refresh the list
+      // Cache invalidation will automatically refresh, but we also manually refetch to ensure immediate update
+      await refetch()
       showSuccessToast('Appointment rejected successfully!')
     } catch (error) {
       showErrorToast('Failed to reject appointment')
@@ -81,8 +89,13 @@ function NotificationsPageContent() {
   const handleRefresh = async () => {
     setIsRefreshing(true)
     try {
-      await refetch()
-      showSuccessToast('Notifications refreshed successfully!')
+      // Force refetch by passing true to bypass cache
+      const result = await refetch()
+      if (result.data) {
+        showSuccessToast('Notifications refreshed successfully!')
+      } else {
+        showErrorToast('Failed to refresh notifications')
+      }
     } catch (error) {
       showErrorToast('Failed to refresh notifications')
     } finally {

@@ -40,6 +40,7 @@ import {
 } from "lucide-react"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { usePathname } from "next/navigation"
+import { showSuccessToast, showErrorToast } from "@/utils/toast"
 
 export function Navbar() {
   const router = useRouter()
@@ -151,29 +152,42 @@ export function Navbar() {
 
   const handleLogout = useCallback(async () => {
     try {
+      // Clear data first
       dispatch(logout())
       
+      // Call logout API (but don't wait for it or show errors)
       logoutMutation().unwrap().catch(() => {
+        // Silently fail - we're logging out locally anyway
       })
       
       if (typeof window !== "undefined") {
         localStorage.removeItem("token")
         localStorage.removeItem("user")
         sessionStorage.clear()
-        window.scrollTo({ top: 0, behavior: 'smooth' })
       }
       
+      // Show success toast
+      showSuccessToast('Logout successful!')
+      
+      // Redirect to login page after a short delay
       setTimeout(() => {
-        router.replace(routes.publicroute.HOME)
-      }, 150)
+        router.replace(routes.publicroute.LOGIN)
+      }, 300)
     } catch (error) {
+      // Even on error, logout locally
       dispatch(logout())
       if (typeof window !== "undefined") {
         localStorage.removeItem("token")
         localStorage.removeItem("user")
-        window.scrollTo({ top: 0, behavior: 'smooth' })
       }
-      router.replace(routes.publicroute.HOME)
+      
+      // Show success toast
+      showSuccessToast('Logout successful!')
+      
+      // Redirect to login page
+      setTimeout(() => {
+        router.replace(routes.publicroute.LOGIN)
+      }, 300)
     }
   }, [logoutMutation, dispatch, router])
 
