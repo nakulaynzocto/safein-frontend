@@ -22,6 +22,7 @@ export interface Appointment {
   deletedBy?: string | null
   createdAt: string
   updatedAt: string
+  approvalLink?: string | null // One-time approval link
 }
 
 export interface EmployeeDetails {
@@ -166,6 +167,7 @@ export interface AppointmentStats {
 }
 
 export const appointmentApi = baseApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     createAppointment: builder.mutation<Appointment, CreateAppointmentRequest>({
       query: (appointmentData) => ({

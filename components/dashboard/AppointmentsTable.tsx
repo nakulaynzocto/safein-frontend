@@ -3,17 +3,13 @@
 import { memo, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataTable } from "@/components/common/dataTable"
-import { StatusBadge } from "@/components/common/statusBadge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { formatDateTime } from "@/utils/helpers"
 import { 
   Calendar, 
-  User, 
   Phone, 
   Mail, 
-  Building,
-  Clock,
-  CheckCircle
+  Building
 } from "lucide-react"
 
 interface AppointmentsTableProps {
@@ -137,58 +133,6 @@ export const AppointmentsTable = memo(function AppointmentsTable({
             ),
           },
         ]),
-    {
-      key: "purpose",
-      header: "Purpose",
-      sortable: true,
-      render: (appointment: any) => (
-        <div className="text-sm">
-          <div className="font-medium text-gray-900">{appointment.appointmentDetails?.purpose || "N/A"}</div>
-          {appointment.appointmentDetails?.meetingRoom && (
-            <div className="text-xs text-gray-500 mt-1">
-              <Building className="h-3 w-3 inline mr-1" />
-              {appointment.appointmentDetails.meetingRoom}
-            </div>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: "checkTimes",
-      header: "Check In/Out",
-      sortable: false,
-      render: (appointment: any) => (
-        <div className="text-xs space-y-1">
-          {appointment.checkInTime && (
-            <div className="flex items-center gap-1 text-green-600">
-              <CheckCircle className="h-3 w-3" />
-              <span>In: {(() => {
-                const date = new Date(appointment.checkInTime);
-                return isNaN(date.getTime()) ? "Invalid Time" : date.toLocaleTimeString();
-              })()}</span>
-            </div>
-          )}
-          {appointment.checkOutTime && (
-            <div className="flex items-center gap-1 text-red-600">
-              <Clock className="h-3 w-3" />
-              <span>Out: {(() => {
-                const date = new Date(appointment.checkOutTime);
-                return isNaN(date.getTime()) ? "Invalid Time" : date.toLocaleTimeString();
-              })()}</span>
-            </div>
-          )}
-          {!appointment.checkInTime && !appointment.checkOutTime && (
-            <div className="text-gray-400">Not checked in</div>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: "status",
-      header: "Status",
-      sortable: true,
-      render: (appointment: any) => <StatusBadge status={appointment.status} />,
-    },
   ], [showDateTime])
 
   return (

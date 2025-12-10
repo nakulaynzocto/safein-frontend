@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { Navbar } from "./navbar"
 import { Footer } from "./footer"
 import { useAuthSubscription } from "@/hooks/useAuthSubscription"
+import { routes } from "@/utils/routes"
 
 interface PublicLayoutProps {
   children: React.ReactNode
@@ -23,11 +24,19 @@ export function PublicLayout({ children }: PublicLayoutProps) {
   } = useAuthSubscription()
 
   // Define auth routes where navbar and footer should be hidden
-  const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password']
+  const authRoutes = [
+    routes.publicroute.LOGIN,
+    routes.publicroute.REGISTER,
+    routes.publicroute.FORGOT_PASSWORD,
+    routes.publicroute.RESET_PASSWORD,
+    routes.publicroute.VERIFY,
+  ]
   
   // Dynamically check if current route is an auth route
-  const shouldHideNavbar = authRoutes.includes(pathname)
-  const shouldHideFooter = authRoutes.includes(pathname)
+  // Also check if pathname starts with verify route (for dynamic routes like /verify/[token])
+  const isAuthRoute = authRoutes.some(route => pathname === route) || pathname?.startsWith(routes.publicroute.VERIFY + '/')
+  const shouldHideNavbar = isAuthRoute
+  const shouldHideFooter = isAuthRoute
 
   return (
     <div 

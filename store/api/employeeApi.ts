@@ -55,6 +55,7 @@ export interface EmployeeListResponse {
 }
 
 export const employeeApi = baseApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
 
     getEmployees: builder.query<EmployeeListResponse, GetEmployeesQuery | void>({

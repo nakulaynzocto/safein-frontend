@@ -86,7 +86,7 @@ export const baseApi = createApi({
   // - 'User' + 'Subscription' are used by userSubscriptionApi
   // - Other tags are used by their respective feature APIs
   // If you introduce new cache tags, add them here.
-  tagTypes: ['User', 'Employee', 'Appointment', 'Company', 'Visitor', 'Subscription', 'SubscriptionPlan'],
+  tagTypes: ['User', 'Employee', 'Appointment', 'Company', 'Visitor', 'Subscription', 'SubscriptionPlan', 'Settings'],
   endpoints: () => ({}),
   refetchOnMountOrArgChange: false,
   refetchOnFocus: false,

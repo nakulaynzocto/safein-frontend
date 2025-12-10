@@ -51,6 +51,7 @@ interface CreateFreeVerificationSessionRequest {
 }
 
 export const subscriptionApi = baseApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     getAllSubscriptionPlans: builder.query<GetAllSubscriptionPlansResponse, GetAllSubscriptionPlansQueryArgs>({
       query: ({ isActive }) => ({

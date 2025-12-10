@@ -44,6 +44,7 @@ interface GetTrialLimitsStatusResponse {
 }
 
 export const userSubscriptionApi = baseApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     /**
      * Get user's active subscription

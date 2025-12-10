@@ -52,9 +52,15 @@ export function ImageUploadField({
   }
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
     const file = event.target.files?.[0]
     if (file) {
       await processFile(file)
+    }
+    // Reset the input value to allow re-uploading the same file
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
     }
   }
 
@@ -80,7 +86,11 @@ export function ImageUploadField({
       
       setIsImageLoading(false)
       setUploadSuccess(true)
-      showSuccessToast("Image uploaded successfully!")
+      
+      // Show success toast after a brief delay to ensure state is updated
+      setTimeout(() => {
+        showSuccessToast("Image uploaded successfully!")
+      }, 100)
       
       setTimeout(() => setUploadSuccess(false), 3000)
       
@@ -125,7 +135,9 @@ export function ImageUploadField({
     }
   }
 
-  const switchCamera = () => {
+  const switchCamera = (e?: React.MouseEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
     const newFacingMode = facingMode === 'environment' ? 'user' : 'environment'
     startCamera(newFacingMode)
   }
@@ -138,7 +150,9 @@ export function ImageUploadField({
     setIsCapturing(false)
   }
 
-  const capturePhoto = () => {
+  const capturePhoto = (e?: React.MouseEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current
       const canvas = canvasRef.current
@@ -195,7 +209,9 @@ export function ImageUploadField({
     }
   }
 
-  const triggerFileInput = () => {
+  const triggerFileInput = (e?: React.MouseEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
     if (enableImageCapture) {
       setShowCaptureOptions(true)
     } else {
@@ -203,21 +219,29 @@ export function ImageUploadField({
     }
   }
 
-  const handleGalleryUpload = () => {
+  const handleGalleryUpload = (e?: React.MouseEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
     setShowCaptureOptions(false)
     fileInputRef.current?.click()
   }
 
-  const handleCameraUpload = () => {
+  const handleCameraUpload = (e?: React.MouseEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
     setShowCaptureOptions(false)
     startCamera()
   }
 
-  const cancelCapture = () => {
+  const cancelCapture = (e?: React.MouseEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
     setShowCaptureOptions(false)
   }
 
-  const cancelCamera = () => {
+  const cancelCamera = (e?: React.MouseEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
     stopCamera()
   }
 
@@ -266,6 +290,7 @@ export function ImageUploadField({
               
               <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
                 <Button
+                  type="button"
                   onClick={switchCamera}
                   className="bg-white bg-opacity-90 hover:bg-opacity-100 text-black rounded-full p-2 sm:p-3 shadow-lg"
                   title={`Switch to ${facingMode === 'environment' ? 'Front' : 'Back'} Camera`}
@@ -276,6 +301,7 @@ export function ImageUploadField({
               
               <div className="absolute bottom-2 sm:bottom-4 left-0 right-0 flex justify-center gap-2 sm:gap-4 px-2">
                 <Button
+                  type="button"
                   onClick={capturePhoto}
                   className="bg-white text-black hover:bg-gray-200 px-4 py-2 sm:px-6 sm:py-3 rounded-full shadow-lg text-sm sm:text-base flex items-center gap-2"
                 >
@@ -284,6 +310,7 @@ export function ImageUploadField({
                   <span className="sm:hidden">Capture</span>
                 </Button>
                 <Button
+                  type="button"
                   onClick={cancelCamera}
                   className="bg-red-500 text-white hover:bg-red-600 px-4 py-2 sm:px-6 sm:py-3 rounded-full shadow-lg text-sm sm:text-base"
                 >
@@ -300,6 +327,7 @@ export function ImageUploadField({
               <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Choose Image Source</h3>
               <div className="space-y-2 sm:space-y-3">
                 <Button
+                  type="button"
                   onClick={handleCameraUpload}
                   className="w-full justify-start bg-blue-500 hover:bg-blue-600 text-white py-3 sm:py-2.5"
                 >
@@ -307,6 +335,7 @@ export function ImageUploadField({
                   <span className="text-sm sm:text-base">Take Photo</span>
                 </Button>
                 <Button
+                  type="button"
                   onClick={handleGalleryUpload}
                   className="w-full justify-start bg-gray-500 hover:bg-gray-600 text-white py-3 sm:py-2.5"
                 >
@@ -314,6 +343,7 @@ export function ImageUploadField({
                   <span className="text-sm sm:text-base">Choose from Gallery</span>
                 </Button>
                 <Button
+                  type="button"
                   onClick={cancelCapture}
                   variant="outline"
                   className="w-full py-3 sm:py-2.5"
@@ -332,7 +362,13 @@ export function ImageUploadField({
                 uploadSuccess ? 'border-green-400 bg-white ring-2 ring-green-200' : 
                 imageError ? 'border-red-400 bg-red-50 ring-2 ring-red-200' : 'border-gray-300 bg-white hover:border-blue-500 hover:ring-2 hover:ring-blue-200'
               }`}
-              onClick={!isUploading && !isImageLoading ? triggerFileInput : undefined}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                if (!isUploading && !isImageLoading) {
+                  triggerFileInput(e)
+                }
+              }}
             >
               {isUploading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-95 z-10 rounded-xl">
@@ -400,7 +436,14 @@ export function ImageUploadField({
                   <span className="text-xs text-blue-500 mt-1">Please wait</span>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center p-4 sm:p-6" onClick={triggerFileInput}>
+                <div 
+                  className="flex flex-col items-center justify-center p-4 sm:p-6" 
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    triggerFileInput(e)
+                  }}
+                >
                   <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-200 group-hover:bg-blue-200 rounded-full flex items-center justify-center transition-all duration-300 shadow-inner group-hover:shadow-md">
                     {enableImageCapture ? (
                       <Camera className="w-6 h-6 sm:w-7 sm:h-7 text-gray-500 group-hover:text-blue-600 transition-colors duration-300" />

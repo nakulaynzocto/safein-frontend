@@ -11,6 +11,7 @@ import { ConfirmationDialog } from "@/components/common/confirmationDialog"
 import { Pagination } from "@/components/common/pagination"
 import { StatusBadge } from "@/components/common/statusBadge"
 import { format } from "date-fns"
+import { formatDateTime } from "@/utils/helpers"
 import { 
   Trash2, 
   Eye,
@@ -46,6 +47,7 @@ import {
 } from "@/components/ui/dropdownMenu"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
+import { getAppointmentStatus, getAppointmentDateTime, isAppointmentTimedOut } from "@/utils/helpers"
 import { NewAppointmentModal } from "./NewAppointmentModal"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
@@ -249,86 +251,12 @@ export function AppointmentTable({
   }
 
 
+  // Using common functions from utils/helpers
   const isAppointmentDatePast = (appointment: Appointment): boolean => {
-    if (!appointment.appointmentDetails?.scheduledDate) return false
-    
-    try {
-      const dateStr = appointment.appointmentDetails.scheduledDate
-      const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0]
-      const [year, month, day] = datePart.split('-').map(Number)
-      
-      let scheduledDateTime = new Date(year, month - 1, day, 0, 0, 0, 0)
-      
-      const hasTimeInDate = dateStr.includes('T') && /T\d{2}:\d{2}/.test(dateStr)
-      
-      if (appointment.appointmentDetails.scheduledTime && !hasTimeInDate) {
-        const timeStr = appointment.appointmentDetails.scheduledTime.trim()
-        let hours = 0
-        let minutes = 0
-        
-        if (timeStr.includes(':')) {
-          const timeParts = timeStr.split(':')
-          hours = parseInt(timeParts[0], 10) || 0
-          const minutesPart = timeParts[1] ? timeParts[1].trim() : '0'
-          
-          if (minutesPart.includes('AM') || minutesPart.includes('PM')) {
-            const mins = minutesPart.replace(/[APM]/gi, '').trim()
-            minutes = parseInt(mins, 10) || 0
-            if (minutesPart.toUpperCase().includes('PM') && hours !== 12) {
-              hours += 12
-            }
-            if (minutesPart.toUpperCase().includes('AM') && hours === 12) {
-              hours = 0
-            }
-          } else {
-            minutes = parseInt(minutesPart, 10) || 0
-          }
-        } else {
-          hours = parseInt(timeStr.replace(/[APM]/gi, '').trim(), 10) || 0
-          if (timeStr.toUpperCase().includes('PM') && hours !== 12) {
-            hours += 12
-          }
-          if (timeStr.toUpperCase().includes('AM') && hours === 12) {
-            hours = 0
-          }
-        }
-        
-        if (hours < 0 || hours > 23) hours = 0
-        if (minutes < 0 || minutes > 59) minutes = 0
-        
-        scheduledDateTime.setHours(hours, minutes, 0, 0)
-      } else if (!hasTimeInDate && !appointment.appointmentDetails.scheduledTime) {
-        scheduledDateTime.setHours(23, 59, 59, 0)
-      } else if (hasTimeInDate) {
-        const utcDate = new Date(dateStr)
-        scheduledDateTime = new Date(
-          utcDate.getUTCFullYear(),
-          utcDate.getUTCMonth(),
-          utcDate.getUTCDate(),
-          utcDate.getUTCHours(),
-          utcDate.getUTCMinutes(),
-          0
-        )
-      }
-      
-      const now = new Date()
-      
-      return scheduledDateTime < now
-    } catch (error) {
-      try {
-        const datePart = appointment.appointmentDetails.scheduledDate.includes('T') 
-          ? appointment.appointmentDetails.scheduledDate.split('T')[0] 
-          : appointment.appointmentDetails.scheduledDate.split(' ')[0]
-        const [year, month, day] = datePart.split('-').map(Number)
-        const appointmentDate = new Date(year, month - 1, day)
-        const now = new Date()
-        now.setHours(0, 0, 0, 0)
-        appointmentDate.setHours(0, 0, 0, 0)
-        return appointmentDate < now
-      } catch (e) {
-        return false
-      }
-    }
+    const scheduledDateTime = getAppointmentDateTime(appointment)
+    if (!scheduledDateTime) return false
+    const now = new Date()
+    return scheduledDateTime < now
   }
 
   const handleAppointmentCreated = () => {
@@ -357,23 +285,41 @@ export function AppointmentTable({
           const visitor = (appointment as any).visitorId || appointment.visitor;
           const visitorName = visitor?.name || "Unknown Visitor";
           const visitorPhone = visitor?.phone || "N/A";
+          const visitorEmail = visitor?.email || "N/A";
           const visitorCompany = visitor?.company || "";
+          // Get photo from visitor object, handle both populated and non-populated cases
+          const visitorPhoto = visitor?.photo || (visitor as any)?.profilePicture || "";
           
           return (
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={visitor?.photo} alt={visitorName} />
+            <div className="flex items-center gap-3 min-w-0">
+              <Avatar className="h-10 w-10 flex-shrink-0">
+                <AvatarImage 
+                  src={visitorPhoto} 
+                  alt={visitorName}
+                  onError={(e) => {
+                    // Hide image on error, fallback will show
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
                 <AvatarFallback>
-                  {visitorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
+                  {visitorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <div className="font-medium">{visitorName}</div>
-                <div className="text-sm text-gray-500">{visitorCompany || "N/A"}</div>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <Phone className="h-3 w-3" />
-                  {visitorPhone}
+              <div className="min-w-0 flex-1">
+                <div className="font-medium truncate">{visitorName}</div>
+                {visitorEmail !== "N/A" && (
+                  <div className="flex items-center gap-1 text-xs text-gray-500 truncate">
+                    <Mail className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">{visitorEmail}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <Phone className="h-3 w-3 flex-shrink-0" />
+                  <span>{visitorPhone}</span>
                 </div>
+                {visitorCompany && (
+                  <div className="text-xs text-gray-400 mt-0.5 truncate">{visitorCompany}</div>
+                )}
               </div>
             </div>
           );
@@ -430,18 +376,18 @@ export function AppointmentTable({
       {
         key: "appointmentDate",
         header: "Date & Time",
-        render: (appointment: Appointment) => (
-          <div className="space-y-1">
+        render: (appointment: Appointment) => {
+          const dateTime = formatDateTime(
+            appointment.appointmentDetails?.scheduledDate || "",
+            appointment.appointmentDetails?.scheduledTime
+          )
+          return (
             <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-3 w-3" />
-              {appointment.appointmentDetails?.scheduledDate ? (() => {
-                const date = new Date(appointment.appointmentDetails.scheduledDate);
-                return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM dd, yyyy");
-              })() : "N/A"}
+              <Calendar className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+              <span>{dateTime || "N/A"}</span>
             </div>
-            <div className="text-xs text-gray-500">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
-          </div>
-        ),
+          )
+        },
       },
       {
         key: "status",
@@ -456,14 +402,8 @@ export function AppointmentTable({
             )
           }
           
-          const status = typeof appointment.status === 'string' ? appointment.status : 'pending'
-          const isPast = isAppointmentDatePast(appointment)
-          
-          if (isPast && status === 'pending') {
-            return <StatusBadge status="closed" />
-          }
-          
-          return <StatusBadge status={status} />
+          const effectiveStatus = getAppointmentStatus(appointment) as "pending" | "approved" | "rejected" | "completed" | "time_out"
+          return <StatusBadge status={effectiveStatus} />
         },
       },
     ]
@@ -494,12 +434,10 @@ export function AppointmentTable({
       header: "Actions",
       render: (appointment: Appointment) => {
         const status = typeof appointment.status === 'string' ? appointment.status : 'pending'
-        const isPast = isAppointmentDatePast(appointment)
-        const isPending = status === 'pending' && !isPast
+        const isTimedOut = isAppointmentTimedOut(appointment)
+        const isPending = status === 'pending' && !isTimedOut
         const isApproved = status === 'approved'
         const isRejected = status === 'rejected'
-        // Removed 'closed' status check as it's not a valid status type
-        // const isClosed = status === 'closed'
         const isCompleted = status === 'completed'
         
         const showOnlyView = isRejected || isApproved || isCompleted

@@ -10,6 +10,7 @@ import {
   Users,
   Calendar,
   UserPlus,
+  Settings,
 } from "lucide-react"
 
 interface SidebarProps {
@@ -36,6 +37,11 @@ const navigation = [
     name: "Appointments",
     href: routes.privateroute.APPOINTMENTLIST,
     icon: Calendar,
+  },
+  {
+    name: "Settings",
+    href: routes.privateroute.SETTINGS,
+    icon: Settings,
   },
 ]
 

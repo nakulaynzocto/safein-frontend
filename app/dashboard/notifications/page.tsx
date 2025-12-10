@@ -16,6 +16,7 @@ import { NotificationCard } from "@/components/common/notificationCard"
 import { PageHeader } from "@/components/common/pageHeader"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { ProtectedLayout } from "@/components/layout/protectedLayout"
+import { getAppointmentDateTime } from "@/utils/helpers"
 
 function NotificationsPageContent() {
   const [isProcessing, setIsProcessing] = useState(false)
@@ -30,7 +31,26 @@ function NotificationsPageContent() {
   const [approveAppointment] = useApproveAppointmentMutation()
   const [rejectAppointment] = useRejectAppointmentMutation()
   
-  const pendingAppointments = appointmentsData?.appointments || []
+  // Filter to show only future pending appointments (exclude past appointments)
+  const pendingAppointments = (appointmentsData?.appointments || []).filter(
+    (appointment) => {
+      // First check if status is pending
+      if (appointment.status !== 'pending') {
+        return false
+      }
+      
+      // Check if appointment is in the future
+      const scheduledDateTime = getAppointmentDateTime(appointment)
+      if (!scheduledDateTime) {
+        // If we can't determine the date/time, exclude it
+        return false
+      }
+      
+      // Only show appointments that are scheduled for the future
+      const now = new Date()
+      return scheduledDateTime.getTime() > now.getTime()
+    }
+  )
   
   const handleApprove = async (appointmentId: string) => {
     setIsProcessing(true)

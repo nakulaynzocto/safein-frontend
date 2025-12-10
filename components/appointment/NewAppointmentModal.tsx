@@ -30,6 +30,7 @@ import { useGetVisitorsQuery, Visitor } from "@/store/api/visitorApi"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
 import { Calendar, User, Car } from "lucide-react"
+import { ApprovalLinkModal } from "./ApprovalLinkModal"
 
 // Validation schema
 const appointmentSchema = yup.object({
@@ -42,29 +43,68 @@ const appointmentSchema = yup.object({
   purpose: yup.string().required("Purpose of visit is required").min(5, "Purpose must be at least 5 characters"),
   appointmentDate: yup.string().required("Appointment date is required").test('future-date', 'Scheduled date cannot be in the past', function(value) {
     if (!value) return false
-    const selectedDate = new Date(value)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    return selectedDate >= today
+    
+    try {
+      // Handle different date formats (YYYY-MM-DD or DD/MM/YYYY)
+      let dateStr = value
+      if (dateStr.includes('/')) {
+        // Convert DD/MM/YYYY to YYYY-MM-DD
+        const parts = dateStr.split('/')
+        if (parts.length === 3) {
+          dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`
+        }
+      }
+      
+      const selectedDate = new Date(dateStr + 'T00:00:00')
+      if (isNaN(selectedDate.getTime())) {
+        return false
+      }
+      
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      selectedDate.setHours(0, 0, 0, 0)
+      
+      return selectedDate >= today
+    } catch (error) {
+      return false
+    }
   }),
   appointmentTime: yup.string().required("Appointment time is required").test('future-time', 'Scheduled time cannot be in the past', function(value) {
     if (!value) return false
     const appointmentDate = this.parent.appointmentDate
     if (!appointmentDate) return true
     
-    const selectedDateTime = new Date(`${appointmentDate} ${value}`)
-    const now = new Date()
-    
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const selectedDate = new Date(appointmentDate)
-    selectedDate.setHours(0, 0, 0, 0)
-    
-    if (selectedDate.getTime() === today.getTime()) {
-      return selectedDateTime > now
+    try {
+      // Handle different date formats
+      let dateStr = appointmentDate
+      if (dateStr.includes('/')) {
+        const parts = dateStr.split('/')
+        if (parts.length === 3) {
+          dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`
+        }
+      }
+      
+      const selectedDateTime = new Date(`${dateStr}T${value}`)
+      if (isNaN(selectedDateTime.getTime())) {
+        return true // If date parsing fails, skip time validation
+      }
+      
+      const now = new Date()
+      
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const selectedDate = new Date(dateStr + 'T00:00:00')
+      selectedDate.setHours(0, 0, 0, 0)
+      
+      // Only validate time if the date is today
+      if (selectedDate.getTime() === today.getTime()) {
+        return selectedDateTime > now
+      }
+      
+      return true
+    } catch (error) {
+      return true // If validation fails, allow it (date validation will catch it)
     }
-    
-    return true
   }),
   notes: yup.string().optional().default(""),
   vehicleNumber: yup.string().optional().default(""),
@@ -91,6 +131,8 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
   const { data: employeesData } = useGetEmployeesQuery()
   const employees = employeesData?.employees || []
   const [generalError, setGeneralError] = React.useState<string | null>(null)
+  const [approvalLink, setApprovalLink] = React.useState<string | null>(null)
+  const [showApprovalLinkModal, setShowApprovalLinkModal] = React.useState(false)
   
   const isEditMode = !!appointmentId
   const isLoading = isCreating || isUpdating
@@ -151,6 +193,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
     if (!open) {
       reset()
       setGeneralError(null)
+      setApprovalLink(null)
       clearErrors()
     }
   }, [open, reset, clearErrors])
@@ -216,6 +259,9 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
         }
         await updateAppointment({ id: appointmentId, ...updateData }).unwrap()
         showSuccessToast("Appointment updated successfully!")
+        // For edit mode, close modal after update
+        setOpen(false)
+        if (onSuccess) onSuccess()
       } else {
         const newAppointmentData = {
           appointmentId: `APT${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
@@ -251,12 +297,20 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
             reminderSent: false
           }
         }
-        await createAppointment(newAppointmentData).unwrap()
+        const result = await createAppointment(newAppointmentData).unwrap()
         showSuccessToast("Appointment created successfully")
+        
+        // Close the appointment creation modal
+        setOpen(false)
+        
+        // Store approval link if provided and open approval link modal
+        if (result.approvalLink) {
+          setApprovalLink(result.approvalLink)
+          setShowApprovalLinkModal(true)
+        } else {
+          if (onSuccess) onSuccess()
+        }
       }
-      
-      setOpen(false)
-      if (onSuccess) onSuccess()
     } catch (error: any) {
       if (error?.data?.errors && Array.isArray(error.data.errors)) {
         // Handle field-specific errors if needed
@@ -275,6 +329,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
   )
 
   return (
+    <>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {triggerButton || defaultTrigger}
@@ -357,7 +412,30 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                   render={({ field }) => (
                     <DatePicker
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        // Validate date is not in the past
+                        if (value) {
+                          const selectedDate = new Date(value + 'T00:00:00')
+                          selectedDate.setHours(0, 0, 0, 0)
+                          const today = new Date()
+                          today.setHours(0, 0, 0, 0)
+                          
+                          if (selectedDate < today) {
+                            // If past date, don't update and trigger validation
+                            trigger('appointmentDate')
+                            return
+                          }
+                        }
+                        // Ensure date is in YYYY-MM-DD format
+                        field.onChange(value)
+                        // Clear time validation error when date changes
+                        if (errors.appointmentTime) {
+                          clearErrors('appointmentTime')
+                        }
+                        // Trigger validation to show error if any
+                        trigger('appointmentDate')
+                      }}
                       error={errors.appointmentDate?.message}
                     />
                   )}
@@ -369,14 +447,30 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                 <Controller
                   control={control}
                   name="appointmentTime"
-                  render={({ field }) => (
-                    <TimePicker
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={errors.appointmentTime?.message}
-                      selectedDate={watch("appointmentDate")}
-                    />
-                  )}
+                  render={({ field }) => {
+                    // Normalize date format for TimePicker
+                    let normalizedDate = watch("appointmentDate")
+                    if (normalizedDate && normalizedDate.includes('/')) {
+                      const parts = normalizedDate.split('/')
+                      if (parts.length === 3) {
+                        normalizedDate = `${parts[2]}-${parts[1]}-${parts[0]}`
+                      }
+                    }
+                    return (
+                      <TimePicker
+                        value={field.value}
+                        onChange={(e) => {
+                          field.onChange(e)
+                          // Clear date validation error when time changes
+                          if (errors.appointmentDate) {
+                            clearErrors('appointmentDate')
+                          }
+                        }}
+                        error={errors.appointmentTime?.message}
+                        selectedDate={normalizedDate}
+                      />
+                    )
+                  }}
                 />
               </div>
             </div>
@@ -467,6 +561,25 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
         )}
       </DialogContent>
     </Dialog>
+
+    {/* Approval Link Modal - Separate Modal */}
+    {approvalLink && (
+      <ApprovalLinkModal
+        open={showApprovalLinkModal}
+        onOpenChange={(open) => {
+          setShowApprovalLinkModal(open)
+          if (!open) {
+            setApprovalLink(null)
+            if (onSuccess) onSuccess()
+          }
+        }}
+        approvalLink={approvalLink || ''}
+        onCancel={() => {
+          if (onSuccess) onSuccess()
+        }}
+      />
+    )}
+    </>
   )
 }
 

@@ -13,6 +13,8 @@ export const routes = {
     SUBSCRIPTION_CANCEL: "/subscription/cancel",
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
+    VERIFY: "/verify",
+    EMAIL_ACTION: "/email-action",
     FREE_TRIAL_PLAN_ID: "FREE_TRIAL_PLAN_ID_PLACEHOLDER", // This should be replaced with the actual ID from the backend
   },
 
@@ -20,6 +22,7 @@ export const routes = {
     DASHBOARD: "/dashboard",
     NOTIFICATIONS: "/dashboard/notifications",
     PROFILE: "/profile",
+    SETTINGS: "/settings",
     EMPLOYEECREATE: "/employee/create",
     EMPLOYEELIST: "/employee/list",
     EMPLOYEETRASH: "/employee/trash",

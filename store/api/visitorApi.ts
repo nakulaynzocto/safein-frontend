@@ -126,6 +126,7 @@ export interface BulkUpdateVisitorsRequest {
 }
 
 export const visitorApi = baseApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     createVisitor: builder.mutation<Visitor, CreateVisitorRequest>({
       query: (visitorData) => ({

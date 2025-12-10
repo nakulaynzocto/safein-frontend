@@ -15,6 +15,7 @@ export interface UploadFileResponse {
 }
 
 export const uploadApi = baseApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     uploadFile: builder.mutation<UploadFileResponse['data'], UploadFileRequest>({
       query: ({ file }) => {

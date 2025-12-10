@@ -57,7 +57,7 @@ export const ProfileCard = React.memo(function ProfileCard({ profile }: ProfileC
       <CardContent className="space-y-4">
         <div className="flex justify-center">
           <Badge variant="secondary" className="capitalize">
-            {profile.role}
+            {profile.role === "visitor" ? "User" : profile.role}
           </Badge>
         </div>
       </CardContent>

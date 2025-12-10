@@ -86,6 +86,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
   
+  // Allow email-action and verify routes without authentication
+  if (pathname.startsWith(`${routes.publicroute.EMAIL_ACTION}/`) || pathname.startsWith(`${routes.publicroute.VERIFY}/`)) {
+    return NextResponse.next()
+  }
+  
   // Allow authenticated users to access subscription-plan and subscription-success pages
   const subscriptionPages = [
     routes.publicroute.SUBSCRIPTION_PLAN,

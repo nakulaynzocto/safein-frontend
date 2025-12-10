@@ -82,10 +82,14 @@ export function useAuthSubscription() {
     routes.publicroute.FEATURES,
     routes.publicroute.CONTACT,
     routes.publicroute.HELP,
+    routes.publicroute.VERIFY,
   ], [])
 
   const isAllowedPageForAuthenticated = useMemo(() => {
-    return allowedPagesForAuthenticated.some(page => pathname === page)
+    // Check exact match or if pathname starts with allowed page (for dynamic routes like /verify/[token])
+    return allowedPagesForAuthenticated.some(page => 
+      pathname === page || pathname?.startsWith(page + '/')
+    )
   }, [pathname, allowedPagesForAuthenticated])
 
   // Determine if Navbar should show (private navbar)
@@ -237,6 +241,7 @@ export function useAuthSubscription() {
     isLoading,
   }
 }
+
 
 
 

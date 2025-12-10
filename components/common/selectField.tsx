@@ -50,7 +50,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(
         <Select
           ref={ref}
           inputId={name ?? stableId}
-          instanceId={name ?? stableId} // ← add this for react-select’s internal IDs
+          instanceId={name ?? stableId} // ← add this for react-select's internal IDs
           className={cn("text-sm", className)}
           classNamePrefix="react-select"
           options={options}
@@ -58,6 +58,8 @@ const SelectField = forwardRef<any, SelectFieldProps>(
           value={selectedOption}
           onChange={handleChange}
           isSearchable
+          menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+          menuPosition="fixed"
           styles={{
             control: (base, state) => ({
               ...base,
@@ -73,7 +75,8 @@ const SelectField = forwardRef<any, SelectFieldProps>(
             placeholder: (base) => ({ ...base, color: "hsl(var(--muted-foreground))" }),
             singleValue: (base) => ({ ...base, color: "hsl(var(--foreground))" }),
             input: (base) => ({ ...base, color: "hsl(var(--foreground))" }),
-            menu: (base) => ({ ...base, borderRadius: "0.375rem", zIndex: 20 }),
+            menu: (base) => ({ ...base, borderRadius: "0.375rem", zIndex: 9999 }),
+            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
             option: (base, state) => ({
               ...base,
               backgroundColor: state.isFocused

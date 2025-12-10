@@ -86,7 +86,7 @@ export function ProfilePageContent() {
   const accountInfoFields = [
     { label: "Email", value: profile?.email },
     { label: "Company Name", value: profile?.companyName },
-    { label: "Role", value: profile?.role },
+    { label: "Role", value: profile?.role === "visitor" ? "User" : profile?.role },
   ]
   
   const accountStatusFields = [

@@ -72,10 +72,22 @@ export const NotificationCard = memo(function NotificationCard({
   }, [appointment.status])
 
   const employeeName = useMemo(() => {
-    return typeof appointment.employeeId === 'string' 
-      ? appointment.employeeId 
-      : appointment.employee?.name || 'N/A'
-  }, [appointment.employeeId, appointment.employee?.name])
+    // Handle both populated and non-populated employeeId
+    const employee = (appointment as any).employeeId || appointment.employee
+    if (typeof employee === 'object' && employee !== null) {
+      return employee.name || 'N/A'
+    }
+    return appointment.employee?.name || 'N/A'
+  }, [appointment.employeeId, appointment.employee])
+
+  const visitorName = useMemo(() => {
+    // Handle both populated and non-populated visitorId
+    const visitor = (appointment as any).visitorId || appointment.visitor
+    if (typeof visitor === 'object' && visitor !== null) {
+      return visitor.name || 'N/A'
+    }
+    return appointment.visitor?.name || 'N/A'
+  }, [appointment.visitorId, appointment.visitor])
 
   return (
     <Card className="w-full h-full flex flex-col mx-2 sm:mx-0">
@@ -100,7 +112,7 @@ export const NotificationCard = memo(function NotificationCard({
             <User className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-900">Visitor</p>
-              <p className="text-sm text-gray-600 truncate">{appointment.visitor?.name || 'N/A'}</p>
+              <p className="text-sm text-gray-600 truncate">{visitorName}</p>
             </div>
           </div>
           
