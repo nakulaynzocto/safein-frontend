@@ -13,6 +13,27 @@ import { useRouter } from "next/navigation"
 import { routes } from "@/utils/routes"
 import { formatCurrency } from "@/utils/helpers"
 
+declare global {
+  interface Window {
+    Razorpay: any
+  }
+}
+
+async function loadRazorpayScript(src: string) {
+  return new Promise<boolean>((resolve) => {
+    const existing = document.querySelector(`script[src="${src}"]`)
+    if (existing) {
+      resolve(true)
+      return
+    }
+    const script = document.createElement("script")
+    script.src = src
+    script.onload = () => resolve(true)
+    script.onerror = () => resolve(false)
+    document.body.appendChild(script)
+  })
+}
+
 interface PricingModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -42,9 +63,37 @@ export function PricingModal({ open, onOpenChange, isRegistrationFlow = false }:
         cancelUrl,
       }).unwrap();
 
-      if (response.url) {
-        window.location.href = response.url;
+      const loaded = await loadRazorpayScript("https://checkout.razorpay.com/v1/checkout.js");
+      if (!loaded) {
+        toast.error('Failed to load Razorpay. Please try again.');
+        return;
       }
+
+      const options = {
+        key: response.keyId,
+        amount: response.amount,
+        currency: response.currency || "INR",
+        name: "Subscription Payment",
+        description: "Plan purchase",
+        order_id: response.orderId,
+        prefill: {
+          email: response.userEmail,
+        },
+        handler: function () {
+          window.location.href = successUrl;
+        },
+        modal: {
+          ondismiss: function () {
+            window.location.href = cancelUrl;
+          },
+        },
+        theme: {
+          color: "#3882a5",
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
     } catch (err: any) {
       toast.error(err?.data?.message || 'Failed to initiate checkout. Please try again.');
     }

@@ -221,8 +221,9 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
     }
   }, [isEditMode, existingAppointment, open, reset])
 
-  const handleVisitorSelect = React.useCallback((visitorId: string) => {
-    if (visitorId) {
+  const handleVisitorSelect = React.useCallback((visitorId: string | null) => {
+    const id = visitorId ?? ""
+    if (id) {
       const selectedVisitor = visitors.find(v => v._id === visitorId)
       if (selectedVisitor) {
         setValue("visitorName", selectedVisitor.name)
@@ -372,7 +373,8 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                       options={visitorOptions}
                       value={field.value}
                       onChange={(val) => {
-                        field.onChange(val)
+                        console.log("Visitor select change", { val })
+                        field.onChange(val ?? "")
                         handleVisitorSelect(val)
                       }}
                       error={errors.visitorId?.message}
@@ -392,7 +394,10 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                       placeholder="Select employee"
                       options={employeeOptions}
                       value={field.value}
-                      onChange={(val) => field.onChange(val)}
+                      onChange={(val) => {
+                        console.log("Employee select change", { val })
+                        field.onChange(val ?? "")
+                      }}
                       error={errors.employeeId?.message}
                     />
                   )}

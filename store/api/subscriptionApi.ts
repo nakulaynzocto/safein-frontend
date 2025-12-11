@@ -41,8 +41,12 @@ interface CreateCheckoutSessionRequest {
 }
 
 interface CreateCheckoutSessionResponse {
-  url: string;
-  sessionId?: string;
+  orderId: string;
+  amount: number;
+  currency: string;
+  keyId: string;
+  planId: string;
+  userEmail: string;
 }
 
 interface CreateFreeVerificationSessionRequest {
@@ -73,7 +77,7 @@ export const subscriptionApi = baseApi.injectEndpoints({
     }),
     createCheckoutSession: builder.mutation<CreateCheckoutSessionResponse, CreateCheckoutSessionRequest>({
       query: (body) => ({
-        url: '/user-subscriptions/stripe/checkout',
+        url: '/user-subscriptions/razorpay/checkout',
         method: 'POST',
         body,
       }),

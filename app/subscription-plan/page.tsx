@@ -30,6 +30,27 @@ import {
   X,
 } from "lucide-react"
 
+declare global {
+  interface Window {
+    Razorpay: any
+  }
+}
+
+async function loadRazorpayScript(src: string) {
+  return new Promise<boolean>((resolve) => {
+    const existing = document.querySelector(`script[src="${src}"]`)
+    if (existing) {
+      resolve(true)
+      return
+    }
+    const script = document.createElement("script")
+    script.src = src
+    script.onload = () => resolve(true)
+    script.onerror = () => resolve(false)
+    document.body.appendChild(script)
+  })
+}
+
 export default function SubscriptionPlanPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -103,18 +124,43 @@ export default function SubscriptionPlanPage() {
       const successUrl = `${window.location.origin}${routes.publicroute.SUBSCRIPTION_SUCCESS}`
       const cancelUrl = `${window.location.origin}${routes.publicroute.SUBSCRIPTION_CANCEL}`
 
-      // Use single checkout route - backend handles free vs paid plans
       const response = await createCheckoutSession({
         planId: selectedPlan._id,
         successUrl,
         cancelUrl,
       }).unwrap()
 
-      if (response.url) {
-        router.push(response.url)
-      } else {
-        toast.error("Failed to start checkout. Please try again.")
+      const razorpayLoaded = await loadRazorpayScript("https://checkout.razorpay.com/v1/checkout.js")
+      if (!razorpayLoaded) {
+        toast.error("Failed to load Razorpay. Please try again.")
+        return
       }
+
+      const options = {
+        key: response.keyId,
+        amount: response.amount,
+        currency: response.currency || "INR",
+        name: "Subscription Payment",
+        description: selectedPlan.name,
+        order_id: response.orderId,
+        prefill: {
+          email: response.userEmail,
+        },
+        handler: function () {
+          router.replace(successUrl)
+        },
+        modal: {
+          ondismiss: function () {
+            router.replace(cancelUrl)
+          },
+        },
+        theme: {
+          color: "#3882a5",
+        },
+      }
+
+      const razorpay = new window.Razorpay(options)
+      razorpay.open()
     } catch (error: any) {
       const message =
         error?.data?.message || error?.message || "Failed to start checkout."

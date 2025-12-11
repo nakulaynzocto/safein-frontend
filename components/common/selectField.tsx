@@ -2,100 +2,105 @@
 
 import type React from "react"
 import { forwardRef, useId } from "react"
-import Select, { Props as ReactSelectProps, SingleValue } from "react-select"
 import { cn } from "@/lib/utils"
 
 interface Option {
-  value: string
+  value: string | number
   label: string
 }
 
 interface SelectFieldProps
-  extends Omit<ReactSelectProps<Option, false>, "options" | "value" | "onChange"> {
+  extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "value" | "onChange"> {
   label?: string
   error?: string
   helperText?: string
   options: Option[]
   placeholder?: string
   onChange?: (value: string) => void
-  value?: string
+  value?: string | number
   name?: string
   required?: boolean
+  allowEmpty?: boolean
 }
 
-const SelectField = forwardRef<any, SelectFieldProps>(
+const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
   (
-    { className, label, error, helperText, options, placeholder, value, onChange, name, required = false, ...props },
+    {
+      className,
+      label,
+      error,
+      helperText,
+      options,
+      placeholder = "Select option",
+      value = "",
+      onChange,
+      name,
+      required = false,
+      allowEmpty = true,
+      ...props
+    },
     ref
   ) => {
-    const selectedOption: Option | null =
-      options.find((opt) => opt.value === value) || null
+    const stableId = useId()
+    const controlId = name ?? stableId
+    const describedBy = error
+      ? `${controlId}-error`
+      : helperText
+        ? `${controlId}-helper`
+        : undefined
 
-    const handleChange = (option: SingleValue<Option>) => {
-      const selectedValue = option ? option.value : ""
+    const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const selectedValue = event.target.value
       onChange?.(selectedValue)
     }
-
-    // ✅ Stable ID to prevent SSR/client mismatch
-    const stableId = useId()
 
     return (
       <div className="space-y-2">
         {label && (
-          <label htmlFor={name ?? stableId} className="text-sm font-medium text-foreground">
+          <label htmlFor={controlId} className="text-sm font-medium text-foreground">
             {label}
             {required && <span className="text-red-500 ml-1">*</span>}
           </label>
         )}
-        <Select
+
+        <select
           ref={ref}
-          inputId={name ?? stableId}
-          instanceId={name ?? stableId} // ← add this for react-select's internal IDs
-          className={cn("text-sm", className)}
-          classNamePrefix="react-select"
-          options={options}
-          placeholder={placeholder}
-          value={selectedOption}
+          id={controlId}
+          name={name}
+          value={value === null || value === undefined ? "" : String(value)}
           onChange={handleChange}
-          isSearchable
-          menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
-          menuPosition="fixed"
-          styles={{
-            control: (base, state) => ({
-              ...base,
-              minHeight: "2.5rem",
-              borderRadius: "0.375rem",
-              borderColor: error ? "hsl(var(--destructive))" : "#e0e0e0",
-              backgroundColor: "hsl(var(--input))",
-              boxShadow: state.isFocused ? `0 0 0 2px hsl(var(--ring))` : undefined,
-              "&:hover": {
-                borderColor: error ? "hsl(var(--destructive))" : "#e0e0e0",
-              },
-            }),
-            placeholder: (base) => ({ ...base, color: "hsl(var(--muted-foreground))" }),
-            singleValue: (base) => ({ ...base, color: "hsl(var(--foreground))" }),
-            input: (base) => ({ ...base, color: "hsl(var(--foreground))" }),
-            menu: (base) => ({ ...base, borderRadius: "0.375rem", zIndex: 9999 }),
-            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-            option: (base, state) => ({
-              ...base,
-              backgroundColor: state.isFocused
-                ? "hsl(var(--primary))"
-                : "transparent",
-              color: state.isFocused
-                ? "hsl(var(--primary-foreground))"
-                : "hsl(var(--foreground))",
-              cursor: "pointer",
-              "&:active": {
-                backgroundColor: "hsl(var(--primary) / 0.8)",
-              },
-            }),
-          }}
+          aria-invalid={!!error}
+          aria-describedby={describedBy}
+          className={cn(
+            "flex h-10 w-full rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground",
+            "placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            error ? "border-destructive focus:ring-destructive" : "",
+            className
+          )}
           {...props}
-        />
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        >
+          {allowEmpty && (
+            <option value="" disabled={required}>
+              {placeholder}
+            </option>
+          )}
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+
+        {error && (
+          <p id={`${controlId}-error`} className="text-sm text-destructive">
+            {error}
+          </p>
+        )}
         {helperText && !error && (
-          <p className="text-sm text-muted-foreground">{helperText}</p>
+          <p id={`${controlId}-helper`} className="text-sm text-muted-foreground">
+            {helperText}
+          </p>
         )}
       </div>
     )
