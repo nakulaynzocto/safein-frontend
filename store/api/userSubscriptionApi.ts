@@ -8,8 +8,6 @@ export interface IUserSubscription {
   endDate: string;
   isActive: boolean;
   paymentStatus: 'pending' | 'succeeded' | 'failed' | 'cancelled';
-  stripeCustomerId?: string;
-  stripeSubscriptionId?: string;
   trialDays?: number;
   isTrialing: boolean;
   createdAt: string;
@@ -113,11 +111,10 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
      * Assign free plan to new user
      * POST /api/v1/user-subscriptions/assign-free-plan
      */
-    assignFreePlan: builder.mutation<AssignFreePlanResponse, { stripeCustomerId?: string }>({
-      query: (body) => ({
+    assignFreePlan: builder.mutation<AssignFreePlanResponse, void>({
+      query: () => ({
         url: '/user-subscriptions/assign-free-plan',
         method: 'POST',
-        body,
       }),
       transformResponse: (response: any) => {
         if (response && response.success && response.data) {

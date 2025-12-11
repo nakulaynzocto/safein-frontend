@@ -11,7 +11,14 @@ import { ConfirmationDialog } from "@/components/common/confirmationDialog"
 import { Pagination } from "@/components/common/pagination"
 import { StatusBadge } from "@/components/common/statusBadge"
 import { format } from "date-fns"
-import { formatDateTime } from "@/utils/helpers"
+import { 
+  formatDateTime, 
+  formatName, 
+  getInitials, 
+  getAppointmentStatus, 
+  getAppointmentDateTime, 
+  isAppointmentTimedOut 
+} from "@/utils/helpers"
 import { 
   Trash2, 
   Eye,
@@ -47,7 +54,6 @@ import {
 } from "@/components/ui/dropdownMenu"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
-import { getAppointmentStatus, getAppointmentDateTime, isAppointmentTimedOut } from "@/utils/helpers"
 import { NewAppointmentModal } from "./NewAppointmentModal"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
@@ -283,7 +289,8 @@ export function AppointmentTable({
         header: "Visitor",
         render: (appointment: Appointment) => {
           const visitor = (appointment as any).visitorId || appointment.visitor;
-          const visitorName = visitor?.name || "Unknown Visitor";
+          const visitorNameRaw = visitor?.name || "Unknown Visitor";
+          const visitorName = formatName(visitorNameRaw) || visitorNameRaw;
           const visitorPhone = visitor?.phone || "N/A";
           const visitorEmail = visitor?.email || "N/A";
           const visitorCompany = visitor?.company || "";
@@ -302,7 +309,7 @@ export function AppointmentTable({
                   }}
                 />
                 <AvatarFallback>
-                  {visitorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
+                  {getInitials(visitorName, 2)}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
@@ -330,7 +337,8 @@ export function AppointmentTable({
         header: "Meeting With",
         render: (appointment: Appointment) => {
           const employee = (appointment as any).employeeId || appointment.employee;
-          const employeeName = employee?.name || "Unknown Employee";
+          const employeeNameRaw = employee?.name || "Unknown Employee";
+          const employeeName = formatName(employeeNameRaw) || employeeNameRaw;
           const employeeEmail = employee?.email || "N/A";
           const employeeDepartment = employee?.department || "";
           
@@ -338,7 +346,7 @@ export function AppointmentTable({
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
                 <AvatarFallback className="bg-blue-100 text-blue-600">
-                  {employeeName.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
+                  {getInitials(employeeName, 2)}
                 </AvatarFallback>
               </Avatar>
               <div>

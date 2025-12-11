@@ -44,6 +44,7 @@ import { NewVisitorModal } from "./NewVisitorModal"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 import { VisitorDetailsDialog } from "./visitorDetailsDialog"
+import { formatName, getInitials } from "@/utils/helpers"
 
 const createColumns = (
   handleDeleteClick: (visitor: Visitor) => void, 
@@ -58,11 +59,11 @@ const createColumns = (
         <Avatar className="h-10 w-10">
           <AvatarImage src={visitor.photo} alt={visitor.name} />
           <AvatarFallback>
-            {visitor.name.split(' ').map(n => n[0]).join('')}
+            {getInitials(formatName(visitor.name) || visitor.name)}
           </AvatarFallback>
         </Avatar>
         <div>
-          <div className="font-medium">{visitor.name}</div>
+          <div className="font-medium">{formatName(visitor.name)}</div>
           {visitor.visitorId && (
             <div className="text-xs text-blue-600 font-mono">ID: {visitor.visitorId}</div>
           )}

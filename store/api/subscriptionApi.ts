@@ -49,6 +49,13 @@ interface CreateCheckoutSessionResponse {
   userEmail: string;
 }
 
+export interface VerifyRazorpayPaymentRequest {
+  planId: string;
+  orderId: string;
+  paymentId: string;
+  signature: string;
+}
+
 interface CreateFreeVerificationSessionRequest {
   successUrl: string;
   cancelUrl: string;
@@ -89,9 +96,23 @@ export const subscriptionApi = baseApi.injectEndpoints({
       },
     }),
 
+    verifyRazorpayPayment: builder.mutation<{ success: boolean }, VerifyRazorpayPaymentRequest>({
+      query: (body) => ({
+        url: '/user-subscriptions/razorpay/verify',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (response: any) => {
+        if (response.success) {
+          return { success: true }
+        }
+        return response
+      },
+    }),
+
     // Removed createFreeVerificationSession - now using single createCheckoutSession route
     // Free plans are handled automatically by the backend based on planType
   }),
 });
 
-export const { useGetAllSubscriptionPlansQuery, useCreateCheckoutSessionMutation } = subscriptionApi;
+export const { useGetAllSubscriptionPlansQuery, useCreateCheckoutSessionMutation, useVerifyRazorpayPaymentMutation } = subscriptionApi;

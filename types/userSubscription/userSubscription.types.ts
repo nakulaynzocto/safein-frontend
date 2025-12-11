@@ -8,8 +8,6 @@ export interface IUserSubscriptionResponse {
     endDate: Date;
     isActive: boolean;
     paymentStatus: 'pending' | 'succeeded' | 'failed' | 'cancelled';
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
     trialDays: number;
     isTrialing: boolean; // Derived field
     isDeleted: boolean;

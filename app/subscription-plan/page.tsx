@@ -10,6 +10,7 @@ import {
   ISubscriptionPlan,
   useCreateCheckoutSessionMutation,
   useGetAllSubscriptionPlansQuery,
+  useVerifyRazorpayPaymentMutation,
 } from "@/store/api/subscriptionApi"
 import { useAuthSubscription } from "@/hooks/useAuthSubscription"
 import { routes } from "@/utils/routes"
@@ -78,8 +79,9 @@ export default function SubscriptionPlanPage() {
   } = useGetAllSubscriptionPlansQuery({ isActive: true })
 
   // Use single checkout route for both free and paid plans
-  const [createCheckoutSession, { isLoading: isCreating }] =
-    useCreateCheckoutSessionMutation()
+const [createCheckoutSession, { isLoading: isCreating }] =
+  useCreateCheckoutSessionMutation()
+const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
 
   const plans: ISubscriptionPlan[] = fetchedPlans?.data?.plans || []
 
@@ -146,8 +148,19 @@ export default function SubscriptionPlanPage() {
         prefill: {
           email: response.userEmail,
         },
-        handler: function () {
-          router.replace(successUrl)
+        handler: async function (rpResponse: any) {
+          try {
+            await verifyRazorpayPayment({
+              planId: selectedPlan._id,
+              orderId: rpResponse.razorpay_order_id,
+              paymentId: rpResponse.razorpay_payment_id,
+              signature: rpResponse.razorpay_signature,
+            }).unwrap()
+            router.replace(successUrl)
+          } catch (verificationError: any) {
+            toast.error(verificationError?.data?.message || "Payment verification failed.")
+            router.replace(cancelUrl)
+          }
         },
         modal: {
           ondismiss: function () {

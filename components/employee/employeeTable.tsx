@@ -43,6 +43,7 @@ import { Input } from "../ui/input"
 import { routes } from "@/utils/routes"
 import { NewEmployeeModal } from "./NewEmployeeModal"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
+import { formatName, getInitials } from "@/utils/helpers"
 
 export interface EmployeeTableProps {
   employees: Employee[]
@@ -175,11 +176,11 @@ export function EmployeeTable({
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
               <AvatarFallback>
-                {employee.name.split(' ').map(n => n[0]).join('')}
+                {getInitials(formatName(employee.name) || employee.name)}
               </AvatarFallback>
             </Avatar>
             <div>
-              <div className="font-medium">{employee.name}</div>
+              <div className="font-medium">{formatName(employee.name)}</div>
               <div className="text-sm text-gray-500">{employee.department}</div>
             </div>
           </div>

@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Check, ArrowRight, X } from "lucide-react"
-import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan, useCreateCheckoutSessionMutation } from "@/store/api/subscriptionApi"
+import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan, useCreateCheckoutSessionMutation, useVerifyRazorpayPaymentMutation } from "@/store/api/subscriptionApi"
 import { useAppSelector } from "@/store/hooks"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -43,6 +43,7 @@ interface PricingModalProps {
 export function PricingModal({ open, onOpenChange, isRegistrationFlow = false }: PricingModalProps) {
   const { data: fetchedSubscriptionPlans, isLoading } = useGetAllSubscriptionPlansQuery({ isActive: true });
   const [createCheckoutSession, { isLoading: isCreatingSession }] = useCreateCheckoutSessionMutation();
+  const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const router = useRouter();
 
@@ -79,8 +80,19 @@ export function PricingModal({ open, onOpenChange, isRegistrationFlow = false }:
         prefill: {
           email: response.userEmail,
         },
-        handler: function () {
-          window.location.href = successUrl;
+        handler: async function (rpResponse: any) {
+          try {
+            await verifyRazorpayPayment({
+              planId,
+              orderId: rpResponse.razorpay_order_id,
+              paymentId: rpResponse.razorpay_payment_id,
+              signature: rpResponse.razorpay_signature,
+            }).unwrap();
+            window.location.href = successUrl;
+          } catch (verificationError: any) {
+            toast.error(verificationError?.data?.message || 'Payment verification failed.');
+            window.location.href = cancelUrl;
+          }
         },
         modal: {
           ondismiss: function () {
