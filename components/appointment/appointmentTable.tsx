@@ -448,7 +448,7 @@ export function AppointmentTable({
         const isRejected = status === 'rejected'
         const isCompleted = status === 'completed'
         
-        const showOnlyView = isRejected || isApproved || isCompleted
+        const showOnlyView = isRejected || isCompleted
         
         return (
         <div className="flex justify-end">
@@ -497,6 +497,22 @@ export function AppointmentTable({
                       <DropdownMenuItem onClick={() => handleEdit(appointment)}>
                         <Edit className="mr-2 h-4 w-4" />
                         Edit
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  
+                  {isApproved && onCheckOut && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectedAppointment(appointment)
+                          setShowCheckOutDialog(true)
+                        }}
+                        disabled={isAppointmentLoading(appointment._id)}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Check Out
                       </DropdownMenuItem>
                     </>
                   )}
