@@ -106,6 +106,12 @@ const appointmentSchema = yup.object({
       return true // If validation fails, allow it (date validation will catch it)
     }
   }),
+  accompanyingCount: yup
+    .number()
+    .typeError("Please enter a valid number")
+    .min(0, "Accompanying people cannot be negative")
+    .max(20, "Accompanying people cannot exceed 20")
+    .default(0),
   notes: yup.string().optional().default(""),
   vehicleNumber: yup.string().optional().default(""),
   vehiclePhoto: yup.string().optional().default(""),
@@ -143,12 +149,15 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
   )
 
   const employeeOptions = React.useMemo(() => 
-    employees.map((emp) => ({
-      value: emp._id,
-      label: `${emp.name} - ${emp.department}`,
-    })),
+    employees
+      ?.filter(emp => emp.status == "Active")      // only ACTIVE records
+      .map(emp => ({
+        value: emp._id,
+        label: `${emp.name} (${emp.status}) - ${emp.department}`,
+      })),
     [employees]
-  )
+  );
+  
 
   const { data: visitorsData } = useGetVisitorsQuery({ page: 1, limit: 100 })
   const visitors: Visitor[] = visitorsData?.visitors || []
@@ -186,6 +195,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
       notes: "",
       vehicleNumber: "",
       vehiclePhoto: "",
+      accompanyingCount: 0,
     },
   })
 
@@ -217,6 +227,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
         notes: appointmentDetails?.notes || "",
         vehicleNumber: appointmentDetails?.vehicleNumber || "",
         vehiclePhoto: appointmentDetails?.vehiclePhoto || "",
+        accompanyingCount: existingAppointment.accompanyingCount ?? 0,
       })
     }
   }, [isEditMode, existingAppointment, open, reset])
@@ -245,8 +256,14 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
     setGeneralError(null)
     
     try {
+      const selectedEmp = employees.find(e => e._id === data.employeeId)
+      if (selectedEmp && selectedEmp.status === 'Inactive') {
+        setGeneralError('Selected employee is inactive. Please choose an active employee.')
+        return
+      }
       if (isEditMode && appointmentId) {
         const updateData = {
+          accompanyingCount: data.accompanyingCount ?? 0,
           appointmentDetails: {
             purpose: data.purpose,
             scheduledDate: data.appointmentDate,
@@ -269,6 +286,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
           employeeId: data.employeeId,
           visitorId: data.visitorId,
           checkInTime: new Date().toISOString(), // Auto-set check-in time on creation
+          accompanyingCount: data.accompanyingCount ?? 0,
           appointmentDetails: {
             purpose: data.purpose,
             scheduledDate: data.appointmentDate,
@@ -407,7 +425,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
 
 
 
-            {/* Date and Time */}
+            {/* Date, Time, Accompanying People */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label className="font-medium">Appointment Date</Label>
@@ -480,18 +498,37 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
               </div>
             </div>
 
-            {/* Purpose */}
-            <div className="space-y-2">
-              <Label htmlFor="purpose" className="font-medium">Purpose of Visit</Label>
-              <Textarea
-                id="purpose"
-                {...register("purpose")}
-                placeholder="Brief description of the visit purpose"
-                className={errors.purpose ? "border-destructive" : ""}
-              />
-              {errors.purpose && (
-                <span className="text-sm text-destructive">{errors.purpose.message}</span>
-              )}
+            {/* Purpose & Accompanying People */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="purpose" className="font-medium">Purpose of Visit</Label>
+                <Textarea
+                  id="purpose"
+                  {...register("purpose")}
+                  placeholder="Brief description of the visit purpose"
+                  className={errors.purpose ? "border-destructive" : ""}
+                  rows={4}
+                />
+                {errors.purpose && (
+                  <span className="text-sm text-destructive">{errors.purpose.message}</span>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="font-medium">Accompanying People</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={20}
+                  step={1}
+                  placeholder="Number of people with the visitor (e.g., 0, 1, 2)"
+                  {...register("accompanyingCount")}
+                  className={errors.accompanyingCount ? "border-destructive" : ""}
+                />
+                {errors.accompanyingCount && (
+                  <span className="text-sm text-destructive">{errors.accompanyingCount.message}</span>
+                )}
+              </div>
             </div>
 
             {/* Vehicle Information (Optional) */}

@@ -63,8 +63,10 @@ function NotificationsPageContent() {
     try {
       await approveAppointment(appointmentId).unwrap()
       // Cache invalidation will automatically refresh, but we also manually refetch to ensure immediate update
-      await refetch()
-      showSuccessToast('Appointment approved successfully!')
+      const result = await refetch()
+      if (result.data) {
+        showSuccessToast('Appointment approved successfully!')
+      }
     } catch (error) {
       showErrorToast('Failed to approve appointment')
     } finally {
@@ -77,8 +79,10 @@ function NotificationsPageContent() {
     try {
       await rejectAppointment(appointmentId).unwrap()
       // Cache invalidation will automatically refresh, but we also manually refetch to ensure immediate update
-      await refetch()
-      showSuccessToast('Appointment rejected successfully!')
+      const result = await refetch()
+      if (result.data) {
+        showSuccessToast('Appointment rejected successfully!')
+      }
     } catch (error) {
       showErrorToast('Failed to reject appointment')
     } finally {

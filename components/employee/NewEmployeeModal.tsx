@@ -32,6 +32,7 @@ const employeeSchema = yup.object({
     .required("Phone number is required")
     .matches(/^[\+]?[1-9][\d]{0,15}$/, "Please enter a valid phone number"),
   department: yup.string().required("Department is required").min(2, "Department must be at least 2 characters").max(50, "Department cannot exceed 50 characters"),
+  designation: yup.string().required("Position is required").min(2, "Position must be at least 2 characters").max(100, "Position cannot exceed 100 characters"),
   status: yup.string().oneOf(['Active', 'Inactive']).default('Active'),
 })
 
@@ -40,6 +41,7 @@ type EmployeeFormData = {
   email: string
   phone: string
   department: string
+  designation: string
   status: 'Active' | 'Inactive'
 }
 
@@ -102,6 +104,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
       email: "",
       phone: "",
       department: "",
+      designation: "",
       status: "Active",
     },
   })
@@ -113,6 +116,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
         email: employeeData.email,
         phone: employeeData.phone,
         department: employeeData.department,
+        designation: employeeData.designation || "",
         status: employeeData.status,
       })
     }
@@ -313,6 +317,30 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
                       />
                       {errors.department && (
                         <span className="text-sm text-destructive">{errors.department.message}</span>
+                      )}
+                    </div>
+                  )}
+                />
+
+                <Controller
+                  name="designation"
+                  control={control}
+                  rules={{ required: "Position is required" }}
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-2">
+                      <Label className="font-medium">
+                        Position <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="designation"
+                        placeholder="e.g., CEO, VP, HR, Manager"
+                        value={field.value || ""}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        aria-required="true"
+                        className={errors.designation ? "border-destructive" : ""}
+                      />
+                      {errors.designation && (
+                        <span className="text-sm text-destructive">{errors.designation.message}</span>
                       )}
                     </div>
                   )}

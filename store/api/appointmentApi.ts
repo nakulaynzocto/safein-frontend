@@ -9,8 +9,9 @@ export interface Appointment {
   visitorId: string // Reference to Visitor
   visitor?: VisitorDetails // Populated visitor details
   accompaniedBy?: AccompaniedBy
+  accompanyingCount?: number
   appointmentDetails: AppointmentDetails
-  status: 'pending' | 'approved' | 'rejected' | 'completed'
+  status: 'pending' | 'approved' | 'rejected' | 'completed' | 'time_out'
   checkInTime?: string
   checkOutTime?: string
   actualDuration?: number
@@ -32,6 +33,7 @@ export interface EmployeeDetails {
   phone: string
   department: string
   designation: string
+  status: 'Active' | 'Inactive'
 }
 
 export interface VisitorDetails {
@@ -83,6 +85,7 @@ export interface CreateAppointmentRequest {
   employeeId: string
   visitorId: string // Reference to Visitor
   accompaniedBy?: AccompaniedBy
+  accompanyingCount?: number
   appointmentDetails: AppointmentDetails
   securityDetails: SecurityDetails
   notifications: NotificationPreferences

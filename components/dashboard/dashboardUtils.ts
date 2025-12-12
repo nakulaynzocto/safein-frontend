@@ -1,4 +1,5 @@
 import { Appointment } from "@/store/api/appointmentApi"
+import { getAppointmentStatus } from "@/utils/helpers"
 
 export interface AppointmentStats {
   totalAppointments: number
@@ -28,7 +29,9 @@ export function calculateAppointmentStats(appointments: Appointment[]): Appointm
     (acc, appointment) => {
       acc.totalAppointments++
       
-      switch (appointment.status) {
+      const effectiveStatus = getAppointmentStatus(appointment as any) as Appointment['status'] | 'time_out'
+
+      switch (effectiveStatus) {
         case 'pending':
           acc.pendingAppointments++
           break
@@ -39,9 +42,10 @@ export function calculateAppointmentStats(appointments: Appointment[]): Appointm
           acc.rejectedAppointments++
           break
         case 'completed':
-        // Removed 'checked-out' case as it's not a valid status type
-        // case 'checked-out':
           acc.completedAppointments++
+          break
+        case 'time_out':
+        default:
           break
       }
       
