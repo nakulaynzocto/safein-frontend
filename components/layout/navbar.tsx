@@ -292,18 +292,20 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
                   <span className="relative z-10">Contact</span>
                   <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
                 </Link>
-                <Link
-                  href={routes.publicroute.HELP}
-                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
-                    pathname === routes.publicroute.HELP
-                      ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
-                      : `border-transparent ${linkText}`
-                  } group transition-colors duration-200 ${linkHoverBgClass}`}
-                  prefetch={true}
-                >
-                  <span className="relative z-10">Help</span>
-                  <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
-                </Link>
+                {!isActuallyAuthenticated && (
+                  <Link
+                    href={routes.publicroute.HELP}
+                    className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
+                      pathname === routes.publicroute.HELP
+                        ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
+                        : `border-transparent ${linkText}`
+                    } group transition-colors duration-200 ${linkHoverBgClass}`}
+                    prefetch={true}
+                  >
+                    <span className="relative z-10">Help</span>
+                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
+                  </Link>
+                )}
               </>
             )}
           </div>
@@ -312,17 +314,9 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
             {shouldShowProfileDropdown ? (
               <>
                 {isActuallyAuthenticated && (
-                  <>
-                    <div className="md:hidden">
-                      <MobileSidebar />
-                    </div>
-                    <Button variant="ghost" size="sm" asChild className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all duration-200 hover:bg-gray-100/80 rounded-lg">
-                      <Link href={routes.publicroute.HELP} prefetch={true}>
-                        <HelpCircle className="h-4 w-4" />
-                        Help
-                      </Link>
-                    </Button>
-                  </>
+                  <div className="md:hidden">
+                    <MobileSidebar />
+                  </div>
                 )}
 
                 <DropdownMenu>
@@ -424,18 +418,13 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
                     </Link>
                   </>
                 ) : (
-                  <div className="hidden sm:flex items-center gap-2">
-                    <Button variant="ghost" asChild className={`px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkText}`}>
-                      <Link href={routes.publicroute.HELP} prefetch={true}>Help</Link>
-                    </Button>
-                    <Link 
-                      href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN} 
-                      className={`px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`} 
-                      prefetch={true}
-                    >
-                      My Account
-                    </Link>
-                  </div>
+                  <Link 
+                    href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN} 
+                    className={`hidden sm:flex px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`} 
+                    prefetch={true}
+                  >
+                    My Account
+                  </Link>
                 )}
                 
                 <Button
@@ -516,23 +505,13 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
                         </Link>
                       </>
                     ) : (
-                      <>
-                        <Link
-                          href={routes.publicroute.HELP}
-                          className="block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 hover:bg-gray-100/80"
-                          style={{ color: '#161718' }}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          Help
-                        </Link>
-                        <Link
-                          href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN}
-                          className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          My Account
-                        </Link>
-                      </>
+                      <Link
+                        href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN}
+                        className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        My Account
+                      </Link>
                     )}
                   </div>
                 </>
