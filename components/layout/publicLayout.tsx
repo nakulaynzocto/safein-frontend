@@ -43,7 +43,7 @@ export function PublicLayout({ children }: PublicLayoutProps) {
       className="min-h-screen flex flex-col transition-all duration-300" 
       style={{ backgroundColor: 'var(--background)' }}
     >
-      {!shouldHideNavbar && <Navbar />}
+      {!shouldHideNavbar && <Navbar forcePublic />}
       <main 
         className="flex-1 transition-opacity duration-300 ease-in-out" 
         style={{ backgroundColor: 'var(--background)', minHeight: shouldHideNavbar ? '100vh' : 'calc(100vh - 200px)' }}

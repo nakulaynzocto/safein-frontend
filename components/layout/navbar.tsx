@@ -42,7 +42,11 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { usePathname } from "next/navigation"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 
-export function Navbar() {
+interface NavbarProps {
+  forcePublic?: boolean
+}
+
+export function Navbar({ forcePublic = false }: NavbarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const dispatch = useAppDispatch()
@@ -68,7 +72,7 @@ export function Navbar() {
     linkHoverBgClass,
     ctaBtn,
   } = useNavbarScrollStyle({
-    isAuthenticated: shouldShowPrivateNavbar,
+    isAuthenticated: !forcePublic && shouldShowPrivateNavbar,
     isMounted,
     threshold: 10,
   })
@@ -136,16 +140,18 @@ export function Navbar() {
 
   // Determine if user is authenticated (for UI display purposes)
   // Show private navbar UI only if: hasActiveSubscription AND token exists
-  const isActuallyAuthenticated = shouldShowPrivateNavbar
+  const isPublicVariant = forcePublic === true
+  const isActuallyAuthenticated = !isPublicVariant && shouldShowPrivateNavbar
   
   // For hiding Sign In button: check if user is simply logged in (has token)
-  const isLoggedIn = isAuthenticated && token
+  const isLoggedIn = !isPublicVariant && isAuthenticated && token
+  const isLoggedInPublic = isAuthenticated && token
   
   // Show profile dropdown if:
   // 1. User is on subscription-plan page AND logged in (has token) - show dropdown even if user data is loading
   // 2. OR user has active subscription (shouldShowPrivateNavbar) AND has user data
   // Otherwise show "My Account" button
-  const shouldShowProfileDropdown = isAuthenticated && token && (
+  const shouldShowProfileDropdown = !isPublicVariant && isAuthenticated && token && (
     (isSubscriptionPage) || 
     (shouldShowPrivateNavbar && user)
   )
@@ -408,7 +414,7 @@ export function Navbar() {
               </>
             ) : (
               <>
-                {!isLoggedIn ? (
+                {(!isPublicVariant && !isLoggedIn) || (isPublicVariant && !isLoggedInPublic) ? (
                   <>
                     <Button variant="ghost" asChild className={`hidden sm:flex px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkText}`}>
                       <Link href={routes.publicroute.LOGIN} prefetch={true}>Sign in</Link>
@@ -418,13 +424,18 @@ export function Navbar() {
                     </Link>
                   </>
                 ) : (
-                  <Link 
-                    href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN} 
-                    className={`hidden sm:flex px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`} 
-                    prefetch={true}
-                  >
-                    My Account
-                  </Link>
+                  <div className="hidden sm:flex items-center gap-2">
+                    <Button variant="ghost" asChild className={`px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkText}`}>
+                      <Link href={routes.publicroute.HELP} prefetch={true}>Help</Link>
+                    </Button>
+                    <Link 
+                      href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN} 
+                      className={`px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`} 
+                      prefetch={true}
+                    >
+                      My Account
+                    </Link>
+                  </div>
                 )}
                 
                 <Button
@@ -443,7 +454,7 @@ export function Navbar() {
          {isMobileMenuOpen && (
            <div className="lg:hidden border-t border-gray-200/30 bg-white/90 backdrop-blur-md shadow-lg">
             <div className="px-4 pt-4 pb-6 space-y-2">
-              {!isLoggedIn && (
+              {((!isPublicVariant && !isLoggedIn) || (isPublicVariant && !isLoggedInPublic)) && (
                 <>
                   <Link
                     href={routes.publicroute.HOME}
@@ -486,7 +497,7 @@ export function Navbar() {
                     Help
                   </Link>
                   <div className="pt-4 border-t border-gray-200/50">
-                    {!isLoggedIn ? (
+                    {((!isPublicVariant && !isLoggedIn) || (isPublicVariant && !isLoggedInPublic)) ? (
                       <>
                         <Link
                           href={routes.publicroute.LOGIN}
@@ -505,13 +516,23 @@ export function Navbar() {
                         </Link>
                       </>
                     ) : (
-                      <Link
-                        href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN}
-                        className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        My Account
-                      </Link>
+                      <>
+                        <Link
+                          href={routes.publicroute.HELP}
+                          className="block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 hover:bg-gray-100/80"
+                          style={{ color: '#161718' }}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Help
+                        </Link>
+                        <Link
+                          href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN}
+                          className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          My Account
+                        </Link>
+                      </>
                     )}
                   </div>
                 </>
