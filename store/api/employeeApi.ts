@@ -7,6 +7,7 @@ export interface Employee {
   email: string
   phone: string
   department: string
+  designation?: string
   status: 'Active' | 'Inactive'
   isDeleted: boolean
   deletedAt?: string
@@ -19,6 +20,7 @@ export interface CreateEmployeeRequest {
   email: string
   phone: string
   department: string
+  designation?: string
   status?: 'Active' | 'Inactive'
 }
 
@@ -28,6 +30,7 @@ export interface UpdateEmployeeRequest {
   email?: string
   phone?: string
   department?: string
+  designation?: string
   status?: 'Active' | 'Inactive'
 }
 
