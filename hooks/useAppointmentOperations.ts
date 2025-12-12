@@ -97,6 +97,9 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     setCurrentPage(1)
   }, [debouncedSearch])
 
+  // Keep server date filtering aligned to the user's local day boundary
+  const timezoneOffsetMinutes = -new Date().getTimezoneOffset()
+
   const queryParams: GetAppointmentsQuery = {
     page: currentPage,
     limit: pageSize,
@@ -106,7 +109,8 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     startDate: dateFrom || undefined,
     endDate: dateTo || undefined,
     sortBy,
-    sortOrder
+    sortOrder,
+    timezoneOffsetMinutes,
   }
 
   const { 

@@ -127,6 +127,7 @@ export interface GetAppointmentsQuery {
   endDate?: string
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
+  timezoneOffsetMinutes?: number
 }
 
 export interface AppointmentListResponse {
@@ -189,7 +190,15 @@ export const appointmentApi = baseApi.injectEndpoints({
 
     getAppointments: builder.query<AppointmentListResponse, GetAppointmentsQuery | void>({
       query: (params) => {
-        const queryParams = createUrlParams(params || {})
+        const timezoneOffsetMinutes =
+          params && typeof params.timezoneOffsetMinutes === 'number'
+            ? params.timezoneOffsetMinutes
+            : -new Date().getTimezoneOffset()
+
+        const queryParams = createUrlParams({
+          timezoneOffsetMinutes,
+          ...(params || {}),
+        })
         const populateParams = '_populate=visitor,employee'
         return `/appointments?${populateParams}${queryParams ? `&${queryParams}` : ''}`
       },

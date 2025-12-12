@@ -20,7 +20,12 @@ const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
     const [hoverDate, setHoverDate] = useState<Date | null>(null);
 
     const today = new Date();
-    const toISO = (d: Date) => d.toISOString().slice(0, 10)
+    const formatLocalDate = (d: Date) => {
+        const y = d.getFullYear()
+        const m = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        return `${y}-${m}-${day}`
+    }
     
     const [currentView, setCurrentView] = useState({
         month: today.getMonth(),
@@ -33,7 +38,7 @@ const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
 
     const displayRange = useMemo(() => {
         const { startDate, endDate } = range;
-        return startDate && endDate ? `${toISO(startDate)} - ${toISO(endDate)}` : '';
+        return startDate && endDate ? `${formatLocalDate(startDate)} - ${formatLocalDate(endDate)}` : '';
     }, [range]);
 
     const generateCalendarDays = (year: number, month: number) => {
@@ -73,12 +78,12 @@ const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
 
         setRangeDates(tempRange);
         
-        localStorage.setItem('dateRange', JSON.stringify({
-          startDate: toISO(tempRange.startDate),
-          endDate: toISO(tempRange.endDate),
-        }))
+            localStorage.setItem('dateRange', JSON.stringify({
+              startDate: formatLocalDate(tempRange.startDate),
+              endDate: formatLocalDate(tempRange.endDate),
+            }))
 
-        onDateRangeChange?.({ startDate: toISO(tempRange.startDate), endDate: toISO(tempRange.endDate) });
+        onDateRangeChange?.({ startDate: formatLocalDate(tempRange.startDate), endDate: formatLocalDate(tempRange.endDate) });
         setIsOpen(false);
     };
 
@@ -201,8 +206,8 @@ const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
             setTempRange({ startDate: start, endDate: end });
             setIsOpen(false);
             
-            localStorage.setItem('dateRange', JSON.stringify({ startDate: toISO(start!), endDate: toISO(end!) }))
-            onDateRangeChange?.({ startDate: toISO(start!), endDate: toISO(end!) });
+            localStorage.setItem('dateRange', JSON.stringify({ startDate: formatLocalDate(start!), endDate: formatLocalDate(end!) }))
+            onDateRangeChange?.({ startDate: formatLocalDate(start!), endDate: formatLocalDate(end!) });
         }
     };
 
@@ -351,7 +356,7 @@ const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
 
                         <div className="date-range-footer flex items-center justify-between mt-4 pt-4 border-t border-gray-300">
                             <div className="date-range-selected-text text-sm text-gray-500">
-                                {tempRange.startDate && tempRange.endDate && `${toISO(tempRange.startDate)} - ${toISO(tempRange.endDate)}`}
+                                {tempRange.startDate && tempRange.endDate && `${formatLocalDate(tempRange.startDate)} - ${formatLocalDate(tempRange.endDate)}`}
                             </div>
                             <div className="date-range-footer-buttons flex gap-2">
                                 <button className="date-range-btn date-range-btn-cancel px-3 py-1 text-sm border border-gray-300 rounded" onClick={cancelSelection}>Cancel</button>
