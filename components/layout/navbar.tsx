@@ -148,12 +148,12 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
   const isLoggedInPublic = isAuthenticated && token
   
   // Show profile dropdown if:
-  // 1. User is on subscription-plan page AND logged in (has token) - show dropdown even if user data is loading
+  // 1. User is on subscription-plan page AND logged in (has token) - show dropdown even in public variant
   // 2. OR user has active subscription (shouldShowPrivateNavbar) AND has user data
   // Otherwise show "My Account" button
-  const shouldShowProfileDropdown = !isPublicVariant && isAuthenticated && token && (
-    (isSubscriptionPage) || 
-    (shouldShowPrivateNavbar && user)
+  const shouldShowProfileDropdown = isAuthenticated && token && (
+    (isPublicVariant && isSubscriptionPage) || // Allow dropdown on subscription page even in public variant
+    (!isPublicVariant && (isSubscriptionPage || (shouldShowPrivateNavbar && user)))
   )
 
   const handleLogout = useCallback(async () => {
@@ -362,7 +362,8 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
                       </div>
                     </div>
                     <DropdownMenuSeparator />
-                    {isActuallyAuthenticated ? (
+                    {/* Show dashboard/notifications only if user has active subscription (not on subscription-plan page) */}
+                    {isActuallyAuthenticated && !isSubscriptionPage ? (
                       <>
                         <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                           <Link href={routes.privateroute.DASHBOARD} className="flex items-center" prefetch={true}>
@@ -376,25 +377,17 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
                             Notifications
                           </Link>
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        {/* Profile option - Only show if not on subscription page */}
+                        <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                          <Link href={routes.privateroute.PROFILE} className="flex items-center" prefetch={true}>
+                            <UserCircle className="mr-3 h-4 w-4" />
+                            Profile
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                       </>
-                    ) : (
-                      <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                        <Link href={routes.publicroute.SUBSCRIPTION_PLAN} className="flex items-center" prefetch={true}>
-                          <CreditCard className="mr-3 h-4 w-4" />
-                          Subscription Plan
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    {/* Profile option - Always visible when dropdown is shown */}
-                    {!isSubscriptionPage && (
-                      <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                        <Link href={routes.privateroute.PROFILE} className="flex items-center" prefetch={true}>
-                          <UserCircle className="mr-3 h-4 w-4" />
-                          Profile
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator />
+                    ) : null}
                     <DropdownMenuItem 
                       onClick={handleLogout} 
                       className="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
