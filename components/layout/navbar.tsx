@@ -63,6 +63,7 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
     shouldShowPrivateNavbar,
     canAccessDashboard,
     isSubscriptionPage,
+    hasActiveSubscription,
   } = useAuthSubscription()
 
   // Use scroll-based styling hook for navbar
@@ -148,12 +149,12 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
   const isLoggedInPublic = isAuthenticated && token
   
   // Show profile dropdown if:
-  // 1. User is on subscription-plan page AND logged in (has token) - show dropdown even in public variant
-  // 2. OR user has active subscription (shouldShowPrivateNavbar) AND has user data
-  // Otherwise show "My Account" button
+  // 1. Token exists AND payment successful (hasActiveSubscription) - show dropdown with "My Account"
+  // 2. OR user is on subscription-plan page AND logged in (has token) - show dropdown even in public variant
+  // Otherwise show public navbar (Sign In / Start Trial)
   const shouldShowProfileDropdown = isAuthenticated && token && (
     (isPublicVariant && isSubscriptionPage) || // Allow dropdown on subscription page even in public variant
-    (!isPublicVariant && (isSubscriptionPage || (shouldShowPrivateNavbar && user)))
+    (!isPublicVariant && (isSubscriptionPage || (hasActiveSubscription && user))) // Show if token exists AND payment successful
   )
 
   const handleLogout = useCallback(async () => {
@@ -401,7 +402,8 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
               </>
             ) : (
               <>
-                {(!isPublicVariant && !isLoggedIn) || (isPublicVariant && !isLoggedInPublic) ? (
+                {/* Show Sign In / Start Trial if: No token OR token exists but payment not successful */}
+                {!isAuthenticated || !token || !hasActiveSubscription ? (
                   <>
                     <Button variant="ghost" asChild className={`hidden sm:flex px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkText}`}>
                       <Link href={routes.publicroute.LOGIN} prefetch={true}>Sign in</Link>
@@ -411,6 +413,7 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
                     </Link>
                   </>
                 ) : (
+                  /* Show "My Account" only if: Token exists AND payment successful */
                   <Link 
                     href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN} 
                     className={`hidden sm:flex px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`} 
@@ -436,7 +439,8 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
          {isMobileMenuOpen && (
            <div className="lg:hidden border-t border-gray-200/30 bg-white/90 backdrop-blur-md shadow-lg">
             <div className="px-4 pt-4 pb-6 space-y-2">
-              {((!isPublicVariant && !isLoggedIn) || (isPublicVariant && !isLoggedInPublic)) && (
+              {/* Show public menu links only if: No token OR token exists but payment not successful */}
+              {(!isAuthenticated || !token || !hasActiveSubscription) && (
                 <>
                   <Link
                     href={routes.publicroute.HOME}
@@ -479,7 +483,8 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
                     Help
                   </Link>
                   <div className="pt-4 border-t border-gray-200/50">
-                    {((!isPublicVariant && !isLoggedIn) || (isPublicVariant && !isLoggedInPublic)) ? (
+                    {/* Show Sign In / Start Trial if: No token OR token exists but payment not successful */}
+                    {!isAuthenticated || !token || !hasActiveSubscription ? (
                       <>
                         <Link
                           href={routes.publicroute.LOGIN}
@@ -498,6 +503,7 @@ export function Navbar({ forcePublic = false }: NavbarProps) {
                         </Link>
                       </>
                     ) : (
+                      /* Show "My Account" only if: Token exists AND payment successful */
                       <Link
                         href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN}
                         className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
