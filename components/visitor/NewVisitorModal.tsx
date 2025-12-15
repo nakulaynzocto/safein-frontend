@@ -244,7 +244,7 @@ export function NewVisitorModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="max-h-[65vh] overflow-y-auto overflow-x-visible pr-2">
+        <div className="max-h-[65vh] overflow-y-auto pr-2">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {isEditMode && isLoadingVisitor ? (
               <div className="flex items-center justify-center h-32">

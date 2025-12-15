@@ -17,9 +17,20 @@ interface Props {
 }
 
 export function CountryStateCitySelect({ value, onChange, errors }: Props) {
-  const countries = Country.getAllCountries().map(c => ({ label: c.name, value: c.isoCode }))
-  const states = value.country ? State.getStatesOfCountry(value.country).map(s => ({ label: s.name, value: s.isoCode })) : []
-  const cities = value.country && value.state ? City.getCitiesOfState(value.country, value.state).map(ct => ({ label: ct.name, value: ct.name })) : []
+  const countries = Country.getAllCountries().map(c => ({ 
+    label: c.name, 
+    value: c.isoCode,
+    searchKeywords: `${c.name} ${c.isoCode} ${c.phonecode ?? ""}`.trim()
+  }))
+  const states = value.country ? State.getStatesOfCountry(value.country).map(s => ({ 
+    label: s.name, 
+    value: s.isoCode,
+    searchKeywords: `${s.name} ${s.isoCode}`.trim()
+  })) : []
+  const cities = value.country && value.state ? City.getCitiesOfState(value.country, value.state).map(ct => ({ 
+    label: ct.name, 
+    value: ct.name 
+  })) : []
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

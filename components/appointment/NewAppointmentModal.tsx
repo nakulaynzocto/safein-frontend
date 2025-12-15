@@ -154,6 +154,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
       .map(emp => ({
         value: emp._id,
         label: `${emp.name} (${emp.status}) - ${emp.department}`,
+        searchKeywords: `${emp.name} ${emp.email ?? ""} ${emp.phone ?? ""} ${emp.department ?? ""} ${emp.designation ?? ""}`.trim(),
       })),
     [employees]
   );
@@ -166,6 +167,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
     visitors.map((visitor) => ({
       value: visitor._id,
       label: `${visitor.name} - ${visitor.email}`,
+      searchKeywords: `${visitor.name} ${visitor.email ?? ""} ${visitor.phone ?? ""}`.trim(),
     })),
     [visitors]
   )

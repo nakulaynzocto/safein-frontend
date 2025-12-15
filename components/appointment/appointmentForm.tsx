@@ -67,6 +67,7 @@ export function AppointmentForm() {
   const employeeOptions = employees.map((emp) => ({
     value: emp._id,
     label: `${emp.name} - ${emp.department}`,
+    searchKeywords: `${emp.name} ${emp.email ?? ""} ${emp.phone ?? ""} ${emp.department ?? ""} ${emp.designation ?? ""}`.trim(),
   }))
 
   const clearGeneralError = () => {

@@ -100,6 +100,7 @@ export function AppointmentDetailsStep({
     .map((emp) => ({
       value: emp._id,
       label: `${emp.name} - ${emp.department}`,
+      searchKeywords: `${emp.name} ${emp.email ?? ""} ${emp.phone ?? ""} ${emp.department ?? ""} ${emp.designation ?? ""}`.trim(),
     }))
 
 
