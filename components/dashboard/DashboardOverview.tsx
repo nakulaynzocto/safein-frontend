@@ -26,11 +26,24 @@ export function DashboardOverview() {
   const [retryCount, setRetryCount] = useState(0)
   const [loadingTimeout, setLoadingTimeout] = useState(false)
   
-  const { data: appointmentsData, isLoading: appointmentsLoading, error: appointmentsError, refetch: refetchAppointments } = useGetAppointmentsQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-    refetchOnFocus: false,
-    skip: false,
-  })
+  const timezoneOffset = useMemo(() => -new Date().getTimezoneOffset(), [])
+  const appointmentQueryParams = useMemo(
+    () => ({
+      page: 1,
+      limit: 5000, // fetch enough records so dashboard stats are not limited to the first page
+      sortBy: "createdAt",
+      sortOrder: "desc" as const,
+      timezoneOffsetMinutes: timezoneOffset,
+    }),
+    [timezoneOffset]
+  )
+
+  const { data: appointmentsData, isLoading: appointmentsLoading, error: appointmentsError, refetch: refetchAppointments } =
+    useGetAppointmentsQuery(appointmentQueryParams, {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: false,
+      skip: false,
+    })
   
   const { data: employeesData, isLoading: employeesLoading, error: employeesError, refetch: refetchEmployees } = useGetEmployeesQuery(undefined, {
     refetchOnMountOrArgChange: true,
