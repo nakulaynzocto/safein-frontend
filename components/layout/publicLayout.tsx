@@ -21,6 +21,7 @@ export function PublicLayout({ children }: PublicLayoutProps) {
     isAuthenticated,
     token,
     isAllowedPageForAuthenticated,
+    hasActiveSubscription,
   } = useAuthSubscription()
 
   // Define auth routes where navbar and footer should be hidden
@@ -38,12 +39,15 @@ export function PublicLayout({ children }: PublicLayoutProps) {
   const shouldHideNavbar = isAuthRoute
   const shouldHideFooter = isAuthRoute
 
+  // Check if user is logged in but doesn't have active subscription
+  const shouldShowUpgradeButton = !!(isAuthenticated && token && !hasActiveSubscription)
+
   return (
     <div 
       className="min-h-screen flex flex-col transition-all duration-300" 
       style={{ backgroundColor: 'var(--background)' }}
     >
-      {!shouldHideNavbar && <Navbar forcePublic />}
+      {!shouldHideNavbar && <Navbar forcePublic showUpgradeButton={shouldShowUpgradeButton} />}
       <main 
         className="flex-1 transition-opacity duration-300 ease-in-out" 
         style={{ backgroundColor: 'var(--background)', minHeight: shouldHideNavbar ? '100vh' : 'calc(100vh - 200px)' }}

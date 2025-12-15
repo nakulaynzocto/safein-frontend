@@ -99,7 +99,10 @@ export function DashboardOverview() {
     setShowAppointmentModal(false)
   }, [])
 
-  const hasError = useMemo(() => appointmentsError || employeesError || visitorsError, [appointmentsError, employeesError, visitorsError])
+  const hasError = useMemo(
+    () => appointmentsError || employeesError || visitorsError,
+    [appointmentsError, employeesError, visitorsError]
+  )
   
   const handleRetry = useCallback(() => {
     setRetryCount((prev) => prev + 1)
@@ -138,7 +141,12 @@ export function DashboardOverview() {
     )
   }
   
-  if (hasError && !hasData) {
+  // Show a friendly error state only when:
+  // - There is an error
+  // - No data has been loaded yet
+  // - AND we're not currently in a loading state
+  // This prevents a quick "1 second" error flash while data is still being fetched.
+  if (hasError && !hasData && !isLoading) {
     return (
       <div className="space-y-6">
         <DashboardHeader userName={user?.name} />
