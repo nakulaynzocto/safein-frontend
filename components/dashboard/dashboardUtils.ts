@@ -27,10 +27,27 @@ export function calculateAppointmentStats(appointments: Appointment[]): Appointm
   
   const stats = appointments.reduce(
     (acc, appointment) => {
-      acc.totalAppointments++
-      
-      const effectiveStatus = getAppointmentStatus(appointment as any) as Appointment['status'] | 'time_out'
+      const appointmentDate = new Date(
+        appointment.appointmentDetails?.scheduledDate ||
+          appointment.appointmentDetails?.scheduledDate ||
+          new Date().toISOString()
+      )
+      const appointmentDateOnly = new Date(
+        appointmentDate.getFullYear(),
+        appointmentDate.getMonth(),
+        appointmentDate.getDate()
+      )
 
+      const isToday = appointmentDateOnly.getTime() === today.getTime()
+      if (!isToday) {
+        return acc
+      }
+
+      // Today-only stats (as requested)
+      acc.totalAppointments++
+      acc.todaysAppointments++
+
+      const effectiveStatus = getAppointmentStatus(appointment as any) as Appointment['status'] | 'time_out'
       switch (effectiveStatus) {
         case 'pending':
           acc.pendingAppointments++
@@ -48,18 +65,7 @@ export function calculateAppointmentStats(appointments: Appointment[]): Appointm
         default:
           break
       }
-      
-      const appointmentDate = new Date(appointment.appointmentDetails?.scheduledDate || appointment.appointmentDetails?.scheduledDate || new Date().toISOString())
-      const appointmentDateOnly = new Date(
-        appointmentDate.getFullYear(),
-        appointmentDate.getMonth(),
-        appointmentDate.getDate()
-      )
-      
-      if (appointmentDateOnly.getTime() === today.getTime()) {
-        acc.todaysAppointments++
-      }
-      
+
       return acc
     },
     {

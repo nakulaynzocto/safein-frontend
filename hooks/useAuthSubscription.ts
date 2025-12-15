@@ -47,6 +47,13 @@ export function useAuthSubscription() {
     )
   }, [activeSubscriptionData])
 
+  // Trial detection (3 day trial / free plan)
+  const isTrialingSubscription = useMemo(() => {
+    if (!activeSubscriptionData?.data) return false
+    // Backend provides derived field `isTrialing`
+    return activeSubscriptionData.data.isTrialing === true
+  }, [activeSubscriptionData])
+
   // Check if current route is private
   const isCurrentRoutePrivate = useMemo(() => {
     return isPrivateRoute(pathname)
@@ -225,6 +232,7 @@ export function useAuthSubscription() {
     isSubscriptionLoading,
     isSubscriptionFetching,
     activeSubscriptionData: activeSubscriptionData?.data,
+    isTrialingSubscription,
     
     // Route state
     pathname,

@@ -20,6 +20,7 @@ import { routes } from "@/utils/routes"
 import { MobileSidebar } from "./mobileSidebar"
 import { useAuthSubscription } from "@/hooks/useAuthSubscription"
 import { useNavbarScrollStyle } from "@/hooks/useScrollStyle"
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import {
   User,
   LogOut,
@@ -55,6 +56,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
   const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false)
   const lastProfileUserRef = useRef<string | null>(null)
 
   // Use centralized hook for auth and subscription checks
@@ -65,6 +67,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
     canAccessDashboard,
     isSubscriptionPage,
     hasActiveSubscription,
+    isTrialingSubscription,
   } = useAuthSubscription()
 
   // Use scroll-based styling hook for navbar
@@ -201,6 +204,14 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
     router.push(routes.privateroute.PROFILE)
   }, [router])
 
+  const handleOpenUpgradeModal = useCallback(() => {
+    setIsUpgradeModalOpen(true)
+  }, [])
+
+  const handleCloseUpgradeModal = useCallback(() => {
+    setIsUpgradeModalOpen(false)
+  }, [])
+
   const getUserInitials = (name?: string, companyName?: string) => {
     if (companyName) {
       return companyName.substring(0, 1).toUpperCase()
@@ -313,13 +324,24 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
           <div className="flex items-center gap-2">
             {/* 1. Upgrade button (first) - Show if user is logged in but no subscription, hide on subscription-plan page */}
             {showUpgradeButton && isAuthenticated && token && !hasActiveSubscription && !isSubscriptionPage && (
-              <Link 
-                href={routes.publicroute.SUBSCRIPTION_PLAN}
+              <button
+                type="button"
+                onClick={handleOpenUpgradeModal}
                 className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
-                prefetch={true}
               >
                 Upgrade
-              </Link>
+              </button>
+            )}
+
+            {/* Trial plan active (3 day trial): show Upgrade button left of profile in navbar */}
+            {isAuthenticated && token && hasActiveSubscription && isTrialingSubscription && !isSubscriptionPage && (
+              <button
+                type="button"
+                onClick={handleOpenUpgradeModal}
+                className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
+              >
+                Upgrade
+              </button>
             )}
 
             {shouldShowProfileDropdown ? (
@@ -521,6 +543,9 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
             </Button>
           </div>
         </div>
+
+        {/* Upgrade Modal (opened from navbar Upgrade button) */}
+        <UpgradePlanModal isOpen={isUpgradeModalOpen} onClose={handleCloseUpgradeModal} />
 
          {isMobileMenuOpen && (
            <div className="lg:hidden border-t border-gray-200/30 bg-white/90 backdrop-blur-md shadow-lg">

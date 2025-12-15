@@ -15,9 +15,30 @@ import {
   useGetAllSubscriptionPlansQuery,
   ISubscriptionPlan,
 } from "@/store/api/subscriptionApi";
-import { useCreateCheckoutSessionMutation } from "@/store/api/subscriptionApi";
+import { useCreateCheckoutSessionMutation, useVerifyRazorpayPaymentMutation } from "@/store/api/subscriptionApi";
 import { toast } from "sonner";
 import { formatCurrency } from "@/utils/helpers";
+
+declare global {
+  interface Window {
+    Razorpay: any
+  }
+}
+
+async function loadRazorpayScript(src: string) {
+  return new Promise<boolean>((resolve) => {
+    const existing = document.querySelector(`script[src="${src}"]`)
+    if (existing) {
+      resolve(true)
+      return
+    }
+    const script = document.createElement("script")
+    script.src = src
+    script.onload = () => resolve(true)
+    script.onerror = () => resolve(false)
+    document.body.appendChild(script)
+  })
+}
 
 interface UpgradePlanModalProps {
   isOpen: boolean;
@@ -29,6 +50,7 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
   const { data, isLoading } = useGetAllSubscriptionPlansQuery({ isActive: true });
   const [createCheckoutSession, { isLoading: isCreating }] =
     useCreateCheckoutSessionMutation();
+  const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation();
 
   const plans: ISubscriptionPlan[] = data?.data?.plans || [];
   const paidPlans = plans.filter((plan) => plan.planType !== "free");
@@ -67,12 +89,51 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
         cancelUrl,
       }).unwrap();
 
-      if (response.url) {
-        router.push(response.url);
-        onClose();
-      } else {
-        toast.error("Failed to start checkout. Please try again.");
+      const loaded = await loadRazorpayScript("https://checkout.razorpay.com/v1/checkout.js");
+      if (!loaded) {
+        toast.error("Failed to load Razorpay. Please try again.");
+        return;
       }
+
+      const options = {
+        key: response.keyId,
+        amount: response.amount,
+        currency: response.currency || "INR",
+        name: "Subscription Payment",
+        description: "Plan upgrade",
+        order_id: response.orderId,
+        prefill: {
+          email: response.userEmail,
+        },
+        handler: async function (rpResponse: any) {
+          try {
+            await verifyRazorpayPayment({
+              planId: selectedPlanId,
+              orderId: rpResponse.razorpay_order_id,
+              paymentId: rpResponse.razorpay_payment_id,
+              signature: rpResponse.razorpay_signature,
+            }).unwrap();
+            onClose();
+            window.location.href = successUrl;
+          } catch (verificationError: any) {
+            toast.error(verificationError?.data?.message || "Payment verification failed.");
+            onClose();
+            window.location.href = cancelUrl;
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            onClose();
+            window.location.href = cancelUrl;
+          },
+        },
+        theme: {
+          color: "#3882a5",
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
     } catch (error: any) {
       const message =
         error?.data?.message || error?.message || "Failed to start checkout.";
