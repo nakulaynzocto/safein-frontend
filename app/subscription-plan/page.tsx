@@ -192,7 +192,7 @@ const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
 
   // Show loader while checking subscription status or loading plans
   // Also show loader if user has active subscription (will redirect to dashboard)
-  if (isSubscriptionLoading || (isLoadingPlans && plans.length === 0) || hasActiveSubscription) {
+  if (isSubscriptionLoading || hasActiveSubscription) {
     return (
       <PublicLayout>
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
@@ -203,9 +203,7 @@ const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
                 <p className="text-muted-foreground text-sm">
                   {hasActiveSubscription 
                     ? 'Redirecting to dashboard...' 
-                    : isSubscriptionLoading 
-                    ? 'Checking subscription status...' 
-                    : 'Loading subscription plans...'}
+                    : 'Checking subscription status...'}
                 </p>
               </div>
             </div>
@@ -243,7 +241,7 @@ const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
           )}
 
           {/* Main Content - Compact Layout */}
-          {!isLoadingPlans && !plansError && plans.length > 0 && selectedPlan && isInitialized && (
+          {!isLoadingPlans && !plansError && plans.length > 0 && selectedPlan && (
             <div className="space-y-3">
               {/* Page Header - Compact */}
     
