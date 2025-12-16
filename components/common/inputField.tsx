@@ -14,7 +14,7 @@ interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
-  ({ className, label, error, helperText, required = false, type = "text", ...props }, ref) => {
+  ({ className, label, error, helperText, required = false, type = "text", autoComplete = "off", ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false)
     const isPasswordField = type === "password"
     const inputType = isPasswordField && showPassword ? "text" : type
@@ -30,6 +30,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
         <div className="relative">
           <input
             type={inputType}
+            autoComplete={autoComplete}
             className={cn(
               "flex h-10 w-full rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
               error && "border-destructive focus:ring-destructive",

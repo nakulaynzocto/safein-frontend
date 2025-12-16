@@ -38,9 +38,8 @@ export function DashboardHeader({ userName }: DashboardHeaderProps) {
           <NewAppointmentModal
             triggerButton={
               <Button className="w-full sm:w-auto text-xs sm:text-sm whitespace-nowrap">
-                <CalendarPlus className="mr-1 sm:mr-2 h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline">New Appointment</span>
-                <span className="sm:hidden">New</span>
+                <CalendarPlus className="mr-1.5 h-4 w-4 shrink-0" />
+                New Appointment
               </Button>
             }
           />

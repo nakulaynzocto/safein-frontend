@@ -4,6 +4,7 @@ import type React from "react"
 import { Navbar } from "./navbar"
 import { Sidebar } from "./sidebar"
 import { useAuthSubscription } from "@/hooks/useAuthSubscription"
+import { useAppointmentSocket } from "@/hooks/useSocket"
 
 interface ProtectedLayoutProps {
   children: React.ReactNode
@@ -23,6 +24,10 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     isSubscriptionPage,
     hasActiveSubscription,
   } = useAuthSubscription()
+
+  // 🔌 Initialize WebSocket for real-time appointment updates
+  // Auto-connects when user is authenticated and auto-disconnects on logout
+  useAppointmentSocket()
 
   return (
     <div 

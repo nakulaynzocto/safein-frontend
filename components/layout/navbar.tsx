@@ -19,6 +19,7 @@ import { useLogoutMutation, useGetProfileQuery } from "@/store/api/authApi"
 import { routes } from "@/utils/routes"
 import { MobileSidebar } from "./mobileSidebar"
 import { useAuthSubscription } from "@/hooks/useAuthSubscription"
+import { NotificationBell } from "@/components/common/NotificationBell"
 import { useNavbarScrollStyle } from "@/hooks/useScrollStyle"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import {
@@ -345,12 +346,15 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
 
             {shouldShowProfileDropdown ? (
               <>
-                {/* Mobile Sidebar Menu - Shows hamburger icon for authenticated users on mobile */}
-                {isActuallyAuthenticated && (
-                  <MobileSidebar className="md:hidden" />
+                {/* 1. Notification Bell (First) - Shows for authenticated users with active subscription */}
+                {isActuallyAuthenticated && !isSubscriptionPage && (
+                  <NotificationBell 
+                    className={shouldShowWhiteNavbar ? 'hover:bg-gray-100/80' : 'hover:bg-white/10'}
+                    iconClassName={shouldShowWhiteNavbar ? 'text-gray-700' : 'text-white'}
+                  />
                 )}
 
-                {/* Profile dropdown */}
+                {/* 2. Profile dropdown (Second) */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button 
@@ -424,6 +428,11 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+
+                {/* 3. Mobile Sidebar Menu (Third) - Shows hamburger icon for authenticated users on mobile */}
+                {isActuallyAuthenticated && (
+                  <MobileSidebar className="md:hidden" />
+                )}
               </>
             ) : (
               <>
