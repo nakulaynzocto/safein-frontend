@@ -30,22 +30,32 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
       },
     })(args, api, extraOptions)
 
-    // Handle 401 errors
+    // Handle 401 errors - silent redirect to login using route helpers
     if (result.error && result.error.status === 401) {
-      const isLoginRequest = args && args.url && args.url.includes(routes.publicroute.LOGIN)
-      const isLogoutRequest = args && args.url && args.url.includes('/logout')
+      const isLoginRequest = args?.url?.includes(routes.publicroute.LOGIN)
+      const isLogoutRequest = args?.url?.includes('/logout')
+      const isRegisterRequest = args?.url?.includes(routes.publicroute.REGISTER)
       
-      if (!isLoginRequest && !isLogoutRequest) {
+      if (!isLoginRequest && !isLogoutRequest && !isRegisterRequest) {
         api.dispatch(logout())
         
         if (typeof window !== 'undefined') {
-          import('sonner').then(({ toast }) => {
-            toast.error('Session expired. Please login again.')
-          })
-
-          setTimeout(() => {
-            window.location.href = routes.publicroute.LOGIN
-          }, 1000)
+          // Clear storage silently
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          sessionStorage.clear()
+          
+          // Check if not already on login page
+          const currentPath = window.location.pathname
+          const isOnAuthPage = currentPath === routes.publicroute.LOGIN || 
+                               currentPath === routes.publicroute.REGISTER || 
+                               currentPath === routes.publicroute.FORGOT_PASSWORD ||
+                               currentPath === routes.publicroute.RESET_PASSWORD
+          
+          if (!isOnAuthPage) {
+            // Direct redirect without toast or delay
+            window.location.replace(routes.publicroute.LOGIN)
+          }
         }
       }
     }

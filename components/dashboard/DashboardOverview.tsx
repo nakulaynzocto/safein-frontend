@@ -41,7 +41,8 @@ export function DashboardOverview() {
   const { data: appointmentsData, isLoading: appointmentsLoading, error: appointmentsError, refetch: refetchAppointments } =
     useGetAppointmentsQuery(appointmentQueryParams, {
       refetchOnMountOrArgChange: true,
-      refetchOnFocus: false,
+      refetchOnFocus: true, // Refetch when user comes back to tab (for real-time updates)
+      refetchOnReconnect: true, // Refetch when network reconnects
       skip: false,
     })
   
