@@ -4,6 +4,7 @@ import type React from "react"
 import { Navbar } from "./navbar"
 import { Sidebar } from "./sidebar"
 import { useAuthSubscription } from "@/hooks/useAuthSubscription"
+import { useAppointmentSocket } from "@/hooks/useSocket"
 
 interface ProtectedLayoutProps {
   children: React.ReactNode
@@ -24,6 +25,10 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     hasActiveSubscription,
   } = useAuthSubscription()
 
+  // 🔌 Initialize WebSocket for real-time appointment updates
+  // Auto-connects when user is authenticated and auto-disconnects on logout
+  useAppointmentSocket()
+
   return (
     <div 
       className="h-screen flex flex-col overflow-hidden" 
@@ -38,10 +43,10 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
           </div>
         )}
         <main 
-          className="flex-1 overflow-y-auto transition-opacity duration-200" 
+          className="flex-1 overflow-y-auto overflow-x-hidden transition-opacity duration-200" 
           style={{ backgroundColor: 'var(--background)' }}
         >
-          <div className="container mx-auto p-4 md:p-6">
+          <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-5 md:p-6 max-w-full">
             {isLoading ? (
               // Show loading state
               <div 

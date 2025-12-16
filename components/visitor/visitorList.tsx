@@ -45,6 +45,12 @@ import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 import { VisitorDetailsDialog } from "./visitorDetailsDialog"
 
+// Helper function to truncate text
+const truncateText = (text: string, maxLength: number) => {
+  if (!text) return ''
+  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text
+}
+
 const createColumns = (
   handleDeleteClick: (visitor: Visitor) => void, 
   handleEditVisitor: (visitor: Visitor) => void,
@@ -54,17 +60,21 @@ const createColumns = (
     key: "visitor",
     header: "Visitor",
     render: (visitor: Visitor) => (
-      <div className="flex items-center gap-3">
-        <Avatar className="h-10 w-10">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <Avatar className="h-8 w-8 sm:h-10 sm:w-10 shrink-0">
           <AvatarImage src={visitor.photo} alt={visitor.name} />
-          <AvatarFallback>
+          <AvatarFallback className="text-xs sm:text-sm">
             {visitor.name.split(' ').map(n => n[0]).join('')}
           </AvatarFallback>
         </Avatar>
-        <div>
-          <div className="font-medium">{visitor.name}</div>
+        <div className="min-w-0 flex-1">
+          <div className="font-medium text-sm sm:text-base truncate max-w-[100px] sm:max-w-[150px]">
+            {visitor.name}
+          </div>
           {visitor.visitorId && (
-            <div className="text-xs text-blue-600 font-mono">ID: {visitor.visitorId}</div>
+            <div className="text-[10px] sm:text-xs text-blue-600 font-mono truncate max-w-[80px] sm:max-w-[120px]" title={visitor.visitorId}>
+              ID: {truncateText(visitor.visitorId, 10)}
+            </div>
           )}
         </div>
       </div>
@@ -74,14 +84,16 @@ const createColumns = (
     key: "contact",
     header: "Contact",
     render: (visitor: Visitor) => (
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-sm">
-          <Phone className="h-3 w-3" />
-          {visitor.phone}
+      <div className="space-y-0.5 sm:space-y-1 min-w-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+          <Phone className="h-3 w-3 shrink-0" />
+          <span className="truncate">{visitor.phone}</span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <Mail className="h-3 w-3" />
-          {visitor.email}
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-500">
+          <Mail className="h-3 w-3 shrink-0" />
+          <span className="truncate max-w-[80px] sm:max-w-[150px]" title={visitor.email}>
+            {truncateText(visitor.email, 12)}
+          </span>
         </div>
       </div>
     )
@@ -89,22 +101,24 @@ const createColumns = (
   {
     key: "address",
     header: "Address",
+    className: "hidden lg:table-cell",
     render: (visitor: Visitor) => (
       <div className="flex items-center gap-2 text-sm text-gray-500">
-        <MapPin className="h-3 w-3" />
-        {visitor.address.city}, {visitor.address.state}
+        <MapPin className="h-3 w-3 shrink-0" />
+        <span className="truncate">{visitor.address.city}, {visitor.address.state}</span>
       </div>
     )
   },
   {
     key: "idProof",
     header: "ID Proof",
+    className: "hidden md:table-cell",
     render: (visitor: Visitor) => (
       <div className="space-y-1">
         <Badge variant="outline" className="text-xs">
           {visitor.idProof.type.replace('_', ' ').toUpperCase()}
         </Badge>
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-gray-500 truncate max-w-[100px]">
           {visitor.idProof.number}
         </div>
       </div>
@@ -113,16 +127,18 @@ const createColumns = (
   {
     key: "createdAt",
     header: "Registered",
+    className: "hidden xl:table-cell",
     render: (visitor: Visitor) => (
       <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Calendar className="h-3 w-3" />
+        <Calendar className="h-3 w-3 shrink-0" />
         {new Date(visitor.createdAt).toLocaleDateString()}
       </div>
     )
   },
   {
     key: "actions",
-    header: "Actions",
+    header: "",
+    className: "w-10",
     render: (visitor: Visitor) => (
       <div className="flex justify-end">
         <DropdownMenu>
@@ -284,36 +300,39 @@ export function VisitorList() {
   return (
     <div className="space-y-6">
       {/* Header Actions */}
-      <Card className="card-hostinger   p-4">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-                <User className="h-5 w-5" />
-                Visitor Management
+      <Card className="card-hostinger p-3 sm:p-4">
+        <CardHeader className="pb-3 sm:pb-4 px-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="min-w-0">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl font-semibold">
+                <User className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                <span className="truncate">Visitor Management</span>
               </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
-                Manage and view all registered visitors 
-                {pagination && ` (${pagination.totalVisitors} total visitors)`}
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                <span className="hidden sm:inline">Manage and view all registered visitors</span>
+                <span className="sm:hidden">All visitors</span>
+                {pagination && ` (${pagination.totalVisitors} total)`}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <Button 
                 onClick={handleRefresh}
                 variant="outline"
                 size="sm"
                 disabled={isLoading}
+                className="h-9 w-9 p-0 sm:h-9 sm:w-9"
               >
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
               {hasReachedVisitorLimit ? (
                 <>
                   <Button 
-                    className="btn-hostinger btn-hostinger-primary flex items-center gap-2"
+                    className="btn-hostinger btn-hostinger-primary flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4"
                     onClick={() => setShowUpgradeModal(true)}
                   >
                     <Plus className="h-4 w-4" />
-                    Upgrade to Add More
+                    <span className="hidden sm:inline">Upgrade to Add More</span>
+                    <span className="sm:hidden">Upgrade</span>
                   </Button>
                   <UpgradePlanModal
                     isOpen={showUpgradeModal}
@@ -324,8 +343,8 @@ export function VisitorList() {
                 <NewVisitorModal 
                   onSuccess={handleVisitorCreated}
                   trigger={
-                    <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-2">
-                      <Plus className="h-4 w-4" />
+                    <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-1.5 text-xs sm:text-sm px-3 sm:px-4 whitespace-nowrap">
+                      <Plus className="h-4 w-4 shrink-0" />
                       Add Visitor
                     </Button>
                   }

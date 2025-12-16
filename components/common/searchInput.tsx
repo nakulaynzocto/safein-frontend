@@ -37,6 +37,7 @@ export function SearchInput({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        autoComplete="off"
         className="ml-2 w-full outline-none text-gray-700 field__text"
       />
     </div>

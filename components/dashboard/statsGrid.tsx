@@ -12,6 +12,7 @@ interface StatsGridProps {
 /**
  * StatsGrid component displays statistics cards for appointments
  * Optimized with React.memo and useMemo for performance
+ * Mobile-responsive: 1 column on mobile, 2 on tablet, 4 on desktop
  */
 export const StatsGrid = memo(function StatsGrid({ stats }: StatsGridProps) {
   const statCards = useMemo(() => [
@@ -42,7 +43,7 @@ export const StatsGrid = memo(function StatsGrid({ stats }: StatsGridProps) {
   ], [stats.pendingAppointments, stats.approvedAppointments, stats.completedAppointments, stats.todaysAppointments])
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
       {statCards.map((card) => (
         <StatCard
           key={card.title}

@@ -169,7 +169,7 @@ export function DashboardOverview() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <DashboardHeader userName={user?.name} />
 
       {/* Statistics Cards */}
@@ -182,7 +182,7 @@ export function DashboardOverview() {
         visitorsData={visitors}
       />
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         {/* Today's Appointments */}
         <AppointmentsTable
           title="Today's Appointments"

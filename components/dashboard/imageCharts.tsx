@@ -36,13 +36,13 @@ export function ImageChart({ title, description, data, type = 'donut', className
 
   return (
     <Card className={className}>
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+      <CardHeader className="p-3 sm:p-4 md:p-6">
+        <CardTitle className="text-base sm:text-lg font-semibold">{title}</CardTitle>
         {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">{description}</p>
         )}
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
         {renderChart()}
       </CardContent>
     </Card>
@@ -55,8 +55,8 @@ function DonutChart({ data }: { data: ImageChartProps['data'] }) {
   
   if (total === 0 || data.length === 0) {
     return (
-      <div className="relative w-full h-64 flex items-center justify-center">
-        <svg className="w-48 h-48 transform -rotate-90" viewBox="0 0 100 100">
+      <div className="relative w-full h-48 sm:h-64 flex flex-col items-center justify-center">
+        <svg className="w-32 h-32 sm:w-48 sm:h-48 transform -rotate-90" viewBox="0 0 100 100">
           <circle
             cx="50"
             cy="50"
@@ -71,8 +71,8 @@ function DonutChart({ data }: { data: ImageChartProps['data'] }) {
         
         {/* Center text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold text-gray-400">0</span>
-          <span className="text-sm text-gray-400">No Data</span>
+          <span className="text-xl sm:text-2xl font-bold text-gray-400">0</span>
+          <span className="text-xs sm:text-sm text-gray-400">No Data</span>
         </div>
       </div>
     )
@@ -81,50 +81,56 @@ function DonutChart({ data }: { data: ImageChartProps['data'] }) {
   let cumulativePercentage = 0
   
   return (
-    <div className="relative w-full h-64 flex items-center justify-center">
-      <svg className="w-48 h-48 transform -rotate-90" viewBox="0 0 100 100">
-        {data.map((item, index) => {
-          const percentage = (item.value / total) * 100
-          const strokeDasharray = `${percentage} ${100 - percentage}`
-          const strokeDashoffset = -cumulativePercentage
+    <div className="w-full">
+      {/* Chart and Legend Container - Stack on mobile, side by side on larger screens */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        {/* Chart */}
+        <div className="relative flex items-center justify-center">
+          <svg className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 transform -rotate-90" viewBox="0 0 100 100">
+            {data.map((item, index) => {
+              const percentage = (item.value / total) * 100
+              const strokeDasharray = `${percentage} ${100 - percentage}`
+              const strokeDashoffset = -cumulativePercentage
+              
+              cumulativePercentage += percentage
+              
+              return (
+                <circle
+                  key={index}
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  stroke={item.color || colors[index % colors.length]}
+                  strokeWidth="8"
+                  strokeDasharray={strokeDasharray}
+                  strokeDashoffset={strokeDashoffset.toString()}
+                  className="transition-all duration-500 ease-in-out"
+                />
+              )
+            })}
+          </svg>
           
-          cumulativePercentage += percentage
-          
-          return (
-            <circle
-              key={index}
-              cx="50"
-              cy="50"
-              r="40"
-              fill="none"
-              stroke={item.color || colors[index % colors.length]}
-              strokeWidth="8"
-              strokeDasharray={strokeDasharray}
-              strokeDashoffset={strokeDashoffset.toString()}
-              className="transition-all duration-500 ease-in-out"
-            />
-          )
-        })}
-      </svg>
-      
-      {/* Center text */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold text-gray-900">{total}</span>
-        <span className="text-sm text-gray-500">Total</span>
-      </div>
-      
-      {/* Legend */}
-      <div className="absolute -right-4 top-0 space-y-2">
-        {data.map((item, index) => (
-          <div key={index} className="flex items-center gap-2 text-sm">
-            <div 
-              className="w-3 h-3 rounded-full" 
-              style={{ backgroundColor: item.color || colors[index % colors.length] }}
-            />
-            <span className="text-gray-600">{item.label}</span>
-            <span className="font-medium">{item.value}</span>
+          {/* Center text */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">{total}</span>
+            <span className="text-xs sm:text-sm text-gray-500">Total</span>
           </div>
-        ))}
+        </div>
+        
+        {/* Legend */}
+        <div className="flex flex-wrap justify-center sm:flex-col gap-2 sm:gap-2">
+          {data.map((item, index) => (
+            <div key={index} className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+              <div 
+                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0" 
+                style={{ backgroundColor: item.color || colors[index % colors.length] }}
+              />
+              <span className="text-gray-600 truncate max-w-[60px] sm:max-w-none">{item.label}</span>
+              <span className="font-medium">{item.value}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -133,10 +139,10 @@ function DonutChart({ data }: { data: ImageChartProps['data'] }) {
 function BarChart({ data }: { data: ImageChartProps['data'] }) {
   if (data.length === 0) {
     return (
-      <div className="w-full h-64 flex items-center justify-center text-gray-400">
+      <div className="w-full h-48 sm:h-64 flex items-center justify-center text-gray-400">
         <div className="text-center">
-          <div className="text-lg font-medium">No Data Available</div>
-          <div className="text-sm">Add some data to see the chart</div>
+          <div className="text-base sm:text-lg font-medium">No Data Available</div>
+          <div className="text-xs sm:text-sm">Add some data to see the chart</div>
         </div>
       </div>
     )
@@ -146,25 +152,25 @@ function BarChart({ data }: { data: ImageChartProps['data'] }) {
   const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
   
   return (
-    <div className="w-full h-64">
-      <div className="flex items-end justify-between h-full gap-2">
+    <div className="w-full h-48 sm:h-64">
+      <div className="flex items-end justify-between h-full gap-1 sm:gap-2">
         {data.map((item, index) => {
           const height = maxValue > 0 ? (item.value / maxValue) * 100 : 0
           return (
-            <div key={index} className="flex flex-col items-center flex-1">
+            <div key={index} className="flex flex-col items-center flex-1 min-w-0">
               <div className="relative w-full flex flex-col items-center">
                 <div 
-                  className="w-full rounded-t-md transition-all duration-500 ease-in-out hover:opacity-80"
+                  className="w-full max-w-[40px] sm:max-w-none rounded-t-md transition-all duration-500 ease-in-out hover:opacity-80 mx-auto"
                   style={{ 
-                    height: `${height}%`,
+                    height: `${Math.max(height, 2)}%`,
                     backgroundColor: item.color || colors[index % colors.length]
                   }}
                 />
-                <div className="mt-2 text-xs font-medium text-gray-600">
+                <div className="mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium text-gray-600">
                   {item.value}
                 </div>
               </div>
-              <div className="mt-1 text-xs text-gray-500 text-center">
+              <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-gray-500 text-center truncate w-full px-0.5">
                 {item.label}
               </div>
             </div>
@@ -178,10 +184,10 @@ function BarChart({ data }: { data: ImageChartProps['data'] }) {
 function LineChart({ data }: { data: ImageChartProps['data'] }) {
   if (data.length === 0) {
     return (
-      <div className="w-full h-64 flex items-center justify-center text-gray-400">
+      <div className="w-full h-48 sm:h-64 flex items-center justify-center text-gray-400">
         <div className="text-center">
-          <div className="text-lg font-medium">No Data Available</div>
-          <div className="text-sm">Add some data to see the chart</div>
+          <div className="text-base sm:text-lg font-medium">No Data Available</div>
+          <div className="text-xs sm:text-sm">Add some data to see the chart</div>
         </div>
       </div>
     )
@@ -199,7 +205,7 @@ function LineChart({ data }: { data: ImageChartProps['data'] }) {
   }).join(' ')
   
   return (
-    <div className="w-full h-64 relative">
+    <div className="w-full h-48 sm:h-64 relative pb-5 sm:pb-6">
       <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
         {/* Grid lines */}
         {[0, 25, 50, 75, 100].map((y, index) => (
@@ -243,9 +249,9 @@ function LineChart({ data }: { data: ImageChartProps['data'] }) {
       </svg>
       
       {/* Labels */}
-      <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-gray-500">
+      <div className="absolute bottom-0 left-0 right-0 flex justify-between text-[10px] sm:text-xs text-gray-500 px-1">
         {data.map((item, index) => (
-          <span key={index}>{item.label}</span>
+          <span key={index} className="truncate max-w-[35px] sm:max-w-none">{item.label}</span>
         ))}
       </div>
     </div>
@@ -255,10 +261,10 @@ function LineChart({ data }: { data: ImageChartProps['data'] }) {
 function AreaChart({ data }: { data: ImageChartProps['data'] }) {
   if (data.length === 0) {
     return (
-      <div className="w-full h-64 flex items-center justify-center text-gray-400">
+      <div className="w-full h-48 sm:h-64 flex items-center justify-center text-gray-400">
         <div className="text-center">
-          <div className="text-lg font-medium">No Data Available</div>
-          <div className="text-sm">Add some data to see the chart</div>
+          <div className="text-base sm:text-lg font-medium">No Data Available</div>
+          <div className="text-xs sm:text-sm">Add some data to see the chart</div>
         </div>
       </div>
     )
@@ -278,7 +284,7 @@ function AreaChart({ data }: { data: ImageChartProps['data'] }) {
   const areaPath = `M 0,100 L ${points} L 100,100 Z`
   
   return (
-    <div className="w-full h-64 relative">
+    <div className="w-full h-48 sm:h-64 relative pb-5 sm:pb-6">
       <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
         {/* Grid lines */}
         {[0, 25, 50, 75, 100].map((y, index) => (
@@ -319,9 +325,9 @@ function AreaChart({ data }: { data: ImageChartProps['data'] }) {
       </svg>
       
       {/* Labels */}
-      <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-gray-500">
+      <div className="absolute bottom-0 left-0 right-0 flex justify-between text-[10px] sm:text-xs text-gray-500 px-1">
         {data.map((item, index) => (
-          <span key={index}>{item.label}</span>
+          <span key={index} className="truncate max-w-[35px] sm:max-w-none">{item.label}</span>
         ))}
       </div>
     </div>
@@ -331,10 +337,10 @@ function AreaChart({ data }: { data: ImageChartProps['data'] }) {
 function ScatterChart({ data }: { data: ImageChartProps['data'] }) {
   if (data.length === 0) {
     return (
-      <div className="w-full h-64 flex items-center justify-center text-gray-400">
+      <div className="w-full h-48 sm:h-64 flex items-center justify-center text-gray-400">
         <div className="text-center">
-          <div className="text-lg font-medium">No Data Available</div>
-          <div className="text-sm">Add some data to see the chart</div>
+          <div className="text-base sm:text-lg font-medium">No Data Available</div>
+          <div className="text-xs sm:text-sm">Add some data to see the chart</div>
         </div>
       </div>
     )
@@ -344,7 +350,7 @@ function ScatterChart({ data }: { data: ImageChartProps['data'] }) {
   const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
   
   return (
-    <div className="w-full h-64 relative">
+    <div className="w-full h-48 sm:h-64 relative pb-5 sm:pb-6">
       <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
         {/* Grid lines */}
         {[0, 25, 50, 75, 100].map((y, index) => (
@@ -394,9 +400,9 @@ function ScatterChart({ data }: { data: ImageChartProps['data'] }) {
       </svg>
       
       {/* Labels */}
-      <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-gray-500">
+      <div className="absolute bottom-0 left-0 right-0 flex justify-between text-[10px] sm:text-xs text-gray-500 px-1">
         {data.map((item, index) => (
-          <span key={index}>{item.label}</span>
+          <span key={index} className="truncate max-w-[35px] sm:max-w-none">{item.label}</span>
         ))}
       </div>
     </div>
