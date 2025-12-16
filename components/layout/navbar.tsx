@@ -324,24 +324,44 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
           <div className="flex items-center gap-2">
             {/* 1. Upgrade button (first) - Show if user is logged in but no subscription, hide on subscription-plan page */}
             {showUpgradeButton && isAuthenticated && token && !hasActiveSubscription && !isSubscriptionPage && (
-              <button
-                type="button"
-                onClick={handleOpenUpgradeModal}
-                className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
-              >
-                Upgrade
-              </button>
+              forcePublic ? (
+                <Link 
+                  href={routes.publicroute.SUBSCRIPTION_PLAN}
+                  className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
+                  prefetch={true}
+                >
+                  Upgrade
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleOpenUpgradeModal}
+                  className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
+                >
+                  Upgrade
+                </button>
+              )
             )}
 
             {/* Trial plan active (3 day trial): show Upgrade button left of profile in navbar */}
             {isAuthenticated && token && hasActiveSubscription && isTrialingSubscription && !isSubscriptionPage && (
-              <button
-                type="button"
-                onClick={handleOpenUpgradeModal}
-                className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
-              >
-                Upgrade
-              </button>
+              forcePublic ? (
+                <Link 
+                  href={routes.publicroute.SUBSCRIPTION_PLAN}
+                  className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
+                  prefetch={true}
+                >
+                  Upgrade
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleOpenUpgradeModal}
+                  className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
+                >
+                  Upgrade
+                </button>
+              )
             )}
 
             {shouldShowProfileDropdown ? (
