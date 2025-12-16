@@ -137,22 +137,22 @@ export function DataTable<T extends Record<string, any>>({
   }
 
   const TableContent = () => (
-    <div className={cn("overflow-x-auto", className)}>
-      <table className="w-full border-collapse">
+    <div className={cn("overflow-x-auto -mx-1 sm:mx-0", className)}>
+      <table className="w-full border-collapse min-w-[400px] sm:min-w-0">
         <thead>
           <tr className="border-b border-border bg-muted/50">
             {columns.map((column, index) => (
               <th
                 key={index}
                 className={cn(
-                  "px-4 py-3 text-left text-sm font-medium text-foreground",
+                  "px-2 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-foreground whitespace-nowrap",
                   enableSorting && column.sortable && "cursor-pointer hover:bg-muted/70 transition-colors",
                   column.className
                 )}
                 onClick={() => enableSorting && column.sortable && handleSort(column.key as string)}
               >
-                <div className="flex items-center gap-2">
-                  {column.header}
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <span className="truncate">{column.header}</span>
                   {getSortIcon(column.key as string, column)}
                 </div>
               </th>
@@ -168,7 +168,7 @@ export function DataTable<T extends Record<string, any>>({
               {columns.map((column, colIndex) => (
                 <td
                   key={colIndex}
-                  className={cn("px-4 py-3 text-sm text-foreground", column.className)}
+                  className={cn("px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-foreground", column.className)}
                 >
                   {(() => {
                     const renderSafeValue = (value: any): ReactNode => {

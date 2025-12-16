@@ -136,25 +136,29 @@ export const AppointmentsTable = memo(function AppointmentsTable({
   ], [showDateTime])
 
   return (
-    <Card className="card-hostinger p-4">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-lg font-medium">
-          <Calendar className="h-5 w-5" />
-          {title}
+    <Card className="card-hostinger p-2 sm:p-4">
+      <CardHeader className="pb-2 sm:pb-4 p-2 sm:p-4">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-medium">
+          <Calendar className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+          <span className="truncate">{title}</span>
         </CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardDescription className="text-xs sm:text-sm">{description}</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
-        <DataTable
-          data={data}
-          columns={columns}
-          isLoading={isLoading}
-          emptyMessage={`No ${title.toLowerCase()}`}
-          showCard={false}
-          enableSorting={true}
-          emptyData={emptyData}
-          onPrimaryAction={onPrimaryAction}
-        />
+        <div className="overflow-x-auto -mx-2 sm:mx-0">
+          <div className="min-w-[500px] sm:min-w-0">
+            <DataTable
+              data={data}
+              columns={columns}
+              isLoading={isLoading}
+              emptyMessage={`No ${title.toLowerCase()}`}
+              showCard={false}
+              enableSorting={true}
+              emptyData={emptyData}
+              onPrimaryAction={onPrimaryAction}
+            />
+          </div>
+        </div>
       </CardContent>
     </Card>
   )

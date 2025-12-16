@@ -154,9 +154,9 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
     }, 0) / Math.max(appointmentsData.filter(apt => apt.checkInTime && apt.checkOutTime).length, 1)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Top Row - Status Overview */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
         <ImageChart
           title="Appointment Status"
           description="Current status distribution of all appointments"
@@ -173,7 +173,7 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
       </div>
 
       {/* Middle Row - Visitor Analytics */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <ImageChart
           title="Visitor Types"
           description="Distribution by visitor purpose"
@@ -197,7 +197,7 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
       </div>
 
       {/* Bottom Row - Performance & Analytics */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
         <ImageChart
           title="Quarterly Performance"
           description="Performance metrics by quarter"
@@ -206,51 +206,51 @@ export function DashboardCharts({ appointmentsData = [], employeesData = [], vis
         />
         
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-500" />
+          <CardHeader className="p-3 sm:p-4 md:p-6">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
               Real-time Analytics
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500 rounded-full">
-                    <Users className="h-4 w-4 text-white" />
+          <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-blue-50 rounded-lg gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <div className="p-1.5 sm:p-2 bg-blue-500 rounded-full flex-shrink-0">
+                    <Users className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                   </div>
-                  <div>
-                    <p className="font-medium">Active Visitors</p>
-                    <p className="text-sm text-gray-600">Currently in building</p>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm sm:text-base truncate">Active Visitors</p>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">Currently in building</p>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-blue-600">{activeVisitors}</div>
+                <div className="text-xl sm:text-2xl font-bold text-blue-600 flex-shrink-0">{activeVisitors}</div>
               </div>
               
-              <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-500 rounded-full">
-                    <Calendar className="h-4 w-4 text-white" />
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-green-50 rounded-lg gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <div className="p-1.5 sm:p-2 bg-green-500 rounded-full flex-shrink-0">
+                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                   </div>
-                  <div>
-                    <p className="font-medium">Today's Appointments</p>
-                    <p className="text-sm text-gray-600">Scheduled meetings</p>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm sm:text-base truncate">Today's Appointments</p>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">Scheduled meetings</p>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-green-600">{todaysAppointments}</div>
+                <div className="text-xl sm:text-2xl font-bold text-green-600 flex-shrink-0">{todaysAppointments}</div>
               </div>
               
-              <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-500 rounded-full">
-                    <Clock className="h-4 w-4 text-white" />
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-orange-50 rounded-lg gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <div className="p-1.5 sm:p-2 bg-orange-500 rounded-full flex-shrink-0">
+                    <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                   </div>
-                  <div>
-                    <p className="font-medium">Average Wait Time</p>
-                    <p className="text-sm text-gray-600">Minutes per visitor</p>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm sm:text-base truncate">Average Wait Time</p>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">Minutes per visitor</p>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-orange-600">{averageWaitTime.toFixed(1)}</div>
+                <div className="text-xl sm:text-2xl font-bold text-orange-600 flex-shrink-0">{averageWaitTime.toFixed(1)}</div>
               </div>
             </div>
           </CardContent>

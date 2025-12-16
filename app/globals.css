@@ -3,6 +3,9 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Custom xs breakpoint for extra small screens */
+@custom-variant xs (@media (min-width: 480px));
+
 :root {
   /* Aynzo-aligned palette for Safein */
   --background: #ffffff;            /* page background */
@@ -505,4 +508,124 @@
 /* Fix for dialogs/modals - don't let them block the select dropdown */
 [data-radix-popper-content-wrapper] {
   z-index: 99999 !important;
+}
+
+/* Mobile Responsive Utilities */
+@media (max-width: 640px) {
+  /* Better touch targets on mobile */
+  button:not(.h-4):not(.h-5):not(.h-6):not(.w-4):not(.w-5):not(.w-6), 
+  [role="button"]:not(.h-4):not(.h-5):not(.h-6):not(.w-4):not(.w-5):not(.w-6) {
+    min-height: 40px;
+  }
+  
+  /* Improve form inputs on mobile */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+  
+  /* Better scrolling on mobile */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Mobile card improvements */
+  .card-hostinger {
+    border-radius: 8px;
+  }
+  
+  /* Mobile table improvements */
+  table {
+    font-size: 12px;
+  }
+  
+  table th,
+  table td {
+    padding: 8px 6px;
+  }
+}
+
+/* Extra small screens (< 480px) */
+@media (max-width: 479px) {
+  /* Tighter spacing for very small screens */
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* Mobile Navigation Improvements */
+@media (max-width: 768px) {
+  /* Ensure mobile sidebar scrolls properly */
+  [data-radix-scroll-area-viewport] {
+    overscroll-behavior: contain;
+  }
+  
+  /* Mobile sheet improvements */
+  [data-state="open"][role="dialog"] {
+    animation: slideIn 0.2s ease-out;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+}
+
+/* Responsive text utilities */
+.text-responsive-sm {
+  font-size: 12px;
+}
+
+.text-responsive-base {
+  font-size: 13px;
+}
+
+@media (min-width: 640px) {
+  .text-responsive-sm {
+    font-size: 13px;
+  }
+  
+  .text-responsive-base {
+    font-size: 14px;
+  }
+}
+
+/* Line clamp utilities for mobile */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

@@ -356,20 +356,20 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
         {triggerButton || defaultTrigger}
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl bg-white dark:bg-gray-900">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl bg-white dark:bg-gray-900 p-4 sm:p-6 max-h-[90vh] overflow-hidden">
+        <DialogHeader className="pb-2 sm:pb-4">
+          <DialogTitle className="text-lg sm:text-xl font-semibold">
             {isEditMode ? "Edit Appointment" : "Schedule New Appointment"}
           </DialogTitle>
         </DialogHeader>
 
         {isEditMode && isLoadingAppointment ? (
-          <div className="flex items-center justify-center py-8">
+          <div className="flex items-center justify-center py-6 sm:py-8">
             <LoadingSpinner size="lg" />
-            <span className="ml-2 text-sm text-gray-600">Loading appointment details...</span>
+            <span className="ml-2 text-xs sm:text-sm text-gray-600">Loading appointment details...</span>
           </div>
         ) : (
-          <div className="max-h-[60vh] overflow-y-auto pr-2">
+          <div className="max-h-[60vh] sm:max-h-[65vh] overflow-y-auto pr-1 sm:pr-2 -mr-1 sm:-mr-2">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {generalError && (
               <Alert variant="destructive">
@@ -573,29 +573,30 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
               </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="flex-col-reverse sm:flex-row gap-2 sm:gap-0 pt-4">
               <Button 
                 type="button" 
                 variant="outline" 
                 onClick={() => setOpen(false)}
                 disabled={isLoading}
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
               <Button 
                 type="submit" 
                 disabled={isLoading}
-                className={isLoading ? 'pointer-events-none opacity-70' : ''}
+                className={`w-full sm:w-auto ${isLoading ? 'pointer-events-none opacity-70' : ''}`}
               >
                 {isLoading ? (
                   <>
                     <LoadingSpinner size="sm" className="mr-2" />
-                    <span>{isEditMode ? "Updating..." : "Scheduling..."}</span>
+                    <span className="text-xs sm:text-sm">{isEditMode ? "Updating..." : "Scheduling..."}</span>
                   </>
                 ) : (
                   <>
-                    <Calendar className="h-4 w-4 mr-2" />
-                    {isEditMode ? "Update" : "Schedule"} Appointment
+                    <Calendar className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span className="text-xs sm:text-sm">{isEditMode ? "Update" : "Schedule"} Appointment</span>
                   </>
                 )}
               </Button>

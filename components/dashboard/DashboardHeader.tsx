@@ -21,12 +21,13 @@ export function DashboardHeader({ userName }: DashboardHeaderProps) {
 
   return (
     <PageHeader title={`Hi, ${userName || "User"}!`}>
-      <div className="flex gap-2">
+      <div className="flex gap-2 w-full sm:w-auto">
         {hasReachedAppointmentLimit ? (
           <>
-            <Button onClick={() => setShowUpgradeModal(true)}>
-              <CalendarPlus className="mr-2 h-4 w-4" />
-              Upgrade to Create More
+            <Button onClick={() => setShowUpgradeModal(true)} className="w-full sm:w-auto text-xs sm:text-sm whitespace-nowrap">
+              <CalendarPlus className="mr-1 sm:mr-2 h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">Upgrade to Create More</span>
+              <span className="sm:hidden">Upgrade</span>
             </Button>
             <UpgradePlanModal
               isOpen={showUpgradeModal}
@@ -36,9 +37,10 @@ export function DashboardHeader({ userName }: DashboardHeaderProps) {
         ) : (
           <NewAppointmentModal
             triggerButton={
-              <Button>
-                <CalendarPlus className="mr-2 h-4 w-4" />
-                New Appointment
+              <Button className="w-full sm:w-auto text-xs sm:text-sm whitespace-nowrap">
+                <CalendarPlus className="mr-1 sm:mr-2 h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">New Appointment</span>
+                <span className="sm:hidden">New</span>
               </Button>
             }
           />

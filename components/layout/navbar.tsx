@@ -31,7 +31,6 @@ import {
   Users,
   Building2,
   Shield,
-  BarChart3,
   FileText,
   HelpCircle,
   Phone,
@@ -346,13 +345,12 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
 
             {shouldShowProfileDropdown ? (
               <>
+                {/* Mobile Sidebar Menu - Shows hamburger icon for authenticated users on mobile */}
                 {isActuallyAuthenticated && (
-                  <div className="md:hidden">
-                    <MobileSidebar />
-                  </div>
+                  <MobileSidebar className="md:hidden" />
                 )}
 
-                {/* 2. Profile dropdown (second) */}
+                {/* Profile dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button 
@@ -396,15 +394,9 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                       </div>
                     </div>
                     <DropdownMenuSeparator />
-                    {/* Show dashboard/notifications only if user has active subscription (not on subscription-plan page) */}
+                    {/* Show notifications and profile only if user has active subscription (not on subscription-plan page) */}
                     {isActuallyAuthenticated && !isSubscriptionPage ? (
                       <>
-                        <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                          <Link href={routes.privateroute.DASHBOARD} className="flex items-center" prefetch={true}>
-                            <BarChart3 className="mr-3 h-4 w-4" />
-                            Dashboard
-                          </Link>
-                        </DropdownMenuItem>
                         <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                           <Link href={routes.privateroute.NOTIFICATIONS} className="flex items-center" prefetch={true}>
                             <Bell className="mr-3 h-4 w-4" />
@@ -532,26 +524,32 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
               </>
             )}
 
-            {/* 3. Three-row menu icon (third) - Always show on mobile */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="lg:hidden p-2 rounded-lg transition-all duration-200 hover:bg-gray-100/80"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
+            {/* 3. Three-row menu icon (third) - Only show on mobile for PUBLIC pages (not authenticated users) */}
+            {!isActuallyAuthenticated && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`lg:hidden p-2 rounded-lg transition-all duration-200 ${
+                  shouldShowWhiteNavbar 
+                    ? 'hover:bg-gray-100/80 text-gray-900' 
+                    : 'hover:bg-white/10 text-white'
+                }`}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+            )}
           </div>
         </div>
 
         {/* Upgrade Modal (opened from navbar Upgrade button) */}
         <UpgradePlanModal isOpen={isUpgradeModalOpen} onClose={handleCloseUpgradeModal} />
 
-         {isMobileMenuOpen && (
+         {isMobileMenuOpen && !isActuallyAuthenticated && (
            <div className="lg:hidden border-t border-gray-200/30 bg-white/90 backdrop-blur-md shadow-lg">
             <div className="px-4 pt-4 pb-6 space-y-2">
-              {/* Show public menu links only if: No token OR token exists but payment not successful */}
-              {(!isAuthenticated || !token || !hasActiveSubscription) && (
+              {/* Show public menu links when: forcePublic is true OR not authenticated OR no subscription */}
+              {(forcePublic || !isAuthenticated || !token || !hasActiveSubscription) && (
                 <>
                   <Link
                     href={routes.publicroute.HOME}

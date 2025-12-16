@@ -39,34 +39,34 @@ export function QuickActions() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Quick Actions</CardTitle>
-        <CardDescription>Common tasks and shortcuts</CardDescription>
+      <CardHeader className="p-3 sm:p-4 md:p-6">
+        <CardTitle className="text-base sm:text-lg">Quick Actions</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">Common tasks and shortcuts</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+        <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
           {hasReachedAppointmentLimit ? (
             <>
               <Button
-                className="h-20 flex-col bg-transparent"
+                className="h-16 sm:h-20 flex-col bg-transparent text-xs sm:text-sm p-2"
                 variant="outline"
                 onClick={() => setShowUpgradeModal(true)}
               >
-                <CalendarPlus className="h-6 w-6 mb-2" />
-                Upgrade to Create More
+                <CalendarPlus className="h-5 w-5 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
+                <span className="text-center line-clamp-2">Upgrade to Create More</span>
               </Button>
             </>
           ) : (
             <NewAppointmentModal
               triggerButton={
                 <Button
-                  className="h-20 flex-col bg-transparent"
+                  className="h-16 sm:h-20 flex-col bg-transparent text-xs sm:text-sm p-2"
                   variant="outline"
                   asChild
                 >
                   <div>
-                    <CalendarPlus className="h-6 w-6 mb-2" />
-                    Create Appointment
+                    <CalendarPlus className="h-5 w-5 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
+                    <span className="text-center line-clamp-2">Create Appointment</span>
                   </div>
                 </Button>
               }
@@ -76,13 +76,13 @@ export function QuickActions() {
           {quickActions.map((action) => (
             <Button
               key={action.href}
-              className="h-20 flex-col bg-transparent"
+              className="h-16 sm:h-20 flex-col bg-transparent text-xs sm:text-sm p-2"
               variant="outline"
               asChild
             >
               <Link href={action.href} prefetch={true}>
-                <action.icon className="h-6 w-6 mb-2" />
-                {action.label}
+                <action.icon className="h-5 w-5 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
+                <span className="text-center line-clamp-2">{action.label}</span>
               </Link>
             </Button>
           ))}
@@ -90,25 +90,25 @@ export function QuickActions() {
           {hasReachedEmployeeLimit ? (
             <>
               <Button
-                className="h-20 flex-col bg-transparent"
+                className="h-16 sm:h-20 flex-col bg-transparent text-xs sm:text-sm p-2"
                 variant="outline"
                 onClick={() => setShowUpgradeModal(true)}
               >
-                <UserPlus className="h-6 w-6 mb-2" />
-                Upgrade to Add More
+                <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
+                <span className="text-center line-clamp-2">Upgrade to Add More</span>
               </Button>
             </>
           ) : (
             <NewEmployeeModal
               trigger={
                 <Button
-                  className="h-20 flex-col bg-transparent"
+                  className="h-16 sm:h-20 flex-col bg-transparent text-xs sm:text-sm p-2"
                   variant="outline"
                   asChild
                 >
                   <div>
-                    <UserPlus className="h-6 w-6 mb-2" />
-                    Add Employee
+                    <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
+                    <span className="text-center line-clamp-2">Add Employee</span>
                   </div>
                 </Button>
               }
