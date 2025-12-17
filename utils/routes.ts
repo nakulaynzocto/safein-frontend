@@ -15,14 +15,17 @@ export const routes = {
     RESET_PASSWORD: "/reset-password",
     VERIFY: "/verify",
     EMAIL_ACTION: "/email-action",
+    PRIVACY_POLICY: "/privacy-policy",
+    TERMS_OF_SERVICE: "/terms-of-service",
     FREE_TRIAL_PLAN_ID: "FREE_TRIAL_PLAN_ID_PLACEHOLDER", // This should be replaced with the actual ID from the backend
   },
 
   privateroute: {
     DASHBOARD: "/dashboard",
-    NOTIFICATIONS: "/dashboard/notifications",
-    PROFILE: "/profile",
-    SETTINGS: "/settings",
+    NOTIFICATIONS: "/settings/notifications",
+    PROFILE: "/settings/profile",
+    SETTINGS: "/settings/status",
+    ACTIVE_PLAN: "/settings/plan",
     EMPLOYEECREATE: "/employee/create",
     EMPLOYEELIST: "/employee/list",
     EMPLOYEETRASH: "/employee/trash",
@@ -68,6 +71,10 @@ export const isPrivateRoute = (path: string): boolean => {
   }
   
   if (path.startsWith('/visitor/') && path !== routes.privateroute.VISITORLIST && path !== routes.privateroute.VISITORREGISTRATION) {
+    return true
+  }
+  
+  if (path.startsWith('/settings/')) {
     return true
   }
   

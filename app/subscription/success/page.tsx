@@ -33,11 +33,32 @@ export default function SubscriptionSuccessPage() {
     pollingInterval: pollingInterval,
   })
 
-  const subscriptionIsActive = !!(
-    activeSubscriptionData?.data &&
-    activeSubscriptionData.data.isActive === true &&
-    activeSubscriptionData.data.paymentStatus === 'succeeded'
-  )
+  const subscriptionIsActive = (() => {
+    if (!activeSubscriptionData?.data) return false
+    
+    const subscription = activeSubscriptionData.data
+    
+    // ✅ PREFERRED: Use backend-provided flag if available (backend calculates this securely)
+    if (subscription.hasActiveSubscription !== undefined) {
+      return subscription.hasActiveSubscription
+    }
+    
+    // ✅ ALTERNATIVE: Use backend-provided canAccessDashboard flag
+    if (subscription.canAccessDashboard !== undefined) {
+      return subscription.canAccessDashboard
+    }
+    
+    // ⚠️ FALLBACK: Frontend calculation (less secure, but works until backend adds flags)
+    // Explicitly reject cancelled, failed, or pending payments
+    if (subscription.paymentStatus === 'cancelled' || 
+        subscription.paymentStatus === 'failed' || 
+        subscription.paymentStatus === 'pending') {
+      return false
+    }
+    
+    // Must be active AND payment must be succeeded
+    return subscription.isActive === true && subscription.paymentStatus === 'succeeded'
+  })()
 
   useEffect(() => {
     if (subscriptionIsActive && !isRedirecting) {

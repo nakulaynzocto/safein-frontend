@@ -1,14 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { routes } from "@/utils/routes"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Separator } from "@/components/ui/separator"
+import { useAppDispatch } from "@/store/hooks"
+import { logout } from "@/store/slices/authSlice"
+import { useLogoutMutation } from "@/store/api/authApi"
 import { 
   Menu, 
   LayoutDashboard,
@@ -16,15 +18,20 @@ import {
   Calendar, 
   UserPlus,
   Settings,
+  UserCircle,
+  CheckCircle,
   Bell,
-  User,
+  Package,
+  LogOut,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react"
 
 interface MobileSidebarProps {
   className?: string
 }
 
-const mainNavigation = [
+const navigation = [
   {
     name: "Dashboard",
     href: routes.privateroute.DASHBOARD,
@@ -47,47 +54,75 @@ const mainNavigation = [
   },
 ]
 
-const secondaryNavigation = [
-  {
-    name: "Notifications",
-    href: routes.privateroute.NOTIFICATIONS,
-    icon: Bell,
-  },
+const settingsSubmenu = [
   {
     name: "Profile",
     href: routes.privateroute.PROFILE,
-    icon: User,
+    icon: UserCircle,
   },
   {
-    name: "Settings",
+    name: "Appointment Status",
+    href: routes.privateroute.NOTIFICATIONS,
+    icon: CheckCircle,
+  },
+  {
+    name: "Notification",
     href: routes.privateroute.SETTINGS,
-    icon: Settings,
+    icon: Bell,
+  },
+  {
+    name: "Subscription",
+    href: routes.privateroute.ACTIVE_PLAN,
+    icon: Package,
   },
 ]
 
-
 export function MobileSidebar({ className }: MobileSidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+  const dispatch = useAppDispatch()
   const [open, setOpen] = useState(false)
+  const isSettingsActive = pathname === routes.privateroute.SETTINGS || 
+                          pathname === routes.privateroute.PROFILE || 
+                          pathname === routes.privateroute.NOTIFICATIONS ||
+                          pathname === routes.privateroute.ACTIVE_PLAN ||
+                          pathname?.startsWith('/settings/')
+  const [settingsOpen, setSettingsOpen] = useState(isSettingsActive)
+  const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation()
 
   const isActive = (href: string) => pathname === href
 
-  const NavLink = ({ item }: { item: { name: string; href: string; icon: React.ComponentType<{ className?: string }> } }) => (
-    <Link
-      href={item.href}
-      prefetch={true}
-      className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200",
-        isActive(item.href)
-          ? "bg-brand text-white shadow-sm"
-          : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
-      )}
-      onClick={() => setOpen(false)}
-    >
-      <item.icon className="h-5 w-5 flex-shrink-0" />
-      <span className="truncate">{item.name}</span>
-    </Link>
-  )
+  useEffect(() => {
+    if (isSettingsActive && !settingsOpen) {
+      setSettingsOpen(true)
+    }
+  }, [pathname, isSettingsActive, settingsOpen])
+
+  const handleLogout = async () => {
+    try {
+      dispatch(logout())
+      logoutMutation().unwrap().catch(() => {})
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+        sessionStorage.clear()
+      }
+      setOpen(false)
+      setTimeout(() => {
+        router.replace(routes.publicroute.LOGIN)
+      }, 300)
+    } catch (error) {
+      dispatch(logout())
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+      }
+      setOpen(false)
+      setTimeout(() => {
+        router.replace(routes.publicroute.LOGIN)
+      }, 300)
+    }
+  }
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -112,22 +147,79 @@ export function MobileSidebar({ className }: MobileSidebarProps) {
         </SheetHeader>
         
         <div className="flex-1 overflow-y-auto">
-          {/* Main Navigation */}
-          <nav className="space-y-1 p-3">
-            <p className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main Menu</p>
-            {mainNavigation.map((item) => (
-              <NavLink key={item.name} item={item} />
+          {/* Navigation */}
+          <nav className="flex-1 space-y-2 p-2 overflow-y-auto mt-2">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href!}
+                prefetch={true}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200",
+                  isActive(item.href!)
+                    ? "bg-brand text-white shadow-sm"
+                    : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
+                )}
+                onClick={() => setOpen(false)}
+              >
+                <item.icon className="h-5 w-5 shrink-0" />
+                <span className="truncate">{item.name}</span>
+              </Link>
             ))}
-          </nav>
 
-          <Separator className="my-2" />
+            {/* Settings with submenu */}
+            <div className="space-y-1 mt-2">
+              <button
+                onClick={() => setSettingsOpen(!settingsOpen)}
+                className={cn(
+                  "flex items-center justify-between w-full rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200",
+                  isSettingsActive
+                    ? "bg-brand text-white shadow-sm"
+                    : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <Settings className="h-5 w-5 shrink-0" />
+                  <span className="truncate">Settings</span>
+                </div>
+                {settingsOpen ? (
+                  <ChevronDown className="h-4 w-4 shrink-0" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 shrink-0" />
+                )}
+              </button>
 
-          {/* Secondary Navigation */}
-          <nav className="space-y-1 p-3">
-            <p className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Account</p>
-            {secondaryNavigation.map((item) => (
-              <NavLink key={item.name} item={item} />
-            ))}
+              {/* Settings submenu */}
+              {settingsOpen && (
+                <div className="ml-6 space-y-1 pl-2 border-l-2 border-gray-200">
+                  {settingsSubmenu.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      prefetch={true}
+                      className={cn(
+                        "flex items-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200",
+                        isActive(item.href)
+                          ? "bg-brand text-white shadow-sm"
+                          : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
+                      )}
+                      onClick={() => setOpen(false)}
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{item.name}</span>
+                    </Link>
+                  ))}
+                  <button
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="flex items-center gap-2 py-2 px-3 rounded-md w-full text-left text-sm font-medium text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                  >
+                    <LogOut className="h-4 w-4 shrink-0" />
+                    <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </nav>
         </div>
 

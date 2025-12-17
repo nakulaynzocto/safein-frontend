@@ -383,7 +383,9 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Visitor Selection */}
               <div className="space-y-2">
-                <Label className="font-medium">Visitor</Label>
+                <Label className="font-medium">
+                  Visitor <span className="text-red-500">*</span>
+                </Label>
                 <Controller
                   name="visitorId"
                   control={control}
@@ -405,7 +407,9 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
 
               {/* Employee Selection */}
               <div className="space-y-2">
-                <Label className="font-medium">Employee to Meet</Label>
+                <Label className="font-medium">
+                  Employee to Meet <span className="text-red-500">*</span>
+                </Label>
                 <Controller
                   name="employeeId"
                   control={control}
@@ -427,10 +431,12 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
 
 
 
-            {/* Date, Time, Accompanying People */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Appointment Date, Time, and Accompanying People - One Row */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="space-y-2">
-                <Label className="font-medium">Appointment Date</Label>
+                <Label className="font-medium">
+                  Appointment Date <span className="text-red-500">*</span>
+                </Label>
                 <Controller
                   control={control}
                   name="appointmentDate"
@@ -468,7 +474,9 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
               </div>
 
               <div className="space-y-2">
-                <Label className="font-medium">Appointment Time</Label>
+                <Label className="font-medium">
+                  Appointment Time <span className="text-red-500">*</span>
+                </Label>
                 <Controller
                   control={control}
                   name="appointmentTime"
@@ -498,12 +506,30 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                   }}
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label className="font-medium">Accompanying People</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={20}
+                  step={1}
+                  placeholder="Number of people (e.g., 0, 1, 2)"
+                  {...register("accompanyingCount")}
+                  className={errors.accompanyingCount ? "border-destructive" : ""}
+                />
+                {errors.accompanyingCount && (
+                  <span className="text-sm text-destructive">{errors.accompanyingCount.message}</span>
+                )}
+              </div>
             </div>
 
-            {/* Purpose & Accompanying People */}
+            {/* Purpose of Visit & Notes - One Row */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="purpose" className="font-medium">Purpose of Visit</Label>
+                <Label htmlFor="purpose" className="font-medium">
+                  Purpose of Visit <span className="text-red-500">*</span>
+                </Label>
                 <Textarea
                   id="purpose"
                   {...register("purpose")}
@@ -517,18 +543,16 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
               </div>
 
               <div className="space-y-2">
-                <Label className="font-medium">Accompanying People</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  max={20}
-                  step={1}
-                  placeholder="Number of people with the visitor (e.g., 0, 1, 2)"
-                  {...register("accompanyingCount")}
-                  className={errors.accompanyingCount ? "border-destructive" : ""}
+                <Label htmlFor="notes" className="font-medium">Notes</Label>
+                <Textarea
+                  id="notes"
+                  {...register("notes")}
+                  placeholder="Any additional information or special requirements"
+                  className={errors.notes ? "border-destructive" : ""}
+                  rows={4}
                 />
-                {errors.accompanyingCount && (
-                  <span className="text-sm text-destructive">{errors.accompanyingCount.message}</span>
+                {errors.notes && (
+                  <span className="text-sm text-destructive">{errors.notes.message}</span>
                 )}
               </div>
             </div>

@@ -119,7 +119,7 @@ export function DashboardOverview() {
   if (loadingTimeout && isLoading && !hasData && !hasError) {
     return (
       <div className="space-y-6">
-        <DashboardHeader userName={user?.name} />
+        <DashboardHeader companyName={user?.companyName} />
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-yellow-800 mb-2">Loading is taking longer than expected</h3>
           <p className="text-yellow-600 mb-4">
@@ -150,7 +150,7 @@ export function DashboardOverview() {
   if (hasError && !hasData && !isLoading) {
     return (
       <div className="space-y-6">
-        <DashboardHeader userName={user?.name} />
+        <DashboardHeader companyName={user?.companyName} />
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-red-800 mb-2">Failed to load dashboard data</h3>
           <p className="text-red-600 mb-4">
@@ -171,7 +171,7 @@ export function DashboardOverview() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <DashboardHeader userName={user?.name} />
+      <DashboardHeader companyName={user?.companyName} />
 
       {/* Statistics Cards */}
       <StatsGrid stats={stats} />

@@ -45,14 +45,14 @@ const visitorSchema = yup.object({
     .required("Email is required"),
   phone: yup.string().required("Phone number is required"),
   address: yup.object({
-    street: yup.string().required("Street address is required"),
+    street: yup.string().optional(),
     city: yup.string().required("City is required"),
     state: yup.string().required("State is required"),
     country: yup.string().required("Country is required"),
   }),
   idProof: yup.object({
-    type: yup.string().required("ID proof type is required"),
-    number: yup.string().required("ID proof number is required"),
+    type: yup.string().optional(),
+    number: yup.string().optional(),
     image: yup.string().optional(),
   }),
   photo: yup.string().optional().default(""),
@@ -178,12 +178,17 @@ export function NewVisitorModal({
         name: data.name,
         email: data.email,
         phone: data.phone,
-        address: data.address,
-        idProof: {
-          type: data.idProof.type,
-          number: data.idProof.number,
-          image: data.idProof.image || undefined,
+        address: {
+          street: data.address.street || undefined,
+          city: data.address.city,
+          state: data.address.state,
+          country: data.address.country,
         },
+        idProof: (data.idProof.type || data.idProof.number || data.idProof.image) ? {
+          type: data.idProof.type || undefined,
+          number: data.idProof.number || undefined,
+          image: data.idProof.image || undefined,
+        } : undefined,
         photo: data.photo || undefined,
       };
 
@@ -261,7 +266,9 @@ export function NewVisitorModal({
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name *</Label>
+                    <Label htmlFor="name">
+                      Full Name <span className="text-red-500">*</span>
+                    </Label>
                     <Input
                       id="name"
                       {...register("name")}
@@ -276,7 +283,9 @@ export function NewVisitorModal({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email Address *</Label>
+                    <Label htmlFor="email">
+                      Email Address <span className="text-red-500">*</span>
+                    </Label>
                     <Input
                       id="email"
                       type="email"
@@ -336,11 +345,11 @@ export function NewVisitorModal({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                  <Label htmlFor="address.street">Street Address *</Label>
+                  <Label htmlFor="address.street">Company Address</Label>
                   <Input
                     id="address.street"
                     {...register("address.street")}
-                    placeholder="Enter street address"
+                    placeholder="Enter company address"
                     className={
                       errors.address?.street ? "border-destructive" : ""
                     }
@@ -356,7 +365,7 @@ export function NewVisitorModal({
                     control={control}
                     render={({ field }) => (
                       <div className="space-y-2">
-                        <Label>ID Proof Type *</Label>
+                        <Label>ID Proof Type</Label>
                         <SelectField
                           placeholder="Select ID proof type"
                           options={idProofTypes}
@@ -369,7 +378,7 @@ export function NewVisitorModal({
                   />
 
                   <div className="space-y-2">
-                    <Label htmlFor="idProof.number">ID Proof Number *</Label>
+                    <Label htmlFor="idProof.number">ID Proof Number</Label>
                     <Input
                       id="idProof.number"
                       {...register("idProof.number")}

@@ -20,14 +20,14 @@ const visitorDetailsSchema = yup.object({
   email: yup.string().email("Invalid email address").required("Email is required"),
   phone: yup.string().required("Phone number is required"),
   address: yup.object({
-    street: yup.string().required("Street address is required"),
+    street: yup.string().optional(),
     city: yup.string().required("City is required"),
     state: yup.string().required("State is required"),
     country: yup.string().required("Country is required"),
   }),
   idProof: yup.object({
-    type: yup.string().required("ID proof type is required"),
-    number: yup.string().required("ID proof number is required"),
+    type: yup.string().optional(),
+    number: yup.string().optional(),
     image: yup.string().optional(),
   }),
   photo: yup.string().optional().default(""),
@@ -103,12 +103,17 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
         // company and designation are not part of CreateVisitorRequest
         // company: data.company,
         // designation: data.designation,
-        address: data.address,
-        idProof: {
-          type: data.idProof.type,
-          number: data.idProof.number,
-          image: data.idProof.image || undefined,
+        address: {
+          street: data.address.street || undefined,
+          city: data.address.city,
+          state: data.address.state,
+          country: data.address.country,
         },
+        idProof: (data.idProof.type || data.idProof.number || data.idProof.image) ? {
+          type: data.idProof.type || undefined,
+          number: data.idProof.number || undefined,
+          image: data.idProof.image || undefined,
+        } : undefined,
         photo: data.photo || undefined,
       }
 
@@ -224,11 +229,10 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField
-                  label="Street Address"
-                  placeholder="Enter street address"
+                  label="Company Address"
+                  placeholder="Enter company address"
                   error={errors.address?.street?.message}
                   {...register("address.street")}
-                  required
                 />
                 <InputField
                   label="City"
@@ -268,14 +272,12 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                   error={errors.idProof?.type?.message}
                   value={watch("idProof.type") || ""}
                   onChange={(value) => setValue("idProof.type", value)}
-                  required
                 />
                 <InputField
                   label="ID Proof Number"
                   placeholder="Enter ID proof number"
                   error={errors.idProof?.number?.message}
                   {...register("idProof.number")}
-                  required
                 />
               </div>
 

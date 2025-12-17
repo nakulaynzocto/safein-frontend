@@ -37,14 +37,32 @@ export function useAuthSubscription() {
   })
 
   // Check if user has active subscription
-  // According to documentation: subscription_status === "active" means:
-  // isActive === true AND paymentStatus === 'succeeded'
+  // PREFERRED: Use backend-provided permission flag (more secure)
+  // FALLBACK: Calculate on frontend if backend flag not available
   const hasActiveSubscription = useMemo(() => {
-    return !!(
-      activeSubscriptionData?.data &&
-      activeSubscriptionData.data.isActive === true &&
-      activeSubscriptionData.data.paymentStatus === 'succeeded'
-    )
+    if (!activeSubscriptionData?.data) return false
+    
+    const subscription = activeSubscriptionData.data
+    
+    // ✅ PREFERRED: Use backend-provided flag if available (backend calculates this securely)
+    if (subscription.hasActiveSubscription !== undefined) {
+      return subscription.hasActiveSubscription
+    }
+    
+    // ✅ ALTERNATIVE: Use backend-provided canAccessDashboard flag
+    if (subscription.canAccessDashboard !== undefined) {
+      return subscription.canAccessDashboard
+    }
+    
+    // ⚠️ FALLBACK: Frontend calculation (less secure, but works until backend adds flags)
+    // Explicitly reject cancelled, failed, or pending payments
+    if (subscription.paymentStatus === 'cancelled' || 
+        subscription.paymentStatus === 'failed' || 
+        subscription.paymentStatus === 'pending') {
+      return false
+    }
+    
+    return subscription.isActive === true && subscription.paymentStatus === 'succeeded'
   }, [activeSubscriptionData])
 
   // Trial detection (3 day trial / free plan)
@@ -71,7 +89,6 @@ export function useAuthSubscription() {
   // Check if current route should hide sidebar
   const shouldHideSidebar = useMemo(() => {
     return (
-      pathname === routes.privateroute.NOTIFICATIONS ||
       pathname === routes.publicroute.SUBSCRIPTION_PLAN ||
       pathname === routes.publicroute.SUBSCRIPTION_SUCCESS
     )

@@ -43,14 +43,14 @@ export interface CreateVisitorRequest {
   email: string
   phone: string
   address: {
-    street: string
+    street?: string
     city: string
     state: string
     country: string
   }
-  idProof: {
-    type: string
-    number: string
+  idProof?: {
+    type?: string
+    number?: string
     image?: string
   }
   photo?: string

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { PublicLayout } from "@/components/layout/publicLayout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -312,7 +313,7 @@ const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
                       Complete Payment
                     </CardTitle>
                     <CardDescription className="text-blue-100 text-xs mt-1">
-                      Secure checkout powered by Stripe
+                      Secure checkout powered by Razorpay
                     </CardDescription>
                   </CardHeader>
                   
@@ -415,6 +416,29 @@ const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
                     <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground pt-1">
                       <Lock className="h-3.5 w-3.5" />
                       <span>256-bit SSL encryption</span>
+                    </div>
+
+                    {/* Privacy Policy Link - Razorpay Requirement */}
+                    <div className="pt-2 border-t text-center">
+                      <p className="text-[10px] text-muted-foreground">
+                        By proceeding, you agree to our{" "}
+                        <Link 
+                          href={routes.publicroute.PRIVACY_POLICY} 
+                          className="text-[#3882a5] hover:underline"
+                          target="_blank"
+                        >
+                          Privacy Policy
+                        </Link>
+                        {" "}and Razorpay's{" "}
+                        <a 
+                          href="https://razorpay.com/privacy/" 
+                          className="text-[#3882a5] hover:underline"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Privacy Policy
+                        </a>
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
