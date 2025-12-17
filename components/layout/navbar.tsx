@@ -381,7 +381,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                           : 'bg-white/10 text-white'
                       }`}>
                         <Building2 className={`h-4 w-4 mr-2 flex-shrink-0 ${shouldShowWhiteNavbar ? 'text-gray-600' : 'text-white'}`} />
-                        <span className="text-sm font-semibold truncate max-w-[150px]">
+                        <span className="text-sm font-semibold whitespace-nowrap">
                           {user.companyName}
                         </span>
                       </div>
