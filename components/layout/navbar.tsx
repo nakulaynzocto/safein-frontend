@@ -227,7 +227,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                     width={48}
                     height={48}
                     priority
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-contain p-1"
                     onError={(e) => {
                       // Fallback to AYNZO logo if profile picture fails to load
                       const target = e.currentTarget as HTMLImageElement
