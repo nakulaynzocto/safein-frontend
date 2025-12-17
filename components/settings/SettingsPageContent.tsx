@@ -63,33 +63,25 @@ export function SettingsPageContent() {
   }
 
   return (
-    <div className="w-full">
-      <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-          Manage your notification preferences
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <Card className="w-full">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <MessageSquare className="h-5 w-5" />
-              Notification Settings
-            </CardTitle>
-            <CardDescription>
-              Control how you receive appointment notifications
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="flex items-center justify-between gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-              <div className="space-y-0.5 flex-1">
-                <Label htmlFor="email-enabled" className="text-base font-medium flex items-center gap-2 cursor-pointer">
-                  <Mail className="h-4 w-4 text-primary" />
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <Card className="w-full">
+        <CardHeader className="pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
+            Notification Settings
+          </CardTitle>
+          <CardDescription className="text-sm">
+            Control how you receive appointment notifications
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 sm:space-y-5 px-4 sm:px-6 pb-4 sm:pb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+              <div className="space-y-0.5 flex-1 w-full sm:w-auto">
+                <Label htmlFor="email-enabled" className="text-sm sm:text-base font-medium flex items-center gap-2 cursor-pointer">
+                  <Mail className="h-4 w-4 text-primary flex-shrink-0" />
                   Email Notifications
                 </Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   Receive appointment notifications via email
                 </p>
               </div>
@@ -97,16 +89,17 @@ export function SettingsPageContent() {
                 id="email-enabled"
                 checked={emailEnabled}
                 onCheckedChange={setEmailEnabled}
+                className="self-start sm:self-auto"
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-              <div className="space-y-0.5 flex-1">
-                <Label htmlFor="whatsapp-enabled" className="text-base font-medium flex items-center gap-2 cursor-pointer">
-                  <MessageSquare className="h-4 w-4 text-green-600" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+              <div className="space-y-0.5 flex-1 w-full sm:w-auto">
+                <Label htmlFor="whatsapp-enabled" className="text-sm sm:text-base font-medium flex items-center gap-2 cursor-pointer">
+                  <MessageSquare className="h-4 w-4 text-green-600 flex-shrink-0" />
                   WhatsApp Notifications
                 </Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   Receive notifications via WhatsApp Cloud API
                 </p>
               </div>
@@ -114,16 +107,17 @@ export function SettingsPageContent() {
                 id="whatsapp-enabled"
                 checked={whatsappEnabled}
                 onCheckedChange={setWhatsappEnabled}
+                className="self-start sm:self-auto"
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-              <div className="space-y-0.5 flex-1">
-                <Label htmlFor="sms-enabled" className="text-base font-medium flex items-center gap-2 cursor-pointer">
-                  <Phone className="h-4 w-4 text-blue-600" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+              <div className="space-y-0.5 flex-1 w-full sm:w-auto">
+                <Label htmlFor="sms-enabled" className="text-sm sm:text-base font-medium flex items-center gap-2 cursor-pointer">
+                  <Phone className="h-4 w-4 text-blue-600 flex-shrink-0" />
                   SMS Notifications
                 </Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   Receive appointment notifications via SMS
                 </p>
               </div>
@@ -131,31 +125,31 @@ export function SettingsPageContent() {
                 id="sms-enabled"
                 checked={smsEnabled}
                 onCheckedChange={setSmsEnabled}
+                className="self-start sm:self-auto"
               />
             </div>
 
-            <div className="pt-4 border-t">
-              <Button
-                onClick={handleSave}
-                disabled={isUpdating}
-                className="w-full sm:w-auto"
-              >
-                {isUpdating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Settings
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          <div className="pt-4 border-t">
+            <Button
+              onClick={handleSave}
+              disabled={isUpdating}
+              className="w-full sm:w-auto"
+            >
+              {isUpdating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Settings
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

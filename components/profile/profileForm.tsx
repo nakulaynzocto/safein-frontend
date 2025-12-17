@@ -4,11 +4,11 @@ import { useState, useEffect, useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { User, X, Save, Loader2 } from "lucide-react"
+import { X, Save, Loader2, Upload } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { InputField } from "@/components/common/inputField"
-import { FileUpload } from "@/components/common/fileUpload"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { useUploadFileMutation } from "@/store/api"
 import { User as UserType } from "@/store/api/authApi"
@@ -29,6 +29,9 @@ interface ProfileFormProps {
 export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [profileImage, setProfileImage] = useState<string | null>(profile?.profilePicture || null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadSuccess, setUploadSuccess] = useState(false)
+  const [hasAttemptedUpload, setHasAttemptedUpload] = useState(false)
   const [uploadFile] = useUploadFileMutation()
 
   const defaultValues = {
@@ -94,16 +97,41 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
   const handleImageUpload = useCallback(async (file: File | null) => {
     if (!file) return
 
+    setIsUploading(true)
+    setHasAttemptedUpload(true)
+    setUploadSuccess(false)
+
     try {
       const result = await uploadFile({ file }).unwrap()
       
       setProfileImage(result.url)
       setValue("profilePicture", result.url)
+      setUploadSuccess(true)
       showSuccessToast("Profile picture uploaded successfully!")
     } catch (err: any) {
+      setUploadSuccess(false)
       showErrorToast(err?.data?.message || err?.message || "Failed to upload profile picture")
+    } finally {
+      setIsUploading(false)
     }
   }, [uploadFile, setValue])
+
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        showErrorToast("File size must be less than 5MB")
+        return
+      }
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showErrorToast("Please upload an image file")
+        return
+      }
+      handleImageUpload(file)
+    }
+  }, [handleImageUpload])
   
   const handleCancel = useCallback(() => {
     if (profile) {
@@ -113,70 +141,102 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     onCancel()
   }, [profile, reset, onCancel, defaultValues])
 
+  // Check if save button should be enabled
+  // If user attempted upload, it must be successful
+  // Otherwise, allow saving without upload
+  const canSave = !hasAttemptedUpload || (hasAttemptedUpload && uploadSuccess)
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="h-5 w-5" />
-          Edit Profile
-        </CardTitle>
+        <CardTitle>Edit Profile</CardTitle>
         <CardDescription>Update your personal information</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
           {/* Profile Picture */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Profile Picture</label>
-            <div className="flex items-center gap-4">
+          <div className="space-y-3">
+            <Label>Profile Picture</Label>
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
               <div className="relative">
                 <img
-                  src={profileImage ? `${profileImage}${profileImage.includes('?') ? '&' : '?'}v=${profileImage.length}` : "/placeholder-user.jpg"}
+                  src={profileImage ? `${profileImage}${profileImage.includes('?') ? '&' : '?'}v=${profileImage.length}` : "/aynzo-logo.png"}
                   alt="Profile"
                   key={profileImage}
-                  className="h-20 w-20 rounded-full object-cover border-2 border-border"
+                  className="h-24 w-24 rounded-full object-cover border-2 border-gray-200"
                   onError={(e) => {
-                    e.currentTarget.src = "/placeholder-user.jpg"
+                    e.currentTarget.src = "/aynzo-logo.png"
                   }}
                 />
               </div>
-              <FileUpload
-                onChange={handleImageUpload}
-                accept="image/*"
-                className="flex-1"
-                label="Upload Photo"
-              />
+              <div className="flex-1">
+                <Label
+                  htmlFor="profile-upload"
+                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="h-8 w-8 animate-spin text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-500">Uploading...</p>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-600">
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">Accepted formats: image/* • Max 5MB</p>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    id="profile-upload"
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    disabled={isUploading}
+                  />
+                </Label>
+                {hasAttemptedUpload && !uploadSuccess && (
+                  <p className="text-sm text-red-500 mt-2">Please upload image successfully to save profile</p>
+                )}
+              </div>
             </div>
-            {errors.profilePicture && (
-              <p className="text-sm text-destructive">{errors.profilePicture.message}</p>
+          </div>
+
+          {/* Company Name */}
+          <div className="space-y-2">
+            <Label htmlFor="companyName">
+              Company Name <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="companyName"
+              placeholder="Enter your company name"
+              {...register("companyName")}
+              className={errors.companyName ? "border-red-500" : ""}
+            />
+            {errors.companyName && (
+              <p className="text-sm text-red-500">{errors.companyName.message}</p>
             )}
           </div>
 
-          {/* Company Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Company Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-              <InputField
-                label="Company Name"
-                placeholder="Enter your company name"
-                {...register("companyName")}
-                error={errors.companyName?.message}
-                required
-              />
-            </div>
-          </div>
-
           {/* Form Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
             <Button
               type="button"
               variant="outline"
               onClick={handleCancel}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isUploading}
             >
               <X className="mr-2 h-4 w-4" />
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting || isUploading || !canSave}
+            >
               {isSubmitting ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" /> Saving...

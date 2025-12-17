@@ -35,27 +35,33 @@ export function CountryStateCitySelect({ value, onChange, errors }: Props) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <SelectField
+        label="Country"
         placeholder="Select country"
         options={countries}
         value={value.country}
         onChange={(country) => onChange({ country, state: "", city: "" })}
         error={errors?.country}
+        required
       />
       <SelectField
+        label="State"
         placeholder="Select state"
         options={states}
         value={value.state}
         onChange={(state) => onChange({ ...value, state, city: "" })}
         isDisabled={!value.country}
         error={errors?.state}
+        required
       />
       <SelectField
+        label="City"
         placeholder="Select city"
         options={cities}
         value={value.city}
         onChange={(city) => onChange({ ...value, city })}
         isDisabled={!value.country || !value.state}
         error={errors?.city}
+        required
       />
     </div>
   )

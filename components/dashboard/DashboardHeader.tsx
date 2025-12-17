@@ -9,10 +9,10 @@ import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 
 interface DashboardHeaderProps {
-  userName?: string
+  companyName?: string
 }
 
-export function DashboardHeader({ userName }: DashboardHeaderProps) {
+export function DashboardHeader({ companyName }: DashboardHeaderProps) {
   const { data: trialStatus } = useGetTrialLimitsStatusQuery()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
@@ -20,7 +20,7 @@ export function DashboardHeader({ userName }: DashboardHeaderProps) {
     trialStatus?.data?.isTrial && trialStatus.data.limits.appointments.reached
 
   return (
-    <PageHeader title={`Hi, ${userName || "User"}!`}>
+    <PageHeader title={companyName || "Company"}>
       <div className="flex gap-2 w-full sm:w-auto">
         {hasReachedAppointmentLimit ? (
           <>

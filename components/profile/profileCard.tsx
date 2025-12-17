@@ -25,7 +25,7 @@ export const ProfileCard = React.memo(function ProfileCard({ profile }: ProfileC
     if (profile.profilePicture && profile.profilePicture.trim() !== "") {
       return `${profile.profilePicture}${profile.profilePicture.includes('?') ? '&' : '?'}v=${profile.profilePicture.length}`
     }
-    return null
+    return "/aynzo-logo.png"
   }, [profile.profilePicture])
   
   return (
@@ -33,13 +33,14 @@ export const ProfileCard = React.memo(function ProfileCard({ profile }: ProfileC
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
           <Avatar className="h-24 w-24">
-            {profileImageSrc ? (
-              <AvatarImage 
-                src={profileImageSrc} 
-                alt="Profile"
-                key={profile.profilePicture}
-              />
-            ) : null}
+            <AvatarImage 
+              src={profileImageSrc} 
+              alt="Profile"
+              key={profile.profilePicture}
+              onError={(e) => {
+                e.currentTarget.src = "/aynzo-logo.png"
+              }}
+            />
             <AvatarFallback className="text-2xl">
               {initials}
             </AvatarFallback>

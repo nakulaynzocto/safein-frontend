@@ -12,6 +12,10 @@ export interface IUserSubscription {
   isTrialing: boolean;
   createdAt: string;
   updatedAt: string;
+  // Backend-provided permission flags (preferred over frontend calculation)
+  canAccessDashboard?: boolean;
+  hasActiveSubscription?: boolean;
+  subscriptionStatus?: 'active' | 'inactive' | 'cancelled' | 'expired';
 }
 
 interface GetUserActiveSubscriptionResponse {
@@ -39,6 +43,27 @@ export interface TrialLimitsStatus {
 
 interface GetTrialLimitsStatusResponse {
   data: TrialLimitsStatus;
+}
+
+export interface ISubscriptionHistory {
+  _id: string;
+  subscriptionId: string;
+  planType: 'free' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  planName: string;
+  purchaseDate: string;
+  startDate: string;
+  endDate: string;
+  amount: number;
+  currency: string;
+  paymentStatus: 'pending' | 'succeeded' | 'failed' | 'cancelled';
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  remainingDaysFromPrevious?: number;
+  createdAt: string;
+}
+
+interface GetSubscriptionHistoryResponse {
+  data: ISubscriptionHistory[];
 }
 
 export const userSubscriptionApi = baseApi.injectEndpoints({
@@ -124,6 +149,24 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ['User', 'Subscription'],
     }),
+
+    /**
+     * Get subscription history (all successful purchases)
+     * GET /api/v1/user-subscriptions/history
+     */
+    getSubscriptionHistory: builder.query<GetSubscriptionHistoryResponse, void>({
+      query: () => ({
+        url: '/user-subscriptions/history',
+        method: 'GET',
+      }),
+      transformResponse: (response: any) => {
+        if (response && response.success && response.data) {
+          return { data: response.data };
+        }
+        return { data: [] };
+      },
+      providesTags: ['User', 'Subscription'],
+    }),
   }),
 });
 
@@ -132,4 +175,5 @@ export const {
   useCheckPremiumSubscriptionQuery,
   useGetTrialLimitsStatusQuery,
   useAssignFreePlanMutation,
+  useGetSubscriptionHistoryQuery,
 } = userSubscriptionApi;

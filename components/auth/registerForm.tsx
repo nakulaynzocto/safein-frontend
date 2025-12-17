@@ -219,12 +219,24 @@ export function RegisterForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <div className="flex justify-center mb-4">
-          <img
-            src="/aynzo-logo.svg"
-            alt="Aynzo Logo"
-            className="h-10 w-auto"
-          />
+        <div className="flex items-center justify-between mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push(routes.publicroute.HOME)}
+            className="text-muted-foreground hover:text-white hover:bg-[#3882a5]"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <div className="flex-1 flex justify-center">
+            <img
+              src="/aynzo-logo.svg"
+              alt="Aynzo Logo"
+              className="h-10 w-auto"
+            />
+          </div>
+          <div className="w-20"></div>
         </div>
         <CardTitle className="text-2xl text-brand">
           {currentStep === 'success' ? 'Registration Complete!' : 
