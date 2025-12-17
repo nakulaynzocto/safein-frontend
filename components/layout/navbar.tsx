@@ -217,7 +217,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center">
             <Link href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex-shrink-0" prefetch={true}>
               {user?.profilePicture && user.profilePicture.trim() !== "" ? (
                 <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-gray-200 flex items-center justify-center bg-white">
@@ -254,20 +254,6 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                 </div>
               )}
             </Link>
-            {/* Application Description - Only show if user has subscription */}
-            {isActuallyAuthenticated && hasActiveSubscription && user?.systemText && (
-              <div className={`hidden lg:flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
-                shouldShowWhiteNavbar 
-                  ? 'bg-[#3882a5]/10 text-[#3882a5] border border-[#3882a5]/20' 
-                  : 'bg-white/15 text-white border border-white/20'
-              }`}>
-                <span className="text-base font-bold tracking-tight">
-                  {user.systemText.length > 30 
-                    ? `${user.systemText.substring(0, 30)}...` 
-                    : user.systemText}
-                </span>
-              </div>
-            )}
           </div>
 
           <div className="hidden lg:flex items-center gap-2">
