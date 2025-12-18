@@ -235,6 +235,43 @@ export const employeeApi = baseApi.injectEndpoints({
       },
       providesTags: [{ type: 'Employee', id: 'STATS' }],
     }),
+
+    /**
+     * Download Excel template for bulk import
+     * Note: This endpoint doesn't use RTK Query to avoid serialization issues with Blob
+     * Use the downloadEmployeeTemplate helper function instead
+     */
+
+    /**
+     * Bulk create employees from Excel file
+     * POST /api/employees/bulk-create
+     */
+    bulkCreateEmployees: builder.mutation<{
+      successCount: number
+      failedCount: number
+      errors: Array<{
+        row: number
+        email?: string
+        errors: string[]
+      }>
+    }, File>({
+      query: (file) => {
+        const formData = new FormData()
+        formData.append('file', file)
+        return {
+          url: '/employees/bulk-create',
+          method: 'POST',
+          body: formData,
+        }
+      },
+      transformResponse: (response: any) => {
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
+      invalidatesTags: [{ type: 'Employee', id: 'LIST' }],
+    }),
   }),
 })
 
@@ -249,4 +286,5 @@ export const {
   useUpdateEmployeeStatusMutation,
   useBulkUpdateEmployeesMutation,
   useGetEmployeeStatsQuery,
+  useBulkCreateEmployeesMutation,
 } = employeeApi

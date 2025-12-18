@@ -10,7 +10,8 @@ import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 import { useGetEmployeesQuery, useDeleteEmployeeMutation } from "@/store/api/employeeApi"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
-import { UserPlus, Archive } from "lucide-react"
+import { UserPlus, Archive, FileSpreadsheet } from "lucide-react"
+import { BulkImportModal } from "./BulkImportModal"
 import { routes } from "@/utils/routes"
 import { useDebounce } from "@/hooks/useDebounce"
 
@@ -33,6 +34,7 @@ export function EmployeeList() {
   const debouncedSearch = useDebounce(search, 500)
   const { data: trialStatus, refetch: refetchTrialLimits } = useGetTrialLimitsStatusQuery()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showBulkImportModal, setShowBulkImportModal] = useState(false)
   
   const { data: employeeData, isLoading, error, refetch } = useGetEmployeesQuery({
     page: currentPage,
@@ -116,18 +118,33 @@ export function EmployeeList() {
               />
             </>
           ) : (
-            <NewEmployeeModal 
-              onSuccess={handleEmployeeCreated}
-              trigger={
-                <Button>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Add Employee
-                </Button>
-              }
-            />
+            <>
+              <NewEmployeeModal 
+                onSuccess={handleEmployeeCreated}
+                trigger={
+                  <Button>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Add Employee
+                  </Button>
+                }
+              />
+              <Button
+                variant="outline"
+                onClick={() => setShowBulkImportModal(true)}
+              >
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                Bulk Import
+              </Button>
+            </>
           )}
         </div>
       </PageHeader>
+
+      <BulkImportModal
+        open={showBulkImportModal}
+        onOpenChange={setShowBulkImportModal}
+        onSuccess={handleEmployeeCreated}
+      />
 
       <EmployeeTable
         employees={employees}
