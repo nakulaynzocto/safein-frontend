@@ -217,27 +217,9 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             <Link href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex-shrink-0" prefetch={true}>
-              {user?.profilePicture && user.profilePicture.trim() !== "" ? (
-                <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-gray-200 flex items-center justify-center bg-white">
-                  <Image 
-                    src={`${user.profilePicture}${user.profilePicture.includes('?') ? '&' : '?'}v=${user.profilePicture.length}`}
-                    alt={user?.companyName || "Company Logo"} 
-                    width={48}
-                    height={48}
-                    priority
-                    className="h-full w-full object-contain p-1"
-                    onError={(e) => {
-                      // Fallback to AYNZO logo if profile picture fails to load
-                      const target = e.currentTarget as HTMLImageElement
-                      target.src = "/aynzo-logo.png"
-                      target.className = "h-full w-full object-contain p-1"
-                    }}
-                  />
-                </div>
-              ) : (
-                <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-gray-200 flex items-center justify-center bg-white">
+                 <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-gray-200 flex items-center justify-center bg-white">
                   <Image 
                     src="/aynzo-logo.png" 
                     alt="Aynzo Logo" 
@@ -252,13 +234,25 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                     }}
                   />
                 </div>
-              )}
             </Link>
+            {/* Visitor Management System Text - Only show if user has subscription */}
+            {isActuallyAuthenticated && hasActiveSubscription && (
+              <div className={`hidden lg:flex items-center`}>
+                <div className={`text-base font-bold tracking-tight transition-all duration-300 ${
+                  shouldShowWhiteNavbar 
+                    ? 'text-[#3882a5]' 
+                    : 'text-white drop-shadow-lg'
+                }`}>
+                  Visitor Management System
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="hidden lg:flex items-center gap-2">
+          {/* Center: Navigation Links */}
+          <div className="hidden lg:flex items-center justify-center flex-1">
             {!isActuallyAuthenticated && (
-              <>
+              <div className="flex items-center gap-2">
                 <Link
                   href={routes.publicroute.HOME}
                   className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
@@ -307,21 +301,19 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                   <span className="relative z-10">Contact</span>
                   <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
                 </Link>
-                {!isActuallyAuthenticated && (
-                  <Link
-                    href={routes.publicroute.HELP}
-                    className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
-                      pathname === routes.publicroute.HELP
-                        ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
-                        : `border-transparent ${linkText}`
-                    } group transition-colors duration-200 ${linkHoverBgClass}`}
-                    prefetch={true}
-                  >
-                    <span className="relative z-10">Help</span>
-                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
-                  </Link>
-                )}
-              </>
+                <Link
+                  href={routes.publicroute.HELP}
+                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
+                    pathname === routes.publicroute.HELP
+                      ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
+                      : `border-transparent ${linkText}`
+                  } group transition-colors duration-200 ${linkHoverBgClass}`}
+                  prefetch={true}
+                >
+                  <span className="relative z-10">Help</span>
+                  <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
+                </Link>
+              </div>
             )}
           </div>
 
@@ -373,14 +365,32 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                 {/* Company Name and Notification Bell - Shows for authenticated users */}
                 {isActuallyAuthenticated && !isSubscriptionPage && (
                   <div className="flex items-center gap-3">
-                    {/* Company Name */}
+                    {/* Company Name with Logo */}
                     {user?.companyName && (
-                      <div className={`hidden sm:flex items-center px-3 py-2 rounded-lg transition-all duration-200 ${
+                      <div className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
                         shouldShowWhiteNavbar 
                           ? 'bg-gray-50 text-gray-900' 
                           : 'bg-white/10 text-white'
                       }`}>
-                        <Building2 className={`h-4 w-4 mr-2 flex-shrink-0 ${shouldShowWhiteNavbar ? 'text-gray-600' : 'text-white'}`} />
+                        {/* Company Logo */}
+                        {user?.profilePicture && user.profilePicture.trim() !== "" ? (
+                          <div className="h-10 w-10 overflow-hidden flex items-center justify-center bg-white flex-shrink-0">
+                            <Image 
+                              src={`${user.profilePicture}${user.profilePicture.includes('?') ? '&' : '?'}v=${user.profilePicture.length}`}
+                              alt={user?.companyName || "Company Logo"} 
+                              width={40}
+                              height={40}
+                              className="h-full w-full object-contain p-1"
+                              onError={(e) => {
+                                const target = e.currentTarget as HTMLImageElement
+                                target.src = "/aynzo-logo.png"
+                                target.className = "h-full w-full object-contain p-1"
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <Building2 className={`h-5 w-5 flex-shrink-0 ${shouldShowWhiteNavbar ? 'text-gray-600' : 'text-white'}`} />
+                        )}
                         <span className="text-sm font-semibold whitespace-nowrap">
                           {user.companyName}
                         </span>
