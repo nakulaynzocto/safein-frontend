@@ -132,6 +132,11 @@ export function GlobalPageLoader() {
       
       const anchor = target.closest("a")
       if (anchor && anchor.href) {
+        // Skip if link has data-no-loader or data-skip-navigation attribute (for downloads, etc.)
+        if (anchor.hasAttribute('data-no-loader') || anchor.hasAttribute('data-skip-navigation')) {
+          return
+        }
+        
         try {
           const url = new URL(anchor.href)
           const currentUrl = new URL(window.location.href)
