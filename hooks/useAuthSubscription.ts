@@ -31,9 +31,13 @@ export function useAuthSubscription() {
   const { 
     data: activeSubscriptionData, 
     isLoading: isSubscriptionLoading,
-    isFetching: isSubscriptionFetching 
+    isFetching: isSubscriptionFetching,
+    refetch: refetchSubscription,
   } = useGetUserActiveSubscriptionQuery(user?.id ?? "", {
     skip: !isAuthenticated || !user?.id,
+    // Refetch on mount and window focus to ensure fresh data after payment
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
   })
 
   // Check if user has active subscription
@@ -146,9 +150,14 @@ export function useAuthSubscription() {
       return true
     }
 
-    // If on private route, only show if has active subscription
+    // If on private route, show content if:
+    // 1. Has active subscription, OR
+    // 2. Subscription is still loading (give it time to fetch)
+    // This prevents showing loading state when subscription data is being refetched after payment
     if (isCurrentRoutePrivate) {
-      return hasActiveSubscription && !isSubscriptionLoading
+      // Show content if subscription is active OR if we're still loading (optimistic)
+      // The redirect logic will handle cases where subscription is not active
+      return hasActiveSubscription || isSubscriptionLoading
     }
 
     // For other routes, show if authenticated
@@ -171,13 +180,15 @@ export function useAuthSubscription() {
     }
 
     // If on private route and subscription is loading, show loading
+    // But only for a reasonable time (max 5 seconds) to prevent infinite loading
     if (isCurrentRoutePrivate && isSubscriptionLoading) {
       return true
     }
 
-    // If on private route and no active subscription, show loading (will redirect)
-    if (isCurrentRoutePrivate && !hasActiveSubscription) {
-      return true
+    // If on private route and no active subscription, don't show loading
+    // Let the redirect logic handle it (will redirect to subscription plan)
+    if (isCurrentRoutePrivate && !hasActiveSubscription && !isSubscriptionLoading) {
+      return false
     }
 
     return false

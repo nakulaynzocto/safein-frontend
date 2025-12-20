@@ -1,13 +1,13 @@
 "use client"
 
-import type React from "react"
+import { type ReactNode } from "react"
 import { Navbar } from "./navbar"
 import { Sidebar } from "./sidebar"
 import { useAuthSubscription } from "@/hooks/useAuthSubscription"
 import { useAppointmentSocket } from "@/hooks/useSocket"
 
 interface ProtectedLayoutProps {
-  children: React.ReactNode
+  children: ReactNode
 }
 
 export function ProtectedLayout({ children }: ProtectedLayoutProps) {
