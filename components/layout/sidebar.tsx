@@ -130,7 +130,7 @@ const SidebarContent = ({
   }
 
   if (isMobile) {
-    return (
+  return (
       <div className="flex-1 overflow-y-auto">
         <SheetHeader className="p-4 border-b bg-gradient-to-r from-gray-50 to-white">
           <div className="flex items-center gap-3">
@@ -167,7 +167,7 @@ const SidebarContent = ({
           <div className="space-y-1 mt-2">
             <button
               onClick={() => setSettingsOpen(!settingsOpen)}
-              className={cn(
+      className={cn(
                 "flex items-center justify-between w-full rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200",
                 isSettingsActive
                   ? "bg-brand text-white shadow-sm"
@@ -225,69 +225,69 @@ const SidebarContent = ({
   }
 
   return (
-    <nav className="flex-1 space-y-2 p-2 overflow-y-auto mt-8">
-      {navigation.map((item) => (
-        <Link
-          key={item.name}
-          href={item.href!}
-          prefetch={true}
-          className={cn(
-            "sidebar-item text-base",
-            isActive(item.href!) && "active"
-          )}
-        >
-          <item.icon className="sidebar-item-icon" />
+      <nav className="flex-1 space-y-2 p-2 overflow-y-auto mt-8">
+        {navigation.map((item) => (
+          <Link
+            key={item.name}
+            href={item.href!}
+            prefetch={true}
+            className={cn(
+              "sidebar-item text-base",
+              isActive(item.href!) && "active"
+            )}
+          >
+            <item.icon className="sidebar-item-icon" />
           <span className="sidebar-item-text font-medium tracking-wide">{item.name}</span>
-        </Link>
-      ))}
+          </Link>
+        ))}
 
-      <div className="space-y-1">
-        <button
-          onClick={() => setSettingsOpen(!settingsOpen)}
-          className={cn(
-            "sidebar-item text-base w-full flex items-center justify-between",
-            isSettingsActive && "active"
-          )}
-        >
-          <div className="flex items-center">
-            <Settings className="sidebar-item-icon" />
+        <div className="space-y-1">
+          <button
+            onClick={() => setSettingsOpen(!settingsOpen)}
+            className={cn(
+              "sidebar-item text-base w-full flex items-center justify-between",
+              isSettingsActive && "active"
+            )}
+          >
+            <div className="flex items-center">
+              <Settings className="sidebar-item-icon" />
             <span className="sidebar-item-text font-medium tracking-wide">Settings</span>
-          </div>
+            </div>
           {settingsOpen ? (
-            <ChevronDown className="h-4 w-4 sidebar-item-text" />
-          ) : (
-            <ChevronRight className="h-4 w-4 sidebar-item-text" />
-          )}
-        </button>
+                <ChevronDown className="h-4 w-4 sidebar-item-text" />
+              ) : (
+                <ChevronRight className="h-4 w-4 sidebar-item-text" />
+            )}
+          </button>
 
         {settingsOpen && (
-          <div className="ml-6 space-y-1 pl-2 border-l-2 border-gray-200">
-            {settingsSubmenu.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                prefetch={true}
-                className={cn(
-                  "sidebar-item text-sm flex items-center gap-2 py-2 px-3 rounded-md",
-                  isActive(item.href) && "active"
-                )}
+            <div className="ml-6 space-y-1 pl-2 border-l-2 border-gray-200">
+              {settingsSubmenu.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  prefetch={true}
+                  className={cn(
+                    "sidebar-item text-sm flex items-center gap-2 py-2 px-3 rounded-md",
+                    isActive(item.href) && "active"
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span className="sidebar-item-text font-medium">{item.name}</span>
+                </Link>
+              ))}
+              <button
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="sidebar-item text-sm flex items-center gap-2 py-2 px-3 rounded-md w-full text-left text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
               >
-                <item.icon className="h-4 w-4" />
-                <span className="sidebar-item-text font-medium">{item.name}</span>
-              </Link>
-            ))}
-            <button
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              className="sidebar-item text-sm flex items-center gap-2 py-2 px-3 rounded-md w-full text-left text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="font-medium">{isLoggingOut ? "Logging out..." : "Logout"}</span>
-            </button>
-          </div>
-        )}
-      </div>
-    </nav>
+                <LogOut className="h-4 w-4" />
+                <span className="font-medium">{isLoggingOut ? "Logging out..." : "Logout"}</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </nav>
   )
 }
 
@@ -306,7 +306,7 @@ export function Sidebar({ className }: SidebarProps) {
         )}
       >
         <SidebarContent />
-      </div>
+    </div>
 
       {/* Mobile Sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
