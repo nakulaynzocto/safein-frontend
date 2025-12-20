@@ -228,26 +228,32 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
 
   const userInitials = user ? getUserInitials(user.name, user.companyName) : "U"
 
+  // For authenticated users with active subscription, always show white navbar
+  const shouldUseWhiteNavbar = shouldShowWhiteNavbar || (isActuallyAuthenticated && hasActiveSubscription)
+
   return (
     <nav
       className={`${
-        shouldShowWhiteNavbar
-          ? 'bg-white/90 border-b border-gray-200/30 shadow-lg backdrop-blur-md'
+        shouldUseWhiteNavbar
+          ? 'bg-white border-b border-gray-200 shadow-sm'
           : 'bg-hero-gradient border-transparent shadow-none backdrop-blur-0'
       } sticky top-0 z-50 transition-all duration-300`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
-          <div className="flex items-center">
-            <Link href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex-shrink-0" prefetch={true}>
-              <Image 
-                src="/aynzo-logo.png" 
-                alt="Aynzo Logo" 
-                width={120}
-                height={48}
-                priority
-                className={`h-12 w-auto ${shouldShowWhiteNavbar ? '' : 'filter brightness-0 invert'}`}
-              />
+          <div className="flex items-center gap-3">
+            <Link href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex items-center gap-3" prefetch={true}>
+              {/* Circular Logo with A */}
+              <div className="relative flex-shrink-0">
+                <div className="h-12 w-12 rounded-full bg-[#3882a5] flex items-center justify-center shadow-md">
+                  <span className="text-white text-xl font-bold">A</span>
+                </div>
+              </div>
+              {/* AYNZO Text and Visitor Management System */}
+              <div className="flex flex-col">
+                <span className="text-xs sm:text-sm font-semibold text-gray-900 leading-tight">AYNZO</span>
+                <span className="text-xs sm:text-sm font-medium text-[#3882a5] leading-tight">Visitor Management System</span>
+              </div>
             </Link>
           </div>
 
@@ -365,89 +371,104 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
 
             {shouldShowProfileDropdown ? (
               <>
-                {/* 1. Notification Bell (First) - Shows for authenticated users with active subscription */}
-                {isActuallyAuthenticated && !isSubscriptionPage && (
-                  <NotificationBell 
-                    className={shouldShowWhiteNavbar ? 'hover:bg-gray-100/80' : 'hover:bg-white/10'}
-                    iconClassName={shouldShowWhiteNavbar ? 'text-gray-700' : 'text-white'}
-                  />
-                )}
-
-                {/* 2. Profile dropdown (Second) */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      className="relative h-10 w-10 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                      onClick={handleAvatarClick}
-                    >
-                      <Avatar className="h-10 w-10 ring-2 ring-gray-200 hover:ring-blue-300 transition-all duration-200">
-                        {user?.profilePicture && user.profilePicture.trim() !== "" ? (
-                          <AvatarImage 
-                            src={`${user.profilePicture}${user.profilePicture.includes('?') ? '&' : '?'}v=${user.profilePicture.length}`} 
-                            alt={user.companyName || "User"}
-                            key={user.profilePicture}
-                          />
-                        ) : null}
-                        <AvatarFallback className="text-white font-semibold shadow-lg" style={{ backgroundColor: '#3882a5' }}>
-                          {userInitials}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64 p-2 shadow-xl border-gray-200/50" align="end" forceMount>
-                    <div className="flex items-center justify-start gap-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-lg mb-2">
-                      <Avatar className="h-10 w-10">
-                        {user?.profilePicture && user.profilePicture.trim() !== "" ? (
-                          <AvatarImage 
-                            src={`${user?.profilePicture}${user.profilePicture.includes('?') ? '&' : '?'}v=${user.profilePicture.length}`} 
-                            alt={user?.companyName || "User"}
-                            key={user?.profilePicture}
-                          />
-                        ) : null}
-                        <AvatarFallback className="text-white font-semibold" style={{ backgroundColor: '#3882a5' }}>
-                          {userInitials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col space-y-1 leading-none">
-                        <p className="font-semibold text-gray-900">
-                          {user?.companyName || user?.name || "User"}
-                        </p>
-                        <p className="w-[180px] truncate text-sm text-gray-600">{user?.email}</p>
-                      </div>
+                {/* User Profile Section with Paytm logo, name, and bell icon */}
+                <div className="flex items-center gap-3">
+                  {/* Paytm Logo */}
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div className="h-6 w-6 rounded bg-orange-500 flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">P</span>
                     </div>
-                    <DropdownMenuSeparator />
-                    {/* Show notifications and profile only if user has active subscription (not on subscription-plan page) */}
-                    {isActuallyAuthenticated && !isSubscriptionPage ? (
-                      <>
-                        <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                          <Link href={routes.privateroute.NOTIFICATIONS} className="flex items-center" prefetch={true}>
-                            <Bell className="mr-3 h-4 w-4" />
-                            Notifications
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        {/* Profile option - Only show if not on subscription page */}
-                        <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                          <Link href={routes.privateroute.PROFILE} className="flex items-center" prefetch={true}>
-                            <UserCircle className="mr-3 h-4 w-4" />
-                            Profile
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                      </>
-                    ) : null}
-                    <DropdownMenuItem 
-                      onClick={handleLogout} 
-                      className="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-                      disabled={isLoggingOut}
-                    >
-                      <LogOut className="mr-3 h-4 w-4" />
-                      {isLoggingOut ? "Logging out..." : "Log out"}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    <span className="text-sm font-medium text-gray-700">Paytm</span>
+                  </div>
 
+                  {/* User Name */}
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium text-gray-700">{user?.name || user?.companyName || "User"}</span>
+                  </div>
+
+                  {/* Notification Bell */}
+                  {isActuallyAuthenticated && !isSubscriptionPage && (
+                    <NotificationBell 
+                      className="hover:bg-gray-100 rounded-lg p-2 transition-colors"
+                      iconClassName="text-gray-700"
+                    />
+                  )}
+
+                  {/* Profile Avatar Dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        className="relative h-10 w-10 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                        onClick={handleAvatarClick}
+                      >
+                        <Avatar className="h-10 w-10 ring-2 ring-gray-200 hover:ring-blue-300 transition-all duration-200">
+                          {user?.profilePicture && user.profilePicture.trim() !== "" ? (
+                            <AvatarImage 
+                              src={`${user.profilePicture}${user.profilePicture.includes('?') ? '&' : '?'}v=${user.profilePicture.length}`} 
+                              alt={user.companyName || "User"}
+                              key={user.profilePicture}
+                            />
+                          ) : null}
+                          <AvatarFallback className="text-white font-semibold shadow-lg" style={{ backgroundColor: '#3882a5' }}>
+                            {userInitials}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-64 p-2 shadow-xl border-gray-200/50" align="end" forceMount>
+                      <div className="flex items-center justify-start gap-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-lg mb-2">
+                        <Avatar className="h-10 w-10">
+                          {user?.profilePicture && user.profilePicture.trim() !== "" ? (
+                            <AvatarImage 
+                              src={`${user?.profilePicture}${user.profilePicture.includes('?') ? '&' : '?'}v=${user.profilePicture.length}`} 
+                              alt={user?.companyName || "User"}
+                              key={user?.profilePicture}
+                            />
+                          ) : null}
+                          <AvatarFallback className="text-white font-semibold" style={{ backgroundColor: '#3882a5' }}>
+                            {userInitials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col space-y-1 leading-none">
+                          <p className="font-semibold text-gray-900">
+                            {user?.companyName || user?.name || "User"}
+                          </p>
+                          <p className="w-[180px] truncate text-sm text-gray-600">{user?.email}</p>
+                        </div>
+                      </div>
+                      <DropdownMenuSeparator />
+                      {/* Show notifications and profile only if user has active subscription (not on subscription-plan page) */}
+                      {isActuallyAuthenticated && !isSubscriptionPage ? (
+                        <>
+                          <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                            <Link href={routes.privateroute.NOTIFICATIONS} className="flex items-center" prefetch={true}>
+                              <Bell className="mr-3 h-4 w-4" />
+                              Notifications
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          {/* Profile option - Only show if not on subscription page */}
+                          <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                            <Link href={routes.privateroute.PROFILE} className="flex items-center" prefetch={true}>
+                              <UserCircle className="mr-3 h-4 w-4" />
+                              Profile
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                        </>
+                      ) : null}
+                      <DropdownMenuItem 
+                        onClick={handleLogout} 
+                        className="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                        disabled={isLoggingOut}
+                      >
+                        <LogOut className="mr-3 h-4 w-4" />
+                        {isLoggingOut ? "Logging out..." : "Log out"}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </>
             ) : (
               <>
