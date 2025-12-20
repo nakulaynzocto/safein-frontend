@@ -3,6 +3,7 @@
 import ReactPaginate from "react-paginate"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import "./pagination.css"
 
 interface PaginationProps {
   currentPage: number
@@ -78,28 +79,18 @@ export function Pagination({
           marginPagesDisplayed={1}
           pageCount={totalPages}
           forcePage={currentPage - 1}
-          disabledClassName="opacity-50 cursor-not-allowed"
-          containerClassName="flex items-center gap-1 list-none"
-          pageClassName="mx-0.5"
-          pageLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-          previousClassName="mx-0.5"
-          previousLinkClassName={cn(
-            "flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md transition-colors cursor-pointer",
-            hasPrevPage 
-              ? "hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-[#3882a5] hover:text-[#3882a5]" 
-              : "opacity-50 cursor-not-allowed"
-          )}
-          nextClassName="mx-0.5"
-          nextLinkClassName={cn(
-            "flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md transition-colors cursor-pointer",
-            hasNextPage 
-              ? "hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-[#3882a5] hover:text-[#3882a5]" 
-              : "opacity-50 cursor-not-allowed"
-          )}
-          breakClassName="mx-0.5"
-          breakLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-500 dark:text-gray-400"
-          activeClassName="mx-0.5"
-          activeLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-white bg-[#3882a5] border border-[#3882a5] rounded-md hover:bg-[#2d6a87] hover:border-[#2d6a87] transition-colors cursor-pointer shadow-sm"
+          disabledClassName="disabled"
+          containerClassName="react-paginate"
+          pageClassName=""
+          pageLinkClassName=""
+          previousClassName={hasPrevPage ? "" : "disabled"}
+          previousLinkClassName=""
+          nextClassName={hasNextPage ? "" : "disabled"}
+          nextLinkClassName=""
+          breakClassName="break"
+          breakLinkClassName=""
+          activeClassName="selected"
+          activeLinkClassName=""
         />
       </div>
     </div>
@@ -142,28 +133,18 @@ export function CompactPagination({
         marginPagesDisplayed={1}
         pageCount={totalPages}
         forcePage={currentPage - 1}
-        disabledClassName="opacity-50 cursor-not-allowed"
-        containerClassName="flex items-center gap-1 list-none"
-        pageClassName="mx-0.5"
-        pageLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-        previousClassName="mx-0.5"
-        previousLinkClassName={cn(
-          "flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md transition-colors cursor-pointer",
-          hasPrevPage 
-            ? "hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-[#3882a5] hover:text-[#3882a5]" 
-            : "opacity-50 cursor-not-allowed"
-        )}
-        nextClassName="mx-0.5"
-        nextLinkClassName={cn(
-          "flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md transition-colors cursor-pointer",
-          hasNextPage 
-            ? "hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-[#3882a5] hover:text-[#3882a5]" 
-            : "opacity-50 cursor-not-allowed"
-        )}
-        breakClassName="mx-0.5"
-        breakLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-500 dark:text-gray-400"
-        activeClassName="mx-0.5"
-        activeLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-white bg-[#3882a5] border border-[#3882a5] rounded-md hover:bg-[#2d6a87] hover:border-[#2d6a87] transition-colors cursor-pointer shadow-sm"
+        disabledClassName="disabled"
+        containerClassName="react-paginate"
+        pageClassName=""
+        pageLinkClassName=""
+        previousClassName={hasPrevPage ? "" : "disabled"}
+        previousLinkClassName=""
+        nextClassName={hasNextPage ? "" : "disabled"}
+        nextLinkClassName=""
+        breakClassName="break"
+        breakLinkClassName=""
+        activeClassName="selected"
+        activeLinkClassName=""
       />
     </div>
   )
