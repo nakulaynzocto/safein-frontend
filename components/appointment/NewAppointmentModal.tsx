@@ -134,7 +134,11 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
   const setOpen = onOpenChange || setInternalOpen
   const [createAppointment, { isLoading: isCreating }] = useCreateAppointmentMutation()
   const [updateAppointment, { isLoading: isUpdating }] = useUpdateAppointmentMutation()
-  const { data: employeesData } = useGetEmployeesQuery()
+  const { data: employeesData, isLoading: isLoadingEmployees, error: employeesError } = useGetEmployeesQuery({ 
+    page: 1, 
+    limit: 100, // Backend max limit is 100
+    status: "Active" as const, // Filter active employees on the backend
+  })
   const employees = employeesData?.employees || []
   const [generalError, setGeneralError] = React.useState<string | null>(null)
   const [approvalLink, setApprovalLink] = React.useState<string | null>(null)
@@ -148,19 +152,18 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
     { skip: !appointmentId }
   )
 
-  const employeeOptions = React.useMemo(() => 
-    employees
-      ?.filter(emp => emp.status == "Active")      // only ACTIVE records
-      .map(emp => ({
-        value: emp._id,
-        label: `${emp.name} (${emp.status}) - ${emp.department}`,
-        searchKeywords: `${emp.name} ${emp.email ?? ""} ${emp.phone ?? ""} ${emp.department ?? ""} ${emp.designation ?? ""}`.trim(),
-      })),
-    [employees]
-  );
+  const employeeOptions = React.useMemo(() => {
+    // Backend already filters by status, but double-check to be safe
+    const activeEmployees = employees?.filter(emp => emp.status === "Active") || []
+    return activeEmployees.map(emp => ({
+      value: emp._id,
+      label: `${emp.name} (${emp.status}) - ${emp.department}`,
+      searchKeywords: `${emp.name} ${emp.email ?? ""} ${emp.phone ?? ""} ${emp.department ?? ""} ${emp.designation ?? ""}`.trim(),
+    }))
+  }, [employees])
   
 
-  const { data: visitorsData } = useGetVisitorsQuery({ page: 1, limit: 100 })
+  const { data: visitorsData } = useGetVisitorsQuery({ page: 1, limit: 1000 })
   const visitors: Visitor[] = visitorsData?.visitors || []
   
   const visitorOptions = React.useMemo(() => 
@@ -422,7 +425,8 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                         console.log("Employee select change", { val })
                         field.onChange(val ?? "")
                       }}
-                      error={errors.employeeId?.message}
+                      error={errors.employeeId?.message || (employeesError ? "Failed to load employees" : undefined)}
+                      isLoading={isLoadingEmployees}
                     />
                   )}
                 />
