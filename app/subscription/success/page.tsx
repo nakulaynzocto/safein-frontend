@@ -68,9 +68,9 @@ export default function SubscriptionSuccessPage() {
     if (subscriptionIsActive && !isRedirecting) {
       setIsRedirecting(true)
       // Invalidate subscription query to ensure fresh data on dashboard
+      // Use correct tag types: 'User' and 'Subscription' as defined in the API
       if (user?.id) {
-        dispatch(userSubscriptionApi.util.invalidateTags([{ type: 'UserSubscription', id: user.id }]))
-        dispatch(userSubscriptionApi.util.invalidateTags(['UserSubscription']))
+        dispatch(userSubscriptionApi.util.invalidateTags(['User', 'Subscription']))
       }
       // Refetch subscription before redirect
       refetchSubscription()

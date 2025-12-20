@@ -19,8 +19,8 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user?.id) {
       // Invalidate and refetch subscription data to ensure fresh state
-      dispatch(userSubscriptionApi.util.invalidateTags([{ type: 'UserSubscription', id: user.id }]))
-      dispatch(userSubscriptionApi.util.invalidateTags(['UserSubscription']))
+      // Use correct tag types: 'User' and 'Subscription' as defined in the API
+      dispatch(userSubscriptionApi.util.invalidateTags(['User', 'Subscription']))
     }
   }, [user?.id, dispatch])
 
