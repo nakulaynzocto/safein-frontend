@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -27,7 +27,7 @@ export function ApprovalLinkModal({
   approvalLink,
   onCancel 
 }: ApprovalLinkModalProps) {
-  const [linkCopied, setLinkCopied] = React.useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
 
   const copyToClipboard = async (text: string) => {
     try {

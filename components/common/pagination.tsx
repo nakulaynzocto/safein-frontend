@@ -38,25 +38,6 @@ export function Pagination({
     onPageChange(event.selected + 1)
   }
 
-  useEffect(() => {
-    const style = document.createElement('style')
-    style.textContent = `
-      .pagination-active-link {
-        background-color: #3882a5 !important;
-        border-color: #3882a5 !important;
-        color: white !important;
-      }
-      .pagination-active-link:hover {
-        background-color: #2d6a87 !important;
-        border-color: #2d6a87 !important;
-      }
-    `
-    document.head.appendChild(style)
-    return () => {
-      document.head.removeChild(style)
-    }
-  }, [])
-
   if (totalPages <= 1) {
     return null
   }
@@ -118,7 +99,7 @@ export function Pagination({
           breakClassName="mx-0.5"
           breakLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-500 dark:text-gray-400"
           activeClassName="mx-0.5 selected"
-          activeLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium rounded-md transition-colors cursor-pointer shadow-sm"
+          activeLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium !bg-[#3882a5] !border-[#3882a5] !text-white rounded-md hover:!bg-[#2d6a87] hover:!border-[#2d6a87] transition-colors cursor-pointer shadow-sm"
         />
       </div>
     </div>
@@ -142,25 +123,6 @@ export function CompactPagination({
   const handlePageClick = (event: { selected: number }) => {
     onPageChange(event.selected + 1)
   }
-
-  useEffect(() => {
-    const style = document.createElement('style')
-    style.textContent = `
-      .pagination-active-link {
-        background-color: #3882a5 !important;
-        border-color: #3882a5 !important;
-        color: white !important;
-      }
-      .pagination-active-link:hover {
-        background-color: #2d6a87 !important;
-        border-color: #2d6a87 !important;
-      }
-    `
-    document.head.appendChild(style)
-    return () => {
-      document.head.removeChild(style)
-    }
-  }, [])
 
   if (totalPages <= 1) {
     return null

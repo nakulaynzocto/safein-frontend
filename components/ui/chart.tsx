@@ -1,6 +1,6 @@
 'use client'
 
-import * as React from 'react'
+import { useMemo } from 'react'
 import * as RechartsPrimitive from 'recharts'
 
 import { cn } from '@/lib/utils'
@@ -128,7 +128,7 @@ function ChartTooltipContent({
   }) {
   const { config } = useChart()
 
-  const tooltipLabel = React.useMemo(() => {
+  const tooltipLabel = useMemo(() => {
     if (hideLabel || !payload?.length) {
       return null
     }

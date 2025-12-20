@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { routes } from "@/utils/routes"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -33,7 +33,7 @@ export default function HomePage() {
     setIsInitialized(true)
   }, [dispatch])
 
-  const plans = React.useMemo(() => {
+  const plans = useMemo(() => {
     if (!fetchedSubscriptionPlans) return []
     
     const apiPlans = fetchedSubscriptionPlans?.data?.plans || 
