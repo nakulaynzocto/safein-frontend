@@ -241,7 +241,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <Link href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex items-center gap-3" prefetch={true}>
               {/* Circular Logo with A */}
               <div className="relative flex-shrink-0">
@@ -257,9 +257,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
             </Link>
           </div>
 
-          <div className="hidden lg:flex items-center gap-2">
+          {/* Center: Navigation Links */}
+          <div className="hidden lg:flex items-center justify-center flex-1">
             {!isActuallyAuthenticated && (
-              <>
+              <div className="flex items-center gap-2">
                 <Link
                   href={routes.publicroute.HOME}
                   className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
@@ -308,21 +309,19 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                   <span className="relative z-10">Contact</span>
                   <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
                 </Link>
-                {!isActuallyAuthenticated && (
-                  <Link
-                    href={routes.publicroute.HELP}
-                    className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
-                      pathname === routes.publicroute.HELP
-                        ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
-                        : `border-transparent ${linkText}`
-                    } group transition-colors duration-200 ${linkHoverBgClass}`}
-                    prefetch={true}
-                  >
-                    <span className="relative z-10">Help</span>
-                    <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
-                  </Link>
-                )}
-              </>
+                <Link
+                  href={routes.publicroute.HELP}
+                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
+                    pathname === routes.publicroute.HELP
+                      ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
+                      : `border-transparent ${linkText}`
+                  } group transition-colors duration-200 ${linkHoverBgClass}`}
+                  prefetch={true}
+                >
+                  <span className="relative z-10">Help</span>
+                  <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${shouldShowWhiteNavbar ? 'bg-gradient-to-r from-brand/10 to-brand-strong/10' : 'bg-white/5'}`} />
+                </Link>
+              </div>
             )}
           </div>
 
@@ -341,7 +340,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                 <button
                   type="button"
                   onClick={handleOpenUpgradeModal}
-                  className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
+                  className="px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 bg-[#3882a5] text-white hover:bg-[#2d6a87]"
                 >
                   Upgrade
                 </button>
@@ -362,7 +361,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                 <button
                   type="button"
                   onClick={handleOpenUpgradeModal}
-                  className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
+                  className="px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 bg-[#3882a5] text-white hover:bg-[#2d6a87]"
                 >
                   Upgrade
                 </button>
@@ -374,7 +373,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                 {/* User Profile Section with Paytm logo, name, and bell icon */}
                 <div className="flex items-center gap-3">
                   {/* Paytm Logo */}
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                     <div className="h-6 w-6 rounded bg-orange-500 flex items-center justify-center">
                       <span className="text-white text-xs font-bold">P</span>
                     </div>
@@ -382,7 +381,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                   </div>
 
                   {/* User Name */}
-                  <div className="flex items-center">
+                  <div className="hidden sm:flex items-center">
                     <span className="text-sm font-medium text-gray-700">{user?.name || user?.companyName || "User"}</span>
                   </div>
 
@@ -469,6 +468,18 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
+
+                {/* 2. Logout Button - Only show on subscription-plan page */}
+                {isSubscriptionPage && isAuthenticated && token && (
+                  <Button
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 bg-[#3882a5] text-white hover:bg-[#2d6a87]"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    {isLoggingOut ? "Logging out..." : "Logout"}
+                  </Button>
+                )}
               </>
             ) : (
               <>
@@ -492,78 +503,18 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                     My Account
                   </Link>
                 ) : (
-                  /* Show Upgrade button and Profile if logged in but no subscription, but hide on subscription-plan page */
+                  /* Show Upgrade button if logged in but no subscription, but hide on subscription-plan page */
                   <>
                     {/* 1. Upgrade button (first) */}
                     {showUpgradeButton && !isSubscriptionPage && (
                       <Link 
                         href={routes.publicroute.SUBSCRIPTION_PLAN}
-                        className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
+                        className="px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 bg-[#3882a5] text-white hover:bg-[#2d6a87]"
                         prefetch={true}
                       >
                         Upgrade
                       </Link>
                     )}
-                    {/* 2. Profile dropdown (second) */}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          className="relative h-10 w-10 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                        >
-                          <Avatar className="h-10 w-10 ring-2 ring-gray-200 hover:ring-blue-300 transition-all duration-200">
-                            {user?.profilePicture && user.profilePicture.trim() !== "" ? (
-                              <AvatarImage 
-                                src={`${user.profilePicture}${user.profilePicture.includes('?') ? '&' : '?'}v=${user.profilePicture.length}`} 
-                                alt={user.companyName || "User"}
-                                key={user.profilePicture}
-                              />
-                            ) : null}
-                            <AvatarFallback className="text-white font-semibold shadow-lg" style={{ backgroundColor: '#3882a5' }}>
-                              {userInitials}
-                            </AvatarFallback>
-                          </Avatar>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-64 p-2 shadow-xl border-gray-200/50" align="end" forceMount>
-                        <div className="flex items-center justify-start gap-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-lg mb-2">
-                          <Avatar className="h-10 w-10">
-                            {user?.profilePicture && user.profilePicture.trim() !== "" ? (
-                              <AvatarImage 
-                                src={`${user?.profilePicture}${user.profilePicture.includes('?') ? '&' : '?'}v=${user.profilePicture.length}`} 
-                                alt={user?.companyName || "User"}
-                                key={user?.profilePicture}
-                              />
-                            ) : null}
-                            <AvatarFallback className="text-white font-semibold" style={{ backgroundColor: '#3882a5' }}>
-                              {userInitials}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col space-y-1 leading-none">
-                            <p className="font-semibold text-gray-900">
-                              {user?.companyName || user?.name || "User"}
-                            </p>
-                            <p className="w-[180px] truncate text-sm text-gray-600">{user?.email}</p>
-                          </div>
-                        </div>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                          <Link href={routes.publicroute.SUBSCRIPTION_PLAN} className="flex items-center" prefetch={true}>
-                            <CreditCard className="mr-3 h-4 w-4" />
-                            Upgrade Plan
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          onClick={handleLogout} 
-                          className="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-                          disabled={isLoggingOut}
-                        >
-                          <LogOut className="mr-3 h-4 w-4" />
-                          {isLoggingOut ? "Logging out..." : "Log out"}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
                   </>
                 )}
               </>
@@ -671,7 +622,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                         {showUpgradeButton && !isSubscriptionPage && (
                           <Link
                             href={routes.publicroute.SUBSCRIPTION_PLAN}
-                            className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
+                            className="block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 bg-[#3882a5] text-white hover:bg-[#2d6a87]"
                             onClick={() => setIsMobileMenuOpen(false)}
                           >
                             Upgrade
@@ -689,4 +640,3 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
     </nav>
   )
 }
-
