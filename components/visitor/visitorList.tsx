@@ -302,37 +302,21 @@ export function VisitorList() {
       {/* Header Actions */}
       <Card className="card-hostinger p-3 sm:p-4">
         <CardHeader className="pb-3 sm:pb-4 px-0">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-            <div className="min-w-0">
-              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl font-semibold">
-                <User className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                <span className="truncate">Visitor Management</span>
-              </CardTitle>
-              <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                <span className="hidden sm:inline">Manage and view all registered visitors</span>
-                <span className="sm:hidden">All visitors</span>
-                {pagination && ` (${pagination.totalVisitors} total)`}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <Button 
-                onClick={handleRefresh}
-                variant="outline"
-                size="sm"
-                disabled={isLoading}
-                className="h-9 w-9 p-0 sm:h-9 sm:w-9"
-              >
-                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-              </Button>
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-semibold flex-1 min-w-0">
+              <User className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+              <span className="truncate">Visitors</span>
+            </CardTitle>
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {hasReachedVisitorLimit ? (
                 <>
                   <Button 
-                    className="btn-hostinger btn-hostinger-primary flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4"
+                    className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
                     onClick={() => setShowUpgradeModal(true)}
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                    <span className="hidden min-[375px]:inline sm:hidden">Upgrade</span>
                     <span className="hidden sm:inline">Upgrade to Add More</span>
-                    <span className="sm:hidden">Upgrade</span>
                   </Button>
                   <UpgradePlanModal
                     isOpen={showUpgradeModal}
@@ -343,9 +327,9 @@ export function VisitorList() {
                 <NewVisitorModal 
                   onSuccess={handleVisitorCreated}
                   trigger={
-                    <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-1.5 text-xs sm:text-sm px-3 sm:px-4 whitespace-nowrap">
-                      <Plus className="h-4 w-4 shrink-0" />
-                      Add Visitor
+                    <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0">
+                      <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                      <span className="hidden min-[375px]:inline">Add Visitor</span>
                     </Button>
                   }
                 />
