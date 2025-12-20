@@ -163,7 +163,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
   }, [employees])
   
 
-  const { data: visitorsData } = useGetVisitorsQuery({ page: 1, limit: 1000 })
+  const { data: visitorsData } = useGetVisitorsQuery({ page: 1, limit: 100 })
   const visitors: Visitor[] = visitorsData?.visitors || []
   
   const visitorOptions = React.useMemo(() => 
