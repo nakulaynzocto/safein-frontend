@@ -37,11 +37,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
       <Navbar />
       <div className="flex flex-1 overflow-hidden">
         {/* Only show sidebar if user has active subscription AND token */}
-        {shouldShowSidebar && (
-          <div className="hidden md:block flex-shrink-0">
-            <Sidebar />
-          </div>
-        )}
+        {shouldShowSidebar && <Sidebar />}
         <main 
           className="flex-1 overflow-y-auto overflow-x-hidden transition-opacity duration-200" 
           style={{ backgroundColor: 'var(--background)' }}
