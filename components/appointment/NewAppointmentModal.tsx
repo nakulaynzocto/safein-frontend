@@ -1,15 +1,13 @@
 "use client"
 
-import * as React from "react"
+import { useState, useEffect, useMemo, useCallback, type ReactNode } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import * as yup from "yup"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -25,104 +23,30 @@ import { TimePicker } from "@/components/common/timePicker"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { ImageUploadField } from "@/components/common/imageUploadField"
 import { useCreateAppointmentMutation, useGetAppointmentQuery, useUpdateAppointmentMutation } from "@/store/api/appointmentApi"
-import { useGetEmployeesQuery } from "@/store/api/employeeApi"
-import { useGetVisitorsQuery, Visitor } from "@/store/api/visitorApi"
-import { showSuccessToast, showErrorToast } from "@/utils/toast"
-import { routes } from "@/utils/routes"
-import { Calendar, User, Car } from "lucide-react"
+import { useGetEmployeesQuery, useGetEmployeeQuery } from "@/store/api/employeeApi"
+import { useGetVisitorsQuery, useGetVisitorQuery, Visitor } from "@/store/api/visitorApi"
+import { showSuccessToast } from "@/utils/toast"
+import { Calendar, Car } from "lucide-react"
 import { ApprovalLinkModal } from "./ApprovalLinkModal"
 import { useDebounce } from "@/hooks/useDebounce"
-
-// Validation schema
-const appointmentSchema = yup.object({
-  visitorId: yup.string().required("Please select a visitor"),
-  visitorName: yup.string().optional().default(""),
-  visitorEmail: yup.string().optional().default(""),
-  visitorPhone: yup.string().optional().default(""),
-  aadhaarNumber: yup.string().optional().default(""),
-  employeeId: yup.string().required("Please select an employee"),
-  purpose: yup.string().required("Purpose of visit is required").min(5, "Purpose must be at least 5 characters"),
-  appointmentDate: yup.string().required("Appointment date is required").test('future-date', 'Scheduled date cannot be in the past', function(value) {
-    if (!value) return false
-    
-    try {
-      // Handle different date formats (YYYY-MM-DD or DD/MM/YYYY)
-      let dateStr = value
-      if (dateStr.includes('/')) {
-        // Convert DD/MM/YYYY to YYYY-MM-DD
-        const parts = dateStr.split('/')
-        if (parts.length === 3) {
-          dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`
-        }
-      }
-      
-      const selectedDate = new Date(dateStr + 'T00:00:00')
-      if (isNaN(selectedDate.getTime())) {
-        return false
-      }
-      
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      selectedDate.setHours(0, 0, 0, 0)
-      
-      return selectedDate >= today
-    } catch (error) {
-      return false
-    }
-  }),
-  appointmentTime: yup.string().required("Appointment time is required").test('future-time', 'Scheduled time cannot be in the past', function(value) {
-    if (!value) return false
-    const appointmentDate = this.parent.appointmentDate
-    if (!appointmentDate) return true
-    
-    try {
-      // Handle different date formats
-      let dateStr = appointmentDate
-      if (dateStr.includes('/')) {
-        const parts = dateStr.split('/')
-        if (parts.length === 3) {
-          dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`
-        }
-      }
-      
-      const selectedDateTime = new Date(`${dateStr}T${value}`)
-      if (isNaN(selectedDateTime.getTime())) {
-        return true // If date parsing fails, skip time validation
-      }
-      
-      const now = new Date()
-      
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const selectedDate = new Date(dateStr + 'T00:00:00')
-      selectedDate.setHours(0, 0, 0, 0)
-      
-      // Only validate time if the date is today
-      if (selectedDate.getTime() === today.getTime()) {
-        return selectedDateTime > now
-      }
-      
-      return true
-    } catch (error) {
-      return true // If validation fails, allow it (date validation will catch it)
-    }
-  }),
-  accompanyingCount: yup
-    .number()
-    .typeError("Please enter a valid number")
-    .min(0, "Accompanying people cannot be negative")
-    .max(20, "Accompanying people cannot exceed 20")
-    .default(0),
-  notes: yup.string().optional().default(""),
-  vehicleNumber: yup.string().optional().default(""),
-  vehiclePhoto: yup.string().optional().default(""),
-})
-
-type AppointmentFormData = yup.InferType<typeof appointmentSchema>
+import { appointmentSchema, type AppointmentFormData } from "./helpers/appointmentValidation"
+import { createSelectOptions } from "./helpers/selectOptionsHelper"
+import {
+  createAppointmentPayload,
+  createUpdateAppointmentPayload,
+  formatEmployeeLabel,
+  formatEmployeeSearchKeywords,
+  formatVisitorLabel,
+  formatVisitorSearchKeywords,
+} from "./helpers/appointmentFormHelpers"
+import {
+  getDefaultFormValues,
+  appointmentToFormValues,
+} from "./helpers/formResetHelpers"
 
 interface NewAppointmentModalProps {
   appointmentId?: string
-  triggerButton?: React.ReactNode
+  triggerButton?: ReactNode
   onSuccess?: () => void
   open?: boolean
   onOpenChange?: (open: boolean) => void
@@ -131,43 +55,42 @@ interface NewAppointmentModalProps {
 export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, open: controlledOpen, onOpenChange }: NewAppointmentModalProps) {
   const router = useRouter()
   
-  // ========== State Declarations ==========
-  const [internalOpen, setInternalOpen] = React.useState(false)
-  const [generalError, setGeneralError] = React.useState<string | null>(null)
-  const [approvalLink, setApprovalLink] = React.useState<string | null>(null)
-  const [showApprovalLinkModal, setShowApprovalLinkModal] = React.useState(false)
-  const [employeeSearchInput, setEmployeeSearchInput] = React.useState("")
-  const [visitorSearchInput, setVisitorSearchInput] = React.useState("")
+  // ========== All Hooks at Top ==========
+  // State hooks
+  const [internalOpen, setInternalOpen] = useState(false)
+  const [generalError, setGeneralError] = useState<string | null>(null)
+  const [approvalLink, setApprovalLink] = useState<string | null>(null)
+  const [showApprovalLinkModal, setShowApprovalLinkModal] = useState(false)
+  const [employeeSearchInput, setEmployeeSearchInput] = useState("")
+  const [visitorSearchInput, setVisitorSearchInput] = useState("")
   
-  // ========== Debounced Search Values ==========
+  // Debounced search values
   const debouncedEmployeeSearch = useDebounce(employeeSearchInput, 500)
   const debouncedVisitorSearch = useDebounce(visitorSearchInput, 500)
   
-  // ========== Modal State ==========
+  // Modal state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
   const setOpen = onOpenChange || setInternalOpen
   const isEditMode = !!appointmentId
   
-  // ========== API Mutations ==========
+  // API mutations
   const [createAppointment, { isLoading: isCreating }] = useCreateAppointmentMutation()
   const [updateAppointment, { isLoading: isUpdating }] = useUpdateAppointmentMutation()
   const isLoading = isCreating || isUpdating
   
-  // ========== API Queries ==========
-  // Fetch employees with search - default limit 10, search when user types
+  // API queries
   const { data: employeesData, isLoading: isLoadingEmployees, error: employeesError } = useGetEmployeesQuery({ 
     page: 1, 
-    limit: 10, // Default limit 10
-    search: debouncedEmployeeSearch || undefined, // Search in database when user types
-    status: "Active" as const, // Filter active employees on the backend
+    limit: 10,
+    search: debouncedEmployeeSearch || undefined,
+    status: "Active" as const,
   })
   const employees = employeesData?.employees || []
   
-  // Fetch visitors with search - default limit 10, search when user types
   const { data: visitorsData, isLoading: isLoadingVisitors, error: visitorsError } = useGetVisitorsQuery({ 
     page: 1, 
-    limit: 10, // Default limit 10
-    search: debouncedVisitorSearch || undefined, // Search in database when user types
+    limit: 10,
+    search: debouncedVisitorSearch || undefined,
   })
   const visitors: Visitor[] = visitorsData?.visitors || []
   
@@ -176,26 +99,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
     { skip: !appointmentId }
   )
 
-  // ========== Computed Values ==========
-  const employeeOptions = React.useMemo(() => {
-    // Backend already filters by status, but double-check to be safe
-    const activeEmployees = employees?.filter(emp => emp.status === "Active") || []
-    return activeEmployees.map(emp => ({
-      value: emp._id,
-      label: `${emp.name} (${emp.status}) - ${emp.department}`,
-      searchKeywords: `${emp.name} ${emp.email ?? ""} ${emp.phone ?? ""} ${emp.department ?? ""} ${emp.designation ?? ""}`.trim(),
-    }))
-  }, [employees])
-  
-  const visitorOptions = React.useMemo(() => 
-    visitors.map((visitor) => ({
-      value: visitor._id,
-      label: `${visitor.name} - ${visitor.email}`,
-      searchKeywords: `${visitor.name} ${visitor.email ?? ""} ${visitor.phone ?? ""}`.trim(),
-    })),
-    [visitors]
-  )
-
+  // Form hook
   const {
     register,
     handleSubmit,
@@ -208,60 +112,59 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
     trigger,
   } = useForm<AppointmentFormData>({
     resolver: yupResolver(appointmentSchema),
-    defaultValues: {
-      visitorId: "",
-      visitorName: "",
-      visitorEmail: "",
-      visitorPhone: "",
-      aadhaarNumber: "",
-      employeeId: "",
-      purpose: "",
-      appointmentDate: "",
-      appointmentTime: "",
-      notes: "",
-      vehicleNumber: "",
-      vehiclePhoto: "",
-      accompanyingCount: 0,
-    },
+    defaultValues: getDefaultFormValues(),
   })
 
-  // ========== Effects ==========
-  React.useEffect(() => {
-    if (!open) {
-      reset()
-      setGeneralError(null)
-      setApprovalLink(null)
-      clearErrors()
-      setEmployeeSearchInput("") // Reset search when modal closes
-      setVisitorSearchInput("") // Reset search when modal closes
-    }
-  }, [open, reset, clearErrors])
+  // Watch form values
+  const selectedEmployeeId = watch("employeeId")
+  const selectedVisitorId = watch("visitorId")
+  
+  // Fetch selected items if not in current options
+  const { data: selectedEmployeeData } = useGetEmployeeQuery(selectedEmployeeId || '', {
+    skip: !selectedEmployeeId || employees.some(emp => emp._id === selectedEmployeeId)
+  })
+  const selectedEmployee = selectedEmployeeData
+  
+  const isSelectedVisitorInList = visitors.some(v => v._id === selectedVisitorId)
+  const { data: selectedVisitorData } = useGetVisitorQuery(selectedVisitorId || '', {
+    skip: !selectedVisitorId || isSelectedVisitorInList
+  })
+  const selectedVisitor = selectedVisitorData
+  
+  // Computed values
+  const employeeOptions = useMemo(
+    () => createSelectOptions({
+      items: employees,
+      selectedId: selectedEmployeeId,
+      selectedItem: selectedEmployee,
+      formatLabel: formatEmployeeLabel,
+      formatSearchKeywords: formatEmployeeSearchKeywords,
+      filterFn: (emp) => emp.status === "Active"
+    }),
+    [employees, selectedEmployeeId, selectedEmployee]
+  )
+  
+  const visitorOptions = useMemo(
+    () => createSelectOptions({
+      items: visitors,
+      selectedId: selectedVisitorId,
+      selectedItem: selectedVisitor,
+      formatLabel: formatVisitorLabel,
+      formatSearchKeywords: formatVisitorSearchKeywords
+    }),
+    [visitors, selectedVisitorId, selectedVisitor]
+  )
 
-  React.useEffect(() => {
-    if (isEditMode && existingAppointment && open) {
-      const appointmentDetails = existingAppointment.appointmentDetails
-      const visitorDetails = existingAppointment.visitor
-      
-      reset({
-        visitorId: existingAppointment.visitorId || "",
-        visitorName: visitorDetails?.name || "",
-        visitorEmail: visitorDetails?.email || "",
-        visitorPhone: visitorDetails?.phone || "",
-        aadhaarNumber: "",
-        employeeId: existingAppointment.employeeId || "",
-        purpose: appointmentDetails?.purpose || "",
-        appointmentDate: appointmentDetails?.scheduledDate ? 
-          new Date(appointmentDetails.scheduledDate).toISOString().split('T')[0] : "",
-        appointmentTime: appointmentDetails?.scheduledTime || "",
-        notes: appointmentDetails?.notes || "",
-        vehicleNumber: appointmentDetails?.vehicleNumber || "",
-        vehiclePhoto: appointmentDetails?.vehiclePhoto || "",
-        accompanyingCount: existingAppointment.accompanyingCount ?? 0,
-      })
-    }
-  }, [isEditMode, existingAppointment, open, reset])
+  // Callback handlers
+  const handleEmployeeSearchChange = useCallback((inputValue: string) => {
+    setEmployeeSearchInput(inputValue)
+  }, [])
+  
+  const handleVisitorSearchChange = useCallback((inputValue: string) => {
+    setVisitorSearchInput(inputValue)
+  }, [])
 
-  const handleVisitorSelect = React.useCallback((visitorId: string | null) => {
+  const handleVisitorSelect = useCallback((visitorId: string | null) => {
     const id = visitorId ?? ""
     if (id) {
       const selectedVisitor = visitors.find(v => v._id === visitorId)
@@ -280,6 +183,24 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
     }
   }, [visitors, setValue, clearErrors])
 
+  // Effects
+  useEffect(() => {
+    if (!open) {
+      reset()
+      setGeneralError(null)
+      setApprovalLink(null)
+      clearErrors()
+      setEmployeeSearchInput("")
+      setVisitorSearchInput("")
+    }
+  }, [open, reset, clearErrors])
+
+  useEffect(() => {
+    if (isEditMode && existingAppointment && open) {
+      reset(appointmentToFormValues(existingAppointment))
+    }
+  }, [isEditMode, existingAppointment, open, reset])
+
   const onSubmit = async (data: AppointmentFormData) => {
     if (isLoading) return
     setGeneralError(null)
@@ -291,67 +212,17 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
         return
       }
       if (isEditMode && appointmentId) {
-        const updateData = {
-          accompanyingCount: data.accompanyingCount ?? 0,
-          appointmentDetails: {
-            purpose: data.purpose,
-            scheduledDate: data.appointmentDate,
-            scheduledTime: data.appointmentTime,
-            duration: existingAppointment?.appointmentDetails?.duration || 60,
-            meetingRoom: existingAppointment?.appointmentDetails?.meetingRoom || "Main Conference Room",
-            notes: data.notes || "",
-            vehicleNumber: data.vehicleNumber || "",
-            vehiclePhoto: data.vehiclePhoto || ""
-          }
-        }
+        const updateData = createUpdateAppointmentPayload(data, existingAppointment)
         await updateAppointment({ id: appointmentId, ...updateData }).unwrap()
         showSuccessToast("Appointment updated successfully!")
-        // For edit mode, close modal after update
         setOpen(false)
         if (onSuccess) onSuccess()
       } else {
-        const newAppointmentData = {
-          appointmentId: `APT${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
-          employeeId: data.employeeId,
-          visitorId: data.visitorId,
-          checkInTime: new Date().toISOString(), // Auto-set check-in time on creation
-          accompanyingCount: data.accompanyingCount ?? 0,
-          appointmentDetails: {
-            purpose: data.purpose,
-            scheduledDate: data.appointmentDate,
-            scheduledTime: data.appointmentTime,
-            duration: 60,
-            meetingRoom: "Main Conference Room",
-            notes: data.notes || "",
-            vehicleNumber: data.vehicleNumber || "",
-            vehiclePhoto: data.vehiclePhoto || ""
-          },
-          visitorDetails: {
-            name: data.visitorName,
-            email: data.visitorEmail,
-            phone: data.visitorPhone,
-            aadhaarNumber: data.aadhaarNumber || ""
-          },
-          securityDetails: {
-            badgeIssued: false,
-            badgeNumber: "",
-            securityClearance: false,
-            securityNotes: ""
-          },
-          notifications: {
-            smsSent: false,
-            emailSent: false,
-            whatsappSent: false,
-            reminderSent: false
-          }
-        }
+        const newAppointmentData = createAppointmentPayload(data)
         const result = await createAppointment(newAppointmentData).unwrap()
         showSuccessToast("Appointment created successfully")
-        
-        // Close the appointment creation modal
         setOpen(false)
         
-        // Store approval link if provided and open approval link modal
         if (result.approvalLink) {
           setApprovalLink(result.approvalLink)
           setShowApprovalLinkModal(true)
@@ -426,9 +297,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                         field.onChange(val ?? "")
                         handleVisitorSelect(val)
                       }}
-                      onInputChange={(inputValue) => {
-                        setVisitorSearchInput(inputValue)
-                      }}
+                      onInputChange={handleVisitorSearchChange}
                       error={errors.visitorId?.message || (visitorsError ? "Failed to load visitors" : undefined)}
                       isLoading={isLoadingVisitors}
                     />
@@ -453,9 +322,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                         console.log("Employee select change", { val })
                         field.onChange(val ?? "")
                       }}
-                      onInputChange={(inputValue) => {
-                        setEmployeeSearchInput(inputValue)
-                      }}
+                      onInputChange={handleEmployeeSearchChange}
                       error={errors.employeeId?.message || (employeesError ? "Failed to load employees" : undefined)}
                       isLoading={isLoadingEmployees}
                     />

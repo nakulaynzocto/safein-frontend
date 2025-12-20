@@ -73,15 +73,20 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
   }, [])
 
   // Convert options to react-select format
-  const rsOptions: RSOption[] = useMemo(
-    () => options.map((o) => ({ 
+  const rsOptions: RSOption[] = useMemo(() => {
+    const converted: RSOption[] = options.map((o) => ({ 
       value: String(o.value), 
       label: o.label, 
       color: o.color, 
       searchKeywords: o.searchKeywords 
-    })),
-    [options]
-  )
+    }))
+    
+    // If there's a selected value that's not in the options, we should NOT add a placeholder
+    // Instead, we'll let the parent component handle fetching the actual data
+    // This prevents showing IDs as labels
+    
+    return converted
+  }, [options, value])
 
   // Find selected option - convert value to string for comparison
   const selectedOption: RSOption | null = useMemo(() => {
@@ -261,7 +266,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         menuPosition="fixed"
         menuPlacement="auto"
         closeMenuOnSelect={true}
-        blurInputOnSelect={true}
+        blurInputOnSelect={false}
         openMenuOnFocus={false}
         tabSelectsValue={true}
         escapeClearsValue={false}
