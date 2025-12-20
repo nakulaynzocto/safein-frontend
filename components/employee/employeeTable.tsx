@@ -9,23 +9,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DataTable } from "@/components/common/dataTable"
 import { ConfirmationDialog } from "@/components/common/confirmationDialog"
 import { Pagination } from "@/components/common/pagination"
-import { Checkbox } from "@/components/ui/checkbox"
 import { StatusBadge } from "@/components/common/statusBadge"
-import { format } from "date-fns"
 import {
   Edit,
   Trash2,
   Eye,
   MoreVertical,
   Plus,
-  RefreshCw,
-  Filter,
   Phone,
   Mail,
   Building,
-  Calendar,
-  User,
-  Briefcase
+  User
 } from "lucide-react"
 import { Employee } from "@/store/api/employeeApi"
 import { SearchInput } from "@/components/common/searchInput"
@@ -38,7 +32,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu"
-import { Input } from "../ui/input"
 import { routes } from "@/utils/routes"
 import { NewEmployeeModal } from "./NewEmployeeModal"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
