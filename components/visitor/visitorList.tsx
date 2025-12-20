@@ -243,9 +243,6 @@ export function VisitorList() {
     refetchTrialLimits()
   }
 
-  const handleOpenVisitorModal = () => {
-    setShowVisitorModal(true)
-  }
 
   const handleEditVisitor = (visitor: Visitor) => {
     setEditingVisitor(visitor)
@@ -270,7 +267,7 @@ export function VisitorList() {
     if (hasReachedVisitorLimit) {
       setShowUpgradeModal(true)
     } else {
-      handleOpenVisitorModal()
+      setShowVisitorModal(true)
     }
   }
 

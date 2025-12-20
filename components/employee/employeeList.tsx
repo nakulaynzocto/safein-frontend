@@ -170,14 +170,11 @@ export function EmployeeList() {
         onSearchChange={handleSearchChange}
         onPageChange={setCurrentPage}
         onPageSizeChange={setPageSize}
-        mode="active"
         hasReachedLimit={hasReachedEmployeeLimit}
-        showSelection={false}
         onDateFromChange={(v) => { setDateRange(prev => ({ ...prev, startDate: v || null })); setCurrentPage(1) }}
         onDateToChange={(v) => { setDateRange(prev => ({ ...prev, endDate: v || null })); setCurrentPage(1) }}
         onDelete={handleDelete}
         onView={(employee) => {}}
-        onRefresh={handleRefresh}
         isDeleting={isDeleting}
         showHeader={false}
       />
