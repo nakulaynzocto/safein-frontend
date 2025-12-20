@@ -31,6 +31,7 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
 import { Calendar, User, Car } from "lucide-react"
 import { ApprovalLinkModal } from "./ApprovalLinkModal"
+import { useDebounce } from "@/hooks/useDebounce"
 
 // Validation schema
 const appointmentSchema = yup.object({
@@ -129,29 +130,53 @@ interface NewAppointmentModalProps {
 
 export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, open: controlledOpen, onOpenChange }: NewAppointmentModalProps) {
   const router = useRouter()
+  
+  // ========== State Declarations ==========
   const [internalOpen, setInternalOpen] = React.useState(false)
-  const open = controlledOpen !== undefined ? controlledOpen : internalOpen
-  const setOpen = onOpenChange || setInternalOpen
-  const [createAppointment, { isLoading: isCreating }] = useCreateAppointmentMutation()
-  const [updateAppointment, { isLoading: isUpdating }] = useUpdateAppointmentMutation()
-  const { data: employeesData, isLoading: isLoadingEmployees, error: employeesError } = useGetEmployeesQuery({ 
-    page: 1, 
-    limit: 100, // Backend max limit is 100
-    status: "Active" as const, // Filter active employees on the backend
-  })
-  const employees = employeesData?.employees || []
   const [generalError, setGeneralError] = React.useState<string | null>(null)
   const [approvalLink, setApprovalLink] = React.useState<string | null>(null)
   const [showApprovalLinkModal, setShowApprovalLinkModal] = React.useState(false)
+  const [employeeSearchInput, setEmployeeSearchInput] = React.useState("")
+  const [visitorSearchInput, setVisitorSearchInput] = React.useState("")
   
+  // ========== Debounced Search Values ==========
+  const debouncedEmployeeSearch = useDebounce(employeeSearchInput, 500)
+  const debouncedVisitorSearch = useDebounce(visitorSearchInput, 500)
+  
+  // ========== Modal State ==========
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen
+  const setOpen = onOpenChange || setInternalOpen
   const isEditMode = !!appointmentId
+  
+  // ========== API Mutations ==========
+  const [createAppointment, { isLoading: isCreating }] = useCreateAppointmentMutation()
+  const [updateAppointment, { isLoading: isUpdating }] = useUpdateAppointmentMutation()
   const isLoading = isCreating || isUpdating
+  
+  // ========== API Queries ==========
+  // Fetch employees with search - default limit 10, search when user types
+  const { data: employeesData, isLoading: isLoadingEmployees, error: employeesError } = useGetEmployeesQuery({ 
+    page: 1, 
+    limit: 10, // Default limit 10
+    search: debouncedEmployeeSearch || undefined, // Search in database when user types
+    status: "Active" as const, // Filter active employees on the backend
+  })
+  const employees = employeesData?.employees || []
+  
+  // Fetch visitors with search - default limit 10, search when user types
+  const { data: visitorsData, isLoading: isLoadingVisitors, error: visitorsError } = useGetVisitorsQuery({ 
+    page: 1, 
+    limit: 10, // Default limit 10
+    search: debouncedVisitorSearch || undefined, // Search in database when user types
+  })
+  const visitors: Visitor[] = visitorsData?.visitors || []
   
   const { data: existingAppointment, isLoading: isLoadingAppointment } = useGetAppointmentQuery(
     appointmentId || '',
     { skip: !appointmentId }
   )
 
+  // ========== Computed Values ==========
   const employeeOptions = React.useMemo(() => {
     // Backend already filters by status, but double-check to be safe
     const activeEmployees = employees?.filter(emp => emp.status === "Active") || []
@@ -161,10 +186,6 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
       searchKeywords: `${emp.name} ${emp.email ?? ""} ${emp.phone ?? ""} ${emp.department ?? ""} ${emp.designation ?? ""}`.trim(),
     }))
   }, [employees])
-  
-
-  const { data: visitorsData } = useGetVisitorsQuery({ page: 1, limit: 100 })
-  const visitors: Visitor[] = visitorsData?.visitors || []
   
   const visitorOptions = React.useMemo(() => 
     visitors.map((visitor) => ({
@@ -204,12 +225,15 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
     },
   })
 
+  // ========== Effects ==========
   React.useEffect(() => {
     if (!open) {
       reset()
       setGeneralError(null)
       setApprovalLink(null)
       clearErrors()
+      setEmployeeSearchInput("") // Reset search when modal closes
+      setVisitorSearchInput("") // Reset search when modal closes
     }
   }, [open, reset, clearErrors])
 
@@ -394,7 +418,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                   control={control}
                   render={({ field }) => (
                     <SelectField
-                      placeholder="Select visitor"
+                      placeholder="Select visitor (type to search)"
                       options={visitorOptions}
                       value={field.value}
                       onChange={(val) => {
@@ -402,7 +426,11 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                         field.onChange(val ?? "")
                         handleVisitorSelect(val)
                       }}
-                      error={errors.visitorId?.message}
+                      onInputChange={(inputValue) => {
+                        setVisitorSearchInput(inputValue)
+                      }}
+                      error={errors.visitorId?.message || (visitorsError ? "Failed to load visitors" : undefined)}
+                      isLoading={isLoadingVisitors}
                     />
                   )}
                 />
@@ -418,12 +446,15 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                   control={control}
                   render={({ field }) => (
                     <SelectField
-                      placeholder="Select employee"
+                      placeholder="Select employee (type to search)"
                       options={employeeOptions}
                       value={field.value}
                       onChange={(val) => {
                         console.log("Employee select change", { val })
                         field.onChange(val ?? "")
+                      }}
+                      onInputChange={(inputValue) => {
+                        setEmployeeSearchInput(inputValue)
                       }}
                       error={errors.employeeId?.message || (employeesError ? "Failed to load employees" : undefined)}
                       isLoading={isLoadingEmployees}

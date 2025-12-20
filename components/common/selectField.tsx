@@ -20,6 +20,7 @@ export interface SelectFieldProps {
   options: Option[]
   placeholder?: string
   onChange?: (value: string) => void
+  onInputChange?: (inputValue: string) => void
   value?: string | number
   name?: string
   required?: boolean
@@ -46,6 +47,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     placeholder = "Select option",
     value,
     onChange,
+    onInputChange,
     name,
     required = false,
     allowEmpty = true,
@@ -96,14 +98,22 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
   }, [onChange])
 
   // Custom filter function for searching
+  // When onInputChange is provided, we're doing server-side search, so show all options
+  // Otherwise, do client-side filtering
   const customFilter = useCallback((option: { label: string; value: string; data: RSOption }, inputValue: string) => {
+    // If onInputChange is provided, we're doing server-side search, so show all options
+    // The API will handle the filtering
+    if (onInputChange) {
+      return true
+    }
+    // Otherwise, do client-side filtering
     if (!inputValue) return true
     const searchText = inputValue.toLowerCase()
     const label = option.label.toLowerCase()
     const val = option.value.toLowerCase()
     const keywords = (option.data.searchKeywords || "").toLowerCase()
     return label.includes(searchText) || val.includes(searchText) || keywords.includes(searchText)
-  }, [])
+  }, [onInputChange])
 
   // Styles for react-select
   const customStyles: StylesConfig<RSOption, false, GroupBase<RSOption>> = useMemo(
@@ -235,6 +245,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         options={rsOptions}
         value={selectedOption}
         onChange={handleChange}
+        onInputChange={onInputChange}
         placeholder={placeholder}
         isDisabled={isFieldDisabled}
         isLoading={!!isLoading}
