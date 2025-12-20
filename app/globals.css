@@ -629,3 +629,16 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* React Paginate Active Page Styles */
+.react-paginate .selected a,
+.react-paginate .selected a:hover {
+  background-color: #3882a5 !important;
+  border-color: #3882a5 !important;
+  color: white !important;
+}
+
+.react-paginate .selected a:hover {
+  background-color: #2d6a87 !important;
+  border-color: #2d6a87 !important;
+}
