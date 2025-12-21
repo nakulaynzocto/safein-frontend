@@ -449,3 +449,18 @@ export function getAppointmentStatus(appointment: AppointmentForStatus): string 
   
   return status;
 }
+
+export function getAppointmentStatsKey(status: string): 'pendingAppointments' | 'approvedAppointments' | 'rejectedAppointments' | 'completedAppointments' {
+  const statusLower = status.toLowerCase();
+  const statusMap: Record<string, 'pendingAppointments' | 'approvedAppointments' | 'rejectedAppointments' | 'completedAppointments'> = {
+    pending: 'pendingAppointments',
+    approved: 'approvedAppointments',
+    scheduled: 'approvedAppointments',
+    rejected: 'rejectedAppointments',
+    cancelled: 'rejectedAppointments',
+    completed: 'completedAppointments',
+    checked_in: 'completedAppointments',
+  };
+  
+  return statusMap[statusLower] ?? 'pendingAppointments';
+}

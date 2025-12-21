@@ -299,8 +299,11 @@ export const appointmentApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'Appointment', id: 'LIST' }],
     }),
 
-    getAppointmentStats: builder.query<AppointmentStats, void>({
-      query: () => '/appointments/stats',
+    getAppointmentStats: builder.query<AppointmentStats, { startDate?: string; endDate?: string } | void>({
+      query: (params) => {
+        const queryParams = createUrlParams(params || {})
+        return `/appointments/stats${queryParams ? `?${queryParams}` : ''}`
+      },
       transformResponse: (response: any) => {
         if (response.success && response.data) {
           return response.data
@@ -309,6 +312,7 @@ export const appointmentApi = baseApi.injectEndpoints({
       },
       providesTags: [{ type: 'Appointment', id: 'STATS' }],
     }),
+
 
     bulkUpdateAppointments: builder.mutation<{ updatedCount: number }, BulkUpdateAppointmentsRequest>({
       query: (bulkData) => ({

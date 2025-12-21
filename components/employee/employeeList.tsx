@@ -22,11 +22,9 @@ export function EmployeeList() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [sortBy, setSortBy] = useState("createdAt")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
+  // Employee table - no date range filter by default, show all data
   const [dateRange, setDateRange] = useState<{ startDate: string | null; endDate: string | null }>(() => {
-    if (typeof window !== 'undefined') {
-      const raw = localStorage.getItem('dateRange')
-      return raw ? JSON.parse(raw) : { startDate: null, endDate: null }
-    }
+    // Always start with no date range filter - show all employees
     return { startDate: null, endDate: null }
   })
   

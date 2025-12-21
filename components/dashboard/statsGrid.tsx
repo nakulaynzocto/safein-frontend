@@ -1,7 +1,7 @@
 "use client"
 
 import { memo, useMemo } from "react"
-import { Calendar, CalendarCheck, CalendarX, CheckCircle } from "lucide-react"
+import { Calendar, CalendarCheck, CalendarX, CheckCircle, TimerOff } from "lucide-react"
 import { StatCard } from "./statCard"
 import { AppointmentStats } from "./dashboardUtils"
 
@@ -35,12 +35,12 @@ export const StatsGrid = memo(function StatsGrid({ stats }: StatsGridProps) {
       description: "Finished appointments",
     },
     {
-      title: "Today's Appointments",
-      value: stats.todaysAppointments,
-      icon: Calendar,
-      description: "Scheduled for today",
+      title: "Time Out",
+      value: stats.timeOutAppointments,
+      icon: TimerOff,
+      description: "Timed out appointments",
     },
-  ], [stats.pendingAppointments, stats.approvedAppointments, stats.completedAppointments, stats.todaysAppointments])
+  ], [stats.pendingAppointments, stats.approvedAppointments, stats.completedAppointments, stats.timeOutAppointments])
 
   return (
     <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
