@@ -75,21 +75,3 @@ export function calculateAppointmentStats(
     : stats
 }
 
-export function getRecentAppointments(
-  appointments: Appointment[], 
-  limit: number = 5
-): Appointment[] {
-  if (!Array.isArray(appointments) || appointments.length === 0) {
-    return []
-  }
-  
-  return [...appointments]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, limit)
-}
-
-export function getTodaysAppointments(
-  appointments: Appointment[]
-): Appointment[] {
-  return Array.isArray(appointments) ? appointments : []
-}
