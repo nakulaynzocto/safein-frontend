@@ -63,8 +63,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
     // Handle 404 and other errors
     if (result.error && (result.error.status === 404 || result.error.status === 500)) {
       // Don't show error toast for expected 404s or specific endpoints
-      const shouldSilence = args?.url?.includes('/stats') || 
-                           args?.url?.includes('/trashed')
+      const shouldSilence = args?.url?.includes('/stats')
       
       if (!shouldSilence && typeof window !== 'undefined') {
         // Check if it's a JSON parse error (usually means HTML was returned)
@@ -97,7 +96,7 @@ export const baseApi = createApi({
   // - 'User' + 'Subscription' are used by userSubscriptionApi
   // - Other tags are used by their respective feature APIs
   // If you introduce new cache tags, add them here.
-  tagTypes: ['User', 'Employee', 'Appointment', 'Company', 'Visitor', 'Subscription', 'SubscriptionPlan', 'Settings'],
+  tagTypes: ['User', 'Employee', 'Appointment', 'Company', 'Visitor', 'Subscription', 'SubscriptionPlan', 'Settings', 'AppointmentLink'],
   endpoints: () => ({}),
   refetchOnMountOrArgChange: false,
   refetchOnFocus: false,

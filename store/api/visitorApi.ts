@@ -218,43 +218,7 @@ export const visitorApi = baseApi.injectEndpoints({
       ],
     }),
 
-    restoreVisitor: builder.mutation<Visitor, string>({
-      query: (id) => ({
-        url: `/visitors/${id}/restore`,
-        method: 'PUT',
-      }),
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      invalidatesTags: (result, error, id) => [
-        { type: 'Visitor' as const, id },
-        { type: 'Visitor' as const, id: 'LIST' },
-        { type: 'Visitor' as const, id: 'TRASHED' },
-      ],
-    }),
 
-    getTrashedVisitors: builder.query<VisitorListResponse, GetVisitorsQuery | void>({
-      query: (params) => {
-        const queryParams = createUrlParams(params || {})
-        return `/visitors/trashed${queryParams ? `?${queryParams}` : ''}`
-      },
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      providesTags: (result) =>
-        result?.visitors
-          ? [
-              ...result.visitors.map(({ _id }) => ({ type: 'Visitor' as const, id: _id })),
-              { type: 'Visitor' as const, id: 'TRASHED' },
-            ]
-          : [{ type: 'Visitor' as const, id: 'TRASHED' }],
-    }),
 
     getVisitorStats: builder.query<VisitorStats, void>({
       query: () => '/visitors/stats',
@@ -291,8 +255,6 @@ export const {
   useSearchVisitorsMutation,
   useUpdateVisitorMutation,
   useDeleteVisitorMutation,
-  useRestoreVisitorMutation,
-  useGetTrashedVisitorsQuery,
   useGetVisitorStatsQuery,
   useBulkUpdateVisitorsMutation,
 } = visitorApi

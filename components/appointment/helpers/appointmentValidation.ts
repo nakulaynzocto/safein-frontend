@@ -5,10 +5,6 @@ import * as yup from "yup"
 
 export const appointmentSchema = yup.object({
   visitorId: yup.string().required("Please select a visitor"),
-  visitorName: yup.string().optional().default(""),
-  visitorEmail: yup.string().optional().default(""),
-  visitorPhone: yup.string().optional().default(""),
-  aadhaarNumber: yup.string().optional().default(""),
   employeeId: yup.string().required("Please select an employee"),
   purpose: yup.string().required("Purpose of visit is required").min(5, "Purpose must be at least 5 characters"),
   appointmentDate: yup.string().required("Appointment date is required").test('future-date', 'Scheduled date cannot be in the past', function(value) {
@@ -88,4 +84,5 @@ export const appointmentSchema = yup.object({
 })
 
 export type AppointmentFormData = yup.InferType<typeof appointmentSchema>
+
 

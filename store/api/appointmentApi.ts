@@ -329,23 +329,6 @@ export const appointmentApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'Appointment', id: 'LIST' }],
     }),
 
-    restoreAppointment: builder.mutation<Appointment, string>({
-      query: (id) => ({
-        url: `/appointments/${id}/restore`,
-        method: 'PUT',
-      }),
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      invalidatesTags: (result, error, id) => [
-        { type: 'Appointment', id },
-        { type: 'Appointment', id: 'LIST' },
-        { type: 'Appointment', id: 'TRASHED' },
-      ],
-    }),
 
     cancelAppointment: builder.mutation<Appointment, string>({
       query: (id) => ({
@@ -454,7 +437,6 @@ export const {
   useCheckInAppointmentMutation,
   useCheckOutAppointmentMutation,
   useBulkUpdateAppointmentsMutation,
-  useRestoreAppointmentMutation,
   useCancelAppointmentMutation,
   useApproveAppointmentMutation,
   useRejectAppointmentMutation,

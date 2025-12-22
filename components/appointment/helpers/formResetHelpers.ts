@@ -9,10 +9,6 @@ import { AppointmentFormData } from "./appointmentValidation"
 export const getDefaultFormValues = (): AppointmentFormData => {
   return {
     visitorId: "",
-    visitorName: "",
-    visitorEmail: "",
-    visitorPhone: "",
-    aadhaarNumber: "",
     employeeId: "",
     purpose: "",
     appointmentDate: "",
@@ -29,14 +25,9 @@ export const getDefaultFormValues = (): AppointmentFormData => {
  */
 export const appointmentToFormValues = (existingAppointment: any): AppointmentFormData => {
   const appointmentDetails = existingAppointment.appointmentDetails
-  const visitorDetails = existingAppointment.visitor
 
   return {
     visitorId: existingAppointment.visitorId || "",
-    visitorName: visitorDetails?.name || "",
-    visitorEmail: visitorDetails?.email || "",
-    visitorPhone: visitorDetails?.phone || "",
-    aadhaarNumber: "",
     employeeId: existingAppointment.employeeId || "",
     purpose: appointmentDetails?.purpose || "",
     appointmentDate: appointmentDetails?.scheduledDate ? 
@@ -48,4 +39,5 @@ export const appointmentToFormValues = (existingAppointment: any): AppointmentFo
     accompanyingCount: existingAppointment.accompanyingCount ?? 0,
   }
 }
+
 

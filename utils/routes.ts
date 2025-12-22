@@ -16,26 +16,23 @@ export const routes = {
     VERIFY: "/verify",
     EMAIL_ACTION: "/email-action",
     PRIVACY_POLICY: "/privacy-policy",
-    TERMS_OF_SERVICE: "/terms-of-service",
     FREE_TRIAL_PLAN_ID: "FREE_TRIAL_PLAN_ID_PLACEHOLDER", // This should be replaced with the actual ID from the backend
   },
 
   privateroute: {
     DASHBOARD: "/dashboard",
-    NOTIFICATIONS: "/settings/notifications",
-    PROFILE: "/settings/profile",
-    SETTINGS: "/settings/status",
-    ACTIVE_PLAN: "/settings/plan",
-    EMPLOYEECREATE: "/employee/create",
+    NOTIFICATIONS: "/dashboard/notifications",
+    PROFILE: "/profile",
+    SETTINGS: "/settings",
     EMPLOYEELIST: "/employee/list",
     EMPLOYEEEDIT: "/employee/[id]", // Dynamic route pattern
-    APPOINTMENTCREATE: "/appointment/create",
     APPOINTMENTLIST: "/appointment/list",
     APPOINTMENTEDIT: "/appointment/[id]", // Dynamic route pattern
+    APPOINTMENT_LINKS: "/settings/appointment-links",
     VISITORLIST: "/visitor/list",
     VISITORREGISTRATION: "/visitor/register",
     VISITOREDIT: "/visitor/[id]", // Dynamic route pattern
-    TRASH: "/trash",
+    ACTIVE_PLAN: "/settings/plan",
   },
 } as const
 
@@ -64,15 +61,11 @@ export const isPrivateRoute = (path: string): boolean => {
     return true
   }
   
-  if (path.startsWith('/appointment/') && path !== routes.privateroute.APPOINTMENTCREATE && path !== routes.privateroute.APPOINTMENTLIST) {
+  if (path.startsWith('/appointment/') && path !== routes.privateroute.APPOINTMENTLIST) {
     return true
   }
   
   if (path.startsWith('/visitor/') && path !== routes.privateroute.VISITORLIST && path !== routes.privateroute.VISITORREGISTRATION) {
-    return true
-  }
-  
-  if (path.startsWith('/settings/')) {
     return true
   }
   

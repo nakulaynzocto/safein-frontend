@@ -96,25 +96,21 @@ export function useSocket(options: UseSocketOptions = {}) {
 
     socket.on('disconnect', (reason) => {
       isConnectedRef.current = false
-      // Only log disconnect if it's not a normal client disconnect
-      if (reason !== 'io client disconnect') {
-        console.log('Socket disconnected:', reason)
-      }
       onDisconnect?.(reason)
     })
 
-    socket.on('connect_error', (error) => {
-      // Only log error in development, suppress in production
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('WebSocket connection error (this is normal if socket server is not running):', error.message)
-      }
-      // Don't show error to user, socket is optional for app functionality
+    socket.on('connect_error', () => {
+      // Socket is optional for app functionality
     })
 
     socket.on(SocketEvents.APPOINTMENT_STATUS_CHANGED, (data) => {
       const { payload } = data
       const status = payload?.status
-      const appointmentId = payload?.appointment?.appointmentId || payload?.appointmentId
+      const appointmentId = payload?.appointmentId || payload?.appointment?.appointmentId || payload?.appointment?._id || ''
+      
+      if (!appointmentId || typeof appointmentId !== 'string' || !appointmentId.trim()) {
+        return
+      }
 
       if (status === 'approved') {
         dispatch(addNotification({

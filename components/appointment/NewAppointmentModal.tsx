@@ -165,23 +165,10 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
   }, [])
 
   const handleVisitorSelect = useCallback((visitorId: string | null) => {
-    const id = visitorId ?? ""
-    if (id) {
-      const selectedVisitor = visitors.find(v => v._id === visitorId)
-      if (selectedVisitor) {
-        setValue("visitorName", selectedVisitor.name)
-        setValue("visitorEmail", selectedVisitor.email)
-        setValue("visitorPhone", selectedVisitor.phone)
-        setValue("aadhaarNumber", selectedVisitor.idProof?.number || "")
-        clearErrors("visitorId")
-      }
-    } else {
-      setValue("visitorName", "")
-      setValue("visitorEmail", "")
-      setValue("visitorPhone", "")
-      setValue("aadhaarNumber", "")
+    if (visitorId) {
+      clearErrors("visitorId")
     }
-  }, [visitors, setValue, clearErrors])
+  }, [clearErrors])
 
   // Effects
   useEffect(() => {
@@ -293,7 +280,6 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                       options={visitorOptions}
                       value={field.value}
                       onChange={(val) => {
-                        console.log("Visitor select change", { val })
                         field.onChange(val ?? "")
                         handleVisitorSelect(val)
                       }}
@@ -319,7 +305,6 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                       options={employeeOptions}
                       value={field.value}
                       onChange={(val) => {
-                        console.log("Employee select change", { val })
                         field.onChange(val ?? "")
                       }}
                       onInputChange={handleEmployeeSearchChange}

@@ -18,7 +18,6 @@ export const createAppointmentPayload = (data: AppointmentFormData) => {
     appointmentId: generateAppointmentId(),
     employeeId: data.employeeId,
     visitorId: data.visitorId,
-    checkInTime: new Date().toISOString(),
     accompanyingCount: data.accompanyingCount ?? 0,
     appointmentDetails: {
       purpose: data.purpose,
@@ -29,12 +28,6 @@ export const createAppointmentPayload = (data: AppointmentFormData) => {
       notes: data.notes || "",
       vehicleNumber: data.vehicleNumber || "",
       vehiclePhoto: data.vehiclePhoto || ""
-    },
-    visitorDetails: {
-      name: data.visitorName,
-      email: data.visitorEmail,
-      phone: data.visitorPhone,
-      aadhaarNumber: data.aadhaarNumber || ""
     },
     securityDetails: {
       badgeIssued: false,
@@ -100,4 +93,5 @@ export const formatVisitorLabel = (visitor: any): string => {
 export const formatVisitorSearchKeywords = (visitor: any): string => {
   return `${visitor.name} ${visitor.email ?? ""} ${visitor.phone ?? ""}`.trim()
 }
+
 
