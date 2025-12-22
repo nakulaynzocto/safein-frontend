@@ -71,6 +71,10 @@ export function CheckOutDialog({
 
   if (!appointment) return null
 
+  const getVisitorName = () => {
+    return (appointment as any).visitorId?.name || appointment.visitor?.name || 'N/A'
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md bg-white dark:bg-gray-900">
@@ -87,7 +91,7 @@ export function CheckOutDialog({
             <div className="flex items-center gap-2 text-sm">
               <User className="h-4 w-4" />
               <span className="font-medium">Visitor:</span>
-              <span>{appointment.visitor?.name || 'N/A'}</span>
+              <span>{getVisitorName()}</span>
             </div>
             
             <div className="flex items-center gap-2 text-sm">

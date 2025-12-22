@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useAppSelector } from "@/store/hooks"
-import { useGetAppointmentsQuery } from "@/store/api/appointmentApi"
+import { useGetAppointmentsQuery, useGetAppointmentStatsQuery } from "@/store/api/appointmentApi"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
 import { useGetVisitorsQuery } from "@/store/api/visitorApi"
 import { DashboardHeader } from "./DashboardHeader"
@@ -11,26 +11,81 @@ import { AppointmentsTable } from "./AppointmentsTable"
 import { QuickActions } from "./QuickActions"
 import { DashboardCharts } from "./dashboardCharts"
 import { NewAppointmentModal } from "@/components/appointment/NewAppointmentModal"
-import { calculateAppointmentStats, getRecentAppointments, getTodaysAppointments } from "./dashboardUtils"
+import { calculateAppointmentStats } from "./dashboardUtils"
 import { DashboardSkeleton } from "@/components/common/tableSkeleton"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
+import DateRangePicker from "@/components/common/dateRangePicker"
 
-/**
- * DashboardOverview component displays the main dashboard with stats, charts, and appointments
- * Optimized with useMemo and useCallback for performance
- */
 export function DashboardOverview() {
   const [showAppointmentModal, setShowAppointmentModal] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   const [loadingTimeout, setLoadingTimeout] = useState(false)
   
+  const formatDate = (date: Date): string => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  const getDefaultDateRange = (): { startDate: string; endDate: string } => {
+    const today = new Date()
+    const sevenDaysAgo = new Date(today)
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+    return { startDate: formatDate(sevenDaysAgo), endDate: formatDate(today) }
+  }
+
+  const [dateRange, setDateRange] = useState<{ startDate: string | null; endDate: string | null }>(() => {
+    if (typeof window === 'undefined') {
+      return { startDate: null, endDate: null }
+    }
+
+    const saved = localStorage.getItem('dashboardDateRange')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        if (parsed.startDate && parsed.endDate) {
+          return { startDate: parsed.startDate, endDate: parsed.endDate }
+        }
+      } catch {
+        // Invalid JSON
+      }
+    }
+
+    const defaultRange = getDefaultDateRange()
+    localStorage.setItem('dashboardDateRange', JSON.stringify(defaultRange))
+    return defaultRange
+  })
+
+  const handleDateRangeChange = useCallback((range: { startDate: string | null; endDate: string | null }) => {
+    setDateRange(range)
+    if (typeof window !== 'undefined' && range.startDate && range.endDate) {
+      localStorage.setItem('dashboardDateRange', JSON.stringify(range))
+    }
+  }, [])
+  
   const timezoneOffset = useMemo(() => -new Date().getTimezoneOffset(), [])
+  const isDateRangeInitialized = dateRange.startDate !== null && dateRange.endDate !== null
+
   const appointmentQueryParams = useMemo(
     () => ({
       page: 1,
-      limit: 5000, // fetch enough records so dashboard stats are not limited to the first page
+      limit: 5000,
+      sortBy: "createdAt",
+      sortOrder: "desc" as const,
+      timezoneOffsetMinutes: timezoneOffset,
+      startDate: dateRange.startDate || undefined,
+      endDate: dateRange.endDate || undefined,
+    }),
+    [timezoneOffset, dateRange.startDate, dateRange.endDate]
+  )
+
+  const recentAppointmentsQueryParams = useMemo(
+    () => ({
+      page: 1,
+      limit: 5,
       sortBy: "createdAt",
       sortOrder: "desc" as const,
       timezoneOffsetMinutes: timezoneOffset,
@@ -41,10 +96,26 @@ export function DashboardOverview() {
   const { data: appointmentsData, isLoading: appointmentsLoading, error: appointmentsError, refetch: refetchAppointments } =
     useGetAppointmentsQuery(appointmentQueryParams, {
       refetchOnMountOrArgChange: true,
-      refetchOnFocus: true, // Refetch when user comes back to tab (for real-time updates)
-      refetchOnReconnect: true, // Refetch when network reconnects
-      skip: false,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+      skip: !isDateRangeInitialized,
     })
+
+  const { data: recentAppointmentsData, isLoading: recentAppointmentsLoading } =
+    useGetAppointmentsQuery(recentAppointmentsQueryParams, {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    })
+
+  const { data: appointmentStatsData, isLoading: appointmentStatsLoading } = useGetAppointmentStatsQuery(
+    isDateRangeInitialized ? { startDate: dateRange.startDate!, endDate: dateRange.endDate! } : undefined,
+    {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      skip: !isDateRangeInitialized,
+    }
+  )
   
   const { data: employeesData, isLoading: employeesLoading, error: employeesError, refetch: refetchEmployees } = useGetEmployeesQuery(undefined, {
     refetchOnMountOrArgChange: true,
@@ -80,10 +151,20 @@ export function DashboardOverview() {
   const employees = useMemo(() => employeesData?.employees || [], [employeesData?.employees])
   const visitors = useMemo(() => visitorsData?.visitors || [], [visitorsData?.visitors])
 
-  const stats = useMemo(() => calculateAppointmentStats(appointments), [appointments])
+  const recentAppointments = useMemo(
+    () => (recentAppointmentsData?.appointments || []).slice(0, 5),
+    [recentAppointmentsData?.appointments]
+  )
 
-  const recentAppointments = useMemo(() => getRecentAppointments(appointments, 5), [appointments])
-  const todaysAppointments = useMemo(() => getTodaysAppointments(appointments), [appointments])
+  const stats = useMemo(() => {
+    const calculatedStats = calculateAppointmentStats(appointments)
+    const { pendingAppointments, approvedAppointments, rejectedAppointments, completedAppointments, timeOutAppointments, totalAppointments } = calculatedStats
+    const sumOfCategories = pendingAppointments + approvedAppointments + rejectedAppointments + completedAppointments + timeOutAppointments
+    
+    return sumOfCategories !== totalAppointments
+      ? { ...calculatedStats, totalAppointments: sumOfCategories }
+      : calculatedStats
+  }, [appointments])
 
   const hasReachedAppointmentLimit =
     trialStatus?.data?.isTrial && trialStatus.data.limits.appointments.reached
@@ -142,11 +223,6 @@ export function DashboardOverview() {
     )
   }
   
-  // Show a friendly error state only when:
-  // - There is an error
-  // - No data has been loaded yet
-  // - AND we're not currently in a loading state
-  // This prevents a quick "1 second" error flash while data is still being fetched.
   if (hasError && !hasData && !isLoading) {
     return (
       <div className="space-y-6">
@@ -173,57 +249,43 @@ export function DashboardOverview() {
     <div className="space-y-4 sm:space-y-6">
       <DashboardHeader companyName={user?.companyName} />
 
-      {/* Statistics Cards */}
+      <div className="flex justify-end">
+        <DateRangePicker 
+          onDateRangeChange={handleDateRangeChange}
+          initialValue={dateRange.startDate && dateRange.endDate ? dateRange : undefined}
+        />
+      </div>
+
       <StatsGrid stats={stats} />
 
-      {/* Image-Type Charts */}
       <DashboardCharts 
         appointmentsData={appointments}
         employeesData={employees}
         visitorsData={visitors}
+        dateRange={dateRange}
       />
 
-      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
-        {/* Today's Appointments */}
-        <AppointmentsTable
-          title="Today's Appointments"
-          description="Appointments scheduled for today"
-          data={todaysAppointments}
-          isLoading={appointmentsLoading}
-          showDateTime={true}
-          emptyData={{
-            title: "No appointments today",
-            description: "No appointments are scheduled for today.",
-            primaryActionLabel: hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment",
-          }}
-          onPrimaryAction={handleScheduleAppointment}
-        />
+      <AppointmentsTable
+        title="Recent Appointments"
+        description="Latest appointment activities"
+        data={recentAppointments}
+        isLoading={recentAppointmentsLoading}
+        showDateTime={true}
+        emptyData={{
+          title: "No recent appointments",
+          description: "No recent appointment activities found.",
+          primaryActionLabel: hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment",
+        }}
+        onPrimaryAction={handleScheduleAppointment}
+      />
 
-        {/* Recent Appointments */}
-        <AppointmentsTable
-          title="Recent Appointments"
-          description="Latest appointment activities"
-          data={recentAppointments}
-          isLoading={appointmentsLoading}
-          showDateTime={true}
-          emptyData={{
-            title: "No recent appointments",
-            description: "No recent appointment activities found.",
-            primaryActionLabel: hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment",
-          }}
-          onPrimaryAction={handleScheduleAppointment}
-        />
-      </div>
-
-      {/* Quick Actions */}
       <QuickActions />
 
-      {/* Appointment Modal */}
       <NewAppointmentModal
         open={showAppointmentModal}
         onOpenChange={setShowAppointmentModal}
         onSuccess={handleAppointmentCreated}
-        triggerButton={<div />} // Hidden trigger since we control the modal programmatically
+        triggerButton={<div />}
       />
       <UpgradePlanModal
         isOpen={showUpgradeModal}

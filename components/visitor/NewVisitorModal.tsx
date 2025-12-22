@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -70,7 +70,7 @@ const idProofTypes = [
 
 interface NewVisitorModalProps {
   visitorId?: string;
-  trigger?: React.ReactNode;
+  trigger?: ReactNode;
   onSuccess?: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -84,13 +84,13 @@ export function NewVisitorModal({
   onOpenChange,
 }: NewVisitorModalProps) {
   const router = useRouter();
-  const [internalOpen, setInternalOpen] = React.useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
 
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
   const [createVisitor, { isLoading: isCreating }] = useCreateVisitorMutation();
   const [updateVisitor, { isLoading: isUpdating }] = useUpdateVisitorMutation();
-  const [generalError, setGeneralError] = React.useState<string | null>(null);
+  const [generalError, setGeneralError] = useState<string | null>(null);
 
   const isEditMode = !!visitorId;
   const isLoading = isCreating || isUpdating;
@@ -134,7 +134,7 @@ export function NewVisitorModal({
     },
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) {
       reset();
       setGeneralError(null);
@@ -142,7 +142,7 @@ export function NewVisitorModal({
     }
   }, [open, reset, clearErrors]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isEditMode && visitorData) {
       reset({
         name: visitorData.name || "",

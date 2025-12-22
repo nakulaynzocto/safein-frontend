@@ -22,7 +22,6 @@ import {
 import { 
   Trash2, 
   Eye,
-  RotateCcw,
   Clock,
   LogOut,
   Calendar,
@@ -74,18 +73,11 @@ export interface AppointmentTableProps {
   pageSize: number
   onSearchChange: (value: string) => void
   onPageChange: (page: number) => void
-  mode: 'active' | 'trash'
-  showSelection?: boolean
-  selectedItems?: string[]
-  onSelectionChange?: (items: string[]) => void
   onDelete?: (appointmentId: string) => void
-  onRestore?: (appointmentId: string) => void
-  onBulkRestore?: (appointmentIds: string[]) => void
   onView?: (appointment: Appointment) => void
   onCheckOut?: (appointmentId: string, notes?: string) => void
   onApprove?: (appointmentId: string) => void
   isDeleting?: boolean
-  isRestoring?: boolean
   isCheckingOut?: boolean
   isApproving?: boolean
   onRefresh?: () => void
@@ -116,21 +108,13 @@ export function AppointmentTable({
   pageSize,
   onSearchChange,
   onPageChange,
-  mode,
-  showSelection = false,
-  selectedItems = [],
-  onSelectionChange,
   onDelete,
-  onRestore,
-  onBulkRestore,
   onView,
   onCheckOut,
   onApprove,
   isDeleting = false,
-  isRestoring = false,
   isCheckingOut = false,
   isApproving = false,
-  onRefresh,
   showHeader = true,
   title,
   onDateFromChange,
@@ -146,7 +130,6 @@ export function AppointmentTable({
   const [rejectAppointment, { isLoading: isRejectingMutation }] = useRejectAppointmentMutation()
   
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [showRestoreDialog, setShowRestoreDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [showCheckOutDialog, setShowCheckOutDialog] = useState(false)
   const [showApproveDialog, setShowApproveDialog] = useState(false)
@@ -172,37 +155,12 @@ export function AppointmentTable({
   }
 
   const hasReachedAppointmentLimit = trialStatus?.data?.isTrial && trialStatus.data.limits.appointments.reached
-  const emptyPrimaryLabel = mode === 'active'
-    ? hasReachedAppointmentLimit ? 'Upgrade Plan' : 'Schedule Appointment'
-    : undefined
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      onSelectionChange?.(appointments.map(apt => apt._id))
-    } else {
-      onSelectionChange?.([])
-    }
-  }
-
-  const handleSelectAppointment = (appointmentId: string, checked: boolean) => {
-    if (checked) {
-      onSelectionChange?.([...selectedItems, appointmentId])
-    } else {
-      onSelectionChange?.(selectedItems.filter(id => id !== appointmentId))
-    }
-  }
+  const emptyPrimaryLabel = hasReachedAppointmentLimit ? 'Upgrade Plan' : 'Schedule Appointment'
 
   const handleDelete = async () => {
     if (!selectedAppointment || !onDelete) return
     await onDelete(selectedAppointment._id)
     setShowDeleteDialog(false)
-    setSelectedAppointment(null)
-  }
-
-  const handleRestore = async () => {
-    if (!selectedAppointment || !onRestore) return
-    await onRestore(selectedAppointment._id)
-    setShowRestoreDialog(false)
     setSelectedAppointment(null)
   }
 
@@ -225,7 +183,6 @@ export function AppointmentTable({
       await approveAppointment(appointmentId).unwrap()
       showSuccessToast('Appointment approved successfully!')
       onApprove?.(appointmentId)
-      onRefresh?.() // Refresh the list after approval
     } catch (error) {
       showErrorToast('Failed to approve appointment')
     } finally {
@@ -238,7 +195,6 @@ export function AppointmentTable({
     try {
       await rejectAppointment(appointmentId).unwrap()
       showSuccessToast('Appointment rejected successfully!')
-      onRefresh?.() // Refresh the list after rejection
     } catch (error) {
       showErrorToast('Failed to reject appointment')
     } finally {
@@ -268,7 +224,6 @@ export function AppointmentTable({
   const handleAppointmentCreated = () => {
     setEditingAppointmentId(null)
     setShowNewAppointmentModal(false)
-    onRefresh?.()
     refetchTrialLimits()
   }
 
@@ -416,27 +371,6 @@ export function AppointmentTable({
       },
     ]
 
-    if (mode === 'trash') {
-      baseColumns.push({
-        key: "deletedAt",
-        header: "Deleted At",
-        render: (appointment: Appointment) => (
-          <div className="text-sm">
-            <div>{(() => {
-              const date = new Date(appointment.deletedAt!);
-              return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM dd, yyyy");
-            })()}</div>
-            <div className="text-muted-foreground">
-              {(() => {
-                const date = new Date(appointment.deletedAt!);
-                return isNaN(date.getTime()) ? "Invalid Time" : format(date, "HH:mm");
-              })()}
-            </div>
-          </div>
-        ),
-      })
-    }
-
     baseColumns.push({
       key: "actions",
       header: "Actions",
@@ -459,16 +393,14 @@ export function AppointmentTable({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              {mode === 'active' && (
-                <>
-                  {onView && (
-                    <DropdownMenuItem onClick={() => handleView(appointment)}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      View Details
-                    </DropdownMenuItem>
-                  )}
-                    
-                  {isPending && (
+              {onView && (
+                <DropdownMenuItem onClick={() => handleView(appointment)}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </DropdownMenuItem>
+              )}
+                
+              {isPending && (
                     <>
                       <DropdownMenuSeparator />
                       {onApprove && (
@@ -520,20 +452,6 @@ export function AppointmentTable({
                   {showOnlyView && (
                     null
                   )}
-                </>
-              )}
-              {mode === 'trash' && onRestore && (
-                <DropdownMenuItem 
-                  onClick={() => {
-                    setSelectedAppointment(appointment)
-                    setShowRestoreDialog(true)
-                  }}
-                  disabled={isRestoring}
-                >
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Restore
-                </DropdownMenuItem>
-              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -551,7 +469,7 @@ export function AppointmentTable({
           <CardContent className="flex items-center justify-center py-8">
             <div className="text-center">
               <p className="text-red-500 mb-4">Failed to load appointments</p>
-              <Button onClick={onRefresh} className="btn-hostinger btn-hostinger-primary">
+              <Button onClick={() => window.location.reload()} className="btn-hostinger btn-hostinger-primary">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Retry
               </Button>
@@ -566,59 +484,39 @@ export function AppointmentTable({
     <div className="space-y-4 sm:space-y-6">
       <Card className="card-hostinger p-3 sm:p-4">
         <CardHeader className="pb-3 sm:pb-4 px-0">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl font-semibold">
-                <Calendar className="h-5 w-5 flex-shrink-0" />
-                <span className="truncate">{title || (mode === 'active' ? 'Appointment Management' : 'Deleted Appointments')}</span>
-              </CardTitle>
-              <p className="text-xs sm:text-sm text-gray-600 mt-1 break-words">
-                {mode === 'active' ? 'Manage and view all scheduled appointments' : 'View and restore deleted appointments'}
-                {pagination && ` (${pagination.totalAppointments} total)`}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-              <Button 
-                onClick={onRefresh}
-                variant="outline"
-                size="sm"
-                disabled={isLoading}
-                className="flex-shrink-0"
-              >
-                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-              </Button>
-              {mode === 'active' && (
-                <>
-                  {hasReachedAppointmentLimit ? (
-                    <>
-                      <Button 
-                        className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
-                        onClick={() => setShowUpgradeModal(true)}
-                      >
-                        <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-                        <span className="hidden sm:inline">Upgrade to Schedule More</span>
-                        <span className="sm:hidden">Upgrade</span>
-                      </Button>
-                      <UpgradePlanModal 
-                        isOpen={showUpgradeModal}
-                        onClose={() => setShowUpgradeModal(false)}
-                      />
-                    </>
-                  ) : (
-                    <NewAppointmentModal 
-                      onSuccess={handleAppointmentCreated}
-                      triggerButton={
-                        <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                          <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-                          <span className="hidden sm:inline">Schedule Appointment</span>
-                          <span className="sm:hidden">Schedule</span>
-                        </Button>
-                      }
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-semibold flex-1 min-w-0">
+              <Calendar className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+              <span className="truncate">{title || 'Appointments'}</span>
+            </CardTitle>
+            <>
+                {hasReachedAppointmentLimit ? (
+                  <>
+                    <Button 
+                      className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                      onClick={() => setShowUpgradeModal(true)}
+                    >
+                      <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                      <span className="hidden min-[375px]:inline sm:hidden">Upgrade</span>
+                      <span className="hidden sm:inline">Upgrade to Schedule More</span>
+                    </Button>
+                    <UpgradePlanModal 
+                      isOpen={showUpgradeModal}
+                      onClose={() => setShowUpgradeModal(false)}
                     />
-                  )}
-                </>
-              )}
-            </div>
+                  </>
+                ) : (
+                  <NewAppointmentModal 
+                    onSuccess={handleAppointmentCreated}
+                    triggerButton={
+                      <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0">
+                        <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                        <span className="hidden min-[375px]:inline">Schedule Appointment</span>
+                      </Button>
+                    }
+                  />
+                )}
+            </>
           </div>
         </CardHeader>
       </Card>
@@ -640,21 +538,19 @@ export function AppointmentTable({
           <DataTable
             data={appointments}
             columns={getColumns()}
-            emptyMessage={`No ${mode === 'active' ? 'appointments' : 'deleted appointments'} found. Try adjusting your search criteria.`}
+            emptyMessage="No appointments found. Try adjusting your search criteria."
             emptyData={{
-              title: mode === 'active' ? 'No appointments yet' : 'No deleted appointments',
-              description: mode === 'active'
-                ? 'Get started by scheduling your first appointment.'
-                : 'Trash is empty.',
+              title: 'No appointments yet',
+              description: 'Get started by scheduling your first appointment.',
               primaryActionLabel: emptyPrimaryLabel,
             }}
-            onPrimaryAction={mode === 'active' ? () => {
+            onPrimaryAction={() => {
               if (hasReachedAppointmentLimit) {
                 setShowUpgradeModal(true)
               } else {
                 setShowNewAppointmentModal(true)
               }
-            } : undefined}
+            }}
             showCard={false}
             isLoading={isLoading}
           />
@@ -675,7 +571,7 @@ export function AppointmentTable({
         </div>
       )}
 
-      {mode === 'active' && onDelete && (
+      {onDelete && (
         <ConfirmationDialog
           open={showDeleteDialog}
           onOpenChange={setShowDeleteDialog}
@@ -687,20 +583,7 @@ export function AppointmentTable({
         />
       )}
 
-      {mode === 'trash' && onRestore && (
-        <ConfirmationDialog
-          open={showRestoreDialog}
-          onOpenChange={setShowRestoreDialog}
-          title="Restore Appointment"
-          description={`Are you sure you want to restore appointment ${selectedAppointment?.appointmentId}? This will move the appointment back to the active appointments list.`}
-          onConfirm={handleRestore}
-          confirmText={isRestoring ? "Restoring..." : "Restore"}
-          variant="default"
-        />
-      )}
-
-
-      {mode === 'active' && onApprove && (
+      {onApprove && (
         <ConfirmationDialog
           open={showApproveDialog}
           onOpenChange={setShowApproveDialog}
@@ -717,24 +600,22 @@ export function AppointmentTable({
         />
       )}
 
-      {mode === 'active' && (
-        <ConfirmationDialog
-          open={showRejectDialog}
-          onOpenChange={setShowRejectDialog}
-          title="Reject Appointment"
-          description={`Are you sure you want to reject appointment ${selectedAppointment?.appointmentId}? This will change the status to rejected.`}
-          onConfirm={() => {
-            if (selectedAppointment) {
-              handleReject(selectedAppointment._id)
-              setShowRejectDialog(false)
-            }
-          }}
-          confirmText={isRejectingMutation || isAppointmentLoading(selectedAppointment?._id || '') ? "Rejecting..." : "Reject"}
-          variant="destructive"
-        />
-      )}
+      <ConfirmationDialog
+        open={showRejectDialog}
+        onOpenChange={setShowRejectDialog}
+        title="Reject Appointment"
+        description={`Are you sure you want to reject appointment ${selectedAppointment?.appointmentId}? This will change the status to rejected.`}
+        onConfirm={() => {
+          if (selectedAppointment) {
+            handleReject(selectedAppointment._id)
+            setShowRejectDialog(false)
+          }
+        }}
+        confirmText={isRejectingMutation || isAppointmentLoading(selectedAppointment?._id || '') ? "Rejecting..." : "Reject"}
+        variant="destructive"
+      />
 
-      {mode === 'active' && onCheckOut && (
+      {onCheckOut && (
         <CheckOutDialog
           appointment={selectedAppointment}
           open={showCheckOutDialog}
@@ -746,13 +627,12 @@ export function AppointmentTable({
 
       <AppointmentDetailsDialog
         appointment={selectedAppointment}
-        mode={mode}
+        mode="active"
         open={showViewDialog}
         on_close={() => setShowViewDialog(false)}
       />
 
-      {mode === 'active' && (
-        <NewAppointmentModal
+      <NewAppointmentModal
           appointmentId={editingAppointmentId || undefined}
           open={showNewAppointmentModal}
           onOpenChange={(open) => {
@@ -764,7 +644,6 @@ export function AppointmentTable({
           onSuccess={handleAppointmentCreated}
           triggerButton={<div />}
         />
-      )}
     </div>
   )
 }

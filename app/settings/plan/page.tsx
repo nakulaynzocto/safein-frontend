@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import { useEffect, useState, type MouseEvent } from "react"
 import { useRouter } from "next/navigation"
 import { ProtectedLayout } from "@/components/layout/protectedLayout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -191,7 +191,7 @@ export default function ActivePlanPage() {
     return labels[planType] || planType.charAt(0).toUpperCase() + planType.slice(1)
   }
 
-  const handleViewInvoice = (e: React.MouseEvent<HTMLButtonElement>, historyItem: ISubscriptionHistory) => {
+  const handleViewInvoice = (e: MouseEvent<HTMLButtonElement>, historyItem: ISubscriptionHistory) => {
     e.preventDefault()
     e.stopPropagation()
     setSelectedInvoice(historyItem)
@@ -709,3 +709,4 @@ export default function ActivePlanPage() {
     </ProtectedLayout>
   )
 }
+

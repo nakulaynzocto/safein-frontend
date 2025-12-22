@@ -16,7 +16,6 @@ import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { logout, setUser } from "@/store/slices/authSlice"
 import { useLogoutMutation, useGetProfileQuery } from "@/store/api/authApi"
 import { routes } from "@/utils/routes"
-import { MobileSidebar } from "./mobileSidebar"
 import { useAuthSubscription } from "@/hooks/useAuthSubscription"
 import { NotificationBell } from "@/components/common/NotificationBell"
 import { useNavbarScrollStyle } from "@/hooks/useScrollStyle"
@@ -416,10 +415,6 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                   </Button>
                 )}
 
-                {/* 3. Mobile Sidebar Menu - Shows hamburger icon for authenticated users on mobile */}
-                {isActuallyAuthenticated && (
-                  <MobileSidebar className="md:hidden" />
-                )}
               </>
             ) : (
               <>

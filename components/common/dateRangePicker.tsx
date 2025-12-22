@@ -10,9 +10,12 @@ const PREDEFINED_RANGES = [
 ];
 
 interface DateRange { startDate: Date | null; endDate: Date | null }
-interface DateRangePickerProps { onDateRangeChange?: (v: { startDate: string | null; endDate: string | null }) => void }
+interface DateRangePickerProps { 
+  onDateRangeChange?: (v: { startDate: string | null; endDate: string | null }) => void
+  initialValue?: { startDate: string | null; endDate: string | null }
+}
 
-const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
+const DateRangePicker = ({ onDateRangeChange, initialValue }: DateRangePickerProps) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [range, setRangeDates] = useState<DateRange>({ startDate: null, endDate: null });
@@ -77,11 +80,11 @@ const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
         if (!tempRange.startDate || !tempRange.endDate) return;
 
         setRangeDates(tempRange);
-        
-            localStorage.setItem('dateRange', JSON.stringify({
-              startDate: formatLocalDate(tempRange.startDate),
-              endDate: formatLocalDate(tempRange.endDate),
-            }))
+
+        localStorage.setItem('dateRange', JSON.stringify({
+          startDate: formatLocalDate(tempRange.startDate),
+          endDate: formatLocalDate(tempRange.endDate),
+        }))
 
         onDateRangeChange?.({ startDate: formatLocalDate(tempRange.startDate), endDate: formatLocalDate(tempRange.endDate) });
         setIsOpen(false);
@@ -212,12 +215,39 @@ const DateRangePicker = ({ onDateRangeChange }: DateRangePickerProps) => {
     };
 
     useEffect(() => {
-        const raw = localStorage.getItem('dateRange');
-        const saved = raw ? JSON.parse(raw) : null;
-        const initialStart = saved?.startDate ? normalizeDate(new Date(saved.startDate)) : null;
-        const initialEnd = saved?.endDate ? normalizeDate(new Date(saved.endDate)) : null;
-        setRangeDates({ startDate: initialStart, endDate: initialEnd });
-        setTempRange({ startDate: initialStart, endDate: initialEnd });
+        // Priority: 1. initialValue prop, 2. localStorage 'dateRange', 3. null (no filter)
+        let initialStart: Date | null = null;
+        let initialEnd: Date | null = null;
+        
+        // First check if parent provided initialValue
+        if (initialValue?.startDate && initialValue?.endDate) {
+            initialStart = normalizeDate(new Date(initialValue.startDate));
+            initialEnd = normalizeDate(new Date(initialValue.endDate));
+        } else {
+            // Otherwise check localStorage
+            const raw = localStorage.getItem('dateRange');
+            const saved = raw ? JSON.parse(raw) : null;
+            if (saved?.startDate && saved?.endDate) {
+                initialStart = normalizeDate(new Date(saved.startDate));
+                initialEnd = normalizeDate(new Date(saved.endDate));
+            }
+        }
+        
+        // Only set if we have valid dates
+        if (initialStart && initialEnd) {
+            setRangeDates({ startDate: initialStart, endDate: initialEnd });
+            setTempRange({ startDate: initialStart, endDate: initialEnd });
+            
+            // Call onDateRangeChange to sync with parent (only if not from initialValue to avoid double call)
+            if (onDateRangeChange && !initialValue) {
+                const startDateStr = formatLocalDate(initialStart);
+                const endDateStr = formatLocalDate(initialEnd);
+                setTimeout(() => {
+                    onDateRangeChange({ startDate: startDateStr, endDate: endDateStr });
+                }, 0);
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {

@@ -629,3 +629,35 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* React Paginate Active Page Styles */
+.react-paginate .selected a,
+.react-paginate li.selected a,
+.react-paginate .selected > a {
+  background-color: #3882a5 !important;
+  border-color: #3882a5 !important;
+  color: white !important;
+}
+
+.react-paginate .selected a:hover,
+.react-paginate li.selected a:hover,
+.react-paginate .selected > a:hover {
+  background-color: #2d6a87 !important;
+  border-color: #2d6a87 !important;
+  color: white !important;
+}
+
+/* Override any conflicting Tailwind classes with higher specificity */
+.react-paginate li.selected a,
+.react-paginate .selected a[aria-current="page"] {
+  background-color: #3882a5 !important;
+  border-color: #3882a5 !important;
+  color: white !important;
+}
+
+.react-paginate li.selected a:hover,
+.react-paginate .selected a[aria-current="page"]:hover {
+  background-color: #2d6a87 !important;
+  border-color: #2d6a87 !important;
+  color: white !important;
+}

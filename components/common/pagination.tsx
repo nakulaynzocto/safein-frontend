@@ -1,7 +1,8 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
+import ReactPaginate from "react-paginate"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface PaginationProps {
   currentPage: number
@@ -33,59 +34,30 @@ export function Pagination({
   const startItem = ((currentPage - 1) * pageSize) + 1
   const endItem = Math.min(currentPage * pageSize, totalItems)
 
-  const getPageNumbers = () => {
-    const pages = []
-    const maxVisiblePages = 5
-    
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
-      }
-    } else {
-      const start = Math.max(1, currentPage - 2)
-      const end = Math.min(totalPages, currentPage + 2)
-      
-      if (start > 1) {
-        pages.push(1)
-        if (start > 2) {
-          pages.push('...')
-        }
-      }
-      
-      for (let i = start; i <= end; i++) {
-        pages.push(i)
-      }
-      
-      if (end < totalPages) {
-        if (end < totalPages - 1) {
-          pages.push('...')
-        }
-        pages.push(totalPages)
-      }
-    }
-    
-    return pages
+  const handlePageClick = (event: { selected: number }) => {
+    onPageChange(event.selected + 1)
   }
 
-  const pageNumbers = getPageNumbers()
+  if (totalPages <= 1) {
+    return null
+  }
 
   return (
-    <div className={`flex items-center justify-between ${className}`}>
+    <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-4", className)}>
       {/* Items info */}
-      <div className="text-sm text-muted-foreground">
-        Showing {startItem} to {endItem} of {totalItems} items
+      <div className="text-sm text-gray-600 dark:text-gray-400">
+        Showing <span className="font-medium">{startItem}</span> to <span className="font-medium">{endItem}</span> of <span className="font-medium">{totalItems}</span> items
       </div>
 
-      {/* Pagination controls */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         {/* Page size selector (optional) */}
         {showPageSizeSelector && onPageSizeChange && (
-          <div className="flex items-center gap-2 mr-4">
-            <span className="text-sm text-muted-foreground">Show:</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Show:</span>
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="px-2 py-1 text-sm border rounded-md bg-background"
+              className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#3882a5] focus:border-transparent"
             >
               {pageSizeOptions.map((size) => (
                 <option key={size} value={size}>
@@ -96,50 +68,39 @@ export function Pagination({
           </div>
         )}
 
-        {/* Page navigation */}
-        <div className="flex items-center gap-1">
-          {/* Previous button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-            disabled={!hasPrevPage}
-            className="h-8 w-8 p-0"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-
-          {/* Page numbers */}
-          {pageNumbers.map((page, index) => (
-            <div key={index}>
-              {page === '...' ? (
-                <div className="h-8 w-8 flex items-center justify-center">
-                  <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                </div>
-              ) : (
-                <Button
-                  variant={currentPage === page ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => onPageChange(page as number)}
-                  className="h-8 w-8 p-0"
-                >
-                  {page}
-                </Button>
-              )}
-            </div>
-          ))}
-
-          {/* Next button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={!hasNextPage}
-            className="h-8 w-8 p-0"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+        {/* React Paginate */}
+        <ReactPaginate
+          breakLabel="..."
+          nextLabel={<ChevronRight className="h-4 w-4" />}
+          previousLabel={<ChevronLeft className="h-4 w-4" />}
+          onPageChange={handlePageClick}
+          pageRangeDisplayed={3}
+          marginPagesDisplayed={1}
+          pageCount={totalPages}
+          forcePage={currentPage - 1}
+          disabledClassName="opacity-50 cursor-not-allowed"
+          containerClassName="flex items-center gap-1 list-none"
+          pageClassName="mx-0.5"
+          pageLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+          previousClassName="mx-0.5"
+          previousLinkClassName={cn(
+            "flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md transition-colors cursor-pointer",
+            hasPrevPage 
+              ? "hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-[#3882a5] hover:text-[#3882a5]" 
+              : "opacity-50 cursor-not-allowed"
+          )}
+          nextClassName="mx-0.5"
+          nextLinkClassName={cn(
+            "flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md transition-colors cursor-pointer",
+            hasNextPage 
+              ? "hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-[#3882a5] hover:text-[#3882a5]" 
+              : "opacity-50 cursor-not-allowed"
+          )}
+          breakClassName="mx-0.5"
+          breakLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-500 dark:text-gray-400"
+          activeClassName="mx-0.5 selected"
+          activeLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium !bg-[#3882a5] !border-[#3882a5] !text-white rounded-md hover:!bg-[#2d6a87] hover:!border-[#2d6a87] transition-colors cursor-pointer shadow-sm"
+        />
       </div>
     </div>
   )
@@ -159,29 +120,51 @@ export function CompactPagination({
   const startItem = ((currentPage - 1) * pageSize) + 1
   const endItem = Math.min(currentPage * pageSize, totalItems)
 
+  const handlePageClick = (event: { selected: number }) => {
+    onPageChange(event.selected + 1)
+  }
+
+  if (totalPages <= 1) {
+    return null
+  }
+
   return (
-    <div className={`flex items-center justify-between ${className}`}>
-      <div className="text-sm text-muted-foreground">
-        {startItem}-{endItem} of {totalItems}
+    <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-4", className)}>
+      <div className="text-sm text-gray-600 dark:text-gray-400">
+        <span className="font-medium">{startItem}</span>-<span className="font-medium">{endItem}</span> of <span className="font-medium">{totalItems}</span>
       </div>
-      <div className="flex gap-1">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-          disabled={!hasPrevPage}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={!hasNextPage}
-        >
-          Next
-        </Button>
-      </div>
+      <ReactPaginate
+        breakLabel="..."
+        nextLabel={<ChevronRight className="h-4 w-4" />}
+        previousLabel={<ChevronLeft className="h-4 w-4" />}
+        onPageChange={handlePageClick}
+        pageRangeDisplayed={2}
+        marginPagesDisplayed={1}
+        pageCount={totalPages}
+        forcePage={currentPage - 1}
+        disabledClassName="opacity-50 cursor-not-allowed"
+        containerClassName="flex items-center gap-1 list-none"
+        pageClassName="mx-0.5"
+        pageLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+        previousClassName="mx-0.5"
+        previousLinkClassName={cn(
+          "flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md transition-colors cursor-pointer",
+          hasPrevPage 
+            ? "hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-[#3882a5] hover:text-[#3882a5]" 
+            : "opacity-50 cursor-not-allowed"
+        )}
+        nextClassName="mx-0.5"
+        nextLinkClassName={cn(
+          "flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md transition-colors cursor-pointer",
+          hasNextPage 
+            ? "hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-[#3882a5] hover:text-[#3882a5]" 
+            : "opacity-50 cursor-not-allowed"
+        )}
+        breakClassName="mx-0.5"
+        breakLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-gray-500 dark:text-gray-400"
+        activeClassName="mx-0.5 selected"
+        activeLinkClassName="flex items-center justify-center min-w-[32px] h-8 px-2 text-sm font-medium text-white bg-[#3882a5] border border-[#3882a5] rounded-md hover:bg-[#2d6a87] hover:border-[#2d6a87] transition-colors cursor-pointer shadow-sm"
+      />
     </div>
   )
 }

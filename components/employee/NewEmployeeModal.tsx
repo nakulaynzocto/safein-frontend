@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { useState, useEffect, type ReactNode } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
@@ -66,7 +66,7 @@ const statusOptions = [
 
 interface NewEmployeeModalProps {
   employeeId?: string
-  trigger?: React.ReactNode
+  trigger?: ReactNode
   onSuccess?: () => void
   open?: boolean
   onOpenChange?: (open: boolean) => void
@@ -74,13 +74,13 @@ interface NewEmployeeModalProps {
 
 export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: controlledOpen, onOpenChange }: NewEmployeeModalProps) {
   const router = useRouter()
-  const [internalOpen, setInternalOpen] = React.useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
   
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
   const setOpen = onOpenChange || setInternalOpen
   const [createEmployee, { isLoading: isCreating }] = useCreateEmployeeMutation()
   const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation()
-  const [generalError, setGeneralError] = React.useState<string | null>(null)
+  const [generalError, setGeneralError] = useState<string | null>(null)
   
   const isEditMode = !!employeeId
   const isLoading = isCreating || isUpdating
@@ -109,7 +109,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
     },
   })
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isEditMode && employeeData) {
       reset({
         name: employeeData.name,
@@ -122,7 +122,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
     }
   }, [isEditMode, employeeData, reset])
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) {
       reset()
       setGeneralError(null)

@@ -28,11 +28,9 @@ export const routes = {
     ACTIVE_PLAN: "/settings/plan",
     EMPLOYEECREATE: "/employee/create",
     EMPLOYEELIST: "/employee/list",
-    EMPLOYEETRASH: "/employee/trash",
     EMPLOYEEEDIT: "/employee/[id]", // Dynamic route pattern
     APPOINTMENTCREATE: "/appointment/create",
     APPOINTMENTLIST: "/appointment/list",
-    APPOINTMENTTRASH: "/appointment/trash",
     APPOINTMENTEDIT: "/appointment/[id]", // Dynamic route pattern
     VISITORLIST: "/visitor/list",
     VISITORREGISTRATION: "/visitor/register",
@@ -62,11 +60,11 @@ export const isPrivateRoute = (path: string): boolean => {
     return true
   }
   
-  if (path.startsWith('/employee/') && path !== routes.privateroute.EMPLOYEELIST && path !== routes.privateroute.EMPLOYEETRASH) {
+  if (path.startsWith('/employee/') && path !== routes.privateroute.EMPLOYEELIST) {
     return true
   }
   
-  if (path.startsWith('/appointment/') && path !== routes.privateroute.APPOINTMENTCREATE && path !== routes.privateroute.APPOINTMENTLIST && path !== routes.privateroute.APPOINTMENTTRASH) {
+  if (path.startsWith('/appointment/') && path !== routes.privateroute.APPOINTMENTCREATE && path !== routes.privateroute.APPOINTMENTLIST) {
     return true
   }
   

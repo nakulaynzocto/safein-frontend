@@ -9,10 +9,13 @@ import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionA
 import { useAuthSubscription } from "@/hooks/useAuthSubscription"
 import { routes } from "@/utils/routes"
 import { CheckCircle, Loader2, AlertCircle } from "lucide-react"
+import { useAppDispatch } from "@/store/hooks"
+import { userSubscriptionApi } from "@/store/api/userSubscriptionApi"
 
 export default function SubscriptionSuccessPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const dispatch = useAppDispatch()
   
   const {
     user,
@@ -28,6 +31,7 @@ export default function SubscriptionSuccessPage() {
   const {
     data: activeSubscriptionData,
     isFetching: isSubscriptionFetching,
+    refetch: refetchSubscription,
   } = useGetUserActiveSubscriptionQuery(user?.id ?? "", {
     skip: !isAuthenticated || !user?.id,
     pollingInterval: pollingInterval,
@@ -63,11 +67,18 @@ export default function SubscriptionSuccessPage() {
   useEffect(() => {
     if (subscriptionIsActive && !isRedirecting) {
       setIsRedirecting(true)
+      // Invalidate subscription query to ensure fresh data on dashboard
+      // Use correct tag types: 'User' and 'Subscription' as defined in the API
+      if (user?.id) {
+        dispatch(userSubscriptionApi.util.invalidateTags(['User', 'Subscription']))
+      }
+      // Refetch subscription before redirect
+      refetchSubscription()
       setTimeout(() => {
         router.replace(routes.privateroute.DASHBOARD)
       }, 1500)
     }
-  }, [subscriptionIsActive, isRedirecting, router])
+  }, [subscriptionIsActive, isRedirecting, router, user?.id, dispatch, refetchSubscription])
 
   useEffect(() => {
     if (isSubscriptionFetching && !subscriptionIsActive) {

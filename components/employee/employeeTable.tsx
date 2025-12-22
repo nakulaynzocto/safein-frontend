@@ -9,24 +9,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DataTable } from "@/components/common/dataTable"
 import { ConfirmationDialog } from "@/components/common/confirmationDialog"
 import { Pagination } from "@/components/common/pagination"
-import { Checkbox } from "@/components/ui/checkbox"
 import { StatusBadge } from "@/components/common/statusBadge"
-import { format } from "date-fns"
 import {
   Edit,
   Trash2,
   Eye,
-  RotateCcw,
   MoreVertical,
   Plus,
-  RefreshCw,
-  Filter,
   Phone,
   Mail,
   Building,
-  Calendar,
-  User,
-  Briefcase
+  User
 } from "lucide-react"
 import { Employee } from "@/store/api/employeeApi"
 import { SearchInput } from "@/components/common/searchInput"
@@ -39,7 +32,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu"
-import { Input } from "../ui/input"
 import { routes } from "@/utils/routes"
 import { NewEmployeeModal } from "./NewEmployeeModal"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
@@ -62,17 +54,9 @@ export interface EmployeeTableProps {
   onSearchChange: (value: string) => void
   onPageChange: (page: number) => void
   onPageSizeChange: (size: number) => void
-  mode: 'active' | 'trash'
-  showSelection?: boolean
-  selectedItems?: string[]
-  onSelectionChange?: (items: string[]) => void
   onDelete?: (employeeId: string) => void
-  onRestore?: (employeeId: string) => void
-  onBulkRestore?: (employeeIds: string[]) => void
   onView?: (employee: Employee) => void
   isDeleting?: boolean
-  isRestoring?: boolean
-  onRefresh?: () => void
   showHeader?: boolean
   title?: string
   description?: string
@@ -92,17 +76,9 @@ export function EmployeeTable({
   onSearchChange,
   onPageChange,
   onPageSizeChange,
-  mode,
-  showSelection = false,
-  selectedItems = [],
-  onSelectionChange,
   onDelete,
-  onRestore,
-  onBulkRestore,
   onView,
   isDeleting = false,
-  isRestoring = false,
-  onRefresh,
   showHeader = true,
   title,
   onDateFromChange,
@@ -112,41 +88,15 @@ export function EmployeeTable({
   const router = useRouter()
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [showRestoreDialog, setShowRestoreDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      onSelectionChange?.(employees.map(emp => emp._id))
-    } else {
-      onSelectionChange?.([])
-    }
-  }
-
-  const handleSelectEmployee = (employeeId: string, checked: boolean) => {
-    if (checked) {
-      onSelectionChange?.([...selectedItems, employeeId])
-    } else {
-      onSelectionChange?.(selectedItems.filter(id => id !== employeeId))
-    }
-  }
-
-
   const handleDelete = async () => {
     if (!selectedEmployee || !onDelete) return
     await onDelete(selectedEmployee._id)
     setShowDeleteDialog(false)
-    setSelectedEmployee(null)
-  }
-
-  const handleRestore = async () => {
-    if (!selectedEmployee || !onRestore) return
-    await onRestore(selectedEmployee._id)
-    setShowRestoreDialog(false)
     setSelectedEmployee(null)
   }
 
@@ -163,7 +113,6 @@ export function EmployeeTable({
 
   const handleEmployeeUpdated = () => {
     setEditingEmployee(null)
-    onRefresh?.()
   }
 
 
@@ -214,28 +163,11 @@ export function EmployeeTable({
       },
     ]
 
-
-    if (mode === 'active') {
-      baseColumns.push({
-        key: "status",
-        header: "Status",
-        render: (employee: Employee) => <StatusBadge status={employee.status.toLowerCase() as any} />
-      })
-    } else if (mode === 'trash') {
-      baseColumns.push({
-        key: "deletedAt",
-        header: "Deleted At",
-        render: (employee: Employee) => (
-          <div className="text-sm">
-            <div>{format(new Date(employee.deletedAt!), "MMM dd, yyyy")}</div>
-            <div className="text-muted-foreground">
-              {format(new Date(employee.deletedAt!), "HH:mm")}
-            </div>
-          </div>
-        )
-      })
-    }
-
+    baseColumns.push({
+      key: "status",
+      header: "Status",
+      render: (employee: Employee) => <StatusBadge status={employee.status.toLowerCase() as any} />
+    })
 
     baseColumns.push({
       key: "actions",
@@ -255,40 +187,24 @@ export function EmployeeTable({
                   View Details
                 </DropdownMenuItem>
               )}
-              {mode === 'active' && (
+              <DropdownMenuItem onClick={() => handleEditEmployee(employee)}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+              </DropdownMenuItem>
+              {onDelete && (
                 <>
-                  <DropdownMenuItem onClick={() => handleEditEmployee(employee)}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelectedEmployee(employee)
+                      setShowDeleteDialog(true)
+                    }}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
                   </DropdownMenuItem>
-                  {onDelete && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setSelectedEmployee(employee)
-                          setShowDeleteDialog(true)
-                        }}
-                        className="text-destructive"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </>
-                  )}
                 </>
-              )}
-              {mode === 'trash' && onRestore && (
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSelectedEmployee(employee)
-                    setShowRestoreDialog(true)
-                  }}
-                  disabled={isRestoring}
-                >
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Restore
-                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -337,39 +253,32 @@ export function EmployeeTable({
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {mode === 'active' ? 'No employees yet' : 'No deleted employees'}
+                    No employees yet
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    {mode === 'active' 
-                      ? 'Add your first employee to get started.'
-                      : 'Trash is empty.'
-                    }
+                    Add your first employee to get started.
                   </p>
                 </div>
-                {mode === 'active' && (
+                {hasReachedLimit ? (
                   <>
-                    {hasReachedLimit ? (
-                      <>
-                        <Button className="mt-4" onClick={() => setShowUpgradeModal(true)}>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Upgrade Plan
-                        </Button>
-                        <UpgradePlanModal
-                          isOpen={showUpgradeModal}
-                          onClose={() => setShowUpgradeModal(false)}
-                        />
-                      </>
-                    ) : (
-                      <NewEmployeeModal
-                        trigger={
-                          <Button className="mt-4">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Employee
-                          </Button>
-                        }
-                      />
-                    )}
+                    <Button className="mt-4" onClick={() => setShowUpgradeModal(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Upgrade Plan
+                    </Button>
+                    <UpgradePlanModal
+                      isOpen={showUpgradeModal}
+                      onClose={() => setShowUpgradeModal(false)}
+                    />
                   </>
+                ) : (
+                  <NewEmployeeModal
+                    trigger={
+                      <Button className="mt-4">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Employee
+                      </Button>
+                    }
+                  />
                 )}
               </div>
             </div>
@@ -377,7 +286,7 @@ export function EmployeeTable({
             <DataTable
               data={employees}
               columns={getColumns()}
-              emptyMessage={`No ${mode === 'active' ? 'employees' : 'deleted employees'} found`}
+              emptyMessage="No employees found"
               showCard={false}
               isLoading={isLoading}
             />
@@ -403,7 +312,7 @@ export function EmployeeTable({
       )}
 
       {/* Confirmation Dialogs */}
-      {mode === 'active' && onDelete && (
+      {onDelete && (
         <ConfirmationDialog
           open={showDeleteDialog}
           onOpenChange={setShowDeleteDialog}
@@ -415,22 +324,10 @@ export function EmployeeTable({
         />
       )}
 
-      {mode === 'trash' && onRestore && (
-        <ConfirmationDialog
-          open={showRestoreDialog}
-          onOpenChange={setShowRestoreDialog}
-          title="Restore Employee"
-          description={`Are you sure you want to restore ${selectedEmployee?.name}? This will move the employee back to the active employees list.`}
-          onConfirm={handleRestore}
-          confirmText={isRestoring ? "Restoring..." : "Restore"}
-          variant="default"
-        />
-      )}
-
       {/* View Details Dialog */}
       <EmployeeDetailsDialog
         employee={selectedEmployee}
-        mode={mode}
+        mode="active"
         open={showViewDialog}
         on_close={() => setShowViewDialog(false)}
       />

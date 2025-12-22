@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo } from "react"
+import { useMemo, memo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -17,7 +17,7 @@ interface ProfileCardProps {
   }
 }
 
-export const ProfileCard = React.memo(function ProfileCard({ profile }: ProfileCardProps) {
+export const ProfileCard = memo(function ProfileCard({ profile }: ProfileCardProps) {
   const initials = getUserInitials(profile.name, profile.companyName)
   const displayName = profile.companyName || profile.name || "User"
   

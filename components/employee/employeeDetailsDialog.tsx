@@ -9,13 +9,12 @@ const employee_details_config = [
   { key: "email", label: "Email" },
   { key: "phone", label: "Phone" },
   { key: "department", label: "Department" },
-  { key: "status", label: "Status", mode: "active" },
-  { key: "deletedAt", label: "Deleted At", mode: "trash", format: (value: string) => format(new Date(value), "MMM dd, yyyy 'at' HH:mm") },
+  { key: "status", label: "Status" },
 ]
 
 interface EmployeeDetailsDialogProps {
   employee: Employee | null
-  mode: 'active' | 'trash'
+  mode: 'active'
   open: boolean
   on_close: () => void
 }
@@ -27,7 +26,6 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
     <Dialog 
       open={open} 
       onOpenChange={(isOpen) => {
-
         if (!isOpen) {
           on_close()
         }
@@ -39,14 +37,13 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
         </DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            {employee_details_config.map(({ key, label, mode: field_mode, format }) => {
-              if (field_mode && field_mode !== mode) return null
+            {employee_details_config.map(({ key, label }) => {
               const value = employee[key as keyof Employee]
               return (
                 <div key={key} className="space-y-2">
                   <div className="font-medium">{label}:</div>
                   <div className="text-muted-foreground">
-                    {format && value ? format(value as string) : value}
+                    {value || 'N/A'}
                   </div>
                 </div>
               )

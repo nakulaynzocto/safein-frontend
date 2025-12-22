@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { useState, useEffect, useCallback, type ChangeEvent } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -41,23 +41,23 @@ interface ImportResult {
 }
 
 export function BulkImportModal({ open, onOpenChange, onSuccess }: BulkImportModalProps) {
-  const [file, setFile] = React.useState<File | null>(null)
-  const [error, setError] = React.useState<string | null>(null)
-  const [importResult, setImportResult] = React.useState<ImportResult | null>(null)
-  const [isDownloading, setIsDownloading] = React.useState(false)
+  const [file, setFile] = useState<File | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [importResult, setImportResult] = useState<ImportResult | null>(null)
+  const [isDownloading, setIsDownloading] = useState(false)
   
   const [bulkCreateEmployees, { isLoading: isUploading }] = useBulkCreateEmployeesMutation()
   const token = useAppSelector((state) => state.auth.token)
   
   // Cleanup function for download link
-  const cleanupDownloadLink = React.useCallback((link: HTMLAnchorElement, url: string) => {
+  const cleanupDownloadLink = useCallback((link: HTMLAnchorElement, url: string) => {
     if (document.body.contains(link)) {
       document.body.removeChild(link)
     }
     window.URL.revokeObjectURL(url)
   }, [])
 
-  const handleDownloadTemplate = React.useCallback(async () => {
+  const handleDownloadTemplate = useCallback(async () => {
     try {
       setError(null)
       setIsDownloading(true)
@@ -110,7 +110,7 @@ export function BulkImportModal({ open, onOpenChange, onSuccess }: BulkImportMod
     }
   }, [token, cleanupDownloadLink])
 
-  const handleFileChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
     if (!selectedFile) return
 
@@ -133,7 +133,7 @@ export function BulkImportModal({ open, onOpenChange, onSuccess }: BulkImportMod
     setImportResult(null)
   }, [])
 
-  const handleUpload = React.useCallback(async () => {
+  const handleUpload = useCallback(async () => {
     if (!file) {
       setError("Please select a file to upload")
       return
@@ -184,7 +184,7 @@ export function BulkImportModal({ open, onOpenChange, onSuccess }: BulkImportMod
     }
   }, [file, bulkCreateEmployees, onSuccess])
 
-  const handleClose = React.useCallback(() => {
+  const handleClose = useCallback(() => {
     setFile(null)
     setError(null)
     setImportResult(null)
@@ -192,7 +192,7 @@ export function BulkImportModal({ open, onOpenChange, onSuccess }: BulkImportMod
   }, [onOpenChange])
 
   // Reset state when modal closes
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) {
       setFile(null)
       setError(null)
@@ -371,4 +371,8 @@ export function BulkImportModal({ open, onOpenChange, onSuccess }: BulkImportMod
     </Dialog>
   )
 }
+
+
+
+
 
