@@ -53,7 +53,6 @@ import {
 } from "@/components/ui/dropdownMenu"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
-import { NewAppointmentModal } from "./NewAppointmentModal"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 
@@ -121,8 +120,6 @@ export function AppointmentTable({
   onDateToChange,
 }: AppointmentTableProps) {
   const router = useRouter()
-  const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false)
-  const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null)
   const { data: trialStatus, refetch: refetchTrialLimits } = useGetTrialLimitsStatusQuery()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   
@@ -208,8 +205,7 @@ export function AppointmentTable({
   }
 
   const handleEdit = (appointment: Appointment) => {
-    setEditingAppointmentId(appointment._id)
-    setShowNewAppointmentModal(true)
+    router.push(routes.privateroute.APPOINTMENTEDIT.replace("[id]", appointment._id))
   }
 
 
@@ -221,11 +217,6 @@ export function AppointmentTable({
     return scheduledDateTime < now
   }
 
-  const handleAppointmentCreated = () => {
-    setEditingAppointmentId(null)
-    setShowNewAppointmentModal(false)
-    refetchTrialLimits()
-  }
 
   const getColumns = () => {
     const baseColumns = [
@@ -254,7 +245,7 @@ export function AppointmentTable({
           
           return (
             <div className="flex items-center gap-3 min-w-0">
-              <Avatar className="h-10 w-10 flex-shrink-0">
+              <Avatar className="h-10 w-10 shrink-0">
                 <AvatarImage 
                   src={visitorPhoto} 
                   alt={visitorName}
@@ -271,12 +262,12 @@ export function AppointmentTable({
                 <div className="font-medium truncate">{visitorName}</div>
                 {visitorEmail !== "N/A" && (
                   <div className="flex items-center gap-1 text-xs text-gray-500 truncate">
-                    <Mail className="h-3 w-3 flex-shrink-0" />
+                    <Mail className="h-3 w-3 shrink-0" />
                     <span className="truncate">{visitorEmail}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <Phone className="h-3 w-3 flex-shrink-0" />
+                  <Phone className="h-3 w-3 shrink-0" />
                   <span>{visitorPhone}</span>
                 </div>
                 {visitorCompany && (
@@ -346,7 +337,7 @@ export function AppointmentTable({
           )
           return (
             <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+              <Calendar className="h-3 w-3 text-muted-foreground shrink-0" />
               <span>{dateTime || "N/A"}</span>
             </div>
           )
@@ -506,15 +497,13 @@ export function AppointmentTable({
                     />
                   </>
                 ) : (
-                  <NewAppointmentModal 
-                    onSuccess={handleAppointmentCreated}
-                    triggerButton={
-                      <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0">
-                        <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                        <span className="hidden min-[375px]:inline">Schedule Appointment</span>
-                      </Button>
-                    }
-                  />
+                  <Button
+                    className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                    onClick={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
+                  >
+                    <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                    <span className="hidden min-[375px]:inline">Schedule Appointment</span>
+                  </Button>
                 )}
             </>
           </div>
@@ -548,7 +537,7 @@ export function AppointmentTable({
               if (hasReachedAppointmentLimit) {
                 setShowUpgradeModal(true)
               } else {
-                setShowNewAppointmentModal(true)
+                router.push(routes.privateroute.APPOINTMENTCREATE)
               }
             }}
             showCard={false}
@@ -632,18 +621,6 @@ export function AppointmentTable({
         on_close={() => setShowViewDialog(false)}
       />
 
-      <NewAppointmentModal
-          appointmentId={editingAppointmentId || undefined}
-          open={showNewAppointmentModal}
-          onOpenChange={(open) => {
-            setShowNewAppointmentModal(open)
-            if (!open) {
-              setEditingAppointmentId(null)
-            }
-          }}
-          onSuccess={handleAppointmentCreated}
-          triggerButton={<div />}
-        />
     </div>
   )
 }

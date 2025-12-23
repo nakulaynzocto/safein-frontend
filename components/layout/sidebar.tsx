@@ -95,7 +95,29 @@ const SidebarContent = ({
   const [settingsOpen, setSettingsOpen] = useState(isSettingsActive)
   const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation()
 
-  const isActive = (href: string) => pathname === href
+  const isActive = (href: string) => {
+    if (pathname === href) return true
+    
+    if (href === routes.privateroute.EMPLOYEELIST) {
+      return pathname === routes.privateroute.EMPLOYEELIST || 
+             pathname === routes.privateroute.EMPLOYEECREATE ||
+             (pathname?.startsWith('/employee/') && pathname !== routes.privateroute.EMPLOYEELIST)
+    }
+    
+    if (href === routes.privateroute.APPOINTMENTLIST) {
+      return pathname === routes.privateroute.APPOINTMENTLIST || 
+             pathname === routes.privateroute.APPOINTMENTCREATE ||
+             (pathname?.startsWith('/appointment/') && pathname !== routes.privateroute.APPOINTMENTLIST)
+    }
+    
+    if (href === routes.privateroute.VISITORLIST) {
+      return pathname === routes.privateroute.VISITORLIST || 
+             pathname === routes.privateroute.VISITORREGISTRATION ||
+             (pathname?.startsWith('/visitor/') && pathname !== routes.privateroute.VISITORLIST)
+    }
+    
+    return false
+  }
 
   useEffect(() => {
     if (isSettingsActive && !settingsOpen) {
@@ -132,7 +154,7 @@ const SidebarContent = ({
   if (isMobile) {
     return (
       <div className="flex-1 overflow-y-auto">
-        <SheetHeader className="p-4 border-b bg-gradient-to-r from-gray-50 to-white">
+        <SheetHeader className="p-4 border-b bg-linear-to-r from-gray-50 to-white">
           <div className="flex items-center gap-3">
             <Image 
               src="/aynzo-logo.png" 

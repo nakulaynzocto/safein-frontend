@@ -20,7 +20,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
     const inputType = isPasswordField && showPassword ? "text" : type
 
     return (
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {label && (
           <label className="text-sm font-medium text-foreground">
             {label}
@@ -32,7 +32,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             type={inputType}
             autoComplete={autoComplete}
             className={cn(
-              "flex h-10 w-full rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              "flex h-9 w-full rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
               error && "border-destructive focus:ring-destructive",
               isPasswordField && "pr-10",
               className,
@@ -54,8 +54,8 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             </button>
           )}
         </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
-        {helperText && !error && <p className="text-sm text-muted-foreground">{helperText}</p>}
+        {error && <p className="text-xs text-destructive">{error}</p>}
+        {helperText && !error && <p className="text-xs text-muted-foreground">{helperText}</p>}
       </div>
     )
   },

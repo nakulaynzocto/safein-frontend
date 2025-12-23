@@ -1,0 +1,25 @@
+"use client"
+
+import { ProtectedLayout } from "@/components/layout/protectedLayout"
+import { NewEmployeeModal } from "@/components/employee/EmployeeForm"
+import { UserPlus } from "lucide-react"
+
+// Page: Employeecreat (non-modal page version)
+export default function Employeecreat() {
+  return (
+    <ProtectedLayout>
+      <div className="container mx-auto max-w-4xl py-3 sm:py-4">
+        <div className="mb-3">
+          <h1 className="text-lg font-semibold text-foreground leading-tight">Add New Employee</h1>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+            Fill in the employee details to add them to the system
+          </p>
+        </div>
+        <div className="w-full">
+          <NewEmployeeModal layout="page" />
+        </div>
+      </div>
+    </ProtectedLayout>
+  )
+}
+

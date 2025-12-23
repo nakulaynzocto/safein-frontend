@@ -1,9 +1,10 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { format } from "date-fns"
 import { Appointment } from "@/store/api/appointmentApi"
-import { ExternalLink } from "lucide-react"
+import { ExternalLink, User, Mail, Phone, Calendar, Clock, Briefcase, FileText, Car, CheckCircle, XCircle } from "lucide-react"
 
 interface AppointmentDetailsDialogProps {
   appointment: Appointment | null
@@ -23,6 +24,7 @@ const getFieldValue = (appointment: Appointment, key: string): any => {
     visitorName: (appt) => (appt as any).visitorId?.name || appt.visitor?.name || 'N/A',
     visitorEmail: (appt) => (appt as any).visitorId?.email || appt.visitor?.email || 'N/A',
     visitorPhone: (appt) => (appt as any).visitorId?.phone || appt.visitor?.phone || 'N/A',
+    visitorPhoto: (appt) => (appt as any).visitorId?.photo || (appt as any).visitor?.photo || '',
     employeeName: (appt) => (appt as any).employeeId?.name || appt.employee?.name || 'N/A',
     purpose: (appt) => appt.appointmentDetails?.purpose || 'N/A',
     appointmentDate: (appt) => appt.appointmentDetails?.scheduledDate || 'N/A',
@@ -111,26 +113,80 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
     return value || 'N/A'
   }
 
+  const visitorPhoto = getFieldValue(appointment, 'visitorPhoto')
+  const visitorName = getFieldValue(appointment, 'visitorName')
+  const status = appointment.status
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && on_close()}>
-      <DialogContent className="max-w-2xl bg-white dark:bg-gray-900">
+      <DialogContent className="max-w-4xl bg-white dark:bg-gray-900">
         <DialogHeader>
           <DialogTitle>Appointment Details</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-6">
+          {/* Profile Header - LinkedIn/Facebook Style */}
+          <div className="flex gap-6 pb-6 border-b">
+            {/* Left Side - Visitor Photo */}
+            <div className="shrink-0">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={visitorPhoto} alt={visitorName} />
+                <AvatarFallback className="text-2xl">
+                  {visitorName !== 'N/A' ? visitorName.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'V'}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            
+            {/* Right Side - Visitor Info & Status */}
+            <div className="flex-1 space-y-3">
+              <div>
+                <h3 className="text-xl font-semibold">{visitorName}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">{getFieldValue(appointment, 'visitorEmail')}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">{getFieldValue(appointment, 'visitorPhone')}</span>
+                </div>
+              </div>
+              <div>
+                <Badge variant={statusVariants[status] || 'secondary'} className="text-sm">
+                  {status}
+                </Badge>
+              </div>
+            </div>
+          </div>
+
+          {/* Appointment Details - Bottom Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {fieldConfig.map(({ key, label, format, optional, showOnlyForCompleted }) => {
+              if (key === 'visitorName' || key === 'visitorEmail' || key === 'visitorPhone' || key === 'status') return null
               if (showOnlyForCompleted && appointment.status !== 'completed') return null
               
               const value = getFieldValue(appointment, key)
               
               if (optional && !value && key !== 'checkInTime' && key !== 'checkOutTime') return null
               
+              let icon = null
+              if (key === 'appointmentId') icon = <FileText className="h-4 w-4" />
+              else if (key === 'employeeName') icon = <Briefcase className="h-4 w-4" />
+              else if (key === 'purpose') icon = <FileText className="h-4 w-4" />
+              else if (key === 'appointmentDate') icon = <Calendar className="h-4 w-4" />
+              else if (key === 'appointmentTime') icon = <Clock className="h-4 w-4" />
+              else if (key === 'checkInTime') icon = <CheckCircle className="h-4 w-4" />
+              else if (key === 'checkOutTime') icon = <XCircle className="h-4 w-4" />
+              else if (key === 'vehicleNumber') icon = <Car className="h-4 w-4" />
+              else if (key === 'notes') icon = <FileText className="h-4 w-4" />
+              else if (key === 'createdAt') icon = <Calendar className="h-4 w-4" />
+              
               return (
-                <div key={key} className="space-y-2">
-                  <div className="font-medium">{label}:</div>
-                  <div className="text-muted-foreground">
+                <div key={key} className="space-y-1">
+                  <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    {icon}
+                    {label}
+                  </div>
+                  <div className="text-sm font-semibold text-foreground">
                     {renderFieldValue(key, value, format)}
                   </div>
                 </div>
@@ -139,7 +195,11 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
           </div>
           
           <div className="flex justify-end pt-4 border-t">
-            <Button type="button" onClick={on_close}>
+            <Button 
+              type="button" 
+              onClick={on_close}
+              variant="outline"
+            >
               Close
             </Button>
           </div>

@@ -53,103 +53,108 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
         }
       }}
     >
-      <DialogContent className="max-w-3xl bg-white dark:bg-gray-900">
+      <DialogContent className="max-w-4xl bg-white dark:bg-gray-900">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Visitor Details</DialogTitle>
+          <DialogTitle>Visitor Details</DialogTitle>
         </DialogHeader>
         
-        <div className="max-h-[65vh] overflow-y-auto pr-2">
-          <div className="space-y-6">
-          {/* Header with Photo */}
-          <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={visitor.photo} alt={visitor.name} />
-              <AvatarFallback className="text-2xl">
-                {visitor.name.split(' ').map(n => n[0]).join('')}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <h3 className="text-xl font-semibold">{visitor.name}</h3>
-              {visitor.visitorId && (
-                <p className="text-sm text-muted-foreground font-mono">
-                  ID: {visitor.visitorId}
-                </p>
-              )}
+        <div className="space-y-6">
+          {/* Profile Header - LinkedIn/Facebook Style */}
+          <div className="flex gap-6 pb-6 border-b">
+            {/* Left Side - Visitor Photo */}
+            <div className="shrink-0">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={visitor.photo} alt={visitor.name} />
+                <AvatarFallback className="text-2xl">
+                  {visitor.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
             </div>
-          </div>
-
-          {/* Personal Information */}
-          <div className="space-y-4 pb-4 border-b">
-            <h4 className="font-semibold text-lg flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Personal Information
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {visitor_details_config.map(({ key, label, icon: Icon, format }) => {
-                const value = getFieldValue(key);
-                
-                return (
-                  <div key={key} className="space-y-2">
-                    <div className="text-sm font-medium text-muted-foreground">{label}</div>
-                    <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-muted-foreground" />
-                      <span className={key === 'email' ? 'break-all' : ''}>
-                        {format && value ? format(value as string) : value}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Address Information */}
-          <div className="space-y-4 pb-4 border-b">
-            <h4 className="font-semibold text-lg flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              Address
-            </h4>
-            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border space-y-2">
-              <div className="flex items-start gap-2">
-                <Building className="h-4 w-4 text-muted-foreground mt-1" />
-                <div>
-                  <div>{visitor.address.street}</div>
-                  <div>{visitor.address.city}, {visitor.address.state}</div>
-                  <div>{visitor.address.country}</div>
+            
+            {/* Right Side - Visitor Info */}
+            <div className="flex-1 space-y-3">
+              <div>
+                <h3 className="text-xl font-semibold">{visitor.name}</h3>
+                {visitor.visitorId && (
+                  <p className="text-sm text-muted-foreground font-mono mt-1">
+                    ID: {visitor.visitorId}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 mt-2">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground break-all">{visitor.email}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">{visitor.phone}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ID Proof Information */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-lg flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
-              ID Proof
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">ID Type</div>
-                <Badge variant="outline" className="text-sm">
-                  {visitor.idProof.type.replace('_', ' ').toUpperCase()}
-                </Badge>
+          {/* Visitor Details - Bottom Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Registered On */}
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Registered On
               </div>
-              
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">ID Number</div>
-                {visitor.idProof.image ? (
-                  <button
-                    onClick={() => window.open(visitor.idProof.image, '_blank')}
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-mono"
-                  >
-                    <span>{visitor.idProof.number}</span>
-                    <ExternalLink className="h-4 w-4" />
-                  </button>
-                ) : (
-                  <div className="font-mono">{visitor.idProof.number}</div>
-                )}
+              <div className="text-sm font-semibold text-foreground">
+                {visitor.createdAt ? format(new Date(visitor.createdAt), "MMM dd, yyyy 'at' HH:mm") : 'N/A'}
               </div>
             </div>
+
+            {/* Address */}
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                Address
+              </div>
+              <div className="text-sm font-semibold text-foreground">
+                <div>{visitor.address.street || 'N/A'}</div>
+                <div>{visitor.address.city}, {visitor.address.state}</div>
+                <div>{visitor.address.country}</div>
+              </div>
+            </div>
+
+            {/* ID Proof Type */}
+            {visitor.idProof?.type && (
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  ID Proof Type
+                </div>
+                <div className="text-sm font-semibold text-foreground">
+                  <Badge variant="outline" className="text-sm">
+                    {visitor.idProof.type.replace('_', ' ').toUpperCase()}
+                  </Badge>
+                </div>
+              </div>
+            )}
+
+            {/* ID Proof Number */}
+            {(visitor.idProof?.number || visitor.idProof?.image) && (
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  ID Proof Number
+                </div>
+                <div className="text-sm font-semibold text-foreground">
+                  {visitor.idProof.image ? (
+                    <button
+                      onClick={() => window.open(visitor?.idProof?.image, '_blank')}
+                      className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-mono"
+                    >
+                      <span>{visitor.idProof.number || 'N/A'}</span>
+                      <ExternalLink className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <span className="font-mono">{visitor.idProof.number || 'N/A'}</span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Actions */}
@@ -157,10 +162,10 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
             <Button 
               type="button" 
               onClick={onClose}
+              variant="outline"
             >
               Close
             </Button>
-          </div>
           </div>
         </div>
       </DialogContent>

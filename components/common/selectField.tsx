@@ -126,7 +126,8 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
       control: (base, state) => ({
         ...base,
         backgroundColor: "#ffffff",
-        minHeight: 40,
+        minHeight: 36,
+        height: 36,
         borderRadius: 6,
         borderColor: error ? "#ef4444" : state.isFocused ? "#3882a5" : "#e5e7eb",
         boxShadow: state.isFocused ? (error ? "0 0 0 2px rgba(239, 68, 68, 0.2)" : "0 0 0 2px rgba(56, 130, 165, 0.2)") : "none",
@@ -234,7 +235,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
   )
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("space-y-1.5", className)}>
       {label && (
         <label htmlFor={controlId} className="text-sm font-medium text-foreground">
           {label}
@@ -275,12 +276,12 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
       />
 
       {error && (
-        <p id={`${controlId}-error`} className="text-sm text-destructive">
+        <p id={`${controlId}-error`} className="text-xs text-destructive">
           {error}
         </p>
       )}
       {helperText && !error && (
-        <p id={`${controlId}-helper`} className="text-sm text-muted-foreground">
+        <p id={`${controlId}-helper`} className="text-xs text-muted-foreground">
           {helperText}
         </p>
       )}

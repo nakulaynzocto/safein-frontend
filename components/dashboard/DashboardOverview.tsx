@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { useAppSelector } from "@/store/hooks"
 import { useGetAppointmentsQuery, useGetAppointmentStatsQuery } from "@/store/api/appointmentApi"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
@@ -10,15 +11,15 @@ import { StatsGrid } from "./statsGrid"
 import { AppointmentsTable } from "./AppointmentsTable"
 import { QuickActions } from "./QuickActions"
 import { DashboardCharts } from "./dashboardCharts"
-import { NewAppointmentModal } from "@/components/appointment/NewAppointmentModal"
 import { calculateAppointmentStats } from "./dashboardUtils"
 import { DashboardSkeleton } from "@/components/common/tableSkeleton"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 import DateRangePicker from "@/components/common/dateRangePicker"
+import { routes } from "@/utils/routes"
 
 export function DashboardOverview() {
-  const [showAppointmentModal, setShowAppointmentModal] = useState(false)
+  const router = useRouter()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   const [loadingTimeout, setLoadingTimeout] = useState(false)
@@ -173,13 +174,9 @@ export function DashboardOverview() {
     if (hasReachedAppointmentLimit) {
       setShowUpgradeModal(true)
     } else {
-      setShowAppointmentModal(true)
+      router.push(routes.privateroute.APPOINTMENTCREATE)
     }
-  }, [hasReachedAppointmentLimit])
-
-  const handleAppointmentCreated = useCallback(() => {
-    setShowAppointmentModal(false)
-  }, [])
+  }, [hasReachedAppointmentLimit, router])
 
   const hasError = useMemo(
     () => appointmentsError || employeesError || visitorsError,
@@ -281,12 +278,6 @@ export function DashboardOverview() {
 
       <QuickActions />
 
-      <NewAppointmentModal
-        open={showAppointmentModal}
-        onOpenChange={setShowAppointmentModal}
-        onSuccess={handleAppointmentCreated}
-        triggerButton={<div />}
-      />
       <UpgradePlanModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}

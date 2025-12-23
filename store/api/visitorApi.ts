@@ -13,9 +13,9 @@ export interface Visitor {
     state: string
     country: string
   }
-  idProof: {
-    type: string
-    number: string
+  idProof?: {
+    type?: string
+    number?: string
     image?: string
   }
   photo?: string
@@ -207,6 +207,18 @@ export const visitorApi = baseApi.injectEndpoints({
       ],
     }),
 
+    checkVisitorHasAppointments: builder.query<{ hasAppointments: boolean; count: number }, string>({
+      query: (id) => `/visitors/${id}/has-appointments`,
+      transformResponse: (response: any) => {
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
+      providesTags: (result, error, id) => [{ type: 'Visitor' as const, id: `APPOINTMENTS_${id}` }],
+      keepUnusedDataFor: 60,
+    }),
+
     deleteVisitor: builder.mutation<void, string>({
       query: (id) => ({
         url: `/visitors/${id}`,
@@ -291,6 +303,7 @@ export const {
   useSearchVisitorsMutation,
   useUpdateVisitorMutation,
   useDeleteVisitorMutation,
+  useCheckVisitorHasAppointmentsQuery,
   useRestoreVisitorMutation,
   useGetTrashedVisitorsQuery,
   useGetVisitorStatsQuery,

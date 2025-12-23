@@ -131,6 +131,18 @@ export const employeeApi = baseApi.injectEndpoints({
     }),
 
 
+    checkEmployeeHasAppointments: builder.query<{ hasAppointments: boolean; count: number }, string>({
+      query: (id) => `/employees/${id}/has-appointments`,
+      transformResponse: (response: any) => {
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
+      providesTags: (result, error, id) => [{ type: 'Employee', id: `APPOINTMENTS_${id}` }],
+      keepUnusedDataFor: 60,
+    }),
+
     deleteEmployee: builder.mutation<void, string>({
       query: (id) => ({
         url: `/employees/${id}`,
@@ -281,6 +293,7 @@ export const {
   useCreateEmployeeMutation,
   useUpdateEmployeeMutation,
   useDeleteEmployeeMutation,
+  useCheckEmployeeHasAppointmentsQuery,
   useGetTrashedEmployeesQuery,
   useRestoreEmployeeMutation,
   useUpdateEmployeeStatusMutation,
