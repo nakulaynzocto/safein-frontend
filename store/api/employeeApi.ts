@@ -155,44 +155,6 @@ export const employeeApi = baseApi.injectEndpoints({
     }),
 
 
-    getTrashedEmployees: builder.query<EmployeeListResponse, GetEmployeesQuery | void>({
-      query: (params) => {
-        const queryParams = createUrlParams(params || {})
-        return `/employees/trashed${queryParams ? `?${queryParams}` : ''}`
-      },
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      providesTags: (result) =>
-        result?.employees
-          ? [
-              ...result.employees.map(({ _id }) => ({ type: 'Employee' as const, id: _id })),
-              { type: 'Employee', id: 'TRASHED' },
-            ]
-          : [{ type: 'Employee', id: 'TRASHED' }],
-    }),
-
-
-    restoreEmployee: builder.mutation<Employee, string>({
-      query: (id) => ({
-        url: `/employees/${id}/restore`,
-        method: 'PUT',
-      }),
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      invalidatesTags: (result, error, id) => [
-        { type: 'Employee', id },
-        { type: 'Employee', id: 'LIST' },
-        { type: 'Employee', id: 'TRASHED' },
-      ],
-    }),
 
 
     updateEmployeeStatus: builder.mutation<Employee, { id: string; status: 'Active' | 'Inactive' }>({
@@ -294,8 +256,6 @@ export const {
   useUpdateEmployeeMutation,
   useDeleteEmployeeMutation,
   useCheckEmployeeHasAppointmentsQuery,
-  useGetTrashedEmployeesQuery,
-  useRestoreEmployeeMutation,
   useUpdateEmployeeStatusMutation,
   useBulkUpdateEmployeesMutation,
   useGetEmployeeStatsQuery,

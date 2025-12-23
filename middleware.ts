@@ -86,8 +86,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
   
-  // Allow email-action and verify routes without authentication
-  if (pathname.startsWith(`${routes.publicroute.EMAIL_ACTION}/`) || pathname.startsWith(`${routes.publicroute.VERIFY}/`)) {
+  // Allow email-action, verify, and book-appointment routes without authentication
+  if (
+    pathname.startsWith(`${routes.publicroute.EMAIL_ACTION}/`) || 
+    pathname.startsWith(`${routes.publicroute.VERIFY}/`) ||
+    pathname.startsWith('/book-appointment/')
+  ) {
     return NextResponse.next()
   }
   

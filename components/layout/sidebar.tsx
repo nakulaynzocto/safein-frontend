@@ -71,6 +71,11 @@ const settingsSubmenu = [
     icon: Bell,
   },
   {
+    name: "Appointment Links",
+    href: routes.privateroute.APPOINTMENT_LINKS,
+    icon: Calendar,
+  },
+  {
     name: "Subscription",
     href: routes.privateroute.ACTIVE_PLAN,
     icon: Package,
@@ -91,6 +96,7 @@ const SidebarContent = ({
                           pathname === routes.privateroute.PROFILE || 
                           pathname === routes.privateroute.NOTIFICATIONS ||
                           pathname === routes.privateroute.ACTIVE_PLAN ||
+                          pathname === routes.privateroute.APPOINTMENT_LINKS ||
                           pathname?.startsWith('/settings/')
   const [settingsOpen, setSettingsOpen] = useState(isSettingsActive)
   const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation()
@@ -168,23 +174,26 @@ const SidebarContent = ({
         </SheetHeader>
         
         <nav className="flex-1 space-y-2 p-2 overflow-y-auto mt-2">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href!}
-              prefetch={true}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200",
-                isActive(item.href!)
-                  ? "bg-brand text-white shadow-sm"
-                  : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
-              )}
-              onClick={onLinkClick}
-            >
-              <item.icon className="h-5 w-5 shrink-0" />
-              <span className="truncate">{item.name}</span>
-            </Link>
-          ))}
+          {navigation.map((item) => {
+            if (!item.href) return null
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                prefetch={true}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200",
+                  isActive(item.href)
+                    ? "bg-brand text-white shadow-sm"
+                    : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
+                )}
+                onClick={onLinkClick}
+              >
+                <item.icon className="h-5 w-5 shrink-0" />
+                <span className="truncate">{item.name}</span>
+              </Link>
+            )
+          })}
 
           <div className="space-y-1 mt-2">
             <button
@@ -209,23 +218,26 @@ const SidebarContent = ({
 
             {settingsOpen && (
               <div className="ml-6 space-y-1 pl-2 border-l-2 border-gray-200">
-                {settingsSubmenu.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    prefetch={true}
-                    className={cn(
-                      "flex items-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200",
-                      isActive(item.href)
-                        ? "bg-brand text-white shadow-sm"
-                        : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
-                    )}
-                    onClick={onLinkClick}
-                  >
-                    <item.icon className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{item.name}</span>
-                  </Link>
-                ))}
+                {settingsSubmenu.map((item) => {
+                  if (!item.href) return null
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      prefetch={true}
+                      className={cn(
+                        "flex items-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200",
+                        isActive(item.href)
+                          ? "bg-brand text-white shadow-sm"
+                          : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
+                      )}
+                      onClick={onLinkClick}
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{item.name}</span>
+                    </Link>
+                  )
+                })}
                 <button
                   onClick={handleLogout}
                   disabled={isLoggingOut}
@@ -246,22 +258,24 @@ const SidebarContent = ({
     )
   }
 
-  return (
-    <nav className="flex-1 space-y-2 p-2 overflow-y-auto mt-8">
-      {navigation.map((item) => (
-        <Link
-          key={item.name}
-          href={item.href!}
-          prefetch={true}
-          className={cn(
-            "sidebar-item text-base",
-            isActive(item.href!) && "active"
-          )}
-        >
-          <item.icon className="sidebar-item-icon" />
-          <span className="sidebar-item-text font-medium tracking-wide">{item.name}</span>
-        </Link>
-      ))}
+  return (    <nav className="flex-1 space-y-2 p-2 overflow-y-auto mt-8">
+      {navigation.map((item) => {
+        if (!item.href) return null
+        return (
+          <Link
+            key={item.name}
+            href={item.href}
+            prefetch={true}
+            className={cn(
+              "sidebar-item text-base",
+              isActive(item.href) && "active"
+            )}
+          >
+            <item.icon className="sidebar-item-icon" />
+            <span className="sidebar-item-text font-medium tracking-wide">{item.name}</span>
+          </Link>
+        )
+      })}
 
       <div className="space-y-1">
         <button
@@ -284,20 +298,23 @@ const SidebarContent = ({
 
         {settingsOpen && (
           <div className="ml-6 space-y-1 pl-2 border-l-2 border-gray-200">
-            {settingsSubmenu.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                prefetch={true}
-                className={cn(
-                  "sidebar-item text-sm flex items-center gap-2 py-2 px-3 rounded-md",
-                  isActive(item.href) && "active"
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                <span className="sidebar-item-text font-medium">{item.name}</span>
-              </Link>
-            ))}
+            {settingsSubmenu.map((item) => {
+              if (!item.href) return null
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  prefetch={true}
+                  className={cn(
+                    "sidebar-item text-sm flex items-center gap-2 py-2 px-3 rounded-md",
+                    isActive(item.href) && "active"
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span className="sidebar-item-text font-medium">{item.name}</span>
+                </Link>
+              )
+            })}
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
@@ -345,3 +362,4 @@ export function Sidebar({ className }: SidebarProps) {
     </>
   )
 }
+

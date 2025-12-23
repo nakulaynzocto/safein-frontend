@@ -6,7 +6,6 @@ import {
   useCheckInAppointmentMutation,
   useCheckOutAppointmentMutation,
   useUpdateAppointmentMutation,
-  useRestoreAppointmentMutation,
   useCancelAppointmentMutation,
   Appointment,
   GetAppointmentsQuery 
@@ -38,7 +37,6 @@ export interface UseAppointmentOperationsReturn {
   isDeleting: boolean
   isCheckingOut: boolean
   isApproving: boolean
-  isRestoring: boolean
   isCancelling: boolean
   error: any
   searchTerm: string
@@ -62,7 +60,6 @@ export interface UseAppointmentOperationsReturn {
   deleteAppointment: (appointmentId: string) => Promise<void>
   checkOutAppointment: (appointmentId: string, notes?: string) => Promise<void>
   approveAppointment: (appointmentId: string) => Promise<void>
-  restoreAppointment: (appointmentId: string) => Promise<void>
   cancelAppointment: (appointmentId: string) => Promise<void>
   refresh: () => void
   resetFilters: () => void
@@ -123,7 +120,6 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
   const [deleteAppointmentMutation, { isLoading: isDeleting }] = useDeleteAppointmentMutation()
   const [checkOutAppointmentMutation, { isLoading: isCheckingOut }] = useCheckOutAppointmentMutation()
   const [updateAppointmentMutation, { isLoading: isApproving }] = useUpdateAppointmentMutation()
-  const [restoreAppointmentMutation, { isLoading: isRestoring }] = useRestoreAppointmentMutation()
   const [cancelAppointmentMutation, { isLoading: isCancelling }] = useCancelAppointmentMutation()
 
   const deleteAppointment = async (appointmentId: string): Promise<void> => {
@@ -163,16 +159,6 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     }
   }
 
-  const restoreAppointment = async (appointmentId: string): Promise<void> => {
-    try {
-      await restoreAppointmentMutation(appointmentId).unwrap()
-      toast.success('Appointment restored successfully')
-      refetch()
-    } catch (error) {
-      toast.error('Failed to restore appointment')
-      throw error
-    }
-  }
 
   const cancelAppointment = async (appointmentId: string): Promise<void> => {
     try {
@@ -244,7 +230,6 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     isDeleting,
     isCheckingOut,
     isApproving,
-    isRestoring,
     isCancelling,
     error,
     searchTerm,
@@ -268,87 +253,9 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     deleteAppointment,
     checkOutAppointment,
     approveAppointment,
-    restoreAppointment,
     cancelAppointment,
     refresh,
     resetFilters
   }
 }
 
-export function useAppointmentTrashOperations() {
-  const [restoreAppointmentMutation, { isLoading: isRestoring }] = useRestoreAppointmentMutation()
-
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
-  const [employeeFilter, setEmployeeFilter] = useState('')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [sortBy, setSortBy] = useState('createdAt')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
-
-  const appointments: Appointment[] = []
-  const pagination = {
-    currentPage: 1,
-    totalPages: 1,
-    totalAppointments: 0,
-    hasNextPage: false,
-    hasPrevPage: false
-  }
-  const isLoading = false
-  const error = null
-
-  const restoreAppointment = async (appointmentId: string): Promise<void> => {
-    try {
-      await restoreAppointmentMutation(appointmentId).unwrap()
-      toast.success('Appointment restored successfully')
-    } catch (error) {
-      toast.error('Failed to restore appointment')
-      throw error
-    }
-  }
-
-  const restoreMultipleAppointments = async (appointmentIds: string[]): Promise<void> => {
-    try {
-      const restorePromises = appointmentIds.map(id => restoreAppointmentMutation(id).unwrap())
-      await Promise.all(restorePromises)
-      toast.success(`${appointmentIds.length} appointment(s) restored successfully`)
-    } catch (error) {
-      toast.error('Failed to restore some appointments')
-      throw error
-    }
-  }
-
-  const refresh = () => {
-  }
-
-  return {
-    appointments,
-    pagination,
-    isLoading,
-    error,
-    searchTerm,
-    statusFilter,
-    employeeFilter,
-    dateFrom,
-    dateTo,
-    currentPage,
-    pageSize,
-    sortBy,
-    sortOrder,
-    setSearchTerm,
-    setStatusFilter,
-    setEmployeeFilter,
-    setDateFrom,
-    setDateTo,
-    setCurrentPage,
-    setPageSize,
-    setSortBy,
-    setSortOrder,
-    restoreAppointment,
-    restoreMultipleAppointments,
-    isRestoring,
-    refresh
-  }
-}

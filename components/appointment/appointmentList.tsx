@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation"
 import { useAppointmentOperations } from "@/hooks/useAppointmentOperations"
 import { AppointmentTable } from "./appointmentTable"
 import { Appointment } from "@/store/api/appointmentApi"
+import { CreateAppointmentLinkModal } from "./CreateAppointmentLinkModal"
+import { Button } from "@/components/ui/button"
+import { Link2 } from "lucide-react"
 
 export function AppointmentList() {
   const router = useRouter()
@@ -57,6 +60,19 @@ export function AppointmentList() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <CreateAppointmentLinkModal
+          triggerButton={
+            <Button className="flex items-center gap-2">
+              <Link2 className="h-4 w-4" />
+              Create Appointment Link
+            </Button>
+          }
+          onSuccess={() => {
+            // Optionally refresh the appointments list
+          }}
+        />
+      </div>
       <AppointmentTable
         appointments={appointments}
         pagination={pagination || undefined}
