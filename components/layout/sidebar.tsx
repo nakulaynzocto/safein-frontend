@@ -62,12 +62,12 @@ const settingsSubmenu = [
   },
   {
     name: "Appointment Status",
-    href: routes.privateroute.NOTIFICATIONS,
+    href: routes.privateroute.SETTINGS_STATUS,
     icon: CheckCircle,
   },
   {
     name: "Notification",
-    href: routes.privateroute.SETTINGS,
+    href: routes.privateroute.NOTIFICATIONS,
     icon: Bell,
   },
   {
@@ -95,9 +95,11 @@ const SidebarContent = ({
   const isSettingsActive = pathname === routes.privateroute.SETTINGS || 
                           pathname === routes.privateroute.PROFILE || 
                           pathname === routes.privateroute.NOTIFICATIONS ||
+                          pathname === routes.privateroute.SETTINGS_STATUS ||
                           pathname === routes.privateroute.ACTIVE_PLAN ||
                           pathname === routes.privateroute.APPOINTMENT_LINKS ||
-                          pathname?.startsWith('/settings/')
+                          pathname?.startsWith('/settings/') ||
+                          pathname?.startsWith('/appointment-links')
   const [settingsOpen, setSettingsOpen] = useState(isSettingsActive)
   const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation()
 
