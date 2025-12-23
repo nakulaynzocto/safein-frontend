@@ -1,37 +1,58 @@
 
 export const routes = {
   publicroute: {
+    // Main Pages
     HOME: "/",
-    LOGIN: "/login",
-    REGISTER: "/register",
     FEATURES: "/features",
     PRICING: "/pricing",
     CONTACT: "/contact",
     HELP: "/help",
-    SUBSCRIPTION_PLAN: "/subscription-plan",
-    SUBSCRIPTION_SUCCESS: "/subscription/success",
-    SUBSCRIPTION_CANCEL: "/subscription/cancel",
+    PRIVACY_POLICY: "/privacy-policy",
+    
+    // Authentication
+    LOGIN: "/login",
+    REGISTER: "/register",
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
     VERIFY: "/verify",
+    
+    // Subscription
+    SUBSCRIPTION_PLAN: "/subscription-plan",
+    SUBSCRIPTION_SUCCESS: "/subscription/success",
+    SUBSCRIPTION_CANCEL: "/subscription/cancel",
+    
+    // Email Actions
     EMAIL_ACTION: "/email-action",
-    PRIVACY_POLICY: "/privacy-policy",
+    
+    // Constants
     FREE_TRIAL_PLAN_ID: "FREE_TRIAL_PLAN_ID_PLACEHOLDER", // This should be replaced with the actual ID from the backend
   },
 
   privateroute: {
+    // Dashboard
     DASHBOARD: "/dashboard",
-    NOTIFICATIONS: "/dashboard/notifications",
-    PROFILE: "/profile",
-    SETTINGS: "/settings",
+    
+    // Employee Routes
     EMPLOYEELIST: "/employee/list",
+    EMPLOYEECREATE: "/employee/create",
     EMPLOYEEEDIT: "/employee/[id]", // Dynamic route pattern
-    APPOINTMENTLIST: "/appointment/list",
-    APPOINTMENTEDIT: "/appointment/[id]", // Dynamic route pattern
-    APPOINTMENT_LINKS: "/settings/appointment-links",
+    
+    // Visitor Routes
     VISITORLIST: "/visitor/list",
     VISITORREGISTRATION: "/visitor/register",
     VISITOREDIT: "/visitor/[id]", // Dynamic route pattern
+    
+    // Appointment Routes
+    APPOINTMENTLIST: "/appointment/list",
+    APPOINTMENTCREATE: "/appointment/create",
+    APPOINTMENTEDIT: "/appointment/[id]", // Dynamic route pattern
+    APPOINTMENT_LINKS: "/appointment-links",
+    
+    // Settings Routes
+    SETTINGS: "/settings",
+    PROFILE: "/settings/profile",
+    NOTIFICATIONS: "/settings/notifications",
+    SETTINGS_STATUS: "/settings/status",
     ACTIVE_PLAN: "/settings/plan",
   },
 } as const
@@ -66,6 +87,14 @@ export const isPrivateRoute = (path: string): boolean => {
   }
   
   if (path.startsWith('/visitor/') && path !== routes.privateroute.VISITORLIST && path !== routes.privateroute.VISITORREGISTRATION) {
+    return true
+  }
+  
+  if (path.startsWith('/settings/')) {
+    return true
+  }
+  
+  if (path === routes.privateroute.APPOINTMENT_LINKS || path.startsWith('/appointment-links')) {
     return true
   }
   
