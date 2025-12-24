@@ -4,18 +4,10 @@
 import { AppointmentFormData } from "./appointmentValidation"
 
 /**
- * Generate unique appointment ID
- */
-export const generateAppointmentId = (): string => {
-  return `APT${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`
-}
-
-/**
  * Create appointment data for API submission
  */
 export const createAppointmentPayload = (data: AppointmentFormData) => {
   return {
-    appointmentId: generateAppointmentId(),
     employeeId: data.employeeId,
     visitorId: data.visitorId,
     accompanyingCount: data.accompanyingCount ?? 0,

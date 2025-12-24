@@ -70,7 +70,6 @@ export function AppointmentBookingForm({
     }
 
     const payload = {
-      appointmentId: `APT${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
       employeeId: normalizedEmployeeId,
       visitorId: normalizedVisitorId,
       accompanyingCount: data.accompanyingCount ?? 0,

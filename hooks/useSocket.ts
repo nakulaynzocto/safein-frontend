@@ -106,7 +106,7 @@ export function useSocket(options: UseSocketOptions = {}) {
     socket.on(SocketEvents.APPOINTMENT_STATUS_CHANGED, (data) => {
       const { payload } = data
       const status = payload?.status
-      const appointmentId = payload?.appointmentId || payload?.appointment?.appointmentId || payload?.appointment?._id || ''
+      const appointmentId = payload?.appointment?._id || payload?.appointmentId || ''
       
       if (!appointmentId || typeof appointmentId !== 'string' || !appointmentId.trim()) {
         return

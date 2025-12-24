@@ -114,7 +114,8 @@ export function EmployeeList() {
                 <>
                   <Button 
                     onClick={() => setShowUpgradeModal(true)}
-                    className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                    variant="outline"
+                    className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
                   >
                     <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                     <span className="hidden min-[375px]:inline sm:hidden">Upgrade</span>
@@ -129,7 +130,8 @@ export function EmployeeList() {
                 <>
                   <Button
                     asChild
-                    className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                    variant="outline"
+                    className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
                   >
                     <Link href={routes.privateroute.EMPLOYEECREATE} prefetch>
                       <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />

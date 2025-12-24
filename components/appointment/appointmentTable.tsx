@@ -33,7 +33,8 @@ import {
   Building,
   CheckCircle,
   X,
-  Edit
+  Edit,
+  Link2
 } from "lucide-react"
 import { Appointment } from "@/store/api/appointmentApi"
 import { 
@@ -44,6 +45,7 @@ import { SearchInput } from "@/components/common/searchInput"
 import DateRangePicker from "@/components/common/dateRangePicker"
 import { AppointmentDetailsDialog } from "./appointmentDetailsDialog"
 import { CheckOutDialog } from "./checkOutDialog"
+import { CreateAppointmentLinkModal } from "./CreateAppointmentLinkModal"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -122,6 +124,7 @@ export function AppointmentTable({
   const router = useRouter()
   const { data: trialStatus, refetch: refetchTrialLimits } = useGetTrialLimitsStatusQuery()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showCreateLinkModal, setShowCreateLinkModal] = useState(false)
   
   const [approveAppointment, { isLoading: isApprovingMutation }] = useApproveAppointmentMutation()
   const [rejectAppointment, { isLoading: isRejectingMutation }] = useRejectAppointmentMutation()
@@ -220,16 +223,6 @@ export function AppointmentTable({
 
   const getColumns = () => {
     const baseColumns = [
-      {
-        key: "appointmentId",
-        header: "Appointment",
-        render: (appointment: Appointment) => (
-          <div className="space-y-1">
-            <div className="font-medium">{appointment.appointmentId}</div>
-            <div className="text-xs text-blue-600 font-mono">ID: {appointment._id.slice(-8)}</div>
-          </div>
-        ),
-      },
       {
         key: "visitorName",
         header: "Visitor",
@@ -460,7 +453,7 @@ export function AppointmentTable({
           <CardContent className="flex items-center justify-center py-8">
             <div className="text-center">
               <p className="text-red-500 mb-4">Failed to load appointments</p>
-              <Button onClick={() => window.location.reload()} className="btn-hostinger btn-hostinger-primary">
+              <Button onClick={() => window.location.reload()} variant="outline">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Retry
               </Button>
@@ -484,7 +477,8 @@ export function AppointmentTable({
                 {hasReachedAppointmentLimit ? (
                   <>
                     <Button 
-                      className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                      variant="outline"
+                      className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
                       onClick={() => setShowUpgradeModal(true)}
                     >
                       <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
@@ -497,13 +491,31 @@ export function AppointmentTable({
                     />
                   </>
                 ) : (
-                  <Button
-                    className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
-                    onClick={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
-                  >
-                    <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                    <span className="hidden min-[375px]:inline">Schedule Appointment</span>
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                      onClick={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
+                    >
+                      <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                      <span className="hidden min-[375px]:inline">Schedule Appointment</span>
+                    </Button>
+                    <CreateAppointmentLinkModal
+                      open={showCreateLinkModal}
+                      onOpenChange={setShowCreateLinkModal}
+                      triggerButton={
+                        <Button
+                          variant="outline"
+                          className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                          title="Create Appointment Link"
+                        >
+                          <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                          <span className="hidden sm:inline">Create Link</span>
+                        </Button>
+                      }
+                      onSuccess={() => {}}
+                    />
+                  </>
                 )}
             </>
           </div>
@@ -565,7 +577,7 @@ export function AppointmentTable({
           open={showDeleteDialog}
           onOpenChange={setShowDeleteDialog}
           title="Delete Appointment"
-          description={`Are you sure you want to delete appointment ${selectedAppointment?.appointmentId}? This will move the appointment to trash.`}
+          description={`Are you sure you want to delete appointment ${selectedAppointment?._id}? This will move the appointment to trash.`}
           onConfirm={handleDelete}
           confirmText={isDeleting ? "Deleting..." : "Delete"}
           variant="destructive"
@@ -577,7 +589,7 @@ export function AppointmentTable({
           open={showApproveDialog}
           onOpenChange={setShowApproveDialog}
           title="Approve Appointment"
-          description={`Are you sure you want to approve appointment ${selectedAppointment?.appointmentId}? This will change the status to approved.`}
+          description={`Are you sure you want to approve appointment ${selectedAppointment?._id}? This will change the status to approved.`}
           onConfirm={() => {
             if (selectedAppointment) {
               handleApprove(selectedAppointment._id)
@@ -593,7 +605,7 @@ export function AppointmentTable({
         open={showRejectDialog}
         onOpenChange={setShowRejectDialog}
         title="Reject Appointment"
-        description={`Are you sure you want to reject appointment ${selectedAppointment?.appointmentId}? This will change the status to rejected.`}
+        description={`Are you sure you want to reject appointment ${selectedAppointment?._id}? This will change the status to rejected.`}
         onConfirm={() => {
           if (selectedAppointment) {
             handleReject(selectedAppointment._id)

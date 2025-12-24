@@ -42,6 +42,7 @@ import {
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { useRouter } from "next/navigation"
 import { NewVisitorModal } from "./VisitorForm"
+import { formatDate } from "@/utils/helpers"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 import { VisitorDetailsDialog } from "./visitorDetailsDialog"
@@ -72,9 +73,9 @@ const createColumns = (
           <div className="font-medium text-sm sm:text-base truncate max-w-[100px] sm:max-w-[150px]">
             {visitor.name}
           </div>
-          {visitor.visitorId && (
-            <div className="text-[10px] sm:text-xs text-blue-600 font-mono truncate max-w-[80px] sm:max-w-[120px]" title={visitor.visitorId}>
-              ID: {truncateText(visitor.visitorId, 10)}
+          {visitor.email && (
+            <div className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[80px] sm:max-w-[120px]" title={visitor.email}>
+              {truncateText(visitor.email, 20)}
             </div>
           )}
         </div>
@@ -140,7 +141,7 @@ const createColumns = (
     render: (visitor: Visitor) => (
       <div className="flex items-center gap-2 text-sm text-gray-500">
         <Calendar className="h-3 w-3 shrink-0" />
-        {new Date(visitor.createdAt).toLocaleDateString()}
+        {formatDate(visitor.createdAt)}
       </div>
     )
   },
@@ -289,7 +290,7 @@ export function VisitorList() {
             <div className="text-center">
               <p className="text-red-500 mb-2">Failed to load visitors</p>
               <p className="text-sm text-gray-500 mb-4">{errorMessage}</p>
-              <Button onClick={handleRefresh} className="btn-hostinger btn-hostinger-primary">
+              <Button onClick={handleRefresh} variant="outline">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Retry
               </Button>
@@ -314,7 +315,8 @@ export function VisitorList() {
               {hasReachedVisitorLimit ? (
                 <>
                   <Button 
-                    className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                    variant="outline"
+                    className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
                     onClick={() => setShowUpgradeModal(true)}
                   >
                     <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
@@ -328,7 +330,8 @@ export function VisitorList() {
                 </>
               ) : (
                 <Button
-                  className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                  variant="outline"
+                  className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
                   onClick={() => router.push(routes.privateroute.VISITORREGISTRATION)}
                 >
                   <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />

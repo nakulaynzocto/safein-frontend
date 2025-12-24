@@ -11,6 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
@@ -24,6 +25,40 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { isValidEmail } from "@/utils/helpers"
 import { Link2, Mail, User } from "lucide-react"
 
+const EXPIRATION_CONFIG = {
+  "30m": { days: 0.0208, label: "30 minutes" },
+  "1h": { days: 0.0417, label: "1 hour" },
+  "2h": { days: 0.0833, label: "2 hours" },
+  "4h": { days: 0.1667, label: "4 hours" },
+  "8h": { days: 0.3333, label: "8 hours" },
+  "1day": { days: 1, label: "1 day" },
+  "2day": { days: 2, label: "2 days" },
+  "3day": { days: 3, label: "3 days" },
+  "4day": { days: 4, label: "4 days" },
+  "5day": { days: 5, label: "5 days" },
+} as const
+
+const EXPIRATION_OPTIONS = Object.entries(EXPIRATION_CONFIG).map(([value, config]) => ({
+  value,
+  label: config.label,
+}))
+
+const DAYS_TO_DISPLAY_MAP: Record<number, string> = Object.fromEntries(
+  Object.entries(EXPIRATION_CONFIG).map(([display, config]) => [config.days, display])
+) as Record<number, string>
+
+const DISPLAY_TO_DAYS_MAP: Record<string, number> = Object.fromEntries(
+  Object.entries(EXPIRATION_CONFIG).map(([display, config]) => [display, config.days])
+) as Record<string, number>
+
+const getDisplayValue = (days: number): string => {
+  return DAYS_TO_DISPLAY_MAP[days] || "1day"
+}
+
+const convertToDays = (value: string): number => {
+  return DISPLAY_TO_DAYS_MAP[value] || 1
+}
+
 const createLinkSchema = yup.object().shape({
   visitorEmail: yup
     .string()
@@ -32,9 +67,9 @@ const createLinkSchema = yup.object().shape({
   employeeId: yup.string().required("Employee is required"),
   expiresInDays: yup
     .number()
-    .min(1, "Expiry must be at least 1 day")
-    .max(90, "Expiry cannot exceed 90 days")
-    .default(30)
+    .min(0.0208, "Expiry must be at least 30 minutes")
+    .max(5, "Expiry cannot exceed 5 days")
+    .default(1)
     .required(),
 })
 
@@ -92,7 +127,7 @@ export function CreateAppointmentLinkModal({
     defaultValues: {
       visitorEmail: "",
       employeeId: "",
-      expiresInDays: 30,
+      expiresInDays: 1,
     },
   })
 
@@ -134,7 +169,7 @@ export function CreateAppointmentLinkModal({
         const result = await createAppointmentLink({
           visitorEmail: data.visitorEmail.trim().toLowerCase(),
           employeeId: data.employeeId,
-          expiresInDays: data.expiresInDays || 30,
+          expiresInDays: data.expiresInDays || 1,
         }).unwrap()
 
         showSuccessToast("Appointment link created and email sent successfully!")
@@ -177,6 +212,9 @@ export function CreateAppointmentLinkModal({
             <Link2 className="h-5 w-5 text-blue-500" />
             Create Appointment Link
           </DialogTitle>
+          <DialogDescription>
+            Generate a secure booking link that visitors can use to schedule appointments. The link will be sent via email and expires based on your selected duration.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -214,12 +252,12 @@ export function CreateAppointmentLinkModal({
                       {visitorExists ? (
                         <span className="text-green-600 flex items-center gap-1">
                           <User className="h-4 w-4" />
-                          Visitor exists in database
+                          This visitor is already registered
                         </span>
                       ) : (
                         <span className="text-blue-600 flex items-center gap-1">
                           <User className="h-4 w-4" />
-                          New visitor - will be created during booking
+                          New visitor - will be registered during booking
                         </span>
                       )}
                     </div>
@@ -261,25 +299,23 @@ export function CreateAppointmentLinkModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="expiresInDays">Link Expires In (Days)</Label>
+            <Label htmlFor="expiresInDays">Link Expires In</Label>
             <Controller
               name="expiresInDays"
               control={control}
               render={({ field }) => (
                 <div className="space-y-1">
-                  <Input
-                    {...field}
-                    id="expiresInDays"
-                    type="number"
-                    min={1}
-                    max={90}
-                    placeholder="30"
-                    onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 30)}
+                  <SelectField
+                    value={getDisplayValue(field.value || 1)}
+                    onChange={(value) => field.onChange(convertToDays(value))}
+                    options={EXPIRATION_OPTIONS}
+                    placeholder="Select expiration time"
+                    className={errors.expiresInDays ? "border-red-500" : ""}
                   />
                   {errors.expiresInDays && (
                     <p className="text-sm text-red-500">{errors.expiresInDays.message}</p>
                   )}
-                  <p className="text-xs text-gray-500">Default: 30 days</p>
+                  <p className="text-xs text-gray-500">Default: 1 day</p>
                 </div>
               )}
             />
@@ -289,7 +325,7 @@ export function CreateAppointmentLinkModal({
             <Button type="button" variant="outline" onClick={handleClose} disabled={isCreating}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isCreating}>
+            <Button type="submit" variant="outline" disabled={isCreating}>
               {isCreating ? (
                 <>
                   <LoadingSpinner size="sm" className="mr-2" />

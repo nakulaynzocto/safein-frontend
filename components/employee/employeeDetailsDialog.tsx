@@ -13,6 +13,7 @@ const formatDate = (value: string | null | undefined, formatStr: string, fallbac
 }
 
 const employee_details_config = [
+  { key: "_id", label: "Employee ID" },
   { key: "name", label: "Name" },
   { key: "email", label: "Email" },
   { key: "phone", label: "Phone" },
@@ -113,7 +114,8 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
               
               const value = employee[key as keyof Employee]
               let icon = null
-              if (key === 'department') icon = <Building className="h-4 w-4" />
+              if (key === '_id') icon = <User className="h-4 w-4" />
+              else if (key === 'department') icon = <Building className="h-4 w-4" />
               else if (key === 'designation') icon = <Briefcase className="h-4 w-4" />
               else if (key === 'createdAt') icon = <Calendar className="h-4 w-4" />
               else if (key === 'updatedAt') icon = <Clock className="h-4 w-4" />
@@ -125,7 +127,11 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
                     {label}
                   </div>
                   <div className="text-sm font-semibold text-foreground">
-                    {renderFieldValue(key, value, formatFn)}
+                    {key === '_id' ? (
+                      <span className="font-mono text-xs">{value}</span>
+                    ) : (
+                      renderFieldValue(key, value, formatFn)
+                    )}
                   </div>
                 </div>
               )

@@ -14,7 +14,9 @@ import { extractIdString, isValidId } from "@/utils/idExtractor"
 
 export default function BookAppointmentPage() {
   const params = useParams()
-  const token = params?.token as string
+  const rawToken = params?.token as string
+  // Decode the token in case it's URL encoded
+  const token = rawToken ? decodeURIComponent(rawToken) : ""
 
   const [step, setStep] = useState<"loading" | "visitor" | "appointment" | "success" | "error">("loading")
   const [errorMessage, setErrorMessage] = useState<string>("")
@@ -27,17 +29,34 @@ export default function BookAppointmentPage() {
     { skip: !token }
   )
 
+
   const [createVisitorThroughLink, { isLoading: isCreatingVisitor }] = useCreateVisitorThroughLinkMutation()
   const [createAppointmentThroughLink, { isLoading: isCreatingAppointment }] = useCreateAppointmentThroughLinkMutation()
 
   useEffect(() => {
-    if (linkError) {
-      const error = linkError as any
-      setErrorMessage(error?.data?.message || error?.message || "Invalid or expired appointment link")
+    // Handle missing token
+    if (!token) {
+      setErrorMessage("Invalid appointment link - token is missing")
       setStep("error")
       return
     }
 
+    // Handle API errors
+    if (linkError) {
+      const error = linkError as any
+      const errorMessage = error?.data?.message || error?.message || "Invalid or expired appointment link"
+      
+      // Check if it's a 404 or not found error
+      if (error?.status === 404 || error?.status === 'FETCH_ERROR' || errorMessage.includes('not found')) {
+        setErrorMessage("Appointment link not found. Please check the link and try again.")
+      } else {
+        setErrorMessage(errorMessage)
+      }
+      setStep("error")
+      return
+    }
+
+    // Handle successful data load
     if (linkData) {
       setAppointmentLinkData(linkData)
       if (linkData.visitor) setVisitorData(linkData.visitor)
@@ -50,7 +69,7 @@ export default function BookAppointmentPage() {
         setStep("visitor")
       }
     }
-  }, [linkData, linkError])
+  }, [linkData, linkError, token])
 
   const handleVisitorSubmit = async (visitorData: any) => {
     if (!token) return

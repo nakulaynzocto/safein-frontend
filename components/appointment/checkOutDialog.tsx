@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Appointment } from "@/store/api/appointmentApi"
 import { LogOut, User, Calendar, Clock } from "lucide-react"
-import { format } from "date-fns"
+import { formatDate, formatDateTime } from "@/utils/helpers"
 
 const checkOutSchema = yup.object({
   notes: yup.string().optional().max(500, "Notes cannot exceed 500 characters")
@@ -61,7 +61,7 @@ export function CheckOutDialog({
 
     setIsSubmitting(true)
     try {
-      await onConfirm(appointment.appointmentId, data.notes || undefined)
+      await onConfirm(appointment._id, data.notes || undefined)
       handleClose()
     } catch (error) {
     } finally {
@@ -97,7 +97,7 @@ export function CheckOutDialog({
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4" />
               <span className="font-medium">Appointment ID:</span>
-              <span className="font-mono text-xs">{appointment.appointmentId}</span>
+              <span className="font-mono text-xs">{appointment._id}</span>
             </div>
 
             {appointment.appointmentDetails && (
@@ -105,7 +105,7 @@ export function CheckOutDialog({
                 <Clock className="h-4 w-4" />
                 <span className="font-medium">Scheduled:</span>
                 <span>
-                  {format(new Date(appointment.appointmentDetails.scheduledDate), "MMM dd, yyyy")} at {appointment.appointmentDetails.scheduledTime}
+                  {formatDate(appointment.appointmentDetails.scheduledDate)} at {appointment.appointmentDetails.scheduledTime}
                 </span>
               </div>
             )}
@@ -114,7 +114,7 @@ export function CheckOutDialog({
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="h-4 w-4" />
                 <span className="font-medium">Checked In:</span>
-                <span>{format(new Date(appointment.checkInTime), "MMM dd, yyyy 'at' HH:mm")}</span>
+                <span>{formatDateTime(appointment.checkInTime)}</span>
               </div>
             )}
           </div>

@@ -56,10 +56,6 @@ interface NewEmployeeModalProps {
   onSuccess?: () => void
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  /**
-   * layout = "modal" (default) renders inside a Dialog.
-   * layout = "page" renders a standalone page form (no modal).
-   */
   layout?: "modal" | "page"
 }
 
@@ -361,6 +357,7 @@ export function NewEmployeeModal({
         </Button>
         <Button 
           type="submit" 
+          variant="outline"
           disabled={isLoading || isLoadingEmployee}
           className="px-6 min-w-[160px]"
         >

@@ -362,6 +362,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
       <div className="flex justify-end pt-4">
               <Button
                 type="submit"
+                variant="outline"
                 className="px-8 min-w-[140px]"
                 disabled={isLoading}
               >

@@ -75,10 +75,6 @@ interface NewVisitorModalProps {
   onSuccess?: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  /**
-   * layout = "modal" (default) renders inside a Dialog.
-   * layout = "page" renders a standalone page form (no modal chrome).
-   */
   layout?: "modal" | "page";
 }
 
@@ -110,7 +106,6 @@ export function NewVisitorModal({
     }
   );
 
-  // Check if visitor data has any optional fields filled
   const hasOptionalData = visitorData && (
     visitorData.idProof?.type ||
     visitorData.idProof?.number ||
@@ -197,7 +192,6 @@ export function NewVisitorModal({
 
   const handleToggleChange = (checked: boolean) => {
     setShowOptionalFields(checked)
-    // Clear optional fields when toggle is turned OFF
     if (!checked) {
       setValue("idProof.type", "")
       setValue("idProof.number", "")
@@ -489,6 +483,7 @@ export function NewVisitorModal({
               )}
               <Button
                 type="submit"
+                variant="outline"
                 disabled={isLoading}
                 className="w-full sm:w-auto"
               >

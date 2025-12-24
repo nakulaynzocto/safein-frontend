@@ -145,13 +145,13 @@ export function DataTable<T extends Record<string, any>>({
               <th
                 key={index}
                 className={cn(
-                  "px-2 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-foreground whitespace-nowrap",
+                  "px-2 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm font-medium text-foreground whitespace-nowrap",
                   enableSorting && column.sortable && "cursor-pointer hover:bg-muted/70 transition-colors",
                   column.className
                 )}
                 onClick={() => enableSorting && column.sortable && handleSort(column.key as string)}
               >
-                <div className="flex items-center gap-1 sm:gap-2">
+                <div className="flex items-center justify-center gap-1 sm:gap-2">
                   <span className="truncate">{column.header}</span>
                   {getSortIcon(column.key as string, column)}
                 </div>

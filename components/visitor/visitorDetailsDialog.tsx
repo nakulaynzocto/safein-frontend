@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { format } from "date-fns"
+import { formatDate, formatDateTime } from "@/utils/helpers"
 import { Visitor } from "@/store/api/visitorApi"
 import { 
   User, 
@@ -23,7 +23,7 @@ const visitor_details_config = [
   { key: "createdAt", label: "Registered On", icon: Calendar, format: (value: string) => {
     if (!value) return "N/A";
     const date = new Date(value);
-    return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM dd, yyyy 'at' HH:mm");
+    return isNaN(date.getTime()) ? "Invalid Date" : formatDateTime(date);
   }},
 ]
 
@@ -75,9 +75,9 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
             <div className="flex-1 space-y-3">
               <div>
                 <h3 className="text-xl font-semibold">{visitor.name}</h3>
-                {visitor.visitorId && (
+                {visitor._id && (
                   <p className="text-sm text-muted-foreground font-mono mt-1">
-                    ID: {visitor.visitorId}
+                    ID: {visitor._id}
                   </p>
                 )}
                 <div className="flex items-center gap-2 mt-2">
@@ -101,7 +101,7 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
                 Registered On
               </div>
               <div className="text-sm font-semibold text-foreground">
-                {visitor.createdAt ? format(new Date(visitor.createdAt), "MMM dd, yyyy 'at' HH:mm") : 'N/A'}
+                {visitor.createdAt ? formatDateTime(visitor.createdAt) : 'N/A'}
               </div>
             </div>
 

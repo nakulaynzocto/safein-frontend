@@ -3,7 +3,6 @@ import { createUrlParams } from '@/utils/helpers'
 
 export interface Appointment {
   _id: string
-  appointmentId: string
   employeeId: string
   employee?: EmployeeDetails // Populated employee details
   visitorId: string // Reference to Visitor
@@ -81,7 +80,6 @@ export interface NotificationPreferences {
 }
 
 export interface CreateAppointmentRequest {
-  appointmentId: string
   employeeId: string
   visitorId: string // Reference to Visitor
   accompaniedBy?: AccompaniedBy

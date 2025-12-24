@@ -193,9 +193,9 @@ export function VerifyAppointment() {
               </Avatar>
               <div className="flex-1 min-w-0">
                 <h4 className="text-base sm:text-xl font-semibold truncate">{appointment.visitor.name}</h4>
-                {appointment.visitor.visitorId && (
+                {appointment.visitor._id && (
                   <p className="text-xs sm:text-sm text-muted-foreground font-mono truncate">
-                    Visitor ID: {appointment.visitor.visitorId}
+                    Visitor ID: {appointment.visitor._id}
                   </p>
                 )}
                 {appointment.visitor.company && (

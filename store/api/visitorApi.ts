@@ -3,7 +3,6 @@ import { createUrlParams } from '@/utils/helpers'
 
 export interface Visitor {
   _id: string
-  visitorId?: string // Add visitorId field
   name: string
   email: string
   phone: string

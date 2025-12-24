@@ -52,10 +52,6 @@ interface NewAppointmentModalProps {
   onSuccess?: () => void
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  /**
-   * layout = "modal" (default) renders inside a Dialog.
-   * layout = "page" renders as a standalone page form.
-   */
   layout?: "modal" | "page"
 }
 
@@ -69,8 +65,6 @@ export function NewAppointmentModal({
 }: NewAppointmentModalProps) {
   const router = useRouter()
   
-  // ========== All Hooks at Top ==========
-  // State hooks
   const [internalOpen, setInternalOpen] = useState(false)
   const isPage = layout === "page"
   const [generalError, setGeneralError] = useState<string | null>(null)
@@ -80,21 +74,16 @@ export function NewAppointmentModal({
   const [visitorSearchInput, setVisitorSearchInput] = useState("")
   const [showVehicleFields, setShowVehicleFields] = useState<boolean>(false)
   
-  // Debounced search values
   const debouncedEmployeeSearch = useDebounce(employeeSearchInput, 500)
   const debouncedVisitorSearch = useDebounce(visitorSearchInput, 500)
   
-  // Modal state
   const open = isPage ? true : controlledOpen !== undefined ? controlledOpen : internalOpen
   const setOpen = isPage ? (_: boolean) => {} : onOpenChange || setInternalOpen
   const isEditMode = !!appointmentId
   
-  // API mutations
   const [createAppointment, { isLoading: isCreating }] = useCreateAppointmentMutation()
   const [updateAppointment, { isLoading: isUpdating }] = useUpdateAppointmentMutation()
   const isLoading = isCreating || isUpdating
-  
-  // API queries
   const { data: employeesData, isLoading: isLoadingEmployees, error: employeesError } = useGetEmployeesQuery({ 
     page: 1, 
     limit: 10,
@@ -115,7 +104,6 @@ export function NewAppointmentModal({
     { skip: !appointmentId }
   )
 
-  // Form hook
   const {
     register,
     handleSubmit,
@@ -131,11 +119,8 @@ export function NewAppointmentModal({
     defaultValues: getDefaultFormValues(),
   })
 
-  // Watch form values
   const selectedEmployeeId = watch("employeeId")
   const selectedVisitorId = watch("visitorId")
-  
-  // Fetch selected items if not in current options
   const { data: selectedEmployeeData } = useGetEmployeeQuery(selectedEmployeeId || '', {
     skip: !selectedEmployeeId || employees.some(emp => emp._id === selectedEmployeeId)
   })
@@ -147,7 +132,6 @@ export function NewAppointmentModal({
   })
   const selectedVisitor = selectedVisitorData
   
-  // Computed values
   const employeeOptions = useMemo(
     () => createSelectOptions({
       items: employees,
@@ -171,7 +155,6 @@ export function NewAppointmentModal({
     [visitors, selectedVisitorId, selectedVisitor]
   )
 
-  // Callback handlers
   const handleEmployeeSearchChange = useCallback((inputValue: string) => {
     setEmployeeSearchInput(inputValue)
   }, [])
@@ -181,23 +164,10 @@ export function NewAppointmentModal({
   }, [])
 
   const handleVisitorSelect = useCallback((visitorId: string | null) => {
-    const id = visitorId ?? ""
-    if (id) {
-      const selectedVisitor = visitors.find(v => v._id === visitorId)
-      if (selectedVisitor) {
-        setValue("visitorName", selectedVisitor.name)
-        setValue("visitorEmail", selectedVisitor.email)
-        setValue("visitorPhone", selectedVisitor.phone)
-        setValue("aadhaarNumber", selectedVisitor.idProof?.number || "")
-        clearErrors("visitorId")
-      }
-    } else {
-      setValue("visitorName", "")
-      setValue("visitorEmail", "")
-      setValue("visitorPhone", "")
-      setValue("aadhaarNumber", "")
+    if (visitorId) {
+      clearErrors("visitorId")
     }
-  }, [visitors, setValue, clearErrors])
+  }, [clearErrors])
 
   // Effects
   useEffect(() => {
@@ -265,7 +235,7 @@ export function NewAppointmentModal({
       }
     } catch (error: any) {
       if (error?.data?.errors && Array.isArray(error.data.errors)) {
-        // Handle field-specific errors if needed
+        setGeneralError(error.data.message || "Validation failed")
       } else if (error?.data?.message) {
         setGeneralError(error.data.message)
       } else {
@@ -290,10 +260,8 @@ export function NewAppointmentModal({
         </Alert>
       )}
 
-      {/* First Row: Visitor, Employee to Meet, Accompanying People */}
       <div className="space-y-4">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {/* Visitor Selection */}
           <Controller
             name="visitorId"
             control={control}
@@ -315,7 +283,6 @@ export function NewAppointmentModal({
             )}
           />
 
-          {/* Employee Selection */}
           <Controller
             name="employeeId"
             control={control}
@@ -336,7 +303,6 @@ export function NewAppointmentModal({
             )}
           />
 
-          {/* Accompanying People */}
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">
               Accompanying People <span className="text-muted-foreground font-normal">(optional)</span>
@@ -369,7 +335,6 @@ export function NewAppointmentModal({
                 value={field.value}
                 onChange={(e) => {
                   const value = e.target.value
-                  // Validate date is not in the past
                   if (value) {
                     const selectedDate = new Date(value + 'T00:00:00')
                     selectedDate.setHours(0, 0, 0, 0)
@@ -377,18 +342,14 @@ export function NewAppointmentModal({
                     today.setHours(0, 0, 0, 0)
                     
                     if (selectedDate < today) {
-                      // If past date, don't update and trigger validation
                       trigger('appointmentDate')
                       return
                     }
                   }
-                  // Ensure date is in YYYY-MM-DD format
                   field.onChange(value)
-                  // Clear time validation error when date changes
                   if (errors.appointmentTime) {
                     clearErrors('appointmentTime')
                   }
-                  // Trigger validation to show error if any
                   trigger('appointmentDate')
                 }}
                 error={errors.appointmentDate?.message}
@@ -401,7 +362,6 @@ export function NewAppointmentModal({
             control={control}
             name="appointmentTime"
             render={({ field }) => {
-              // Normalize date format for TimePicker
               let normalizedDate = watch("appointmentDate")
               if (normalizedDate && normalizedDate.includes('/')) {
                 const parts = normalizedDate.split('/')
@@ -415,7 +375,6 @@ export function NewAppointmentModal({
                   value={field.value}
                   onChange={(e) => {
                     field.onChange(e)
-                    // Clear date validation error when time changes
                     if (errors.appointmentDate) {
                       clearErrors('appointmentDate')
                     }
@@ -533,6 +492,7 @@ export function NewAppointmentModal({
         </Button>
         <Button 
           type="submit" 
+          variant="outline"
           disabled={isLoading}
           className="px-6 min-w-[180px]"
         >

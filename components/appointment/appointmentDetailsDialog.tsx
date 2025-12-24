@@ -21,6 +21,7 @@ const formatDate = (value: string | null | undefined, formatStr: string, fallbac
 
 const getFieldValue = (appointment: Appointment, key: string): any => {
   const fieldMap: Record<string, (appt: Appointment) => any> = {
+    _id: (appt) => appt._id || 'N/A',
     visitorName: (appt) => (appt as any).visitorId?.name || appt.visitor?.name || 'N/A',
     visitorEmail: (appt) => (appt as any).visitorId?.email || appt.visitor?.email || 'N/A',
     visitorPhone: (appt) => (appt as any).visitorId?.phone || appt.visitor?.phone || 'N/A',
@@ -49,7 +50,7 @@ const statusVariants: Record<string, 'secondary' | 'default' | 'destructive' | '
 }
 
 const fieldConfig = [
-  { key: "appointmentId", label: "Appointment ID" },
+  { key: "_id", label: "Appointment ID" },
   { key: "visitorName", label: "Visitor Name" },
   { key: "visitorEmail", label: "Visitor Email" },
   { key: "visitorPhone", label: "Visitor Phone" },
@@ -169,7 +170,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
               if (optional && !value && key !== 'checkInTime' && key !== 'checkOutTime') return null
               
               let icon = null
-              if (key === 'appointmentId') icon = <FileText className="h-4 w-4" />
+              if (key === '_id') icon = <FileText className="h-4 w-4" />
               else if (key === 'employeeName') icon = <Briefcase className="h-4 w-4" />
               else if (key === 'purpose') icon = <FileText className="h-4 w-4" />
               else if (key === 'appointmentDate') icon = <Calendar className="h-4 w-4" />
