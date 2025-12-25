@@ -61,15 +61,37 @@ export default function BookAppointmentPage() {
       if (linkData.visitor) setVisitorData(linkData.visitor)
       
       // Check if visitorId exists (either from link or found by email check in backend)
-      const extractedVisitorId = extractIdString(linkData.visitorId)
-      if (isValidId(extractedVisitorId)) {
-        // Visitor exists (either already associated with link or found by email)
-        setVisitorId(extractedVisitorId)
-        setStep("appointment")
-      } else {
-        // Visitor doesn't exist, show visitor form
-        setStep("visitor")
+      let finalVisitorId: string | null = null
+      
+      // Priority 1: Check direct visitorId from linkData
+      if (linkData.visitorId) {
+        const extractedVisitorId = extractIdString(linkData.visitorId)
+        if (isValidId(extractedVisitorId)) {
+          finalVisitorId = extractedVisitorId
+        }
       }
+      
+      // Priority 2: Check visitor object _id (when visitor was found by email)
+      if (!finalVisitorId && linkData.visitor) {
+        const visitorIdFromObject = extractIdString(
+          linkData.visitor._id || 
+          (linkData.visitor as any).id ||
+          linkData.visitor
+        )
+        if (isValidId(visitorIdFromObject)) {
+          finalVisitorId = visitorIdFromObject
+        }
+      }
+      
+      // If visitor exists, go directly to appointment form
+      if (finalVisitorId && isValidId(finalVisitorId)) {
+        setVisitorId(finalVisitorId)
+        setStep("appointment")
+        return
+      }
+      
+      // Visitor doesn't exist, show visitor form
+      setStep("visitor")
     }
   }, [linkData, linkError, token])
 
@@ -114,18 +136,15 @@ export default function BookAppointmentPage() {
 
   const errorConfig = useMemo(() => {
     const lowerMsg = errorMessage.toLowerCase()
+    const isExpired = lowerMsg.includes("expired")
+    const isAlreadyUsed = lowerMsg.includes("already been used") || lowerMsg.includes("already created") || lowerMsg.includes("isbooked")
+    
     return {
-      isExpired: lowerMsg.includes("expired"),
-      isAlreadyUsed: lowerMsg.includes("already been used") || lowerMsg.includes("already created"),
-      title: lowerMsg.includes("already been used") || lowerMsg.includes("already created") 
-        ? "Link Already Used" 
-        : lowerMsg.includes("expired") 
-        ? "Link Expired" 
-        : "Invalid Link",
-      message: lowerMsg.includes("already been used") || lowerMsg.includes("already created")
-        ? "This appointment link has already been used to create an appointment. Each link can only be used once."
-        : lowerMsg.includes("expired")
-        ? "This appointment link has expired. Please contact the person who sent you this link to get a new one."
+      isExpired: isExpired || isAlreadyUsed,
+      isAlreadyUsed: isAlreadyUsed,
+      title: isExpired || isAlreadyUsed ? "Link Expired" : "Invalid Link",
+      message: isExpired || isAlreadyUsed
+        ? "This appointment link has expired or has already been used. Please contact the person who sent you this link to get a new one."
         : "This appointment link is invalid. Please contact the person who sent you this link."
     }
   }, [errorMessage])

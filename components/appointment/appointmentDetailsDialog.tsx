@@ -54,7 +54,7 @@ const fieldConfig = [
   { key: "visitorName", label: "Visitor Name" },
   { key: "visitorEmail", label: "Visitor Email" },
   { key: "visitorPhone", label: "Visitor Phone" },
-  { key: "employeeName", label: "Employee" },
+  { key: "employeeName", label: "Meeting With" },
   { key: "purpose", label: "Purpose" },
   { 
     key: "appointmentDate", 

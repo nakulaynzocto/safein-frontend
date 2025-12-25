@@ -44,10 +44,6 @@ export function EnhancedTimePicker({
       }
     }
     
-    if (selectedDate && selectedDate.includes('-') && !normalizedSelectedDate) {
-      normalizedSelectedDate = selectedDate
-    }
-    
     const isToday = normalizedSelectedDate === today
     
     let startHour = 0

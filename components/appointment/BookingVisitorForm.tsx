@@ -81,17 +81,17 @@ export function BookingVisitorForm({ initialEmail, initialValues, onSubmit, isLo
       email: initialValues?.email || initialEmail || "",
       phone: initialValues?.phone || "",
       address: {
-        street: initialValues?.address?.street || "",
+        street: initialValues?.address?.street || undefined,
         city: initialValues?.address?.city || "",
         state: initialValues?.address?.state || "",
         country: initialValues?.address?.country || "",
       },
       idProof: {
-        type: initialValues?.idProof?.type || "",
-        number: initialValues?.idProof?.number || "",
+        type: initialValues?.idProof?.type || undefined,
+        number: initialValues?.idProof?.number || undefined,
         image: initialValues?.idProof?.image || "",
       },
-      photo: initialValues?.photo || "",
+      photo: initialValues?.photo || undefined,
     },
   })
 
@@ -105,18 +105,21 @@ export function BookingVisitorForm({ initialEmail, initialValues, onSubmit, isLo
       })
       if (address) {
         setValue("address", {
-          street: address.street || "",
+          street: address.street || undefined,
           city: address.city || "",
           state: address.state || "",
           country: address.country || "",
-        }, opts)
+        } as any, opts)
       }
       if (idProof) {
         setValue("idProof", {
-          type: idProof.type || "",
-          number: idProof.number || "",
+          type: idProof.type || undefined,
+          number: idProof.number || undefined,
           image: idProof.image || "",
-        }, opts)
+        } as any, opts)
+      }
+      if (initialValues?.photo) {
+        setValue("photo", initialValues.photo, opts)
       }
     }
   }, [initialEmail, initialValues, setValue])

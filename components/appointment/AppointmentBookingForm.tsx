@@ -124,39 +124,8 @@ export function AppointmentBookingForm({
         </div>
       </div>
 
-      {/* First Row: Accompanying People and Purpose of Visit */}
+      {/* First Row: Appointment Date and Appointment Time */}
       <div className="space-y-4">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">
-              Accompanying People <span className="text-muted-foreground font-normal">(optional)</span>
-            </Label>
-            <Input
-              type="number"
-              min={0}
-              max={20}
-              step={1}
-              placeholder="Number of people (e.g., 0, 1, 2)"
-              {...register("accompanyingCount")}
-              className={`h-9 ${errors.accompanyingCount ? "border-destructive" : ""}`}
-            />
-            {errors.accompanyingCount && (
-              <span className="text-xs text-destructive">{errors.accompanyingCount.message}</span>
-            )}
-          </div>
-
-          <InputField
-            label="Purpose of Visit"
-            placeholder="Brief description of the visit purpose"
-            error={errors.purpose?.message}
-            {...register("purpose")}
-            required
-          />
-        </div>
-      </div>
-
-      {/* Second Row: Appointment Date and Appointment Time */}
-      <div className="space-y-4 pt-4">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Controller
             control={control}
@@ -218,6 +187,37 @@ export function AppointmentBookingForm({
               )
             }}
           />
+        </div>
+      </div>
+
+      {/* Second Row: Purpose of Visit and Accompanying People */}
+      <div className="space-y-4 pt-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <InputField
+            label="Purpose of Visit"
+            placeholder="Brief description of the visit purpose"
+            error={errors.purpose?.message}
+            {...register("purpose")}
+            required
+          />
+
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">
+              Accompanying People <span className="text-muted-foreground font-normal">(optional)</span>
+            </Label>
+            <Input
+              type="number"
+              min={0}
+              max={20}
+              step={1}
+              placeholder="Number of people (e.g., 0, 1, 2)"
+              {...register("accompanyingCount")}
+              className={`h-9 ${errors.accompanyingCount ? "border-destructive" : ""}`}
+            />
+            {errors.accompanyingCount && (
+              <span className="text-xs text-destructive">{errors.accompanyingCount.message}</span>
+            )}
+          </div>
         </div>
       </div>
 

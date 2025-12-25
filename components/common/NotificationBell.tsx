@@ -54,8 +54,9 @@ export function NotificationBell({ className, iconClassName }: NotificationBellP
       case 'appointment_rejected':
         return <X className="h-4 w-4 text-red-500" />
       case 'appointment_created':
+        return <Calendar className="h-4 w-4 text-yellow-600" />
       case 'appointment_deleted':
-        return <Calendar className="h-4 w-4 text-blue-500" />
+        return <Calendar className="h-4 w-4 text-orange-500" />
       default:
         return <Bell className="h-4 w-4 text-gray-500" />
     }
@@ -166,7 +167,7 @@ export function NotificationBell({ className, iconClassName }: NotificationBellP
                     "flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center",
                     notification.type === 'appointment_approved' && "bg-green-100",
                     notification.type === 'appointment_rejected' && "bg-red-100",
-                    notification.type === 'appointment_created' && "bg-blue-100",
+                    notification.type === 'appointment_created' && "bg-yellow-100",
                     notification.type === 'appointment_deleted' && "bg-orange-100",
                     notification.type === 'general' && "bg-gray-100"
                   )}>

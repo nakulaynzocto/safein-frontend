@@ -20,8 +20,25 @@ export enum SocketEvents {
   NEW_NOTIFICATION = 'new_notification',
 }
 
-const getSocketUrl = () => {
-  // Check if socket is disabled via environment variable
+interface UseSocketOptions {
+  onAppointmentUpdated?: (data: any) => void
+  onAppointmentStatusChanged?: (data: any) => void
+  onConnect?: () => void
+  onDisconnect?: (reason: string) => void
+  showToasts?: boolean
+}
+
+type NotificationType = 'appointment_created' | 'appointment_approved' | 'appointment_rejected'
+
+interface NotificationConfig {
+  type: NotificationType
+  title: string
+  message: string
+  toastType: 'success' | 'error' | 'info'
+}
+
+// Helper: Get socket URL from environment
+const getSocketUrl = (): string | null => {
   if (process.env.NEXT_PUBLIC_DISABLE_SOCKET === 'true') {
     return null
   }
@@ -30,15 +47,87 @@ const getSocketUrl = () => {
   if (!apiUrl || apiUrl === 'undefined') {
     return null
   }
+  
   return apiUrl.replace('/api/v1', '')
 }
 
-interface UseSocketOptions {
-  onAppointmentUpdated?: (data: any) => void
-  onAppointmentStatusChanged?: (data: any) => void
-  onConnect?: () => void
-  onDisconnect?: (reason: string) => void
-  showToasts?: boolean
+// Helper: Extract names from payload (backend always provides these)
+const extractNames = (payload: any): { employeeName: string; visitorName: string } => {
+  if (payload?.employeeName && payload?.visitorName) {
+    return {
+      employeeName: payload.employeeName,
+      visitorName: payload.visitorName
+    }
+  }
+
+  // Fallback (shouldn't happen in normal flow)
+  return {
+    employeeName: payload?.appointment?.employeeId?.name || payload?.appointment?.employee?.name || 'Unknown Employee',
+    visitorName: payload?.appointment?.visitorId?.name || payload?.appointment?.visitor?.name || 'Unknown Visitor'
+  }
+}
+
+// Helper: Get notification config based on status
+const getNotificationConfig = (status: string, employeeName: string, visitorName: string): NotificationConfig => {
+  const configs: Record<string, NotificationConfig> = {
+    pending: {
+      type: 'appointment_created',
+      title: 'New Appointment Request 📅',
+      message: `${visitorName} has requested an appointment with ${employeeName}.`,
+      toastType: 'info'
+    },
+    approved: {
+      type: 'appointment_approved',
+      title: 'Appointment Approved! ✅',
+      message: `${employeeName} has approved the appointment for ${visitorName}.`,
+      toastType: 'success'
+    },
+    rejected: {
+      type: 'appointment_rejected',
+      title: 'Appointment Rejected ❌',
+      message: `${employeeName} has rejected the appointment for ${visitorName}.`,
+      toastType: 'error'
+    },
+    completed: {
+      type: 'appointment_created',
+      title: 'Appointment Completed ✓',
+      message: `Appointment for ${visitorName} with ${employeeName} has been completed.`,
+      toastType: 'success'
+    }
+  }
+
+  return configs[status] || configs.pending
+}
+
+// Helper: Show toast notification
+const showToast = (config: NotificationConfig) => {
+  const toastOptions = {
+    description: config.message,
+    duration: 5000
+  }
+
+  switch (config.toastType) {
+    case 'success':
+      toast.success(config.title, toastOptions)
+      break
+    case 'error':
+      toast.error(config.title, toastOptions)
+      break
+    case 'info':
+      toast.info(config.title, toastOptions)
+      break
+  }
+}
+
+// Helper: Add notification to store
+const createNotification = (config: NotificationConfig, appointmentId: string) => {
+  return {
+    type: config.type,
+    title: config.title,
+    message: config.message,
+    appointmentId,
+    timestamp: new Date().toISOString()
+  }
 }
 
 export function useSocket(options: UseSocketOptions = {}) {
@@ -63,25 +152,82 @@ export function useSocket(options: UseSocketOptions = {}) {
     ]))
   }, [dispatch])
 
+  // Handle appointment status change
+  const handleAppointmentStatusChange = useCallback((data: any) => {
+    const { payload } = data
+    const appointmentId = payload?.appointment?._id || payload?.appointmentId || ''
+    
+    if (!appointmentId || typeof appointmentId !== 'string' || !appointmentId.trim()) {
+      invalidateAppointments()
+      onAppointmentStatusChanged?.(data)
+      return
+    }
+
+    const { employeeName, visitorName } = extractNames(payload)
+    const status = payload?.status
+
+    if (status === 'approved' || status === 'rejected') {
+      const config = getNotificationConfig(status, employeeName, visitorName)
+      
+      dispatch(addNotification(createNotification(config, appointmentId)))
+      
+      if (showToasts) {
+        showToast(config)
+      }
+    }
+
+    invalidateAppointments()
+    onAppointmentStatusChanged?.(data)
+  }, [dispatch, showToasts, invalidateAppointments, onAppointmentStatusChanged])
+
+  // Handle appointment created
+  const handleAppointmentCreated = useCallback((data: any) => {
+    const { payload } = data
+    const appointmentId = payload?.appointment?._id || payload?.appointmentId || ''
+    const status = payload?.appointment?.status || payload?.status || 'pending'
+    
+    if (!appointmentId || typeof appointmentId !== 'string' || !appointmentId.trim()) {
+      invalidateAppointments()
+      return
+    }
+
+    const { employeeName, visitorName } = extractNames(payload)
+    const config = getNotificationConfig(status, employeeName, visitorName)
+
+    dispatch(addNotification(createNotification(config, appointmentId)))
+    
+    if (showToasts) {
+      showToast(config)
+    }
+
+    invalidateAppointments()
+  }, [dispatch, showToasts, invalidateAppointments])
+
+  // Handle appointment updated
+  const handleAppointmentUpdated = useCallback((data: any) => {
+    invalidateAppointments()
+    onAppointmentUpdated?.(data)
+  }, [invalidateAppointments, onAppointmentUpdated])
+
+  // Handle appointment deleted
+  const handleAppointmentDeleted = useCallback(() => {
+    invalidateAppointments()
+  }, [invalidateAppointments])
+
   const connect = useCallback(() => {
     if (socketRef.current?.connected || !token) return
 
     const socketUrl = getSocketUrl()
-    
-    // Only connect if we have a valid URL
-    if (!socketUrl) {
-      // Silently skip if socket is disabled or URL not configured
-      return
-    }
-    
+    if (!socketUrl) return
+
     socketRef.current = io(socketUrl, {
       transports: ['websocket', 'polling'],
       autoConnect: true,
       reconnection: true,
-      reconnectionAttempts: 3, // Reduced attempts
+      reconnectionAttempts: 3,
       reconnectionDelay: 2000,
       reconnectionDelayMax: 5000,
-      timeout: 10000, // Connection timeout
+      timeout: 10000,
     })
 
     const socket = socketRef.current
@@ -103,71 +249,21 @@ export function useSocket(options: UseSocketOptions = {}) {
       // Socket is optional for app functionality
     })
 
-    socket.on(SocketEvents.APPOINTMENT_STATUS_CHANGED, (data) => {
-      const { payload } = data
-      const status = payload?.status
-      const appointment = payload?.appointment
-      const appointmentId = appointment?._id || payload?.appointmentId || ''
-      
-      if (!appointmentId || typeof appointmentId !== 'string' || !appointmentId.trim()) {
-        return
-      }
+    socket.on(SocketEvents.APPOINTMENT_STATUS_CHANGED, handleAppointmentStatusChange)
+    socket.on(SocketEvents.APPOINTMENT_CREATED, handleAppointmentCreated)
+    socket.on(SocketEvents.APPOINTMENT_UPDATED, handleAppointmentUpdated)
+    socket.on(SocketEvents.APPOINTMENT_DELETED, handleAppointmentDeleted)
 
-      // Extract visitor information
-      const visitor = appointment?.visitorId || appointment?.visitor
-      const visitorName = visitor?.name || 'Unknown Visitor'
-      const visitorEmail = visitor?.email || 'N/A'
-
-      if (status === 'approved') {
-        dispatch(addNotification({
-          type: 'appointment_approved',
-          title: 'Appointment Approved! ✅',
-          message: `Appointment for ${visitorName} (${visitorEmail}) has been approved via email.`,
-          appointmentId: appointmentId,
-          timestamp: new Date().toISOString(),
-        }))
-        
-        if (showToasts) {
-          toast.success('Appointment Approved! ✅', {
-            description: `Appointment for ${visitorName} (${visitorEmail}) has been approved.`,
-            duration: 5000,
-          })
-        }
-      } else if (status === 'rejected') {
-        dispatch(addNotification({
-          type: 'appointment_rejected',
-          title: 'Appointment Rejected ❌',
-          message: `Appointment for ${visitorName} (${visitorEmail}) has been rejected via email.`,
-          appointmentId: appointmentId,
-          timestamp: new Date().toISOString(),
-        }))
-        
-        if (showToasts) {
-          toast.error('Appointment Rejected ❌', {
-            description: `Appointment for ${visitorName} (${visitorEmail}) has been rejected.`,
-            duration: 5000,
-          })
-        }
-      }
-
-      invalidateAppointments()
-      onAppointmentStatusChanged?.(data)
-    })
-
-    socket.on(SocketEvents.APPOINTMENT_UPDATED, (data) => {
-      invalidateAppointments()
-      onAppointmentUpdated?.(data)
-    })
-
-    socket.on(SocketEvents.APPOINTMENT_CREATED, () => {
-      invalidateAppointments()
-    })
-
-    socket.on(SocketEvents.APPOINTMENT_DELETED, () => {
-      invalidateAppointments()
-    })
-
-  }, [token, user?.id, onConnect, onDisconnect, onAppointmentStatusChanged, onAppointmentUpdated, invalidateAppointments, showToasts, dispatch])
+  }, [
+    token,
+    user?.id,
+    onConnect,
+    onDisconnect,
+    handleAppointmentStatusChange,
+    handleAppointmentCreated,
+    handleAppointmentUpdated,
+    handleAppointmentDeleted
+  ])
 
   const disconnect = useCallback(() => {
     if (socketRef.current) {
@@ -181,10 +277,7 @@ export function useSocket(options: UseSocketOptions = {}) {
   }, [user?.id])
 
   useEffect(() => {
-    // Only connect if we have token and are in a page that needs socket
-    // Check if we're in browser environment
     if (typeof window !== 'undefined' && token) {
-      // Add a small delay to avoid connection attempts during page transitions
       const timeoutId = setTimeout(() => {
         connect()
       }, 1000)
@@ -194,6 +287,7 @@ export function useSocket(options: UseSocketOptions = {}) {
         disconnect()
       }
     }
+    
     return () => {
       disconnect()
     }
