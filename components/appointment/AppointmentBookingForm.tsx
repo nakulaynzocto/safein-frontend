@@ -1,19 +1,19 @@
 "use client"
 
+import { useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { appointmentSchema, type AppointmentFormData } from "./helpers/appointmentValidation"
-import { createAppointmentPayload } from "./helpers/appointmentFormHelpers"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { DatePicker } from "@/components/common/datePicker"
-import { TimePicker } from "@/components/common/timePicker"
+import { EnhancedDatePicker } from "@/components/common/enhancedDatePicker"
+import { EnhancedTimePicker } from "@/components/common/enhancedTimePicker"
 import { ImageUploadField } from "@/components/common/imageUploadField"
+import { InputField } from "@/components/common/inputField"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { User, Mail, Calendar, Clock, FileText, Car } from "lucide-react"
+import { Calendar, Clock, FileText, Car, User } from "lucide-react"
 import { extractIdString, isValidId } from "@/utils/idExtractor"
 import { showErrorToast } from "@/utils/toast"
 
@@ -33,15 +33,20 @@ export function AppointmentBookingForm({
   visitorEmail,
   onSubmit,
   isLoading = false,
-}: AppointmentBookingFormProps) {
+  appointmentToken,
+}: AppointmentBookingFormProps & { appointmentToken?: string }) {
   const normalizedVisitorId = extractIdString(visitorId)
   const normalizedEmployeeId = extractIdString(employeeId)
+  const [showVehicleFields, setShowVehicleFields] = useState(false)
 
   const {
     control,
     handleSubmit,
     register,
     setValue,
+    watch,
+    clearErrors,
+    trigger,
     formState: { errors },
   } = useForm<AppointmentFormData>({
     resolver: yupResolver(appointmentSchema),
@@ -99,150 +104,209 @@ export function AppointmentBookingForm({
     onSubmit(payload)
   }
 
-        return (
-          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-
-      <div className="space-y-2">
-        <Label htmlFor="purpose" className="flex items-center gap-2">
-          <FileText className="h-4 w-4" />
-          Purpose of Visit <span className="text-red-500">*</span>
-        </Label>
-        <Controller
-          name="purpose"
-          control={control}
-          render={({ field }) => (
-            <div className="space-y-1">
-              <Textarea
-                {...field}
-                id="purpose"
-                placeholder="Enter the purpose of your visit"
-                rows={3}
-                className={errors.purpose ? "border-red-500" : ""}
-              />
-              {errors.purpose && (
-                <p className="text-sm text-red-500">{errors.purpose.message}</p>
-              )}
-            </div>
-          )}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="appointmentDate" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Appointment Date <span className="text-red-500">*</span>
-          </Label>
-          <Controller
-            name="appointmentDate"
-            control={control}
-            render={({ field }) => (
-              <div className="space-y-1">
-                <DatePicker
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  className={errors.appointmentDate ? "border-red-500" : ""}
-                />
-                {errors.appointmentDate && (
-                  <p className="text-sm text-red-500">{errors.appointmentDate.message}</p>
-                )}
-              </div>
-            )}
-          />
+  return (
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 pt-2">
+      {/* Visitor and Employee Info Display */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="space-y-1">
+          <Label className="text-sm font-medium text-gray-600">Visitor</Label>
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-900">{visitorEmail || "Visitor"}</span>
+          </div>
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="appointmentTime" className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            Appointment Time <span className="text-red-500">*</span>
-          </Label>
-          <Controller
-            name="appointmentTime"
-            control={control}
-            render={({ field }) => (
-              <div className="space-y-1">
-                <TimePicker
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  className={errors.appointmentTime ? "border-red-500" : ""}
-                />
-                {errors.appointmentTime && (
-                  <p className="text-sm text-red-500">{errors.appointmentTime.message}</p>
-                )}
-              </div>
-            )}
-          />
+        <div className="space-y-1">
+          <Label className="text-sm font-medium text-gray-600">Meeting With</Label>
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-900">{employeeName || "Employee"}</span>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="accompanyingCount">Accompanying People</Label>
-        <Controller
-          name="accompanyingCount"
-          control={control}
-          render={({ field }) => (
+      {/* First Row: Accompanying People and Purpose of Visit */}
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">
+              Accompanying People <span className="text-muted-foreground font-normal">(optional)</span>
+            </Label>
             <Input
-              {...field}
-              id="accompanyingCount"
               type="number"
               min={0}
               max={20}
-              placeholder="0"
-              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
+              step={1}
+              placeholder="Number of people (e.g., 0, 1, 2)"
+              {...register("accompanyingCount")}
+              className={`h-9 ${errors.accompanyingCount ? "border-destructive" : ""}`}
             />
-          )}
-        />
+            {errors.accompanyingCount && (
+              <span className="text-xs text-destructive">{errors.accompanyingCount.message}</span>
+            )}
+          </div>
+
+          <InputField
+            label="Purpose of Visit"
+            placeholder="Brief description of the visit purpose"
+            error={errors.purpose?.message}
+            {...register("purpose")}
+            required
+          />
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="notes">Additional Notes</Label>
-        <Controller
-          name="notes"
-          control={control}
-          render={({ field }) => (
-            <Textarea
-              {...field}
-              id="notes"
-              placeholder="Any additional information..."
-              rows={3}
-            />
-          )}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="vehicleNumber" className="flex items-center gap-2">
-            <Car className="h-4 w-4" />
-            Vehicle Number (Optional)
-          </Label>
+      {/* Second Row: Appointment Date and Appointment Time */}
+      <div className="space-y-4 pt-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Controller
-            name="vehicleNumber"
             control={control}
+            name="appointmentDate"
             render={({ field }) => (
-              <Input
-                {...field}
-                id="vehicleNumber"
-                placeholder="Enter vehicle number"
+              <EnhancedDatePicker
+                label="Appointment Date"
+                value={field.value}
+                onChange={(e) => {
+                  const value = e.target.value
+                  if (value) {
+                    const selectedDate = new Date(value + 'T00:00:00')
+                    selectedDate.setHours(0, 0, 0, 0)
+                    const today = new Date()
+                    today.setHours(0, 0, 0, 0)
+                    
+                    if (selectedDate < today) {
+                      trigger('appointmentDate')
+                      return
+                    }
+                  }
+                  field.onChange(value)
+                  if (errors.appointmentTime) {
+                    clearErrors('appointmentTime')
+                  }
+                  trigger('appointmentDate')
+                }}
+                error={errors.appointmentDate?.message}
+                required
               />
             )}
           />
+
+          <Controller
+            control={control}
+            name="appointmentTime"
+            render={({ field }) => {
+              let normalizedDate = watch("appointmentDate")
+              if (normalizedDate && normalizedDate.includes('/')) {
+                const parts = normalizedDate.split('/')
+                if (parts.length === 3) {
+                  normalizedDate = `${parts[2]}-${parts[1]}-${parts[0]}`
+                }
+              }
+              return (
+                <EnhancedTimePicker
+                  label="Appointment Time"
+                  value={field.value}
+                  onChange={(e) => {
+                    field.onChange(e)
+                    if (errors.appointmentDate) {
+                      clearErrors('appointmentDate')
+                    }
+                  }}
+                  error={errors.appointmentTime?.message}
+                  selectedDate={normalizedDate}
+                  required
+                />
+              )
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Visit Information Section */}
+      <div className="space-y-4 pt-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="notes" className="text-sm font-medium">
+            Notes <span className="text-muted-foreground font-normal">(optional)</span>
+          </Label>
+          <Textarea
+            id="notes"
+            {...register("notes")}
+            placeholder="Any additional information or special requirements"
+            className={errors.notes ? "border-destructive" : ""}
+            rows={4}
+          />
+          {errors.notes && (
+            <span className="text-xs text-destructive">{errors.notes.message}</span>
+          )}
+        </div>
+      </div>
+
+      {/* Vehicle Fields Toggle */}
+      <div className="space-y-4 pt-4">
+        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-3">
+            <Car className="h-5 w-5 text-gray-600" />
+            <div>
+              <Label htmlFor="vehicle-toggle" className="text-sm font-medium cursor-pointer">
+                Vehicle Information
+              </Label>
+              <p className="text-xs text-muted-foreground">Add vehicle details if applicable</p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowVehicleFields(!showVehicleFields)}
+            className="shrink-0"
+          >
+            {showVehicleFields ? "Hide" : "Add Vehicle"}
+          </Button>
         </div>
 
-               <div className="space-y-2">
-                 <Label htmlFor="vehiclePhoto">Vehicle Photo (Optional)</Label>
-                 <ImageUploadField
-                   name="vehiclePhoto"
-                   register={register}
-                   setValue={setValue}
-                   errors={errors.vehiclePhoto}
-                   label="Upload Vehicle Photo"
-                 />
-               </div>
+        {showVehicleFields && (
+          <div className="space-y-4 pt-4 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {/* Vehicle Photo */}
+              <div className="flex items-start justify-center md:justify-start">
+                <ImageUploadField
+                  name="vehiclePhoto"
+                  label="Vehicle Photo (optional)"
+                  register={register}
+                  setValue={setValue}
+                  errors={errors.vehiclePhoto}
+                  initialUrl={watch("vehiclePhoto")}
+                  enableImageCapture={true}
+                  appointmentToken={appointmentToken}
+                />
+              </div>
+
+              {/* Vehicle Number */}
+              <div className="space-y-1.5">
+                <Label htmlFor="vehicleNumber" className="text-sm font-medium">
+                  Vehicle Number <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <Input
+                  id="vehicleNumber"
+                  {...register("vehicleNumber")}
+                  placeholder="e.g., DL01AB1234"
+                  className={`h-9 ${errors.vehicleNumber ? "border-destructive" : ""}`}
+                />
+                {errors.vehicleNumber && (
+                  <span className="text-xs text-destructive">{errors.vehicleNumber.message}</span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-4 pt-4 border-t">
-        <Button type="submit" disabled={isLoading} size="lg">
+        <Button 
+          type="submit" 
+          disabled={isLoading} 
+          className="bg-[#3882a5] hover:bg-[#2d6a87] text-white"
+          size="lg"
+        >
           {isLoading ? (
             <>
               <LoadingSpinner size="sm" className="mr-2" />

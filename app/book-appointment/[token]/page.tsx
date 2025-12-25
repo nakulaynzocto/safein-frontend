@@ -29,7 +29,6 @@ export default function BookAppointmentPage() {
     { skip: !token }
   )
 
-
   const [createVisitorThroughLink, { isLoading: isCreatingVisitor }] = useCreateVisitorThroughLinkMutation()
   const [createAppointmentThroughLink, { isLoading: isCreatingAppointment }] = useCreateAppointmentThroughLinkMutation()
 
@@ -61,11 +60,14 @@ export default function BookAppointmentPage() {
       setAppointmentLinkData(linkData)
       if (linkData.visitor) setVisitorData(linkData.visitor)
       
+      // Check if visitorId exists (either from link or found by email check in backend)
       const extractedVisitorId = extractIdString(linkData.visitorId)
       if (isValidId(extractedVisitorId)) {
+        // Visitor exists (either already associated with link or found by email)
         setVisitorId(extractedVisitorId)
         setStep("appointment")
       } else {
+        // Visitor doesn't exist, show visitor form
         setStep("visitor")
       }
     }
@@ -171,48 +173,86 @@ export default function BookAppointmentPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-4 sm:py-8 px-3 sm:px-4">
       <div className="max-w-4xl mx-auto">
-        {(step === "visitor" || step === "appointment") && (
-          <div className="mb-4 sm:mb-6">
-            <div className="flex items-center justify-center gap-2 sm:gap-4">
-              <div className={`flex items-center gap-2 ${step === "visitor" || step === "appointment" ? "text-blue-600" : "text-gray-400"}`}>
-                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 ${
-                  step === "visitor" ? "bg-blue-600 border-blue-600 text-white" : 
-                  step === "appointment" ? "bg-green-500 border-green-500 text-white" : 
-                  "bg-gray-200 border-gray-300 text-gray-500"
-                }`}>
-                  {step === "visitor" ? "1" : step === "appointment" ? "✓" : "1"}
+        <Card className="shadow-lg border-0">
+          <CardHeader className="border-b border-gray-200 pb-4">
+            <div className="flex flex-col items-center gap-3 sm:gap-4">
+              {/* Company Logo - Top */}
+              {appointmentLinkData?.createdBy?.profilePicture ? (
+                <div className="flex items-center justify-center">
+                  <img
+                    src={appointmentLinkData.createdBy.profilePicture}
+                    alt={appointmentLinkData.createdBy.companyName || "Company Logo"}
+                    className="h-16 sm:h-20 w-auto max-w-[250px] object-contain"
+                    onError={(e) => {
+                      // Fallback to company name if logo fails to load
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
                 </div>
-                <span className="text-xs sm:text-sm font-medium hidden sm:inline">Visitor Info</span>
-              </div>
-              <div className={`h-0.5 sm:h-1 w-12 sm:w-20 ${step === "appointment" ? "bg-blue-600" : "bg-gray-300"}`}></div>
-              <div className={`flex items-center gap-2 ${step === "appointment" ? "text-blue-600" : "text-gray-400"}`}>
-                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 ${
-                  step === "appointment" ? "bg-blue-600 border-blue-600 text-white" : 
-                  "bg-gray-200 border-gray-300 text-gray-500"
-                }`}>
-                  {step === "appointment" ? "2" : "2"}
+              ) : appointmentLinkData?.createdBy?.companyName ? (
+                <div className="flex items-center justify-center">
+                  <div className="h-16 sm:h-20 w-16 sm:w-20 rounded-full bg-[#3882a5] flex items-center justify-center shadow-md">
+                    <span className="text-white font-bold text-xl sm:text-2xl">
+                      {appointmentLinkData.createdBy.companyName.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
                 </div>
-                <span className="text-xs sm:text-sm font-medium hidden sm:inline">Appointment</span>
+              ) : null}
+              
+              {/* Company Name */}
+              {appointmentLinkData?.createdBy?.companyName && (
+                <div className="text-center">
+                  <p className="text-lg sm:text-xl font-semibold text-[#3882a5]">
+                    {appointmentLinkData.createdBy.companyName}
+                  </p>
+                </div>
+              )}
+              
+              {/* Book Your Appointment */}
+              <CardTitle className="flex items-center justify-center gap-2 sm:gap-3 text-lg sm:text-xl text-[#3882a5]/80">
+                <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-[#3882a5]/80" />
+                Book Your Appointment
+              </CardTitle>
+              
+              {/* Employee Info */}
+              {appointmentLinkData?.employee && (
+                <div className="mt-1 sm:mt-2 text-center">
+                  <p className="text-xs sm:text-sm text-gray-700">
+                    Meeting with: <strong className="text-[#3882a5]">{appointmentLinkData.employee.name}</strong>
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">{appointmentLinkData.employee.email}</p>
+                </div>
+              )}
+            </div>
+          </CardHeader>
+
+          {/* Steps - After Header */}
+          {(step === "visitor" || step === "appointment") && (
+            <div className="pt-4 sm:pt-6 px-4 sm:px-6 pb-4 border-b border-gray-200">
+              <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4">
+                <div className={`flex items-center gap-2 ${step === "visitor" || step === "appointment" ? "text-[#3882a5]" : "text-gray-400"}`}>
+                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+                    step === "visitor" ? "bg-[#3882a5] border-[#3882a5] text-white shadow-md" : 
+                    step === "appointment" ? "bg-[#3882a5] border-[#3882a5] text-white shadow-md" : 
+                    "bg-gray-200 border-gray-300 text-gray-500"
+                  }`}>
+                    {step === "visitor" ? "1" : step === "appointment" ? "✓" : "1"}
+                  </div>
+                  <span className="text-xs sm:text-sm font-medium hidden sm:inline">Visitor Info</span>
+                </div>
+                <div className={`h-0.5 sm:h-1 w-12 sm:w-16 md:w-20 transition-colors ${step === "appointment" ? "bg-[#3882a5]" : "bg-gray-300"}`}></div>
+                <div className={`flex items-center gap-2 ${step === "appointment" ? "text-[#3882a5]" : "text-gray-400"}`}>
+                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+                    step === "appointment" ? "bg-[#3882a5] border-[#3882a5] text-white shadow-md" : 
+                    "bg-gray-200 border-gray-300 text-gray-500"
+                  }`}>
+                    {step === "appointment" ? "2" : "2"}
+                  </div>
+                  <span className="text-xs sm:text-sm font-medium hidden sm:inline">Appointment</span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-
-        <Card className="shadow-lg border-0">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
-            <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
-              <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
-              Book Your Appointment
-            </CardTitle>
-            {appointmentLinkData?.employee && (
-              <div className="mt-2 sm:mt-3">
-                <p className="text-xs sm:text-sm text-gray-600">
-                  Meeting with: <strong className="text-gray-900">{appointmentLinkData.employee.name}</strong>
-                </p>
-                <p className="text-xs text-gray-500 mt-1">{appointmentLinkData.employee.email}</p>
-              </div>
-            )}
-          </CardHeader>
+          )}
           <CardContent className="p-4 sm:p-6">
             {step === "visitor" && (
               <BookingVisitorForm
@@ -220,6 +260,7 @@ export default function BookAppointmentPage() {
                 initialValues={visitorData || undefined}
                 onSubmit={handleVisitorSubmit}
                 isLoading={isCreatingVisitor}
+                appointmentToken={token}
               />
             )}
             {step === "appointment" && appointmentLinkData && visitorId && (
@@ -230,6 +271,7 @@ export default function BookAppointmentPage() {
                 visitorEmail={appointmentLinkData.visitorEmail}
                 onSubmit={handleAppointmentSubmit}
                 isLoading={isCreatingAppointment}
+                appointmentToken={token}
               />
             )}
           </CardContent>

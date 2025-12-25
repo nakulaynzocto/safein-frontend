@@ -34,7 +34,8 @@ import {
   CheckCircle,
   X,
   Edit,
-  Link2
+  Link2,
+  Maximize2
 } from "lucide-react"
 import { Appointment } from "@/store/api/appointmentApi"
 import { 
@@ -238,19 +239,33 @@ export function AppointmentTable({
           
           return (
             <div className="flex items-center gap-3 min-w-0">
-              <Avatar className="h-10 w-10 shrink-0">
-                <AvatarImage 
-                  src={visitorPhoto} 
-                  alt={visitorName}
-                  onError={(e) => {
-                    // Hide image on error, fallback will show
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-                <AvatarFallback>
-                  {getInitials(visitorName, 2)}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative group shrink-0">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage 
+                    src={visitorPhoto} 
+                    alt={visitorName}
+                    onError={(e) => {
+                      // Hide image on error, fallback will show
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <AvatarFallback>
+                    {getInitials(visitorName, 2)}
+                  </AvatarFallback>
+                </Avatar>
+                {visitorPhoto && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(visitorPhoto, '_blank');
+                    }}
+                    className="absolute -bottom-1 -right-1 bg-[#3882a5] text-white rounded-full p-1 shadow-md hover:bg-[#2d6a87] transition-colors opacity-0 group-hover:opacity-100"
+                    title="View full image"
+                  >
+                    <Maximize2 className="h-2.5 w-2.5" />
+                  </button>
+                )}
+              </div>
               <div className="min-w-0 flex-1">
                 <div className="font-medium truncate">{visitorName}</div>
                 {visitorEmail !== "N/A" && (
@@ -468,22 +483,22 @@ export function AppointmentTable({
     <div className="space-y-4 sm:space-y-6">
       <Card className="card-hostinger p-3 sm:p-4">
         <CardHeader className="pb-3 sm:pb-4 px-0">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-semibold flex-1 min-w-0">
               <Calendar className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
               <span className="truncate">{title || 'Appointments'}</span>
             </CardTitle>
-            <>
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">
                 {hasReachedAppointmentLimit ? (
                   <>
                     <Button 
                       variant="outline"
-                      className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                      className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 whitespace-nowrap shrink-0 min-h-[40px] sm:min-h-0"
                       onClick={() => setShowUpgradeModal(true)}
                     >
-                      <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                      <span className="hidden min-[375px]:inline sm:hidden">Upgrade</span>
+                      <Plus className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
                       <span className="hidden sm:inline">Upgrade to Schedule More</span>
+                      <span className="sm:hidden">Upgrade</span>
                     </Button>
                     <UpgradePlanModal 
                       isOpen={showUpgradeModal}
@@ -494,11 +509,12 @@ export function AppointmentTable({
                   <>
                     <Button
                       variant="outline"
-                      className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                      className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 whitespace-nowrap shrink-0 min-h-[40px] sm:min-h-0"
                       onClick={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
                     >
-                      <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                      <span className="hidden min-[375px]:inline">Schedule Appointment</span>
+                      <Plus className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                      <span className="hidden sm:inline">Schedule Appointment</span>
+                      <span className="sm:hidden">Schedule</span>
                     </Button>
                     <CreateAppointmentLinkModal
                       open={showCreateLinkModal}
@@ -506,33 +522,39 @@ export function AppointmentTable({
                       triggerButton={
                         <Button
                           variant="outline"
-                          className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                          className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 whitespace-nowrap shrink-0 min-h-[40px] sm:min-h-0"
                           title="Create Appointment Link"
                         >
-                          <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                          <Link2 className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
                           <span className="hidden sm:inline">Create Link</span>
+                          <span className="sm:hidden">Link</span>
                         </Button>
                       }
                       onSuccess={() => {}}
                     />
                   </>
                 )}
-            </>
+            </div>
           </div>
         </CardHeader>
       </Card>
 
       <Card className="card-hostinger p-3 sm:p-4 overflow-hidden">
         <CardHeader className="pb-3 sm:pb-4 px-0">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
               <SearchInput
                 placeholder="Search appointments..."
                 value={searchTerm}
                 onChange={onSearchChange}
                 debounceDelay={500}
-                className="w-full"
+                className="w-full sm:flex-1"
               />
-              <DateRangePicker onDateRangeChange={(r) => { onDateFromChange?.(r.startDate || ""); onDateToChange?.(r.endDate || ""); onPageChange?.(1); }} />
+              <div className="w-full sm:w-auto">
+                <DateRangePicker 
+                  onDateRangeChange={(r) => { onDateFromChange?.(r.startDate || ""); onDateToChange?.(r.endDate || ""); onPageChange?.(1); }} 
+                  className="w-full sm:w-auto"
+                />
+              </div>
             </div>
         </CardHeader>
         <CardContent className="p-0">

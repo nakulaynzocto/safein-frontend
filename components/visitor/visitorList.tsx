@@ -23,7 +23,8 @@ import {
   Calendar,
   User,
   MoreVertical,
-  RefreshCw
+  RefreshCw,
+  Maximize2
 } from "lucide-react"
 import { 
   useGetVisitorsQuery, 
@@ -63,12 +64,26 @@ const createColumns = (
     header: "Visitor",
     render: (visitor: Visitor) => (
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-        <Avatar className="h-8 w-8 sm:h-10 sm:w-10 shrink-0">
-          <AvatarImage src={visitor.photo} alt={visitor.name} />
-          <AvatarFallback className="text-xs sm:text-sm">
-            {visitor.name.split(' ').map(n => n[0]).join('')}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative group shrink-0">
+          <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+            <AvatarImage src={visitor.photo} alt={visitor.name} />
+            <AvatarFallback className="text-xs sm:text-sm">
+              {visitor.name.split(' ').map(n => n[0]).join('')}
+            </AvatarFallback>
+          </Avatar>
+          {visitor.photo && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(visitor.photo, '_blank');
+              }}
+              className="absolute -bottom-1 -right-1 bg-[#3882a5] text-white rounded-full p-1 shadow-md hover:bg-[#2d6a87] transition-colors opacity-0 group-hover:opacity-100"
+              title="View full image"
+            >
+              <Maximize2 className="h-2.5 w-2.5" />
+            </button>
+          )}
+        </div>
         <div className="min-w-0 flex-1">
           <div className="font-medium text-sm sm:text-base truncate max-w-[100px] sm:max-w-[150px]">
             {visitor.name}

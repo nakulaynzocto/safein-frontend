@@ -13,6 +13,11 @@ export interface AppointmentLink {
     name: string;
     email: string;
   };
+  createdBy?: {
+    _id: string;
+    companyName: string;
+    profilePicture?: string;
+  };
   secureToken: string;
   isBooked: boolean;
   expiresAt: string;

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { format } from "date-fns"
 import { Appointment } from "@/store/api/appointmentApi"
-import { ExternalLink, User, Mail, Phone, Calendar, Clock, Briefcase, FileText, Car, CheckCircle, XCircle } from "lucide-react"
+import { ExternalLink, User, Mail, Phone, Calendar, Clock, Briefcase, FileText, Car, CheckCircle, XCircle, Maximize2 } from "lucide-react"
 
 interface AppointmentDetailsDialogProps {
   appointment: Appointment | null
@@ -129,13 +129,22 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
           {/* Profile Header - LinkedIn/Facebook Style */}
           <div className="flex gap-6 pb-6 border-b">
             {/* Left Side - Visitor Photo */}
-            <div className="shrink-0">
+            <div className="shrink-0 relative group">
               <Avatar className="h-24 w-24">
                 <AvatarImage src={visitorPhoto} alt={visitorName} />
                 <AvatarFallback className="text-2xl">
                   {visitorName !== 'N/A' ? visitorName.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'V'}
                 </AvatarFallback>
               </Avatar>
+              {visitorPhoto && (
+                <button
+                  onClick={() => window.open(visitorPhoto, '_blank')}
+                  className="absolute bottom-0 right-0 bg-[#3882a5] text-white rounded-full p-1.5 shadow-lg hover:bg-[#2d6a87] transition-colors opacity-0 group-hover:opacity-100"
+                  title="View full image"
+                >
+                  <Maximize2 className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
             
             {/* Right Side - Visitor Info & Status */}

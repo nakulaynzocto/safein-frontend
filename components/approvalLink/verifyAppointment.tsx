@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { useVerifyTokenQuery, useUpdateStatusMutation } from "@/store/api/approvalLinkApi"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, XCircle, Loader2, Calendar, Clock, User, Building2, FileText, Mail, Phone, MapPin, CreditCard, ExternalLink } from "lucide-react"
+import { CheckCircle2, XCircle, Loader2, Calendar, Clock, User, Building2, FileText, Mail, Phone, MapPin, CreditCard, ExternalLink, Maximize2 } from "lucide-react"
 import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -185,12 +185,23 @@ export function VerifyAppointment() {
             
             {/* Visitor Header with Photo */}
             <div className="flex items-center gap-2 sm:gap-4 p-3 sm:p-4 bg-background rounded-lg border">
-              <Avatar className="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0">
-                <AvatarImage src={appointment.visitor.photo} alt={appointment.visitor.name} />
-                <AvatarFallback className="text-lg sm:text-2xl">
-                  {appointment.visitor.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative group flex-shrink-0">
+                <Avatar className="h-16 w-16 sm:h-20 sm:w-20">
+                  <AvatarImage src={appointment.visitor.photo} alt={appointment.visitor.name} />
+                  <AvatarFallback className="text-lg sm:text-2xl">
+                    {appointment.visitor.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {appointment.visitor.photo && (
+                  <button
+                    onClick={() => window.open(appointment.visitor.photo, '_blank')}
+                    className="absolute bottom-0 right-0 bg-[#3882a5] text-white rounded-full p-1.5 shadow-lg hover:bg-[#2d6a87] transition-colors opacity-0 group-hover:opacity-100"
+                    title="View full image"
+                  >
+                    <Maximize2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
               <div className="flex-1 min-w-0">
                 <h4 className="text-base sm:text-xl font-semibold truncate">{appointment.visitor.name}</h4>
                 {appointment.visitor._id && (
@@ -368,13 +379,13 @@ export function VerifyAppointment() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <div className="flex flex-row gap-3 justify-end">
             <Button
               variant="outline"
               size="lg"
               onClick={() => handleStatusUpdate('rejected')}
               disabled={isProcessing}
-              className="w-full sm:w-auto"
+              className="flex-1 sm:flex-initial sm:w-auto"
             >
               {isProcessing ? (
                 <>
@@ -392,7 +403,7 @@ export function VerifyAppointment() {
               size="lg"
               onClick={() => handleStatusUpdate('approved')}
               disabled={isProcessing}
-              className="w-full sm:w-auto"
+              className="flex-1 sm:flex-initial sm:w-auto"
             >
               {isProcessing ? (
                 <>

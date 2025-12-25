@@ -14,7 +14,7 @@ import { Pagination } from "@/components/common/pagination"
 import { useGetAllAppointmentLinksQuery, useDeleteAppointmentLinkMutation } from "@/store/api/appointmentLinkApi"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { formatDate, formatDateTime } from "@/utils/helpers"
-import { Link2, Trash2, CheckCircle, XCircle, Copy, Mail, Phone, Calendar } from "lucide-react"
+import { Link2, Trash2, CheckCircle, XCircle, Copy, Mail, Phone, Calendar, Maximize2 } from "lucide-react"
 import { AppointmentLink } from "@/store/api/appointmentLinkApi"
 import { getInitials, formatName } from "@/utils/helpers"
 import { CreateAppointmentLinkModal } from "@/components/appointment/CreateAppointmentLinkModal"
@@ -53,7 +53,15 @@ export default function AppointmentLinksPage() {
   }, [deleteLinkId, deleteAppointmentLink, refetch])
 
   const handleCopyLink = useCallback((link: AppointmentLink) => {
-    navigator.clipboard.writeText(link.bookingUrl)
+    // Generate booking URL if not provided by backend
+    const bookingUrl = link.bookingUrl || `${window.location.origin}/book-appointment/${link.secureToken}`
+    
+    if (!bookingUrl) {
+      showErrorToast("Unable to generate booking link")
+      return
+    }
+    
+    navigator.clipboard.writeText(bookingUrl)
     showSuccessToast("Link copied to clipboard!")
   }, [])
 
@@ -75,18 +83,32 @@ export default function AppointmentLinksPage() {
           
           return (
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <Avatar className="h-8 w-8 sm:h-10 sm:w-10 shrink-0">
-                <AvatarImage 
-                  src={visitorPhoto} 
-                  alt={formattedName}
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-                <AvatarFallback>
-                  {getInitials(formattedName, 2)}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative group shrink-0">
+                <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                  <AvatarImage 
+                    src={visitorPhoto} 
+                    alt={formattedName}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                    }}
+                  />
+                  <AvatarFallback>
+                    {getInitials(formattedName, 2)}
+                  </AvatarFallback>
+                </Avatar>
+                {visitorPhoto && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(visitorPhoto, '_blank');
+                    }}
+                    className="absolute -bottom-1 -right-1 bg-[#3882a5] text-white rounded-full p-1 shadow-md hover:bg-[#2d6a87] transition-colors opacity-0 group-hover:opacity-100"
+                    title="View full image"
+                  >
+                    <Maximize2 className="h-2.5 w-2.5" />
+                  </button>
+                )}
+              </div>
               <div className="min-w-0 flex-1">
                 <div className="font-medium truncate text-sm sm:text-base">{formattedName}</div>
                 <div className="flex items-center gap-1 text-xs text-gray-500 truncate">

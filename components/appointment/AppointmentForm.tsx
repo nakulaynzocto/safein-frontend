@@ -17,8 +17,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { SelectField } from "@/components/common/selectField"
 import { InputField } from "@/components/common/inputField"
-import { DatePicker } from "@/components/common/datePicker"
-import { TimePicker } from "@/components/common/timePicker"
+import { EnhancedDatePicker } from "@/components/common/enhancedDatePicker"
+import { EnhancedTimePicker } from "@/components/common/enhancedTimePicker"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { ImageUploadField } from "@/components/common/imageUploadField"
 import { useCreateAppointmentMutation, useGetAppointmentQuery, useUpdateAppointmentMutation } from "@/store/api/appointmentApi"
@@ -330,7 +330,7 @@ export function NewAppointmentModal({
             control={control}
             name="appointmentDate"
             render={({ field }) => (
-              <DatePicker
+              <EnhancedDatePicker
                 label="Appointment Date"
                 value={field.value}
                 onChange={(e) => {
@@ -370,7 +370,7 @@ export function NewAppointmentModal({
                 }
               }
               return (
-                <TimePicker
+                <EnhancedTimePicker
                   label="Appointment Time"
                   value={field.value}
                   onChange={(e) => {

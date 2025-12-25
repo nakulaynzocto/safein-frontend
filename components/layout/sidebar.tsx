@@ -82,12 +82,12 @@ const settingsSubmenu = [
   },
 ]
 
-const SidebarContent = ({ 
+export const SidebarContent = ({ 
   onLinkClick, 
   isMobile = false 
 }: { 
   onLinkClick?: () => void
-  isMobile?: boolean 
+  isMobile?: boolean
 }) => {
   const pathname = usePathname()
   const router = useRouter()
@@ -349,18 +349,7 @@ export function Sidebar({ className }: SidebarProps) {
         <SidebarContent />
       </div>
 
-      {/* Mobile Sidebar */}
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className={cn("md:hidden", className)}>
-            <Menu className="h-6 w-6" />
-            <span className="sr-only">Toggle menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-72 p-0 flex flex-col">
-          <SidebarContent isMobile onLinkClick={() => setMobileOpen(false)} />
-        </SheetContent>
-      </Sheet>
+      {/* Mobile Sidebar - Now controlled from Navbar */}
     </>
   )
 }

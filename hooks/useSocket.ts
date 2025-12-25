@@ -106,24 +106,30 @@ export function useSocket(options: UseSocketOptions = {}) {
     socket.on(SocketEvents.APPOINTMENT_STATUS_CHANGED, (data) => {
       const { payload } = data
       const status = payload?.status
-      const appointmentId = payload?.appointment?._id || payload?.appointmentId || ''
+      const appointment = payload?.appointment
+      const appointmentId = appointment?._id || payload?.appointmentId || ''
       
       if (!appointmentId || typeof appointmentId !== 'string' || !appointmentId.trim()) {
         return
       }
 
+      // Extract visitor information
+      const visitor = appointment?.visitorId || appointment?.visitor
+      const visitorName = visitor?.name || 'Unknown Visitor'
+      const visitorEmail = visitor?.email || 'N/A'
+
       if (status === 'approved') {
         dispatch(addNotification({
           type: 'appointment_approved',
           title: 'Appointment Approved! ✅',
-          message: `Appointment ${appointmentId} has been approved via email.`,
+          message: `Appointment for ${visitorName} (${visitorEmail}) has been approved via email.`,
           appointmentId: appointmentId,
           timestamp: new Date().toISOString(),
         }))
         
         if (showToasts) {
           toast.success('Appointment Approved! ✅', {
-            description: `Appointment ${appointmentId} has been approved.`,
+            description: `Appointment for ${visitorName} (${visitorEmail}) has been approved.`,
             duration: 5000,
           })
         }
@@ -131,14 +137,14 @@ export function useSocket(options: UseSocketOptions = {}) {
         dispatch(addNotification({
           type: 'appointment_rejected',
           title: 'Appointment Rejected ❌',
-          message: `Appointment ${appointmentId} has been rejected via email.`,
+          message: `Appointment for ${visitorName} (${visitorEmail}) has been rejected via email.`,
           appointmentId: appointmentId,
           timestamp: new Date().toISOString(),
         }))
         
         if (showToasts) {
           toast.error('Appointment Rejected ❌', {
-            description: `Appointment ${appointmentId} has been rejected.`,
+            description: `Appointment for ${visitorName} (${visitorEmail}) has been rejected.`,
             duration: 5000,
           })
         }

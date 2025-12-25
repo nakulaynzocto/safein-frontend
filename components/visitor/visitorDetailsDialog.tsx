@@ -12,7 +12,8 @@ import {
   CreditCard, 
   Calendar,
   Building,
-  ExternalLink
+  ExternalLink,
+  Maximize2
 } from "lucide-react"
 
 
@@ -62,13 +63,22 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
           {/* Profile Header - LinkedIn/Facebook Style */}
           <div className="flex gap-6 pb-6 border-b">
             {/* Left Side - Visitor Photo */}
-            <div className="shrink-0">
+            <div className="shrink-0 relative group">
               <Avatar className="h-24 w-24">
                 <AvatarImage src={visitor.photo} alt={visitor.name} />
                 <AvatarFallback className="text-2xl">
                   {visitor.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                 </AvatarFallback>
               </Avatar>
+              {visitor.photo && (
+                <button
+                  onClick={() => window.open(visitor.photo, '_blank')}
+                  className="absolute bottom-0 right-0 bg-[#3882a5] text-white rounded-full p-1.5 shadow-lg hover:bg-[#2d6a87] transition-colors opacity-0 group-hover:opacity-100"
+                  title="View full image"
+                >
+                  <Maximize2 className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
             
             {/* Right Side - Visitor Info */}
