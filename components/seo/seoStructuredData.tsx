@@ -1,6 +1,6 @@
 "use client"
 
-import { generateStructuredData } from "@/lib/seo"
+import { generateStructuredData } from "@/lib/seoHelpers"
 
 interface SEOStructuredDataProps {
   pageKey: 'home' | 'dashboard' | 'login' | 'register' | 'contact' | 'pricing' | 'features' | 'help'

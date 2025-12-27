@@ -3,7 +3,6 @@ import { createUrlParams } from '@/utils/helpers'
 
 export interface Visitor {
   _id: string
-  visitorId?: string // Add visitorId field
   name: string
   email: string
   phone: string
@@ -13,9 +12,9 @@ export interface Visitor {
     state: string
     country: string
   }
-  idProof: {
-    type: string
-    number: string
+  idProof?: {
+    type?: string
+    number?: string
     image?: string
   }
   photo?: string
@@ -207,6 +206,18 @@ export const visitorApi = baseApi.injectEndpoints({
       ],
     }),
 
+    checkVisitorHasAppointments: builder.query<{ hasAppointments: boolean; count: number }, string>({
+      query: (id) => `/visitors/${id}/has-appointments`,
+      transformResponse: (response: any) => {
+        if (response.success && response.data) {
+          return response.data
+        }
+        return response
+      },
+      providesTags: (result, error, id) => [{ type: 'Visitor' as const, id: `APPOINTMENTS_${id}` }],
+      keepUnusedDataFor: 60,
+    }),
+
     deleteVisitor: builder.mutation<void, string>({
       query: (id) => ({
         url: `/visitors/${id}`,
@@ -218,43 +229,7 @@ export const visitorApi = baseApi.injectEndpoints({
       ],
     }),
 
-    restoreVisitor: builder.mutation<Visitor, string>({
-      query: (id) => ({
-        url: `/visitors/${id}/restore`,
-        method: 'PUT',
-      }),
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      invalidatesTags: (result, error, id) => [
-        { type: 'Visitor' as const, id },
-        { type: 'Visitor' as const, id: 'LIST' },
-        { type: 'Visitor' as const, id: 'TRASHED' },
-      ],
-    }),
 
-    getTrashedVisitors: builder.query<VisitorListResponse, GetVisitorsQuery | void>({
-      query: (params) => {
-        const queryParams = createUrlParams(params || {})
-        return `/visitors/trashed${queryParams ? `?${queryParams}` : ''}`
-      },
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      providesTags: (result) =>
-        result?.visitors
-          ? [
-              ...result.visitors.map(({ _id }) => ({ type: 'Visitor' as const, id: _id })),
-              { type: 'Visitor' as const, id: 'TRASHED' },
-            ]
-          : [{ type: 'Visitor' as const, id: 'TRASHED' }],
-    }),
 
     getVisitorStats: builder.query<VisitorStats, void>({
       query: () => '/visitors/stats',
@@ -291,8 +266,7 @@ export const {
   useSearchVisitorsMutation,
   useUpdateVisitorMutation,
   useDeleteVisitorMutation,
-  useRestoreVisitorMutation,
-  useGetTrashedVisitorsQuery,
+  useCheckVisitorHasAppointmentsQuery,
   useGetVisitorStatsQuery,
   useBulkUpdateVisitorsMutation,
 } = visitorApi

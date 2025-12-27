@@ -4,21 +4,12 @@
 import { AppointmentFormData } from "./appointmentValidation"
 
 /**
- * Generate unique appointment ID
- */
-export const generateAppointmentId = (): string => {
-  return `APT${Date.now()}${Math.random().toString(36).substr(2, 5).toUpperCase()}`
-}
-
-/**
  * Create appointment data for API submission
  */
 export const createAppointmentPayload = (data: AppointmentFormData) => {
   return {
-    appointmentId: generateAppointmentId(),
     employeeId: data.employeeId,
     visitorId: data.visitorId,
-    checkInTime: new Date().toISOString(),
     accompanyingCount: data.accompanyingCount ?? 0,
     appointmentDetails: {
       purpose: data.purpose,
@@ -29,12 +20,6 @@ export const createAppointmentPayload = (data: AppointmentFormData) => {
       notes: data.notes || "",
       vehicleNumber: data.vehicleNumber || "",
       vehiclePhoto: data.vehiclePhoto || ""
-    },
-    visitorDetails: {
-      name: data.visitorName,
-      email: data.visitorEmail,
-      phone: data.visitorPhone,
-      aadhaarNumber: data.aadhaarNumber || ""
     },
     securityDetails: {
       badgeIssued: false,
@@ -100,4 +85,5 @@ export const formatVisitorLabel = (visitor: any): string => {
 export const formatVisitorSearchKeywords = (visitor: any): string => {
   return `${visitor.name} ${visitor.email ?? ""} ${visitor.phone ?? ""}`.trim()
 }
+
 

@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/common/pageHeader"
 import { CalendarPlus } from "lucide-react"
-import { NewAppointmentModal } from "@/components/appointment/NewAppointmentModal"
-import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
+import { routes } from "@/utils/routes"
 
 interface DashboardHeaderProps {
   companyName?: string
@@ -35,14 +36,12 @@ export function DashboardHeader({ companyName }: DashboardHeaderProps) {
             />
           </>
         ) : (
-          <NewAppointmentModal
-            triggerButton={
-              <Button className="w-full sm:w-auto text-xs sm:text-sm whitespace-nowrap">
-                <CalendarPlus className="mr-1.5 h-4 w-4 shrink-0" />
-                New Appointment
-              </Button>
-            }
-          />
+          <Button className="w-full sm:w-auto text-xs sm:text-sm whitespace-nowrap" asChild>
+            <Link href={routes.privateroute.APPOINTMENTCREATE} prefetch>
+              <CalendarPlus className="mr-1.5 h-4 w-4 shrink-0" />
+              New Appointment
+            </Link>
+          </Button>
         )}
       </div>
     </PageHeader>

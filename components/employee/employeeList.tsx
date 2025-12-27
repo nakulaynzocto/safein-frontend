@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmployeeTable } from "./employeeTable"
-import { NewEmployeeModal } from "./NewEmployeeModal"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 import { useGetEmployeesQuery, useDeleteEmployeeMutation } from "@/store/api/employeeApi"
@@ -13,6 +12,7 @@ import { UserPlus, FileSpreadsheet, User } from "lucide-react"
 import { BulkImportModal } from "./BulkImportModal"
 import { routes } from "@/utils/routes"
 import { useDebounce } from "@/hooks/useDebounce"
+import Link from "next/link"
 
 export function EmployeeList() {
   const [currentPage, setCurrentPage] = useState(1)
@@ -58,8 +58,9 @@ export function EmployeeList() {
       showSuccessToast("Employee deleted successfully")
       refetch()
       refetchTrialLimits()
-    } catch (error) {
-      showErrorToast("Failed to delete employee")
+    } catch (error: any) {
+      const errorMessage = error?.data?.message || error?.error || "Failed to delete employee"
+      showErrorToast(errorMessage)
     }
   }
 
@@ -113,7 +114,8 @@ export function EmployeeList() {
                 <>
                   <Button 
                     onClick={() => setShowUpgradeModal(true)}
-                    className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                    variant="outline"
+                    className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
                   >
                     <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                     <span className="hidden min-[375px]:inline sm:hidden">Upgrade</span>
@@ -126,15 +128,16 @@ export function EmployeeList() {
                 </>
               ) : (
                 <>
-                  <NewEmployeeModal 
-                    onSuccess={handleEmployeeCreated}
-                    trigger={
-                      <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0">
-                        <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                        <span className="hidden min-[375px]:inline">Add Employee</span>
-                      </Button>
-                    }
-                  />
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                  >
+                    <Link href={routes.privateroute.EMPLOYEECREATE} prefetch>
+                      <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                      <span className="hidden min-[375px]:inline">Add Employee</span>
+                    </Link>
+                  </Button>
                   <Button
                     variant="outline"
                     onClick={() => setShowBulkImportModal(true)}

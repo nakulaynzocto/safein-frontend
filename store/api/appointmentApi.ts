@@ -3,7 +3,6 @@ import { createUrlParams } from '@/utils/helpers'
 
 export interface Appointment {
   _id: string
-  appointmentId: string
   employeeId: string
   employee?: EmployeeDetails // Populated employee details
   visitorId: string // Reference to Visitor
@@ -81,7 +80,6 @@ export interface NotificationPreferences {
 }
 
 export interface CreateAppointmentRequest {
-  appointmentId: string
   employeeId: string
   visitorId: string // Reference to Visitor
   accompaniedBy?: AccompaniedBy
@@ -329,23 +327,6 @@ export const appointmentApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'Appointment', id: 'LIST' }],
     }),
 
-    restoreAppointment: builder.mutation<Appointment, string>({
-      query: (id) => ({
-        url: `/appointments/${id}/restore`,
-        method: 'PUT',
-      }),
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      invalidatesTags: (result, error, id) => [
-        { type: 'Appointment', id },
-        { type: 'Appointment', id: 'LIST' },
-        { type: 'Appointment', id: 'TRASHED' },
-      ],
-    }),
 
     cancelAppointment: builder.mutation<Appointment, string>({
       query: (id) => ({
@@ -454,7 +435,6 @@ export const {
   useCheckInAppointmentMutation,
   useCheckOutAppointmentMutation,
   useBulkUpdateAppointmentsMutation,
-  useRestoreAppointmentMutation,
   useCancelAppointmentMutation,
   useApproveAppointmentMutation,
   useRejectAppointmentMutation,

@@ -6,6 +6,7 @@ import { useApproveAppointmentMutation, useRejectAppointmentMutation } from '@/s
 import { useAppSelector } from '@/store/hooks'
 import { showSuccessToast, showErrorToast } from '@/utils/toast'
 import { routes } from '@/utils/routes'
+import { StatusPage } from '@/components/common/statusPage'
 
 export default function EmailActionPage() {
   const params = useParams()
@@ -69,61 +70,52 @@ export default function EmailActionPage() {
 
   if (status === 'auth-required') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
-          <div className="text-6xl mb-4">🔒</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h1>
-          <p className="text-gray-600 mb-6 leading-relaxed">
-            {message}
-          </p>
-          <button
-            onClick={handleGoToLogin}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
+      <StatusPage
+        type="warning"
+        title="Authentication Required"
+        message={message}
+        description="You need to be logged in to perform this action."
+        primaryAction={{
+          label: "Go to Login",
+          onClick: handleGoToLogin,
+          href: routes.publicroute.LOGIN,
+        }}
+        showHomeButton={true}
+      />
+    )
+  }
+
+  if (status === 'success') {
+    return (
+      <StatusPage
+        type="success"
+        title={action === 'approve' ? 'Appointment Approved!' : 'Appointment Rejected'}
+        message={message}
+        description={action === 'approve' 
+          ? 'The visitor has been notified about the approval.' 
+          : 'The visitor has been informed about the rejection.'}
+        primaryAction={{
+          label: "View Dashboard",
+          onClick: handleGoToDashboard,
+          href: routes.privateroute.NOTIFICATIONS,
+        }}
+        showHomeButton={true}
+      />
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
-        {status === 'success' ? (
-          <>
-            <div className="text-6xl mb-4">
-              {action === 'approve' ? '✅' : '❌'}
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">
-              {action === 'approve' ? 'Appointment Approved!' : 'Appointment Rejected'}
-            </h1>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              {message}
-            </p>
-            <button
-              onClick={handleGoToDashboard}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
-            >
-              View Dashboard
-            </button>
-          </>
-        ) : (
-          <>
-            <div className="text-6xl mb-4">❌</div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              {message}
-            </p>
-            <button
-              onClick={handleGoToDashboard}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
-            >
-              Back to Dashboard
-            </button>
-          </>
-        )}
-      </div>
-    </div>
+    <StatusPage
+      type="error"
+      title="Error"
+      message={message}
+      description="There was an error processing your request. Please try again or contact support."
+      primaryAction={{
+        label: "Back to Dashboard",
+        onClick: handleGoToDashboard,
+        href: routes.privateroute.NOTIFICATIONS,
+      }}
+      showHomeButton={true}
+    />
   )
 }

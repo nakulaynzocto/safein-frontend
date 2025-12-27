@@ -33,7 +33,9 @@ import {
   Building,
   CheckCircle,
   X,
-  Edit
+  Edit,
+  Link2,
+  Maximize2
 } from "lucide-react"
 import { Appointment } from "@/store/api/appointmentApi"
 import { 
@@ -44,6 +46,7 @@ import { SearchInput } from "@/components/common/searchInput"
 import DateRangePicker from "@/components/common/dateRangePicker"
 import { AppointmentDetailsDialog } from "./appointmentDetailsDialog"
 import { CheckOutDialog } from "./checkOutDialog"
+import { CreateAppointmentLinkModal } from "./CreateAppointmentLinkModal"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,7 +56,6 @@ import {
 } from "@/components/ui/dropdownMenu"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { routes } from "@/utils/routes"
-import { NewAppointmentModal } from "./NewAppointmentModal"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 
@@ -121,10 +123,9 @@ export function AppointmentTable({
   onDateToChange,
 }: AppointmentTableProps) {
   const router = useRouter()
-  const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false)
-  const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null)
   const { data: trialStatus, refetch: refetchTrialLimits } = useGetTrialLimitsStatusQuery()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showCreateLinkModal, setShowCreateLinkModal] = useState(false)
   
   const [approveAppointment, { isLoading: isApprovingMutation }] = useApproveAppointmentMutation()
   const [rejectAppointment, { isLoading: isRejectingMutation }] = useRejectAppointmentMutation()
@@ -208,8 +209,7 @@ export function AppointmentTable({
   }
 
   const handleEdit = (appointment: Appointment) => {
-    setEditingAppointmentId(appointment._id)
-    setShowNewAppointmentModal(true)
+    router.push(routes.privateroute.APPOINTMENTEDIT.replace("[id]", appointment._id))
   }
 
 
@@ -221,24 +221,9 @@ export function AppointmentTable({
     return scheduledDateTime < now
   }
 
-  const handleAppointmentCreated = () => {
-    setEditingAppointmentId(null)
-    setShowNewAppointmentModal(false)
-    refetchTrialLimits()
-  }
 
   const getColumns = () => {
     const baseColumns = [
-      {
-        key: "appointmentId",
-        header: "Appointment",
-        render: (appointment: Appointment) => (
-          <div className="space-y-1">
-            <div className="font-medium">{appointment.appointmentId}</div>
-            <div className="text-xs text-blue-600 font-mono">ID: {appointment._id.slice(-8)}</div>
-          </div>
-        ),
-      },
       {
         key: "visitorName",
         header: "Visitor",
@@ -254,29 +239,43 @@ export function AppointmentTable({
           
           return (
             <div className="flex items-center gap-3 min-w-0">
-              <Avatar className="h-10 w-10 flex-shrink-0">
-                <AvatarImage 
-                  src={visitorPhoto} 
-                  alt={visitorName}
-                  onError={(e) => {
-                    // Hide image on error, fallback will show
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-                <AvatarFallback>
-                  {getInitials(visitorName, 2)}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative group shrink-0">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage 
+                    src={visitorPhoto} 
+                    alt={visitorName}
+                    onError={(e) => {
+                      // Hide image on error, fallback will show
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <AvatarFallback>
+                    {getInitials(visitorName, 2)}
+                  </AvatarFallback>
+                </Avatar>
+                {visitorPhoto && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(visitorPhoto, '_blank');
+                    }}
+                    className="absolute -bottom-1 -right-1 bg-[#3882a5] text-white rounded-full p-1 shadow-md hover:bg-[#2d6a87] transition-colors opacity-0 group-hover:opacity-100"
+                    title="View full image"
+                  >
+                    <Maximize2 className="h-2.5 w-2.5" />
+                  </button>
+                )}
+              </div>
               <div className="min-w-0 flex-1">
                 <div className="font-medium truncate">{visitorName}</div>
                 {visitorEmail !== "N/A" && (
                   <div className="flex items-center gap-1 text-xs text-gray-500 truncate">
-                    <Mail className="h-3 w-3 flex-shrink-0" />
+                    <Mail className="h-3 w-3 shrink-0" />
                     <span className="truncate">{visitorEmail}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <Phone className="h-3 w-3 flex-shrink-0" />
+                  <Phone className="h-3 w-3 shrink-0" />
                   <span>{visitorPhone}</span>
                 </div>
                 {visitorCompany && (
@@ -346,7 +345,7 @@ export function AppointmentTable({
           )
           return (
             <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+              <Calendar className="h-3 w-3 text-muted-foreground shrink-0" />
               <span>{dateTime || "N/A"}</span>
             </div>
           )
@@ -469,7 +468,7 @@ export function AppointmentTable({
           <CardContent className="flex items-center justify-center py-8">
             <div className="text-center">
               <p className="text-red-500 mb-4">Failed to load appointments</p>
-              <Button onClick={() => window.location.reload()} className="btn-hostinger btn-hostinger-primary">
+              <Button onClick={() => window.location.reload()} variant="outline">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Retry
               </Button>
@@ -484,21 +483,22 @@ export function AppointmentTable({
     <div className="space-y-4 sm:space-y-6">
       <Card className="card-hostinger p-3 sm:p-4">
         <CardHeader className="pb-3 sm:pb-4 px-0">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-semibold flex-1 min-w-0">
               <Calendar className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
               <span className="truncate">{title || 'Appointments'}</span>
             </CardTitle>
-            <>
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">
                 {hasReachedAppointmentLimit ? (
                   <>
                     <Button 
-                      className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                      variant="outline"
+                      className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 whitespace-nowrap shrink-0 min-h-[40px] sm:min-h-0"
                       onClick={() => setShowUpgradeModal(true)}
                     >
-                      <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                      <span className="hidden min-[375px]:inline sm:hidden">Upgrade</span>
+                      <Plus className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
                       <span className="hidden sm:inline">Upgrade to Schedule More</span>
+                      <span className="sm:hidden">Upgrade</span>
                     </Button>
                     <UpgradePlanModal 
                       isOpen={showUpgradeModal}
@@ -506,32 +506,55 @@ export function AppointmentTable({
                     />
                   </>
                 ) : (
-                  <NewAppointmentModal 
-                    onSuccess={handleAppointmentCreated}
-                    triggerButton={
-                      <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0">
-                        <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                        <span className="hidden min-[375px]:inline">Schedule Appointment</span>
-                      </Button>
-                    }
-                  />
+                  <>
+                    <Button
+                      variant="outline"
+                      className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 whitespace-nowrap shrink-0 min-h-[40px] sm:min-h-0"
+                      onClick={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
+                    >
+                      <Plus className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                      <span className="hidden sm:inline">Schedule Appointment</span>
+                      <span className="sm:hidden">Schedule</span>
+                    </Button>
+                    <CreateAppointmentLinkModal
+                      open={showCreateLinkModal}
+                      onOpenChange={setShowCreateLinkModal}
+                      triggerButton={
+                        <Button
+                          variant="outline"
+                          className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 whitespace-nowrap shrink-0 min-h-[40px] sm:min-h-0"
+                          title="Create Appointment Link"
+                        >
+                          <Link2 className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                          <span className="hidden sm:inline">Create Link</span>
+                          <span className="sm:hidden">Link</span>
+                        </Button>
+                      }
+                      onSuccess={() => {}}
+                    />
+                  </>
                 )}
-            </>
+            </div>
           </div>
         </CardHeader>
       </Card>
 
       <Card className="card-hostinger p-3 sm:p-4 overflow-hidden">
         <CardHeader className="pb-3 sm:pb-4 px-0">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
               <SearchInput
                 placeholder="Search appointments..."
                 value={searchTerm}
                 onChange={onSearchChange}
                 debounceDelay={500}
-                className="w-full"
+                className="w-full sm:flex-1"
               />
-              <DateRangePicker onDateRangeChange={(r) => { onDateFromChange?.(r.startDate || ""); onDateToChange?.(r.endDate || ""); onPageChange?.(1); }} />
+              <div className="w-full sm:w-auto">
+                <DateRangePicker 
+                  onDateRangeChange={(r) => { onDateFromChange?.(r.startDate || ""); onDateToChange?.(r.endDate || ""); onPageChange?.(1); }} 
+                  className="w-full sm:w-auto"
+                />
+              </div>
             </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -548,7 +571,7 @@ export function AppointmentTable({
               if (hasReachedAppointmentLimit) {
                 setShowUpgradeModal(true)
               } else {
-                setShowNewAppointmentModal(true)
+                router.push(routes.privateroute.APPOINTMENTCREATE)
               }
             }}
             showCard={false}
@@ -576,7 +599,7 @@ export function AppointmentTable({
           open={showDeleteDialog}
           onOpenChange={setShowDeleteDialog}
           title="Delete Appointment"
-          description={`Are you sure you want to delete appointment ${selectedAppointment?.appointmentId}? This will move the appointment to trash.`}
+          description={`Are you sure you want to delete appointment ${selectedAppointment?._id}? This will move the appointment to trash.`}
           onConfirm={handleDelete}
           confirmText={isDeleting ? "Deleting..." : "Delete"}
           variant="destructive"
@@ -588,7 +611,7 @@ export function AppointmentTable({
           open={showApproveDialog}
           onOpenChange={setShowApproveDialog}
           title="Approve Appointment"
-          description={`Are you sure you want to approve appointment ${selectedAppointment?.appointmentId}? This will change the status to approved.`}
+          description={`Are you sure you want to approve appointment ${selectedAppointment?._id}? This will change the status to approved.`}
           onConfirm={() => {
             if (selectedAppointment) {
               handleApprove(selectedAppointment._id)
@@ -604,7 +627,7 @@ export function AppointmentTable({
         open={showRejectDialog}
         onOpenChange={setShowRejectDialog}
         title="Reject Appointment"
-        description={`Are you sure you want to reject appointment ${selectedAppointment?.appointmentId}? This will change the status to rejected.`}
+        description={`Are you sure you want to reject appointment ${selectedAppointment?._id}? This will change the status to rejected.`}
         onConfirm={() => {
           if (selectedAppointment) {
             handleReject(selectedAppointment._id)
@@ -632,18 +655,6 @@ export function AppointmentTable({
         on_close={() => setShowViewDialog(false)}
       />
 
-      <NewAppointmentModal
-          appointmentId={editingAppointmentId || undefined}
-          open={showNewAppointmentModal}
-          onOpenChange={(open) => {
-            setShowNewAppointmentModal(open)
-            if (!open) {
-              setEditingAppointmentId(null)
-            }
-          }}
-          onSuccess={handleAppointmentCreated}
-          triggerButton={<div />}
-        />
     </div>
   )
 }

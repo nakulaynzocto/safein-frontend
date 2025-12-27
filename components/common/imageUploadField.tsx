@@ -15,6 +15,7 @@ interface ImageUploadFieldProps {
   errors?: any
   initialUrl?: string
   enableImageCapture?: boolean
+  appointmentToken?: string // Token for public upload endpoint
 }
 
 export function ImageUploadField({ 
@@ -24,7 +25,8 @@ export function ImageUploadField({
   setValue, 
   errors, 
   initialUrl, 
-  enableImageCapture = false 
+  enableImageCapture = false,
+  appointmentToken
 }: ImageUploadFieldProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(initialUrl || null)
   const [uploadSuccess, setUploadSuccess] = useState(false)
@@ -54,11 +56,12 @@ export function ImageUploadField({
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault()
     event.stopPropagation()
+    
     const file = event.target.files?.[0]
     if (file) {
       await processFile(file)
     }
-    // Reset the input value to allow re-uploading the same file
+    
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -73,7 +76,7 @@ export function ImageUploadField({
       
       validateFile(file)
       
-      const result = await uploadFile({ file }).unwrap()
+      const result = await uploadFile({ file, token: appointmentToken }).unwrap()
       
       const uploadedUrl = result?.url
       if (!uploadedUrl) {
@@ -87,7 +90,6 @@ export function ImageUploadField({
       setIsImageLoading(false)
       setUploadSuccess(true)
       
-      // Show success toast after a brief delay to ensure state is updated
       setTimeout(() => {
         showSuccessToast("Image uploaded successfully!")
       }, 100)
@@ -101,7 +103,24 @@ export function ImageUploadField({
       setImageError(true)
       setIsImageLoading(false)
       
-      showErrorToast(error?.data?.message || error?.message || "Failed to upload image")
+      let errorMessage = "Failed to upload image"
+      
+      if (error?.data?.message) {
+        errorMessage = error.data.message
+      } else if (error?.data?.error) {
+        errorMessage = error.data.error
+      } else if (error?.message) {
+        errorMessage = error.message
+      } else if (error?.data && typeof error.data === 'string') {
+        errorMessage = error.data
+      } else if (error?.error) {
+        errorMessage = error.error
+      } else if (typeof error === 'string') {
+        errorMessage = error
+      }
+      
+      showErrorToast(errorMessage)
+      return
     }
   }
 
@@ -266,8 +285,7 @@ export function ImageUploadField({
       setPreviewImage(null)
       setValue(name, '', { shouldValidate: true })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialUrl])
+  }, [initialUrl, previewImage, name, setValue])
 
   return (
     <div className="space-y-3 p-[3px]">
@@ -401,6 +419,7 @@ export function ImageUploadField({
                 <button
                   type="button"
                   onClick={(e) => {
+                    e.preventDefault()
                     e.stopPropagation()
                     handleClearFile()
                   }}
@@ -469,6 +488,9 @@ export function ImageUploadField({
           className="hidden"
           accept="image/*"
           onChange={handleFileChange}
+          onClick={(e) => {
+            e.stopPropagation()
+          }}
           disabled={isUploading}
           ref={fileInputRef}
         />

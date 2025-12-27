@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useDebounce } from "@/hooks/useDebounce"
+import { routes } from "@/utils/routes"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { SearchInput } from "@/components/common/searchInput"
@@ -22,11 +23,13 @@ import {
   Calendar,
   User,
   MoreVertical,
-  RefreshCw
+  RefreshCw,
+  Maximize2
 } from "lucide-react"
 import { 
   useGetVisitorsQuery, 
   useDeleteVisitorMutation,
+  useCheckVisitorHasAppointmentsQuery,
   Visitor,
   GetVisitorsQuery 
 } from "@/store/api/visitorApi"
@@ -39,8 +42,8 @@ import {
 } from "@/components/ui/dropdownMenu"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { useRouter } from "next/navigation"
-import { routes } from "@/utils/routes"
-import { NewVisitorModal } from "./NewVisitorModal"
+import { NewVisitorModal } from "./VisitorForm"
+import { formatDate } from "@/utils/helpers"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 import { VisitorDetailsDialog } from "./visitorDetailsDialog"
@@ -61,19 +64,33 @@ const createColumns = (
     header: "Visitor",
     render: (visitor: Visitor) => (
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-        <Avatar className="h-8 w-8 sm:h-10 sm:w-10 shrink-0">
-          <AvatarImage src={visitor.photo} alt={visitor.name} />
-          <AvatarFallback className="text-xs sm:text-sm">
-            {visitor.name.split(' ').map(n => n[0]).join('')}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative group shrink-0">
+          <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+            <AvatarImage src={visitor.photo} alt={visitor.name} />
+            <AvatarFallback className="text-xs sm:text-sm">
+              {visitor.name.split(' ').map(n => n[0]).join('')}
+            </AvatarFallback>
+          </Avatar>
+          {visitor.photo && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(visitor.photo, '_blank');
+              }}
+              className="absolute -bottom-1 -right-1 bg-[#3882a5] text-white rounded-full p-1 shadow-md hover:bg-[#2d6a87] transition-colors opacity-0 group-hover:opacity-100"
+              title="View full image"
+            >
+              <Maximize2 className="h-2.5 w-2.5" />
+            </button>
+          )}
+        </div>
         <div className="min-w-0 flex-1">
           <div className="font-medium text-sm sm:text-base truncate max-w-[100px] sm:max-w-[150px]">
             {visitor.name}
           </div>
-          {visitor.visitorId && (
-            <div className="text-[10px] sm:text-xs text-blue-600 font-mono truncate max-w-[80px] sm:max-w-[120px]" title={visitor.visitorId}>
-              ID: {truncateText(visitor.visitorId, 10)}
+          {visitor.email && (
+            <div className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[80px] sm:max-w-[120px]" title={visitor.email}>
+              {truncateText(visitor.email, 20)}
             </div>
           )}
         </div>
@@ -114,14 +131,22 @@ const createColumns = (
     header: "ID Proof",
     className: "hidden md:table-cell",
     render: (visitor: Visitor) => (
-      <div className="space-y-1">
-        <Badge variant="outline" className="text-xs">
-          {visitor.idProof.type.replace('_', ' ').toUpperCase()}
-        </Badge>
-        <div className="text-xs text-gray-500 truncate max-w-[100px]">
-          {visitor.idProof.number}
+      visitor.idProof?.type || visitor.idProof?.number ? (
+        <div className="space-y-1">
+          {visitor.idProof.type && (
+            <Badge variant="outline" className="text-xs">
+              {visitor.idProof.type.replace('_', ' ').toUpperCase()}
+            </Badge>
+          )}
+          {visitor.idProof.number && (
+            <div className="text-xs text-gray-500 truncate max-w-[100px]">
+              {visitor.idProof.number}
+            </div>
+          )}
         </div>
-      </div>
+      ) : (
+        <span className="text-xs text-muted-foreground">-</span>
+      )
     )
   },
   {
@@ -131,7 +156,7 @@ const createColumns = (
     render: (visitor: Visitor) => (
       <div className="flex items-center gap-2 text-sm text-gray-500">
         <Calendar className="h-3 w-3 shrink-0" />
-        {new Date(visitor.createdAt).toLocaleDateString()}
+        {formatDate(visitor.createdAt)}
       </div>
     )
   },
@@ -180,8 +205,6 @@ export function VisitorList() {
     return { startDate: null, endDate: null }
   })
   const [currentPage, setCurrentPage] = useState(1)
-  const [editingVisitor, setEditingVisitor] = useState<Visitor | null>(null)
-  const [showVisitorModal, setShowVisitorModal] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null)
@@ -210,6 +233,18 @@ export function VisitorList() {
   } = useGetVisitorsQuery(queryParams)
   
   const [deleteVisitor, { isLoading: isDeleting }] = useDeleteVisitorMutation()
+  
+  const visitorId = selectedVisitor?._id || ''
+  const shouldCheckAppointments = Boolean(selectedVisitor && showDeleteDialog)
+  
+  const { data: appointmentCheck } = useCheckVisitorHasAppointmentsQuery(visitorId, {
+    skip: !shouldCheckAppointments,
+  })
+  
+  const disabledMessage = useMemo(() => {
+    if (!appointmentCheck?.hasAppointments) return undefined
+    return `Cannot delete visitor. ${appointmentCheck.count} appointment(s) have been created with this visitor. Please delete or reassign the appointments first.`
+  }, [appointmentCheck])
 
   const handleDeleteClick = (visitor: Visitor) => {
     setSelectedVisitor(visitor)
@@ -235,15 +270,8 @@ export function VisitorList() {
     refetch()
   }
 
-  const handleVisitorCreated = () => {
-    setShowVisitorModal(false)
-    refetch()
-    refetchTrialLimits()
-  }
-
-
   const handleEditVisitor = (visitor: Visitor) => {
-    setEditingVisitor(visitor)
+    router.push(routes.privateroute.VISITOREDIT.replace("[id]", visitor._id))
   }
 
   const handleViewVisitor = (visitor: Visitor) => {
@@ -251,10 +279,6 @@ export function VisitorList() {
     setShowViewDialog(true)
   }
 
-  const handleVisitorUpdated = () => {
-    setEditingVisitor(null)
-    refetch()
-  }
 
   const visitors = visitorsData?.visitors || []
   const pagination = visitorsData?.pagination
@@ -265,7 +289,7 @@ export function VisitorList() {
     if (hasReachedVisitorLimit) {
       setShowUpgradeModal(true)
     } else {
-      setShowVisitorModal(true)
+      router.push(routes.privateroute.VISITORREGISTRATION)
     }
   }
 
@@ -281,7 +305,7 @@ export function VisitorList() {
             <div className="text-center">
               <p className="text-red-500 mb-2">Failed to load visitors</p>
               <p className="text-sm text-gray-500 mb-4">{errorMessage}</p>
-              <Button onClick={handleRefresh} className="btn-hostinger btn-hostinger-primary">
+              <Button onClick={handleRefresh} variant="outline">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Retry
               </Button>
@@ -306,7 +330,8 @@ export function VisitorList() {
               {hasReachedVisitorLimit ? (
                 <>
                   <Button 
-                    className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                    variant="outline"
+                    className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
                     onClick={() => setShowUpgradeModal(true)}
                   >
                     <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
@@ -319,15 +344,14 @@ export function VisitorList() {
                   />
                 </>
               ) : (
-                <NewVisitorModal 
-                  onSuccess={handleVisitorCreated}
-                  trigger={
-                    <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0">
-                      <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                      <span className="hidden min-[375px]:inline">Add Visitor</span>
-                    </Button>
-                  }
-                />
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
+                  onClick={() => router.push(routes.privateroute.VISITORREGISTRATION)}
+                >
+                  <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                  <span className="hidden min-[375px]:inline">Add Visitor</span>
+                </Button>
               )}
             </div>
           </div>
@@ -380,32 +404,18 @@ export function VisitorList() {
         </div>
       )}
 
-      {/* Edit Visitor Modal */}
-      <NewVisitorModal
-        visitorId={editingVisitor?._id}
-        open={!!editingVisitor}
-        onOpenChange={(open) => !open && setEditingVisitor(null)}
-        onSuccess={handleVisitorUpdated}
-        trigger={<div />} // Hidden trigger since we control the modal programmatically
-      />
-
-      {/* Add Visitor Modal */}
-      <NewVisitorModal
-        open={showVisitorModal}
-        onOpenChange={setShowVisitorModal}
-        onSuccess={handleVisitorCreated}
-        trigger={<div />} // Hidden trigger since we control the modal programmatically
-      />
 
       {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         title="Delete Visitor"
-        description={`Are you sure you want to delete ${selectedVisitor?.name}? This will move the visitor to trash.`}
+        description={`Are you sure you want to delete ${selectedVisitor?.name}?`}
         onConfirm={handleDeleteVisitor}
         confirmText={isDeleting ? "Deleting..." : "Delete"}
         variant="destructive"
+        disabled={appointmentCheck?.hasAppointments || false}
+        disabledMessage={disabledMessage}
       />
 
       {/* View Visitor Details Dialog */}

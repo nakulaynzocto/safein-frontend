@@ -5,7 +5,6 @@ import { routes } from '../../utils/routes'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4010/api/v1'
 
-// Custom base query with 401 handling and timeout
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   try {
     const result = await fetchBaseQuery({
@@ -19,10 +18,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
           headers.set('Authorization', `Bearer ${token}`)
         }
         
-        // Only set JSON content type if body is not FormData
-        if (args.body instanceof FormData) {
-          // Don't set Content-Type for FormData - let browser set it with boundary
-        } else {
+        if (!(args.body instanceof FormData)) {
           headers.set('Content-Type', 'application/json')
         }
         
@@ -30,22 +26,29 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
       },
     })(args, api, extraOptions)
 
-    // Handle 401 errors - silent redirect to login using route helpers
     if (result.error && result.error.status === 401) {
       const isLoginRequest = args?.url?.includes(routes.publicroute.LOGIN)
       const isLogoutRequest = args?.url?.includes('/logout')
       const isRegisterRequest = args?.url?.includes(routes.publicroute.REGISTER)
+      const isUploadRequest = args?.url?.includes('/upload')
+      
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname
+        const isOnPublicBookingPage = currentPath?.includes('/book-appointment/')
+        
+        if (isOnPublicBookingPage && isUploadRequest) {
+          return result
+        }
+      }
       
       if (!isLoginRequest && !isLogoutRequest && !isRegisterRequest) {
         api.dispatch(logout())
         
         if (typeof window !== 'undefined') {
-          // Clear storage silently
           localStorage.removeItem('token')
           localStorage.removeItem('user')
           sessionStorage.clear()
           
-          // Check if not already on login page
           const currentPath = window.location.pathname
           const isOnAuthPage = currentPath === routes.publicroute.LOGIN || 
                                currentPath === routes.publicroute.REGISTER || 
@@ -53,34 +56,25 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
                                currentPath === routes.publicroute.RESET_PASSWORD
           
           if (!isOnAuthPage) {
-            // Direct redirect without toast or delay
             window.location.replace(routes.publicroute.LOGIN)
           }
         }
       }
     }
 
-    // Handle 404 and other errors
     if (result.error && (result.error.status === 404 || result.error.status === 500)) {
-      // Don't show error toast for expected 404s or specific endpoints
-      const shouldSilence = args?.url?.includes('/stats') || 
-                           args?.url?.includes('/trashed')
+      const shouldSilence = args?.url?.includes('/stats')
       
       if (!shouldSilence && typeof window !== 'undefined') {
-        // Check if it's a JSON parse error (usually means HTML was returned)
         const errorData = result.error.data as any
         if (errorData && typeof errorData === 'string' && errorData.includes('<!DOCTYPE')) {
-          console.error('API returned HTML instead of JSON - backend route may be missing')
+          // Silent handling for HTML responses
         }
       }
     }
 
     return result
   } catch (error: any) {
-    // Handle network errors
-    if (typeof window !== 'undefined') {
-      console.error('Network error:', error)
-    }
     return {
       error: {
         status: 'FETCH_ERROR' as const,
@@ -93,11 +87,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  // NOTE:
-  // - 'User' + 'Subscription' are used by userSubscriptionApi
-  // - Other tags are used by their respective feature APIs
-  // If you introduce new cache tags, add them here.
-  tagTypes: ['User', 'Employee', 'Appointment', 'Company', 'Visitor', 'Subscription', 'SubscriptionPlan', 'Settings'],
+  tagTypes: ['User', 'Employee', 'Appointment', 'Company', 'Visitor', 'Subscription', 'SubscriptionPlan', 'Settings', 'AppointmentLink'],
   endpoints: () => ({}),
   refetchOnMountOrArgChange: false,
   refetchOnFocus: false,
