@@ -9,85 +9,23 @@ import {
   Search,
   Book,
   Video,
-  MessageSquare,
   Phone,
-  Mail,
   ArrowRight,
-  HelpCircle,
-  FileText,
-  PlayCircle,
-  Users,
-  Calendar,
-  Shield
+  Tag,
+  Clock
 } from "lucide-react"
 import Link from "next/link"
 import { PublicLayout } from "@/components/layout/publicLayout"
 import { PageSEOHead } from "@/components/seo/pageSEOHead"
+import { helpCategories, helpArticles } from "./data"
 
 export default function HelpPage() {
-  const helpCategories = [
-    {
-      icon: Calendar,
-      title: "Getting Started",
-      description: "Learn the basics of setting up your SafeIn management system",
-      articles: [
-        "How to create your first appointment",
-        "Setting up visitor registration",
-        "Configuring email notifications",
-        "Basic dashboard overview"
-      ]
-    },
-    {
-      icon: Users,
-      title: "User Management",
-      description: "Manage employees, visitors, and user permissions",
-      articles: [
-        "Adding and managing employees",
-        "Visitor registration process",
-        "User roles and permissions",
-        "Bulk user import"
-      ]
-    },
-    {
-      icon: Shield,
-      title: "Security & Privacy",
-      description: "Learn about security features and data protection",
-      articles: [
-        "Data encryption and security",
-        "Privacy policy compliance",
-        "Access control settings",
-        "Audit trail features"
-      ]
-    }
-  ]
+  const getArticleBySlug = (slug: string) => {
+    return helpArticles.find(a => a.slug === slug)
+  }
 
-  const popularArticles = [
-    {
-      title: "How to schedule your first visitor appointment",
-      category: "Getting Started",
-      readTime: "3 min read"
-    },
-    {
-      title: "Setting up email notifications for visitors",
-      category: "Configuration",
-      readTime: "5 min read"
-    },
-    {
-      title: "Managing visitor check-in and check-out",
-      category: "User Management",
-      readTime: "4 min read"
-    },
-    {
-      title: "Troubleshooting common login issues",
-      category: "Troubleshooting",
-      readTime: "2 min read"
-    },
-    {
-      title: "Exporting visitor reports and analytics",
-      category: "Reporting",
-      readTime: "6 min read"
-    }
-  ]
+  // Get most popular articles (first 5 for demo)
+  const popularArticles = helpArticles.slice(0, 5)
 
   const supportOptions = [
     {
@@ -210,7 +148,7 @@ export default function HelpPage() {
 
               <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {helpCategories.map((category, index) => (
-                  <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
+                  <Card key={index} className="hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
                     <CardHeader>
                       <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 bg-brand-tint">
                         <category.icon className="h-6 w-6 text-brand-strong" />
@@ -222,20 +160,33 @@ export default function HelpPage() {
                         {category.description}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
-                        {category.articles.map((article, articleIndex) => (
-                          <li key={articleIndex} className="text-sm text-accent">
-                            • {article}
-                          </li>
-                        ))}
+                    <CardContent className="flex-1 flex flex-col">
+                      <ul className="space-y-3 mb-6 flex-1">
+                        {category.articles.map((slug, articleIndex) => {
+                          const article = getArticleBySlug(slug)
+                          if (!article) return null
+                          return (
+                            <li key={articleIndex}>
+                              <Link
+                                href={`/help/${slug}`}
+                                className="text-sm text-accent hover:text-brand-strong hover:underline flex items-start gap-2"
+                              >
+                                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-brand-light flex-shrink-0" />
+                                <span>{article.title}</span>
+                              </Link>
+                            </li>
+                          )
+                        })}
                       </ul>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="mt-4 w-full border-brand text-brand-strong hover:!text-white"
+                        className="mt-auto w-full border-brand text-brand-strong hover:!text-white"
+                        asChild
                       >
-                        View All Articles
+                        <Link href={`/help/${category.articles[0]}`}>
+                          View All Articles
+                        </Link>
                       </Button>
                     </CardContent>
                   </Card>
@@ -258,24 +209,32 @@ export default function HelpPage() {
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
                 {popularArticles.map((article, index) => (
-                  <Card key={index} className="hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col h-full">
+                  <Card key={index} className="hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col h-full group">
                     <CardContent className="p-6 flex flex-col flex-1">
                       <div className="flex items-start justify-between mb-3">
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-xs bg-brand-tint text-brand-strong hover:bg-brand-light/20">
                           {article.category}
                         </Badge>
-                        <span className="text-xs text-gray-500">{article.readTime}</span>
+                        <span className="text-xs text-gray-500 flex items-center">
+                          <Clock className="w-3 h-3 mr-1" />
+                          {article.readTime}
+                        </span>
                       </div>
-                      <h3 className="font-semibold mb-4 text-brand">
-                        {article.title}
-                      </h3>
+                      <Link href={`/help/${article.slug}`} className="block flex-1">
+                        <h3 className="font-semibold mb-4 text-brand text-lg group-hover:text-brand-strong transition-colors">
+                          {article.title}
+                        </h3>
+                      </Link>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
-                        className="mt-auto border-brand text-brand-strong hover:!text-white transition-all duration-200 group"
+                        className="mt-auto p-0 h-auto font-medium text-brand-strong hover:text-brand hover:bg-transparent justify-start"
+                        asChild
                       >
-                        Read Article
-                        <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                        <Link href={`/help/${article.slug}`}>
+                          Read Article
+                          <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                        </Link>
                       </Button>
                     </CardContent>
                   </Card>

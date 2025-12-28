@@ -273,6 +273,78 @@ export default function PrivacyPolicyPage() {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-[#3882a5]" />
+                Grievance Officer
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm text-gray-700">
+              <p>
+                In accordance with Information Technology Act 2000 and rules made there under, the name and contact details of the Grievance Officer are provided below:
+              </p>
+              <div className="ml-4">
+                <p><strong>Name:</strong> Nakul (Grievance Officer)</p>
+                <p><strong>Email:</strong> grievance@aynzo.com</p>
+                <p><strong>Address:</strong> Aynzo Technologies, Bangalore, Karnataka, India</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="mb-6" id="refund-policy">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-[#3882a5]" />
+                Refund and Cancellation Policy
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm text-gray-700">
+              <p>
+                <strong>Cancellation:</strong> You may cancel your subscription at any time through your account settings.
+                Cancellation will be effective at the end of the current billing cycle.
+              </p>
+              <p>
+                <strong>Refunds:</strong>
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  <strong>Free Trial:</strong> We offer a 3-day free trial to evaluate the platform. You will not be charged if you cancel before the trial ends.
+                </li>
+                <li>
+                  <strong>Subscription Fees:</strong> Once a subscription fee is charged, it is non-refundable for the current billing period (month/year).
+                </li>
+                <li>
+                  <strong>Exceptions:</strong> Refunds may be processed in cases of duplicate transactions or technical errors attributable to SafeIn.
+                  Refund requests must be made within 5 days of the transaction via <a href="mailto:support@aynzo.com" className="text-[#3882a5]">support@aynzo.com</a>.
+                </li>
+                <li>
+                  <strong>Processing Timeline:</strong> Approved refunds will be processed within 5-7 business days to the original payment method.
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="mb-6" id="shipping-policy">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-[#3882a5]" />
+                Shipping and Delivery Policy
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm text-gray-700">
+              <p>
+                <strong>Service Delivery:</strong> SafeIn is a SaaS (Software as a Service) platform.
+                Services are delivered digitally and immediately upon successful registration and/or payment.
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>No physical shipping is involved.</li>
+                <li>Account activation is instant.</li>
+                <li>Login credentials and invoices are sent to your registered email address immediately.</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-[#3882a5]" />
                 Contact Us
               </CardTitle>
@@ -288,9 +360,14 @@ export default function PrivacyPolicyPage() {
                   <Phone className="h-4 w-4 text-[#3882a5]" />
                   <span>Phone: <a href="tel:+911234567890" className="text-[#3882a5] hover:underline">+91 123 456 7890</a></span>
                 </div>
-                <div>
-                  <p className="font-semibold">Aynzo</p>
-                  <p>SafeIn Security Management Platform</p>
+                <div className="flex items-start gap-2">
+                  <FileText className="h-4 w-4 text-[#3882a5] mt-1" />
+                  <div>
+                    <p className="font-semibold">Registered Office:</p>
+                    <p>Aynzo Technologies Pvt Ltd</p>
+                    <p>123, Tech Park, Indiranagar</p>
+                    <p>Bangalore, Karnataka, 560038, India</p>
+                  </div>
                 </div>
               </div>
             </CardContent>
