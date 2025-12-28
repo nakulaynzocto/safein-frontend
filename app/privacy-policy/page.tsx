@@ -28,12 +28,12 @@ export default function PrivacyPolicyPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-gray-700">
               <p>
-                At SafeIn (operated by Aynzo), we are committed to protecting your privacy and ensuring the security of your personal information. 
-                This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our visitor management and 
+                At SafeIn (operated by Aynzo), we are committed to protecting your privacy and ensuring the security of your personal information.
+                This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our visitor management and
                 appointment scheduling platform.
               </p>
               <p>
-                By using our services, you agree to the collection and use of information in accordance with this policy. If you do not agree with 
+                By using our services, you agree to the collection and use of information in accordance with this policy. If you do not agree with
                 our policies and practices, please do not use our services.
               </p>
             </CardContent>
@@ -87,7 +87,7 @@ export default function PrivacyPolicyPage() {
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>To provide and maintain our visitor management services</li>
                 <li>To process subscription payments securely through Razorpay</li>
-                <li>To send appointment notifications via email, SMS, and WhatsApp</li>
+                <li>To send appointment notifications and updates via email</li>
                 <li>To manage employee and visitor records</li>
                 <li>To improve our services and user experience</li>
                 <li>To comply with legal obligations and prevent fraud</li>
@@ -105,7 +105,7 @@ export default function PrivacyPolicyPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-gray-700">
               <p>
-                We use <strong>Razorpay</strong> as our payment gateway to process subscription payments securely. 
+                We use <strong>Razorpay</strong> as our payment gateway to process subscription payments securely.
                 When you make a payment:
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
@@ -117,9 +117,9 @@ export default function PrivacyPolicyPage() {
               </ul>
               <p className="mt-4">
                 For more information about Razorpay's privacy practices, please visit:{" "}
-                <a 
-                  href="https://razorpay.com/privacy/" 
-                  target="_blank" 
+                <a
+                  href="https://razorpay.com/privacy/"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#3882a5] hover:underline"
                 >
@@ -148,7 +148,7 @@ export default function PrivacyPolicyPage() {
                 <li>Secure cloud storage with encrypted backups</li>
               </ul>
               <p className="mt-4">
-                However, no method of transmission over the Internet or electronic storage is 100% secure. 
+                However, no method of transmission over the Internet or electronic storage is 100% secure.
                 While we strive to use commercially acceptable means to protect your information, we cannot guarantee absolute security.
               </p>
             </CardContent>
@@ -204,11 +204,11 @@ export default function PrivacyPolicyPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-gray-700">
               <p>
-                We use cookies and similar tracking technologies to track activity on our platform and store certain information. 
+                We use cookies and similar tracking technologies to track activity on our platform and store certain information.
                 Cookies are files with a small amount of data that are sent to your browser and stored on your device.
               </p>
               <p>
-                You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. 
+                You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent.
                 However, if you do not accept cookies, you may not be able to use some portions of our service.
               </p>
             </CardContent>
@@ -223,7 +223,7 @@ export default function PrivacyPolicyPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-gray-700">
               <p>
-                We retain your personal information only for as long as necessary to fulfill the purposes outlined in this Privacy Policy, 
+                We retain your personal information only for as long as necessary to fulfill the purposes outlined in this Privacy Policy,
                 unless a longer retention period is required or permitted by law.
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
@@ -244,8 +244,8 @@ export default function PrivacyPolicyPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-gray-700">
               <p>
-                Our services are not intended for individuals under the age of 18. We do not knowingly collect personal information 
-                from children. If you are a parent or guardian and believe your child has provided us with personal information, 
+                Our services are not intended for individuals under the age of 18. We do not knowingly collect personal information
+                from children. If you are a parent or guardian and believe your child has provided us with personal information,
                 please contact us immediately.
               </p>
             </CardContent>
@@ -260,11 +260,11 @@ export default function PrivacyPolicyPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-gray-700">
               <p>
-                We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy 
+                We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy
                 on this page and updating the "Last updated" date.
               </p>
               <p>
-                You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective 
+                You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective
                 when they are posted on this page.
               </p>
             </CardContent>
@@ -298,7 +298,7 @@ export default function PrivacyPolicyPage() {
 
           <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-gray-700">
-              <strong>Note:</strong> This Privacy Policy complies with Indian data protection regulations and Razorpay's requirements 
+              <strong>Note:</strong> This Privacy Policy complies with Indian data protection regulations and Razorpay's requirements
               for payment processing. By using our services, you acknowledge that you have read and understood this Privacy Policy.
             </p>
           </div>

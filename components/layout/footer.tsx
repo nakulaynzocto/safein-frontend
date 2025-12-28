@@ -20,43 +20,23 @@ interface SocialLink {
 
 const footerSections: FooterSection[] = [
   {
-    title: "Company",
+    title: "Product",
     links: [
-      { label: "About Us", href: "/about" },
-      { label: "Careers", href: "/footer/careers" },
-      { label: "Blog", href: "/footer/blog" },
-      { label: "Glossary", href: "/footer/glossary" },
+      { label: "Features", href: "/features" },
+      { label: "Pricing", href: "/pricing" },
     ],
   },
   {
-    title: "Help & Support",
+    title: "Support",
     links: [
-      { label: "Help Center", href: "/footer/help" },
+      { label: "Help Center", href: "/help" },
       { label: "Contact Us", href: "/contact" },
-      { label: "FAQ", href: "/footer/faq" },
     ],
   },
   {
     title: "Legal",
     links: [
       { label: "Privacy Policy", href: "/privacy-policy" },
-      { label: "Terms of Service", href: "/terms-of-service" },
-    ],
-  },
-  {
-    title: "Services",
-    links: [
-      { label: "Aynzo App", href: "/services/web-development" },
-      { label: "Aynzo Web", href: "/services/app-development" },
-    ],
-  },
-  {
-    title: "Products",
-    links: [
-      { label: "Aynzo Leads", href: "/products/aynzo-leads" },
-      { label: "Aynzo Books", href: "/products/aynzo-books" },
-      { label: "Aynzo Marketing", href: "/products/aynzo-marketing" },
-      { label: "Aynzo SafeIn", href: "https://safein.aynzo.com/", external: true },
     ],
   },
 ]
@@ -132,16 +112,16 @@ export function Footer() {
         {/* Logo Section */}
         <div className="mb-8 pb-8 border-b border-white/10">
           <Link href="/" className="inline-block">
-            <Image 
-              src="/aynzo-logo.png" 
-              alt="Aynzo Logo" 
+            <Image
+              src="/aynzo-logo.png"
+              alt="Aynzo Logo"
               width={120}
               height={48}
               className="h-10 w-auto brightness-0 invert"
             />
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Footer Sections */}
           {footerSections.map((section) => (
             <div key={section.title}>
