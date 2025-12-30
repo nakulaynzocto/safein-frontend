@@ -286,9 +286,6 @@ export function ImageUploadField({
     if (initialUrl && initialUrl !== previewImage) {
       setPreviewImage(initialUrl)
       setValue(name, initialUrl, { shouldValidate: true })
-    } else if (!initialUrl && previewImage && previewImage.startsWith('http')) {
-      setPreviewImage(null)
-      setValue(name, '', { shouldValidate: true })
     }
   }, [initialUrl, previewImage, name, setValue])
 
@@ -382,7 +379,7 @@ export function ImageUploadField({
           <div className="relative group">
             <div
               className={`relative w-40 h-40 sm:w-40 sm:h-40 flex items-center justify-center border-2 rounded-xl sm:rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer ${uploadSuccess ? 'border-green-400 bg-white ring-2 ring-green-200' :
-                  imageError ? 'border-red-400 bg-red-50 ring-2 ring-red-200' : 'border-gray-300 bg-white hover:border-blue-500 hover:ring-2 hover:ring-blue-200'
+                imageError ? 'border-red-400 bg-red-50 ring-2 ring-red-200' : 'border-gray-300 bg-white hover:border-blue-500 hover:ring-2 hover:ring-blue-200'
                 }`}
               onClick={(e) => {
                 e.preventDefault()

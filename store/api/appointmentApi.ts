@@ -209,9 +209,9 @@ export const appointmentApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result?.appointments
           ? [
-              ...result.appointments.map(({ _id }) => ({ type: 'Appointment' as const, id: _id })),
-              { type: 'Appointment', id: 'LIST' },
-            ]
+            ...result.appointments.map(({ _id }) => ({ type: 'Appointment' as const, id: _id })),
+            { type: 'Appointment', id: 'LIST' },
+          ]
           : [{ type: 'Appointment', id: 'LIST' }],
       keepUnusedDataFor: 300, // Keep data for 5 minutes
     }),
@@ -393,9 +393,9 @@ export const appointmentApi = baseApi.injectEndpoints({
       providesTags: (result, error, { employeeId }) =>
         result?.appointments
           ? [
-              ...result.appointments.map(({ _id }) => ({ type: 'Appointment' as const, id: _id })),
-              { type: 'Appointment', id: `EMPLOYEE_${employeeId}` },
-            ]
+            ...result.appointments.map(({ _id }) => ({ type: 'Appointment' as const, id: _id })),
+            { type: 'Appointment', id: `EMPLOYEE_${employeeId}` },
+          ]
           : [{ type: 'Appointment', id: `EMPLOYEE_${employeeId}` }],
     }),
 
@@ -413,9 +413,9 @@ export const appointmentApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result?.appointments
           ? [
-              ...result.appointments.map(({ _id }) => ({ type: 'Appointment' as const, id: _id })),
-              { type: 'Appointment', id: 'DATE_RANGE' },
-            ]
+            ...result.appointments.map(({ _id }) => ({ type: 'Appointment' as const, id: _id })),
+            { type: 'Appointment', id: 'DATE_RANGE' },
+          ]
           : [{ type: 'Appointment', id: 'DATE_RANGE' }],
     }),
   }),
@@ -427,17 +427,17 @@ export const {
   useCreateAppointmentMutation,
   useUpdateAppointmentMutation,
   useDeleteAppointmentMutation,
-  
+
   useGetAppointmentByAppointmentIdQuery,
   useGetAppointmentsByEmployeeQuery,
   useGetAppointmentsByDateRangeQuery,
-  
+
   useCheckInAppointmentMutation,
   useCheckOutAppointmentMutation,
   useBulkUpdateAppointmentsMutation,
   useCancelAppointmentMutation,
   useApproveAppointmentMutation,
   useRejectAppointmentMutation,
-  
+
   useGetAppointmentStatsQuery,
 } = appointmentApi
