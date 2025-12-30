@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { 
-  useGetAppointmentsQuery, 
+import {
+  useGetAppointmentsQuery,
   useDeleteAppointmentMutation,
   useCheckInAppointmentMutation,
   useCheckOutAppointmentMutation,
   useUpdateAppointmentMutation,
   useCancelAppointmentMutation,
+  useRejectAppointmentMutation,
   Appointment,
-  GetAppointmentsQuery 
+  GetAppointmentsQuery
 } from '@/store/api/appointmentApi'
 import { useDebounce } from './useDebounce'
 
@@ -37,6 +38,7 @@ export interface UseAppointmentOperationsReturn {
   isDeleting: boolean
   isCheckingOut: boolean
   isApproving: boolean
+  isRejecting: boolean
   isCancelling: boolean
   error: any
   searchTerm: string
@@ -60,6 +62,7 @@ export interface UseAppointmentOperationsReturn {
   deleteAppointment: (appointmentId: string) => Promise<void>
   checkOutAppointment: (appointmentId: string, notes?: string) => Promise<void>
   approveAppointment: (appointmentId: string) => Promise<void>
+  rejectAppointment: (appointmentId: string) => Promise<void>
   cancelAppointment: (appointmentId: string) => Promise<void>
   refresh: () => void
   resetFilters: () => void
@@ -110,16 +113,17 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     timezoneOffsetMinutes,
   }
 
-  const { 
-    data: appointmentData, 
-    isLoading, 
-    error, 
-    refetch 
+  const {
+    data: appointmentData,
+    isLoading,
+    error,
+    refetch
   } = useGetAppointmentsQuery(queryParams)
 
   const [deleteAppointmentMutation, { isLoading: isDeleting }] = useDeleteAppointmentMutation()
   const [checkOutAppointmentMutation, { isLoading: isCheckingOut }] = useCheckOutAppointmentMutation()
   const [updateAppointmentMutation, { isLoading: isApproving }] = useUpdateAppointmentMutation()
+  const [rejectAppointmentMutation, { isLoading: isRejecting }] = useRejectAppointmentMutation()
   const [cancelAppointmentMutation, { isLoading: isCancelling }] = useCancelAppointmentMutation()
 
   const deleteAppointment = async (appointmentId: string): Promise<void> => {
@@ -147,14 +151,25 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
 
   const approveAppointment = async (appointmentId: string): Promise<void> => {
     try {
-      await updateAppointmentMutation({ 
-        id: appointmentId, 
-        status: 'approved' 
+      await updateAppointmentMutation({
+        id: appointmentId,
+        status: 'approved'
       }).unwrap()
       toast.success('Appointment approved successfully')
       refetch()
     } catch (error) {
       toast.error('Failed to approve appointment')
+      throw error
+    }
+  }
+
+  const rejectAppointment = async (appointmentId: string): Promise<void> => {
+    try {
+      await rejectAppointmentMutation(appointmentId).unwrap()
+      toast.success('Appointment rejected successfully')
+      refetch()
+    } catch (error) {
+      toast.error('Failed to reject appointment')
       throw error
     }
   }
@@ -230,6 +245,7 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     isDeleting,
     isCheckingOut,
     isApproving,
+    isRejecting,
     isCancelling,
     error,
     searchTerm,
@@ -253,6 +269,7 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     deleteAppointment,
     checkOutAppointment,
     approveAppointment,
+    rejectAppointment,
     cancelAppointment,
     refresh,
     resetFilters
