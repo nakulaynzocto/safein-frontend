@@ -11,7 +11,7 @@ import { CountryStateCitySelect } from "@/components/common/countryStateCity"
 import { PhoneInputField } from "@/components/common/phoneInputField"
 import { ImageUploadField } from "@/components/common/imageUploadField"
 import { LoadingSpinner } from "@/components/common/loadingSpinner"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { FileText, Camera } from "lucide-react"
 
 const bookingVisitorSchema = yup.object({
@@ -95,6 +95,9 @@ export function BookingVisitorForm({ initialEmail, initialValues, onSubmit, isLo
     },
   })
 
+  // Store separate states for each upload field if needed, or a global one
+  const [isFileUploading, setIsFileUploading] = useState(false)
+
   useEffect(() => {
     const opts = { shouldValidate: false, shouldDirty: false }
     if (initialEmail) setValue("email", initialEmail, opts)
@@ -145,11 +148,11 @@ export function BookingVisitorForm({ initialEmail, initialValues, onSubmit, isLo
   }
 
   return (
-    <form 
+    <form
       onSubmit={(e) => {
         e.preventDefault()
         handleSubmit(handleFormSubmit)(e)
-      }} 
+      }}
       className="space-y-4 sm:space-y-6"
       noValidate
     >
@@ -326,6 +329,7 @@ export function BookingVisitorForm({ initialEmail, initialValues, onSubmit, isLo
             label="Take or Upload Photo"
             enableImageCapture={true}
             appointmentToken={appointmentToken}
+            onUploadStatusChange={setIsFileUploading}
           />
         </div>
 
@@ -343,20 +347,26 @@ export function BookingVisitorForm({ initialEmail, initialValues, onSubmit, isLo
             label="Take or Upload Photo"
             enableImageCapture={true}
             appointmentToken={appointmentToken}
+            onUploadStatusChange={setIsFileUploading}
           />
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-4 sm:pt-6 border-t">
-        <Button 
-          type="submit" 
-          disabled={isLoading}
+        <Button
+          type="submit"
+          disabled={isLoading || isFileUploading}
           className="w-full sm:w-auto bg-[#3882a5] hover:bg-[#2d6a87] text-white"
         >
           {isLoading ? (
             <>
               <LoadingSpinner size="sm" className="mr-2" />
               Creating...
+            </>
+          ) : isFileUploading ? (
+            <>
+              <LoadingSpinner size="sm" className="mr-2" />
+              Uploading Image...
             </>
           ) : (
             "Continue to Appointment"

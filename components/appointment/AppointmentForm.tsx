@@ -64,7 +64,7 @@ export function NewAppointmentModal({
   layout = "modal",
 }: NewAppointmentModalProps) {
   const router = useRouter()
-  
+
   const [internalOpen, setInternalOpen] = useState(false)
   const isPage = layout === "page"
   const [generalError, setGeneralError] = useState<string | null>(null)
@@ -73,32 +73,33 @@ export function NewAppointmentModal({
   const [employeeSearchInput, setEmployeeSearchInput] = useState("")
   const [visitorSearchInput, setVisitorSearchInput] = useState("")
   const [showVehicleFields, setShowVehicleFields] = useState<boolean>(false)
-  
+  const [isFileUploading, setIsFileUploading] = useState(false)
+
   const debouncedEmployeeSearch = useDebounce(employeeSearchInput, 500)
   const debouncedVisitorSearch = useDebounce(visitorSearchInput, 500)
-  
+
   const open = isPage ? true : controlledOpen !== undefined ? controlledOpen : internalOpen
-  const setOpen = isPage ? (_: boolean) => {} : onOpenChange || setInternalOpen
+  const setOpen = isPage ? (_: boolean) => { } : onOpenChange || setInternalOpen
   const isEditMode = !!appointmentId
-  
+
   const [createAppointment, { isLoading: isCreating }] = useCreateAppointmentMutation()
   const [updateAppointment, { isLoading: isUpdating }] = useUpdateAppointmentMutation()
   const isLoading = isCreating || isUpdating
-  const { data: employeesData, isLoading: isLoadingEmployees, error: employeesError } = useGetEmployeesQuery({ 
-    page: 1, 
+  const { data: employeesData, isLoading: isLoadingEmployees, error: employeesError } = useGetEmployeesQuery({
+    page: 1,
     limit: 10,
     search: debouncedEmployeeSearch || undefined,
     status: "Active" as const,
   })
   const employees = employeesData?.employees || []
-  
-  const { data: visitorsData, isLoading: isLoadingVisitors, error: visitorsError } = useGetVisitorsQuery({ 
-    page: 1, 
+
+  const { data: visitorsData, isLoading: isLoadingVisitors, error: visitorsError } = useGetVisitorsQuery({
+    page: 1,
     limit: 10,
     search: debouncedVisitorSearch || undefined,
   })
   const visitors: Visitor[] = visitorsData?.visitors || []
-  
+
   const { data: existingAppointment, isLoading: isLoadingAppointment } = useGetAppointmentQuery(
     appointmentId || '',
     { skip: !appointmentId }
@@ -125,13 +126,13 @@ export function NewAppointmentModal({
     skip: !selectedEmployeeId || employees.some(emp => emp._id === selectedEmployeeId)
   })
   const selectedEmployee = selectedEmployeeData
-  
+
   const isSelectedVisitorInList = visitors.some(v => v._id === selectedVisitorId)
   const { data: selectedVisitorData } = useGetVisitorQuery(selectedVisitorId || '', {
     skip: !selectedVisitorId || isSelectedVisitorInList
   })
   const selectedVisitor = selectedVisitorData
-  
+
   const employeeOptions = useMemo(
     () => createSelectOptions({
       items: employees,
@@ -143,7 +144,7 @@ export function NewAppointmentModal({
     }),
     [employees, selectedEmployeeId, selectedEmployee]
   )
-  
+
   const visitorOptions = useMemo(
     () => createSelectOptions({
       items: visitors,
@@ -158,7 +159,7 @@ export function NewAppointmentModal({
   const handleEmployeeSearchChange = useCallback((inputValue: string) => {
     setEmployeeSearchInput(inputValue)
   }, [])
-  
+
   const handleVisitorSearchChange = useCallback((inputValue: string) => {
     setVisitorSearchInput(inputValue)
   }, [])
@@ -201,7 +202,7 @@ export function NewAppointmentModal({
   const onSubmit = async (data: AppointmentFormData) => {
     if (isLoading) return
     setGeneralError(null)
-    
+
     try {
       const selectedEmp = employees.find(e => e._id === data.employeeId)
       if (selectedEmp && selectedEmp.status === 'Inactive') {
@@ -222,7 +223,7 @@ export function NewAppointmentModal({
         const result = await createAppointment(newAppointmentData).unwrap()
         showSuccessToast("Appointment created successfully")
         if (!isPage) setOpen(false)
-        
+
         if (result.approvalLink) {
           setApprovalLink(result.approvalLink)
           setShowApprovalLinkModal(true)
@@ -340,7 +341,7 @@ export function NewAppointmentModal({
                     selectedDate.setHours(0, 0, 0, 0)
                     const today = new Date()
                     today.setHours(0, 0, 0, 0)
-                    
+
                     if (selectedDate < today) {
                       trigger('appointmentDate')
                       return
@@ -458,6 +459,7 @@ export function NewAppointmentModal({
                 errors={errors}
                 initialUrl={watch("vehiclePhoto")}
                 enableImageCapture={true}
+                onUploadStatusChange={setIsFileUploading}
               />
             </div>
 
@@ -481,19 +483,19 @@ export function NewAppointmentModal({
       )}
 
       <div className="flex justify-end gap-3 pt-4">
-        <Button 
-          type="button" 
-          variant="outline" 
+        <Button
+          type="button"
+          variant="outline"
           onClick={handleClose}
           disabled={isLoading}
           className="px-6"
         >
           Cancel
         </Button>
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           variant="outline"
-          disabled={isLoading}
+          disabled={isLoading || isFileUploading}
           className="px-6 min-w-[180px]"
         >
           {isLoading ? (

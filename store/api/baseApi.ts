@@ -9,7 +9,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   try {
     const result = await fetchBaseQuery({
       baseUrl: API_BASE_URL,
-      timeout: 10000, // 10 second timeout
+      timeout: 60000, // 60 second timeout for slower networks/large uploads
       prepareHeaders: (headers, { getState }) => {
         const state = getState() as RootState
         const token = state.auth.token

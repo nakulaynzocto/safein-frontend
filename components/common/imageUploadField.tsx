@@ -16,17 +16,19 @@ interface ImageUploadFieldProps {
   initialUrl?: string
   enableImageCapture?: boolean
   appointmentToken?: string // Token for public upload endpoint
+  onUploadStatusChange?: (isUploading: boolean) => void
 }
 
-export function ImageUploadField({ 
-  name, 
-  label, 
-  register, 
-  setValue, 
-  errors, 
-  initialUrl, 
+export function ImageUploadField({
+  name,
+  label,
+  register,
+  setValue,
+  errors,
+  initialUrl,
   enableImageCapture = false,
-  appointmentToken
+  appointmentToken,
+  onUploadStatusChange
 }: ImageUploadFieldProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(initialUrl || null)
   const [uploadSuccess, setUploadSuccess] = useState(false)
@@ -36,7 +38,7 @@ export function ImageUploadField({
   const [isCapturing, setIsCapturing] = useState(false)
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment')
   const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation()
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -56,12 +58,12 @@ export function ImageUploadField({
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault()
     event.stopPropagation()
-    
+
     const file = event.target.files?.[0]
     if (file) {
       await processFile(file)
     }
-    
+
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -71,40 +73,43 @@ export function ImageUploadField({
     try {
       setImageError(false)
       setIsImageLoading(true)
+      onUploadStatusChange?.(true)
       setUploadSuccess(false)
       setPreviewImage(null)
-      
+
       validateFile(file)
-      
+
       const result = await uploadFile({ file, token: appointmentToken }).unwrap()
-      
+
       const uploadedUrl = result?.url
       if (!uploadedUrl) {
         throw new Error('No URL returned from upload')
       }
-      
+
       setPreviewImage(uploadedUrl)
-      
+
       setValue(name, uploadedUrl, { shouldValidate: true })
-      
+
       setIsImageLoading(false)
+      onUploadStatusChange?.(false)
       setUploadSuccess(true)
-      
+
       setTimeout(() => {
         showSuccessToast("Image uploaded successfully!")
       }, 100)
-      
+
       setTimeout(() => setUploadSuccess(false), 3000)
-      
+
     } catch (error: any) {
       setValue(name, "", { shouldValidate: true })
       setPreviewImage(null)
       setUploadSuccess(false)
       setImageError(true)
       setIsImageLoading(false)
-      
+      onUploadStatusChange?.(false)
+
       let errorMessage = "Failed to upload image"
-      
+
       if (error?.data?.message) {
         errorMessage = error.data.message
       } else if (error?.data?.error) {
@@ -118,7 +123,7 @@ export function ImageUploadField({
       } else if (typeof error === 'string') {
         errorMessage = error
       }
-      
+
       showErrorToast(errorMessage)
       return
     }
@@ -128,22 +133,22 @@ export function ImageUploadField({
     try {
       setIsCapturing(true)
       setShowCaptureOptions(false)
-      
+
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop())
       }
-      
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
           facingMode: facing,
           width: { ideal: 1920 },
           height: { ideal: 1080 }
-        } 
+        }
       })
-      
+
       streamRef.current = stream
       setFacingMode(facing)
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         videoRef.current.play()
@@ -176,20 +181,20 @@ export function ImageUploadField({
       const video = videoRef.current
       const canvas = canvasRef.current
       const context = canvas.getContext('2d')
-      
+
       canvas.width = video.videoWidth
       canvas.height = video.videoHeight
-      
+
       context?.drawImage(video, 0, 0, canvas.width, canvas.height)
-      
+
       canvas.toBlob(async (blob) => {
         if (blob) {
           const file = new File([blob], `captured-image-${Date.now()}.jpg`, {
             type: 'image/jpeg'
           })
-          
+
           stopCamera()
-          
+
           await processFile(file)
         }
       }, 'image/jpeg', 0.9)
@@ -204,7 +209,7 @@ export function ImageUploadField({
   const handleImageError = (e: any) => {
     setIsImageLoading(false)
     setImageError(true)
-    
+
     if (previewImage && previewImage.startsWith('http')) {
       setValue(name, "", { shouldValidate: true })
       setPreviewImage(null)
@@ -213,13 +218,13 @@ export function ImageUploadField({
 
   const handleClearFile = () => {
     setValue(name, "", { shouldValidate: true })
-    
+
     if (previewImage && previewImage !== initialUrl) {
       if (previewImage.startsWith('blob:')) {
         URL.revokeObjectURL(previewImage)
       }
     }
-    
+
     setPreviewImage(null)
     setUploadSuccess(false)
     setImageError(false)
@@ -292,7 +297,7 @@ export function ImageUploadField({
       {label && (
         <Label className="text-sm font-medium text-gray-700">{label}</Label>
       )}
-      
+
       <div className="flex flex-col gap-3">
         {isCapturing && (
           <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center p-2 sm:p-4">
@@ -305,7 +310,7 @@ export function ImageUploadField({
                 muted
               />
               <canvas ref={canvasRef} className="hidden" />
-              
+
               <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
                 <Button
                   type="button"
@@ -316,7 +321,7 @@ export function ImageUploadField({
                   <RotateCw className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
               </div>
-              
+
               <div className="absolute bottom-2 sm:bottom-4 left-0 right-0 flex justify-center gap-2 sm:gap-4 px-2">
                 <Button
                   type="button"
@@ -375,11 +380,10 @@ export function ImageUploadField({
 
         {previewImage ? (
           <div className="relative group">
-            <div 
-              className={`relative w-40 h-40 sm:w-40 sm:h-40 flex items-center justify-center border-2 rounded-xl sm:rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer ${
-                uploadSuccess ? 'border-green-400 bg-white ring-2 ring-green-200' : 
-                imageError ? 'border-red-400 bg-red-50 ring-2 ring-red-200' : 'border-gray-300 bg-white hover:border-blue-500 hover:ring-2 hover:ring-blue-200'
-              }`}
+            <div
+              className={`relative w-40 h-40 sm:w-40 sm:h-40 flex items-center justify-center border-2 rounded-xl sm:rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer ${uploadSuccess ? 'border-green-400 bg-white ring-2 ring-green-200' :
+                  imageError ? 'border-red-400 bg-red-50 ring-2 ring-red-200' : 'border-gray-300 bg-white hover:border-blue-500 hover:ring-2 hover:ring-blue-200'
+                }`}
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
@@ -397,7 +401,7 @@ export function ImageUploadField({
                   </div>
                 </div>
               )}
-              
+
               {imageError && !isUploading ? (
                 <div className="flex flex-col items-center justify-center text-red-500 p-3 sm:p-4">
                   <ImageIcon className="w-7 h-7 sm:w-8 sm:h-8 mb-2" />
@@ -414,7 +418,7 @@ export function ImageUploadField({
                   onError={handleImageError}
                 />
               ) : null}
-              
+
               {!imageError && !isImageLoading && !isUploading && (
                 <button
                   type="button"
@@ -430,7 +434,7 @@ export function ImageUploadField({
                   <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </button>
               )}
-              
+
               {uploadSuccess && !imageError && !isImageLoading && !isUploading && (
                 <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 bg-green-500 text-white rounded-full p-1 sm:p-1.5 shadow-md animate-bounce z-20">
                   <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -440,9 +444,8 @@ export function ImageUploadField({
           </div>
         ) : (
           <div className="relative">
-            <div className={`flex flex-col items-center justify-center w-full h-40 sm:w-40 sm:h-40 border-2 border-dashed rounded-xl sm:rounded-xl cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-100 transition-all duration-300 group shadow-sm hover:shadow-md ${
-              isUploading ? "border-blue-400 bg-blue-50 ring-2 ring-blue-200" : "border-gray-300 hover:border-blue-400 hover:ring-2 hover:ring-blue-200"
-            }`}>
+            <div className={`flex flex-col items-center justify-center w-full h-40 sm:w-40 sm:h-40 border-2 border-dashed rounded-xl sm:rounded-xl cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-100 transition-all duration-300 group shadow-sm hover:shadow-md ${isUploading ? "border-blue-400 bg-blue-50 ring-2 ring-blue-200" : "border-gray-300 hover:border-blue-400 hover:ring-2 hover:ring-blue-200"
+              }`}>
               {isUploading || isImageLoading ? (
                 <div className="flex flex-col items-center justify-center p-4">
                   <div className="relative">
@@ -455,8 +458,8 @@ export function ImageUploadField({
                   <span className="text-xs text-blue-500 mt-1">Please wait</span>
                 </div>
               ) : (
-                <div 
-                  className="flex flex-col items-center justify-center p-4 sm:p-6" 
+                <div
+                  className="flex flex-col items-center justify-center p-4 sm:p-6"
                   onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
