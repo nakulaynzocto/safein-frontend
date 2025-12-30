@@ -8,7 +8,7 @@ import { Appointment } from "@/store/api/appointmentApi"
 
 export function AppointmentList() {
   const router = useRouter()
-  
+
   const {
     appointments,
     pagination,
@@ -17,9 +17,11 @@ export function AppointmentList() {
     isDeleting,
     isCheckingOut,
     isApproving,
+    isRejecting,
     deleteAppointment,
     checkOutAppointment,
     approveAppointment,
+    rejectAppointment,
     setSearchTerm,
     searchTerm,
     setCurrentPage,
@@ -82,10 +84,12 @@ export function AppointmentList() {
         onDelete={deleteAppointment}
         onCheckOut={checkOutAppointment}
         onApprove={approveAppointment}
+        onReject={rejectAppointment}
         onView={handleView}
         isDeleting={isDeleting}
         isCheckingOut={isCheckingOut}
         isApproving={isApproving}
+        isRejecting={isRejecting}
         title="Appointments"
       />
     </div>

@@ -552,12 +552,20 @@ export function NewAppointmentModal({
             setShowApprovalLinkModal(open)
             if (!open) {
               setApprovalLink(null)
-              if (onSuccess) onSuccess()
+              if (onSuccess) {
+                onSuccess()
+              } else if (isPage) {
+                router.push(routes.privateroute.APPOINTMENTLIST)
+              }
             }
           }}
           approvalLink={approvalLink || ''}
           onCancel={() => {
-            if (onSuccess) onSuccess()
+            if (onSuccess) {
+              onSuccess()
+            } else if (isPage) {
+              router.push(routes.privateroute.APPOINTMENTLIST)
+            }
           }}
         />
       )}
