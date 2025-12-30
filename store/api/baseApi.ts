@@ -13,15 +13,15 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
       prepareHeaders: (headers, { getState }) => {
         const state = getState() as RootState
         const token = state.auth.token
-        
+
         if (token) {
           headers.set('Authorization', `Bearer ${token}`)
         }
-        
+
         if (!(args.body instanceof FormData)) {
           headers.set('Content-Type', 'application/json')
         }
-        
+
         return headers
       },
     })(args, api, extraOptions)
@@ -31,30 +31,30 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
       const isLogoutRequest = args?.url?.includes('/logout')
       const isRegisterRequest = args?.url?.includes(routes.publicroute.REGISTER)
       const isUploadRequest = args?.url?.includes('/upload')
-      
+
       if (typeof window !== 'undefined') {
         const currentPath = window.location.pathname
         const isOnPublicBookingPage = currentPath?.includes('/book-appointment/')
-        
-        if (isOnPublicBookingPage && isUploadRequest) {
+
+        if (isOnPublicBookingPage) {
           return result
         }
       }
-      
+
       if (!isLoginRequest && !isLogoutRequest && !isRegisterRequest) {
         api.dispatch(logout())
-        
+
         if (typeof window !== 'undefined') {
           localStorage.removeItem('token')
           localStorage.removeItem('user')
           sessionStorage.clear()
-          
+
           const currentPath = window.location.pathname
-          const isOnAuthPage = currentPath === routes.publicroute.LOGIN || 
-                               currentPath === routes.publicroute.REGISTER || 
-                               currentPath === routes.publicroute.FORGOT_PASSWORD ||
-                               currentPath === routes.publicroute.RESET_PASSWORD
-          
+          const isOnAuthPage = currentPath === routes.publicroute.LOGIN ||
+            currentPath === routes.publicroute.REGISTER ||
+            currentPath === routes.publicroute.FORGOT_PASSWORD ||
+            currentPath === routes.publicroute.RESET_PASSWORD
+
           if (!isOnAuthPage) {
             window.location.replace(routes.publicroute.LOGIN)
           }
@@ -64,7 +64,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 
     if (result.error && (result.error.status === 404 || result.error.status === 500)) {
       const shouldSilence = args?.url?.includes('/stats')
-      
+
       if (!shouldSilence && typeof window !== 'undefined') {
         const errorData = result.error.data as any
         if (errorData && typeof errorData === 'string' && errorData.includes('<!DOCTYPE')) {
