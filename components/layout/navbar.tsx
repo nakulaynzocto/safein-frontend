@@ -20,6 +20,8 @@ import { useAuthSubscription } from "@/hooks/useAuthSubscription"
 import { NotificationBell } from "@/components/common/NotificationBell"
 import { useNavbarScrollStyle } from "@/hooks/useScrollStyle"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { SidebarContent } from "@/components/layout/sidebar"
 import {
   User,
   LogOut,
@@ -40,6 +42,7 @@ import {
 import { useState, useEffect, useCallback, useRef } from "react"
 import { usePathname } from "next/navigation"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
+import { cn } from "@/lib/utils"
 
 interface NavbarProps {
   forcePublic?: boolean
@@ -53,6 +56,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
   const { user: authUser } = useAppSelector((state) => state.auth)
   const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false)
   const lastProfileUserRef = useRef<string | null>(null)
@@ -400,6 +404,21 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                       className={shouldShowWhiteNavbar ? 'hover:bg-gray-100/80' : 'hover:bg-white/10'}
                       iconClassName={shouldShowWhiteNavbar ? 'text-gray-700' : 'text-white'}
                     />
+                    {/* Sidebar Toggle Button - Mobile Only */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsMobileSidebarOpen(true)}
+                      className={cn(
+                        "md:hidden size-9",
+                        shouldShowWhiteNavbar 
+                          ? 'hover:bg-gray-100/80 text-gray-700' 
+                          : 'hover:bg-white/10 text-white'
+                      )}
+                    >
+                      <Menu className="h-6 w-6" />
+                      <span className="sr-only">Toggle menu</span>
+                    </Button>
                   </div>
                 )}
 
@@ -572,6 +591,15 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
           </div>
         )}
       </div>
+
+      {/* Mobile Sidebar Sheet */}
+      {shouldShowPrivateNavbar && (
+        <Sheet open={isMobileSidebarOpen} onOpenChange={setIsMobileSidebarOpen}>
+          <SheetContent side="left" className="w-72 p-0 flex flex-col">
+            <SidebarContent isMobile onLinkClick={() => setIsMobileSidebarOpen(false)} />
+          </SheetContent>
+        </Sheet>
+      )}
     </nav>
   )
 }

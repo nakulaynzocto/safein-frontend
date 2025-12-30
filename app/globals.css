@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -294,6 +295,19 @@
   .btn-hostinger-secondary:hover {
     background: #f9fafb;
     border-color: #9ca3af;
+  }
+  
+  /* Force white text on button hover for accent buttons */
+  [data-slot="button"][class*="border-accent"]:hover,
+  [data-slot="button"][class*="bg-accent"]:hover {
+    color: #ffffff !important;
+  }
+  
+  [data-slot="button"][class*="border-accent"]:hover svg,
+  [data-slot="button"][class*="bg-accent"]:hover svg {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
   }
   
   /* Sidebar styling - Hostinger style */

@@ -9,7 +9,8 @@ import {
   Calendar, 
   Phone, 
   Mail, 
-  Building
+  Building,
+  Maximize2
 } from "lucide-react"
 
 interface AppointmentsTableProps {
@@ -52,12 +53,26 @@ export const AppointmentsTable = memo(function AppointmentsTable({
         
         return (
           <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={visitor?.photo} alt={visitorName} />
-              <AvatarFallback>
-                {visitorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative group">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={visitor?.photo} alt={visitorName} />
+                <AvatarFallback>
+                  {visitorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+              {visitor?.photo && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(visitor.photo, '_blank');
+                  }}
+                  className="absolute -bottom-1 -right-1 bg-[#3882a5] text-white rounded-full p-1 shadow-md hover:bg-[#2d6a87] transition-colors opacity-0 group-hover:opacity-100"
+                  title="View full image"
+                >
+                  <Maximize2 className="h-2.5 w-2.5" />
+                </button>
+              )}
+            </div>
             <div>
               <div className="font-medium text-sm">{visitorName}</div>
               <div className="flex items-center gap-1 text-xs text-gray-500">

@@ -135,7 +135,7 @@ export const NotificationCard = memo(function NotificationCard({
           <div className="flex items-start gap-3">
             <User className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-900">Employee</p>
+              <p className="text-sm font-medium text-gray-900">Meeting With</p>
               <p className="text-sm text-gray-600 truncate">{employeeName}</p>
             </div>
           </div>

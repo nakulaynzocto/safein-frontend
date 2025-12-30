@@ -1,6 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
+import { useMemo, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -22,6 +23,8 @@ interface ConfirmationDialogProps {
   onCancel?: () => void
   variant?: "default" | "destructive"
   children?: ReactNode
+  disabled?: boolean
+  disabledMessage?: string
 }
 
 export function ConfirmationDialog({
@@ -35,30 +38,52 @@ export function ConfirmationDialog({
   onCancel,
   variant = "default",
   children,
+  disabled = false,
+  disabledMessage,
 }: ConfirmationDialogProps) {
   const handleCancel = () => {
     onCancel?.()
     onOpenChange(false)
   }
 
-  const handleConfirm = () => {
-    onConfirm()
+  const handleConfirm = useCallback(() => {
+    if (!disabled) {
+      onConfirm()
+      onOpenChange(false)
+    }
+  }, [disabled, onConfirm, onOpenChange])
+
+  const handleCancelMemo = useCallback(() => {
+    onCancel?.()
     onOpenChange(false)
-  }
+  }, [onCancel, onOpenChange])
+
+  const showDisabledMessage = disabled && disabledMessage
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-white dark:bg-gray-900">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <DialogDescription>
+            {description}
+          </DialogDescription>
         </DialogHeader>
+        {showDisabledMessage && (
+          <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded text-sm text-yellow-800 dark:text-yellow-200">
+            {disabledMessage}
+          </div>
+        )}
         {children}
         <DialogFooter>
-          <Button variant="outline" onClick={handleCancel}>
+          <Button variant="outline" onClick={handleCancelMemo}>
             {cancelText}
           </Button>
-          <Button variant={variant === "destructive" ? "destructive" : "default"} onClick={handleConfirm}>
+          <Button 
+            variant={variant === "destructive" ? "destructive" : "default"} 
+            onClick={handleConfirm}
+            disabled={disabled}
+          >
             {confirmText}
           </Button>
         </DialogFooter>

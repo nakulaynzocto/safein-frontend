@@ -13,9 +13,10 @@ interface DateRange { startDate: Date | null; endDate: Date | null }
 interface DateRangePickerProps { 
   onDateRangeChange?: (v: { startDate: string | null; endDate: string | null }) => void
   initialValue?: { startDate: string | null; endDate: string | null }
+  className?: string
 }
 
-const DateRangePicker = ({ onDateRangeChange, initialValue }: DateRangePickerProps) => {
+const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRangePickerProps) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [range, setRangeDates] = useState<DateRange>({ startDate: null, endDate: null });
@@ -326,7 +327,7 @@ const DateRangePicker = ({ onDateRangeChange, initialValue }: DateRangePickerPro
     );
 
     return (
-        <div className="date-range-picker-container" ref={containerRef}>
+        <div className={`date-range-picker-container ${className || ''}`} ref={containerRef}>
             <div
                 className="date-range-picker-trigger flex items-center gap-1 whitespace-nowrap border border-dashed border-gray-300 rounded-full px-2 py-1 bg-white"
                 onClick={() => setIsOpen(!isOpen)}

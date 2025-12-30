@@ -42,7 +42,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
           className="flex-1 overflow-y-auto overflow-x-hidden transition-opacity duration-200" 
           style={{ backgroundColor: 'var(--background)' }}
         >
-          <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-5 md:p-6 max-w-full">
+          <div className="container mx-auto px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-6 max-w-full">
             {isLoading ? (
               // Show loading state
               <div 

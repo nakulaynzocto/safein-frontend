@@ -1,13 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar, CalendarPlus, UserPlus, Users } from "lucide-react"
 import { routes } from "@/utils/routes"
-import { NewEmployeeModal } from "@/components/employee/NewEmployeeModal"
-import { NewAppointmentModal } from "@/components/appointment/NewAppointmentModal"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 
@@ -57,20 +55,16 @@ export function QuickActions() {
               </Button>
             </>
           ) : (
-            <NewAppointmentModal
-              triggerButton={
-                <Button
-                  className="h-16 sm:h-20 flex-col bg-transparent text-xs sm:text-sm p-2"
-                  variant="outline"
-                  asChild
-                >
-                  <div>
-                    <CalendarPlus className="h-5 w-5 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
-                    <span className="text-center line-clamp-2">Create Appointment</span>
-                  </div>
-                </Button>
-              }
-            />
+            <Button
+              className="h-16 sm:h-20 flex-col bg-transparent text-xs sm:text-sm p-2"
+              variant="outline"
+              asChild
+            >
+              <Link href={routes.privateroute.APPOINTMENTCREATE} prefetch>
+                <CalendarPlus className="h-5 w-5 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
+                <span className="text-center line-clamp-2">Create Appointment</span>
+              </Link>
+            </Button>
           )}
 
           {quickActions.map((action) => (
@@ -99,20 +93,16 @@ export function QuickActions() {
               </Button>
             </>
           ) : (
-            <NewEmployeeModal
-              trigger={
-                <Button
-                  className="h-16 sm:h-20 flex-col bg-transparent text-xs sm:text-sm p-2"
-                  variant="outline"
-                  asChild
-                >
-                  <div>
-                    <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
-                    <span className="text-center line-clamp-2">Add Employee</span>
-                  </div>
-                </Button>
-              }
-            />
+            <Button
+              className="h-16 sm:h-20 flex-col bg-transparent text-xs sm:text-sm p-2"
+              variant="outline"
+              asChild
+            >
+              <Link href={routes.privateroute.EMPLOYEECREATE} prefetch>
+                <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
+                <span className="text-center line-clamp-2">Add Employee</span>
+              </Link>
+            </Button>
           )}
 
           <UpgradePlanModal

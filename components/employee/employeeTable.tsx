@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -21,7 +21,7 @@ import {
   Building,
   User
 } from "lucide-react"
-import { Employee } from "@/store/api/employeeApi"
+import { Employee, useCheckEmployeeHasAppointmentsQuery } from "@/store/api/employeeApi"
 import { SearchInput } from "@/components/common/searchInput"
 import DateRangePicker from "@/components/common/dateRangePicker"
 import { EmployeeDetailsDialog } from "./employeeDetailsDialog"
@@ -33,7 +33,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu"
 import { routes } from "@/utils/routes"
-import { NewEmployeeModal } from "./NewEmployeeModal"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { formatName, getInitials } from "@/utils/helpers"
 
@@ -90,8 +89,19 @@ export function EmployeeTable({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
-  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  
+  const employeeId = selectedEmployee?._id || ''
+  const shouldCheckAppointments = Boolean(selectedEmployee && showDeleteDialog)
+  
+  const { data: appointmentCheck } = useCheckEmployeeHasAppointmentsQuery(employeeId, {
+    skip: !shouldCheckAppointments,
+  })
+  
+  const disabledMessage = useMemo(() => {
+    if (!appointmentCheck?.hasAppointments) return undefined
+    return `Cannot delete employee. ${appointmentCheck.count} appointment(s) have been created with this employee. Please delete or reassign the appointments first.`
+  }, [appointmentCheck])
 
   const handleDelete = async () => {
     if (!selectedEmployee || !onDelete) return
@@ -105,14 +115,8 @@ export function EmployeeTable({
     setShowViewDialog(true)
   }
 
-
   const handleEditEmployee = (employee: Employee) => {
-    setEditingEmployee(employee)
-  }
-
-
-  const handleEmployeeUpdated = () => {
-    setEditingEmployee(null)
+    router.push(routes.privateroute.EMPLOYEEEDIT.replace("[id]", employee._id))
   }
 
 
@@ -271,14 +275,10 @@ export function EmployeeTable({
                     />
                   </>
                 ) : (
-                  <NewEmployeeModal
-                    trigger={
-                      <Button className="mt-4">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Employee
-                      </Button>
-                    }
-                  />
+                  <Button className="mt-4" onClick={() => router.push(routes.privateroute.EMPLOYEECREATE)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Employee
+                  </Button>
                 )}
               </div>
             </div>
@@ -317,10 +317,12 @@ export function EmployeeTable({
           open={showDeleteDialog}
           onOpenChange={setShowDeleteDialog}
           title="Delete Employee"
-          description={`Are you sure you want to delete ${selectedEmployee?.name}? This will move the employee to trash.`}
+          description={`Are you sure you want to delete ${selectedEmployee?.name}?`}
           onConfirm={handleDelete}
           confirmText={isDeleting ? "Deleting..." : "Delete"}
           variant="destructive"
+          disabled={appointmentCheck?.hasAppointments || false}
+          disabledMessage={disabledMessage}
         />
       )}
 
@@ -332,14 +334,7 @@ export function EmployeeTable({
         on_close={() => setShowViewDialog(false)}
       />
 
-      {/* Edit Employee Modal */}
-      <NewEmployeeModal
-        employeeId={editingEmployee?._id}
-        open={!!editingEmployee}
-        onOpenChange={(open: boolean) => !open && setEditingEmployee(null)}
-        onSuccess={handleEmployeeUpdated}
-        trigger={<div />} // Hidden trigger since we control the modal programmatically
-      />
+      {/* Edit Employee handled via navigation (see useEffect) */}
     </div>
   )
 }

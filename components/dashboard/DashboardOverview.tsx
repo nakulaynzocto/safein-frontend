@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { useAppSelector } from "@/store/hooks"
 import { useGetAppointmentsQuery, useGetAppointmentStatsQuery } from "@/store/api/appointmentApi"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
@@ -10,15 +11,15 @@ import { StatsGrid } from "./statsGrid"
 import { AppointmentsTable } from "./AppointmentsTable"
 import { QuickActions } from "./QuickActions"
 import { DashboardCharts } from "./dashboardCharts"
-import { NewAppointmentModal } from "@/components/appointment/NewAppointmentModal"
 import { calculateAppointmentStats } from "./dashboardUtils"
 import { DashboardSkeleton } from "@/components/common/tableSkeleton"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
 import DateRangePicker from "@/components/common/dateRangePicker"
+import { routes } from "@/utils/routes"
 
 export function DashboardOverview() {
-  const [showAppointmentModal, setShowAppointmentModal] = useState(false)
+  const router = useRouter()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   const [loadingTimeout, setLoadingTimeout] = useState(false)
@@ -173,13 +174,9 @@ export function DashboardOverview() {
     if (hasReachedAppointmentLimit) {
       setShowUpgradeModal(true)
     } else {
-      setShowAppointmentModal(true)
+      router.push(routes.privateroute.APPOINTMENTCREATE)
     }
-  }, [hasReachedAppointmentLimit])
-
-  const handleAppointmentCreated = useCallback(() => {
-    setShowAppointmentModal(false)
-  }, [])
+  }, [hasReachedAppointmentLimit, router])
 
   const hasError = useMemo(
     () => appointmentsError || employeesError || visitorsError,
@@ -201,23 +198,25 @@ export function DashboardOverview() {
     return (
       <div className="space-y-6">
         <DashboardHeader companyName={user?.companyName} />
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-yellow-800 mb-2">Loading is taking longer than expected</h3>
-          <p className="text-yellow-600 mb-4">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-yellow-800 mb-2">Loading is taking longer than expected</h3>
+          <p className="text-sm sm:text-base text-yellow-600 mb-4">
             The dashboard is taking longer to load than usual. This may be due to network issues or server response delays.
           </p>
-          <button 
-            onClick={handleRetry} 
-            className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 mr-4"
-          >
-            Retry
-          </button>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-yellow-700 text-white rounded hover:bg-yellow-800"
-          >
-            Reload Page
-          </button>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+            <button 
+              onClick={handleRetry} 
+              className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm sm:text-base min-h-[40px]"
+            >
+              Retry
+            </button>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-yellow-700 text-white rounded hover:bg-yellow-800 text-sm sm:text-base min-h-[40px]"
+            >
+              Reload Page
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -227,16 +226,16 @@ export function DashboardOverview() {
     return (
       <div className="space-y-6">
         <DashboardHeader companyName={user?.companyName} />
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-red-800 mb-2">Failed to load dashboard data</h3>
-          <p className="text-red-600 mb-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-red-800 mb-2">Failed to load dashboard data</h3>
+          <p className="text-sm sm:text-base text-red-600 mb-4 whitespace-pre-line">
             {appointmentsError && `Appointments: ${(appointmentsError as any)?.data?.message || 'Failed to load'}`}
             {employeesError && `\nEmployees: ${(employeesError as any)?.data?.message || 'Failed to load'}`}
             {visitorsError && `\nVisitors: ${(visitorsError as any)?.data?.message || 'Failed to load'}`}
           </p>
           <button 
             onClick={handleRetry} 
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm sm:text-base min-h-[40px]"
           >
             Retry
           </button>
@@ -253,6 +252,7 @@ export function DashboardOverview() {
         <DateRangePicker 
           onDateRangeChange={handleDateRangeChange}
           initialValue={dateRange.startDate && dateRange.endDate ? dateRange : undefined}
+          className="w-full sm:w-auto"
         />
       </div>
 
@@ -281,12 +281,6 @@ export function DashboardOverview() {
 
       <QuickActions />
 
-      <NewAppointmentModal
-        open={showAppointmentModal}
-        onOpenChange={setShowAppointmentModal}
-        onSuccess={handleAppointmentCreated}
-        triggerButton={<div />}
-      />
       <UpgradePlanModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
