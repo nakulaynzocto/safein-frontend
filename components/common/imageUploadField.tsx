@@ -283,11 +283,10 @@ export function ImageUploadField({
   }, [previewImage])
 
   useEffect(() => {
-    if (initialUrl && initialUrl !== previewImage) {
+    if (initialUrl) {
       setPreviewImage(initialUrl)
-      setValue(name, initialUrl, { shouldValidate: true })
     }
-  }, [initialUrl, previewImage, name, setValue])
+  }, [initialUrl])
 
   return (
     <div className="space-y-3 p-[3px]">
@@ -425,10 +424,10 @@ export function ImageUploadField({
                     handleClearFile()
                   }}
                   disabled={isUploading}
-                  className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white rounded-full p-1.5 sm:p-1.5 opacity-0 group-hover:opacity-100 sm:opacity-100 transition-opacity duration-200 z-20 shadow-md"
+                  className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white rounded-full p-2 sm:p-1.5 opacity-100 transition-opacity duration-200 z-20 shadow-md"
                   title="Remove image"
                 >
-                  <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <X className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                 </button>
               )}
 
