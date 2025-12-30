@@ -38,6 +38,7 @@ export function AppointmentBookingForm({
   const normalizedVisitorId = extractIdString(visitorId)
   const normalizedEmployeeId = extractIdString(employeeId)
   const [showVehicleFields, setShowVehicleFields] = useState(false)
+  const [isFileUploading, setIsFileUploading] = useState(false)
 
   const {
     control,
@@ -141,7 +142,7 @@ export function AppointmentBookingForm({
                     selectedDate.setHours(0, 0, 0, 0)
                     const today = new Date()
                     today.setHours(0, 0, 0, 0)
-                    
+
                     if (selectedDate < today) {
                       trigger('appointmentDate')
                       return
@@ -277,6 +278,7 @@ export function AppointmentBookingForm({
                   initialUrl={watch("vehiclePhoto")}
                   enableImageCapture={true}
                   appointmentToken={appointmentToken}
+                  onUploadStatusChange={setIsFileUploading}
                 />
               </div>
 
@@ -301,9 +303,9 @@ export function AppointmentBookingForm({
       </div>
 
       <div className="flex justify-end gap-4 pt-4 border-t">
-        <Button 
-          type="submit" 
-          disabled={isLoading} 
+        <Button
+          type="submit"
+          disabled={isLoading || isFileUploading}
           className="bg-[#3882a5] hover:bg-[#2d6a87] text-white"
           size="lg"
         >

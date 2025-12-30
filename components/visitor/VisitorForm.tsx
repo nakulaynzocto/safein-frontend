@@ -91,10 +91,11 @@ export function NewVisitorModal({
   const isPage = layout === "page";
 
   const open = isPage ? true : controlledOpen !== undefined ? controlledOpen : internalOpen;
-  const setOpen = isPage ? (_: boolean) => {} : onOpenChange || setInternalOpen;
+  const setOpen = isPage ? (_: boolean) => { } : onOpenChange || setInternalOpen;
   const [createVisitor, { isLoading: isCreating }] = useCreateVisitorMutation();
   const [updateVisitor, { isLoading: isUpdating }] = useUpdateVisitorMutation();
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [isFileUploading, setIsFileUploading] = useState(false);
 
   const isEditMode = !!visitorId;
   const isLoading = isCreating || isUpdating;
@@ -163,7 +164,7 @@ export function NewVisitorModal({
         visitorData.photo
       )
       setShowOptionalFields(hasOptional)
-      
+
       reset({
         name: visitorData.name || "",
         email: visitorData.email || "",
@@ -330,171 +331,173 @@ export function NewVisitorModal({
             )}
           </div>
 
-                  <Controller
-                    name="phone"
-                    control={control}
-                    render={({ field }) => (
-                      <PhoneInputField
-                        id="phone"
-                        label="Phone Number"
-                        value={field.value}
-                        onChange={(value) => {
-                          field.onChange(value);
-                          clearGeneralError();
-                        }}
-                        error={errors.phone?.message}
-                        required
-                        placeholder="Enter phone number"
-                        defaultCountry="in"
-                      />
-                    )}
-                  />
-                </div>
-              </div>
+          <Controller
+            name="phone"
+            control={control}
+            render={({ field }) => (
+              <PhoneInputField
+                id="phone"
+                label="Phone Number"
+                value={field.value}
+                onChange={(value) => {
+                  field.onChange(value);
+                  clearGeneralError();
+                }}
+                error={errors.phone?.message}
+                required
+                placeholder="Enter phone number"
+                defaultCountry="in"
+              />
+            )}
+          />
+        </div>
+      </div>
 
-              {/* Address Information */}
-              <div className="space-y-4">
+      {/* Address Information */}
+      <div className="space-y-4">
 
-                <CountryStateCitySelect
-                  value={{
-                    country: watch("address.country") || "",
-                    state: watch("address.state") || "",
-                    city: watch("address.city") || "",
-                  }}
-                  onChange={(v) => {
-                    setValue("address.country", v.country)
-                    setValue("address.state", v.state)
-                    setValue("address.city", v.city)
-                  }}
-                  errors={{
-                    country: errors.address?.country?.message as string,
-                    state: errors.address?.state?.message as string,
-                    city: errors.address?.city?.message as string,
-                  }}
-                />
-              </div>
+        <CountryStateCitySelect
+          value={{
+            country: watch("address.country") || "",
+            state: watch("address.state") || "",
+            city: watch("address.city") || "",
+          }}
+          onChange={(v) => {
+            setValue("address.country", v.country)
+            setValue("address.state", v.state)
+            setValue("address.city", v.city)
+          }}
+          errors={{
+            country: errors.address?.country?.message as string,
+            state: errors.address?.state?.message as string,
+            city: errors.address?.city?.message as string,
+          }}
+        />
+      </div>
 
-              {/* Company Address Section */}
-              <div className="space-y-4 pt-4">
-                <TextareaField
-                  label="Company Address"
-                  id="address.street"
-                  placeholder="Enter company address"
-                  {...register("address.street")}
-                  error={errors.address?.street?.message}
-                  rows={3}
-                />
-              </div>
+      {/* Company Address Section */}
+      <div className="space-y-4 pt-4">
+        <TextareaField
+          label="Company Address"
+          id="address.street"
+          placeholder="Enter company address"
+          {...register("address.street")}
+          error={errors.address?.street?.message}
+          rows={3}
+        />
+      </div>
 
-              {/* Optional Fields Toggle */}
-              <div className="pt-4 border-t">
-                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-                  <div className="flex items-center gap-3">
-                    <Info className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <Label htmlFor="optional-fields-toggle" className="text-sm font-medium cursor-pointer">
-                        Add Additional Information
-                      </Label>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Include optional details like ID proof, photos, and notes
-                      </p>
-                    </div>
-                  </div>
-                  <Switch
-                    id="optional-fields-toggle"
-                    checked={showOptionalFields}
-                    onCheckedChange={handleToggleChange}
-                  />
-                </div>
-              </div>
-
-              {/* Optional Fields Section - Only shown when toggle is ON */}
-              {showOptionalFields && (
-                <div className="space-y-4 pt-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                  {/* ID Proof & Additional Information Section */}
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Controller
-                        name="idProof.type"
-                        control={control}
-                        render={({ field }) => (
-                          <SelectField
-                            label="ID Proof Type (optional)"
-                            placeholder="Select ID proof type"
-                            options={idProofTypes}
-                            value={field.value || ""}
-                            onChange={(val) => field.onChange(val)}
-                            error={errors.idProof?.type?.message}
-                          />
-                        )}
-                      />
-                      <InputField
-                        label="ID Proof Number (optional)"
-                        placeholder="Enter ID proof number"
-                        error={errors.idProof?.number?.message}
-                        {...register("idProof.number")}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Image Uploads Section */}
-                  <div className="space-y-4 pt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <ImageUploadField
-                          key={`idProof-${visitorId}-${visitorData?.idProof?.image}`}
-                          name="idProof.image"
-                          label="ID Proof Image (optional)"
-                          register={register}
-                          setValue={setValue}
-                          errors={errors.idProof?.image}
-                          initialUrl={visitorData?.idProof?.image}
-                          enableImageCapture={true}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <ImageUploadField
-                          key={`photo-${visitorId}-${visitorData?.photo}`}
-                          name="photo"
-                          label="Visitor Photo (optional)"
-                          register={register}
-                          setValue={setValue}
-                          errors={errors.photo}
-                          initialUrl={visitorData?.photo}
-                          enableImageCapture={true}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-            <div className={`flex flex-col sm:flex-row gap-2 w-full justify-end ${isPage ? "pt-4" : ""}`}>
-              {!isPage && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setOpen(false)}
-                  disabled={isLoading}
-                  className="w-full sm:w-auto"
-                >
-                  Cancel
-                </Button>
-              )}
-              <Button
-                type="submit"
-                variant="outline"
-                disabled={isLoading}
-                className="w-full sm:w-auto"
-              >
-                {isLoading ? (
-                  <LoadingSpinner size="sm" className="mr-2" />
-                ) : null}
-                <CheckCircle className="h-4 w-4 mr-2" />
-                {isEditMode ? "Update Visitor" : "Register Visitor"}
-              </Button>
+      {/* Optional Fields Toggle */}
+      <div className="pt-4 border-t">
+        <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+          <div className="flex items-center gap-3">
+            <Info className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <Label htmlFor="optional-fields-toggle" className="text-sm font-medium cursor-pointer">
+                Add Additional Information
+              </Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Include optional details like ID proof, photos, and notes
+              </p>
             </div>
-        </form>
+          </div>
+          <Switch
+            id="optional-fields-toggle"
+            checked={showOptionalFields}
+            onCheckedChange={handleToggleChange}
+          />
+        </div>
+      </div>
+
+      {/* Optional Fields Section - Only shown when toggle is ON */}
+      {showOptionalFields && (
+        <div className="space-y-4 pt-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          {/* ID Proof & Additional Information Section */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Controller
+                name="idProof.type"
+                control={control}
+                render={({ field }) => (
+                  <SelectField
+                    label="ID Proof Type (optional)"
+                    placeholder="Select ID proof type"
+                    options={idProofTypes}
+                    value={field.value || ""}
+                    onChange={(val) => field.onChange(val)}
+                    error={errors.idProof?.type?.message}
+                  />
+                )}
+              />
+              <InputField
+                label="ID Proof Number (optional)"
+                placeholder="Enter ID proof number"
+                error={errors.idProof?.number?.message}
+                {...register("idProof.number")}
+              />
+            </div>
+          </div>
+
+          {/* Image Uploads Section */}
+          <div className="space-y-4 pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <ImageUploadField
+                  key={`idProof-${visitorId}-${visitorData?.idProof?.image}`}
+                  name="idProof.image"
+                  label="ID Proof Image (optional)"
+                  register={register}
+                  setValue={setValue}
+                  errors={errors.idProof?.image}
+                  initialUrl={visitorData?.idProof?.image}
+                  enableImageCapture={true}
+                  onUploadStatusChange={setIsFileUploading}
+                />
+              </div>
+              <div className="space-y-2">
+                <ImageUploadField
+                  key={`photo-${visitorId}-${visitorData?.photo}`}
+                  name="photo"
+                  label="Visitor Photo (optional)"
+                  register={register}
+                  setValue={setValue}
+                  errors={errors.photo}
+                  initialUrl={visitorData?.photo}
+                  enableImageCapture={true}
+                  onUploadStatusChange={setIsFileUploading}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className={`flex flex-col sm:flex-row gap-2 w-full justify-end ${isPage ? "pt-4" : ""}`}>
+        {!isPage && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+            disabled={isLoading || isFileUploading}
+            className="w-full sm:w-auto"
+          >
+            Cancel
+          </Button>
+        )}
+        <Button
+          type="submit"
+          variant="outline"
+          disabled={isLoading || isFileUploading}
+          className="w-full sm:w-auto"
+        >
+          {isLoading ? (
+            <LoadingSpinner size="sm" className="mr-2" />
+          ) : null}
+          <CheckCircle className="h-4 w-4 mr-2" />
+          {isEditMode ? "Update Visitor" : "Register Visitor"}
+        </Button>
+      </div>
+    </form>
   )
 
   if (isPage) {
