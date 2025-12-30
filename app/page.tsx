@@ -451,11 +451,11 @@ export default function HomePage() {
                   </p>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                      SK
+                      AK
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">Sarah Kumar</p>
-                      <p className="text-sm text-gray-600">Security Manager, TechCorp</p>
+                      <p className="font-semibold text-gray-900">Amit Kumar</p>
+                      <p className="text-sm text-gray-600">Security Manager</p>
                     </div>
                   </div>
                 </CardContent>
@@ -474,11 +474,11 @@ export default function HomePage() {
                   </p>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-semibold">
-                      MR
+                      PS
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">Michael Rodriguez</p>
-                      <p className="text-sm text-gray-600">Facilities Director, MedCenter</p>
+                      <p className="font-semibold text-gray-900">Priya Sharma</p>
+                      <p className="text-sm text-gray-600">Facilities Director</p>
                     </div>
                   </div>
                 </CardContent>
@@ -497,11 +497,11 @@ export default function HomePage() {
                   </p>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
-                      AJ
+                      RM
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">Amanda Johnson</p>
-                      <p className="text-sm text-gray-600">Office Manager, EduTech</p>
+                      <p className="font-semibold text-gray-900">Rahul Mehta</p>
+                      <p className="text-sm text-gray-600">Office Manager</p>
                     </div>
                   </div>
                 </CardContent>
