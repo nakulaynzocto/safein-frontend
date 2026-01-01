@@ -22,17 +22,12 @@ export function EmployeeList() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [sortBy, setSortBy] = useState("createdAt")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
-  // Employee table - no date range filter by default, show all data
-  const [dateRange, setDateRange] = useState<{ startDate: string | null; endDate: string | null }>(() => {
-    // Always start with no date range filter - show all employees
-    return { startDate: null, endDate: null }
-  })
-  
+
   const debouncedSearch = useDebounce(search, 500)
   const { data: trialStatus, refetch: refetchTrialLimits } = useGetTrialLimitsStatusQuery()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [showBulkImportModal, setShowBulkImportModal] = useState(false)
-  
+
   const { data: employeeData, isLoading, error, refetch } = useGetEmployeesQuery({
     page: currentPage,
     limit: pageSize,
@@ -41,12 +36,10 @@ export function EmployeeList() {
     status: statusFilter && statusFilter !== "all" ? statusFilter as "Active" | "Inactive" : undefined,
     sortBy,
     sortOrder,
-    startDate: dateRange.startDate || undefined,
-    endDate: dateRange.endDate || undefined,
   })
-  
+
   const [deleteEmployee, { isLoading: isDeleting }] = useDeleteEmployeeMutation()
-  
+
   const employees = employeeData?.employees || []
   const pagination = employeeData?.pagination
 
@@ -112,7 +105,7 @@ export function EmployeeList() {
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap shrink-0">
               {hasReachedEmployeeLimit ? (
                 <>
-                  <Button 
+                  <Button
                     onClick={() => setShowUpgradeModal(true)}
                     variant="outline"
                     className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
@@ -121,7 +114,7 @@ export function EmployeeList() {
                     <span className="hidden min-[375px]:inline sm:hidden">Upgrade</span>
                     <span className="hidden sm:inline">Upgrade to Add More</span>
                   </Button>
-                  <UpgradePlanModal 
+                  <UpgradePlanModal
                     isOpen={showUpgradeModal}
                     onClose={() => setShowUpgradeModal(false)}
                   />
@@ -171,10 +164,8 @@ export function EmployeeList() {
         onPageChange={setCurrentPage}
         onPageSizeChange={setPageSize}
         hasReachedLimit={hasReachedEmployeeLimit}
-        onDateFromChange={(v) => { setDateRange(prev => ({ ...prev, startDate: v || null })); setCurrentPage(1) }}
-        onDateToChange={(v) => { setDateRange(prev => ({ ...prev, endDate: v || null })); setCurrentPage(1) }}
         onDelete={handleDelete}
-        onView={(employee) => {}}
+        onView={(employee) => { }}
         isDeleting={isDeleting}
         showHeader={false}
       />

@@ -87,12 +87,12 @@ export interface AppointmentTableProps {
   employeeFilter?: string
   dateFrom?: string
   dateTo?: string
+  onDateFromChange?: (value: string) => void
+  onDateToChange?: (value: string) => void
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
   onStatusFilterChange?: (value: string) => void
   onEmployeeFilterChange?: (value: string) => void
-  onDateFromChange?: (value: string) => void
-  onDateToChange?: (value: string) => void
   onPageSizeChange?: (value: number) => void
   onSortChange?: (field: string) => void
 }
@@ -105,6 +105,8 @@ export function AppointmentTable({
   searchTerm,
   currentPage,
   pageSize,
+  dateFrom,
+  dateTo,
   onSearchChange,
   onPageChange,
   onDelete,
@@ -543,6 +545,7 @@ export function AppointmentTable({
             <div className="w-full sm:w-auto">
               <DateRangePicker
                 onDateRangeChange={(r) => { onDateFromChange?.(r.startDate || ""); onDateToChange?.(r.endDate || ""); onPageChange?.(1); }}
+                initialValue={dateFrom && dateTo ? { startDate: dateFrom, endDate: dateTo } : undefined}
                 className="w-full sm:w-auto"
               />
             </div>
