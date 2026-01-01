@@ -68,15 +68,24 @@ export interface UseAppointmentOperationsReturn {
   resetFilters: () => void
 }
 
+const getTodayDate = () => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 export function useAppointmentOperations(options: UseAppointmentOperationsOptions = {}): UseAppointmentOperationsReturn {
+  const todayDate = getTodayDate()
   const {
     initialPage = 1,
     initialLimit = 10,
     initialSearch = '',
     initialStatus = '',
     initialEmployeeId = '',
-    initialDateFrom = '',
-    initialDateTo = '',
+    initialDateFrom = todayDate,
+    initialDateTo = todayDate,
     initialSortBy = 'createdAt',
     initialSortOrder = 'desc'
   } = options
@@ -194,8 +203,8 @@ export function useAppointmentOperations(options: UseAppointmentOperationsOption
     setSearchTerm('')
     setStatusFilter('')
     setEmployeeFilter('')
-    setDateFrom('')
-    setDateTo('')
+    setDateFrom(todayDate)
+    setDateTo(todayDate)
     setCurrentPage(1)
     setSortBy('createdAt')
     setSortOrder('desc')

@@ -6,19 +6,18 @@ import { routes } from "@/utils/routes"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { SearchInput } from "@/components/common/searchInput"
-import DateRangePicker from "@/components/common/dateRangePicker"
 import { DataTable } from "@/components/common/dataTable"
 import { Pagination } from "@/components/common/pagination"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ConfirmationDialog } from "@/components/common/confirmationDialog"
-import { 
-  Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Phone, 
-  Mail, 
+import {
+  Plus,
+  Eye,
+  Edit,
+  Trash2,
+  Phone,
+  Mail,
   MapPin,
   Calendar,
   User,
@@ -26,12 +25,12 @@ import {
   RefreshCw,
   Maximize2
 } from "lucide-react"
-import { 
-  useGetVisitorsQuery, 
+import {
+  useGetVisitorsQuery,
   useDeleteVisitorMutation,
   useCheckVisitorHasAppointmentsQuery,
   Visitor,
-  GetVisitorsQuery 
+  GetVisitorsQuery
 } from "@/store/api/visitorApi"
 import {
   DropdownMenu,
@@ -55,192 +54,185 @@ const truncateText = (text: string, maxLength: number) => {
 }
 
 const createColumns = (
-  handleDeleteClick: (visitor: Visitor) => void, 
+  handleDeleteClick: (visitor: Visitor) => void,
   handleEditVisitor: (visitor: Visitor) => void,
   handleViewVisitor: (visitor: Visitor) => void
 ) => [
-  {
-    key: "visitor",
-    header: "Visitor",
-    render: (visitor: Visitor) => (
-      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-        <div className="relative group shrink-0">
-          <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-            <AvatarImage src={visitor.photo} alt={visitor.name} />
-            <AvatarFallback className="text-xs sm:text-sm">
-              {visitor.name.split(' ').map(n => n[0]).join('')}
-            </AvatarFallback>
-          </Avatar>
-          {visitor.photo && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(visitor.photo, '_blank');
-              }}
-              className="absolute -bottom-1 -right-1 bg-[#3882a5] text-white rounded-full p-1 shadow-md hover:bg-[#2d6a87] transition-colors opacity-0 group-hover:opacity-100"
-              title="View full image"
-            >
-              <Maximize2 className="h-2.5 w-2.5" />
-            </button>
-          )}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="font-medium text-sm sm:text-base truncate max-w-[100px] sm:max-w-[150px]">
-            {visitor.name}
+    {
+      key: "visitor",
+      header: "Visitor",
+      render: (visitor: Visitor) => (
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="relative group shrink-0">
+            <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+              <AvatarImage src={visitor.photo} alt={visitor.name} />
+              <AvatarFallback className="text-xs sm:text-sm">
+                {visitor.name.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
+            {visitor.photo && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(visitor.photo, '_blank');
+                }}
+                className="absolute -bottom-1 -right-1 bg-[#3882a5] text-white rounded-full p-1 shadow-md hover:bg-[#2d6a87] transition-colors opacity-0 group-hover:opacity-100"
+                title="View full image"
+              >
+                <Maximize2 className="h-2.5 w-2.5" />
+              </button>
+            )}
           </div>
-          {visitor.email && (
-            <div className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[80px] sm:max-w-[120px]" title={visitor.email}>
-              {truncateText(visitor.email, 20)}
+          <div className="min-w-0 flex-1">
+            <div className="font-medium text-sm sm:text-base truncate max-w-[100px] sm:max-w-[150px]">
+              {visitor.name}
             </div>
-          )}
+            {visitor.email && (
+              <div className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[80px] sm:max-w-[120px]" title={visitor.email}>
+                {truncateText(visitor.email, 20)}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    )
-  },
-  {
-    key: "contact",
-    header: "Contact",
-    render: (visitor: Visitor) => (
-      <div className="space-y-0.5 sm:space-y-1 min-w-0">
-        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
-          <Phone className="h-3 w-3 shrink-0" />
-          <span className="truncate">{visitor.phone}</span>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-500">
-          <Mail className="h-3 w-3 shrink-0" />
-          <span className="truncate max-w-[80px] sm:max-w-[150px]" title={visitor.email}>
-            {truncateText(visitor.email, 12)}
-          </span>
-        </div>
-      </div>
-    )
-  },
-  {
-    key: "address",
-    header: "Address",
-    className: "hidden lg:table-cell",
-    render: (visitor: Visitor) => (
-      <div className="flex items-center gap-2 text-sm text-gray-500">
-        <MapPin className="h-3 w-3 shrink-0" />
-        <span className="truncate">{visitor.address.city}, {visitor.address.state}</span>
-      </div>
-    )
-  },
-  {
-    key: "idProof",
-    header: "ID Proof",
-    className: "hidden md:table-cell",
-    render: (visitor: Visitor) => (
-      visitor.idProof?.type || visitor.idProof?.number ? (
-        <div className="space-y-1">
-          {visitor.idProof.type && (
-            <Badge variant="outline" className="text-xs">
-              {visitor.idProof.type.replace('_', ' ').toUpperCase()}
-            </Badge>
-          )}
-          {visitor.idProof.number && (
-            <div className="text-xs text-gray-500 truncate max-w-[100px]">
-              {visitor.idProof.number}
-            </div>
-          )}
-        </div>
-      ) : (
-        <span className="text-xs text-muted-foreground">-</span>
       )
-    )
-  },
-  {
-    key: "createdAt",
-    header: "Registered",
-    className: "hidden xl:table-cell",
-    render: (visitor: Visitor) => (
-      <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Calendar className="h-3 w-3 shrink-0" />
-        {formatDate(visitor.createdAt)}
-      </div>
-    )
-  },
-  {
-    key: "actions",
-    header: "",
-    className: "w-10",
-    render: (visitor: Visitor) => (
-      <div className="flex justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => handleViewVisitor(visitor)}>
-              <Eye className="mr-2 h-4 w-4" />
-              View Details
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleEditVisitor(visitor)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              className="text-destructive"
-              onClick={() => handleDeleteClick(visitor)}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    )
-  }
-]
+    },
+    {
+      key: "contact",
+      header: "Contact",
+      render: (visitor: Visitor) => (
+        <div className="space-y-0.5 sm:space-y-1 min-w-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+            <Phone className="h-3 w-3 shrink-0" />
+            <span className="truncate">{visitor.phone}</span>
+          </div>
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-500">
+            <Mail className="h-3 w-3 shrink-0" />
+            <span className="truncate max-w-[80px] sm:max-w-[150px]" title={visitor.email}>
+              {truncateText(visitor.email, 12)}
+            </span>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: "address",
+      header: "Address",
+      className: "hidden lg:table-cell",
+      render: (visitor: Visitor) => (
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <MapPin className="h-3 w-3 shrink-0" />
+          <span className="truncate">{visitor.address.city}, {visitor.address.state}</span>
+        </div>
+      )
+    },
+    {
+      key: "idProof",
+      header: "ID Proof",
+      className: "hidden md:table-cell",
+      render: (visitor: Visitor) => (
+        visitor.idProof?.type || visitor.idProof?.number ? (
+          <div className="space-y-1">
+            {visitor.idProof.type && (
+              <Badge variant="outline" className="text-xs">
+                {visitor.idProof.type.replace('_', ' ').toUpperCase()}
+              </Badge>
+            )}
+            {visitor.idProof.number && (
+              <div className="text-xs text-gray-500 truncate max-w-[100px]">
+                {visitor.idProof.number}
+              </div>
+            )}
+          </div>
+        ) : (
+          <span className="text-xs text-muted-foreground">-</span>
+        )
+      )
+    },
+    {
+      key: "createdAt",
+      header: "Registered",
+      className: "hidden xl:table-cell",
+      render: (visitor: Visitor) => (
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Calendar className="h-3 w-3 shrink-0" />
+          {formatDate(visitor.createdAt)}
+        </div>
+      )
+    },
+    {
+      key: "actions",
+      header: "",
+      className: "w-10",
+      render: (visitor: Visitor) => (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => handleViewVisitor(visitor)}>
+                <Eye className="mr-2 h-4 w-4" />
+                View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleEditVisitor(visitor)}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => handleDeleteClick(visitor)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )
+    }
+  ]
 
 export function VisitorList() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
-  // Visitor table - no date range filter by default, show all data
-  const [dateRange, setDateRange] = useState<{ startDate: string | null; endDate: string | null }>(() => {
-    // Always start with no date range filter - show all visitors
-    return { startDate: null, endDate: null }
-  })
   const [currentPage, setCurrentPage] = useState(1)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null)
   const { data: trialStatus, refetch: refetchTrialLimits } = useGetTrialLimitsStatusQuery()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-  
+
   const debouncedSearchTerm = useDebounce(searchTerm, 500)
-  
+
   useEffect(() => {
     setCurrentPage(1)
   }, [debouncedSearchTerm])
-  
+
   const queryParams: GetVisitorsQuery = {
     page: currentPage,
     limit: 10,
     search: debouncedSearchTerm || undefined,
-    startDate: dateRange.startDate || undefined,
-    endDate: dateRange.endDate || undefined,
   }
 
-  const { 
-    data: visitorsData, 
-    isLoading, 
-    error, 
-    refetch 
+  const {
+    data: visitorsData,
+    isLoading,
+    error,
+    refetch
   } = useGetVisitorsQuery(queryParams)
-  
+
   const [deleteVisitor, { isLoading: isDeleting }] = useDeleteVisitorMutation()
-  
+
   const visitorId = selectedVisitor?._id || ''
   const shouldCheckAppointments = Boolean(selectedVisitor && showDeleteDialog)
-  
+
   const { data: appointmentCheck } = useCheckVisitorHasAppointmentsQuery(visitorId, {
     skip: !shouldCheckAppointments,
   })
-  
+
   const disabledMessage = useMemo(() => {
     if (!appointmentCheck?.hasAppointments) return undefined
     return `Cannot delete visitor. ${appointmentCheck.count} appointment(s) have been created with this visitor. Please delete or reassign the appointments first.`
@@ -253,7 +245,7 @@ export function VisitorList() {
 
   const handleDeleteVisitor = async () => {
     if (!selectedVisitor) return
-    
+
     try {
       await deleteVisitor(selectedVisitor._id).unwrap()
       showSuccessToast("Visitor deleted successfully!")
@@ -294,10 +286,10 @@ export function VisitorList() {
   }
 
   if (error) {
-    const errorMessage = (error as any)?.data?.message || 
-                        (error as any)?.error || 
-                        'Failed to load visitors'
-    
+    const errorMessage = (error as any)?.data?.message ||
+      (error as any)?.error ||
+      'Failed to load visitors'
+
     return (
       <div className="space-y-6">
         <Card className="card-hostinger p-4">
@@ -329,7 +321,7 @@ export function VisitorList() {
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {hasReachedVisitorLimit ? (
                 <>
-                  <Button 
+                  <Button
                     variant="outline"
                     className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
                     onClick={() => setShowUpgradeModal(true)}
@@ -369,7 +361,6 @@ export function VisitorList() {
               debounceDelay={500}
               className="w-full"
             />
-            <DateRangePicker onDateRangeChange={(r) => { setDateRange(r); setCurrentPage(1); }} />
           </div>
         </CardHeader>
         <CardContent className="p-0">

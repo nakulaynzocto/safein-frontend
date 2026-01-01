@@ -10,10 +10,10 @@ const PREDEFINED_RANGES = [
 ];
 
 interface DateRange { startDate: Date | null; endDate: Date | null }
-interface DateRangePickerProps { 
-  onDateRangeChange?: (v: { startDate: string | null; endDate: string | null }) => void
-  initialValue?: { startDate: string | null; endDate: string | null }
-  className?: string
+interface DateRangePickerProps {
+    onDateRangeChange?: (v: { startDate: string | null; endDate: string | null }) => void
+    initialValue?: { startDate: string | null; endDate: string | null }
+    className?: string
 }
 
 const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRangePickerProps) => {
@@ -30,7 +30,7 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
         const day = String(d.getDate()).padStart(2, '0')
         return `${y}-${m}-${day}`
     }
-    
+
     const [currentView, setCurrentView] = useState({
         month: today.getMonth(),
         year: today.getFullYear()
@@ -82,11 +82,6 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
 
         setRangeDates(tempRange);
 
-        localStorage.setItem('dateRange', JSON.stringify({
-          startDate: formatLocalDate(tempRange.startDate),
-          endDate: formatLocalDate(tempRange.endDate),
-        }))
-
         onDateRangeChange?.({ startDate: formatLocalDate(tempRange.startDate), endDate: formatLocalDate(tempRange.endDate) });
         setIsOpen(false);
     };
@@ -105,7 +100,7 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
     const handleDateClick = (date: Date) => {
         const normalizedDate = normalizeDate(date);
         const { startDate, endDate } = tempRange;
-        
+
         if (!startDate || (startDate && endDate)) {
             setTempRange({ startDate: normalizedDate, endDate: null });
             setHoverDate(null);
@@ -125,8 +120,8 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
         const normalizedDate = normalizeDate(date);
         const normalizedStart = normalizeDate(startDate);
         const normalizedEnd = normalizeDate(endDate);
-        const inRange = normalizedDate.getTime() > normalizedStart.getTime() && 
-                        normalizedDate.getTime() < normalizedEnd.getTime();
+        const inRange = normalizedDate.getTime() > normalizedStart.getTime() &&
+            normalizedDate.getTime() < normalizedEnd.getTime();
         return inRange;
     };
 
@@ -155,51 +150,50 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
     const handleRangeSelect = (rangeName: string) => {
         let start: Date | null, end: Date | null;
         const normalizedToday = normalizeDate(today);
-        
+
         switch (rangeName) {
-            case 'Today': 
+            case 'Today':
                 start = end = new Date(normalizedToday);
                 break;
-            case 'Yesterday': 
+            case 'Yesterday':
                 start = new Date(normalizedToday);
                 start.setDate(start.getDate() - 1);
                 end = new Date(start);
                 break;
-            case 'Last 7 Days': 
+            case 'Last 7 Days':
                 start = new Date(normalizedToday);
                 start.setDate(start.getDate() - 6);
                 end = new Date(normalizedToday);
                 break;
-            case 'Last 30 Days': 
+            case 'Last 30 Days':
                 start = new Date(normalizedToday);
                 start.setDate(start.getDate() - 29);
                 end = new Date(normalizedToday);
                 break;
-            case 'This Month': 
+            case 'This Month':
                 start = new Date(today.getFullYear(), today.getMonth(), 1);
                 end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
                 normalizeDate(start);
                 normalizeDate(end);
                 break;
-            case 'Last Month': 
+            case 'Last Month':
                 start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
                 end = new Date(today.getFullYear(), today.getMonth(), 0);
                 normalizeDate(start);
                 normalizeDate(end);
                 break;
-            case 'Last 1 Year': 
+            case 'Last 1 Year':
                 start = new Date(normalizedToday);
                 start.setFullYear(start.getFullYear() - 1);
                 end = new Date(normalizedToday);
                 break;
-            case 'All': 
-                setRangeDates({ startDate: null, endDate: null }); 
-                setTempRange({ startDate: null, endDate: null }); 
-                setIsOpen(false); 
-                localStorage.setItem('dateRange', JSON.stringify({ startDate: null, endDate: null }));
-                onDateRangeChange?.({ startDate: null, endDate: null }); 
+            case 'All':
+                setRangeDates({ startDate: null, endDate: null });
+                setTempRange({ startDate: null, endDate: null });
+                setIsOpen(false);
+                onDateRangeChange?.({ startDate: null, endDate: null });
                 return;
-            default: 
+            default:
                 start = end = new Date(normalizedToday);
         }
 
@@ -209,47 +203,27 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
             setRangeDates({ startDate: start, endDate: end });
             setTempRange({ startDate: start, endDate: end });
             setIsOpen(false);
-            
-            localStorage.setItem('dateRange', JSON.stringify({ startDate: formatLocalDate(start!), endDate: formatLocalDate(end!) }))
+
             onDateRangeChange?.({ startDate: formatLocalDate(start!), endDate: formatLocalDate(end!) });
         }
     };
 
     useEffect(() => {
-        // Priority: 1. initialValue prop, 2. localStorage 'dateRange', 3. null (no filter)
-        let initialStart: Date | null = null;
-        let initialEnd: Date | null = null;
-        
-        // First check if parent provided initialValue
+        // Sync with initialValue prop
         if (initialValue?.startDate && initialValue?.endDate) {
-            initialStart = normalizeDate(new Date(initialValue.startDate));
-            initialEnd = normalizeDate(new Date(initialValue.endDate));
+            const initialStart = normalizeDate(new Date(initialValue.startDate));
+            const initialEnd = normalizeDate(new Date(initialValue.endDate));
+
+            if (initialStart && initialEnd) {
+                setRangeDates({ startDate: initialStart, endDate: initialEnd });
+                setTempRange({ startDate: initialStart, endDate: initialEnd });
+            }
         } else {
-            // Otherwise check localStorage
-            const raw = localStorage.getItem('dateRange');
-            const saved = raw ? JSON.parse(raw) : null;
-            if (saved?.startDate && saved?.endDate) {
-                initialStart = normalizeDate(new Date(saved.startDate));
-                initialEnd = normalizeDate(new Date(saved.endDate));
-            }
+            // If initialValue is cleared, reset internal state
+            setRangeDates({ startDate: null, endDate: null });
+            setTempRange({ startDate: null, endDate: null });
         }
-        
-        // Only set if we have valid dates
-        if (initialStart && initialEnd) {
-            setRangeDates({ startDate: initialStart, endDate: initialEnd });
-            setTempRange({ startDate: initialStart, endDate: initialEnd });
-            
-            // Call onDateRangeChange to sync with parent (only if not from initialValue to avoid double call)
-            if (onDateRangeChange && !initialValue) {
-                const startDateStr = formatLocalDate(initialStart);
-                const endDateStr = formatLocalDate(initialEnd);
-                setTimeout(() => {
-                    onDateRangeChange({ startDate: startDateStr, endDate: endDateStr });
-                }, 0);
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [initialValue]);
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -271,26 +245,26 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
                     if (!date) {
                         return <div key={i} className="date-range-calendar-day" style={{ height: 30 }}></div>;
                     }
-                    
+
                     const isOtherMonth = date.getMonth() !== month;
                     const isInRangeCheck = isInRange(date);
                     const isStartOrEndCheck = isStartOrEnd(date);
                     const isInHoverRangeCheck = isInHoverRange(date);
-                    
+
                     let className = 'date-range-calendar-day';
-                    let inlineStyles: React.CSSProperties = { 
-                        height: 30, 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                    let inlineStyles: React.CSSProperties = {
+                        height: 30,
+                        display: 'flex',
+                        alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer'
                     };
-                    
+
                     if (isOtherMonth) {
                         className += ' other-month';
                         inlineStyles.color = '#d1d5db';
                     }
-                    
+
                     if (isStartOrEndCheck) {
                         className += ' start-end';
                         inlineStyles.backgroundColor = '#2563eb';
@@ -307,7 +281,7 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
                         inlineStyles.backgroundColor = 'rgba(37, 99, 235, 0.2)';
                         inlineStyles.color = '#111827';
                     }
-                    
+
                     return (
                         <div
                             key={i}
@@ -339,7 +313,6 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
                             e.stopPropagation();
                             setRangeDates({ startDate: null, endDate: null });
                             setTempRange({ startDate: null, endDate: null });
-                            localStorage.setItem('dateRange', JSON.stringify({ startDate: null, endDate: null }));
                             onDateRangeChange?.({ startDate: null, endDate: null });
                         }}
                     >
