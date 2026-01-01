@@ -90,14 +90,14 @@ export function EmployeeTable({
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-  
+
   const employeeId = selectedEmployee?._id || ''
   const shouldCheckAppointments = Boolean(selectedEmployee && showDeleteDialog)
-  
+
   const { data: appointmentCheck } = useCheckEmployeeHasAppointmentsQuery(employeeId, {
     skip: !shouldCheckAppointments,
   })
-  
+
   const disabledMessage = useMemo(() => {
     if (!appointmentCheck?.hasAppointments) return undefined
     return `Cannot delete employee. ${appointmentCheck.count} appointment(s) have been created with this employee. Please delete or reassign the appointments first.`
@@ -170,7 +170,7 @@ export function EmployeeTable({
     baseColumns.push({
       key: "status",
       header: "Status",
-      render: (employee: Employee) => <StatusBadge status={employee.status.toLowerCase() as any} />
+      render: (employee: Employee) => <StatusBadge status={employee.status.toLowerCase() as any} className="capitalize" />
     })
 
     baseColumns.push({
