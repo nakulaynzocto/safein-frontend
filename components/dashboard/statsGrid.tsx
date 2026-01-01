@@ -35,15 +35,21 @@ export const StatsGrid = memo(function StatsGrid({ stats }: StatsGridProps) {
       description: "Finished appointments",
     },
     {
+      title: "Rejected",
+      value: stats.rejectedAppointments,
+      icon: CalendarX, // Or a more specific icon if preferred, using CalendarX for now like completed
+      description: "Rejected appointments",
+    },
+    {
       title: "Time Out",
       value: stats.timeOutAppointments,
       icon: TimerOff,
       description: "Timed out appointments",
     },
-  ], [stats.pendingAppointments, stats.approvedAppointments, stats.completedAppointments, stats.timeOutAppointments])
+  ], [stats.pendingAppointments, stats.approvedAppointments, stats.completedAppointments, stats.rejectedAppointments, stats.timeOutAppointments])
 
   return (
-    <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
       {statCards.map((card) => (
         <StatCard
           key={card.title}

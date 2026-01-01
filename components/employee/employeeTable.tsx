@@ -23,7 +23,6 @@ import {
 } from "lucide-react"
 import { Employee, useCheckEmployeeHasAppointmentsQuery } from "@/store/api/employeeApi"
 import { SearchInput } from "@/components/common/searchInput"
-import DateRangePicker from "@/components/common/dateRangePicker"
 import { EmployeeDetailsDialog } from "./employeeDetailsDialog"
 import {
   DropdownMenu,
@@ -59,8 +58,6 @@ export interface EmployeeTableProps {
   showHeader?: boolean
   title?: string
   description?: string
-  onDateFromChange?: (value: string) => void
-  onDateToChange?: (value: string) => void
   hasReachedLimit?: boolean
 }
 
@@ -80,8 +77,6 @@ export function EmployeeTable({
   isDeleting = false,
   showHeader = true,
   title,
-  onDateFromChange,
-  onDateToChange,
   hasReachedLimit = false,
 }: EmployeeTableProps) {
   const router = useRouter()
@@ -244,7 +239,6 @@ export function EmployeeTable({
               debounceDelay={500}
               className="w-full"
             />
-            <DateRangePicker onDateRangeChange={(r) => { onDateFromChange?.(r.startDate || ""); onDateToChange?.(r.endDate || ""); }} />
           </div>
         </CardHeader>
         <CardContent className="p-0">

@@ -15,7 +15,6 @@ import { calculateAppointmentStats } from "./dashboardUtils"
 import { DashboardSkeleton } from "@/components/common/tableSkeleton"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
-import DateRangePicker from "@/components/common/dateRangePicker"
 import { routes } from "@/utils/routes"
 
 export function DashboardOverview() {
@@ -23,7 +22,7 @@ export function DashboardOverview() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   const [loadingTimeout, setLoadingTimeout] = useState(false)
-  
+
   const formatDate = (date: Date): string => {
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -33,42 +32,20 @@ export function DashboardOverview() {
 
   const getDefaultDateRange = (): { startDate: string; endDate: string } => {
     const today = new Date()
-    const sevenDaysAgo = new Date(today)
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
-    return { startDate: formatDate(sevenDaysAgo), endDate: formatDate(today) }
+    const formattedToday = formatDate(today)
+    return { startDate: formattedToday, endDate: formattedToday }
   }
 
-  const [dateRange, setDateRange] = useState<{ startDate: string | null; endDate: string | null }>(() => {
-    if (typeof window === 'undefined') {
-      return { startDate: null, endDate: null }
-    }
+  const [statsDateRange] = useState(() => getDefaultDateRange())
 
-    const saved = localStorage.getItem('dashboardDateRange')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        if (parsed.startDate && parsed.endDate) {
-          return { startDate: parsed.startDate, endDate: parsed.endDate }
-        }
-      } catch {
-        // Invalid JSON
-      }
-    }
-
-    const defaultRange = getDefaultDateRange()
-    localStorage.setItem('dashboardDateRange', JSON.stringify(defaultRange))
-    return defaultRange
-  })
-
-  const handleDateRangeChange = useCallback((range: { startDate: string | null; endDate: string | null }) => {
-    setDateRange(range)
-    if (typeof window !== 'undefined' && range.startDate && range.endDate) {
-      localStorage.setItem('dashboardDateRange', JSON.stringify(range))
-    }
+  const chartDateRange = useMemo(() => {
+    const end = new Date()
+    const start = new Date()
+    start.setDate(end.getDate() - 365) // Fetch 12 months of data for trend charts
+    return { startDate: formatDate(start), endDate: formatDate(end) }
   }, [])
-  
+
   const timezoneOffset = useMemo(() => -new Date().getTimezoneOffset(), [])
-  const isDateRangeInitialized = dateRange.startDate !== null && dateRange.endDate !== null
 
   const appointmentQueryParams = useMemo(
     () => ({
@@ -77,53 +54,35 @@ export function DashboardOverview() {
       sortBy: "createdAt",
       sortOrder: "desc" as const,
       timezoneOffsetMinutes: timezoneOffset,
-      startDate: dateRange.startDate || undefined,
-      endDate: dateRange.endDate || undefined,
+      startDate: chartDateRange.startDate,
+      endDate: chartDateRange.endDate,
     }),
-    [timezoneOffset, dateRange.startDate, dateRange.endDate]
+    [timezoneOffset, chartDateRange.startDate, chartDateRange.endDate]
   )
 
-  const recentAppointmentsQueryParams = useMemo(
-    () => ({
-      page: 1,
-      limit: 5,
-      sortBy: "createdAt",
-      sortOrder: "desc" as const,
-      timezoneOffsetMinutes: timezoneOffset,
-    }),
-    [timezoneOffset]
-  )
 
   const { data: appointmentsData, isLoading: appointmentsLoading, error: appointmentsError, refetch: refetchAppointments } =
     useGetAppointmentsQuery(appointmentQueryParams, {
       refetchOnMountOrArgChange: true,
       refetchOnFocus: true,
       refetchOnReconnect: true,
-      skip: !isDateRangeInitialized,
     })
 
-  const { data: recentAppointmentsData, isLoading: recentAppointmentsLoading } =
-    useGetAppointmentsQuery(recentAppointmentsQueryParams, {
-      refetchOnMountOrArgChange: true,
-      refetchOnFocus: true,
-      refetchOnReconnect: true,
-    })
 
   const { data: appointmentStatsData, isLoading: appointmentStatsLoading } = useGetAppointmentStatsQuery(
-    isDateRangeInitialized ? { startDate: dateRange.startDate!, endDate: dateRange.endDate! } : undefined,
+    { startDate: statsDateRange.startDate, endDate: statsDateRange.endDate },
     {
       refetchOnMountOrArgChange: true,
       refetchOnFocus: true,
-      skip: !isDateRangeInitialized,
     }
   )
-  
+
   const { data: employeesData, isLoading: employeesLoading, error: employeesError, refetch: refetchEmployees } = useGetEmployeesQuery(undefined, {
     refetchOnMountOrArgChange: true,
     refetchOnFocus: false,
     skip: false,
   })
-  
+
   const { data: visitorsData, isLoading: visitorsLoading, error: visitorsError, refetch: refetchVisitors } = useGetVisitorsQuery(undefined, {
     refetchOnMountOrArgChange: true,
     refetchOnFocus: false,
@@ -134,17 +93,17 @@ export function DashboardOverview() {
   const { user } = useAppSelector((state) => state.auth)
 
   const isLoading = appointmentsLoading || employeesLoading || visitorsLoading
-  
+
   const hasData = appointmentsData || employeesData || visitorsData
   const shouldShowSkeleton = isLoading && !hasData && retryCount < 2
-  
+
   useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoading) {
         setLoadingTimeout(true)
       }
     }, 15000)
-    
+
     return () => clearTimeout(timer)
   }, [isLoading])
 
@@ -153,15 +112,21 @@ export function DashboardOverview() {
   const visitors = useMemo(() => visitorsData?.visitors || [], [visitorsData?.visitors])
 
   const recentAppointments = useMemo(
-    () => (recentAppointmentsData?.appointments || []).slice(0, 5),
-    [recentAppointmentsData?.appointments]
+    () => appointments.slice(0, 5),
+    [appointments]
   )
 
   const stats = useMemo(() => {
-    const calculatedStats = calculateAppointmentStats(appointments)
+    const today = new Date().toDateString()
+    const todayAppointments = appointments.filter(apt => {
+      const aptDate = new Date(apt.appointmentDetails?.scheduledDate || apt.createdAt)
+      return aptDate.toDateString() === today
+    })
+
+    const calculatedStats = calculateAppointmentStats(todayAppointments)
     const { pendingAppointments, approvedAppointments, rejectedAppointments, completedAppointments, timeOutAppointments, totalAppointments } = calculatedStats
     const sumOfCategories = pendingAppointments + approvedAppointments + rejectedAppointments + completedAppointments + timeOutAppointments
-    
+
     return sumOfCategories !== totalAppointments
       ? { ...calculatedStats, totalAppointments: sumOfCategories }
       : calculatedStats
@@ -182,18 +147,18 @@ export function DashboardOverview() {
     () => appointmentsError || employeesError || visitorsError,
     [appointmentsError, employeesError, visitorsError]
   )
-  
+
   const handleRetry = useCallback(() => {
     setRetryCount((prev) => prev + 1)
     refetchAppointments()
     refetchEmployees()
     refetchVisitors()
   }, [refetchAppointments, refetchEmployees, refetchVisitors])
-  
+
   if (shouldShowSkeleton && !hasError && !loadingTimeout) {
     return <DashboardSkeleton />
   }
-  
+
   if (loadingTimeout && isLoading && !hasData && !hasError) {
     return (
       <div className="space-y-6">
@@ -204,14 +169,14 @@ export function DashboardOverview() {
             The dashboard is taking longer to load than usual. This may be due to network issues or server response delays.
           </p>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-            <button 
-              onClick={handleRetry} 
+            <button
+              onClick={handleRetry}
               className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm sm:text-base min-h-[40px]"
             >
               Retry
             </button>
-            <button 
-              onClick={() => window.location.reload()} 
+            <button
+              onClick={() => window.location.reload()}
               className="px-4 py-2 bg-yellow-700 text-white rounded hover:bg-yellow-800 text-sm sm:text-base min-h-[40px]"
             >
               Reload Page
@@ -221,7 +186,7 @@ export function DashboardOverview() {
       </div>
     )
   }
-  
+
   if (hasError && !hasData && !isLoading) {
     return (
       <div className="space-y-6">
@@ -233,8 +198,8 @@ export function DashboardOverview() {
             {employeesError && `\nEmployees: ${(employeesError as any)?.data?.message || 'Failed to load'}`}
             {visitorsError && `\nVisitors: ${(visitorsError as any)?.data?.message || 'Failed to load'}`}
           </p>
-          <button 
-            onClick={handleRetry} 
+          <button
+            onClick={handleRetry}
             className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm sm:text-base min-h-[40px]"
           >
             Retry
@@ -248,28 +213,24 @@ export function DashboardOverview() {
     <div className="space-y-4 sm:space-y-6">
       <DashboardHeader companyName={user?.companyName} />
 
-      <div className="flex justify-end">
-        <DateRangePicker 
-          onDateRangeChange={handleDateRangeChange}
-          initialValue={dateRange.startDate && dateRange.endDate ? dateRange : undefined}
-          className="w-full sm:w-auto"
-        />
+      <div className="hidden">
+        {/* Removed DateRangePicker as per request */}
       </div>
 
       <StatsGrid stats={stats} />
 
-      <DashboardCharts 
+      <DashboardCharts
         appointmentsData={appointments}
         employeesData={employees}
         visitorsData={visitors}
-        dateRange={dateRange}
+        dateRange={chartDateRange}
       />
 
       <AppointmentsTable
         title="Recent Appointments"
         description="Latest appointment activities"
         data={recentAppointments}
-        isLoading={recentAppointmentsLoading}
+        isLoading={appointmentsLoading}
         showDateTime={true}
         emptyData={{
           title: "No recent appointments",

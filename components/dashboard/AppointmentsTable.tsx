@@ -5,10 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DataTable } from "@/components/common/dataTable"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { formatDateTime } from "@/utils/helpers"
-import { 
-  Calendar, 
-  Phone, 
-  Mail, 
+import {
+  Calendar,
+  Phone,
+  Mail,
   Building,
   Maximize2
 } from "lucide-react"
@@ -44,13 +44,13 @@ export const AppointmentsTable = memo(function AppointmentsTable({
     {
       key: "visitorName",
       header: "Visitor",
-      sortable: true,
+      sortable: false,
       render: (appointment: any) => {
         const visitor = appointment.visitorId || appointment.visitor;
         const visitorName = visitor?.name || "Unknown Visitor";
         const visitorPhone = visitor?.phone || "N/A";
         const visitorCompany = visitor?.company || "";
-        
+
         return (
           <div className="flex items-center gap-3">
             <div className="relative group">
@@ -93,13 +93,13 @@ export const AppointmentsTable = memo(function AppointmentsTable({
     {
       key: "employeeName",
       header: "Meeting With",
-      sortable: true,
+      sortable: false,
       render: (appointment: any) => {
         const employee = appointment.employeeId || appointment.employee;
         const employeeName = employee?.name || "Unknown Employee";
         const employeeEmail = employee?.email || "N/A";
         const employeeDepartment = employee?.department || "";
-        
+
         return (
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8">
@@ -126,28 +126,28 @@ export const AppointmentsTable = memo(function AppointmentsTable({
     },
     ...(showDateTime
       ? [
-          {
-            key: "appointmentDate",
-            header: "Date & Time",
-            sortable: true,
-            render: (appointment: any) => (
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="h-3 w-3" />
-                {formatDateTime(appointment.appointmentDetails?.scheduledDate, appointment.appointmentDetails?.scheduledTime)}
-              </div>
-            ),
-          },
-        ]
+        {
+          key: "appointmentDate",
+          header: "Date & Time",
+          sortable: false,
+          render: (appointment: any) => (
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="h-3 w-3" />
+              {formatDateTime(appointment.appointmentDetails?.scheduledDate, appointment.appointmentDetails?.scheduledTime)}
+            </div>
+          ),
+        },
+      ]
       : [
-          {
-            key: "appointmentTime",
-            header: "Time",
-            sortable: true,
-            render: (appointment: any) => (
-              <div className="text-sm">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
-            ),
-          },
-        ]),
+        {
+          key: "appointmentTime",
+          header: "Time",
+          sortable: false,
+          render: (appointment: any) => (
+            <div className="text-sm">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
+          ),
+        },
+      ]),
   ], [showDateTime])
 
   return (
@@ -168,7 +168,7 @@ export const AppointmentsTable = memo(function AppointmentsTable({
               isLoading={isLoading}
               emptyMessage={`No ${title.toLowerCase()}`}
               showCard={false}
-              enableSorting={true}
+              enableSorting={false}
               emptyData={emptyData}
               onPrimaryAction={onPrimaryAction}
             />
