@@ -7,7 +7,7 @@ import { NewEmployeeModal } from "@/components/employee/EmployeeForm"
 export default function EmployeeEditPage() {
   const params = useParams()
   const employeeId = params.id as string
-  
+
   if (!employeeId) {
     return (
       <ProtectedLayout>
@@ -20,10 +20,10 @@ export default function EmployeeEditPage() {
       </ProtectedLayout>
     )
   }
-  
+
   return (
     <ProtectedLayout>
-      <div className="container mx-auto max-w-4xl py-3 sm:py-4">
+      <div className="container mx-auto max-w-full py-3 sm:py-4">
         <div className="mb-3">
           <h1 className="text-lg font-semibold text-foreground leading-tight">Edit Employee</h1>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
@@ -31,7 +31,7 @@ export default function EmployeeEditPage() {
           </p>
         </div>
         <div className="w-full">
-          <NewEmployeeModal 
+          <NewEmployeeModal
             employeeId={employeeId}
             layout="page"
           />

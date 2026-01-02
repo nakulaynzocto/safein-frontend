@@ -19,26 +19,26 @@ export function ProfilePageContent() {
   const handleProfileUpdate = useCallback(async (data: any) => {
     try {
       const cleanPayload: UpdateProfileRequest = {}
-      
+
       if (data?.companyName && typeof data.companyName === 'string') {
         cleanPayload.companyName = data.companyName.trim()
       }
-      
+
       if (data?.profilePicture && typeof data.profilePicture === 'string' && data.profilePicture.trim() !== "") {
         cleanPayload.profilePicture = data.profilePicture.trim()
       }
-      
+
       let finalPayload: UpdateProfileRequest
       try {
         finalPayload = JSON.parse(JSON.stringify(cleanPayload))
       } catch (parseError) {
         throw new Error("Failed to prepare profile data: contains invalid data")
       }
-      
+
       if (!finalPayload.companyName) {
         throw new Error("Company name is required")
       }
-      
+
       const result = await updateProfile(finalPayload).unwrap()
       await refetch()
       if (result) {
@@ -62,18 +62,18 @@ export function ProfilePageContent() {
       } else if (err?.error) {
         errorMessage = err.error
       }
-      
+
       throw new Error(errorMessage)
     }
   }, [updateProfile, refetch, dispatch])
-  
+
   const handleCancelEdit = () => {
     // Reset form to original values by refetching
     if (profile) {
       refetch()
     }
   }
-  
+
   if (error || !profile) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -91,7 +91,7 @@ export function ProfilePageContent() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-8">
       <PageHeader title="Profile" description="View and manage your profile information" />
 
       <div className="mt-4 sm:mt-6">

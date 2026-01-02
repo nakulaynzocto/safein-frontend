@@ -20,10 +20,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+import {
+  CheckCircle,
+  XCircle,
+  Clock,
   Calendar,
   CreditCard,
   AlertCircle,
@@ -89,7 +89,7 @@ export default function ActivePlanPage() {
   const subscription = activeSubscriptionData?.data
 
   // Get features from database based on current subscription plan type
-  const currentPlan = subscription 
+  const currentPlan = subscription
     ? subscriptionPlans.find(plan => plan.planType === subscription.planType)
     : null
   const planFeatures = currentPlan?.features || []
@@ -124,7 +124,7 @@ export default function ActivePlanPage() {
     if (!subscription) return null
 
     let status: 'active' | 'trialing' | 'cancelled' | 'expired' | 'pending' = 'pending'
-    
+
     if (subscription.subscriptionStatus) {
       status = subscription.subscriptionStatus as 'active' | 'trialing' | 'cancelled' | 'expired' | 'pending'
     } else if (subscription.isTrialing) {
@@ -259,7 +259,7 @@ export default function ActivePlanPage() {
                   <p className="text-gray-600 mb-8">
                     You don't have an active subscription plan. Subscribe to unlock all features.
                   </p>
-                  <Button 
+                  <Button
                     onClick={() => setIsUpgradeModalOpen(true)}
                     className="bg-[#3882a5] hover:bg-[#2d6a87] text-white px-8 py-6 text-lg"
                     size="lg"
@@ -284,7 +284,7 @@ export default function ActivePlanPage() {
   return (
     <ProtectedLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="max-w-full mx-auto space-y-8">
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
@@ -313,7 +313,7 @@ export default function ActivePlanPage() {
                   <div className="mt-4 sm:mt-6">
                     <div className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">{getPlanTypeLabel(subscription.planType)}</div>
                     <p className="text-blue-100 text-sm sm:text-base">
-                      {subscription.isTrialing 
+                      {subscription.isTrialing
                         ? "Free trial period - Full access to all features"
                         : "Premium subscription with all features included"}
                     </p>
@@ -350,11 +350,11 @@ export default function ActivePlanPage() {
                     <CreditCard className="h-4 w-4" />
                     <span>Payment Status</span>
                   </div>
-                  <Badge 
+                  <Badge
                     variant={subscription.paymentStatus === 'succeeded' ? 'default' : 'secondary'}
                     className={
-                      subscription.paymentStatus === 'succeeded' 
-                        ? 'bg-green-100 text-green-800 hover:bg-green-100' 
+                      subscription.paymentStatus === 'succeeded'
+                        ? 'bg-green-100 text-green-800 hover:bg-green-100'
                         : ''
                     }
                   >
@@ -371,7 +371,7 @@ export default function ActivePlanPage() {
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-blue-900 text-sm sm:text-base">Subscription Active</p>
                       <p className="text-xs sm:text-sm text-blue-700 mt-1">
-                        Your subscription will renew automatically on {formatDateFull(subscription.endDate)}. 
+                        Your subscription will renew automatically on {formatDateFull(subscription.endDate)}.
                         {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} remaining.
                       </p>
                     </div>
@@ -395,7 +395,7 @@ export default function ActivePlanPage() {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t">
-                <Button 
+                <Button
                   onClick={() => setIsUpgradeModalOpen(true)}
                   className="bg-[#3882a5] hover:bg-[#2d6a87] text-white flex-1"
                   size="lg"
@@ -403,7 +403,7 @@ export default function ActivePlanPage() {
                   <TrendingUp className="h-5 w-5 mr-2" />
                   {isExpired ? 'Renew Plan' : 'Upgrade Plan'}
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => router.push(routes.privateroute.DASHBOARD)}
                   className="flex-1"
@@ -579,9 +579,9 @@ export default function ActivePlanPage() {
         </div>
 
         {/* Upgrade Plan Modal */}
-        <UpgradePlanModal 
-          isOpen={isUpgradeModalOpen} 
-          onClose={() => setIsUpgradeModalOpen(false)} 
+        <UpgradePlanModal
+          isOpen={isUpgradeModalOpen}
+          onClose={() => setIsUpgradeModalOpen(false)}
         />
 
         {/* Invoice View Modal */}
@@ -658,10 +658,10 @@ export default function ActivePlanPage() {
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t">
                     <span className="text-sm text-gray-600">Status</span>
-                    <Badge 
+                    <Badge
                       className={
-                        selectedInvoice.paymentStatus === 'succeeded' 
-                          ? 'bg-green-100 text-green-800 hover:bg-green-100 text-xs' 
+                        selectedInvoice.paymentStatus === 'succeeded'
+                          ? 'bg-green-100 text-green-800 hover:bg-green-100 text-xs'
                           : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100 text-xs'
                       }
                     >

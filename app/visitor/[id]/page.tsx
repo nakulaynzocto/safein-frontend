@@ -7,7 +7,7 @@ import { ProtectedLayout } from "@/components/layout/protectedLayout"
 export default function VisitorEditPage() {
   const params = useParams()
   const visitorId = params.id as string
-  
+
   if (!visitorId) {
     return (
       <ProtectedLayout>
@@ -20,10 +20,10 @@ export default function VisitorEditPage() {
       </ProtectedLayout>
     )
   }
-  
+
   return (
     <ProtectedLayout>
-      <div className="container mx-auto max-w-4xl py-3 sm:py-4">
+      <div className="container mx-auto max-w-full py-3 sm:py-4">
         <div className="mb-3">
           <h1 className="text-lg font-semibold text-foreground leading-tight">Edit Visitor</h1>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
@@ -31,7 +31,7 @@ export default function VisitorEditPage() {
           </p>
         </div>
         <div className="w-full">
-          <NewVisitorModal 
+          <NewVisitorModal
             visitorId={visitorId}
             layout="page"
           />
