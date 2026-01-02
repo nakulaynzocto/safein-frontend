@@ -22,28 +22,25 @@ interface GetUserActiveSubscriptionResponse {
   data: IUserSubscription | null;
 }
 
-interface CheckPremiumSubscriptionResponse {
-  data: {
-    hasPremium: boolean;
-  };
-}
 
-interface AssignFreePlanResponse {
-  data: IUserSubscription;
-}
 
 export interface TrialLimitsStatus {
   isTrial: boolean;
+  planType: string;
+  subscriptionStatus: string;
+  isActive: boolean;
+  isExpired: boolean;
   limits: {
-    employees: { limit: number; current: number; reached: boolean };
-    visitors: { limit: number; current: number; reached: boolean };
-    appointments: { limit: number; current: number; reached: boolean };
+    employees: { limit: number; current: number; reached: boolean; canCreate: boolean };
+    visitors: { limit: number; current: number; reached: boolean; canCreate: boolean };
+    appointments: { limit: number; current: number; reached: boolean; canCreate: boolean };
   };
 }
 
 interface GetTrialLimitsStatusResponse {
   data: TrialLimitsStatus;
 }
+
 
 export interface ISubscriptionHistory {
   _id: string;
@@ -66,6 +63,8 @@ interface GetSubscriptionHistoryResponse {
   data: ISubscriptionHistory[];
 }
 
+
+
 export const userSubscriptionApi = baseApi.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
@@ -87,23 +86,6 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
       providesTags: ['User'],
     }),
 
-    /**
-     * Check if user has premium subscription
-     * GET /api/v1/user-subscriptions/check-premium/:userId
-     */
-    checkPremiumSubscription: builder.query<CheckPremiumSubscriptionResponse, string>({
-      query: (userId) => ({
-        url: `/user-subscriptions/check-premium/${userId}`,
-        method: 'GET',
-      }),
-      transformResponse: (response: any) => {
-        if (response && response.success && response.data) {
-          return { data: response.data };
-        }
-        return { data: { hasPremium: false } };
-      },
-      providesTags: ['User'],
-    }),
 
     /**
      * Get trial limits status
@@ -133,24 +115,6 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
     }),
 
     /**
-     * Assign free plan to new user
-     * POST /api/v1/user-subscriptions/assign-free-plan
-     */
-    assignFreePlan: builder.mutation<AssignFreePlanResponse, void>({
-      query: () => ({
-        url: '/user-subscriptions/assign-free-plan',
-        method: 'POST',
-      }),
-      transformResponse: (response: any) => {
-        if (response && response.success && response.data) {
-          return { data: response.data };
-        }
-        return response;
-      },
-      invalidatesTags: ['User', 'Subscription'],
-    }),
-
-    /**
      * Get subscription history (all successful purchases)
      * GET /api/v1/user-subscriptions/history
      */
@@ -167,13 +131,13 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
       },
       providesTags: ['User', 'Subscription'],
     }),
+
+
   }),
 });
 
 export const {
   useGetUserActiveSubscriptionQuery,
-  useCheckPremiumSubscriptionQuery,
   useGetTrialLimitsStatusQuery,
-  useAssignFreePlanMutation,
   useGetSubscriptionHistoryQuery,
 } = userSubscriptionApi;

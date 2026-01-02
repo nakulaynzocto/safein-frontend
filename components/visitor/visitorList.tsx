@@ -44,7 +44,7 @@ import { useRouter } from "next/navigation"
 import { NewVisitorModal } from "./VisitorForm"
 import { formatDate } from "@/utils/helpers"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
-import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus"
 import { VisitorDetailsDialog } from "./visitorDetailsDialog"
 
 // Helper function to truncate text
@@ -202,7 +202,7 @@ export function VisitorList() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null)
-  const { data: trialStatus, refetch: refetchTrialLimits } = useGetTrialLimitsStatusQuery()
+  const { hasReachedVisitorLimit, refetch: refetchSubscriptionStatus } = useSubscriptionStatus()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500)
@@ -252,7 +252,7 @@ export function VisitorList() {
       setShowDeleteDialog(false)
       setSelectedVisitor(null)
       refetch()
-      refetchTrialLimits()
+      refetchSubscriptionStatus()
     } catch (error: any) {
       showErrorToast(error?.data?.message || "Failed to delete visitor")
     }
@@ -275,7 +275,6 @@ export function VisitorList() {
   const visitors = visitorsData?.visitors || []
   const pagination = visitorsData?.pagination
   const columns = createColumns(handleDeleteClick, handleEditVisitor, handleViewVisitor)
-  const hasReachedVisitorLimit = trialStatus?.data?.isTrial && trialStatus.data.limits.visitors.reached
   const emptyPrimaryLabel = hasReachedVisitorLimit ? 'Upgrade Plan' : 'Register Visitor'
   const handlePrimaryAction = () => {
     if (hasReachedVisitorLimit) {
