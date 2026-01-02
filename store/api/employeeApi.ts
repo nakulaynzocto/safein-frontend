@@ -75,9 +75,9 @@ export const employeeApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result?.employees
           ? [
-              ...result.employees.map(({ _id }) => ({ type: 'Employee' as const, id: _id })),
-              { type: 'Employee', id: 'LIST' },
-            ]
+            ...result.employees.map(({ _id }) => ({ type: 'Employee' as const, id: _id })),
+            { type: 'Employee', id: 'LIST' },
+          ]
           : [{ type: 'Employee', id: 'LIST' }],
       keepUnusedDataFor: 300, // Keep data for 5 minutes
     }),
@@ -131,17 +131,7 @@ export const employeeApi = baseApi.injectEndpoints({
     }),
 
 
-    checkEmployeeHasAppointments: builder.query<{ hasAppointments: boolean; count: number }, string>({
-      query: (id) => `/employees/${id}/has-appointments`,
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      providesTags: (result, error, id) => [{ type: 'Employee', id: `APPOINTMENTS_${id}` }],
-      keepUnusedDataFor: 60,
-    }),
+
 
     deleteEmployee: builder.mutation<void, string>({
       query: (id) => ({
@@ -157,58 +147,13 @@ export const employeeApi = baseApi.injectEndpoints({
 
 
 
-    updateEmployeeStatus: builder.mutation<Employee, { id: string; status: 'Active' | 'Inactive' }>({
-      query: ({ id, status }) => ({
-        url: `/employees/${id}/status`,
-        method: 'PUT',
-        body: { status },
-      }),
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      invalidatesTags: (result, error, { id }) => [
-        { type: 'Employee', id },
-        { type: 'Employee', id: 'LIST' },
-      ],
-    }),
 
 
-    bulkUpdateEmployees: builder.mutation<{ updatedCount: number }, { employeeIds: string[]; status?: 'Active' | 'Inactive'; department?: string; designation?: string }>({
-      query: (bulkData) => ({
-        url: '/employees/bulk-update',
-        method: 'PUT',
-        body: bulkData,
-      }),
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      invalidatesTags: [{ type: 'Employee', id: 'LIST' }],
-    }),
 
 
-    getEmployeeStats: builder.query<{
-      totalEmployees: number
-      activeEmployees: number
-      inactiveEmployees: number
-      deletedEmployees: number
-      employeesByDepartment: Array<{ department: string; count: number }>
-      employeesByStatus: Array<{ status: string; count: number }>
-    }, void>({
-      query: () => '/employees/stats',
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      providesTags: [{ type: 'Employee', id: 'STATS' }],
-    }),
+
+
+
 
     /**
      * Download Excel template for bulk import
@@ -255,9 +200,6 @@ export const {
   useCreateEmployeeMutation,
   useUpdateEmployeeMutation,
   useDeleteEmployeeMutation,
-  useCheckEmployeeHasAppointmentsQuery,
-  useUpdateEmployeeStatusMutation,
-  useBulkUpdateEmployeesMutation,
-  useGetEmployeeStatsQuery,
+
   useBulkCreateEmployeesMutation,
 } = employeeApi

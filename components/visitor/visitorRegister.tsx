@@ -16,7 +16,7 @@ import { LoadingSpinner } from "@/components/common/loadingSpinner"
 import { PhoneInputField } from "@/components/common/phoneInputField"
 import { CountryStateCitySelect } from "@/components/common/countryStateCity"
 import { TextareaField } from "@/components/common/textareaField"
-import { CreateVisitorRequest, useCreateVisitorMutation, useGetVisitorStatsQuery } from "@/store/api/visitorApi"
+import { CreateVisitorRequest, useCreateVisitorMutation } from "@/store/api/visitorApi"
 import { CreditCard, Camera, CheckCircle, Info } from "lucide-react"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 
@@ -51,7 +51,7 @@ interface VisitorRegisterProps {
 export function VisitorRegister({ onComplete, initialData, standalone = false }: VisitorRegisterProps) {
   const [createVisitor, { isLoading, isSuccess }] = useCreateVisitorMutation()
   const [generalError, setGeneralError] = useState<string | null>(null)
-  
+
   // Check if initial data has any optional fields filled
   const hasOptionalData = initialData && (
     initialData.idProof?.type ||
@@ -61,7 +61,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
   )
   const [showOptionalFields, setShowOptionalFields] = useState<boolean>(!!hasOptionalData)
 
-  const { data: visitorStats, isLoading: isLoadingStats } = useGetVisitorStatsQuery()
+
 
   const {
     register,
@@ -122,7 +122,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
 
   const onSubmit = async (data: VisitorDetailsFormData): Promise<void> => {
     setGeneralError(null)
-    
+
     try {
       const visitorData: CreateVisitorRequest = {
         name: data.name,
@@ -147,20 +147,20 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
 
 
       const result = await createVisitor(visitorData).unwrap()
-      
+
       showSuccessToast("Visitor registered successfully!")
-      
+
       if (standalone) {
         reset()
       }
-      
+
 
       if (onComplete) {
         onComplete(visitorData, result._id)
       }
     } catch (error: any) {
       let errorMessage = error?.data?.message || error?.message || "Failed to register visitor"
-      
+
       if (errorMessage.toLowerCase().includes("id proof")) {
         errorMessage = errorMessage
           .replace(/idProof\.type:/gi, "ID Proof Type: ")
@@ -176,7 +176,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
           .replace(/validation failed:/gi, "")
           .trim();
       }
-      
+
       setGeneralError(errorMessage)
       showErrorToast(errorMessage)
     }
@@ -204,59 +204,59 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
       {/* Personal Information Section */}
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <InputField
-                  label="Name"
-                  placeholder="Enter name"
-                  error={errors.name?.message}
-                  {...register("name")}
-                  required
-                />
-                <InputField
-                  label="Email"
-                  type="email"
-                  placeholder="Enter email address"
-                  error={errors.email?.message}
-                  {...register("email")}
-                  required
-                />
-                <Controller
-                  name="phone"
-                  control={control}
-                  render={({ field }) => (
-                    <PhoneInputField
-                      id="phone"
-                      label="Phone Number"
-                      value={field.value}
-                      onChange={(value) => field.onChange(value)}
-                      error={errors.phone?.message}
-                      required
-                      placeholder="Enter phone number"
-                      defaultCountry="in"
-                    />
-                  )}
-                />
+          <InputField
+            label="Name"
+            placeholder="Enter name"
+            error={errors.name?.message}
+            {...register("name")}
+            required
+          />
+          <InputField
+            label="Email"
+            type="email"
+            placeholder="Enter email address"
+            error={errors.email?.message}
+            {...register("email")}
+            required
+          />
+          <Controller
+            name="phone"
+            control={control}
+            render={({ field }) => (
+              <PhoneInputField
+                id="phone"
+                label="Phone Number"
+                value={field.value}
+                onChange={(value) => field.onChange(value)}
+                error={errors.phone?.message}
+                required
+                placeholder="Enter phone number"
+                defaultCountry="in"
+              />
+            )}
+          />
         </div>
       </div>
 
       {/* Address Information Section */}
       <div className="space-y-4 pt-4">
-              <CountryStateCitySelect
-                value={{
-                  country: watch("address.country") || "",
-                  state: watch("address.state") || "",
-                  city: watch("address.city") || "",
-                }}
-                onChange={(v) => {
-                  setValue("address.country", v.country)
-                  setValue("address.state", v.state)
-                  setValue("address.city", v.city)
-                }}
-                errors={{
-                  country: errors.address?.country?.message as string,
-                  state: errors.address?.state?.message as string,
-                  city: errors.address?.city?.message as string,
-                }}
-              />
+        <CountryStateCitySelect
+          value={{
+            country: watch("address.country") || "",
+            state: watch("address.state") || "",
+            city: watch("address.city") || "",
+          }}
+          onChange={(v) => {
+            setValue("address.country", v.country)
+            setValue("address.state", v.state)
+            setValue("address.city", v.city)
+          }}
+          errors={{
+            country: errors.address?.country?.message as string,
+            state: errors.address?.state?.message as string,
+            city: errors.address?.city?.message as string,
+          }}
+        />
       </div>
 
       {/* Company Address Section */}
@@ -273,24 +273,24 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
 
       {/* Optional Fields Toggle */}
       <div className="pt-4 border-t">
-              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-                <div className="flex items-center gap-3">
-                  <Info className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <Label htmlFor="optional-fields-toggle" className="text-sm font-medium cursor-pointer">
-                      Add Additional Information
-                    </Label>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Include optional details like ID proof, photos, and notes
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  id="optional-fields-toggle"
-                  checked={showOptionalFields}
-                  onCheckedChange={handleToggleChange}
-                />
-              </div>
+        <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+          <div className="flex items-center gap-3">
+            <Info className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <Label htmlFor="optional-fields-toggle" className="text-sm font-medium cursor-pointer">
+                Add Additional Information
+              </Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Include optional details like ID proof, photos, and notes
+              </p>
+            </div>
+          </div>
+          <Switch
+            id="optional-fields-toggle"
+            checked={showOptionalFields}
+            onCheckedChange={handleToggleChange}
+          />
+        </div>
       </div>
 
       {/* Optional Fields Section - Only shown when toggle is ON */}
@@ -299,87 +299,87 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
           {/* ID Proof & Additional Information Section */}
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <SelectField
-                  label="ID Proof Type (optional)"
-                  placeholder="Select ID proof type"
-                  options={idProofTypes}
-                  error={errors.idProof?.type?.message}
-                  value={watch("idProof.type") || ""}
-                  onChange={(value) => setValue("idProof.type", value)}
-                />
-                <InputField
-                  label="ID Proof Number (optional)"
-                  placeholder="Enter ID proof number"
-                  error={errors.idProof?.number?.message}
-                  {...register("idProof.number")}
-                />
+              <SelectField
+                label="ID Proof Type (optional)"
+                placeholder="Select ID proof type"
+                options={idProofTypes}
+                error={errors.idProof?.type?.message}
+                value={watch("idProof.type") || ""}
+                onChange={(value) => setValue("idProof.type", value)}
+              />
+              <InputField
+                label="ID Proof Number (optional)"
+                placeholder="Enter ID proof number"
+                error={errors.idProof?.number?.message}
+                {...register("idProof.number")}
+              />
             </div>
           </div>
 
           {/* Image Uploads Section */}
           <div className="space-y-4 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <ImageUploadField
-                        name="idProof.image"
-                        label="ID Proof Image (optional)"
-                        register={register}
-                        setValue={setValue}
-                        errors={errors.idProof?.image}
-                        initialUrl={initialData?.idProof?.image}
-                        enableImageCapture={true}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <ImageUploadField
-                        name="photo"
-                        label="Visitor Photo (optional)"
-                        register={register}
-                        setValue={setValue}
-                        errors={errors.photo}
-                        initialUrl={initialData?.photo}
-                        enableImageCapture={true}
-                      />
+              <div className="space-y-2">
+                <ImageUploadField
+                  name="idProof.image"
+                  label="ID Proof Image (optional)"
+                  register={register}
+                  setValue={setValue}
+                  errors={errors.idProof?.image}
+                  initialUrl={initialData?.idProof?.image}
+                  enableImageCapture={true}
+                />
+              </div>
+              <div className="space-y-2">
+                <ImageUploadField
+                  name="photo"
+                  label="Visitor Photo (optional)"
+                  register={register}
+                  setValue={setValue}
+                  errors={errors.photo}
+                  initialUrl={initialData?.photo}
+                  enableImageCapture={true}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
           {/* Additional Notes */}
           <div className="space-y-2 pt-4">
-                  <TextareaField
-                    label="Additional Notes (optional)"
-                    id="notes"
-                    placeholder="Any additional information or special requirements"
-                    {...register("notes")}
-                    error={errors.notes?.message}
-                    rows={3}
-                  />
+            <TextareaField
+              label="Additional Notes (optional)"
+              id="notes"
+              placeholder="Any additional information or special requirements"
+              {...register("notes")}
+              error={errors.notes?.message}
+              rows={3}
+            />
           </div>
         </div>
       )}
 
       {/* Submit Button */}
       <div className="flex justify-end pt-4">
-              <Button
-                type="submit"
-                variant="outline"
-                className="px-8 min-w-[140px]"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Registering...
-                  </>
-                ) : standalone ? (
-                  <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Register Visitor
-                  </>
-                ) : (
-                  "Register"
-                )}
-              </Button>
+        <Button
+          type="submit"
+          variant="outline"
+          className="px-8 min-w-[140px]"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Registering...
+            </>
+          ) : standalone ? (
+            <>
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Register Visitor
+            </>
+          ) : (
+            "Register"
+          )}
+        </Button>
       </div>
     </form>
   )

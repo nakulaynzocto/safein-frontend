@@ -51,25 +51,25 @@ export function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       const result = await login(data).unwrap()
-      
+
       if (!result.token || result.token === 'undefined') {
         throw new Error('No valid token received from server')
       }
-      
+
       if (!result.user) {
         throw new Error('No user data received from server')
       }
-      
+
       dispatch(setCredentials(result))
       setErrorMessage(null)
-      
+
       // According to documentation: After login, check subscription status
       // If no active subscription, redirect to subscription-plan page
       // If we were sent here with a `next` param, use that; otherwise go to subscription-plan
       const next = searchParams.get('next')
       // Always redirect to subscription-plan first (it will check subscription and redirect to dashboard if active)
       // No need for separate loader here - subscription-plan page will show loader
-      const target = next || routes.publicroute.SUBSCRIPTION_PLAN
+      const target = next || routes.privateroute.DASHBOARD
       window.location.replace(target)
     } catch (error: any) {
       const message = error?.data?.message || error?.message || "Login failed"

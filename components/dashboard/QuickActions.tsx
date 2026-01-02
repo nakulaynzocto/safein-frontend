@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Calendar, CalendarPlus, UserPlus, Users } from "lucide-react"
 import { routes } from "@/utils/routes"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
-import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus"
 
 interface QuickAction {
   href: string
@@ -29,11 +29,8 @@ const quickActions: QuickAction[] = [
 ]
 
 export function QuickActions() {
-  const { data: trialStatus } = useGetTrialLimitsStatusQuery()
+  const { hasReachedEmployeeLimit, hasReachedAppointmentLimit } = useSubscriptionStatus()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-
-  const hasReachedEmployeeLimit = trialStatus?.data?.isTrial && trialStatus.data.limits.employees.reached
-  const hasReachedAppointmentLimit = trialStatus?.data?.isTrial && trialStatus.data.limits.appointments.reached
 
   return (
     <Card>
@@ -80,7 +77,7 @@ export function QuickActions() {
               </Link>
             </Button>
           ))}
-          
+
           {hasReachedEmployeeLimit ? (
             <>
               <Button

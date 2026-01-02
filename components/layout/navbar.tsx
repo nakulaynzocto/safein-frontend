@@ -70,6 +70,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
     isSubscriptionPage,
     hasActiveSubscription,
     isTrialingSubscription,
+    expiryWarning,
   } = useAuthSubscription()
 
   // Use scroll-based styling hook for navbar
@@ -105,7 +106,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
         name: profileUser.name,
         companyName: profileUser.companyName
       })
-      
+
       if (userDataHash !== lastProfileUserRef.current) {
         lastProfileUserRef.current = userDataHash
         dispatch(setUser(profileUser))
@@ -118,7 +119,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
 
   useEffect(() => {
     if (!isMounted) return
-    
+
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'user' && e.newValue) {
         try {
@@ -130,13 +131,13 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
         }
       }
     }
-    
+
     const handleProfileUpdate = (e: CustomEvent) => {
       if (e.detail && e.detail.id) {
         refetchProfile()
       }
     }
-    
+
     window.addEventListener('storage', handleStorageChange)
     window.addEventListener('profileUpdated', handleProfileUpdate as EventListener)
     return () => {
@@ -146,42 +147,40 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
   }, [isMounted, refetchProfile])
 
   // Determine if user is authenticated (for UI display purposes)
-  // Show private navbar UI only if: hasActiveSubscription AND token exists AND not forcePublic
-  // If user is logged in but no subscription, show public navbar
-  const isPublicVariant = forcePublic === true || (isAuthenticated && token && !hasActiveSubscription)
+  // Show private navbar UI if: authenticated AND not forcePublic
+  // If user is logged in, show private navbar even if subscription is expired (dashboard access)
+  const isPublicVariant = forcePublic === true
   const isActuallyAuthenticated = !isPublicVariant && shouldShowPrivateNavbar
-  
+
   // For hiding Sign In button: check if user is simply logged in (has token)
   const isLoggedIn = !isPublicVariant && isAuthenticated && token
   const isLoggedInPublic = isAuthenticated && token
-  
+
   // Show profile dropdown if:
   // 1. Token exists AND payment successful (hasActiveSubscription) - show dropdown with "My Account"
   // 2. OR user is on subscription-plan page AND logged in (has token) - show dropdown even in public variant
   // 3. OR user is logged in but no subscription (show profile dropdown with upgrade option)
   // Otherwise show public navbar (Sign In / Start Trial)
-  const shouldShowProfileDropdown = isAuthenticated && token && (
-    (isPublicVariant && (isSubscriptionPage || !hasActiveSubscription)) || // Allow dropdown on subscription page or if no subscription in public variant
-    (!isPublicVariant && (isSubscriptionPage || (hasActiveSubscription && user))) // Show if token exists AND payment successful
-  )
+  // Show profile dropdown if authenticated
+  const shouldShowProfileDropdown = isAuthenticated && token
 
   const handleLogout = useCallback(async () => {
     try {
       // Clear data first
       dispatch(logout())
-      
+
       // Call logout API (but don't wait for it or show errors)
       logoutMutation().unwrap().catch(() => {
         // Silently fail - we're logging out locally anyway
       })
-      
+
       if (typeof window !== "undefined") {
         localStorage.removeItem("token")
         localStorage.removeItem("user")
         sessionStorage.clear()
       }
-      
-      
+
+
       // Redirect to login page after a short delay
       setTimeout(() => {
         router.replace(routes.publicroute.LOGIN)
@@ -193,8 +192,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
         localStorage.removeItem("token")
         localStorage.removeItem("user")
       }
-      
-      
+
+
       // Redirect to login page
       setTimeout(() => {
         router.replace(routes.publicroute.LOGIN)
@@ -212,40 +211,38 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
 
   return (
     <nav
-      className={`${
-        shouldShowWhiteNavbar
-          ? 'bg-white/90 border-b border-gray-200/30 shadow-lg backdrop-blur-md'
-          : 'bg-hero-gradient border-transparent shadow-none backdrop-blur-0'
-      } sticky top-0 z-50 transition-all duration-300`}
+      className={`${shouldShowWhiteNavbar
+        ? 'bg-white/90 border-b border-gray-200/30 shadow-lg backdrop-blur-md'
+        : 'bg-hero-gradient border-transparent shadow-none backdrop-blur-0'
+        } sticky top-0 z-50 transition-all duration-300`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex-shrink-0" prefetch={true}>
-                 <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-gray-200 flex items-center justify-center bg-white">
-                  <Image 
-                    src="/aynzo-logo.png" 
-                    alt="Aynzo Logo" 
-                    width={48}
-                    height={48}
-                    priority
-                    className="h-full w-full object-contain p-1"
-                    onError={(e) => {
-                      // Fallback if logo fails to load
-                      const target = e.currentTarget as HTMLImageElement
-                      target.src = "/aynzo-logo.svg"
-                    }}
-                  />
-                </div>
+              <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-gray-200 flex items-center justify-center bg-white">
+                <Image
+                  src="/aynzo-logo.png"
+                  alt="Aynzo Logo"
+                  width={48}
+                  height={48}
+                  priority
+                  className="h-full w-full object-contain p-1"
+                  onError={(e) => {
+                    // Fallback if logo fails to load
+                    const target = e.currentTarget as HTMLImageElement
+                    target.src = "/aynzo-logo.svg"
+                  }}
+                />
+              </div>
             </Link>
-            {/* Visitor Management System Text - Only show if user has subscription */}
-            {isActuallyAuthenticated && hasActiveSubscription && (
+            {/* Visitor Management System Text - Show for all authenticated users */}
+            {isActuallyAuthenticated && (
               <div className={`hidden lg:flex items-center`}>
-                <div className={`text-base font-bold tracking-tight transition-all duration-300 ${
-                  shouldShowWhiteNavbar 
-                    ? 'text-[#3882a5]' 
-                    : 'text-white drop-shadow-lg'
-                }`}>
+                <div className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar
+                  ? 'text-[#3882a5]'
+                  : 'text-white drop-shadow-lg'
+                  }`}>
                   Visitor Management System
                 </div>
               </div>
@@ -253,16 +250,23 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
           </div>
 
           {/* Center: Navigation Links */}
+          {expiryWarning?.show && !isSubscriptionPage && (
+            <div className="absolute top-20 left-0 w-full bg-amber-500/90 text-white text-xs sm:text-sm py-1 px-4 text-center z-40 backdrop-blur-sm shadow-md">
+              <span className="font-medium">⚠️ Your plan expires in {expiryWarning.days} {expiryWarning.days === 1 ? 'day' : 'days'}. </span>
+              <Link href={routes.publicroute.SUBSCRIPTION_PLAN} className="underline hover:text-amber-100 ml-2 font-bold">
+                Renew Now
+              </Link>
+            </div>
+          )}
           <div className="hidden lg:flex items-center justify-center flex-1">
             {!isActuallyAuthenticated && (
               <div className="flex items-center gap-2">
                 <Link
                   href={routes.publicroute.HOME}
-                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
-                    pathname === routes.publicroute.HOME
-                      ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
-                      : `border-transparent ${linkText}`
-                  } group transition-colors duration-200 ${linkHoverBgClass}`}
+                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${pathname === routes.publicroute.HOME
+                    ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
+                    : `border-transparent ${linkText}`
+                    } group transition-colors duration-200 ${linkHoverBgClass}`}
                   prefetch={true}
                 >
                   <span className="relative z-10">Home</span>
@@ -270,11 +274,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                 </Link>
                 <Link
                   href={routes.publicroute.FEATURES}
-                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
-                    pathname === routes.publicroute.FEATURES
-                      ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
-                      : `border-transparent ${linkText}`
-                  } group transition-colors duration-200 ${linkHoverBgClass}`}
+                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${pathname === routes.publicroute.FEATURES
+                    ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
+                    : `border-transparent ${linkText}`
+                    } group transition-colors duration-200 ${linkHoverBgClass}`}
                   prefetch={true}
                 >
                   <span className="relative z-10">Features</span>
@@ -282,11 +285,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                 </Link>
                 <Link
                   href={routes.publicroute.PRICING}
-                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
-                    pathname === routes.publicroute.PRICING
-                      ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
-                      : `border-transparent ${linkText}`
-                  } group transition-colors duration-200 ${linkHoverBgClass}`}
+                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${pathname === routes.publicroute.PRICING
+                    ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
+                    : `border-transparent ${linkText}`
+                    } group transition-colors duration-200 ${linkHoverBgClass}`}
                   prefetch={true}
                 >
                   <span className="relative z-10">Pricing</span>
@@ -294,11 +296,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                 </Link>
                 <Link
                   href={routes.publicroute.CONTACT}
-                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
-                    pathname === routes.publicroute.CONTACT
-                      ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
-                      : `border-transparent ${linkText}`
-                  } group transition-colors duration-200 ${linkHoverBgClass}`}
+                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${pathname === routes.publicroute.CONTACT
+                    ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
+                    : `border-transparent ${linkText}`
+                    } group transition-colors duration-200 ${linkHoverBgClass}`}
                   prefetch={true}
                 >
                   <span className="relative z-10">Contact</span>
@@ -306,11 +307,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                 </Link>
                 <Link
                   href={routes.publicroute.HELP}
-                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${
-                    pathname === routes.publicroute.HELP
-                      ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
-                      : `border-transparent ${linkText}`
-                  } group transition-colors duration-200 ${linkHoverBgClass}`}
+                  className={`relative inline-flex items-center rounded-lg px-3 py-2 text-[14px] font-medium border-b-2 ${pathname === routes.publicroute.HELP
+                    ? `${shouldShowWhiteNavbar ? 'border-brand' : 'border-white'} ${linkText}`
+                    : `border-transparent ${linkText}`
+                    } group transition-colors duration-200 ${linkHoverBgClass}`}
                   prefetch={true}
                 >
                   <span className="relative z-10">Help</span>
@@ -321,10 +321,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
           </div>
 
           <div className="flex items-center gap-2">
-            {/* 1. Upgrade button (first) - Show if user is logged in but no subscription, hide on subscription-plan page */}
-            {showUpgradeButton && isAuthenticated && token && !hasActiveSubscription && !isSubscriptionPage && (
+            {/* Upgrade button - Show for trial users or users without subscription */}
+            {isAuthenticated && token && !isSubscriptionPage && (isTrialingSubscription || !hasActiveSubscription) && (
               forcePublic ? (
-                <Link 
+                <Link
                   href={routes.publicroute.SUBSCRIPTION_PLAN}
                   className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
                   prefetch={true}
@@ -342,148 +342,105 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
               )
             )}
 
-            {/* Trial plan active (3 day trial): show Upgrade button left of profile in navbar */}
-            {isAuthenticated && token && hasActiveSubscription && isTrialingSubscription && !isSubscriptionPage && (
-              forcePublic ? (
-                <Link 
-                  href={routes.publicroute.SUBSCRIPTION_PLAN}
-                  className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
-                  prefetch={true}
-                >
-                  Upgrade
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleOpenUpgradeModal}
-                  className="px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 bg-[#3882a5] text-white hover:bg-[#2d6a87]"
-                >
-                  Upgrade
-                </button>
-              )
-            )}
-
-            {shouldShowProfileDropdown ? (
-              <>
-                {/* Company Name and Notification Bell - Shows for authenticated users */}
-                {isActuallyAuthenticated && !isSubscriptionPage && (
-                  <div className="flex items-center gap-3">
-                    {/* Company Name with Logo */}
-                    {user?.companyName && (
-                      <div className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                        shouldShowWhiteNavbar 
-                          ? 'bg-gray-50 text-gray-900' 
-                          : 'bg-white/10 text-white'
-                      }`}>
-                        {/* Company Logo */}
-                        {user?.profilePicture && user.profilePicture.trim() !== "" ? (
-                          <div className="h-10 w-10 overflow-hidden flex items-center justify-center bg-white flex-shrink-0">
-                            <Image 
-                              src={`${user.profilePicture}${user.profilePicture.includes('?') ? '&' : '?'}v=${user.profilePicture.length}`}
-                              alt={user?.companyName || "Company Logo"} 
-                              width={40}
-                              height={40}
-                              className="h-full w-full object-contain p-1"
-                              onError={(e) => {
-                                const target = e.currentTarget as HTMLImageElement
-                                target.src = "/aynzo-logo.png"
-                                target.className = "h-full w-full object-contain p-1"
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <Building2 className={`h-5 w-5 flex-shrink-0 ${shouldShowWhiteNavbar ? 'text-gray-600' : 'text-white'}`} />
-                        )}
-                        <span className="text-sm font-semibold whitespace-nowrap">
-                          {user.companyName}
-                        </span>
+            {/* Authenticated users - Show company info, notifications, and sidebar toggle */}
+            {isActuallyAuthenticated && !isSubscriptionPage && (
+              <div className="flex items-center gap-3">
+                {/* Company Name with Logo */}
+                {user?.companyName && (
+                  <div className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${shouldShowWhiteNavbar
+                    ? 'bg-gray-50 text-gray-900'
+                    : 'bg-white/10 text-white'
+                    }`}>
+                    {user?.profilePicture && user.profilePicture.trim() !== "" ? (
+                      <div className="h-10 w-10 overflow-hidden flex items-center justify-center bg-white flex-shrink-0">
+                        <Image
+                          src={`${user.profilePicture}${user.profilePicture.includes('?') ? '&' : '?'}v=${user.profilePicture.length}`}
+                          alt={user?.companyName || "Company Logo"}
+                          width={40}
+                          height={40}
+                          className="h-full w-full object-contain p-1"
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement
+                            target.src = "/aynzo-logo.png"
+                            target.className = "h-full w-full object-contain p-1"
+                          }}
+                        />
                       </div>
+                    ) : (
+                      <Building2 className={`h-5 w-5 flex-shrink-0 ${shouldShowWhiteNavbar ? 'text-gray-600' : 'text-white'}`} />
                     )}
-                    {/* Notification Bell */}
-                    <NotificationBell 
-                      className={shouldShowWhiteNavbar ? 'hover:bg-gray-100/80' : 'hover:bg-white/10'}
-                      iconClassName={shouldShowWhiteNavbar ? 'text-gray-700' : 'text-white'}
-                    />
-                    {/* Sidebar Toggle Button - Mobile Only */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setIsMobileSidebarOpen(true)}
-                      className={cn(
-                        "md:hidden size-9",
-                        shouldShowWhiteNavbar 
-                          ? 'hover:bg-gray-100/80 text-gray-700' 
-                          : 'hover:bg-white/10 text-white'
-                      )}
-                    >
-                      <Menu className="h-6 w-6" />
-                      <span className="sr-only">Toggle menu</span>
-                    </Button>
+                    <span className="text-sm font-semibold whitespace-nowrap">
+                      {user.companyName}
+                    </span>
                   </div>
                 )}
-
-                {/* 2. Logout Button - Only show on subscription-plan page */}
-                {isSubscriptionPage && isAuthenticated && token && (
-                  <Button
-                    onClick={handleLogout}
-                    disabled={isLoggingOut}
-                    className="px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 bg-[#3882a5] text-white hover:bg-[#2d6a87]"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    {isLoggingOut ? "Logging out..." : "Logout"}
-                  </Button>
-                )}
-
-              </>
-            ) : (
-              <>
-                {/* Show Sign In / Start Trial if: No token OR (token exists but payment not successful AND not logged in) */}
-                {!isAuthenticated || !token ? (
-                  <>
-                    <Button variant="ghost" asChild className={`hidden sm:flex px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkText}`}>
-                      <Link href={routes.publicroute.LOGIN} prefetch={true}>Sign in</Link>
-                    </Button>
-                    <Link href={routes.publicroute.REGISTER} className={`hidden sm:flex px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`} prefetch={true}>
-                      Start 3 Day Trial
-                    </Link>
-                  </>
-                ) : hasActiveSubscription ? (
-                  /* Show "My Account" only if: Token exists AND payment successful */
-                  <Link 
-                    href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN} 
-                    className={`hidden sm:flex px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`} 
-                    prefetch={true}
-                  >
-                    My Account
-                  </Link>
-                ) : (
-                  /* Show Upgrade button if logged in but no subscription, but hide on subscription-plan page */
-                  <>
-                    {/* 1. Upgrade button (first) */}
-                    {showUpgradeButton && !isSubscriptionPage && (
-                      <Link 
-                        href={routes.publicroute.SUBSCRIPTION_PLAN}
-                        className="px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 bg-[#3882a5] text-white hover:bg-[#2d6a87]"
-                        prefetch={true}
-                      >
-                        Upgrade
-                      </Link>
-                    )}
-                  </>
-                )}
-              </>
+                {/* Notification Bell */}
+                <NotificationBell
+                  className={shouldShowWhiteNavbar ? 'hover:bg-gray-100/80' : 'hover:bg-white/10'}
+                  iconClassName={shouldShowWhiteNavbar ? 'text-gray-700' : 'text-white'}
+                />
+                {/* Sidebar Toggle Button - Mobile Only */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsMobileSidebarOpen(true)}
+                  className={cn(
+                    "md:hidden size-9",
+                    shouldShowWhiteNavbar
+                      ? 'hover:bg-gray-100/80 text-gray-700'
+                      : 'hover:bg-white/10 text-white'
+                  )}
+                >
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </div>
             )}
 
-            {/* 3. Three-row menu icon (third) - Only show on mobile for PUBLIC pages (not authenticated users) */}
+            {/* My Account button - Show on public pages when authenticated */}
+            {isAuthenticated && token && !isActuallyAuthenticated && (
+              <Link
+                href={routes.privateroute.DASHBOARD}
+                className={`hidden sm:flex px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
+                prefetch={true}
+              >
+                My Account
+              </Link>
+            )}
+
+            {/* Logout button - Only on subscription page */}
+            {isSubscriptionPage && isAuthenticated && token && (
+              <Button
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 bg-[#3882a5] text-white hover:bg-[#2d6a87]"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                {isLoggingOut ? "Logging out..." : "Logout"}
+              </Button>
+            )}
+
+            {/* Sign In / Start Trial - Show when not authenticated */}
+            {!isAuthenticated || !token ? (
+              <>
+                <Button variant="ghost" asChild className={`hidden sm:flex px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkText}`}>
+                  <Link href={routes.publicroute.LOGIN} prefetch={true}>Sign in</Link>
+                </Button>
+                <Link href={routes.publicroute.REGISTER} className={`hidden sm:flex px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`} prefetch={true}>
+                  Start 3 Day Trial
+                </Link>
+              </>
+            ) : null}
+
+            {/* Mobile menu toggle - Only show on public pages */}
             {!isActuallyAuthenticated && (
               <Button
                 variant="ghost"
                 size="sm"
-                className={`lg:hidden p-2 rounded-lg transition-all duration-200 ${
-                  shouldShowWhiteNavbar 
-                    ? 'hover:bg-gray-100/80 text-gray-900' 
-                    : 'hover:bg-white/10 text-white'
-                }`}
+                className={`lg:hidden p-2 rounded-lg transition-all duration-200 ${shouldShowWhiteNavbar
+                  ? 'hover:bg-gray-100/80 text-gray-900'
+                  : 'hover:bg-white/10 text-white'
+                  }`}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -495,8 +452,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
         {/* Upgrade Modal (opened from navbar Upgrade button) */}
         <UpgradePlanModal isOpen={isUpgradeModalOpen} onClose={handleCloseUpgradeModal} />
 
-         {isMobileMenuOpen && !isActuallyAuthenticated && (
-           <div className="lg:hidden border-t border-gray-200/30 bg-white/90 backdrop-blur-md shadow-lg">
+        {isMobileMenuOpen && !isActuallyAuthenticated && (
+          <div className="lg:hidden border-t border-gray-200/30 bg-white/90 backdrop-blur-md shadow-lg">
             <div className="px-4 pt-4 pb-6 space-y-2">
               {/* Show public menu links when: forcePublic is true OR not authenticated OR no subscription */}
               {(forcePublic || !isAuthenticated || !token || !hasActiveSubscription) && (
@@ -561,10 +518,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                           Start 3 Day Trial
                         </Link>
                       </>
-                    ) : hasActiveSubscription ? (
-                      /* Show "My Account" only if: Token exists AND payment successful */
+                    ) : isAuthenticated && token ? (
+                      /* Show "My Account" if authenticated - Dashboard accessible even if expired */
                       <Link
-                        href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.SUBSCRIPTION_PLAN}
+                        href={routes.privateroute.DASHBOARD}
                         className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >

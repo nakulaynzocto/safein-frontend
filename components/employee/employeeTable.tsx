@@ -21,7 +21,7 @@ import {
   Building,
   User
 } from "lucide-react"
-import { Employee, useCheckEmployeeHasAppointmentsQuery } from "@/store/api/employeeApi"
+import { Employee } from "@/store/api/employeeApi"
 import { SearchInput } from "@/components/common/searchInput"
 import { EmployeeDetailsDialog } from "./employeeDetailsDialog"
 import {
@@ -86,17 +86,7 @@ export function EmployeeTable({
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-  const employeeId = selectedEmployee?._id || ''
-  const shouldCheckAppointments = Boolean(selectedEmployee && showDeleteDialog)
 
-  const { data: appointmentCheck } = useCheckEmployeeHasAppointmentsQuery(employeeId, {
-    skip: !shouldCheckAppointments,
-  })
-
-  const disabledMessage = useMemo(() => {
-    if (!appointmentCheck?.hasAppointments) return undefined
-    return `Cannot delete employee. ${appointmentCheck.count} appointment(s) have been created with this employee. Please delete or reassign the appointments first.`
-  }, [appointmentCheck])
 
   const handleDelete = async () => {
     if (!selectedEmployee || !onDelete) return
@@ -315,8 +305,7 @@ export function EmployeeTable({
           onConfirm={handleDelete}
           confirmText={isDeleting ? "Deleting..." : "Delete"}
           variant="destructive"
-          disabled={appointmentCheck?.hasAppointments || false}
-          disabledMessage={disabledMessage}
+
         />
       )}
 

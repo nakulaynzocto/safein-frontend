@@ -52,7 +52,7 @@ import {
 } from "@/components/ui/dropdownMenu"
 import { routes } from "@/utils/routes"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
-import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus"
 
 export interface AppointmentTableProps {
   appointments: Appointment[]
@@ -124,7 +124,7 @@ export function AppointmentTable({
   onDateToChange,
 }: AppointmentTableProps) {
   const router = useRouter()
-  const { data: trialStatus, refetch: refetchTrialLimits } = useGetTrialLimitsStatusQuery()
+  const { hasReachedAppointmentLimit, refetch: refetchSubscriptionStatus } = useSubscriptionStatus()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [showCreateLinkModal, setShowCreateLinkModal] = useState(false)
 
@@ -153,7 +153,6 @@ export function AppointmentTable({
     return loadingAppointments.has(appointmentId)
   }
 
-  const hasReachedAppointmentLimit = trialStatus?.data?.isTrial && trialStatus.data.limits.appointments.reached
   const emptyPrimaryLabel = hasReachedAppointmentLimit ? 'Upgrade Plan' : 'Schedule Appointment'
 
   const handleDelete = async () => {
@@ -503,7 +502,13 @@ export function AppointmentTable({
                   <Button
                     variant="outline"
                     className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 whitespace-nowrap shrink-0 min-h-[40px] sm:min-h-0"
-                    onClick={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
+                    onClick={() => {
+                      if (hasReachedAppointmentLimit) {
+                        setShowUpgradeModal(true)
+                      } else {
+                        router.push(routes.privateroute.APPOINTMENTCREATE)
+                      }
+                    }}
                   >
                     <Plus className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
                     <span className="hidden sm:inline">Schedule Appointment</span>
@@ -511,7 +516,13 @@ export function AppointmentTable({
                   </Button>
                   <CreateAppointmentLinkModal
                     open={showCreateLinkModal}
-                    onOpenChange={setShowCreateLinkModal}
+                    onOpenChange={(open) => {
+                      if (open && hasReachedAppointmentLimit) {
+                        setShowUpgradeModal(true)
+                      } else {
+                        setShowCreateLinkModal(open)
+                      }
+                    }}
                     triggerButton={
                       <Button
                         variant="outline"

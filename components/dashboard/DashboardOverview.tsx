@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useAppSelector } from "@/store/hooks"
-import { useGetAppointmentsQuery, useGetAppointmentStatsQuery } from "@/store/api/appointmentApi"
+import { useGetAppointmentsQuery } from "@/store/api/appointmentApi"
 import { useGetEmployeesQuery } from "@/store/api/employeeApi"
 import { useGetVisitorsQuery } from "@/store/api/visitorApi"
 import { DashboardHeader } from "./DashboardHeader"
@@ -14,7 +14,7 @@ import { DashboardCharts } from "./dashboardCharts"
 import { calculateAppointmentStats } from "./dashboardUtils"
 import { DashboardSkeleton } from "@/components/common/tableSkeleton"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
-import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus"
 import { routes } from "@/utils/routes"
 
 export function DashboardOverview() {
@@ -69,13 +69,7 @@ export function DashboardOverview() {
     })
 
 
-  const { data: appointmentStatsData, isLoading: appointmentStatsLoading } = useGetAppointmentStatsQuery(
-    { startDate: statsDateRange.startDate, endDate: statsDateRange.endDate },
-    {
-      refetchOnMountOrArgChange: true,
-      refetchOnFocus: true,
-    }
-  )
+
 
   const { data: employeesData, isLoading: employeesLoading, error: employeesError, refetch: refetchEmployees } = useGetEmployeesQuery(undefined, {
     refetchOnMountOrArgChange: true,
@@ -89,7 +83,7 @@ export function DashboardOverview() {
     skip: false,
   })
 
-  const { data: trialStatus } = useGetTrialLimitsStatusQuery()
+  const { hasReachedAppointmentLimit, refetch: refetchSubscriptionStatus } = useSubscriptionStatus()
   const { user } = useAppSelector((state) => state.auth)
 
   const isLoading = appointmentsLoading || employeesLoading || visitorsLoading
@@ -132,8 +126,6 @@ export function DashboardOverview() {
       : calculatedStats
   }, [appointments])
 
-  const hasReachedAppointmentLimit =
-    trialStatus?.data?.isTrial && trialStatus.data.limits.appointments.reached
 
   const handleScheduleAppointment = useCallback(() => {
     if (hasReachedAppointmentLimit) {
@@ -153,7 +145,8 @@ export function DashboardOverview() {
     refetchAppointments()
     refetchEmployees()
     refetchVisitors()
-  }, [refetchAppointments, refetchEmployees, refetchVisitors])
+    refetchSubscriptionStatus()
+  }, [refetchAppointments, refetchEmployees, refetchVisitors, refetchSubscriptionStatus])
 
   if (shouldShowSkeleton && !hasError && !loadingTimeout) {
     return <DashboardSkeleton />

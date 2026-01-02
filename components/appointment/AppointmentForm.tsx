@@ -30,6 +30,8 @@ import { Calendar, Car, Info } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { FormContainer } from "@/components/common/formContainer"
 import { ApprovalLinkModal } from "./ApprovalLinkModal"
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus"
 import { useDebounce } from "@/hooks/useDebounce"
 import { appointmentSchema, type AppointmentFormData } from "./helpers/appointmentValidation"
 import { createSelectOptions } from "./helpers/selectOptionsHelper"
@@ -70,6 +72,7 @@ export function NewAppointmentModal({
   const [generalError, setGeneralError] = useState<string | null>(null)
   const [approvalLink, setApprovalLink] = useState<string | null>(null)
   const [showApprovalLinkModal, setShowApprovalLinkModal] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [employeeSearchInput, setEmployeeSearchInput] = useState("")
   const [visitorSearchInput, setVisitorSearchInput] = useState("")
   const [showVehicleFields, setShowVehicleFields] = useState<boolean>(false)
@@ -84,6 +87,7 @@ export function NewAppointmentModal({
 
   const [createAppointment, { isLoading: isCreating }] = useCreateAppointmentMutation()
   const [updateAppointment, { isLoading: isUpdating }] = useUpdateAppointmentMutation()
+  const { hasReachedAppointmentLimit } = useSubscriptionStatus()
   const isLoading = isCreating || isUpdating
   const { data: employeesData, isLoading: isLoadingEmployees, error: employeesError } = useGetEmployeesQuery({
     page: 1,
@@ -201,6 +205,12 @@ export function NewAppointmentModal({
 
   const onSubmit = async (data: AppointmentFormData) => {
     if (isLoading) return
+
+    if (!isEditMode && hasReachedAppointmentLimit) {
+      setShowUpgradeModal(true)
+      return
+    }
+
     setGeneralError(null)
 
     try {
@@ -569,6 +579,11 @@ export function NewAppointmentModal({
           }}
         />
       )}
+
+      <UpgradePlanModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+      />
     </>
   )
 }

@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/common/pageHeader"
 import { CalendarPlus } from "lucide-react"
-import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { routes } from "@/utils/routes"
 
@@ -14,11 +14,9 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ companyName }: DashboardHeaderProps) {
-  const { data: trialStatus } = useGetTrialLimitsStatusQuery()
+  const { hasReachedAppointmentLimit } = useSubscriptionStatus()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-  const hasReachedAppointmentLimit =
-    trialStatus?.data?.isTrial && trialStatus.data.limits.appointments.reached
 
   return (
     <PageHeader title={companyName || "Company"}>
