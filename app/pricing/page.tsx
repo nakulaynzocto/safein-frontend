@@ -14,20 +14,36 @@ import { useAppSelector } from "@/store/hooks"
 import { formatCurrency } from "@/utils/helpers"
 import { PageSEOHead } from "@/components/seo/pageSEOHead"
 import { generateStructuredData } from "@/lib/seoHelpers"
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
+import { useState } from "react"
 
 export default function PricingPage() {
   const pricingStructuredData = generateStructuredData("pricing")
   const { data: fetchedSubscriptionPlans, isLoading, error } = useGetAllSubscriptionPlansQuery({ isActive: true });
   const router = useRouter();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, token } = useAppSelector((state) => state.auth);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+
   const handleGoToSubscriptionPlan = (plan: ISubscriptionPlan) => {
-    const nextPath = `${routes.publicroute.SUBSCRIPTION_PLAN}?planId=${plan._id}`;
-    if (!isAuthenticated) {
-      toast.error("Please login to continue");
-      const encodedNext = encodeURIComponent(nextPath);
-      router.push(`${routes.publicroute.LOGIN}?next=${encodedNext}`);
+    if (plan.planType === 'free') {
+      // For free trial, send to register if not logged in, or dashboard if logged in
+      if (!isAuthenticated || !token) {
+        router.push(routes.publicroute.REGISTER);
+      } else {
+        // Already has free trial from registration, go to dashboard
+        router.push(routes.privateroute.DASHBOARD);
+      }
     } else {
-      router.push(nextPath);
+      // For paid plans
+      if (!isAuthenticated || !token) {
+        // Not logged in - redirect to login first, then come back to pricing
+        toast.info("Please login to purchase a plan");
+        const encodedNext = encodeURIComponent(routes.publicroute.PRICING);
+        router.push(`${routes.publicroute.LOGIN}?next=${encodedNext}`);
+      } else {
+        // User is logged in - open the upgrade modal directly
+        setIsUpgradeModalOpen(true);
+      }
     }
   };
 
@@ -122,7 +138,7 @@ export default function PricingPage() {
                         </span>
                         <div className="mt-2">
                           <span className="text-gray-500">
-                            {plan.planType === 'free' ? 'Card verification - 3 Days Trial (Non-refundable)' : `per ${plan.planType.replace('ly', '')}`}
+                            {plan.planType === 'free' ? 'Free - 3 Days Trial' : `per ${plan.planType.replace('ly', '')}`}
                           </span>
                         </div>
                         {!!plan.monthlyEquivalent && plan.planType !== 'free' && (
@@ -284,6 +300,12 @@ export default function PricingPage() {
           </section>
         </div>
       </PublicLayout>
+
+      {/* Upgrade Plan Modal - Opens when logged-in user clicks a paid plan */}
+      <UpgradePlanModal
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
+      />
     </>
   )
 }

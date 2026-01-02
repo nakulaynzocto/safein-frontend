@@ -16,7 +16,7 @@ export default function SubscriptionSuccessPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const dispatch = useAppDispatch()
-  
+
   const {
     user,
     isAuthenticated,
@@ -39,27 +39,27 @@ export default function SubscriptionSuccessPage() {
 
   const subscriptionIsActive = (() => {
     if (!activeSubscriptionData?.data) return false
-    
+
     const subscription = activeSubscriptionData.data
-    
+
     // ✅ PREFERRED: Use backend-provided flag if available (backend calculates this securely)
     if (subscription.hasActiveSubscription !== undefined) {
       return subscription.hasActiveSubscription
     }
-    
+
     // ✅ ALTERNATIVE: Use backend-provided canAccessDashboard flag
     if (subscription.canAccessDashboard !== undefined) {
       return subscription.canAccessDashboard
     }
-    
+
     // ⚠️ FALLBACK: Frontend calculation (less secure, but works until backend adds flags)
     // Explicitly reject cancelled, failed, or pending payments
-    if (subscription.paymentStatus === 'cancelled' || 
-        subscription.paymentStatus === 'failed' || 
-        subscription.paymentStatus === 'pending') {
+    if (subscription.paymentStatus === 'cancelled' ||
+      subscription.paymentStatus === 'failed' ||
+      subscription.paymentStatus === 'pending') {
       return false
     }
-    
+
     // Must be active AND payment must be succeeded
     return subscription.isActive === true && subscription.paymentStatus === 'succeeded'
   })()
@@ -197,9 +197,9 @@ export default function SubscriptionSuccessPage() {
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => router.push(routes.publicroute.SUBSCRIPTION_PLAN)}
+                    onClick={() => router.push(routes.publicroute.PRICING)}
                   >
-                    Go to Subscription Plan
+                    Go to Pricing
                   </Button>
                 </div>
               </>

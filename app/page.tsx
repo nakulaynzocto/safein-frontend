@@ -32,13 +32,11 @@ export default function HomePage() {
 
 
   const handleHeroFreeTrialClick = () => {
-    // Hero free trial – send user to subscription-plan (free plan will be selected there)
-    const nextPath = `${routes.publicroute.SUBSCRIPTION_PLAN}`
+    // Hero free trial – send user to register page
     if (!isAuthenticated) {
-      const encodedNext = encodeURIComponent(nextPath)
-      router.push(`${routes.publicroute.LOGIN}?next=${encodedNext}`)
+      router.push(routes.publicroute.REGISTER)
     } else {
-      router.push(nextPath)
+      router.push(routes.privateroute.DASHBOARD)
     }
   }
 
@@ -101,7 +99,7 @@ export default function HomePage() {
                       className="text-white font-semibold py-2.5 sm:py-3 px-6 sm:px-8 text-sm sm:text-base bg-brand w-full sm:w-auto"
                       asChild
                     >
-                      <Link href={routes.publicroute.SUBSCRIPTION_PLAN}>My Account</Link>
+                      <Link href={routes.privateroute.DASHBOARD}>My Account</Link>
                     </Button>
                   ) : (
                     <Button

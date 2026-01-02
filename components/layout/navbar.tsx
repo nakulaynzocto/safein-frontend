@@ -69,6 +69,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
     canAccessDashboard,
     isSubscriptionPage,
     hasActiveSubscription,
+    hasAnySubscription,
     isTrialingSubscription,
     expiryWarning,
   } = useAuthSubscription()
@@ -149,20 +150,20 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
   // Determine if user is authenticated (for UI display purposes)
   // Show private navbar UI if: authenticated AND not forcePublic
   // If user is logged in, show private navbar even if subscription is expired (dashboard access)
+  // IMPORTANT: Use isMounted to prevent hydration mismatch - server renders as not authenticated
   const isPublicVariant = forcePublic === true
-  const isActuallyAuthenticated = !isPublicVariant && shouldShowPrivateNavbar
+  const isActuallyAuthenticated = isMounted && !isPublicVariant && shouldShowPrivateNavbar
 
   // For hiding Sign In button: check if user is simply logged in (has token)
-  const isLoggedIn = !isPublicVariant && isAuthenticated && token
-  const isLoggedInPublic = isAuthenticated && token
+  const isLoggedIn = isMounted && !isPublicVariant && isAuthenticated && token
+  const isLoggedInPublic = isMounted && isAuthenticated && token
 
   // Show profile dropdown if:
   // 1. Token exists AND payment successful (hasActiveSubscription) - show dropdown with "My Account"
-  // 2. OR user is on subscription-plan page AND logged in (has token) - show dropdown even in public variant
-  // 3. OR user is logged in but no subscription (show profile dropdown with upgrade option)
+  // 2. OR user is logged in but no subscription (show profile dropdown with upgrade option)
   // Otherwise show public navbar (Sign In / Start Trial)
-  // Show profile dropdown if authenticated
-  const shouldShowProfileDropdown = isAuthenticated && token
+  // Show profile dropdown if authenticated (only after mount to prevent hydration issues)
+  const shouldShowProfileDropdown = isMounted && isAuthenticated && token
 
   const handleLogout = useCallback(async () => {
     try {
@@ -250,10 +251,11 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
           </div>
 
           {/* Center: Navigation Links */}
-          {expiryWarning?.show && !isSubscriptionPage && (
+          {/* Expiry warning - Only show on private pages (not public pages) */}
+          {expiryWarning?.show && !isSubscriptionPage && !forcePublic && isActuallyAuthenticated && (
             <div className="absolute top-20 left-0 w-full bg-amber-500/90 text-white text-xs sm:text-sm py-1 px-4 text-center z-40 backdrop-blur-sm shadow-md">
               <span className="font-medium">⚠️ Your plan expires in {expiryWarning.days} {expiryWarning.days === 1 ? 'day' : 'days'}. </span>
-              <Link href={routes.publicroute.SUBSCRIPTION_PLAN} className="underline hover:text-amber-100 ml-2 font-bold">
+              <Link href={routes.publicroute.PRICING} className="underline hover:text-amber-100 ml-2 font-bold">
                 Renew Now
               </Link>
             </div>
@@ -321,27 +323,6 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Upgrade button - Show for trial users or users without subscription */}
-            {isAuthenticated && token && !isSubscriptionPage && (isTrialingSubscription || !hasActiveSubscription) && (
-              forcePublic ? (
-                <Link
-                  href={routes.publicroute.SUBSCRIPTION_PLAN}
-                  className={`px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
-                  prefetch={true}
-                >
-                  Upgrade
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleOpenUpgradeModal}
-                  className="px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 bg-[#3882a5] text-white hover:bg-[#2d6a87]"
-                >
-                  Upgrade
-                </button>
-              )
-            )}
-
             {/* Authenticated users - Show company info, notifications, and sidebar toggle */}
             {isActuallyAuthenticated && !isSubscriptionPage && (
               <div className="flex items-center gap-3">
@@ -397,19 +378,34 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
               </div>
             )}
 
-            {/* My Account button - Show on public pages when authenticated */}
-            {isAuthenticated && token && !isActuallyAuthenticated && (
-              <Link
-                href={routes.privateroute.DASHBOARD}
-                className={`hidden sm:flex px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
-                prefetch={true}
-              >
-                My Account
-              </Link>
+            {/* Show appropriate button based on subscription status */}
+            {isMounted && isAuthenticated && token && !isSubscriptionPage && (
+              <>
+                {/* Private navbar: Show Upgrade ONLY for trial users or expired subscription */}
+                {isActuallyAuthenticated && (isTrialingSubscription || !hasActiveSubscription) && (
+                  <button
+                    type="button"
+                    onClick={handleOpenUpgradeModal}
+                    className="hidden sm:flex px-3 sm:px-4 py-2 text-xs sm:text-[14px] font-semibold rounded-lg transition-all duration-300 bg-[#3882a5] text-white hover:bg-[#2d6a87]"
+                  >
+                    Upgrade
+                  </button>
+                )}
+                {/* Public navbar ONLY: Show My Account for logged-in users */}
+                {forcePublic && hasAnySubscription && (
+                  <Link
+                    href={routes.privateroute.DASHBOARD}
+                    className={`hidden sm:flex px-6 py-2 text-[14px] font-semibold rounded-lg transition-all duration-300 ${ctaBtn}`}
+                    prefetch={true}
+                  >
+                    My Account
+                  </Link>
+                )}
+              </>
             )}
 
             {/* Logout button - Only on subscription page */}
-            {isSubscriptionPage && isAuthenticated && token && (
+            {isMounted && isSubscriptionPage && isAuthenticated && token && (
               <Button
                 onClick={handleLogout}
                 disabled={isLoggingOut}
@@ -420,8 +416,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
               </Button>
             )}
 
-            {/* Sign In / Start Trial - Show when not authenticated */}
-            {!isAuthenticated || !token ? (
+            {/* Sign In / Start Trial - Show ONLY when not authenticated */}
+            {isMounted && (!isAuthenticated || !token) && (
               <>
                 <Button variant="ghost" asChild className={`hidden sm:flex px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkText}`}>
                   <Link href={routes.publicroute.LOGIN} prefetch={true}>Sign in</Link>
@@ -430,7 +426,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                   Start 3 Day Trial
                 </Link>
               </>
-            ) : null}
+            )}
 
             {/* Mobile menu toggle - Only show on public pages */}
             {!isActuallyAuthenticated && (
@@ -518,29 +514,26 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
                           Start 3 Day Trial
                         </Link>
                       </>
-                    ) : isAuthenticated && token ? (
-                      /* Show "My Account" if authenticated - Dashboard accessible even if expired */
-                      <Link
-                        href={routes.privateroute.DASHBOARD}
-                        className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        My Account
-                      </Link>
-                    ) : (
-                      /* Show Upgrade button if logged in but no subscription, but hide on subscription-plan page */
-                      <>
-                        {showUpgradeButton && !isSubscriptionPage && (
-                          <Link
-                            href={routes.publicroute.SUBSCRIPTION_PLAN}
-                            className="block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 bg-[#3882a5] text-white hover:bg-[#2d6a87]"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            Upgrade
-                          </Link>
-                        )}
-                      </>
-                    )}
+                    ) : isMounted && isAuthenticated && token && !isSubscriptionPage ? (
+                      /* Show My Account or Upgrade based on subscription status */
+                      hasAnySubscription ? (
+                        <Link
+                          href={routes.privateroute.DASHBOARD}
+                          className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          My Account
+                        </Link>
+                      ) : (
+                        <Link
+                          href={routes.publicroute.PRICING}
+                          className={`block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 ${ctaBtn}`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Upgrade
+                        </Link>
+                      )
+                    ) : null}
                   </div>
                 </>
               )}

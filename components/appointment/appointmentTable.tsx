@@ -153,7 +153,17 @@ export function AppointmentTable({
     return loadingAppointments.has(appointmentId)
   }
 
+  const isToday = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+    return dateFrom === todayStr && dateTo === todayStr;
+  };
+
   const emptyPrimaryLabel = hasReachedAppointmentLimit ? 'Upgrade Plan' : 'Schedule Appointment'
+  const emptyTitle = isToday() ? "No appointments for today" : "No appointments yet"
 
   const handleDelete = async () => {
     if (!selectedAppointment || !onDelete) return
@@ -568,7 +578,7 @@ export function AppointmentTable({
             columns={getColumns()}
             emptyMessage="No appointments found. Try adjusting your search criteria."
             emptyData={{
-              title: 'No appointments yet',
+              title: emptyTitle,
               description: 'Get started by scheduling your first appointment.',
               primaryActionLabel: emptyPrimaryLabel,
             }}
