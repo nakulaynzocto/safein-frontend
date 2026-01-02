@@ -95,9 +95,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Allow authenticated users to access subscription-plan and subscription-success pages
+  // Allow authenticated users to access subscription-success and subscription-cancel pages
   const subscriptionPages = [
-    routes.publicroute.SUBSCRIPTION_PLAN,
     routes.publicroute.SUBSCRIPTION_SUCCESS,
     routes.publicroute.SUBSCRIPTION_CANCEL,
   ]

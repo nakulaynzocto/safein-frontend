@@ -47,6 +47,12 @@ export function useAuthSubscription() {
     return activeSubscriptionData.data.isTrialing === true
   }, [activeSubscriptionData])
 
+  // Check if user has ANY subscription (active or expired)
+  // This is used to determine dashboard access and navbar button display
+  const hasAnySubscription = useMemo(() => {
+    return !!activeSubscriptionData?.data
+  }, [activeSubscriptionData])
+
   const isCurrentRoutePrivate = useMemo(() => {
     return isPrivateRoute(pathname)
   }, [pathname])
@@ -54,7 +60,6 @@ export function useAuthSubscription() {
   // Check if current route is a subscription-related page
   const isSubscriptionPage = useMemo(() => {
     return (
-      pathname === routes.publicroute.SUBSCRIPTION_PLAN ||
       pathname === routes.publicroute.SUBSCRIPTION_SUCCESS ||
       pathname === routes.publicroute.SUBSCRIPTION_CANCEL
     )
@@ -63,7 +68,6 @@ export function useAuthSubscription() {
   // Check if current route should hide sidebar
   const shouldHideSidebar = useMemo(() => {
     return (
-      pathname === routes.publicroute.SUBSCRIPTION_PLAN ||
       pathname === routes.publicroute.SUBSCRIPTION_SUCCESS
     )
   }, [pathname])
@@ -72,7 +76,6 @@ export function useAuthSubscription() {
   const allowedPagesForAuthenticated = useMemo(() => [
     routes.publicroute.LOGIN,
     routes.publicroute.REGISTER,
-    routes.publicroute.SUBSCRIPTION_PLAN,
     routes.publicroute.SUBSCRIPTION_SUCCESS,
     routes.publicroute.SUBSCRIPTION_CANCEL,
     routes.publicroute.PRICING,
@@ -192,7 +195,7 @@ export function useAuthSubscription() {
     }
   }, [isInitialized, isAuthenticated, token, isCurrentRoutePrivate, router])
 
-  // Redirect authenticated users from login/register to subscription-plan
+  // Redirect authenticated users from login/register to dashboard
   useEffect(() => {
     if (isInitialized && isAuthenticated && token) {
       const authPages = [routes.publicroute.LOGIN, routes.publicroute.REGISTER]
@@ -206,6 +209,8 @@ export function useAuthSubscription() {
     }
   }, [isInitialized, isAuthenticated, token, router, pathname])
 
+  // Note: Free trial is auto-assigned during registration, so all new users will have a subscription
+
   return {
     // Auth state
     isAuthenticated,
@@ -216,6 +221,7 @@ export function useAuthSubscription() {
 
     // Subscription state
     hasActiveSubscription,
+    hasAnySubscription,
     isSubscriptionLoading,
     isSubscriptionFetching,
     activeSubscriptionData: activeSubscriptionData?.data,

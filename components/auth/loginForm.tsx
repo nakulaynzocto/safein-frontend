@@ -63,12 +63,9 @@ export function LoginForm() {
       dispatch(setCredentials(result))
       setErrorMessage(null)
 
-      // According to documentation: After login, check subscription status
-      // If no active subscription, redirect to subscription-plan page
-      // If we were sent here with a `next` param, use that; otherwise go to subscription-plan
+      // Redirect to dashboard after successful login
+      // Free trial is auto-assigned on registration, so users will always have access
       const next = searchParams.get('next')
-      // Always redirect to subscription-plan first (it will check subscription and redirect to dashboard if active)
-      // No need for separate loader here - subscription-plan page will show loader
       const target = next || routes.privateroute.DASHBOARD
       window.location.replace(target)
     } catch (error: any) {

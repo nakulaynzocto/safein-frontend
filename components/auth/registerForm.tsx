@@ -109,9 +109,8 @@ export function RegisterForm() {
       dispatch(setCredentials({ user: result.user, token: result.token }))
 
       setCurrentStep('success')
-      // After successful verification, honour `next` param if present.
-      // If no next is provided, send the user to the subscription-plan page so they can choose a plan,
-      // instead of giving direct dashboard access without a subscription.
+      // After successful verification, redirect to dashboard
+      // Free trial is now auto-assigned during registration
       const next = searchParams.get('next')
       const target = next || routes.privateroute.DASHBOARD
       router.push(target)
@@ -210,7 +209,7 @@ export function RegisterForm() {
   }
 
   const handleGoToDashboard = () => {
-    // On success, always send users to subscription-plan to pick/confirm a plan first.
+    // On success, send users to dashboard (free trial is auto-assigned during registration)
     const next = searchParams.get('next')
     const target = next || routes.privateroute.DASHBOARD
     router.push(target)

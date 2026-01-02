@@ -8,46 +8,42 @@ export const routes = {
     CONTACT: "/contact",
     HELP: "/help",
     PRIVACY_POLICY: "/privacy-policy",
-    
+
     // Authentication
     LOGIN: "/login",
     REGISTER: "/register",
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
     VERIFY: "/verify",
-    
+
     // Subscription
-    SUBSCRIPTION_PLAN: "/subscription-plan",
     SUBSCRIPTION_SUCCESS: "/subscription/success",
     SUBSCRIPTION_CANCEL: "/subscription/cancel",
-    
+
     // Email Actions
     EMAIL_ACTION: "/email-action",
-    
-    // Constants
-    FREE_TRIAL_PLAN_ID: "FREE_TRIAL_PLAN_ID_PLACEHOLDER", // This should be replaced with the actual ID from the backend
   },
 
   privateroute: {
     // Dashboard
     DASHBOARD: "/dashboard",
-    
+
     // Employee Routes
     EMPLOYEELIST: "/employee/list",
     EMPLOYEECREATE: "/employee/create",
     EMPLOYEEEDIT: "/employee/[id]", // Dynamic route pattern
-    
+
     // Visitor Routes
     VISITORLIST: "/visitor/list",
     VISITORREGISTRATION: "/visitor/register",
     VISITOREDIT: "/visitor/[id]", // Dynamic route pattern
-    
+
     // Appointment Routes
     APPOINTMENTLIST: "/appointment/list",
     APPOINTMENTCREATE: "/appointment/create",
     APPOINTMENTEDIT: "/appointment/[id]", // Dynamic route pattern
     APPOINTMENT_LINKS: "/appointment-links",
-    
+
     // Settings Routes
     SETTINGS: "/settings",
     PROFILE: "/settings/profile",
@@ -77,27 +73,27 @@ export const isPrivateRoute = (path: string): boolean => {
   if (Object.values(routes.privateroute).includes(path as PrivateRoute)) {
     return true
   }
-  
+
   if (path.startsWith('/employee/') && path !== routes.privateroute.EMPLOYEELIST) {
     return true
   }
-  
+
   if (path.startsWith('/appointment/') && path !== routes.privateroute.APPOINTMENTLIST) {
     return true
   }
-  
+
   if (path.startsWith('/visitor/') && path !== routes.privateroute.VISITORLIST && path !== routes.privateroute.VISITORREGISTRATION) {
     return true
   }
-  
+
   if (path.startsWith('/settings/')) {
     return true
   }
-  
+
   if (path === routes.privateroute.APPOINTMENT_LINKS || path.startsWith('/appointment-links')) {
     return true
   }
-  
+
   return false
 }
 
