@@ -63,7 +63,7 @@ export function SettingsPageContent() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-8">
       <Card className="w-full">
         <CardHeader className="pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
@@ -75,59 +75,59 @@ export function SettingsPageContent() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 sm:space-y-5 px-4 sm:px-6 pb-4 sm:pb-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-              <div className="space-y-0.5 flex-1 w-full sm:w-auto">
-                <Label htmlFor="email-enabled" className="text-sm sm:text-base font-medium flex items-center gap-2 cursor-pointer">
-                  <Mail className="h-4 w-4 text-primary flex-shrink-0" />
-                  Email Notifications
-                </Label>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  Receive appointment notifications via email
-                </p>
-              </div>
-              <Switch
-                id="email-enabled"
-                checked={emailEnabled}
-                onCheckedChange={setEmailEnabled}
-                className="self-start sm:self-auto"
-              />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+            <div className="space-y-0.5 flex-1 w-full sm:w-auto">
+              <Label htmlFor="email-enabled" className="text-sm sm:text-base font-medium flex items-center gap-2 cursor-pointer">
+                <Mail className="h-4 w-4 text-primary flex-shrink-0" />
+                Email Notifications
+              </Label>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                Receive appointment notifications via email
+              </p>
             </div>
+            <Switch
+              id="email-enabled"
+              checked={emailEnabled}
+              onCheckedChange={setEmailEnabled}
+              className="self-start sm:self-auto"
+            />
+          </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-              <div className="space-y-0.5 flex-1 w-full sm:w-auto">
-                <Label htmlFor="whatsapp-enabled" className="text-sm sm:text-base font-medium flex items-center gap-2 cursor-pointer">
-                  <MessageSquare className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  WhatsApp Notifications
-                </Label>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  Receive notifications via WhatsApp Cloud API
-                </p>
-              </div>
-              <Switch
-                id="whatsapp-enabled"
-                checked={whatsappEnabled}
-                onCheckedChange={setWhatsappEnabled}
-                className="self-start sm:self-auto"
-              />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+            <div className="space-y-0.5 flex-1 w-full sm:w-auto">
+              <Label htmlFor="whatsapp-enabled" className="text-sm sm:text-base font-medium flex items-center gap-2 cursor-pointer">
+                <MessageSquare className="h-4 w-4 text-green-600 flex-shrink-0" />
+                WhatsApp Notifications
+              </Label>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                Receive notifications via WhatsApp Cloud API
+              </p>
             </div>
+            <Switch
+              id="whatsapp-enabled"
+              checked={whatsappEnabled}
+              onCheckedChange={setWhatsappEnabled}
+              className="self-start sm:self-auto"
+            />
+          </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-              <div className="space-y-0.5 flex-1 w-full sm:w-auto">
-                <Label htmlFor="sms-enabled" className="text-sm sm:text-base font-medium flex items-center gap-2 cursor-pointer">
-                  <Phone className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                  SMS Notifications
-                </Label>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  Receive appointment notifications via SMS
-                </p>
-              </div>
-              <Switch
-                id="sms-enabled"
-                checked={smsEnabled}
-                onCheckedChange={setSmsEnabled}
-                className="self-start sm:self-auto"
-              />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+            <div className="space-y-0.5 flex-1 w-full sm:w-auto">
+              <Label htmlFor="sms-enabled" className="text-sm sm:text-base font-medium flex items-center gap-2 cursor-pointer">
+                <Phone className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                SMS Notifications
+              </Label>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                Receive appointment notifications via SMS
+              </p>
             </div>
+            <Switch
+              id="sms-enabled"
+              checked={smsEnabled}
+              onCheckedChange={setSmsEnabled}
+              className="self-start sm:self-auto"
+            />
+          </div>
 
           <div className="pt-4 border-t">
             <Button

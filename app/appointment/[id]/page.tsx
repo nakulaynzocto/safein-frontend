@@ -7,7 +7,7 @@ import { NewAppointmentModal } from "@/components/appointment/AppointmentForm"
 export default function AppointmentEditPage() {
   const params = useParams()
   const appointmentId = params.id as string
-  
+
   if (!appointmentId) {
     return (
       <ProtectedLayout>
@@ -20,10 +20,10 @@ export default function AppointmentEditPage() {
       </ProtectedLayout>
     )
   }
-  
+
   return (
     <ProtectedLayout>
-      <div className="container mx-auto max-w-4xl py-3 sm:py-4">
+      <div className="container mx-auto max-w-full py-3 sm:py-4">
         <div className="mb-3">
           <h1 className="text-lg font-semibold text-foreground leading-tight">Edit Appointment</h1>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
@@ -31,7 +31,7 @@ export default function AppointmentEditPage() {
           </p>
         </div>
         <div className="w-full">
-          <NewAppointmentModal 
+          <NewAppointmentModal
             appointmentId={appointmentId}
             layout="page"
           />

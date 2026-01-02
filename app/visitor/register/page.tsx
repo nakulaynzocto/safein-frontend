@@ -9,14 +9,14 @@ import { routes } from "@/utils/routes"
 // Page: VisitorRegister (non-modal page version)
 export default function VisitorRegisterPage() {
   const router = useRouter()
-  
+
   const handleVisitorComplete = (visitorData: CreateVisitorRequest) => {
     router.push(routes.privateroute.VISITORLIST)
   }
 
   return (
     <ProtectedLayout>
-      <div className="container mx-auto max-w-4xl py-3 sm:py-4">
+      <div className="container mx-auto max-w-full py-3 sm:py-4">
         <div className="mb-3">
           <h1 className="text-lg font-semibold text-foreground leading-tight">Register New Visitor</h1>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
@@ -24,7 +24,7 @@ export default function VisitorRegisterPage() {
           </p>
         </div>
         <div className="w-full">
-          <VisitorRegister 
+          <VisitorRegister
             onComplete={handleVisitorComplete}
             standalone={true}
           />
