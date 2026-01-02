@@ -156,9 +156,9 @@ export const visitorApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result?.visitors
           ? [
-              ...result.visitors.map(({ _id }) => ({ type: 'Visitor' as const, id: _id })),
-              { type: 'Visitor' as const, id: 'LIST' },
-            ]
+            ...result.visitors.map(({ _id }) => ({ type: 'Visitor' as const, id: _id })),
+            { type: 'Visitor' as const, id: 'LIST' },
+          ]
           : [{ type: 'Visitor' as const, id: 'LIST' }],
       keepUnusedDataFor: 300, // Keep data for 5 minutes
     }),
@@ -174,19 +174,7 @@ export const visitorApi = baseApi.injectEndpoints({
       providesTags: (result, error, id) => [{ type: 'Visitor' as const, id }],
     }),
 
-    searchVisitors: builder.mutation<VisitorSearchResponse, VisitorSearchRequest>({
-      query: (searchData) => ({
-        url: '/visitors/search',
-        method: 'POST',
-        body: searchData,
-      }),
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-    }),
+
 
     updateVisitor: builder.mutation<Visitor, { id: string } & UpdateVisitorRequest>({
       query: ({ id, ...visitorData }) => ({
@@ -231,31 +219,9 @@ export const visitorApi = baseApi.injectEndpoints({
 
 
 
-    getVisitorStats: builder.query<VisitorStats, void>({
-      query: () => '/visitors/stats',
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      providesTags: [{ type: 'Visitor' as const, id: 'STATS' }],
-    }),
 
-    bulkUpdateVisitors: builder.mutation<{ updatedCount: number }, BulkUpdateVisitorsRequest>({
-      query: (bulkData) => ({
-        url: '/visitors/bulk-update',
-        method: 'PUT',
-        body: bulkData,
-      }),
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      invalidatesTags: [{ type: 'Visitor' as const, id: 'LIST' }],
-    }),
+
+
   }),
 })
 
@@ -263,10 +229,7 @@ export const {
   useCreateVisitorMutation,
   useGetVisitorsQuery,
   useGetVisitorQuery,
-  useSearchVisitorsMutation,
   useUpdateVisitorMutation,
   useDeleteVisitorMutation,
   useCheckVisitorHasAppointmentsQuery,
-  useGetVisitorStatsQuery,
-  useBulkUpdateVisitorsMutation,
 } = visitorApi

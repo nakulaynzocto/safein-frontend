@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmployeeTable } from "./employeeTable"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
-import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi"
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus"
 import { useGetEmployeesQuery, useDeleteEmployeeMutation } from "@/store/api/employeeApi"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { UserPlus, FileSpreadsheet, User } from "lucide-react"
@@ -18,13 +18,9 @@ export function EmployeeList() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [search, setSearch] = useState("")
-  const [departmentFilter, setDepartmentFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [sortBy, setSortBy] = useState("createdAt")
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
 
   const debouncedSearch = useDebounce(search, 500)
-  const { data: trialStatus, refetch: refetchTrialLimits } = useGetTrialLimitsStatusQuery()
+  const { hasReachedEmployeeLimit, refetch: refetchSubscriptionStatus } = useSubscriptionStatus()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [showBulkImportModal, setShowBulkImportModal] = useState(false)
 
@@ -32,10 +28,6 @@ export function EmployeeList() {
     page: currentPage,
     limit: pageSize,
     search: debouncedSearch || undefined,
-    department: departmentFilter && departmentFilter !== "all" ? departmentFilter : undefined,
-    status: statusFilter && statusFilter !== "all" ? statusFilter as "Active" | "Inactive" : undefined,
-    sortBy,
-    sortOrder,
   })
 
   const [deleteEmployee, { isLoading: isDeleting }] = useDeleteEmployeeMutation()
@@ -43,23 +35,19 @@ export function EmployeeList() {
   const employees = employeeData?.employees || []
   const pagination = employeeData?.pagination
 
-  const hasReachedEmployeeLimit = trialStatus?.data?.isTrial && trialStatus.data.limits.employees.reached
 
   const handleDelete = async (employeeId: string) => {
     try {
       await deleteEmployee(employeeId).unwrap()
       showSuccessToast("Employee deleted successfully")
       refetch()
-      refetchTrialLimits()
+      refetchSubscriptionStatus()
     } catch (error: any) {
       const errorMessage = error?.data?.message || error?.error || "Failed to delete employee"
       showErrorToast(errorMessage)
     }
   }
 
-  const handleRefresh = () => {
-    refetch()
-  }
 
   useEffect(() => {
     setCurrentPage(1)
@@ -69,28 +57,10 @@ export function EmployeeList() {
     setSearch(value)
   }
 
-  const handleDepartmentFilterChange = (value: string) => {
-    setDepartmentFilter(value)
-    setCurrentPage(1)
-  }
-
-  const handleStatusFilterChange = (value: string) => {
-    setStatusFilter(value)
-    setCurrentPage(1)
-  }
-
-  const handleSortChange = (field: string) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-    } else {
-      setSortBy(field)
-      setSortOrder("desc")
-    }
-  }
 
   const handleEmployeeCreated = () => {
     refetch()
-    refetchTrialLimits()
+    refetchSubscriptionStatus()
   }
 
   return (

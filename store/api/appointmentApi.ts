@@ -297,35 +297,10 @@ export const appointmentApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'Appointment', id: 'LIST' }],
     }),
 
-    getAppointmentStats: builder.query<AppointmentStats, { startDate?: string; endDate?: string } | void>({
-      query: (params) => {
-        const queryParams = createUrlParams(params || {})
-        return `/appointments/stats${queryParams ? `?${queryParams}` : ''}`
-      },
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      providesTags: [{ type: 'Appointment', id: 'STATS' }],
-    }),
 
 
-    bulkUpdateAppointments: builder.mutation<{ updatedCount: number }, BulkUpdateAppointmentsRequest>({
-      query: (bulkData) => ({
-        url: '/appointments/bulk-update',
-        method: 'PUT',
-        body: bulkData,
-      }),
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      invalidatesTags: [{ type: 'Appointment', id: 'LIST' }],
-    }),
+
+
 
 
     cancelAppointment: builder.mutation<Appointment, string>({
@@ -379,45 +354,8 @@ export const appointmentApi = baseApi.injectEndpoints({
       ],
     }),
 
-    getAppointmentsByEmployee: builder.query<AppointmentListResponse, { employeeId: string } & GetAppointmentsQuery>({
-      query: ({ employeeId, ...params }) => {
-        const queryParams = createUrlParams(params)
-        return `/appointments/employee/${employeeId}${queryParams ? `?${queryParams}` : ''}`
-      },
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      providesTags: (result, error, { employeeId }) =>
-        result?.appointments
-          ? [
-            ...result.appointments.map(({ _id }) => ({ type: 'Appointment' as const, id: _id })),
-            { type: 'Appointment', id: `EMPLOYEE_${employeeId}` },
-          ]
-          : [{ type: 'Appointment', id: `EMPLOYEE_${employeeId}` }],
-    }),
 
-    getAppointmentsByDateRange: builder.query<AppointmentListResponse, { dateFrom: string; dateTo: string } & GetAppointmentsQuery>({
-      query: ({ dateFrom, dateTo, ...params }) => {
-        const queryParams = createUrlParams({ dateFrom, dateTo, ...params })
-        return `/appointments/date-range?${queryParams}`
-      },
-      transformResponse: (response: any) => {
-        if (response.success && response.data) {
-          return response.data
-        }
-        return response
-      },
-      providesTags: (result) =>
-        result?.appointments
-          ? [
-            ...result.appointments.map(({ _id }) => ({ type: 'Appointment' as const, id: _id })),
-            { type: 'Appointment', id: 'DATE_RANGE' },
-          ]
-          : [{ type: 'Appointment', id: 'DATE_RANGE' }],
-    }),
+
   }),
 })
 
@@ -427,17 +365,10 @@ export const {
   useCreateAppointmentMutation,
   useUpdateAppointmentMutation,
   useDeleteAppointmentMutation,
-
   useGetAppointmentByAppointmentIdQuery,
-  useGetAppointmentsByEmployeeQuery,
-  useGetAppointmentsByDateRangeQuery,
-
   useCheckInAppointmentMutation,
   useCheckOutAppointmentMutation,
-  useBulkUpdateAppointmentsMutation,
   useCancelAppointmentMutation,
   useApproveAppointmentMutation,
   useRejectAppointmentMutation,
-
-  useGetAppointmentStatsQuery,
 } = appointmentApi

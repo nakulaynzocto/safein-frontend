@@ -56,7 +56,7 @@ async function loadRazorpayScript(src: string) {
 export default function SubscriptionPlanPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  
+
   // Use centralized hook for auth and subscription checks
   const {
     user,
@@ -80,9 +80,9 @@ export default function SubscriptionPlanPage() {
   } = useGetAllSubscriptionPlansQuery({ isActive: true })
 
   // Use single checkout route for both free and paid plans
-const [createCheckoutSession, { isLoading: isCreating }] =
-  useCreateCheckoutSessionMutation()
-const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
+  const [createCheckoutSession, { isLoading: isCreating }] =
+    useCreateCheckoutSessionMutation()
+  const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
 
   const plans: ISubscriptionPlan[] = fetchedPlans?.data?.plans || []
 
@@ -93,7 +93,7 @@ const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
   // Initialize selected plan based on query or first available plan (only once)
   useEffect(() => {
     if (isLoadingPlans) return // Wait for plans to load
-    
+
     if (plans.length === 0) return // No plans available yet
 
     if (isInitialized) return // Already initialized
@@ -202,8 +202,8 @@ const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
               <div className="text-center space-y-4">
                 <div className="animate-spin mx-auto h-10 w-10 border-4 border-[#3882a5] border-t-transparent rounded-full"></div>
                 <p className="text-muted-foreground text-sm">
-                  {hasActiveSubscription 
-                    ? 'Redirecting to dashboard...' 
+                  {hasActiveSubscription
+                    ? 'Redirecting to dashboard...'
                     : 'Checking subscription status...'}
                 </p>
               </div>
@@ -245,7 +245,7 @@ const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
           {!isLoadingPlans && !plansError && plans.length > 0 && selectedPlan && (
             <div className="space-y-3">
               {/* Page Header - Compact */}
-    
+
 
               {/* Selected Plan Details - Responsive Layout */}
               <div className="grid gap-3 grid-cols-1 md:grid-cols-1 lg:grid-cols-3">
@@ -271,7 +271,7 @@ const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
                       )}
                     </div>
                   </CardHeader>
-                  
+
                   <CardContent className="pt-3 px-4 sm:px-6 pb-3 space-y-3">
                     {/* Price Section - Responsive */}
                     <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-3 pb-2 border-b">
@@ -316,7 +316,7 @@ const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
                       Secure checkout powered by Razorpay
                     </CardDescription>
                   </CardHeader>
-                  
+
                   <CardContent className="pt-3 px-4 sm:px-6 pb-3 space-y-3">
                     {/* Plan Selector - Radio Buttons (Like Upgrade Modal) */}
                     <div className="space-y-2">
@@ -333,19 +333,17 @@ const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
                               key={plan._id}
                               type="button"
                               onClick={() => setSelectedPlanId(plan._id)}
-                              className={`w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 text-xs sm:text-sm py-2 px-2 rounded-md text-left transition ${
-                                isSelected
+                              className={`w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 text-xs sm:text-sm py-2 px-2 rounded-md text-left transition ${isSelected
                                   ? "bg-[#3882a5]/10 border border-[#3882a5] text-slate-900"
                                   : "hover:bg-slate-100 border border-transparent text-slate-800"
-                              }`}
+                                }`}
                             >
                               <div className="flex items-center gap-2">
                                 <div
-                                  className={`h-3 w-3 rounded-full border flex-shrink-0 ${
-                                    isSelected
+                                  className={`h-3 w-3 rounded-full border flex-shrink-0 ${isSelected
                                       ? "border-[#3882a5] bg-[#3882a5]"
                                       : "border-slate-400 bg-white"
-                                  }`}
+                                    }`}
                                 />
                                 <div className="font-medium">
                                   {plan.name}
@@ -422,16 +420,16 @@ const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation()
                     <div className="pt-2 border-t text-center">
                       <p className="text-[10px] text-muted-foreground">
                         By proceeding, you agree to our{" "}
-                        <Link 
-                          href={routes.publicroute.PRIVACY_POLICY} 
+                        <Link
+                          href={routes.publicroute.PRIVACY_POLICY}
                           className="text-[#3882a5] hover:underline"
                           target="_blank"
                         >
                           Privacy Policy
                         </Link>
                         {" "}and Razorpay's{" "}
-                        <a 
-                          href="https://razorpay.com/privacy/" 
+                        <a
+                          href="https://razorpay.com/privacy/"
                           className="text-[#3882a5] hover:underline"
                           target="_blank"
                           rel="noopener noreferrer"

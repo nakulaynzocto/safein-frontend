@@ -72,12 +72,12 @@ export function RegisterForm() {
     try {
       setSubmitError(null)
       const result = await register(data).unwrap()
-      
+
       setUserEmail(data.email)
       setCurrentStep('otp')
     } catch (error: any) {
       let errorMessage = "Registration failed"
-      
+
       if (error?.data?.message) {
         errorMessage = error.data.message
       } else if (error?.message) {
@@ -90,46 +90,46 @@ export function RegisterForm() {
   const onOtpSubmit = async (data: OtpFormData) => {
     try {
       setOtpError(null)
-      
+
       // Use otpValue state if form data is empty (for OTP component)
       const otpToVerify = data.otp || otpValue
-      
+
       if (!otpToVerify || otpToVerify.length !== 6) {
         setOtpError("Please enter a valid 6-digit OTP")
         return
       }
-      
+
       const result = await verifyOtp({
         email: userEmail,
         otp: otpToVerify
       }).unwrap()
-      
+
       setUser(result.user)
       setToken(result.token)
       dispatch(setCredentials({ user: result.user, token: result.token }))
-      
+
       setCurrentStep('success')
       // After successful verification, honour `next` param if present.
       // If no next is provided, send the user to the subscription-plan page so they can choose a plan,
       // instead of giving direct dashboard access without a subscription.
       const next = searchParams.get('next')
-      const target = next || routes.publicroute.SUBSCRIPTION_PLAN
+      const target = next || routes.privateroute.DASHBOARD
       router.push(target)
     } catch (error: any) {
       let errorMessage = "OTP verification failed. Please try again."
-      
+
       if (error?.data?.message) {
         errorMessage = error.data.message
       } else if (error?.message) {
         errorMessage = error.message
       }
-      
+
       if (errorMessage.includes('expired')) {
         errorMessage = "OTP expired. Click Resend OTP."
       } else if (errorMessage.includes('incorrect') || errorMessage.includes('invalid')) {
         errorMessage = "OTP incorrect. Please try again."
       }
-      
+
       setOtpError(errorMessage)
     }
   }
@@ -137,22 +137,22 @@ export function RegisterForm() {
   const handleResendOtp = async () => {
     try {
       setOtpError(null)
-      
+
       const result = await resendOtp({
         email: userEmail
       }).unwrap()
-      
+
       setOtpError(null)
       showSuccessToast("OTP resent to your email")
     } catch (error: any) {
       let errorMessage = "Failed to resend OTP. Please try again."
-      
+
       if (error?.data?.message) {
         errorMessage = error.data.message
       } else if (error?.message) {
         errorMessage = error.message
       }
-      
+
       setOtpError(errorMessage)
     }
   }
@@ -166,7 +166,7 @@ export function RegisterForm() {
   const handleOtpChange = async (value: string) => {
     setOtpValue(value)
     setOtpValueForm('otp', value, { shouldValidate: true })
-    
+
     // Auto-verify when 6 digits are entered
     if (value.length === 6) {
       try {
@@ -175,30 +175,30 @@ export function RegisterForm() {
           email: userEmail,
           otp: value
         }).unwrap()
-        
+
         setUser(result.user)
         setToken(result.token)
         dispatch(setCredentials({ user: result.user, token: result.token }))
-        
+
         setCurrentStep('success')
         const next = searchParams.get('next')
-        const target = next || routes.publicroute.SUBSCRIPTION_PLAN
+        const target = next || routes.privateroute.DASHBOARD
         router.push(target)
       } catch (error: any) {
         let errorMessage = "OTP verification failed. Please try again."
-        
+
         if (error?.data?.message) {
           errorMessage = error.data.message
         } else if (error?.message) {
           errorMessage = error.message
         }
-        
+
         if (errorMessage.includes('expired')) {
           errorMessage = "OTP expired. Click Resend OTP."
         } else if (errorMessage.includes('incorrect') || errorMessage.includes('invalid')) {
           errorMessage = "OTP incorrect. Please try again."
         }
-        
+
         setOtpError(errorMessage)
         setOtpValue('') // Clear OTP on error
       }
@@ -212,7 +212,7 @@ export function RegisterForm() {
   const handleGoToDashboard = () => {
     // On success, always send users to subscription-plan to pick/confirm a plan first.
     const next = searchParams.get('next')
-    const target = next || routes.publicroute.SUBSCRIPTION_PLAN
+    const target = next || routes.privateroute.DASHBOARD
     router.push(target)
   }
 
@@ -239,14 +239,14 @@ export function RegisterForm() {
           <div className="w-20"></div>
         </div>
         <CardTitle className="text-2xl text-brand">
-          {currentStep === 'success' ? 'Registration Complete!' : 
-           currentStep === 'otp' ? 'Verify Your Email' : 
-           'Sign Up'}
+          {currentStep === 'success' ? 'Registration Complete!' :
+            currentStep === 'otp' ? 'Verify Your Email' :
+              'Sign Up'}
         </CardTitle>
         <CardDescription>
           {currentStep === 'success' ? 'Your account has been successfully created' :
-           currentStep === 'otp' ? 'Enter the OTP sent to your email' :
-           'Sign up for your account'}
+            currentStep === 'otp' ? 'Enter the OTP sent to your email' :
+              'Sign up for your account'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -256,7 +256,7 @@ export function RegisterForm() {
             <AlertDescription>{submitError}</AlertDescription>
           </Alert>
         )}
-        
+
         {otpError && (
           <Alert variant="destructive" className="mb-4">
             <AlertDescription>{otpError}</AlertDescription>
@@ -371,9 +371,9 @@ export function RegisterForm() {
             </form>
 
             <div className="text-center">
-              <Button 
-                variant="link" 
-                onClick={handleResendOtp} 
+              <Button
+                variant="link"
+                onClick={handleResendOtp}
                 className="text-sm"
                 disabled={isResendingOtp}
               >
@@ -391,7 +391,7 @@ export function RegisterForm() {
                 Your account has been created successfully! You can now access your dashboard or login later.
               </p>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-3">
               <Button onClick={handleGoToDashboard} className="flex-1">
                 Go to Dashboard

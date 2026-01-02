@@ -12,11 +12,8 @@ export function useAuthSubscription() {
   const router = useRouter()
   const pathname = usePathname()
   const dispatch = useAppDispatch()
-  
-  // Auth state from Redux
+
   const { isAuthenticated, token, user } = useAppSelector((state) => state.auth)
-  
-  // Local state for initialization
   const [isClient, setIsClient] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
 
@@ -28,55 +25,28 @@ export function useAuthSubscription() {
   }, [dispatch])
 
   // Fetch active subscription (only if authenticated and user exists)
-  const { 
-    data: activeSubscriptionData, 
+  const {
+    data: activeSubscriptionData,
     isLoading: isSubscriptionLoading,
     isFetching: isSubscriptionFetching,
     refetch: refetchSubscription,
   } = useGetUserActiveSubscriptionQuery(user?.id ?? "", {
     skip: !isAuthenticated || !user?.id,
-    // Refetch on mount and window focus to ensure fresh data after payment
     refetchOnMountOrArgChange: true,
     refetchOnFocus: true,
   })
 
-  // Check if user has active subscription
-  // PREFERRED: Use backend-provided permission flag (more secure)
-  // FALLBACK: Calculate on frontend if backend flag not available
   const hasActiveSubscription = useMemo(() => {
     if (!activeSubscriptionData?.data) return false
-    
     const subscription = activeSubscriptionData.data
-    
-    // ✅ PREFERRED: Use backend-provided flag if available (backend calculates this securely)
-    if (subscription.hasActiveSubscription !== undefined) {
-      return subscription.hasActiveSubscription
-    }
-    
-    // ✅ ALTERNATIVE: Use backend-provided canAccessDashboard flag
-    if (subscription.canAccessDashboard !== undefined) {
-      return subscription.canAccessDashboard
-    }
-    
-    // ⚠️ FALLBACK: Frontend calculation (less secure, but works until backend adds flags)
-    // Explicitly reject cancelled, failed, or pending payments
-    if (subscription.paymentStatus === 'cancelled' || 
-        subscription.paymentStatus === 'failed' || 
-        subscription.paymentStatus === 'pending') {
-      return false
-    }
-    
     return subscription.isActive === true && subscription.paymentStatus === 'succeeded'
   }, [activeSubscriptionData])
 
-  // Trial detection (3 day trial / free plan)
   const isTrialingSubscription = useMemo(() => {
     if (!activeSubscriptionData?.data) return false
-    // Backend provides derived field `isTrialing`
     return activeSubscriptionData.data.isTrialing === true
   }, [activeSubscriptionData])
 
-  // Check if current route is private
   const isCurrentRoutePrivate = useMemo(() => {
     return isPrivateRoute(pathname)
   }, [pathname])
@@ -115,28 +85,27 @@ export function useAuthSubscription() {
 
   const isAllowedPageForAuthenticated = useMemo(() => {
     // Check exact match or if pathname starts with allowed page (for dynamic routes like /verify/[token])
-    return allowedPagesForAuthenticated.some(page => 
+    return allowedPagesForAuthenticated.some(page =>
       pathname === page || pathname?.startsWith(page + '/')
     )
   }, [pathname, allowedPagesForAuthenticated])
 
   // Determine if Navbar should show (private navbar)
-  // Show private navbar only if: hasActiveSubscription AND token exists
+  // Show private navbar if authenticated
   const shouldShowPrivateNavbar = useMemo(() => {
-    return hasActiveSubscription && !!token && isAuthenticated
-  }, [hasActiveSubscription, token, isAuthenticated])
+    return !!token && isAuthenticated
+  }, [token, isAuthenticated])
 
   // Determine if Sidebar should show
-  // Show sidebar only if: hasActiveSubscription AND token exists AND not on pages that hide sidebar
+  // Show sidebar only if authenticated AND not on pages that hide sidebar
   const shouldShowSidebar = useMemo(() => {
-    return hasActiveSubscription && !!token && isAuthenticated && !shouldHideSidebar
-  }, [hasActiveSubscription, token, isAuthenticated, shouldHideSidebar])
+    return !!token && isAuthenticated && !shouldHideSidebar
+  }, [token, isAuthenticated, shouldHideSidebar])
 
-  // Determine if dashboard access is allowed
-  // Dashboard access only if: hasActiveSubscription AND token exists
+
   const canAccessDashboard = useMemo(() => {
-    return hasActiveSubscription && !!token && isAuthenticated
-  }, [hasActiveSubscription, token, isAuthenticated])
+    return !!token && isAuthenticated
+  }, [token, isAuthenticated])
 
   // Determine if content should be shown (for protected routes)
   const shouldShowContent = useMemo(() => {
@@ -155,9 +124,9 @@ export function useAuthSubscription() {
     // 2. Subscription is still loading (give it time to fetch)
     // This prevents showing loading state when subscription data is being refetched after payment
     if (isCurrentRoutePrivate) {
-      // Show content if subscription is active OR if we're still loading (optimistic)
-      // The redirect logic will handle cases where subscription is not active
-      return hasActiveSubscription || isSubscriptionLoading
+      // Allow access to private routes even if subscription is expired
+      // The individual components will handle limits (create button disabled, etc.)
+      return true
     }
 
     // For other routes, show if authenticated
@@ -172,6 +141,21 @@ export function useAuthSubscription() {
     isSubscriptionLoading,
   ])
 
+  // Calculate remaining days and show warning if less than 5 days
+  const expiryWarning = useMemo(() => {
+    if (!activeSubscriptionData?.data?.endDate) return { show: false, days: 0 }
+
+    const endDate = new Date(activeSubscriptionData.data.endDate)
+    const now = new Date()
+    const timeDiff = endDate.getTime() - now.getTime()
+    const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24))
+
+    return {
+      show: daysRemaining <= 5 && daysRemaining >= 0,
+      days: daysRemaining
+    }
+  }, [activeSubscriptionData])
+
   // Determine if loading state should be shown
   const isLoading = useMemo(() => {
     // If not initialized, show loading
@@ -185,8 +169,8 @@ export function useAuthSubscription() {
       return true
     }
 
-    // If on private route and no active subscription, don't show loading
-    // Let the redirect logic handle it (will redirect to subscription plan)
+    // If on private route and no active subscription, still don't show loading
+    // We want to show the content (dashboard)
     if (isCurrentRoutePrivate && !hasActiveSubscription && !isSubscriptionLoading) {
       return false
     }
@@ -200,31 +184,6 @@ export function useAuthSubscription() {
     hasActiveSubscription,
   ])
 
-  // Redirect logic for private routes without active subscription
-  useEffect(() => {
-    if (!isInitialized || !isAuthenticated || !token) return
-    
-    // If user is on a private route (dashboard, employee, appointment, visitor, etc.)
-    if (isCurrentRoutePrivate) {
-      // Wait for subscription check to complete
-      if (isSubscriptionLoading) return
-      
-      // STRICT: If no active subscription, redirect immediately - NO EXCEPTIONS
-      if (!hasActiveSubscription) {
-        router.replace(routes.publicroute.SUBSCRIPTION_PLAN)
-        return
-      }
-    }
-  }, [
-    isInitialized,
-    isAuthenticated,
-    token,
-    isSubscriptionLoading,
-    hasActiveSubscription,
-    pathname,
-    router,
-    isCurrentRoutePrivate,
-  ])
 
   // Redirect logic for unauthenticated users on private routes
   useEffect(() => {
@@ -240,7 +199,7 @@ export function useAuthSubscription() {
       if (authPages.some(page => pathname === page)) {
         // Small delay to allow page to render, then redirect
         const timer = setTimeout(() => {
-          router.replace(routes.publicroute.SUBSCRIPTION_PLAN)
+          router.replace(routes.privateroute.DASHBOARD)
         }, 100)
         return () => clearTimeout(timer)
       }
@@ -254,21 +213,22 @@ export function useAuthSubscription() {
     user,
     isClient,
     isInitialized,
-    
+
     // Subscription state
     hasActiveSubscription,
     isSubscriptionLoading,
     isSubscriptionFetching,
     activeSubscriptionData: activeSubscriptionData?.data,
     isTrialingSubscription,
-    
+    expiryWarning,
+
     // Route state
     pathname,
     isCurrentRoutePrivate,
     isSubscriptionPage,
     shouldHideSidebar,
     isAllowedPageForAuthenticated,
-    
+
     // UI visibility flags
     shouldShowPrivateNavbar,
     shouldShowSidebar,

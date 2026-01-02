@@ -24,6 +24,8 @@ import { useGetEmployeesQuery } from "@/store/api/employeeApi"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { isValidEmail } from "@/utils/helpers"
 import { Link2, Mail, User } from "lucide-react"
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus"
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 
 const EXPIRATION_CONFIG = {
   "30m": { days: 0.0208, label: "30 minutes" },
@@ -95,6 +97,9 @@ export function CreateAppointmentLinkModal({
   const [internalOpen, setInternalOpen] = useState(false)
   const [generalError, setGeneralError] = useState<string | null>(null)
   const [visitorExists, setVisitorExists] = useState<boolean | null>(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+
+  const { hasReachedAppointmentLimit } = useSubscriptionStatus()
 
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
   const setOpen = onOpenChange || setInternalOpen
@@ -106,7 +111,7 @@ export function CreateAppointmentLinkModal({
     limit: 100,
     status: "Active" as const,
   })
-  
+
   const employees = employeesData?.employees || []
 
   const employeeOptions = employees
@@ -164,6 +169,10 @@ export function CreateAppointmentLinkModal({
 
   const onSubmit = useCallback(
     async (data: CreateAppointmentLinkFormData) => {
+      if (hasReachedAppointmentLimit) {
+        setShowUpgradeModal(true)
+        return
+      }
       try {
         setGeneralError(null)
         const result = await createAppointmentLink({
@@ -338,6 +347,11 @@ export function CreateAppointmentLinkModal({
           </DialogFooter>
         </form>
       </DialogContent>
+
+      <UpgradePlanModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+      />
     </Dialog>
   )
 }
