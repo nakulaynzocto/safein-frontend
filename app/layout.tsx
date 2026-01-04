@@ -8,8 +8,6 @@ import { ErrorBoundary } from "@/components/common/errorBoundary"
 import { NavigationProgress } from "@/components/common/navigationProgress"
 import { NavigationProgressProvider } from "@/components/common/navigationProgressProvider"
 import { RouteOptimizer } from "@/components/common/routeOptimizer"
-import { PageTransition } from "@/components/common/pageTransition"
-import { GlobalPageLoader } from "@/components/common/globalPageLoader"
 
 export const metadata: Metadata = {
   title: "SafeIn - Professional Visitor Management & Appointment System | Aynzo",
@@ -144,33 +142,31 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body 
-        className="font-sans" 
-        style={{ 
+      <body
+        className="font-sans"
+        style={{
           backgroundColor: 'var(--background)',
           minHeight: '100vh',
           transition: 'background-color 0.3s ease-in-out'
         }}
       >
-        {/* Global Page Loader - Shows on all page reloads */}
-        <GlobalPageLoader />
-        
+
         {/* Navigation Progress Bar - wrapped in Suspense */}
         <Suspense fallback={null}>
           <NavigationProgress />
         </Suspense>
-        
+
         {/* Route Optimizer for faster navigation */}
         <RouteOptimizer />
-        
+
         {/* Wrapped children with Error Boundary, Redux Provider and Suspense boundary */}
         <ErrorBoundary>
           <NavigationProgressProvider>
             <Providers>
               <Suspense fallback={
-                <div 
-                  className="min-h-screen flex items-center justify-center" 
-                  style={{ 
+                <div
+                  className="min-h-screen flex items-center justify-center"
+                  style={{
                     backgroundColor: 'var(--background)',
                     minHeight: '100vh',
                     width: '100%'
@@ -181,9 +177,7 @@ export default function RootLayout({
                   </div>
                 </div>
               }>
-                <PageTransition>
-                  {children}
-                </PageTransition>
+                {children}
               </Suspense>
             </Providers>
           </NavigationProgressProvider>

@@ -1,4 +1,5 @@
 "use client"
+import { PageSkeleton } from "@/components/common/pageSkeleton"
 
 import { type ReactNode } from "react"
 import { Navbar } from "./navbar"
@@ -30,36 +31,28 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
   useAppointmentSocket()
 
   return (
-    <div 
-      className="h-screen flex flex-col overflow-hidden" 
+    <div
+      className="h-screen flex flex-col overflow-hidden"
       style={{ backgroundColor: 'var(--background)' }}
     >
-      <Navbar />
+      <Navbar variant="dashboard" />
       <div className="flex flex-1 overflow-hidden">
         {/* Only show sidebar if user has active subscription AND token */}
         {shouldShowSidebar && <Sidebar />}
-        <main 
-          className="flex-1 overflow-y-auto overflow-x-hidden transition-opacity duration-200" 
+        <main
+          className="flex-1 overflow-y-auto overflow-x-hidden transition-opacity duration-200"
           style={{ backgroundColor: 'var(--background)' }}
         >
           <div className="container mx-auto px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-6 max-w-full">
             {isLoading ? (
-              // Show loading state
-              <div 
-                className="min-h-[60vh] animate-pulse opacity-50" 
-                style={{ backgroundColor: 'var(--background)' }}
-              />
+              <PageSkeleton />
             ) : shouldShowContent ? (
               // Show content if conditions are met
               <div className="animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
                 {children}
               </div>
             ) : (
-              // Default: show loading
-              <div 
-                className="min-h-[60vh] animate-pulse opacity-50" 
-                style={{ backgroundColor: 'var(--background)' }}
-              />
+              <PageSkeleton />
             )}
           </div>
         </main>
