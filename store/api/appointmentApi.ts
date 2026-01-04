@@ -371,4 +371,5 @@ export const {
   useCancelAppointmentMutation,
   useApproveAppointmentMutation,
   useRejectAppointmentMutation,
+  useLazyGetAppointmentsQuery,
 } = appointmentApi

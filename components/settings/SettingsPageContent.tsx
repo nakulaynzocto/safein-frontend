@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch"
 import { useGetSettingsQuery, useUpdateSettingsMutation } from "@/store/api/settingsApi"
 import { toast } from "sonner"
 import { Loader2, Mail, MessageSquare, Phone, Save } from "lucide-react"
+import { PageSkeleton } from "@/components/common/pageSkeleton"
 
 export function SettingsPageContent() {
   const { data: settings, isLoading, error } = useGetSettingsQuery()
@@ -43,11 +44,7 @@ export function SettingsPageContent() {
 
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
+    return <PageSkeleton />
   }
 
   if (error) {

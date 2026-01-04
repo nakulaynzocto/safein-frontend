@@ -7,6 +7,7 @@ import { setUser } from "@/store/slices/authSlice"
 import { PageHeader } from "@/components/common/pageHeader"
 import { ProfileForm } from "@/components/profile/profileForm"
 import { EmptyState } from "@/components/common/emptyState"
+import { PageSkeleton } from "@/components/common/pageSkeleton"
 
 export function ProfilePageContent() {
   const dispatch = useAppDispatch()
@@ -72,6 +73,10 @@ export function ProfilePageContent() {
     if (profile) {
       refetch()
     }
+  }
+
+  if (isLoading) {
+    return <PageSkeleton />
   }
 
   if (error || !profile) {

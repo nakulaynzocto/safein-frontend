@@ -7,6 +7,7 @@ import { EmployeeTable } from "./employeeTable"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus"
 import { useGetEmployeesQuery, useDeleteEmployeeMutation } from "@/store/api/employeeApi"
+import { useLazyGetAppointmentsQuery } from "@/store/api/appointmentApi"
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { UserPlus, FileSpreadsheet, User } from "lucide-react"
 import { BulkImportModal } from "./BulkImportModal"
@@ -36,13 +37,39 @@ export function EmployeeList() {
   const pagination = employeeData?.pagination
 
 
+  const [triggerGetAppointments] = useLazyGetAppointmentsQuery()
+
   const handleDelete = async (employeeId: string) => {
     try {
+      // Check for active appointments before deleting
+      const pendingResult = await triggerGetAppointments({
+        employeeId,
+        status: 'pending',
+        limit: 1
+      }, true).unwrap()
+
+      if (pendingResult.pagination.totalAppointments > 0) {
+        showErrorToast("Cannot delete employee with pending appointments")
+        return
+      }
+
+      const approvedResult = await triggerGetAppointments({
+        employeeId,
+        status: 'approved',
+        limit: 1
+      }, true).unwrap()
+
+      if (approvedResult.pagination.totalAppointments > 0) {
+        showErrorToast("Cannot delete employee with approved appointments")
+        return
+      }
+
       await deleteEmployee(employeeId).unwrap()
       showSuccessToast("Employee deleted successfully")
       refetch()
       refetchSubscriptionStatus()
     } catch (error: any) {
+      if (error?.name === 'ConditionError') return // Handled above
       const errorMessage = error?.data?.message || error?.error || "Failed to delete employee"
       showErrorToast(errorMessage)
     }
