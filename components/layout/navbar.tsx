@@ -47,9 +47,10 @@ import { cn } from "@/lib/utils"
 interface NavbarProps {
   forcePublic?: boolean
   showUpgradeButton?: boolean
+  variant?: 'public' | 'dashboard'
 }
 
-export function Navbar({ forcePublic = false, showUpgradeButton = false }: NavbarProps) {
+export function Navbar({ forcePublic = false, showUpgradeButton = false, variant = 'public' }: NavbarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const dispatch = useAppDispatch()
@@ -261,7 +262,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
             </div>
           )}
           <div className="hidden lg:flex items-center justify-center flex-1">
-            {!isActuallyAuthenticated && (
+            {!isActuallyAuthenticated && variant !== 'dashboard' && (
               <div className="flex items-center gap-2">
                 <Link
                   href={routes.publicroute.HOME}
@@ -417,7 +418,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
             )}
 
             {/* Sign In / Start Trial - Show ONLY when not authenticated */}
-            {isMounted && (!isAuthenticated || !token) && (
+            {isMounted && (!isAuthenticated || !token) && variant !== 'dashboard' && (
               <>
                 <Button variant="ghost" asChild className={`hidden sm:flex px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${linkHoverBgClass} ${linkText}`}>
                   <Link href={routes.publicroute.LOGIN} prefetch={true}>Sign in</Link>
@@ -429,7 +430,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false }: Navba
             )}
 
             {/* Mobile menu toggle - Only show on public pages */}
-            {!isActuallyAuthenticated && (
+            {!isActuallyAuthenticated && variant !== 'dashboard' && (
               <Button
                 variant="ghost"
                 size="sm"
