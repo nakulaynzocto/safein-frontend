@@ -74,7 +74,7 @@ export default function SubscriptionPlansPage() {
                 <CardContent className="space-y-4">
                   <div className="text-center space-y-1">
                     <div className="text-3xl font-bold">
-                      ₹{Math.round(plan.amount / 100)}
+                      ₹{Math.round(plan.amount)}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {plan.planType === "free" ? "Card verification - 3 Days Trial (Non-refundable)" : `per ${plan.planType.replace("ly", "")}`}
