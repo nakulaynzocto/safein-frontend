@@ -45,10 +45,10 @@ export function BulkImportModal({ open, onOpenChange, onSuccess }: BulkImportMod
   const [error, setError] = useState<string | null>(null)
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
   const [isDownloading, setIsDownloading] = useState(false)
-  
+
   const [bulkCreateEmployees, { isLoading: isUploading }] = useBulkCreateEmployeesMutation()
   const token = useAppSelector((state) => state.auth.token)
-  
+
   // Cleanup function for download link
   const cleanupDownloadLink = useCallback((link: HTMLAnchorElement, url: string) => {
     if (document.body.contains(link)) {
@@ -61,17 +61,17 @@ export function BulkImportModal({ open, onOpenChange, onSuccess }: BulkImportMod
     try {
       setError(null)
       setIsDownloading(true)
-      
+
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4010/api/v1'
       const url = `${apiUrl}/employees/template`
-      
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Authorization': token ? `Bearer ${token}` : '',
         },
       })
-      
+
       if (!response.ok) {
         const errorText = await response.text()
         let errorMessage = 'Failed to download template'
@@ -83,23 +83,23 @@ export function BulkImportModal({ open, onOpenChange, onSuccess }: BulkImportMod
         }
         throw new Error(errorMessage)
       }
-      
+
       const blob = await response.blob()
       const downloadUrl = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
-      
+
       link.href = downloadUrl
       link.download = TEMPLATE_FILENAME
       link.style.display = 'none'
       link.setAttribute('data-no-loader', 'true')
       link.setAttribute('data-skip-navigation', 'true')
-      
+
       document.body.appendChild(link)
       link.click()
-      
+
       // Cleanup after download
       setTimeout(() => cleanupDownloadLink(link, downloadUrl), 100)
-      
+
       setIsDownloading(false)
       showSuccessToast("Template downloaded successfully")
     } catch (err: any) {
@@ -142,21 +142,21 @@ export function BulkImportModal({ open, onOpenChange, onSuccess }: BulkImportMod
     try {
       setError(null)
       setImportResult(null)
-      
+
       const result = await bulkCreateEmployees(file).unwrap()
       setImportResult(result)
-      
+
       // Show success/error messages
       if (result.successCount > 0) {
         showSuccessToast(`${result.successCount} employee(s) imported successfully`)
       }
-      
+
       if (result.failedCount > 0) {
-        const skippedCount = result.errors.filter(e => 
+        const skippedCount = result.errors.filter(e =>
           e.errors.some(err => err.includes('skipped') || err.includes('already exists'))
         ).length
         const errorCount = result.failedCount - skippedCount
-        
+
         if (skippedCount > 0 && errorCount === 0) {
           showSuccessToast(`${skippedCount} duplicate employee(s) skipped. Only unique emails were imported.`)
         } else if (skippedCount > 0 && errorCount > 0) {
@@ -294,7 +294,7 @@ export function BulkImportModal({ open, onOpenChange, onSuccess }: BulkImportMod
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-sm">Import Results</h3>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-3 bg-green-50 rounded-lg border border-green-200">
                   <div className="flex items-center gap-2">

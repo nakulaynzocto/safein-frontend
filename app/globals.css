@@ -9,20 +9,24 @@
 
 :root {
   /* Aynzo-aligned palette for Safein */
-  --background: #ffffff;            /* page background */
+  --background: #ffffff;
+  /* page background */
   --foreground: #161718;
   --card: #ffffff;
   --card-foreground: #161718;
   --popover: #ffffff;
   --popover-foreground: #161718;
-  --primary: #074463;               /* deep brand blue */
+  --primary: #074463;
+  /* deep brand blue */
   --primary-foreground: #ffffff;
   --primary-light: #98c7dd;
-  --secondary: #e9eff6;             /* light panels */
+  --secondary: #e9eff6;
+  /* light panels */
   --secondary-foreground: #074463;
   --muted: #e9eff6;
   --muted-foreground: #6b7280;
-  --accent: #3882a5;                /* highlight */
+  --accent: #3882a5;
+  /* highlight */
   --accent-foreground: #ffffff;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
@@ -125,12 +129,14 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   html {
     background-color: var(--background);
     min-height: 100%;
     /* Prevent white screen during page transitions */
     transition: background-color 0.3s ease-in-out;
   }
+
   body {
     @apply bg-background text-foreground;
     font-family: "DM Sans", Roboto, sans-serif;
@@ -143,63 +149,63 @@
     /* Ensure background is always visible */
     overflow-x: hidden;
   }
-  
+
   /* Prevent white flash during page transitions */
   #__next,
   [data-nextjs-scroll-focus-boundary] {
     background-color: var(--background);
     min-height: 100vh;
   }
-  
+
   /* Typography scale based on Hostinger UI design */
   .text-xs {
     font-size: 11px;
     line-height: 16px;
     font-weight: 400;
   }
-  
+
   .text-sm {
     font-size: 13px;
     line-height: 18px;
     font-weight: 400;
   }
-  
+
   .text-base {
     font-size: 14px;
     line-height: 20px;
     font-weight: 400;
   }
-  
+
   .text-lg {
     font-size: 16px;
     line-height: 24px;
     font-weight: 500;
   }
-  
+
   .text-xl {
     font-size: 18px;
     line-height: 26px;
     font-weight: 500;
   }
-  
+
   .text-2xl {
     font-size: 20px;
     line-height: 28px;
     font-weight: 600;
   }
-  
+
   .text-3xl {
     font-size: 24px;
     line-height: 32px;
     font-weight: 600;
   }
-  
+
   .text-4xl {
     font-size: 28px;
     line-height: 36px;
     font-weight: 700;
   }
-  
+
   /* Button typography - Hostinger style */
   .btn-text {
     font-size: 13px;
@@ -207,14 +213,16 @@
     line-height: 18px;
     font-family: "DM Sans", Roboto, sans-serif;
   }
-  
+
   /* Form elements */
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     font-family: "DM Sans", Roboto, sans-serif;
     font-size: 13px;
     font-weight: 400;
   }
-  
+
   /* Labels */
   label {
     font-family: "DM Sans", Roboto, sans-serif;
@@ -222,7 +230,7 @@
     font-weight: 500;
     color: #161718;
   }
-  
+
   /* Card styling - Hostinger style */
   .card-hostinger {
     background: #ffffff;
@@ -231,18 +239,18 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
   }
-  
+
   .card-hostinger:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
-  
+
   /* Table styling - Hostinger style */
   .table-hostinger {
     width: 100%;
     border-collapse: collapse;
     background: #ffffff;
   }
-  
+
   .table-hostinger th {
     background: #f9fafb;
     border-bottom: 1px solid #e5e7eb;
@@ -252,18 +260,18 @@
     font-weight: 500;
     color: #374151;
   }
-  
+
   .table-hostinger td {
     padding: 12px 16px;
     border-bottom: 1px solid #f3f4f6;
     font-size: 13px;
     color: #161718;
   }
-  
+
   .table-hostinger tr:hover {
     background: #f9fafb;
   }
-  
+
   /* Button styling - Hostinger style */
   .btn-hostinger {
     padding: 8px 16px;
@@ -274,49 +282,59 @@
     transition: all 0.2s ease;
     cursor: pointer;
   }
-  
+
   .btn-hostinger-primary {
+    background: #ffffff;
+    color: #3882a5;
+    border: 1px solid #3882a5;
+  }
+
+  .btn-hostinger-primary:hover {
     background: #3882a5;
     color: #ffffff;
-    border-color: #3882a5;
   }
-  
-  .btn-hostinger-primary:hover {
-    background: #2c6b8a;
-    border-color: #2c6b8a;
+
+  .dark .btn-hostinger-primary {
+    background: #21262d;
+    color: #c9d1d9;
+    border-color: #30363d;
   }
-  
+
+  .dark .btn-hostinger-primary:hover {
+    background: #30363d;
+  }
+
   .btn-hostinger-secondary {
     background: #ffffff;
     color: #374151;
     border-color: #d1d5db;
   }
-  
+
   .btn-hostinger-secondary:hover {
     background: #f9fafb;
     border-color: #9ca3af;
   }
-  
+
   /* Force white text on button hover for accent buttons */
   [data-slot="button"][class*="border-accent"]:hover,
   [data-slot="button"][class*="bg-accent"]:hover {
     color: #ffffff !important;
   }
-  
+
   [data-slot="button"][class*="border-accent"]:hover svg,
   [data-slot="button"][class*="bg-accent"]:hover svg {
     color: #ffffff !important;
     fill: #ffffff !important;
     stroke: #ffffff !important;
   }
-  
+
   /* Sidebar styling - Hostinger style */
   .sidebar-hostinger {
     background: #ffffff;
     border-right: 1px solid #e5e7eb;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
-  
+
   .sidebar-item {
     display: flex;
     align-items: center;
@@ -330,46 +348,46 @@
     transition: all 0.2s ease;
     cursor: pointer;
   }
-  
+
   .sidebar-item:hover {
     background: #f9fafb;
     color: #161718;
   }
-  
+
   .sidebar-item.active {
     background: #3882a5;
     color: #ffffff;
   }
-  
+
   .sidebar-item-icon {
     width: 20px;
     height: 20px;
     margin-right: 12px;
     flex-shrink: 0;
   }
-  
+
   .sidebar-item-text {
     flex: 1;
     font-size: 13px;
     font-weight: 500;
   }
-  
+
   .sidebar-item-arrow {
     width: 16px;
     height: 16px;
     margin-left: auto;
     transition: transform 0.2s ease;
   }
-  
+
   .sidebar-item-arrow.expanded {
     transform: rotate(90deg);
   }
-  
+
   .sidebar-submenu {
     margin-left: 20px;
     margin-top: 4px;
   }
-  
+
   .sidebar-submenu-item {
     display: flex;
     align-items: center;
@@ -383,29 +401,29 @@
     transition: all 0.2s ease;
     cursor: pointer;
   }
-  
+
   .sidebar-submenu-item:hover {
     background: #f3f4f6;
     color: #374151;
   }
-  
+
   .sidebar-submenu-item.active {
     background: #e0f2fe;
     color: #3882a5;
     font-weight: 500;
   }
-  
+
   .sidebar-submenu-item-icon {
     width: 16px;
     height: 16px;
     margin-right: 8px;
     flex-shrink: 0;
   }
-  
+
   .sidebar-collapsed {
     width: 64px;
   }
-  
+
   .sidebar-expanded {
     width: 256px;
   }
@@ -455,8 +473,15 @@
 
 /* Hero title animation */
 @keyframes fadeUp {
-  0% { opacity: 0; transform: translateY(14px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-hero-title {
@@ -465,8 +490,13 @@
 
 /* Page transition fade-in animation */
 @keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 .animate-fade-in {
@@ -474,28 +504,60 @@
 }
 
 /* Brand utilities */
-.bg-hero-gradient { background: linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95)); }
-.text-brand { color: #074463; }
-.text-accent { color: #2c5aa0; }
-.text-brand-strong { color: #3882a5; }
-.bg-brand { background-color: #3882a5; }
-.bg-brand-tint { background-color: #98c7dd; }
-.border-brand { border-color: #3882a5; }
+.bg-hero-gradient {
+  background: linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95));
+}
+
+.text-brand {
+  color: #074463;
+}
+
+.text-accent {
+  color: #2c5aa0;
+}
+
+.text-brand-strong {
+  color: #3882a5;
+}
+
+.bg-brand {
+  background-color: #3882a5;
+}
+
+.bg-brand-tint {
+  background-color: #98c7dd;
+}
+
+.border-brand {
+  border-color: #3882a5;
+}
 
 /* Main heading utility to ensure consistent dark blue across the site */
-.heading-main { color: #074463; }
+.heading-main {
+  color: #074463;
+}
 
 /* Dashboard hero animation utilities */
 @keyframes floatY {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
-.animate-float-slow { animation: floatY 8s ease-in-out infinite; }
+.animate-float-slow {
+  animation: floatY 8s ease-in-out infinite;
+}
 
 .dash-glow {
-  filter: drop-shadow(0 15px 40px rgba(7,68,99,0.25)) drop-shadow(0 8px 20px rgba(56,130,165,0.25));
+  filter: drop-shadow(0 15px 40px rgba(7, 68, 99, 0.25)) drop-shadow(0 8px 20px rgba(56, 130, 165, 0.25));
 }
 
 /* React-Select Portal Styles - Ensure dropdown appears above all modals and dialogs */
@@ -526,12 +588,13 @@
 
 /* Mobile Responsive Utilities */
 @media (max-width: 640px) {
+
   /* Better touch targets on mobile */
-  button:not(.h-4):not(.h-5):not(.h-6):not(.w-4):not(.w-5):not(.w-6), 
+  button:not(.h-4):not(.h-5):not(.h-6):not(.w-4):not(.w-5):not(.w-6),
   [role="button"]:not(.h-4):not(.h-5):not(.h-6):not(.w-4):not(.w-5):not(.w-6) {
     min-height: 40px;
   }
-  
+
   /* Improve form inputs on mobile */
   input[type="text"],
   input[type="email"],
@@ -540,30 +603,31 @@
   input[type="number"],
   textarea,
   select {
-    font-size: 16px !important; /* Prevents iOS zoom on focus */
+    font-size: 16px !important;
+    /* Prevents iOS zoom on focus */
   }
-  
+
   /* Better scrolling on mobile */
   .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
-  
+
   .overflow-x-auto::-webkit-scrollbar {
     display: none;
   }
-  
+
   /* Mobile card improvements */
   .card-hostinger {
     border-radius: 8px;
   }
-  
+
   /* Mobile table improvements */
   table {
     font-size: 12px;
   }
-  
+
   table th,
   table td {
     padding: 8px 6px;
@@ -572,6 +636,7 @@
 
 /* Extra small screens (< 480px) */
 @media (max-width: 479px) {
+
   /* Tighter spacing for very small screens */
   .container {
     padding-left: 12px;
@@ -581,21 +646,23 @@
 
 /* Mobile Navigation Improvements */
 @media (max-width: 768px) {
+
   /* Ensure mobile sidebar scrolls properly */
   [data-radix-scroll-area-viewport] {
     overscroll-behavior: contain;
   }
-  
+
   /* Mobile sheet improvements */
   [data-state="open"][role="dialog"] {
     animation: slideIn 0.2s ease-out;
   }
-  
+
   @keyframes slideIn {
     from {
       transform: translateX(-100%);
       opacity: 0;
     }
+
     to {
       transform: translateX(0);
       opacity: 1;
@@ -616,7 +683,7 @@
   .text-responsive-sm {
     font-size: 13px;
   }
-  
+
   .text-responsive-base {
     font-size: 14px;
   }
@@ -626,6 +693,7 @@
 .line-clamp-1 {
   display: -webkit-box;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -633,6 +701,7 @@
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -640,6 +709,7 @@
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -647,7 +717,7 @@
 /* React Paginate Active Page Styles */
 .react-paginate .selected a,
 .react-paginate li.selected a,
-.react-paginate .selected > a {
+.react-paginate .selected>a {
   background-color: #3882a5 !important;
   border-color: #3882a5 !important;
   color: white !important;
@@ -655,7 +725,7 @@
 
 .react-paginate .selected a:hover,
 .react-paginate li.selected a:hover,
-.react-paginate .selected > a:hover {
+.react-paginate .selected>a:hover {
   background-color: #2d6a87 !important;
   border-color: #2d6a87 !important;
   color: white !important;

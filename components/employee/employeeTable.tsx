@@ -219,8 +219,8 @@ export function EmployeeTable({
   return (
     <div className="space-y-6">
       {/* Main Table */}
-      <Card className="card-hostinger p-4">
-        <CardHeader className="pb-4">
+      <Card className="card-hostinger p-4 gap-3 sm:gap-4">
+        <CardHeader className="pb-0">
           <div className="flex items-center justify-between gap-3">
             <SearchInput
               placeholder="Search employees..."

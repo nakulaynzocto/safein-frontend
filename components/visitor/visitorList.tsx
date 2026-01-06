@@ -321,7 +321,7 @@ export function VisitorList() {
               {hasReachedVisitorLimit ? (
                 <>
                   <Button
-                    variant="outline"
+                    variant="outline-primary"
                     className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
                     onClick={() => setShowUpgradeModal(true)}
                   >
@@ -336,7 +336,7 @@ export function VisitorList() {
                 </>
               ) : (
                 <Button
-                  variant="outline"
+                  variant="outline-primary"
                   className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0"
                   onClick={() => router.push(routes.privateroute.VISITORREGISTRATION)}
                 >
@@ -350,8 +350,8 @@ export function VisitorList() {
       </Card>
 
       {/* Visitors Table */}
-      <Card className="card-hostinger p-4">
-        <CardHeader className="pb-4">
+      <Card className="card-hostinger p-4 gap-3 sm:gap-4">
+        <CardHeader className="pb-0">
           <div className="flex items-center gap-3 justify-between">
             <SearchInput
               placeholder="Search visitors..."
