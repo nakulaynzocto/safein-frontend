@@ -44,6 +44,11 @@ const STATUS_CONFIG = {
     className: "bg-gray-100 text-gray-700",
     dotColor: "bg-stone-500"
   },
+  booked: {
+    label: "Booked",
+    className: "bg-gray-100 text-gray-700",
+    dotColor: "bg-emerald-500"
+  },
 } as const
 
 interface StatusBadgeProps {

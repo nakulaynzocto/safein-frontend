@@ -307,7 +307,7 @@ export function AppointmentTable({
               </Avatar>
               <div>
                 <div className="font-medium">{employeeName}</div>
-                <div className="text-sm text-gray-500">{employeeDepartment || "N/A"}</div>
+                <div className="text-sm text-gray-500">{formatName(employeeDepartment) || "N/A"}</div>
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   <Mail className="h-3 w-3" />
                   {employeeEmail}

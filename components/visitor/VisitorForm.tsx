@@ -473,17 +473,21 @@ export function NewVisitorModal({
       )}
 
       <div className={`flex flex-col sm:flex-row gap-2 w-full justify-end ${isPage ? "pt-4" : ""}`}>
-        {!isPage && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setOpen(false)}
-            disabled={isLoading || isFileUploading}
-            className="w-full sm:w-auto"
-          >
-            Cancel
-          </Button>
-        )}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            if (isPage) {
+              router.push(routes.privateroute.VISITORLIST);
+            } else {
+              setOpen(false);
+            }
+          }}
+          disabled={isLoading || isFileUploading}
+          className="w-full sm:w-auto"
+        >
+          Cancel
+        </Button>
         <Button
           type="submit"
           variant="outline"

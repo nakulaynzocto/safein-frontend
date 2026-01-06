@@ -119,7 +119,7 @@ export function EmployeeTable({
             </Avatar>
             <div>
               <div className="font-medium">{formatName(employee.name)}</div>
-              <div className="text-sm text-gray-500">{employee.department}</div>
+
             </div>
           </div>
         )
@@ -146,7 +146,7 @@ export function EmployeeTable({
         render: (employee: Employee) => (
           <div className="flex items-center gap-2 text-sm">
             <Building className="h-3 w-3" />
-            {employee.department}
+            {formatName(employee.department)}
           </div>
         )
       },

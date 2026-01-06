@@ -42,7 +42,7 @@ import {
 import { showSuccessToast, showErrorToast } from "@/utils/toast"
 import { useRouter } from "next/navigation"
 import { NewVisitorModal } from "./VisitorForm"
-import { formatDate } from "@/utils/helpers"
+import { formatDate, formatName, getInitials } from "@/utils/helpers"
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal"
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus"
 import { VisitorDetailsDialog } from "./visitorDetailsDialog"
@@ -67,7 +67,7 @@ const createColumns = (
             <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
               <AvatarImage src={visitor.photo} alt={visitor.name} />
               <AvatarFallback className="text-xs sm:text-sm">
-                {visitor.name.split(' ').map(n => n[0]).join('')}
+                {getInitials(formatName(visitor.name))}
               </AvatarFallback>
             </Avatar>
             {visitor.photo && (
@@ -85,13 +85,9 @@ const createColumns = (
           </div>
           <div className="min-w-0 flex-1">
             <div className="font-medium text-sm sm:text-base truncate max-w-[100px] sm:max-w-[150px]">
-              {visitor.name}
+              {formatName(visitor.name)}
             </div>
-            {visitor.email && (
-              <div className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[80px] sm:max-w-[120px]" title={visitor.email}>
-                {truncateText(visitor.email, 20)}
-              </div>
-            )}
+
           </div>
         </div>
       )
@@ -107,9 +103,7 @@ const createColumns = (
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-500">
             <Mail className="h-3 w-3 shrink-0" />
-            <span className="truncate max-w-[80px] sm:max-w-[150px]" title={visitor.email}>
-              {truncateText(visitor.email, 12)}
-            </span>
+            <span>{visitor.email}</span>
           </div>
         </div>
       )
