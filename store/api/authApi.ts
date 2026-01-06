@@ -66,7 +66,7 @@ export interface AuthResponse {
 export const authApi = baseApi.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
-    
+
     login: builder.mutation<AuthResponse, LoginRequest>({
       query: (credentials) => ({
         url: '/users/login',
@@ -78,7 +78,7 @@ export const authApi = baseApi.injectEndpoints({
         if (response.success && response.data) {
           data = response.data
         }
-        
+
         // Normalize user data in response
         if (data && data.user) {
           data.user = {
@@ -87,7 +87,7 @@ export const authApi = baseApi.injectEndpoints({
             profilePicture: data.user.profilePicture || '',
           }
         }
-        
+
         return data
       },
       invalidatesTags: ['User'],
@@ -119,7 +119,7 @@ export const authApi = baseApi.injectEndpoints({
         if (response.success && response.data) {
           data = response.data
         }
-        
+
         // Normalize user data in response
         if (data && data.user) {
           data.user = {
@@ -128,7 +128,7 @@ export const authApi = baseApi.injectEndpoints({
             profilePicture: data.user.profilePicture || '',
           }
         }
-        
+
         return data
       },
       invalidatesTags: ['User'],
@@ -156,7 +156,7 @@ export const authApi = baseApi.injectEndpoints({
         if (response.success && response.data) {
           userData = response.data
         }
-        
+
         // Normalize user data: map _id to id and ensure profilePicture
         if (userData && typeof userData === 'object') {
           return {
@@ -186,7 +186,7 @@ export const authApi = baseApi.injectEndpoints({
         if (response.success && response.data) {
           userData = response.data
         }
-        
+
         // Normalize user data: map _id to id and ensure profilePicture
         if (userData && typeof userData === 'object') {
           const normalized = {
@@ -207,15 +207,15 @@ export const authApi = baseApi.injectEndpoints({
       query: (profileData) => {
         // Ensure only allowed fields are sent - explicitly filter the body
         const cleanBody: UpdateProfileRequest = {}
-        
+
         if (profileData.companyName && typeof profileData.companyName === 'string') {
           cleanBody.companyName = profileData.companyName
         }
-        
+
         if (profileData.profilePicture && typeof profileData.profilePicture === 'string') {
           cleanBody.profilePicture = profileData.profilePicture
         }
-        
+
         // Verify it's serializable (no circular refs)
         try {
           JSON.stringify(cleanBody)
@@ -223,7 +223,7 @@ export const authApi = baseApi.injectEndpoints({
           console.error("Profile data contains circular reference:", e)
           throw new Error("Invalid profile data")
         }
-        
+
         return {
           url: '/users/profile',
           method: 'PUT',
@@ -238,7 +238,7 @@ export const authApi = baseApi.injectEndpoints({
             userData = response.data
           }
         }
-        
+
         // Normalize user data: map _id to id and ensure profilePicture
         if (userData && typeof userData === 'object') {
           const normalized = {
@@ -287,6 +287,32 @@ export const authApi = baseApi.injectEndpoints({
         return response
       },
     }),
+
+    exchangeImpersonationToken: builder.mutation<AuthResponse, { code: string }>({
+      query: ({ code }) => ({
+        url: '/users/exchange-impersonation-token',
+        method: 'POST',
+        body: { code },
+      }),
+      transformResponse: (response: any) => {
+        let data = response
+        if (response.success && response.data) {
+          data = response.data
+        }
+
+        // Normalize user data in response
+        if (data && data.user) {
+          data.user = {
+            ...data.user,
+            id: data.user.id || data.user._id || data.user.id,
+            profilePicture: data.user.profilePicture || '',
+          }
+        }
+
+        return data
+      },
+      invalidatesTags: ['User'],
+    }),
   }),
 })
 
@@ -301,4 +327,5 @@ export const {
   useUpdateProfileMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
+  useExchangeImpersonationTokenMutation,
 } = authApi
