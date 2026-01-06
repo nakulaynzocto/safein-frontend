@@ -70,16 +70,16 @@ export function NewEmployeeModal({
   const router = useRouter()
   const [internalOpen, setInternalOpen] = useState(false)
   const isPage = layout === "page"
-  
+
   const open = isPage ? true : controlledOpen !== undefined ? controlledOpen : internalOpen
-  const setOpen = isPage ? (_: boolean) => {} : onOpenChange || setInternalOpen
+  const setOpen = isPage ? (_: boolean) => { } : onOpenChange || setInternalOpen
   const [createEmployee, { isLoading: isCreating }] = useCreateEmployeeMutation()
   const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation()
   const [generalError, setGeneralError] = useState<string | null>(null)
-  
+
   const isEditMode = !!employeeId
   const isLoading = isCreating || isUpdating
-  
+
   const { data: employeeData, isLoading: isLoadingEmployee } = useGetEmployeeQuery(employeeId!, {
     skip: !isEditMode
   })
@@ -142,11 +142,11 @@ export function NewEmployeeModal({
   const onSubmit = async (data: EmployeeFormData) => {
     try {
       setGeneralError(null)
-      
+
       const employeeData = {
         ...data
       }
-      
+
       if (isEditMode) {
         await updateEmployee({ id: employeeId!, ...employeeData }).unwrap()
         showSuccessToast("Employee updated successfully")
@@ -154,12 +154,12 @@ export function NewEmployeeModal({
         await createEmployee(employeeData).unwrap()
         showSuccessToast("Employee created successfully")
       }
-      
+
       if (!isPage) {
         setOpen(false)
       }
       reset()
-      
+
       if (onSuccess) {
         onSuccess()
       } else {
@@ -346,17 +346,17 @@ export function NewEmployeeModal({
       </div>
 
       <div className="flex justify-end gap-3 pt-4">
-        <Button 
-          type="button" 
-          variant="outline" 
+        <Button
+          type="button"
+          variant="outline"
           onClick={handleClose}
           disabled={isLoading}
           className="px-6"
         >
           Cancel
         </Button>
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           variant="outline"
           disabled={isLoading || isLoadingEmployee}
           className="px-6 min-w-[160px]"

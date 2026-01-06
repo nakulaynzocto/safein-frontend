@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { format } from "date-fns"
 import { Employee } from "@/store/api/employeeApi"
 import { User, Mail, Phone, Building, Briefcase, Calendar, Clock } from "lucide-react"
+import { StatusBadge } from "@/components/common/statusBadge"
 
 const formatDate = (value: string | null | undefined, formatStr: string, fallback: string = "N/A"): string => {
   if (!value) return fallback
@@ -20,13 +21,13 @@ const employee_details_config = [
   { key: "department", label: "Department" },
   { key: "designation", label: "Position" },
   { key: "status", label: "Status" },
-  { 
-    key: "createdAt", 
+  {
+    key: "createdAt",
     label: "Created At",
     format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm")
   },
-  { 
-    key: "updatedAt", 
+  {
+    key: "updatedAt",
     label: "Updated At",
     format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm")
   },
@@ -45,9 +46,7 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
   const renderFieldValue = (key: string, value: any, formatFn?: (val: string) => string) => {
     if (key === 'status') {
       return (
-        <Badge variant={value === 'Active' ? 'default' : 'secondary'}>
-          {value}
-        </Badge>
+        <StatusBadge status={value} />
       )
     }
 
@@ -63,8 +62,8 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
   }
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onOpenChange={(isOpen) => {
         if (!isOpen) {
           on_close()
@@ -75,7 +74,7 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
         <DialogHeader>
           <DialogTitle>Employee Details</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {/* Profile Header - LinkedIn/Facebook Style */}
           <div className="flex gap-6 pb-6 border-b">
@@ -87,7 +86,7 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
                 </AvatarFallback>
               </Avatar>
             </div>
-            
+
             {/* Right Side - Employee Info & Status */}
             <div className="flex-1 space-y-3">
               <div>
@@ -111,7 +110,7 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {employee_details_config.map(({ key, label, format: formatFn }) => {
               if (key === 'name' || key === 'email' || key === 'phone' || key === 'status') return null
-              
+
               const value = employee[key as keyof Employee]
               let icon = null
               if (key === '_id') icon = <User className="h-4 w-4" />
@@ -119,7 +118,7 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
               else if (key === 'designation') icon = <Briefcase className="h-4 w-4" />
               else if (key === 'createdAt') icon = <Calendar className="h-4 w-4" />
               else if (key === 'updatedAt') icon = <Clock className="h-4 w-4" />
-              
+
               return (
                 <div key={key} className="space-y-1">
                   <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -137,10 +136,10 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
               )
             })}
           </div>
-          
+
           <div className="flex justify-end pt-4 border-t">
-            <Button 
-              type="button" 
+            <Button
+              type="button"
               onClick={on_close}
               variant="outline"
             >

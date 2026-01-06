@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
+import { cn } from "@/lib/utils"
 import { useGetSettingsQuery, useUpdateSettingsMutation } from "@/store/api/settingsApi"
 import { toast } from "sonner"
 import { Loader2, Mail, MessageSquare, Phone, Save } from "lucide-react"
@@ -82,12 +82,18 @@ export function SettingsPageContent() {
                 Receive appointment notifications via email
               </p>
             </div>
-            <Switch
-              id="email-enabled"
-              checked={emailEnabled}
-              onCheckedChange={setEmailEnabled}
-              className="self-start sm:self-auto"
-            />
+            <button
+              onClick={() => setEmailEnabled(!emailEnabled)}
+              className={cn(
+                "w-12 h-6 rounded-full transition-all relative p-1 duration-300 self-start sm:self-auto",
+                emailEnabled ? "bg-primary shadow-[0_0_8px_rgba(7,68,99,0.4)]" : "bg-muted border border-border"
+              )}
+            >
+              <div className={cn(
+                "h-4 w-4 rounded-full transition-all duration-300",
+                emailEnabled ? "bg-primary-foreground translate-x-6" : "bg-muted-foreground translate-x-0"
+              )} />
+            </button>
           </div>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
@@ -100,12 +106,18 @@ export function SettingsPageContent() {
                 Receive notifications via WhatsApp Cloud API
               </p>
             </div>
-            <Switch
-              id="whatsapp-enabled"
-              checked={whatsappEnabled}
-              onCheckedChange={setWhatsappEnabled}
-              className="self-start sm:self-auto"
-            />
+            <button
+              onClick={() => setWhatsappEnabled(!whatsappEnabled)}
+              className={cn(
+                "w-12 h-6 rounded-full transition-all relative p-1 duration-300 self-start sm:self-auto",
+                whatsappEnabled ? "bg-primary shadow-[0_0_8px_rgba(7,68,99,0.4)]" : "bg-muted border border-border"
+              )}
+            >
+              <div className={cn(
+                "h-4 w-4 rounded-full transition-all duration-300",
+                whatsappEnabled ? "bg-primary-foreground translate-x-6" : "bg-muted-foreground translate-x-0"
+              )} />
+            </button>
           </div>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
@@ -118,12 +130,18 @@ export function SettingsPageContent() {
                 Receive appointment notifications via SMS
               </p>
             </div>
-            <Switch
-              id="sms-enabled"
-              checked={smsEnabled}
-              onCheckedChange={setSmsEnabled}
-              className="self-start sm:self-auto"
-            />
+            <button
+              onClick={() => setSmsEnabled(!smsEnabled)}
+              className={cn(
+                "w-12 h-6 rounded-full transition-all relative p-1 duration-300 self-start sm:self-auto",
+                smsEnabled ? "bg-primary shadow-[0_0_8px_rgba(7,68,99,0.4)]" : "bg-muted border border-border"
+              )}
+            >
+              <div className={cn(
+                "h-4 w-4 rounded-full transition-all duration-300",
+                smsEnabled ? "bg-primary-foreground translate-x-6" : "bg-muted-foreground translate-x-0"
+              )} />
+            </button>
           </div>
 
           <div className="pt-4 border-t">
