@@ -197,7 +197,7 @@ export default function PricingPage() {
                 <div className="grid md:grid-cols-3 gap-6 text-center">
                   {plans.filter(p => p.planType !== 'free').map((plan, index) => {
                     const originalAmount = plan.amount / (1 - (plan.discountPercentage || 0) / 100);
-                    const savedAmount = originalAmount - (plan.amount / 100);
+                    const savedAmount = originalAmount - plan.amount;
                     return (
                       <div key={plan._id} className={`p-6 bg-white rounded-lg ${plan.isPopular ? 'shadow-lg border-2 border-brand' : 'shadow-sm'}`}>
                         <div className="text-2xl font-bold mb-2 text-brand-strong">
@@ -205,7 +205,7 @@ export default function PricingPage() {
                         </div>
                         {plan.discountPercentage && plan.discountPercentage > 0 && (
                           <div className="text-lg line-through text-gray-400 mb-1">
-                            {formatCurrency(originalAmount * 100, plan.currency)}
+                            {formatCurrency(originalAmount, plan.currency)}
                           </div>
                         )}
                         <div className="text-3xl font-bold mb-2">{formatCurrency(plan.amount, plan.currency)}</div>
@@ -216,7 +216,7 @@ export default function PricingPage() {
                         )}
                         {plan.discountPercentage && plan.discountPercentage > 0 && (
                           <Badge className="mt-2 bg-green-500 text-white">
-                            Save {formatCurrency(savedAmount * 100, plan.currency)} ({plan.discountPercentage}% OFF)
+                            Save {formatCurrency(savedAmount, plan.currency)} ({plan.discountPercentage}% OFF)
                           </Badge>
                         )}
                       </div>

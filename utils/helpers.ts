@@ -69,14 +69,14 @@ export const createUrlParams = (urlData: Record<string, any>): string => {
 };
 
 /**
- * Format currency amount (in cents/paise) to display format
- * @param amountInCents - Amount in cents/paise (e.g., 200 = ₹2)
+ * Format currency amount to display format
+ * @param amount - Amount in rupees (e.g., 5999 = ₹5999)
  * @param currency - Currency code (e.g., 'inr', 'usd')
  * @param options - Optional formatting options
- * @returns Formatted currency string (e.g., "₹2")
+ * @returns Formatted currency string (e.g., "₹5,999")
  */
 export function formatCurrency(
-  amountInCents: number,
+  amount: number,
   currency: string = 'inr',
   options?: {
     minimumFractionDigits?: number;
@@ -84,7 +84,6 @@ export function formatCurrency(
     showSymbol?: boolean;
   }
 ): string {
-  const amountInRupees = amountInCents / 100;
   const {
     minimumFractionDigits = 0,
     maximumFractionDigits = 0,
@@ -96,7 +95,7 @@ export function formatCurrency(
     currency: currency.toUpperCase(),
     minimumFractionDigits,
     maximumFractionDigits,
-  }).format(amountInRupees);
+  }).format(amount);
 }
 
 /**
@@ -152,11 +151,11 @@ export function getInitials(name: string, maxInitials: number = 2): string {
   if (!name) return 'U';
   const words = name.trim().split(/\s+/);
   if (words.length === 0) return 'U';
-  
+
   if (words.length === 1) {
     return words[0].charAt(0).toUpperCase();
   }
-  
+
   return words
     .slice(0, maxInitials)
     .map(word => word.charAt(0).toUpperCase())
@@ -183,7 +182,7 @@ export function isEmpty(value: any): boolean {
  */
 export function getStatusColor(status: string): string {
   const statusLower = status.toLowerCase();
-  
+
   if (statusLower === 'active' || statusLower === 'approved' || statusLower === 'completed' || statusLower === 'succeeded') {
     return 'bg-green-100 text-green-800';
   }
@@ -196,7 +195,7 @@ export function getStatusColor(status: string): string {
   if (statusLower === 'inactive' || statusLower === 'deleted') {
     return 'bg-gray-100 text-gray-800';
   }
-  
+
   return 'bg-blue-100 text-blue-800';
 }
 
@@ -264,12 +263,12 @@ interface AppointmentForStatus {
 export function getAppointmentDateTime(appointment: AppointmentForStatus): Date | null {
   // Check if both date and time are available
   if (!appointment.appointmentDetails?.scheduledDate) return null;
-  
+
   try {
     // Parse the scheduled date (separate field)
     const dateStr = appointment.appointmentDetails.scheduledDate;
     let datePart: string;
-    
+
     if (typeof dateStr === 'string') {
       // Extract date part (YYYY-MM-DD format)
       if (dateStr.includes('T')) {
@@ -283,33 +282,33 @@ export function getAppointmentDateTime(appointment: AppointmentForStatus): Date 
       // If it's a Date object, convert to ISO and extract date part
       datePart = dateStr.toISOString().split('T')[0];
     }
-    
+
     // Parse date components
     const [year, month, day] = datePart.split('-').map(Number);
     if (isNaN(year) || isNaN(month) || isNaN(day)) {
       return null;
     }
-    
+
     // Create base date object with date only (time will be set from scheduledTime)
     let scheduledDateTime = new Date(year, month - 1, day, 0, 0, 0, 0);
-    
+
     // Parse the scheduled time (separate field) - format: HH:MM (24-hour format)
     if (appointment.appointmentDetails.scheduledTime) {
       const timeStr = appointment.appointmentDetails.scheduledTime.trim();
       let hours = 0;
       let minutes = 0;
-      
+
       if (timeStr.includes(':')) {
         // Format: HH:MM or HH:MM AM/PM
         const timeParts = timeStr.split(':');
         hours = parseInt(timeParts[0], 10) || 0;
         const minutesPart = timeParts[1] ? timeParts[1].trim() : '0';
-        
+
         // Check if it's 12-hour format (AM/PM)
         if (minutesPart.includes('AM') || minutesPart.includes('PM')) {
           const mins = minutesPart.replace(/[APM]/gi, '').trim();
           minutes = parseInt(mins, 10) || 0;
-          
+
           // Convert to 24-hour format
           if (minutesPart.toUpperCase().includes('PM') && hours !== 12) {
             hours += 12;
@@ -326,7 +325,7 @@ export function getAppointmentDateTime(appointment: AppointmentForStatus): Date 
         const numTime = parseInt(timeStr.replace(/[APM]/gi, '').trim(), 10) || 0;
         hours = numTime;
         minutes = 0;
-        
+
         // Handle AM/PM if present
         if (timeStr.toUpperCase().includes('PM') && hours !== 12) {
           hours += 12;
@@ -335,36 +334,36 @@ export function getAppointmentDateTime(appointment: AppointmentForStatus): Date 
           hours = 0;
         }
       }
-      
+
       // Validate and set hours and minutes
       if (hours < 0 || hours > 23) hours = 0;
       if (minutes < 0 || minutes > 59) minutes = 0;
-      
+
       // Set the time on the date object
       scheduledDateTime.setHours(hours, minutes, 0, 0);
     } else {
       // If no time provided, set to end of day
       scheduledDateTime.setHours(23, 59, 59, 0);
     }
-    
+
     return scheduledDateTime;
   } catch (error) {
     // Fallback: try to parse just the date
     try {
       const dateStr = appointment.appointmentDetails.scheduledDate;
       let datePart: string;
-      
+
       if (typeof dateStr === 'string') {
         datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.split(' ')[0];
       } else {
         datePart = dateStr.toISOString().split('T')[0];
       }
-      
+
       const [year, month, day] = datePart.split('-').map(Number);
       if (isNaN(year) || isNaN(month) || isNaN(day)) {
         return null;
       }
-      
+
       const appointmentDate = new Date(year, month - 1, day);
       // If time is available, try to use it
       if (appointment.appointmentDetails.scheduledTime) {
@@ -373,7 +372,7 @@ export function getAppointmentDateTime(appointment: AppointmentForStatus): Date 
           const [h, m] = timeStr.split(':').map(part => parseInt(part.replace(/[APM]/gi, '').trim(), 10) || 0);
           let hours = h;
           let minutes = m;
-          
+
           // Handle AM/PM
           if (timeStr.toUpperCase().includes('PM') && hours !== 12) {
             hours += 12;
@@ -381,14 +380,14 @@ export function getAppointmentDateTime(appointment: AppointmentForStatus): Date 
           if (timeStr.toUpperCase().includes('AM') && hours === 12) {
             hours = 0;
           }
-          
+
           if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
             appointmentDate.setHours(hours, minutes, 0, 0);
             return appointmentDate;
           }
         }
       }
-      
+
       // Default to end of day if time parsing fails
       appointmentDate.setHours(23, 59, 59, 0);
       return appointmentDate;
@@ -406,10 +405,10 @@ export function getAppointmentDateTime(appointment: AppointmentForStatus): Date 
 export function isAppointmentTimedOut(appointment: AppointmentForStatus): boolean {
   const scheduledDateTime = getAppointmentDateTime(appointment);
   if (!scheduledDateTime) return false;
-  
+
   const now = new Date();
   const diffInMinutes = (now.getTime() - scheduledDateTime.getTime()) / (1000 * 60);
-  
+
   // Check if appointment time has passed by more than 30 minutes
   // Only return true if the scheduled time is in the past AND more than 30 minutes have passed
   return diffInMinutes > 30;
@@ -422,7 +421,7 @@ export function isAppointmentTimedOut(appointment: AppointmentForStatus): boolea
  */
 export function getAppointmentStatus(appointment: AppointmentForStatus): string {
   const status = appointment.status || 'pending';
-  
+
   // Only show 'time_out' if:
   // 1. Status is 'pending' (not approved/rejected/completed)
   // 2. Both scheduledDate and scheduledTime are available
@@ -433,12 +432,12 @@ export function getAppointmentStatus(appointment: AppointmentForStatus): string 
     if (!appointment.appointmentDetails?.scheduledDate || !appointment.appointmentDetails?.scheduledTime) {
       return status;
     }
-    
+
     const scheduledDateTime = getAppointmentDateTime(appointment);
     if (scheduledDateTime) {
       const now = new Date();
       const diffInMinutes = (now.getTime() - scheduledDateTime.getTime()) / (1000 * 60);
-      
+
       // Check if scheduled date+time is in the past AND more than 30 minutes have passed
       // diffInMinutes > 30 means: current time is more than 30 minutes after scheduled time
       if (diffInMinutes > 30) {
@@ -446,7 +445,7 @@ export function getAppointmentStatus(appointment: AppointmentForStatus): string 
       }
     }
   }
-  
+
   return status;
 }
 
@@ -461,6 +460,6 @@ export function getAppointmentStatsKey(status: string): 'pendingAppointments' | 
     completed: 'completedAppointments',
     checked_in: 'completedAppointments',
   };
-  
+
   return statusMap[statusLower] ?? 'pendingAppointments';
 }
