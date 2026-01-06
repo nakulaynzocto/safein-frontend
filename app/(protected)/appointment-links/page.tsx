@@ -19,6 +19,7 @@ import { AppointmentLink } from "@/store/api/appointmentLinkApi"
 import { getInitials, formatName } from "@/utils/helpers"
 import { CreateAppointmentLinkModal } from "@/components/appointment/CreateAppointmentLinkModal"
 import { PageSkeleton } from "@/components/common/pageSkeleton"
+import { StatusBadge } from "@/components/common/statusBadge"
 
 export default function AppointmentLinksPage() {
   const [page, setPage] = useState(1)
@@ -168,22 +169,10 @@ export default function AppointmentLinksPage() {
         header: "Status",
         className: "hidden sm:table-cell",
         render: (link: AppointmentLink) => (
-          <Badge
-            variant={link.isBooked ? "default" : "secondary"}
-            className={`text-xs sm:text-sm border ${link.isBooked ? "bg-green-100 text-green-800 border-green-200" : "bg-yellow-100 text-yellow-800 border-yellow-200"}`}
-          >
-            {link.isBooked ? (
-              <>
-                <CheckCircle className="h-3 w-3 mr-1 shrink-0" />
-                <span className="whitespace-nowrap">Booked</span>
-              </>
-            ) : (
-              <>
-                <XCircle className="h-3 w-3 mr-1 shrink-0" />
-                <span className="whitespace-nowrap">Pending</span>
-              </>
-            )}
-          </Badge>
+          <StatusBadge
+            status={link.isBooked ? "booked" : "pending"}
+            className="w-fit"
+          />
         ),
       },
       {
@@ -271,7 +260,7 @@ export default function AppointmentLinksPage() {
                 open={showCreateModal}
                 onOpenChange={setShowCreateModal}
                 triggerButton={
-                  <Button variant="outline" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-8 sm:h-9 whitespace-nowrap w-full sm:w-auto">
+                  <Button variant="outline-primary" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-8 sm:h-9 whitespace-nowrap w-full sm:w-auto">
                     <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                     <span className="hidden min-[375px]:inline">Create Link</span>
                     <span className="min-[375px]:hidden">Create</span>
@@ -333,8 +322,8 @@ export default function AppointmentLinksPage() {
       )}
 
       {/* Table Card */}
-      <Card className="card-hostinger p-4 overflow-hidden">
-        <CardHeader className="pb-4 px-0">
+      <Card className="card-hostinger flex flex-col gap-3 sm:gap-4 p-3 sm:p-4 overflow-hidden">
+        <CardHeader className="pb-0 px-0">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
             <div className="flex-1 min-w-0">
               <SearchInput
@@ -398,5 +387,3 @@ export default function AppointmentLinksPage() {
     </div>
   )
 }
-
-

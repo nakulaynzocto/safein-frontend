@@ -726,22 +726,46 @@
 .react-paginate .selected a:hover,
 .react-paginate li.selected a:hover,
 .react-paginate .selected>a:hover {
+
+  .react-paginate li.selected a:hover,
+  .react-paginate .selected a[aria-current="page"]:hover {
+    background-color: #2d6a87 !important;
+    border-color: #2d6a87 !important;
+    color: white !important;
+  }
+
+  /* Override any conflicting Tailwind classes with higher specificity */
+  .react-paginate li.selected a,
+  .react-paginate .selected a[aria-current="page"] {
+    background-color: #3882a5 !important;
+    border-color: #3882a5 !important;
+    color: white !important;
+  }
+
   background-color: #2d6a87 !important;
   border-color: #2d6a87 !important;
   color: white !important;
 }
 
-/* Override any conflicting Tailwind classes with higher specificity */
-.react-paginate li.selected a,
-.react-paginate .selected a[aria-current="page"] {
-  background-color: #3882a5 !important;
-  border-color: #3882a5 !important;
-  color: white !important;
+/* Global Thin Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
 
-.react-paginate li.selected a:hover,
-.react-paginate .selected a[aria-current="page"]:hover {
-  background-color: #2d6a87 !important;
-  border-color: #2d6a87 !important;
-  color: white !important;
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #e5e7eb;
+  border-radius: 20px;
+}
+
+:hover::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
 }
