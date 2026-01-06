@@ -494,7 +494,7 @@ export function AppointmentTable({
               {hasReachedAppointmentLimit ? (
                 <>
                   <Button
-                    variant="outline"
+                    variant="outline-primary"
                     className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 whitespace-nowrap shrink-0 min-h-[40px] sm:min-h-0"
                     onClick={() => setShowUpgradeModal(true)}
                   >
@@ -510,7 +510,7 @@ export function AppointmentTable({
               ) : (
                 <>
                   <Button
-                    variant="outline"
+                    variant="outline-primary"
                     className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 whitespace-nowrap shrink-0 min-h-[40px] sm:min-h-0"
                     onClick={() => {
                       if (hasReachedAppointmentLimit) {
@@ -535,7 +535,7 @@ export function AppointmentTable({
                     }}
                     triggerButton={
                       <Button
-                        variant="outline"
+                        variant="outline-primary"
                         className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 whitespace-nowrap shrink-0 min-h-[40px] sm:min-h-0"
                         title="Create Appointment Link"
                       >
@@ -553,8 +553,8 @@ export function AppointmentTable({
         </CardHeader>
       </Card>
 
-      <Card className="card-hostinger p-3 sm:p-4 overflow-hidden">
-        <CardHeader className="pb-3 sm:pb-4 px-0">
+      <Card className="card-hostinger p-3 sm:p-4 overflow-hidden gap-3 sm:gap-4">
+        <CardHeader className="pb-0 px-0">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
             <SearchInput
               placeholder="Search appointments..."

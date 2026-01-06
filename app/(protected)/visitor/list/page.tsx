@@ -10,7 +10,7 @@ const VisitorList = lazy(() =>
 
 export default function VisitorListPage() {
   return (
-    <div className="container mx-auto space-y-8">
+    <div className="w-full space-y-8">
       <Suspense fallback={<PageSkeleton />}>
         <VisitorList />
       </Suspense>

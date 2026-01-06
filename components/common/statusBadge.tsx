@@ -3,52 +3,75 @@
 import { memo } from "react"
 import { cn } from "@/lib/utils"
 
-interface StatusBadgeProps {
-  status: "pending" | "approved" | "rejected" | "completed" | "time_out"
-  className?: string
-}
-
 const STATUS_CONFIG = {
+  active: {
+    label: "Active",
+    className: "bg-gray-100 text-gray-700",
+    dotColor: "bg-emerald-500"
+  },
+  inactive: {
+    label: "Inactive",
+    className: "bg-gray-100 text-gray-700",
+    dotColor: "bg-slate-500"
+  },
   pending: {
     label: "Pending",
-    className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    className: "bg-gray-100 text-gray-700",
+    dotColor: "bg-amber-500"
   },
   approved: {
     label: "Approved",
-    className: "bg-green-100 text-green-800 border-green-200",
+    className: "bg-gray-100 text-gray-700",
+    dotColor: "bg-emerald-500"
   },
   rejected: {
     label: "Rejected",
-    className: "bg-red-100 text-red-800 border-red-200",
+    className: "bg-gray-100 text-gray-700",
+    dotColor: "bg-rose-500"
   },
   completed: {
     label: "Completed",
-    className: "bg-blue-100 text-blue-800 border-blue-200",
+    className: "bg-gray-100 text-gray-700",
+    dotColor: "bg-blue-500"
   },
   time_out: {
     label: "Time Out",
-    className: "bg-orange-100 text-orange-800 border-orange-200",
+    className: "bg-gray-100 text-gray-700",
+    dotColor: "bg-orange-500"
+  },
+  "checked-out": {
+    label: "Checked Out",
+    className: "bg-gray-100 text-gray-700",
+    dotColor: "bg-stone-500"
   },
 } as const
 
+interface StatusBadgeProps {
+  status: string
+  className?: string
+}
+
 /**
- * StatusBadge component displays appointment status with color coding
+ * StatusBadge component displays appointment status with dot indicator and pill shape
  * Optimized with React.memo to prevent unnecessary re-renders
  */
 export const StatusBadge = memo(function StatusBadge({ status, className }: StatusBadgeProps) {
-  const config = STATUS_CONFIG[status] || {
+  const normalizedStatus = status?.toLowerCase() || "pending"
+  const config = STATUS_CONFIG[normalizedStatus as keyof typeof STATUS_CONFIG] || {
     label: status,
-    className: "bg-gray-100 text-gray-800 border-gray-200",
+    className: "bg-gray-100 text-gray-700",
+    dotColor: "bg-gray-500"
   }
 
   return (
     <span
       className={cn(
-        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
+        "inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold",
         config.className,
         className,
       )}
     >
+      <span className={cn("h-1.5 w-1.5 rounded-full", config.dotColor)} />
       {config.label}
     </span>
   )

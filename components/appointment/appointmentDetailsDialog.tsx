@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { format } from "date-fns"
 import { Appointment } from "@/store/api/appointmentApi"
 import { ExternalLink, User, Mail, Phone, Calendar, Clock, Briefcase, FileText, Car, CheckCircle, XCircle, Maximize2 } from "lucide-react"
+import { StatusBadge } from "@/components/common/statusBadge"
 
 interface AppointmentDetailsDialogProps {
   appointment: Appointment | null
@@ -56,8 +57,8 @@ const fieldConfig = [
   { key: "visitorPhone", label: "Visitor Phone" },
   { key: "employeeName", label: "Meeting With" },
   { key: "purpose", label: "Purpose" },
-  { 
-    key: "appointmentDate", 
+  {
+    key: "appointmentDate",
     label: "Appointment Date",
     format: (val: string) => formatDate(val, "MMM dd, yyyy")
   },
@@ -65,19 +66,19 @@ const fieldConfig = [
   { key: "status", label: "Status" },
   { key: "notes", label: "Notes", optional: true },
   { key: "vehicleNumber", label: "Vehicle Number", optional: true },
-  { 
-    key: "checkInTime", 
+  {
+    key: "checkInTime",
     label: "Check In Time",
     format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm", "Not checked in")
   },
-  { 
-    key: "checkOutTime", 
+  {
+    key: "checkOutTime",
     label: "Check Out Time",
     showOnlyForCompleted: true,
     format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm", "Not checked out")
   },
-  { 
-    key: "createdAt", 
+  {
+    key: "createdAt",
     label: "Created At",
     format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm")
   },
@@ -89,9 +90,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
   const renderFieldValue = (key: string, value: any, formatFn?: (val: string) => string) => {
     if (key === 'status') {
       return (
-        <Badge variant={statusVariants[value] || 'secondary'}>
-          {value}
-        </Badge>
+        <StatusBadge status={value} />
       )
     }
 
@@ -124,7 +123,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
         <DialogHeader>
           <DialogTitle>Appointment Details</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {/* Profile Header - LinkedIn/Facebook Style */}
           <div className="flex gap-6 pb-6 border-b">
@@ -146,7 +145,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
                 </button>
               )}
             </div>
-            
+
             {/* Right Side - Visitor Info & Status */}
             <div className="flex-1 space-y-3">
               <div>
@@ -161,9 +160,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
                 </div>
               </div>
               <div>
-                <Badge variant={statusVariants[status] || 'secondary'} className="text-sm">
-                  {status}
-                </Badge>
+                <StatusBadge status={status} className="text-sm" />
               </div>
             </div>
           </div>
@@ -173,11 +170,11 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
             {fieldConfig.map(({ key, label, format, optional, showOnlyForCompleted }) => {
               if (key === 'visitorName' || key === 'visitorEmail' || key === 'visitorPhone' || key === 'status') return null
               if (showOnlyForCompleted && appointment.status !== 'completed') return null
-              
+
               const value = getFieldValue(appointment, key)
-              
+
               if (optional && !value && key !== 'checkInTime' && key !== 'checkOutTime') return null
-              
+
               let icon = null
               if (key === '_id') icon = <FileText className="h-4 w-4" />
               else if (key === 'employeeName') icon = <Briefcase className="h-4 w-4" />
@@ -189,7 +186,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
               else if (key === 'vehicleNumber') icon = <Car className="h-4 w-4" />
               else if (key === 'notes') icon = <FileText className="h-4 w-4" />
               else if (key === 'createdAt') icon = <Calendar className="h-4 w-4" />
-              
+
               return (
                 <div key={key} className="space-y-1">
                   <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -203,10 +200,10 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
               )
             })}
           </div>
-          
+
           <div className="flex justify-end pt-4 border-t">
-            <Button 
-              type="button" 
+            <Button
+              type="button"
               onClick={on_close}
               variant="outline"
             >

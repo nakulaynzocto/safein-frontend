@@ -218,7 +218,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
         : 'bg-hero-gradient border-transparent shadow-none backdrop-blur-0'
         } sticky top-0 z-50 transition-all duration-300`}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME} className="flex-shrink-0" prefetch={true}>

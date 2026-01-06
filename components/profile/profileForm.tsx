@@ -60,7 +60,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
       setProfileImage(profile.profilePicture || null)
     }
   }, [profile, reset])
-  
+
   if (!profile || !profile.companyName) {
     return (
       <Card>
@@ -77,13 +77,13 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
       const cleanData: { companyName: string; profilePicture?: string } = {
         companyName: data.companyName.trim(),
       }
-      
+
       if (data.profilePicture && data.profilePicture.trim() !== "") {
         cleanData.profilePicture = data.profilePicture.trim()
       }
-      
+
       const payload = JSON.parse(JSON.stringify(cleanData))
-      
+
       await onSubmit(payload as ProfileFormData)
       showSuccessToast("Profile updated successfully!")
     } catch (error: any) {
@@ -103,7 +103,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
 
     try {
       const result = await uploadFile({ file }).unwrap()
-      
+
       setProfileImage(result.url)
       setValue("profilePicture", result.url)
       setUploadSuccess(true)
@@ -132,7 +132,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
       handleImageUpload(file)
     }
   }, [handleImageUpload])
-  
+
   const handleCancel = useCallback(() => {
     if (profile) {
       reset(defaultValues)
@@ -233,8 +233,8 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
               <X className="mr-2 h-4 w-4" />
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSubmitting || isUploading || !canSave}
             >
               {isSubmitting ? (
