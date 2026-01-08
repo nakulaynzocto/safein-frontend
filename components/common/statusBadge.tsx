@@ -1,83 +1,98 @@
-"use client"
+import { cn } from "@/lib/utils";
 
-import { memo } from "react"
-import { cn } from "@/lib/utils"
-
-const STATUS_CONFIG = {
-  active: {
-    label: "Active",
-    className: "bg-gray-100 text-gray-700",
-    dotColor: "bg-emerald-500"
-  },
-  inactive: {
-    label: "Inactive",
-    className: "bg-gray-100 text-gray-700",
-    dotColor: "bg-slate-500"
-  },
-  pending: {
-    label: "Pending",
-    className: "bg-gray-100 text-gray-700",
-    dotColor: "bg-amber-500"
-  },
-  approved: {
-    label: "Approved",
-    className: "bg-gray-100 text-gray-700",
-    dotColor: "bg-emerald-500"
-  },
-  rejected: {
-    label: "Rejected",
-    className: "bg-gray-100 text-gray-700",
-    dotColor: "bg-rose-500"
-  },
-  completed: {
-    label: "Completed",
-    className: "bg-gray-100 text-gray-700",
-    dotColor: "bg-blue-500"
-  },
-  time_out: {
-    label: "Time Out",
-    className: "bg-gray-100 text-gray-700",
-    dotColor: "bg-orange-500"
-  },
-  "checked-out": {
-    label: "Checked Out",
-    className: "bg-gray-100 text-gray-700",
-    dotColor: "bg-stone-500"
-  },
-  booked: {
-    label: "Booked",
-    className: "bg-gray-100 text-gray-700",
-    dotColor: "bg-emerald-500"
-  },
-} as const
+type StatusVariant = "success" | "warning" | "error" | "info" | "default";
 
 interface StatusBadgeProps {
-  status: string
-  className?: string
+    status: string;
+    variant?: StatusVariant;
+    className?: string;
 }
 
-/**
- * StatusBadge component displays appointment status with dot indicator and pill shape
- * Optimized with React.memo to prevent unnecessary re-renders
- */
-export const StatusBadge = memo(function StatusBadge({ status, className }: StatusBadgeProps) {
-  const normalizedStatus = status?.toLowerCase() || "pending"
-  const config = STATUS_CONFIG[normalizedStatus as keyof typeof STATUS_CONFIG] || {
-    label: status,
-    className: "bg-gray-100 text-gray-700",
-    dotColor: "bg-gray-500"
-  }
+export const getStatusVariant = (status: string): StatusVariant => {
+    const normalizedStatus = status.toLowerCase();
 
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold",
-        config.className,
-        className,
-      )}
-    >
-      <span className={cn("h-1.5 w-1.5 rounded-full", config.dotColor)} />
-      {config.label}
-    </span>
-  )
-})
+    // Success statuses - Green
+    if (["active", "paid", "accepted", "published", "verified", "approved", "booked"].includes(normalizedStatus)) {
+        return "success";
+    }
+
+    // Info statuses - Blue
+    if (["pending", "sent", "draft", "processing", "in_progress", "completed"].includes(normalizedStatus)) {
+        return "info";
+    }
+
+    // Error statuses - Red
+    if (["overdue", "expired", "cancelled", "rejected", "banned", "deleted", "time_out"].includes(normalizedStatus)) {
+        return "error";
+    }
+
+    // Read/Responded - Blue
+    if (["read", "responded"].includes(normalizedStatus)) {
+        return "info";
+    }
+
+    // Closed - Gray
+    if (["closed", "checked-out", "checked_out"].includes(normalizedStatus)) {
+        return "default";
+    }
+
+    // Inactive/Archived - Gray
+    if (["inactive", "archived"].includes(normalizedStatus)) {
+        return "default";
+    }
+
+    return "default";
+};
+
+// Status label mapping for custom display names
+const STATUS_LABELS: Record<string, string> = {
+    time_out: "Time Out",
+    "checked-out": "Checked Out",
+    checked_out: "Checked Out",
+    in_progress: "In Progress",
+};
+
+export function StatusBadge({ status, variant, className }: StatusBadgeProps) {
+    const finalVariant = variant || getStatusVariant(status);
+    const normalizedStatus = status.toLowerCase();
+
+    // Get custom label or capitalize first letter
+    const displayLabel = STATUS_LABELS[normalizedStatus] || status.charAt(0).toUpperCase() + status.slice(1);
+
+    const variants: Record<StatusVariant, string> = {
+        success:
+            "bg-emerald-100/80 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
+        warning:
+            "bg-amber-100/80 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
+        error: "bg-rose-100/80 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20",
+        info: "bg-blue-100/80 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
+        default:
+            "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
+    };
+
+    const dotVariants: Record<StatusVariant, string> = {
+        success: "bg-emerald-500",
+        warning: "bg-amber-500",
+        error: "bg-rose-500",
+        info: "bg-blue-500",
+        default: "bg-slate-400",
+    };
+
+    return (
+        <span
+            className={cn(
+                "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold whitespace-nowrap shadow-sm transition-all",
+                variants[finalVariant],
+                className,
+            )}
+        >
+            <div
+                className={cn(
+                    "h-2 w-2 rounded-full ring-2 ring-white/50 dark:ring-black/20",
+                    dotVariants[finalVariant],
+                )}
+            />
+            {displayLabel}
+        </span>
+    );
+}
