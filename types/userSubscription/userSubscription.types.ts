@@ -3,11 +3,11 @@
 export interface IUserSubscriptionResponse {
     _id: string;
     userId: string;
-    planType: 'free' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+    planType: "free" | "weekly" | "monthly" | "quarterly" | "yearly";
     startDate: Date;
     endDate: Date;
     isActive: boolean;
-    paymentStatus: 'pending' | 'succeeded' | 'failed' | 'cancelled';
+    paymentStatus: "pending" | "succeeded" | "failed" | "cancelled";
     trialDays: number;
     isTrialing: boolean; // Derived field
     isDeleted: boolean;
@@ -16,6 +16,3 @@ export interface IUserSubscriptionResponse {
     createdAt: Date;
     updatedAt: Date;
 }
-
-
-

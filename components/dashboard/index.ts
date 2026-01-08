@@ -1,10 +1,9 @@
-export { DashboardOverview } from './DashboardOverview'
-export { DashboardHeader } from './DashboardHeader'
-export { StatsGrid } from './statsGrid'
-export { StatCard } from './statCard'
-export { AppointmentsTable } from './AppointmentsTable'
-export { QuickActions } from './QuickActions'
-export { DashboardCharts } from './dashboardCharts'
-export { ImageChart } from './imageCharts'
-export * from './dashboardUtils'
-
+export { DashboardOverview } from "./DashboardOverview";
+export { DashboardHeader } from "./DashboardHeader";
+export { StatsGrid } from "./statsGrid";
+export { StatCard } from "./statCard";
+export { AppointmentsTable } from "./AppointmentsTable";
+export { QuickActions } from "./QuickActions";
+export { DashboardCharts } from "./dashboardCharts";
+export { ImageChart } from "./imageCharts";
+export * from "./dashboardUtils";

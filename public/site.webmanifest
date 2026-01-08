@@ -1,51 +1,33 @@
 {
-  "name": "SafeIn - Visitor Management System",
-  "short_name": "SafeIn",
-  "description": "Professional visitor management and appointment scheduling system",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3882a5",
-  "orientation": "portrait-primary",
-  "icons": [
-    {
-      "src": "/aynzo-logo.png",
-      "sizes": "any",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/aynzo-logo.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/aynzo-logo.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "categories": ["business", "productivity", "utilities"],
-  "lang": "en",
-  "dir": "ltr"
+    "name": "SafeIn - Visitor Management System",
+    "short_name": "SafeIn",
+    "description": "Professional visitor management and appointment scheduling system",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#3882a5",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/aynzo-logo.png",
+            "sizes": "any",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/aynzo-logo.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/aynzo-logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["business", "productivity", "utilities"],
+    "lang": "en",
+    "dir": "ltr"
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

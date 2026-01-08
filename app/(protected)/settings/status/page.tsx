@@ -1,12 +1,7 @@
-"use client"
+"use client";
 
-
-import { SettingsPageContent } from "@/components/settings/SettingsPageContent"
+import { SettingsPageContent } from "@/components/settings/SettingsPageContent";
 
 export default function SettingsStatusPage() {
-  return (
-    <SettingsPageContent />
-  )
+    return <SettingsPageContent />;
 }
-
-

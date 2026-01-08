@@ -1,6 +1,6 @@
-export { ProfilePageContent } from './profilePageContent'
-export { ProfileCard } from './profileCard'
-export { InfoCard } from './infoCard'
-export { InfoRow } from './infoRow'
-export { ProfileForm } from './profileForm'
-export * from './profileUtils'
+export { ProfilePageContent } from "./profilePageContent";
+export { ProfileCard } from "./profileCard";
+export { InfoCard } from "./infoCard";
+export { InfoRow } from "./infoRow";
+export { ProfileForm } from "./profileForm";
+export * from "./profileUtils";
