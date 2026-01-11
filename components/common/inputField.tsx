@@ -32,7 +32,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                         type={inputType}
                         autoComplete={autoComplete}
                         className={cn(
-                            "border-border bg-input text-foreground placeholder:text-muted-foreground focus:ring-ring flex h-9 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+                            "border-border bg-muted/30 text-foreground placeholder:text-muted-foreground focus:ring-ring flex h-12 w-full rounded-xl border px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
                             error && "border-destructive focus:ring-destructive",
                             isPasswordField && "pr-10",
                             className,

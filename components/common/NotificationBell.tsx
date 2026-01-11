@@ -217,7 +217,7 @@ export function NotificationBell({ className, iconClassName }: NotificationBellP
                         <DropdownMenuSeparator />
                         <div className="flex items-center justify-between p-2">
                             <Link
-                                href={routes.privateroute.NOTIFICATIONS}
+                                href={routes.privateroute.DASHBOARD}
                                 className="text-brand hover:text-brand-strong rounded px-2 py-1 text-sm font-medium transition-colors hover:bg-gray-50"
                                 onClick={() => setIsOpen(false)}
                             >

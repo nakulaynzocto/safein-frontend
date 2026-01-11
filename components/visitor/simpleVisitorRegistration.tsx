@@ -32,30 +32,9 @@ export function SimpleVisitorRegistration() {
         }
     };
 
-    const handleBack = () => {
-        router.back();
-    };
-
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <Button variant="outline" size="sm" onClick={handleBack} className="flex items-center gap-2">
-                            <ArrowLeft className="h-4 w-4" />
-                            Back
-                        </Button>
-                        <div>
-                            <CardTitle className="flex items-center gap-2">
-                                <User className="h-5 w-5" />
-                                Visitor Registration
-                            </CardTitle>
-                            <p className="mt-1 text-sm text-gray-600">Register a new visitor to the system</p>
-                        </div>
-                    </div>
-                </CardHeader>
-            </Card>
+
 
             {/* Visitor Details Form */}
             <Card>

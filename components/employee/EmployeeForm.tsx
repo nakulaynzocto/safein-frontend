@@ -6,6 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/common/actionButton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -78,7 +79,7 @@ export function NewEmployeeModal({
     const isPage = layout === "page";
 
     const open = isPage ? true : controlledOpen !== undefined ? controlledOpen : internalOpen;
-    const setOpen = isPage ? (_: boolean) => {} : onOpenChange || setInternalOpen;
+    const setOpen = isPage ? (_: boolean) => { } : onOpenChange || setInternalOpen;
     const [createEmployee, { isLoading: isCreating }] = useCreateEmployeeMutation();
     const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
@@ -225,7 +226,7 @@ export function NewEmployeeModal({
                             {...register("name")}
                             placeholder="Enter employee's full name"
                             aria-required="true"
-                            className={`h-9 ${errors.name ? "border-destructive" : ""}`}
+                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.name ? "border-destructive" : ""}`}
                         />
                         {errors.name && <span className="text-destructive text-xs">{errors.name.message}</span>}
                     </div>
@@ -240,7 +241,7 @@ export function NewEmployeeModal({
                             {...register("email", { onChange: clearGeneralError })}
                             placeholder="Enter email address"
                             aria-required="true"
-                            className={`h-9 ${errors.email ? "border-destructive" : ""}`}
+                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.email ? "border-destructive" : ""}`}
                         />
                         {errors.email && <span className="text-destructive text-xs">{errors.email.message}</span>}
                     </div>
@@ -265,6 +266,7 @@ export function NewEmployeeModal({
                                 required
                                 placeholder="Enter phone number"
                                 defaultCountry="in"
+                                className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                             />
                         )}
                     />
@@ -284,7 +286,7 @@ export function NewEmployeeModal({
                                     value={field.value || ""}
                                     onChange={(e) => field.onChange(e.target.value)}
                                     aria-required="true"
-                                    className={`h-9 ${errors.department ? "border-destructive" : ""}`}
+                                    className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.department ? "border-destructive" : ""}`}
                                 />
                                 {errors.department && (
                                     <span className="text-destructive text-xs">{errors.department.message}</span>
@@ -313,7 +315,7 @@ export function NewEmployeeModal({
                                     value={field.value || ""}
                                     onChange={(e) => field.onChange(e.target.value)}
                                     aria-required="true"
-                                    className={`h-9 ${errors.designation ? "border-destructive" : ""}`}
+                                    className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.designation ? "border-destructive" : ""}`}
                                 />
                                 {errors.designation && (
                                     <span className="text-destructive text-xs">{errors.designation.message}</span>
@@ -334,6 +336,7 @@ export function NewEmployeeModal({
                                     value={field.value}
                                     onChange={(val) => field.onChange(val)}
                                     error={errors.status?.message}
+                                    className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                 />
                             </div>
                         )}
@@ -341,19 +344,27 @@ export function NewEmployeeModal({
                 </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading} className="px-6">
-                    Cancel
-                </Button>
-                <Button
-                    type="submit"
+            <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-end">
+                <ActionButton
+                    type="button"
                     variant="outline"
+                    onClick={handleClose}
+                    disabled={isLoading}
+                    size="xl"
+                    className="w-full px-6 sm:w-auto"
+                >
+                    Cancel
+                </ActionButton>
+                <ActionButton
+                    type="submit"
+                    variant="outline-primary"
                     disabled={isLoading || isLoadingEmployee}
-                    className="min-w-[160px] px-6"
+                    size="xl"
+                    className="w-full min-w-[160px] px-6 sm:w-auto"
                 >
                     {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
                     {isEditMode ? "Update Employee" : "Create Employee"}
-                </Button>
+                </ActionButton>
             </div>
         </form>
     );

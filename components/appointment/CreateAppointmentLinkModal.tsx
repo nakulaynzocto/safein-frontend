@@ -26,6 +26,7 @@ import { isValidEmail } from "@/utils/helpers";
 import { Link2, Mail, User } from "lucide-react";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { ActionButton } from "@/components/common/actionButton";
 
 const EXPIRATION_CONFIG = {
     "30m": { days: 0.0208, label: "30 minutes" },
@@ -249,7 +250,7 @@ export function CreateAppointmentLinkModal({
                                         id="visitorEmail"
                                         type="email"
                                         placeholder="visitor@example.com"
-                                        className={errors.visitorEmail ? "border-red-500" : ""}
+                                        className={`h-12 rounded-xl bg-muted/30 font-medium ${errors.visitorEmail ? "border-red-500" : ""}`}
                                     />
                                     {errors.visitorEmail && (
                                         <p className="text-sm text-red-500">{errors.visitorEmail.message}</p>
@@ -292,8 +293,8 @@ export function CreateAppointmentLinkModal({
                                             isLoadingEmployees
                                                 ? "Loading employees..."
                                                 : employeeOptions.length === 0
-                                                  ? "No active employees found"
-                                                  : "Select employee"
+                                                    ? "No active employees found"
+                                                    : "Select employee"
                                         }
                                         isLoading={isLoadingEmployees}
                                         className={errors.employeeId ? "border-red-500" : ""}
@@ -340,10 +341,10 @@ export function CreateAppointmentLinkModal({
                     </div>
 
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={handleClose} disabled={isCreating}>
+                        <ActionButton type="button" variant="outline" onClick={handleClose} disabled={isCreating} size="xl" className="px-6">
                             Cancel
-                        </Button>
-                        <Button type="submit" variant="outline" disabled={isCreating}>
+                        </ActionButton>
+                        <ActionButton type="submit" variant="outline-primary" disabled={isCreating} size="xl" className="px-6">
                             {isCreating ? (
                                 <>
                                     <LoadingSpinner size="sm" className="mr-2" />
@@ -352,7 +353,7 @@ export function CreateAppointmentLinkModal({
                             ) : (
                                 "Create Link"
                             )}
-                        </Button>
+                        </ActionButton>
                     </DialogFooter>
                 </form>
             </DialogContent>

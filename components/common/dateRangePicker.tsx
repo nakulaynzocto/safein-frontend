@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useMemo } from "react";
 import { Calendar as CalendarIcon, X as XIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const PREDEFINED_RANGES = [
@@ -320,15 +321,24 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
         </div>
     );
 
+    const hasRange = range.startDate && range.endDate;
+
     return (
-        <div className={`date-range-picker-container ${className || ""}`} ref={containerRef}>
-            <div
-                className="date-range-picker-trigger flex items-center gap-1 rounded-full border border-dashed border-gray-300 bg-white px-2 py-1 whitespace-nowrap"
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                {range.startDate && range.endDate ? (
-                    <span
-                        className="cursor-pointer text-lg font-bold text-gray-500 hover:text-red-600"
+        <div className={`date-range-picker-container relative ${className || ""}`} ref={containerRef}>
+            {hasRange ? (
+                <Button
+                    variant="outline"
+                    className="flex h-12 w-auto items-center justify-between gap-2 rounded-xl border-border bg-background px-3 font-medium text-foreground hover:bg-accent hover:text-accent-foreground sm:w-auto"
+                    onClick={() => setIsOpen(!isOpen)}
+                >
+                    <div className="flex items-center gap-2">
+                        <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <span className="truncate text-sm hidden sm:inline">{displayRange}</span>
+                    </div>
+                    <div
+                        role="button"
+                        tabIndex={0}
+                        className="ml-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
                         onClick={(e) => {
                             e.stopPropagation();
                             setRangeDates({ startDate: null, endDate: null });
@@ -336,24 +346,30 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
                             onDateRangeChange?.({ startDate: null, endDate: null });
                         }}
                     >
-                        <XIcon className="h-4 w-4" />
-                    </span>
-                ) : (
-                    <CalendarIcon className="h-4 w-4" />
-                )}
-                <span className="text-default">{displayRange || "Select date range"}</span>
-            </div>
+                        <XIcon className="h-3 w-3" />
+                    </div>
+                </Button>
+            ) : (
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-12 w-12 rounded-xl border-border bg-muted/30 hover:bg-background hover:ring-1 hover:ring-ring"
+                    onClick={() => setIsOpen(!isOpen)}
+                    title="Select Date Range"
+                >
+                    <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+                </Button>
+            )}
 
             {isOpen && (
                 <div
-                    className="date-range-picker-dropdown absolute z-50 mt-2 flex rounded-md border border-gray-300 bg-white shadow-lg"
-                    style={{ right: 0, left: "auto" }}
+                    className="date-range-picker-dropdown absolute z-50 mt-2 flex flex-col lg:flex-row rounded-xl border border-border bg-popover shadow-lg animate-in fade-in-0 zoom-in-95 overflow-hidden w-auto left-1/2 -translate-x-1/2"
                 >
-                    <div className="date-range-presets w-36 border-r border-gray-300 bg-white py-4">
+                    <div className="date-range-presets flex flex-row overflow-x-auto border-b border-border bg-muted/10 p-2 lg:w-36 lg:flex-col lg:border-b-0 lg:border-r lg:py-2">
                         {PREDEFINED_RANGES.map((range) => (
                             <div
                                 key={range}
-                                className="date-range-preset-item cursor-pointer px-4 py-2 text-sm hover:bg-gray-100"
+                                className="date-range-preset-item cursor-pointer whitespace-nowrap rounded-md px-3 py-1.5 text-xs transition-colors hover:bg-accent hover:text-accent-foreground lg:px-4 lg:py-2 lg:text-sm"
                                 onClick={() => handleRangeSelect(range)}
                             >
                                 {range}
@@ -361,53 +377,66 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
                         ))}
                     </div>
 
-                    <div className="date-range-calendar-container flex flex-col p-4">
-                        <div className="date-range-calendar-header mb-2 flex items-center justify-between px-2">
-                            <button className="date-range-calendar-nav-btn" onClick={() => updateCalendarViews("prev")}>
+                    <div className="date-range-calendar-container flex flex-col p-2">
+                        <div className="date-range-calendar-header mb-4 flex items-center justify-between px-2">
+                            <button
+                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                                onClick={() => updateCalendarViews("prev")}
+                            >
                                 &lt;
                             </button>
-                            <div className="date-range-calendar-month-title text-sm font-semibold text-gray-700">
-                                {new Date(currentView.year, currentView.month).toLocaleString("default", {
-                                    month: "long",
-                                    year: "numeric",
-                                })}
+                            <div className="flex text-sm font-semibold">
+                                <span className="w-32 text-center">
+                                    {new Date(currentView.year, currentView.month).toLocaleString("default", {
+                                        month: "long",
+                                        year: "numeric",
+                                    })}
+                                </span>
+                                <span className="hidden w-32 text-center lg:block">
+                                    {new Date(nextView.year, nextView.month).toLocaleString("default", {
+                                        month: "long",
+                                        year: "numeric",
+                                    })}
+                                </span>
                             </div>
-                            <div className="date-range-calendar-month-title text-sm font-semibold text-gray-700">
-                                {new Date(nextView.year, nextView.month).toLocaleString("default", {
-                                    month: "long",
-                                    year: "numeric",
-                                })}
-                            </div>
-                            <button className="date-range-calendar-nav-btn" onClick={() => updateCalendarViews("next")}>
+                            <button
+                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                                onClick={() => updateCalendarViews("next")}
+                            >
                                 &gt;
                             </button>
                         </div>
 
-                        <div className="date-range-calendars flex flex-col gap-5 sm:flex-row">
+                        <div className="date-range-calendars flex flex-col gap-4 lg:flex-row">
                             {renderCalendar(currentMonthDays, currentView.month)}
-                            {renderCalendar(nextMonthDays, nextView.month)}
+                            <div className="hidden lg:block">
+                                {renderCalendar(nextMonthDays, nextView.month)}
+                            </div>
                         </div>
 
-                        <div className="date-range-footer mt-4 flex items-center justify-between border-t border-gray-300 pt-4">
-                            <div className="date-range-selected-text text-sm text-gray-500">
-                                {tempRange.startDate &&
-                                    tempRange.endDate &&
-                                    `${formatLocalDate(tempRange.startDate)} - ${formatLocalDate(tempRange.endDate)}`}
+                        <div className="date-range-footer mt-4 flex items-center justify-between border-t border-border pt-4">
+                            <div className="date-range-selected-text text-xs text-muted-foreground mr-2">
+                                {tempRange.startDate && tempRange.endDate
+                                    ? `${formatLocalDate(tempRange.startDate)} - ${formatLocalDate(tempRange.endDate)}`
+                                    : "Select a range"}
                             </div>
                             <div className="date-range-footer-buttons flex gap-2">
-                                <button
-                                    className="date-range-btn date-range-btn-cancel rounded border border-gray-300 px-3 py-1 text-sm"
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={cancelSelection}
+                                    className="h-8 rounded-lg px-3 text-xs"
                                 >
                                     Cancel
-                                </button>
-                                <button
-                                    className="date-range-btn date-range-btn-apply rounded border bg-blue-600 px-3 py-1 text-sm text-white disabled:cursor-not-allowed disabled:bg-gray-400"
+                                </Button>
+                                <Button
+                                    size="sm"
                                     onClick={applySelection}
                                     disabled={!tempRange.startDate || !tempRange.endDate}
+                                    className="h-8 rounded-lg px-3 text-xs"
                                 >
                                     Apply
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     </div>

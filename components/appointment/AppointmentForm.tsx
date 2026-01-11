@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/common/actionButton";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -78,7 +79,7 @@ export function NewAppointmentModal({
     const debouncedVisitorSearch = useDebounce(visitorSearchInput, 500);
 
     const open = isPage ? true : controlledOpen !== undefined ? controlledOpen : internalOpen;
-    const setOpen = isPage ? (_: boolean) => {} : onOpenChange || setInternalOpen;
+    const setOpen = isPage ? (_: boolean) => { } : onOpenChange || setInternalOpen;
     const isEditMode = !!appointmentId;
 
     const [createAppointment, { isLoading: isCreating }] = useCreateAppointmentMutation();
@@ -334,7 +335,7 @@ export function NewAppointmentModal({
                             step={1}
                             placeholder="Number of people (e.g., 0, 1, 2)"
                             {...register("accompanyingCount")}
-                            className={`h-9 ${errors.accompanyingCount ? "border-destructive" : ""}`}
+                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.accompanyingCount ? "border-destructive" : ""}`}
                         />
                         {errors.accompanyingCount && (
                             <span className="text-destructive text-xs">{errors.accompanyingCount.message}</span>
@@ -427,7 +428,7 @@ export function NewAppointmentModal({
                         id="notes"
                         {...register("notes")}
                         placeholder="Any additional information or special requirements"
-                        className={errors.notes ? "border-destructive" : ""}
+                        className={`bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.notes ? "border-destructive" : ""}`}
                         rows={4}
                     />
                     {errors.notes && <span className="text-destructive text-xs">{errors.notes.message}</span>}
@@ -458,6 +459,7 @@ export function NewAppointmentModal({
                                 setValue("vehiclePhoto", "");
                             }
                         }}
+                        className="data-[state=unchecked]:bg-gray-200 dark:data-[state=unchecked]:bg-gray-700"
                     />
                 </div>
             </div>
@@ -477,6 +479,7 @@ export function NewAppointmentModal({
                                 initialUrl={watch("vehiclePhoto")}
                                 enableImageCapture={true}
                                 onUploadStatusChange={setIsFileUploading}
+                                variant="avatar"
                             />
                         </div>
 
@@ -489,7 +492,7 @@ export function NewAppointmentModal({
                                 id="vehicleNumber"
                                 {...register("vehicleNumber")}
                                 placeholder="e.g., DL01AB1234"
-                                className={`h-9 ${errors.vehicleNumber ? "border-destructive" : ""}`}
+                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.vehicleNumber ? "border-destructive" : ""}`}
                             />
                             {errors.vehicleNumber && (
                                 <span className="text-destructive text-xs">{errors.vehicleNumber.message}</span>
@@ -499,15 +502,23 @@ export function NewAppointmentModal({
                 </div>
             )}
 
-            <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading} className="px-6">
-                    Cancel
-                </Button>
-                <Button
-                    type="submit"
+            <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-end">
+                <ActionButton
+                    type="button"
                     variant="outline"
+                    onClick={handleClose}
+                    disabled={isLoading}
+                    size="xl"
+                    className="w-full px-6 sm:w-auto"
+                >
+                    Cancel
+                </ActionButton>
+                <ActionButton
+                    type="submit"
+                    variant="outline-primary"
                     disabled={isLoading || isFileUploading}
-                    className="min-w-[180px] px-6"
+                    size="xl"
+                    className="w-full min-w-[180px] px-6 sm:w-auto"
                 >
                     {isLoading ? (
                         <>
@@ -520,7 +531,7 @@ export function NewAppointmentModal({
                             <span>{isEditMode ? "Update" : "Schedule"} Appointment</span>
                         </>
                     )}
-                </Button>
+                </ActionButton>
             </div>
         </form>
     );

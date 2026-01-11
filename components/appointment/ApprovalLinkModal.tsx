@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/common/actionButton";
 import {
     Dialog,
     DialogContent,
@@ -91,9 +92,9 @@ export function ApprovalLinkModal({ open, onOpenChange, approvalLink, onCancel }
                 </div>
 
                 <DialogFooter>
-                    <Button type="button" variant="outline" onClick={handleCancel}>
+                    <ActionButton type="button" variant="outline" onClick={handleCancel} size="xl" className="px-6">
                         Cancel
-                    </Button>
+                    </ActionButton>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
