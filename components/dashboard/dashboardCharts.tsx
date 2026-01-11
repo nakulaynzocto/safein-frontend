@@ -2,6 +2,18 @@
 
 import { memo, useMemo } from "react";
 import { ImageChart } from "./imageCharts";
+import {
+    Area,
+    AreaChart,
+    Bar,
+    BarChart,
+    CartesianGrid,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+    Cell,
+} from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Users, Clock, TrendingUp, Activity, TimerOff, CalendarX } from "lucide-react";
 import { getAppointmentStatus } from "@/utils/helpers";
@@ -157,66 +169,144 @@ export const DashboardCharts = memo(function DashboardCharts({
     }, [filteredAppointments]);
 
     return (
+
         <div className="space-y-4 sm:space-y-6">
             <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
-                <ImageChart
-                    title="Today's Appointment Status"
-                    description="Current status distribution of today's appointments"
-                    data={todayStats.statusData}
-                    type="donut"
-                />
-
+                {/* Chart 1: Today's Appointment Status - Styled as Blue Bar Chart (User Growth Style) */}
                 <Card>
-                    <CardHeader className="p-3 sm:p-4 md:p-6">
+                    <CardHeader className="p-3 sm:p-4 md:p-6 pb-2">
                         <CardTitle className="flex items-center gap-2 text-base font-semibold sm:text-lg">
-                            <Calendar className="h-4 w-4 text-blue-500 sm:h-5 sm:w-5" />
+                            <Activity className="h-4 w-4 text-blue-500 sm:h-5 sm:w-5" />
+                            Today's Appointment Status
+                        </CardTitle>
+                        <p className="text-muted-foreground text-xs sm:text-sm">
+                            Current status distribution of today's appointments
+                        </p>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                        <div className="h-[250px] w-full mt-4">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={todayStats.statusData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                    <XAxis
+                                        dataKey="label"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: "#6B7280", fontSize: 12 }}
+                                        dy={10}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: "#6B7280", fontSize: 12 }}
+                                        allowDecimals={false}
+                                    />
+                                    <Tooltip
+                                        cursor={{ fill: "transparent" }}
+                                        content={({ active, payload }) => {
+                                            if (active && payload && payload.length) {
+                                                return (
+                                                    <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                                                    {payload[0].payload.label}
+                                                                </span>
+                                                                <span className="font-bold text-muted-foreground">
+                                                                    {payload[0].value}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                    <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={40}>
+                                        {todayStats.statusData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color || "#3B82F6"} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Chart 2: Daily Appointments Trend - Styled as Green Area Chart (Revenue Growth Style) */}
+                <Card>
+                    <CardHeader className="p-3 sm:p-4 md:p-6 pb-2">
+                        <CardTitle className="flex items-center gap-2 text-base font-semibold sm:text-lg">
+                            <Calendar className="h-4 w-4 text-green-500 sm:h-5 sm:w-5" />
                             Daily Appointments Trend
                         </CardTitle>
                         <p className="text-muted-foreground text-xs sm:text-sm">Appointments over the last 7 days</p>
                     </CardHeader>
-                    <CardContent className="p-3 pt-0 sm:p-4 md:p-6">
-                        {dailyAppointmentsData.length === 0 ? (
-                            <div className="py-8 text-center text-gray-400">
-                                <p className="text-sm">No appointment data available</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {dailyAppointmentsData.map((item, index) => {
-                                    const maxValue = Math.max(...dailyAppointmentsData.map((d) => d.value), 1);
-                                    const percentage = maxValue > 0 ? (item.value / maxValue) * 100 : 0;
-                                    const isToday = item.date.toDateString() === new Date().toDateString();
-                                    return (
-                                        <div key={index} className="space-y-1">
-                                            <div className="flex items-center justify-between text-xs">
-                                                <span
-                                                    className={`font-medium ${isToday ? "font-semibold text-blue-600" : "text-gray-700"}`}
-                                                >
-                                                    {item.label} {isToday && "(Today)"}
-                                                </span>
-                                                <span
-                                                    className={`font-semibold ${isToday ? "text-blue-600" : "text-gray-600"}`}
-                                                >
-                                                    {item.value} {item.value === 1 ? "appointment" : "appointments"}
-                                                </span>
-                                            </div>
-                                            <div className="h-3 w-full rounded-full bg-gray-200">
-                                                <div
-                                                    className={`h-3 rounded-full transition-all duration-500 ${isToday ? "bg-blue-500" : "bg-blue-400"}`}
-                                                    style={{ width: `${percentage}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
+                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                        <div className="h-[250px] w-full mt-4">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={dailyAppointmentsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorDailyAppts" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                    <XAxis
+                                        dataKey="label"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: "#6B7280", fontSize: 12 }}
+                                        dy={10}
+                                        interval="preserveStartEnd"
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: "#6B7280", fontSize: 12 }}
+                                        allowDecimals={false}
+                                    />
+                                    <Tooltip
+                                        content={({ active, payload }) => {
+                                            if (active && payload && payload.length) {
+                                                return (
+                                                    <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                                                    {payload[0].payload.label}
+                                                                </span>
+                                                                <span className="font-bold text-muted-foreground">
+                                                                    {payload[0].value}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="value"
+                                        stroke="#10B981"
+                                        strokeWidth={2}
+                                        fillOpacity={1}
+                                        fill="url(#colorDailyAppts)"
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
                 <Card>
-                    <CardHeader className="p-3 sm:p-4 md:p-6">
+                    <CardHeader className="p-3 sm:p-4 md:p-6 pb-2">
                         <CardTitle className="flex items-center gap-2 text-base font-semibold sm:text-lg">
                             <TrendingUp className="h-4 w-4 text-purple-500 sm:h-5 sm:w-5" />
                             Monthly Visitor Trend (Last 12 Months)
@@ -225,38 +315,68 @@ export const DashboardCharts = memo(function DashboardCharts({
                             Visitor count trend over the last 12 months
                         </p>
                     </CardHeader>
-                    <CardContent className="p-3 pt-0 sm:p-4 md:p-6">
-                        {monthlyTrendData.length === 0 ? (
-                            <div className="py-8 text-center text-gray-400">
-                                <p className="text-sm">No monthly data available</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {monthlyTrendData.map((item, index) => {
-                                    const maxValue = Math.max(...monthlyTrendData.map((d) => d.value), 1);
-                                    const percentage = maxValue > 0 ? (item.value / maxValue) * 100 : 0;
-                                    return (
-                                        <div key={index} className="space-y-1">
-                                            <div className="flex items-center justify-between text-xs">
-                                                <span className="font-medium text-gray-700">{item.label}</span>
-                                                <span className="text-gray-600">{item.value} visitors</span>
-                                            </div>
-                                            <div className="h-3 w-full rounded-full bg-gray-200">
-                                                <div
-                                                    className="h-3 rounded-full bg-purple-500 transition-all duration-500"
-                                                    style={{ width: `${percentage}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
+                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                        <div className="h-[250px] w-full mt-4">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={monthlyTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorMonthlyVisitors" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#A855F7" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#A855F7" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                    <XAxis
+                                        dataKey="label"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: "#6B7280", fontSize: 12 }}
+                                        dy={10}
+                                        interval="preserveStartEnd"
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: "#6B7280", fontSize: 12 }}
+                                        allowDecimals={false}
+                                    />
+                                    <Tooltip
+                                        content={({ active, payload }) => {
+                                            if (active && payload && payload.length) {
+                                                return (
+                                                    <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                                                    {payload[0].payload.label}
+                                                                </span>
+                                                                <span className="font-bold text-muted-foreground">
+                                                                    {payload[0].value}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="value"
+                                        stroke="#A855F7"
+                                        strokeWidth={2}
+                                        fillOpacity={1}
+                                        fill="url(#colorMonthlyVisitors)"
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
                     </CardContent>
                 </Card>
 
                 <Card>
-                    <CardHeader className="p-3 sm:p-4 md:p-6">
+                    <CardHeader className="p-3 sm:p-4 md:p-6 pb-2">
                         <CardTitle className="flex items-center gap-2 text-base font-semibold sm:text-lg">
                             <Clock className="h-4 w-4 text-green-500 sm:h-5 sm:w-5" />
                             Hourly Distribution
@@ -265,33 +385,51 @@ export const DashboardCharts = memo(function DashboardCharts({
                             Peak visiting hours over the last 30 days
                         </p>
                     </CardHeader>
-                    <CardContent className="p-3 pt-0 sm:p-4 md:p-6">
-                        {hourlyDistributionData.length === 0 ? (
-                            <div className="py-8 text-center text-gray-400">
-                                <p className="text-sm">No hourly data available</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-2">
-                                {hourlyDistributionData.map((item, index) => {
-                                    const maxValue = Math.max(...hourlyDistributionData.map((d) => d.value), 1);
-                                    const percentage = maxValue > 0 ? (item.value / maxValue) * 100 : 0;
-                                    return (
-                                        <div key={index} className="space-y-1">
-                                            <div className="flex items-center justify-between text-xs">
-                                                <span className="font-medium text-gray-700">{item.label}</span>
-                                                <span className="text-gray-600">{item.value} visitors</span>
-                                            </div>
-                                            <div className="h-2.5 w-full rounded-full bg-gray-200">
-                                                <div
-                                                    className="h-2.5 rounded-full bg-green-500 transition-all duration-500"
-                                                    style={{ width: `${percentage}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
+                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                        <div className="h-[250px] w-full mt-4">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={hourlyDistributionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                    <XAxis
+                                        dataKey="label"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: "#6B7280", fontSize: 12 }}
+                                        dy={10}
+                                        interval={2}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: "#6B7280", fontSize: 12 }}
+                                        allowDecimals={false}
+                                    />
+                                    <Tooltip
+                                        cursor={{ fill: "transparent" }}
+                                        content={({ active, payload }) => {
+                                            if (active && payload && payload.length) {
+                                                return (
+                                                    <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                                                    {payload[0].payload.label}
+                                                                </span>
+                                                                <span className="font-bold text-muted-foreground">
+                                                                    {payload[0].value}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                    <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={20} fill="#22C55E" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
                     </CardContent>
                 </Card>
             </div>

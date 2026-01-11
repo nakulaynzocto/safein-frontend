@@ -229,7 +229,7 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
 
                     {/* Actions */}
                     <div className="flex justify-end border-t pt-4">
-                        <Button type="button" onClick={onClose} variant="outline">
+                        <Button type="button" onClick={onClose} variant="outline" size="xl" className="px-8">
                             Close
                         </Button>
                     </div>

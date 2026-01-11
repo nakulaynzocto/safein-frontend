@@ -58,131 +58,131 @@ const createColumns = (
     handleEditVisitor: (visitor: Visitor) => void,
     handleViewVisitor: (visitor: Visitor) => void,
 ) => [
-    {
-        key: "visitor",
-        header: "Visitor",
-        render: (visitor: Visitor) => (
-            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-                <div className="group relative shrink-0">
-                    <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-                        <AvatarImage src={visitor.photo} alt={visitor.name} />
-                        <AvatarFallback className="text-xs sm:text-sm">
-                            {getInitials(formatName(visitor.name))}
-                        </AvatarFallback>
-                    </Avatar>
-                    {visitor.photo && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                window.open(visitor.photo, "_blank");
-                            }}
-                            className="absolute -right-1 -bottom-1 rounded-full bg-[#3882a5] p-1 text-white opacity-0 shadow-md transition-colors group-hover:opacity-100 hover:bg-[#2d6a87]"
-                            title="View full image"
-                        >
-                            <Maximize2 className="h-2.5 w-2.5" />
-                        </button>
-                    )}
-                </div>
-                <div className="min-w-0 flex-1">
-                    <div className="max-w-[100px] truncate text-sm font-medium sm:max-w-[150px] sm:text-base">
-                        {formatName(visitor.name)}
+        {
+            key: "visitor",
+            header: "Visitor",
+            render: (visitor: Visitor) => (
+                <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                    <div className="group relative shrink-0">
+                        <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                            <AvatarImage src={visitor.photo} alt={visitor.name} />
+                            <AvatarFallback className="text-xs sm:text-sm">
+                                {getInitials(formatName(visitor.name))}
+                            </AvatarFallback>
+                        </Avatar>
+                        {visitor.photo && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(visitor.photo, "_blank");
+                                }}
+                                className="absolute -right-1 -bottom-1 rounded-full bg-[#3882a5] p-1 text-white opacity-0 shadow-md transition-colors group-hover:opacity-100 hover:bg-[#2d6a87]"
+                                title="View full image"
+                            >
+                                <Maximize2 className="h-2.5 w-2.5" />
+                            </button>
+                        )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <div className="max-w-[100px] truncate text-sm font-medium sm:max-w-[150px] sm:text-base">
+                            {formatName(visitor.name)}
+                        </div>
                     </div>
                 </div>
-            </div>
-        ),
-    },
-    {
-        key: "contact",
-        header: "Contact",
-        render: (visitor: Visitor) => (
-            <div className="min-w-0 space-y-0.5 sm:space-y-1">
-                <div className="flex items-center gap-1.5 text-xs sm:gap-2 sm:text-sm">
-                    <Phone className="h-3 w-3 shrink-0" />
-                    <span className="truncate">{visitor.phone}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-xs text-gray-500 sm:gap-2 sm:text-sm">
-                    <Mail className="h-3 w-3 shrink-0" />
-                    <span>{visitor.email}</span>
-                </div>
-            </div>
-        ),
-    },
-    {
-        key: "address",
-        header: "Address",
-        className: "hidden lg:table-cell",
-        render: (visitor: Visitor) => (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-                <MapPin className="h-3 w-3 shrink-0" />
-                <span className="truncate">
-                    {visitor.address.city}, {visitor.address.state}
-                </span>
-            </div>
-        ),
-    },
-    {
-        key: "idProof",
-        header: "ID Proof",
-        className: "hidden md:table-cell",
-        render: (visitor: Visitor) =>
-            visitor.idProof?.type || visitor.idProof?.number ? (
-                <div className="space-y-1">
-                    {visitor.idProof.type && (
-                        <Badge variant="outline" className="text-xs">
-                            {visitor.idProof.type.replace("_", " ").toUpperCase()}
-                        </Badge>
-                    )}
-                    {visitor.idProof.number && (
-                        <div className="max-w-[100px] truncate text-xs text-gray-500">{visitor.idProof.number}</div>
-                    )}
-                </div>
-            ) : (
-                <span className="text-muted-foreground text-xs">-</span>
             ),
-    },
-    {
-        key: "createdAt",
-        header: "Registered",
-        className: "hidden xl:table-cell",
-        render: (visitor: Visitor) => (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Calendar className="h-3 w-3 shrink-0" />
-                {formatDate(visitor.createdAt)}
-            </div>
-        ),
-    },
-    {
-        key: "actions",
-        header: "",
-        className: "w-10",
-        render: (visitor: Visitor) => (
-            <div className="flex justify-end">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem onClick={() => handleViewVisitor(visitor)}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEditVisitor(visitor)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteClick(visitor)}>
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-        ),
-    },
-];
+        },
+        {
+            key: "contact",
+            header: "Contact",
+            render: (visitor: Visitor) => (
+                <div className="min-w-0 space-y-0.5 sm:space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs sm:gap-2 sm:text-sm">
+                        <Phone className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{visitor.phone}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500 sm:gap-2 sm:text-sm">
+                        <Mail className="h-3 w-3 shrink-0" />
+                        <span>{visitor.email}</span>
+                    </div>
+                </div>
+            ),
+        },
+        {
+            key: "address",
+            header: "Address",
+            className: "hidden lg:table-cell",
+            render: (visitor: Visitor) => (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <MapPin className="h-3 w-3 shrink-0" />
+                    <span className="truncate">
+                        {visitor.address.city}, {visitor.address.state}
+                    </span>
+                </div>
+            ),
+        },
+        {
+            key: "idProof",
+            header: "ID Proof",
+            className: "hidden md:table-cell",
+            render: (visitor: Visitor) =>
+                visitor.idProof?.type || visitor.idProof?.number ? (
+                    <div className="space-y-1">
+                        {visitor.idProof.type && (
+                            <Badge variant="outline" className="text-xs">
+                                {visitor.idProof.type.replace("_", " ").toUpperCase()}
+                            </Badge>
+                        )}
+                        {visitor.idProof.number && (
+                            <div className="max-w-[100px] truncate text-xs text-gray-500">{visitor.idProof.number}</div>
+                        )}
+                    </div>
+                ) : (
+                    <span className="text-muted-foreground text-xs">-</span>
+                ),
+        },
+        {
+            key: "createdAt",
+            header: "Registered",
+            className: "hidden xl:table-cell",
+            render: (visitor: Visitor) => (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Calendar className="h-3 w-3 shrink-0" />
+                    {formatDate(visitor.createdAt)}
+                </div>
+            ),
+        },
+        {
+            key: "actions",
+            header: "",
+            className: "w-10",
+            render: (visitor: Visitor) => (
+                <div className="flex justify-end">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreVertical className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={() => handleViewVisitor(visitor)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditVisitor(visitor)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteClick(visitor)}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            ),
+        },
+    ];
 
 export function VisitorList() {
     const router = useRouter();
@@ -290,60 +290,47 @@ export function VisitorList() {
 
     return (
         <div className="space-y-6">
-            {/* Header Actions */}
-            <Card className="card-hostinger p-3 sm:p-4">
-                <CardHeader className="px-0 pb-3 sm:pb-4">
-                    <div className="flex items-center justify-between gap-3">
-                        <CardTitle className="flex min-w-0 flex-1 items-center gap-2 text-base font-semibold sm:text-lg">
-                            <User className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                            <span className="truncate">Visitors</span>
-                        </CardTitle>
-                        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-                            {hasReachedVisitorLimit ? (
-                                <>
-                                    <Button
-                                        variant="outline-primary"
-                                        className="flex h-8 shrink-0 items-center gap-1 px-2 text-[10px] whitespace-nowrap sm:h-9 sm:gap-1.5 sm:px-3 sm:text-xs"
-                                        onClick={() => setShowUpgradeModal(true)}
-                                    >
-                                        <Plus className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
-                                        <span className="hidden min-[375px]:inline sm:hidden">Upgrade</span>
-                                        <span className="hidden sm:inline">Upgrade to Add More</span>
-                                    </Button>
-                                    <UpgradePlanModal
-                                        isOpen={showUpgradeModal}
-                                        onClose={() => setShowUpgradeModal(false)}
-                                    />
-                                </>
-                            ) : (
-                                <Button
-                                    variant="outline-primary"
-                                    className="flex h-8 shrink-0 items-center gap-1 px-2 text-[10px] whitespace-nowrap sm:h-9 sm:gap-1.5 sm:px-3 sm:text-xs"
-                                    onClick={() => router.push(routes.privateroute.VISITORREGISTRATION)}
-                                >
-                                    <Plus className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
-                                    <span className="hidden min-[375px]:inline">Add Visitor</span>
-                                </Button>
-                            )}
-                        </div>
-                    </div>
-                </CardHeader>
-            </Card>
+
 
             {/* Visitors Table */}
-            <Card className="card-hostinger gap-3 p-4 sm:gap-4">
-                <CardHeader className="pb-0">
-                    <div className="flex items-center justify-between gap-3">
-                        <SearchInput
-                            placeholder="Search visitors..."
-                            value={searchTerm}
-                            onChange={setSearchTerm}
-                            debounceDelay={500}
-                            className="w-full"
-                        />
+            <div className="flex flex-col gap-3 sm:gap-4">
+                <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
+                    <SearchInput
+                        placeholder="Search visitors..."
+                        value={searchTerm}
+                        onChange={setSearchTerm}
+                        debounceDelay={500}
+                        className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none"
+                    />
+                    <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
+                        {hasReachedVisitorLimit ? (
+                            <>
+                                <Button
+                                    variant="outline-primary"
+                                    className="flex h-12 shrink-0 items-center gap-1 rounded-xl px-4 text-[10px] bg-muted/30 whitespace-nowrap sm:gap-2 sm:text-sm"
+                                    onClick={() => setShowUpgradeModal(true)}
+                                >
+                                    <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                    <span className="hidden sm:inline">Upgrade to Add More</span>
+                                </Button>
+                                <UpgradePlanModal
+                                    isOpen={showUpgradeModal}
+                                    onClose={() => setShowUpgradeModal(false)}
+                                />
+                            </>
+                        ) : (
+                            <Button
+                                variant="outline-primary"
+                                className="flex h-12 shrink-0 items-center gap-1 rounded-xl px-4 text-[10px] bg-muted/30 whitespace-nowrap sm:gap-2 sm:text-sm"
+                                onClick={() => router.push(routes.privateroute.VISITORREGISTRATION)}
+                            >
+                                <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                <span className="hidden sm:inline">Add Visitor</span>
+                            </Button>
+                        )}
                     </div>
-                </CardHeader>
-                <CardContent className="p-0">
+                </div>
+                <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
                     <DataTable
                         data={visitors}
                         columns={columns}
@@ -357,8 +344,8 @@ export function VisitorList() {
                         showCard={false}
                         isLoading={isLoading}
                     />
-                </CardContent>
-            </Card>
+                </div>
+            </div>
 
             {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (

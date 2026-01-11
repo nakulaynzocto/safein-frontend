@@ -13,6 +13,7 @@ import { EnhancedTimePicker } from "@/components/common/enhancedTimePicker";
 import { ImageUploadField } from "@/components/common/imageUploadField";
 import { InputField } from "@/components/common/inputField";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
+import { ActionButton } from "@/components/common/actionButton";
 import { Calendar, Clock, FileText, Car, User } from "lucide-react";
 import { extractIdString, isValidId } from "@/utils/idExtractor";
 import { showErrorToast } from "@/utils/toast";
@@ -213,7 +214,7 @@ export function AppointmentBookingForm({
                             step={1}
                             placeholder="Number of people (e.g., 0, 1, 2)"
                             {...register("accompanyingCount")}
-                            className={`h-9 ${errors.accompanyingCount ? "border-destructive" : ""}`}
+                            className={`h-12 rounded-xl bg-muted/30 font-medium ${errors.accompanyingCount ? "border-destructive" : ""}`}
                         />
                         {errors.accompanyingCount && (
                             <span className="text-destructive text-xs">{errors.accompanyingCount.message}</span>
@@ -289,7 +290,7 @@ export function AppointmentBookingForm({
                                     id="vehicleNumber"
                                     {...register("vehicleNumber")}
                                     placeholder="e.g., DL01AB1234"
-                                    className={`h-9 ${errors.vehicleNumber ? "border-destructive" : ""}`}
+                                    className={`h-12 rounded-xl bg-muted/30 font-medium ${errors.vehicleNumber ? "border-destructive" : ""}`}
                                 />
                                 {errors.vehicleNumber && (
                                     <span className="text-destructive text-xs">{errors.vehicleNumber.message}</span>
@@ -301,11 +302,12 @@ export function AppointmentBookingForm({
             </div>
 
             <div className="flex justify-end gap-4 border-t pt-4">
-                <Button
+                <ActionButton
                     type="submit"
                     disabled={isLoading || isFileUploading}
-                    className="bg-[#3882a5] text-white hover:bg-[#2d6a87]"
-                    size="lg"
+                    className="bg-[#3882a5] text-white hover:bg-[#2d6a87] font-medium text-base px-8"
+                    size="xl"
+                    variant="default"
                 >
                     {isLoading ? (
                         <>
@@ -315,7 +317,7 @@ export function AppointmentBookingForm({
                     ) : (
                         "Book Appointment"
                     )}
-                </Button>
+                </ActionButton>
             </div>
         </form>
     );

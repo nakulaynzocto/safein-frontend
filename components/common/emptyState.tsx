@@ -2,7 +2,7 @@
 
 import { memo, type ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/common/actionButton";
 import { GlobeIcon } from "lucide-react";
 
 interface EmptyStateProps {
@@ -43,9 +43,9 @@ export const EmptyState = memo(function EmptyState({
 
                 {/* Primary Action */}
                 {primaryActionLabel && (
-                    <Button onClick={onPrimaryAction} className="w-full text-xs sm:w-auto sm:text-sm">
+                    <ActionButton onClick={onPrimaryAction} size="xl" className="w-full text-xs sm:w-auto sm:text-sm">
                         {primaryActionLabel}
-                    </Button>
+                    </ActionButton>
                 )}
             </CardContent>
         </Card>

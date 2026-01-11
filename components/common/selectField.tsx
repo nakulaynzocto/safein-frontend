@@ -131,10 +131,10 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         () => ({
             control: (base, state) => ({
                 ...base,
-                backgroundColor: "#ffffff",
-                minHeight: 36,
-                height: 36,
-                borderRadius: 6,
+                backgroundColor: "#f3f4f64d", // bg-muted/30 approx
+                minHeight: 48, // h-12
+                height: 48,
+                borderRadius: 12, // rounded-xl
                 borderColor: error ? "#ef4444" : state.isFocused ? "#3882a5" : "#e5e7eb",
                 boxShadow: state.isFocused
                     ? error

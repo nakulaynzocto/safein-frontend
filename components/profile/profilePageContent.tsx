@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { useGetProfileQuery, useUpdateProfileMutation, UpdateProfileRequest } from "@/store/api/authApi";
 import { useAppDispatch } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
-import { PageHeader } from "@/components/common/pageHeader";
+
 import { ProfileForm } from "@/components/profile/profileForm";
 import { EmptyState } from "@/components/common/emptyState";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
@@ -94,7 +94,7 @@ export function ProfilePageContent() {
     if (error || !profile) {
         return (
             <div className="container mx-auto px-4 py-8">
-                <PageHeader title="Profile" description="View and manage your profile information" />
+
                 <EmptyState
                     title={error ? "Failed to load profile" : "No profile found"}
                     description={
@@ -108,12 +108,35 @@ export function ProfilePageContent() {
     }
 
     return (
-        <div className="mx-auto w-full max-w-full px-4 sm:px-6 lg:px-8">
-            <PageHeader title="Profile" description="View and manage your profile information" />
+        <div className="mx-auto w-full max-w-full px-1">
+
 
             <div className="mt-4 sm:mt-6">
-                <ProfileForm profile={profile} onSubmit={handleProfileUpdate} onCancel={handleCancelEdit} />
+                <ProfileLayout>
+                    {(activeTab) => (
+                        <>
+                            {activeTab === "profile" && (
+                                <ProfileForm profile={profile} onSubmit={handleProfileUpdate} onCancel={handleCancelEdit} />
+                            )}
+                            {activeTab === "notification" && (
+                                <div className="space-y-4">
+                                    <SettingsPageContent />
+                                </div>
+                            )}
+                            {activeTab === "subscription" && (
+                                <ProfileSubscription />
+                            )}
+                        </>
+                    )}
+                </ProfileLayout>
             </div>
         </div>
     );
 }
+
+// Wrapper to handle dynamic import or just standard import
+import { SettingsPageContent } from "@/components/settings/SettingsPageContent";
+import { ProfileLayout } from "./profileLayout";
+import { ProfileSubscription } from "./profileSubscription";
+
+

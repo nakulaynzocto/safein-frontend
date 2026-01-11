@@ -20,6 +20,7 @@ import { getInitials, formatName } from "@/utils/helpers";
 import { CreateAppointmentLinkModal } from "@/components/appointment/CreateAppointmentLinkModal";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { StatusBadge } from "@/components/common/statusBadge";
+import { ActionButton } from "@/components/common/actionButton";
 
 export default function AppointmentLinksPage() {
     const [page, setPage] = useState(1);
@@ -239,36 +240,7 @@ export default function AppointmentLinksPage() {
     return (
         <div className="space-y-4 sm:space-y-6">
             {/* Header Card */}
-            <Card className="card-hostinger p-3 sm:p-4">
-                <CardHeader className="px-0 pb-3 sm:pb-4">
-                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center sm:gap-4">
-                        <CardTitle className="flex min-w-0 flex-1 items-center gap-2 text-base font-semibold sm:text-lg">
-                            <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                            <span className="truncate">Appointment Links</span>
-                        </CardTitle>
-                        <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
-                            <CreateAppointmentLinkModal
-                                open={showCreateModal}
-                                onOpenChange={setShowCreateModal}
-                                triggerButton={
-                                    <Button
-                                        variant="outline-primary"
-                                        className="flex h-8 w-full items-center gap-1.5 px-3 text-xs whitespace-nowrap sm:h-9 sm:w-auto sm:gap-2 sm:px-4 sm:text-sm"
-                                    >
-                                        <Link2 className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
-                                        <span className="hidden min-[375px]:inline">Create Link</span>
-                                        <span className="min-[375px]:hidden">Create</span>
-                                    </Button>
-                                }
-                                onSuccess={() => {
-                                    refetch();
-                                    setShowCreateModal(false);
-                                }}
-                            />
-                        </div>
-                    </div>
-                </CardHeader>
-            </Card>
+
 
             {/* Stats Cards */}
             {data?.stats && (
@@ -321,20 +293,20 @@ export default function AppointmentLinksPage() {
                 </div>
             )}
 
-            {/* Table Card */}
-            <Card className="card-hostinger flex flex-col gap-3 overflow-hidden p-3 sm:gap-4 sm:p-4">
-                <CardHeader className="px-0 pb-0">
-                    <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4">
-                        <div className="min-w-0 flex-1">
-                            <SearchInput
-                                placeholder="Search by visitor email or name..."
-                                value={search}
-                                onChange={setSearch}
-                                debounceDelay={500}
-                                className="w-full"
-                            />
-                        </div>
-                        <div className="w-full shrink-0 sm:w-48">
+            {/* Table Section */}
+            <div className="flex flex-col gap-3 sm:gap-4">
+                <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
+                    <div className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none">
+                        <SearchInput
+                            placeholder="Search by visitor..."
+                            value={search}
+                            onChange={setSearch}
+                            debounceDelay={500}
+                            className="w-full"
+                        />
+                    </div>
+                    <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
+                        <div className="hidden shrink-0 sm:block sm:w-48">
                             <SelectField
                                 value={isBooked === undefined ? "all" : isBooked ? "true" : "false"}
                                 onChange={handleFilterChange}
@@ -342,9 +314,29 @@ export default function AppointmentLinksPage() {
                                 placeholder="Filter by status"
                             />
                         </div>
+                        <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
+                            <CreateAppointmentLinkModal
+                                open={showCreateModal}
+                                onOpenChange={setShowCreateModal}
+                                triggerButton={
+                                    <ActionButton
+                                        variant="outline-primary"
+                                        size="xl"
+                                        className="flex w-full shrink-0 items-center justify-center gap-2 text-xs whitespace-nowrap sm:w-auto sm:text-sm"
+                                    >
+                                        <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                        <span className="hidden sm:inline">Create Link</span>
+                                    </ActionButton>
+                                }
+                                onSuccess={() => {
+                                    refetch();
+                                    setShowCreateModal(false);
+                                }}
+                            />
+                        </div>
                     </div>
-                </CardHeader>
-                <CardContent className="p-0">
+                </div>
+                <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
                     <DataTable
                         data={data?.links || []}
                         columns={columns}
@@ -357,33 +349,33 @@ export default function AppointmentLinksPage() {
                         }}
                         onPrimaryAction={() => setShowCreateModal(true)}
                     />
-                </CardContent>
-            </Card>
-
-            {data?.pagination && data.pagination.totalPages > 1 && (
-                <div className="flex justify-center">
-                    <Pagination
-                        currentPage={data.pagination.page}
-                        totalPages={data.pagination.totalPages}
-                        totalItems={data.pagination.total}
-                        pageSize={data.pagination.limit}
-                        onPageChange={setPage}
-                        hasNextPage={data.pagination.page < data.pagination.totalPages}
-                        hasPrevPage={data.pagination.page > 1}
-                    />
                 </div>
-            )}
 
-            <ConfirmationDialog
-                open={!!deleteLinkId}
-                onOpenChange={(open) => !open && setDeleteLinkId(null)}
-                onConfirm={handleDelete}
-                title="Delete Appointment Link"
-                description="Are you sure you want to delete this appointment link? This action cannot be undone."
-                confirmText={isDeleting ? "Deleting..." : "Delete"}
-                cancelText="Cancel"
-                variant="destructive"
-            />
+                {data?.pagination && data.pagination.totalPages > 1 && (
+                    <div className="flex justify-center">
+                        <Pagination
+                            currentPage={data.pagination.page}
+                            totalPages={data.pagination.totalPages}
+                            totalItems={data.pagination.total}
+                            pageSize={data.pagination.limit}
+                            onPageChange={setPage}
+                            hasNextPage={data.pagination.page < data.pagination.totalPages}
+                            hasPrevPage={data.pagination.page > 1}
+                        />
+                    </div>
+                )}
+
+                <ConfirmationDialog
+                    open={!!deleteLinkId}
+                    onOpenChange={(open) => !open && setDeleteLinkId(null)}
+                    onConfirm={handleDelete}
+                    title="Delete Appointment Link"
+                    description="Are you sure you want to delete this appointment link? This action cannot be undone."
+                    confirmText={isDeleting ? "Deleting..." : "Delete"}
+                    cancelText="Cancel"
+                    variant="destructive"
+                />
+            </div>
         </div>
     );
 }

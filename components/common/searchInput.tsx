@@ -31,16 +31,16 @@ export function SearchInput({
 
     return (
         <div
-            className={`field__input field__input--icon-left flex items-center rounded-md border bg-white px-3 py-2 ${className}`}
+            className={`flex items-center rounded-xl border border-border bg-muted/30 px-3 h-12 transition-all focus-within:bg-background focus-within:ring-1 focus-within:ring-ring ${className}`}
         >
-            <Search className="field__icon field__icon--left h-5 w-5 text-gray-400" />
+            <Search className="h-5 w-5 text-muted-foreground shrink-0" />
             <input
                 type="text"
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 autoComplete="off"
-                className="field__text ml-2 w-full text-gray-700 outline-none"
+                className="ml-2 w-full bg-transparent text-foreground outline-none font-medium placeholder:text-muted-foreground"
             />
         </div>
     );

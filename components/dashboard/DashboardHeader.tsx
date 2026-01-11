@@ -24,18 +24,23 @@ export function DashboardHeader({ companyName }: DashboardHeaderProps) {
                     <>
                         <Button
                             onClick={() => setShowUpgradeModal(true)}
-                            className="w-full text-xs whitespace-nowrap sm:w-auto sm:text-sm"
+                            variant="outline-primary"
+                            className="flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-muted/30 text-xs whitespace-nowrap sm:w-auto sm:text-sm"
                         >
-                            <CalendarPlus className="mr-1 h-4 w-4 shrink-0 sm:mr-2" />
+                            <CalendarPlus className="mr-1 h-5 w-5 shrink-0 sm:mr-2" />
                             <span className="hidden sm:inline">Upgrade to Create More</span>
                             <span className="sm:hidden">Upgrade</span>
                         </Button>
                         <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
                     </>
                 ) : (
-                    <Button className="w-full text-xs whitespace-nowrap sm:w-auto sm:text-sm" asChild>
+                    <Button
+                        variant="outline-primary"
+                        className="flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-muted/30 text-xs whitespace-nowrap sm:w-auto sm:text-sm"
+                        asChild
+                    >
                         <Link href={routes.privateroute.APPOINTMENTCREATE} prefetch>
-                            <CalendarPlus className="mr-1.5 h-4 w-4 shrink-0" />
+                            <CalendarPlus className="mr-1.5 h-5 w-5 shrink-0" />
                             New Appointment
                         </Link>
                     </Button>

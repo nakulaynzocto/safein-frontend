@@ -129,45 +129,45 @@ export const AppointmentsTable = memo(function AppointmentsTable({
             },
             ...(showDateTime
                 ? [
-                      {
-                          key: "appointmentDate",
-                          header: "Date & Time",
-                          sortable: false,
-                          render: (appointment: any) => (
-                              <div className="flex items-center gap-2 text-sm">
-                                  <Calendar className="h-3 w-3" />
-                                  {formatDateTime(
-                                      appointment.appointmentDetails?.scheduledDate,
-                                      appointment.appointmentDetails?.scheduledTime,
-                                  )}
-                              </div>
-                          ),
-                      },
-                  ]
+                    {
+                        key: "appointmentDate",
+                        header: "Date & Time",
+                        sortable: false,
+                        render: (appointment: any) => (
+                            <div className="flex items-center gap-2 text-sm">
+                                <Calendar className="h-3 w-3" />
+                                {formatDateTime(
+                                    appointment.appointmentDetails?.scheduledDate,
+                                    appointment.appointmentDetails?.scheduledTime,
+                                )}
+                            </div>
+                        ),
+                    },
+                ]
                 : [
-                      {
-                          key: "appointmentTime",
-                          header: "Time",
-                          sortable: false,
-                          render: (appointment: any) => (
-                              <div className="text-sm">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
-                          ),
-                      },
-                  ]),
+                    {
+                        key: "appointmentTime",
+                        header: "Time",
+                        sortable: false,
+                        render: (appointment: any) => (
+                            <div className="text-sm">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
+                        ),
+                    },
+                ]),
         ],
         [showDateTime],
     );
 
     return (
-        <Card className="card-hostinger p-2 sm:p-4">
-            <CardHeader className="p-2 pb-2 sm:p-4 sm:pb-4">
-                <CardTitle className="flex items-center gap-2 text-base font-medium sm:text-lg">
+        <div className="flex flex-col gap-2 sm:gap-4">
+            <div className="flex flex-col gap-1 p-2 pb-0 sm:p-0 sm:pb-0">
+                <h3 className="flex items-center gap-2 text-base font-medium sm:text-lg">
                     <Calendar className="h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
                     <span className="truncate">{title}</span>
-                </CardTitle>
-                <CardDescription className="text-xs sm:text-sm">{description}</CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
+                </h3>
+                <p className="text-muted-foreground text-xs sm:text-sm">{description}</p>
+            </div>
+            <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
                 <div className="-mx-2 overflow-x-auto sm:mx-0">
                     <div className="min-w-[500px] sm:min-w-0">
                         <DataTable
@@ -182,7 +182,7 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                         />
                     </div>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 });

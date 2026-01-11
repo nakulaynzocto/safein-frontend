@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/common/actionButton";
 import { AlertCircle, CheckCircle, XCircle, AlertTriangle, Home, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { routes } from "@/utils/routes";
@@ -84,16 +84,16 @@ export function StatusPage({
         if (action.href) {
             return (
                 <Link href={action.href}>
-                    <Button variant={variant} className="w-full sm:w-auto">
+                    <ActionButton variant={variant} size="xl" className="w-full sm:w-auto">
                         {action.label}
-                    </Button>
+                    </ActionButton>
                 </Link>
             );
         }
         return (
-            <Button variant={variant} onClick={action.onClick} className="w-full sm:w-auto">
+            <ActionButton variant={variant} onClick={action.onClick} size="xl" className="w-full sm:w-auto">
                 {action.label}
-            </Button>
+            </ActionButton>
         );
     };
 
@@ -125,21 +125,22 @@ export function StatusPage({
                         {secondaryAction && renderButton(secondaryAction, "outline")}
                         {showHomeButton && (
                             <Link href={routes.publicroute.HOME}>
-                                <Button variant="outline" className="w-full sm:w-auto">
+                                <ActionButton variant="outline" size="xl" className="w-full sm:w-auto">
                                     <Home className="mr-2 h-4 w-4" />
                                     Go Home
-                                </Button>
+                                </ActionButton>
                             </Link>
                         )}
                         {showBackButton && (
-                            <Button
+                            <ActionButton
                                 variant="outline"
                                 onClick={() => window.history.back()}
+                                size="xl"
                                 className="w-full sm:w-auto"
                             >
                                 <ArrowLeft className="mr-2 h-4 w-4" />
                                 Go Back
-                            </Button>
+                            </ActionButton>
                         )}
                     </div>
                 </CardContent>

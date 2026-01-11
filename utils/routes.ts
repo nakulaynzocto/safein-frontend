@@ -46,9 +46,8 @@ export const routes = {
         // Settings Routes
         SETTINGS: "/settings",
         PROFILE: "/settings/profile",
-        NOTIFICATIONS: "/settings/notifications",
+
         SETTINGS_STATUS: "/settings/status",
-        ACTIVE_PLAN: "/settings/plan",
     },
 } as const;
 

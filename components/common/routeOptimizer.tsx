@@ -18,7 +18,7 @@ export function RouteOptimizer() {
             routes.privateroute.APPOINTMENTLIST,
             routes.privateroute.VISITORLIST,
             routes.privateroute.EMPLOYEELIST,
-            routes.privateroute.NOTIFICATIONS,
+
             routes.privateroute.PROFILE,
         ];
 
@@ -47,7 +47,7 @@ export function RouteOptimizer() {
                     if (url.origin === currentUrl.origin) {
                         router.prefetch(url.pathname);
                     }
-                } catch (error) {}
+                } catch (error) { }
             }
         };
 

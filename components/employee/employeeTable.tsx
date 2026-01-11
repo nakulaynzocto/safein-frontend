@@ -49,6 +49,7 @@ export interface EmployeeTableProps {
     title?: string;
     description?: string;
     hasReachedLimit?: boolean;
+    headerActions?: React.ReactNode;
 }
 
 export function EmployeeTable({
@@ -68,6 +69,7 @@ export function EmployeeTable({
     showHeader = true,
     title,
     hasReachedLimit = false,
+    headerActions,
 }: EmployeeTableProps) {
     const router = useRouter();
 
@@ -203,19 +205,22 @@ export function EmployeeTable({
     return (
         <div className="space-y-6">
             {/* Main Table */}
-            <Card className="card-hostinger gap-3 p-4 sm:gap-4">
-                <CardHeader className="pb-0">
-                    <div className="flex items-center justify-between gap-3">
-                        <SearchInput
-                            placeholder="Search employees..."
-                            value={searchTerm}
-                            onChange={onSearchChange}
-                            debounceDelay={500}
-                            className="w-full"
-                        />
-                    </div>
-                </CardHeader>
-                <CardContent className="p-0">
+            <div className="flex flex-col gap-3 sm:gap-4">
+                <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
+                    <SearchInput
+                        placeholder="Search employees..."
+                        value={searchTerm}
+                        onChange={onSearchChange}
+                        debounceDelay={500}
+                        className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none"
+                    />
+                    {headerActions && (
+                        <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
+                            {headerActions}
+                        </div>
+                    )}
+                </div>
+                <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
                     {employees.length === 0 && !isLoading ? (
                         <div className="flex flex-col items-center justify-center px-4 py-12">
                             <div className="space-y-4 text-center">
@@ -259,8 +264,8 @@ export function EmployeeTable({
                             isLoading={isLoading}
                         />
                     )}
-                </CardContent>
-            </Card>
+                </div>
+            </div>
 
             {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (

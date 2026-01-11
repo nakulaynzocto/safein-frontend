@@ -16,6 +16,20 @@ export interface User {
     lastLoginAt?: string;
     createdAt?: string;
     updatedAt?: string;
+    mobileNumber?: string;
+    bio?: string;
+    address?: {
+        street?: string;
+        city?: string;
+        state?: string;
+        country?: string;
+        pincode?: string;
+    };
+    socialLinks?: {
+        linkedin?: string;
+        twitter?: string;
+        website?: string;
+    };
 }
 
 export interface LoginRequest {
@@ -47,6 +61,20 @@ export interface RegisterResponse {
 export interface UpdateProfileRequest {
     companyName?: string;
     profilePicture?: string;
+    mobileNumber?: string;
+    bio?: string;
+    address?: {
+        street?: string;
+        city?: string;
+        state?: string;
+        country?: string;
+        pincode?: string;
+    };
+    socialLinks?: {
+        linkedin?: string;
+        twitter?: string;
+        website?: string;
+    };
 }
 
 export interface ForgotPasswordRequest {
@@ -210,6 +238,10 @@ export const authApi = baseApi.injectEndpoints({
                 if (profileData.profilePicture && typeof profileData.profilePicture === "string") {
                     cleanBody.profilePicture = profileData.profilePicture;
                 }
+                if (profileData.mobileNumber) cleanBody.mobileNumber = profileData.mobileNumber;
+                if (profileData.bio) cleanBody.bio = profileData.bio;
+                if (profileData.address) cleanBody.address = profileData.address;
+                if (profileData.socialLinks) cleanBody.socialLinks = profileData.socialLinks;
 
                 // Verify it's serializable (no circular refs)
                 try {

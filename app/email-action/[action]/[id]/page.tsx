@@ -57,7 +57,7 @@ export default function EmailActionPage() {
     }, [action, id, approveAppointment, rejectAppointment, isAuthenticated]);
 
     const handleGoToDashboard = () => {
-        router.push(routes.privateroute.NOTIFICATIONS);
+        router.push(routes.privateroute.DASHBOARD);
     };
 
     const handleGoToLogin = () => {
@@ -99,7 +99,7 @@ export default function EmailActionPage() {
                 primaryAction={{
                     label: "View Dashboard",
                     onClick: handleGoToDashboard,
-                    href: routes.privateroute.NOTIFICATIONS,
+                    href: routes.privateroute.DASHBOARD,
                 }}
                 showHomeButton={true}
             />
@@ -115,7 +115,7 @@ export default function EmailActionPage() {
             primaryAction={{
                 label: "Back to Dashboard",
                 onClick: handleGoToDashboard,
-                href: routes.privateroute.NOTIFICATIONS,
+                href: routes.privateroute.DASHBOARD,
             }}
             showHomeButton={true}
         />

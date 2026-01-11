@@ -4,21 +4,49 @@ import { useState, useEffect, useCallback, type ChangeEvent } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { X, Save, Loader2, Upload } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Save, Loader2, Upload, Mail, Phone, MapPin, Shield,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea"; // Using Textarea component
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useUploadFileMutation } from "@/store/api";
 import { User as UserType } from "@/store/api/authApi";
 
+// Expanded Schema to match Super Admin
 const profileSchema = z.object({
     companyName: z
         .string()
         .min(2, "Company name must be at least 2 characters")
         .max(100, "Company name cannot exceed 100 characters"),
+    email: z.string().email("Invalid email format").min(1, "Email is required"),
+    mobileNumber: z.string().optional().or(z.literal("")),
+    bio: z.string().max(500, "Biography must be less than 500 characters").optional().or(z.literal("")),
     profilePicture: z.string().optional().or(z.literal("")),
+    address: z.object({
+        street: z.string().optional().or(z.literal("")),
+        city: z.string().optional().or(z.literal("")),
+        state: z.string().optional().or(z.literal("")),
+        country: z.string().optional().or(z.literal("")),
+        pincode: z.string().optional().or(z.literal("")),
+    }),
+    socialLinks: z.object({
+        linkedin: z.string().url("Invalid LinkedIn URL").optional().or(z.literal("")),
+        twitter: z.string().url("Invalid Twitter URL").optional().or(z.literal("")),
+        website: z.string().url("Invalid website URL").optional().or(z.literal("")),
+    }),
+    isActive: z.boolean().default(true),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -37,9 +65,25 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     const [hasAttemptedUpload, setHasAttemptedUpload] = useState(false);
     const [uploadFile] = useUploadFileMutation();
 
-    const defaultValues = {
+    const defaultValues: ProfileFormData = {
         companyName: profile?.companyName || "",
+        email: profile?.email || "",
+        mobileNumber: profile?.mobileNumber || "",
+        bio: profile?.bio || "",
         profilePicture: profile?.profilePicture || "",
+        address: {
+            street: profile?.address?.street || "",
+            city: profile?.address?.city || "",
+            state: profile?.address?.state || "",
+            country: profile?.address?.country || "India",
+            pincode: profile?.address?.pincode || "",
+        },
+        socialLinks: {
+            linkedin: profile?.socialLinks?.linkedin || "",
+            twitter: profile?.socialLinks?.twitter || "",
+            website: profile?.socialLinks?.website || "",
+        },
+        isActive: profile?.isActive ?? true,
     };
 
     const {
@@ -48,23 +92,39 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
         formState: { errors },
         setValue,
         reset,
+        watch,
     } = useForm<ProfileFormData>({
         resolver: zodResolver(profileSchema),
         defaultValues,
     });
 
     useEffect(() => {
-        if (profile && profile.companyName) {
-            const newDefaultValues = {
+        if (profile) {
+            reset({
                 companyName: profile.companyName || "",
+                email: profile.email || "",
+                mobileNumber: profile.mobileNumber || "",
+                bio: profile.bio || "",
                 profilePicture: profile.profilePicture || "",
-            };
-            reset(newDefaultValues);
+                address: {
+                    street: profile.address?.street || "",
+                    city: profile.address?.city || "",
+                    state: profile.address?.state || "",
+                    country: profile.address?.country || "India",
+                    pincode: profile.address?.pincode || "",
+                },
+                socialLinks: {
+                    linkedin: profile.socialLinks?.linkedin || "",
+                    twitter: profile.socialLinks?.twitter || "",
+                    website: profile.socialLinks?.website || "",
+                },
+                isActive: profile.isActive ?? true,
+            });
             setProfileImage(profile.profilePicture || null);
         }
     }, [profile, reset]);
 
-    if (!profile || !profile.companyName) {
+    if (!profile) {
         return (
             <Card>
                 <CardContent className="p-6">
@@ -76,32 +136,10 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
         );
     }
 
-    const handleFormSubmit = useCallback(
-        async (data: ProfileFormData) => {
-            setIsSubmitting(true);
-            try {
-                const cleanData: { companyName: string; profilePicture?: string } = {
-                    companyName: data.companyName.trim(),
-                };
+    const companyName = watch("companyName");
+    const isActive = watch("isActive");
 
-                if (data.profilePicture && data.profilePicture.trim() !== "") {
-                    cleanData.profilePicture = data.profilePicture.trim();
-                }
-
-                const payload = JSON.parse(JSON.stringify(cleanData));
-
-                await onSubmit(payload as ProfileFormData);
-                showSuccessToast("Profile updated successfully!");
-            } catch (error: any) {
-                const errorMessage = error?.message || "Failed to update profile";
-                showErrorToast(errorMessage);
-            } finally {
-                setIsSubmitting(false);
-            }
-        },
-        [onSubmit],
-    );
-
+    // Existing Upload Logic - Preserved Exactly
     const handleImageUpload = useCallback(
         async (file: File | null) => {
             if (!file) return;
@@ -119,12 +157,14 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                 showSuccessToast("Profile picture uploaded successfully!");
             } catch (err: any) {
                 setUploadSuccess(false);
-                showErrorToast(err?.data?.message || err?.message || "Failed to upload profile picture");
+                showErrorToast(
+                    err?.data?.message || err?.message || "Failed to upload profile picture"
+                );
             } finally {
                 setIsUploading(false);
             }
         },
-        [uploadFile, setValue],
+        [uploadFile, setValue]
     );
 
     const handleFileChange = useCallback(
@@ -144,131 +184,326 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                 handleImageUpload(file);
             }
         },
-        [handleImageUpload],
+        [handleImageUpload]
     );
+    // End of Existing Upload Logic
 
-    const handleCancel = useCallback(() => {
-        if (profile) {
-            reset(defaultValues);
-            setProfileImage(profile.profilePicture || null);
+    const handleFormSubmit = async (data: ProfileFormData) => {
+        setIsSubmitting(true);
+        try {
+            await onSubmit(data);
+            showSuccessToast("Profile updated successfully!");
+        } catch (error: any) {
+            const errorMessage = error?.message || "Failed to update profile";
+            showErrorToast(errorMessage);
+        } finally {
+            setIsSubmitting(false);
         }
-        onCancel();
-    }, [profile, reset, onCancel, defaultValues]);
+    };
 
-    // Check if save button should be enabled
-    // If user attempted upload, it must be successful
-    // Otherwise, allow saving without upload
+    // Check if save button should be enabled based on upload status
     const canSave = !hasAttemptedUpload || (hasAttemptedUpload && uploadSuccess);
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Edit Profile</CardTitle>
-                <CardDescription>Update your personal information</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-                    {/* Profile Picture */}
-                    <div className="space-y-3">
-                        <Label>Profile Picture</Label>
-                        <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-                            <div className="relative">
-                                <img
+        <div className="space-y-6">
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="text-lg font-bold">
+                        Profile Information
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    {/* Top Row: Avatar Left + Status Right */}
+                    <div className="flex items-start justify-between pb-6 border-b border-border">
+                        <div className="flex-shrink-0 relative group">
+                            <Avatar className="h-24 w-24 border-4 border-muted">
+                                <AvatarImage
                                     src={
                                         profileImage
-                                            ? `${profileImage}${profileImage.includes("?") ? "&" : "?"}v=${profileImage.length}`
-                                            : "/aynzo-logo.png"
+                                            ? `${profileImage}${profileImage.includes("?") ? "&" : "?"}v=${profileImage?.length}`
+                                            : ""
                                     }
-                                    alt="Profile"
-                                    key={profileImage}
-                                    className="h-24 w-24 rounded-full border-2 border-gray-200 object-cover"
-                                    onError={(e) => {
-                                        e.currentTarget.src = "/aynzo-logo.png";
-                                    }}
                                 />
-                            </div>
-                            <div className="flex-1">
-                                <Label
-                                    htmlFor="profile-upload"
-                                    className="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:bg-gray-50"
-                                >
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                        {isUploading ? (
-                                            <>
-                                                <Loader2 className="mb-2 h-8 w-8 animate-spin text-gray-400" />
-                                                <p className="text-sm text-gray-500">Uploading...</p>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Upload className="mb-2 h-8 w-8 text-gray-400" />
-                                                <p className="text-sm text-gray-600">
-                                                    <span className="font-semibold">Click to upload</span> or drag and
-                                                    drop
-                                                </p>
-                                                <p className="mt-1 text-xs text-gray-500">
-                                                    Accepted formats: image/* • Max 5MB
-                                                </p>
-                                            </>
-                                        )}
-                                    </div>
-                                    <input
-                                        id="profile-upload"
-                                        type="file"
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                        disabled={isUploading}
-                                    />
-                                </Label>
-                                {hasAttemptedUpload && !uploadSuccess && (
-                                    <p className="mt-2 text-sm text-red-500">
-                                        Please upload image successfully to save profile
-                                    </p>
+                                <AvatarFallback className="text-3xl font-bold bg-primary/10 text-primary">
+                                    {companyName?.substring(0, 2).toUpperCase() || "CN"}
+                                </AvatarFallback>
+                            </Avatar>
+                            <label
+                                htmlFor="profile-upload"
+                                className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer"
+                            >
+                                {isUploading ? (
+                                    <Loader2 className="animate-spin" size={24} />
+                                ) : (
+                                    <Upload size={24} />
                                 )}
+                            </label>
+                            <input
+                                id="profile-upload"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleFileChange}
+                                disabled={isUploading}
+                            />
+                        </div>
+
+                        {/* Active Account Status - Top Right (Read-only for frontend user usually, but duplicating UI) */}
+                        <div>
+                            <div
+                                className={`flex items-center justify-center px-3 py-1.5 rounded text-xs font-semibold uppercase tracking-wide border-0 ${isActive
+                                    ? "bg-emerald-500/10 text-emerald-700"
+                                    : "bg-destructive/10 text-destructive"
+                                    }`}
+                            >
+                                {isActive ? "Active Account" : "Inactive"}
                             </div>
                         </div>
                     </div>
 
-                    {/* Company Name */}
-                    <div className="space-y-2">
-                        <Label htmlFor="companyName">
-                            Company Name <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            id="companyName"
-                            placeholder="Enter your company name"
-                            {...register("companyName")}
-                            className={errors.companyName ? "border-red-500" : ""}
-                        />
-                        {errors.companyName && <p className="text-sm text-red-500">{errors.companyName.message}</p>}
-                    </div>
+                    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+                        {/* Form Fields Grid - Below Avatar */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="companyName"
+                                    className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                >
+                                    Company Name <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="companyName"
+                                    {...register("companyName")}
+                                    className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.companyName ? "border-destructive" : ""}`}
+                                />
+                                {errors.companyName && (
+                                    <p className="text-xs text-destructive mt-1">{errors.companyName.message}</p>
+                                )}
+                            </div>
 
-                    {/* Form Actions */}
-                    <div className="flex flex-col justify-end gap-3 border-t pt-4 sm:flex-row">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleCancel}
-                            disabled={isSubmitting || isUploading}
-                        >
-                            <X className="mr-2 h-4 w-4" />
-                            Cancel
-                        </Button>
-                        <Button type="submit" disabled={isSubmitting || isUploading || !canSave}>
-                            {isSubmitting ? (
-                                <span className="flex items-center gap-2">
-                                    <Loader2 className="h-4 w-4 animate-spin" /> Saving...
-                                </span>
-                            ) : (
-                                <>
-                                    <Save className="mr-2 h-4 w-4" />
-                                    Save Changes
-                                </>
-                            )}
-                        </Button>
-                    </div>
-                </form>
-            </CardContent>
-        </Card>
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="email"
+                                    className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                >
+                                    Email Address <span className="text-destructive">*</span>
+                                </Label>
+                                <div className="relative group">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
+                                        <Mail size={16} />
+                                    </div>
+                                    <Input
+                                        id="email"
+                                        {...register("email")}
+                                        disabled // Usually email is immutable or requires specific flow
+                                        className={`pl-10 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground ${errors.email ? "border-destructive" : ""}`}
+                                    />
+                                </div>
+                                {errors.email && (
+                                    <p className="text-xs text-destructive mt-1">{errors.email.message}</p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="mobileNumber"
+                                    className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                >
+                                    Contact Number
+                                </Label>
+                                <div className="relative group">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
+                                        <Phone size={16} />
+                                    </div>
+                                    <Input
+                                        id="mobileNumber"
+                                        {...register("mobileNumber")}
+                                        className={`pl-10 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground ${errors.mobileNumber ? "border-destructive" : ""}`}
+                                        placeholder="10-digit mobile number"
+                                    />
+                                </div>
+                                {errors.mobileNumber && (
+                                    <p className="text-xs text-destructive mt-1">{errors.mobileNumber.message}</p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="bio"
+                                    className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                >
+                                    Biography / About
+                                </Label>
+                                <Textarea
+                                    id="bio"
+                                    {...register("bio")}
+                                    rows={3}
+                                    className={`w-full rounded-xl border border-border bg-muted/30 px-3 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus:bg-background transition-all disabled:cursor-not-allowed disabled:opacity-50 font-medium resize-none ${errors.bio ? "border-destructive" : ""}`}
+                                    placeholder="Write a short bio about yourself..."
+                                />
+                                {errors.bio && (
+                                    <p className="text-xs text-destructive mt-1">{errors.bio.message}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="h-px bg-border w-full" />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                            {/* Address Section */}
+                            <div className="space-y-6">
+                                <h3 className="text-sm font-bold flex items-center gap-2">
+                                    <MapPin size={18} className="text-primary" />
+                                    Office Address
+                                </h3>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="street"
+                                            className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                        >
+                                            Street / Locality
+                                        </Label>
+                                        <Input
+                                            id="street"
+                                            {...register("address.street")}
+                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="city"
+                                                className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                            >
+                                                City
+                                            </Label>
+                                            <Input
+                                                id="city"
+                                                {...register("address.city")}
+                                                className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="state"
+                                                className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                            >
+                                                State
+                                            </Label>
+                                            <Input
+                                                id="state"
+                                                {...register("address.state")}
+                                                className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="country"
+                                                className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                            >
+                                                Country
+                                            </Label>
+                                            <Input
+                                                id="country"
+                                                {...register("address.country")}
+                                                className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="pincode"
+                                                className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                            >
+                                                Pincode
+                                            </Label>
+                                            <Input
+                                                id="pincode"
+                                                {...register("address.pincode")}
+                                                className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Social Section */}
+                            <div className="space-y-6">
+                                <h3 className="text-sm font-bold flex items-center gap-2">
+                                    <Shield size={18} className="text-primary" />
+                                    Social Presence
+                                </h3>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="linkedin"
+                                            className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                        >
+                                            LinkedIn URL
+                                        </Label>
+                                        <Input
+                                            id="linkedin"
+                                            {...register("socialLinks.linkedin")}
+                                            placeholder="https://linkedin.com/in/..."
+                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="twitter"
+                                            className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                        >
+                                            Twitter URL
+                                        </Label>
+                                        <Input
+                                            id="twitter"
+                                            {...register("socialLinks.twitter")}
+                                            placeholder="https://twitter.com/..."
+                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="website"
+                                            className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                        >
+                                            Website
+                                        </Label>
+                                        <Input
+                                            id="website"
+                                            {...register("socialLinks.website")}
+                                            placeholder="https://..."
+                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end pt-4 border-t">
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting || isUploading || !canSave}
+                                className="min-w-[120px]"
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save className="mr-2 h-4 w-4" />
+                                        Save Changes
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    </form>
+                </CardContent>
+            </Card>
+        </div>
     );
 }

@@ -86,8 +86,8 @@ export function useAppointmentOperations(
         initialSearch = "",
         initialStatus = "",
         initialEmployeeId = "",
-        initialDateFrom = todayDate,
-        initialDateTo = todayDate,
+        initialDateFrom = "",
+        initialDateTo = "",
         initialSortBy = "createdAt",
         initialSortOrder = "desc",
     } = options;
@@ -198,8 +198,8 @@ export function useAppointmentOperations(
         setSearchTerm("");
         setStatusFilter("");
         setEmployeeFilter("");
-        setDateFrom(todayDate);
-        setDateTo(todayDate);
+        setDateFrom("");
+        setDateTo("");
         setCurrentPage(1);
         setSortBy("createdAt");
         setSortOrder("desc");

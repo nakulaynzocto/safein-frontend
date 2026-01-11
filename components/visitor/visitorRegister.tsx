@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useState, useEffect } from "react";
+import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Button } from "@/components/ui/button";
@@ -9,46 +9,12 @@ import { FormContainer } from "@/components/common/formContainer";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { InputField } from "@/components/common/inputField";
-import { SelectField } from "@/components/common/selectField";
-import { ImageUploadField } from "@/components/common/imageUploadField";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
-import { PhoneInputField } from "@/components/common/phoneInputField";
-import { CountryStateCitySelect } from "@/components/common/countryStateCity";
-import { TextareaField } from "@/components/common/textareaField";
 import { CreateVisitorRequest, useCreateVisitorMutation } from "@/store/api/visitorApi";
-import { CreditCard, Camera, CheckCircle, Info } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
-
-const visitorDetailsSchema = yup.object({
-    name: yup.string().required("Name is required"),
-    email: yup.string().email("Invalid email address").required("Email is required"),
-    phone: yup.string().required("Phone number is required"),
-    gender: yup.string().oneOf(["male", "female", "other"], "Please select gender").optional(),
-    address: yup.object({
-        street: yup.string().optional(),
-        city: yup.string().required("City is required"),
-        state: yup.string().required("State is required"),
-        country: yup.string().required("Country is required"),
-    }),
-    idProof: yup.object({
-        type: yup.string().optional(),
-        number: yup.string().optional(),
-        image: yup.string().optional(),
-    }),
-    photo: yup.string().optional().default(""),
-    blacklisted: yup.boolean().default(false),
-    blacklistReason: yup.string().optional(),
-    tags: yup.string().optional(),
-    emergencyContact: yup
-        .object({
-            name: yup.string().optional(),
-            phone: yup.string().optional(),
-        })
-        .optional(),
-});
-
-type VisitorDetailsFormData = yup.InferType<typeof visitorDetailsSchema>;
+import { VisitorFormFields } from "./visitorFormFields";
+import { visitorSchema, VisitorFormData } from "./visitorSchema";
 
 interface VisitorRegisterProps {
     onComplete?: (data: CreateVisitorRequest, visitorId?: string) => void;
@@ -59,6 +25,7 @@ interface VisitorRegisterProps {
 export function VisitorRegister({ onComplete, initialData, standalone = false }: VisitorRegisterProps) {
     const [createVisitor, { isLoading, isSuccess }] = useCreateVisitorMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
+    const [isFileUploading, setIsFileUploading] = useState(false);
 
     const hasOptionalData =
         initialData &&
@@ -79,8 +46,8 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
         setValue,
         reset,
         control,
-    } = useForm<VisitorDetailsFormData>({
-        resolver: yupResolver(visitorDetailsSchema),
+    } = useForm<VisitorFormData>({
+        resolver: yupResolver(visitorSchema),
         defaultValues: {
             name: initialData?.name || "",
             email: initialData?.email || "",
@@ -108,13 +75,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
         },
     });
 
-    const idProofTypes = [
-        { value: "aadhaar", label: "Aadhaar Card" },
-        { value: "pan", label: "PAN Card" },
-        { value: "driving_license", label: "Driving License" },
-        { value: "passport", label: "Passport" },
-        { value: "other", label: "Other" },
-    ];
+
 
     const clearGeneralError = () => {
         if (generalError) {
@@ -138,7 +99,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
         }
     };
 
-    const onSubmit = async (data: VisitorDetailsFormData): Promise<void> => {
+    const onSubmit: SubmitHandler<VisitorFormData> = async (data) => {
         setGeneralError(null);
 
         try {
@@ -156,10 +117,10 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                 idProof:
                     data.idProof.type || data.idProof.number || data.idProof.image
                         ? {
-                              type: data.idProof.type || undefined,
-                              number: data.idProof.number || undefined,
-                              image: data.idProof.image || undefined,
-                          }
+                            type: data.idProof.type || undefined,
+                            number: data.idProof.number || undefined,
+                            image: data.idProof.image || undefined,
+                        }
                         : undefined,
                 photo: data.photo || undefined,
                 blacklisted: data.blacklisted,
@@ -168,9 +129,9 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                 emergencyContact:
                     data.emergencyContact?.name || data.emergencyContact?.phone
                         ? {
-                              name: data.emergencyContact.name || "",
-                              phone: data.emergencyContact.phone || "",
-                          }
+                            name: data.emergencyContact.name || "",
+                            phone: data.emergencyContact.phone || "",
+                        }
                         : undefined,
             };
 
@@ -235,241 +196,36 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                 </Alert>
             )}
 
-            {/* Personal Information Section */}
-            <div className="space-y-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                    <InputField
-                        label="Name"
-                        placeholder="Enter name"
-                        error={errors.name?.message}
-                        {...register("name")}
-                        required
-                        className="md:col-span-1"
-                    />
-                    <InputField
-                        label="Email"
-                        type="email"
-                        placeholder="Enter email address"
-                        error={errors.email?.message}
-                        {...register("email")}
-                        required
-                        className="md:col-span-1"
-                    />
-                    <Controller
-                        name="phone"
-                        control={control}
-                        render={({ field }) => (
-                            <PhoneInputField
-                                id="phone"
-                                label="Phone Number"
-                                value={field.value}
-                                onChange={(value) => field.onChange(value)}
-                                error={errors.phone?.message}
-                                required
-                                placeholder="Enter phone number"
-                                defaultCountry="in"
-                            />
-                        )}
-                    />
-                    <Controller
-                        name="gender"
-                        control={control}
-                        render={({ field }) => (
-                            <SelectField
-                                label="Gender"
-                                placeholder="Select gender"
-                                options={[
-                                    { value: "male", label: "Male" },
-                                    { value: "female", label: "Female" },
-                                    { value: "other", label: "Other" },
-                                ]}
-                                value={field.value || ""}
-                                onChange={(val) => field.onChange(val)}
-                                error={errors.gender?.message}
-                            />
-                        )}
-                    />
-                </div>
-            </div>
-
-            {/* Address Information Section */}
-            <div className="space-y-4 pt-4">
-                <CountryStateCitySelect
-                    value={{
-                        country: watch("address.country") || "",
-                        state: watch("address.state") || "",
-                        city: watch("address.city") || "",
-                    }}
-                    onChange={(v) => {
-                        setValue("address.country", v.country);
-                        setValue("address.state", v.state);
-                        setValue("address.city", v.city);
-                    }}
-                    errors={{
-                        country: errors.address?.country?.message as string,
-                        state: errors.address?.state?.message as string,
-                        city: errors.address?.city?.message as string,
-                    }}
-                />
-            </div>
-
-            {/* Company Address Section */}
-            <div className="space-y-4 pt-4">
-                <TextareaField
-                    label="Company Address (optional)"
-                    id="address.street"
-                    placeholder="Enter company address"
-                    {...register("address.street")}
-                    error={errors.address?.street?.message}
-                    rows={3}
-                />
-            </div>
-
-            {/* Optional Fields Toggle */}
-            <div className="border-t pt-4">
-                <div className="bg-muted/30 flex items-center justify-between rounded-lg border p-4">
-                    <div className="flex items-center gap-3">
-                        <Info className="text-muted-foreground h-5 w-5" />
-                        <div>
-                            <Label htmlFor="optional-fields-toggle" className="cursor-pointer text-sm font-medium">
-                                Add Additional Information
-                            </Label>
-                            <p className="text-muted-foreground mt-0.5 text-xs">
-                                Include optional details like ID proof, photos, and notes
-                            </p>
-                        </div>
-                    </div>
-                    <Switch
-                        id="optional-fields-toggle"
-                        checked={showOptionalFields}
-                        onCheckedChange={handleToggleChange}
-                    />
-                </div>
-            </div>
-
-            {/* Optional Fields Section - Only shown when toggle is ON */}
-            {showOptionalFields && (
-                <div className="animate-in fade-in slide-in-from-top-2 space-y-4 pt-4 duration-200">
-                    {/* Emergency Contact & Security Section */}
-                    <div className="space-y-4 border-t pt-4">
-                        <h4 className="text-muted-foreground flex items-center gap-2 text-sm font-bold tracking-wider uppercase">
-                            <CreditCard className="h-4 w-4" /> Security & Emergency
-                        </h4>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <InputField
-                                label="Emergency Contact Name"
-                                placeholder="Enter contact name"
-                                {...register("emergencyContact.name")}
-                                error={errors.emergencyContact?.name?.message}
-                            />
-                            <InputField
-                                label="Emergency Contact Phone"
-                                placeholder="Enter contact phone"
-                                {...register("emergencyContact.phone")}
-                                error={errors.emergencyContact?.phone?.message}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-4 border-t pt-4">
-                        <div className="bg-destructive/5 border-destructive/20 flex items-center justify-between rounded-lg border p-3">
-                            <div>
-                                <Label className="text-destructive text-sm font-bold">Blacklist Visitor</Label>
-                                <p className="text-muted-foreground text-[10px]">
-                                    Prevent this visitor from checking in
-                                </p>
-                            </div>
-                            <Controller
-                                name="blacklisted"
-                                control={control}
-                                render={({ field }) => (
-                                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                                )}
-                            />
-                        </div>
-                        {watch("blacklisted") && (
-                            <InputField
-                                label="Blacklist Reason"
-                                placeholder="Enter reason for blacklisting"
-                                {...register("blacklistReason")}
-                                error={errors.blacklistReason?.message}
-                            />
-                        )}
-                    </div>
-
-                    <div className="space-y-4 border-t pt-4">
-                        <InputField
-                            label="Visitor Tags (comma-separated)"
-                            placeholder="VIP, Frequent, Contractor..."
-                            {...register("tags")}
-                            error={errors.tags?.message}
-                        />
-                    </div>
-
-                    {/* ID Proof & Additional Information Section */}
-                    <div className="space-y-4 border-t pt-4">
-                        <h4 className="text-muted-foreground text-sm font-bold tracking-wider uppercase">
-                            ID Verification
-                        </h4>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <Controller
-                                name="idProof.type"
-                                control={control}
-                                render={({ field }) => (
-                                    <SelectField
-                                        label="ID Proof Type (optional)"
-                                        placeholder="Select ID proof type"
-                                        options={idProofTypes}
-                                        value={field.value || ""}
-                                        onChange={(val) => field.onChange(val)}
-                                        error={errors.idProof?.type?.message}
-                                    />
-                                )}
-                            />
-                            <InputField
-                                label="ID Proof Number (optional)"
-                                placeholder="Enter ID proof number"
-                                error={errors.idProof?.number?.message}
-                                {...register("idProof.number")}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Image Uploads Section */}
-                    <div className="space-y-4 pt-4">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div className="space-y-2">
-                                <ImageUploadField
-                                    key={`idProof-${initialData?._id || "new"}`}
-                                    name="idProof.image"
-                                    label="ID Proof Image (optional)"
-                                    register={register}
-                                    setValue={setValue}
-                                    errors={errors.idProof?.image}
-                                    initialUrl={initialData?.idProof?.image}
-                                    enableImageCapture={true}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <ImageUploadField
-                                    key={`photo-${initialData?._id || "new"}`}
-                                    name="photo"
-                                    label="Visitor Photo (optional)"
-                                    register={register}
-                                    setValue={setValue}
-                                    errors={errors.photo}
-                                    initialUrl={initialData?.photo}
-                                    enableImageCapture={true}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Visitor Form Fields - Common Component */}
+            <VisitorFormFields
+                register={register}
+                control={control}
+                errors={errors}
+                watch={watch}
+                setValue={setValue}
+                showOptionalFields={showOptionalFields}
+                onToggleOptionalFields={handleToggleChange}
+                setIsFileUploading={setIsFileUploading}
+                initialData={initialData}
+            />
 
             {/* Submit Button */}
-            <div className="flex justify-end pt-4">
-                <Button type="submit" variant="default" className="min-w-[140px] px-8" disabled={isLoading}>
+            <div className="flex flex-col-reverse justify-end gap-3 border-t pt-4 sm:flex-row sm:gap-4 sm:pt-6">
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onComplete?.({} as CreateVisitorRequest)} // Or handle cancel properly
+                    className="h-12 w-full rounded-xl border-border px-8 font-medium sm:w-auto"
+                    disabled={isLoading || isFileUploading}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    type="submit"
+                    variant="default"
+                    className="h-12 w-full rounded-xl bg-[#3882a5] px-8 text-white hover:bg-[#2d6a87] font-medium sm:w-auto"
+                    disabled={isLoading || isFileUploading}
+                >
                     {isLoading ? (
                         <>
                             <LoadingSpinner size="sm" className="mr-2" />

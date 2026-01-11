@@ -6,66 +6,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/common/actionButton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { SelectField } from "@/components/common/selectField";
-import { CountryStateCitySelect } from "@/components/common/countryStateCity";
-import { ImageUploadField } from "@/components/common/imageUploadField";
-import { PhoneInputField } from "@/components/common/phoneInputField";
-import { LoadingSpinner } from "@/components/common/loadingSpinner";
-import { FormContainer } from "@/components/common/formContainer";
-import {
-    CreateVisitorRequest,
-    useCreateVisitorMutation,
-    useGetVisitorQuery,
-    useUpdateVisitorMutation,
-} from "@/store/api/visitorApi";
-import { showSuccessToast } from "@/utils/toast";
-import { routes } from "@/utils/routes";
-import { CreditCard, Camera, CheckCircle, Info } from "lucide-react";
-import { TextareaField } from "../common/textareaField";
-import { Switch } from "@/components/ui/switch";
-import { InputField } from "@/components/common/inputField";
-
-const visitorSchema = yup.object({
-    name: yup.string().required("Name is required").min(2, "Name must be at least 2 characters"),
-    email: yup.string().email("Invalid email address").required("Email is required"),
-    phone: yup.string().required("Phone number is required"),
-    gender: yup.string().oneOf(["male", "female", "other"], "Please select gender").optional(),
-    address: yup.object({
-        street: yup.string().optional(),
-        city: yup.string().required("City is required"),
-        state: yup.string().required("State is required"),
-        country: yup.string().required("Country is required"),
-    }),
-    idProof: yup.object({
-        type: yup.string().optional(),
-        number: yup.string().optional(),
-        image: yup.string().optional(),
-    }),
-    photo: yup.string().optional().default(""),
-    blacklisted: yup.boolean().default(false),
-    blacklistReason: yup.string().optional(),
-    tags: yup.string().optional(),
-    emergencyContact: yup
-        .object({
-            name: yup.string().optional(),
-            phone: yup.string().optional(),
-        })
-        .optional(),
-});
-
-type VisitorFormData = yup.InferType<typeof visitorSchema>;
-
-const idProofTypes = [
-    { value: "aadhaar", label: "Aadhaar Card" },
-    { value: "pan", label: "PAN Card" },
-    { value: "driving_license", label: "Driving License" },
-    { value: "passport", label: "Passport" },
-    { value: "other", label: "Other" },
-];
+import { VisitorFormFields } from "./visitorFormFields";
+import { visitorSchema, VisitorFormData } from "./visitorSchema";
 
 interface NewVisitorModalProps {
     visitorId?: string;
@@ -89,7 +36,7 @@ export function NewVisitorModal({
     const isPage = layout === "page";
 
     const open = isPage ? true : controlledOpen !== undefined ? controlledOpen : internalOpen;
-    const setOpen = isPage ? (_: boolean) => {} : onOpenChange || setInternalOpen;
+    const setOpen = isPage ? (_: boolean) => { } : onOpenChange || setInternalOpen;
     const [createVisitor, { isLoading: isCreating }] = useCreateVisitorMutation();
     const [updateVisitor, { isLoading: isUpdating }] = useUpdateVisitorMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
@@ -242,10 +189,10 @@ export function NewVisitorModal({
                 idProof:
                     data.idProof.type || data.idProof.number || data.idProof.image
                         ? {
-                              type: data.idProof.type || undefined,
-                              number: data.idProof.number || undefined,
-                              image: data.idProof.image || undefined,
-                          }
+                            type: data.idProof.type || undefined,
+                            number: data.idProof.number || undefined,
+                            image: data.idProof.image || undefined,
+                        }
                         : undefined,
                 photo: data.photo || undefined,
                 blacklisted: data.blacklisted,
@@ -254,9 +201,9 @@ export function NewVisitorModal({
                 emergencyContact:
                     data.emergencyContact?.name || data.emergencyContact?.phone
                         ? {
-                              name: data.emergencyContact.name || "",
-                              phone: data.emergencyContact.phone || "",
-                          }
+                            name: data.emergencyContact.name || "",
+                            phone: data.emergencyContact.phone || "",
+                        }
                         : undefined,
             };
 
@@ -299,7 +246,7 @@ export function NewVisitorModal({
                         .trim();
                     setGeneralError(
                         friendlyMessage ||
-                            "Please check the ID proof fields. They must be at least 2 characters or left empty.",
+                        "Please check the ID proof fields. They must be at least 2 characters or left empty.",
                     );
                 } else if (message.includes("address.street") || message.includes("street address")) {
                     const friendlyMessage = error.data.message
@@ -344,7 +291,7 @@ export function NewVisitorModal({
                             id="name"
                             {...register("name")}
                             placeholder="Enter full name"
-                            className={`h-9 ${errors.name ? "border-destructive" : ""}`}
+                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.name ? "border-destructive" : ""}`}
                         />
                         {errors.name && <span className="text-destructive text-xs">{errors.name.message}</span>}
                     </div>
@@ -358,7 +305,7 @@ export function NewVisitorModal({
                             type="email"
                             {...register("email", { onChange: clearGeneralError })}
                             placeholder="Enter email address"
-                            className={`h-9 ${errors.email ? "border-destructive" : ""}`}
+                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.email ? "border-destructive" : ""}`}
                         />
                         {errors.email && <span className="text-destructive text-xs">{errors.email.message}</span>}
                     </div>
@@ -433,6 +380,7 @@ export function NewVisitorModal({
                     placeholder="Enter company address"
                     {...register("address.street")}
                     error={errors.address?.street?.message}
+                    className="bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                     rows={3}
                 />
             </div>
@@ -455,6 +403,7 @@ export function NewVisitorModal({
                         id="optional-fields-toggle"
                         checked={showOptionalFields}
                         onCheckedChange={handleToggleChange}
+                        className="data-[state=unchecked]:bg-gray-200 dark:data-[state=unchecked]:bg-gray-700"
                     />
                 </div>
             </div>
@@ -462,6 +411,77 @@ export function NewVisitorModal({
             {/* Optional Fields Section - Only shown when toggle is ON */}
             {showOptionalFields && (
                 <div className="animate-in fade-in slide-in-from-top-2 space-y-4 pt-4 duration-200">
+
+                    {/* ID Verification & Images - SINGLE ROW on Desktop */}
+                    <div className="space-y-4 border-t pt-4">
+                        <h4 className="text-muted-foreground text-sm font-bold tracking-wider uppercase">
+                            ID Verification & Photos
+                        </h4>
+
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-start">
+                            {/* 1. Visitor Photo */}
+                            <div className="flex flex-col items-center">
+                                <ImageUploadField
+                                    key={`photo-${visitorId}-${visitorData?.photo}`}
+                                    name="photo"
+                                    label="Visitor Photo"
+                                    register={register}
+                                    setValue={setValue}
+                                    errors={errors.photo}
+                                    initialUrl={visitorData?.photo}
+                                    enableImageCapture={true}
+                                    onUploadStatusChange={setIsFileUploading}
+                                    variant="avatar"
+                                />
+                            </div>
+
+                            {/* 2. ID Proof Type */}
+                            <div className="space-y-2 w-full pt-2">
+                                <Controller
+                                    name="idProof.type"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <SelectField
+                                            label="ID Proof Type"
+                                            placeholder="Select Type"
+                                            options={idProofTypes}
+                                            value={field.value || ""}
+                                            onChange={(val) => field.onChange(val)}
+                                            error={errors.idProof?.type?.message}
+                                        />
+                                    )}
+                                />
+                            </div>
+
+                            {/* 3. ID Proof Number */}
+                            <div className="space-y-2 w-full pt-2">
+                                <InputField
+                                    label="ID Proof Number"
+                                    placeholder="Enter Number"
+                                    error={errors.idProof?.number?.message}
+                                    {...register("idProof.number")}
+                                />
+                            </div>
+
+                            {/* 4. ID Proof Image */}
+                            <div className="flex flex-col items-center">
+                                <ImageUploadField
+                                    key={`idProof-${visitorId}-${visitorData?.idProof?.image}`}
+                                    name="idProof.image"
+                                    label="ID Proof Image"
+                                    register={register}
+                                    setValue={setValue}
+                                    errors={errors.idProof?.image}
+                                    initialUrl={visitorData?.idProof?.image}
+                                    enableImageCapture={true}
+                                    onUploadStatusChange={setIsFileUploading}
+                                    variant="avatar"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+
                     {/* Emergency Contact & Security Section */}
                     <div className="space-y-4 border-t pt-4">
                         <h4 className="text-muted-foreground flex items-center gap-2 text-sm font-bold tracking-wider uppercase">
@@ -484,6 +504,15 @@ export function NewVisitorModal({
                     </div>
 
                     <div className="space-y-4 border-t pt-4">
+                        <InputField
+                            label="Visitor Tags (comma-separated)"
+                            placeholder="VIP, Frequent, Contractor..."
+                            {...register("tags")}
+                            error={errors.tags?.message}
+                        />
+                    </div>
+
+                    <div className="space-y-4 border-t pt-4">
                         <div className="bg-destructive/5 border-destructive/20 flex items-center justify-between rounded-lg border p-3">
                             <div>
                                 <Label className="text-destructive text-sm font-bold">Blacklist Visitor</Label>
@@ -495,10 +524,15 @@ export function NewVisitorModal({
                                 name="blacklisted"
                                 control={control}
                                 render={({ field }) => (
-                                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                                    <Switch
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                        className="data-[state=unchecked]:bg-gray-200 dark:data-[state=unchecked]:bg-gray-700"
+                                    />
                                 )}
                             />
                         </div>
+
                         {watch("blacklisted") && (
                             <InputField
                                 label="Blacklist Reason"
@@ -508,81 +542,11 @@ export function NewVisitorModal({
                             />
                         )}
                     </div>
-
-                    <div className="space-y-4 border-t pt-4">
-                        <InputField
-                            label="Visitor Tags (comma-separated)"
-                            placeholder="VIP, Frequent, Contractor..."
-                            {...register("tags")}
-                            error={errors.tags?.message}
-                        />
-                    </div>
-
-                    {/* ID Proof & Additional Information Section */}
-                    <div className="space-y-4 border-t pt-4">
-                        <h4 className="text-muted-foreground text-sm font-bold tracking-wider uppercase">
-                            ID Verification
-                        </h4>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <Controller
-                                name="idProof.type"
-                                control={control}
-                                render={({ field }) => (
-                                    <SelectField
-                                        label="ID Proof Type (optional)"
-                                        placeholder="Select ID proof type"
-                                        options={idProofTypes}
-                                        value={field.value || ""}
-                                        onChange={(val) => field.onChange(val)}
-                                        error={errors.idProof?.type?.message}
-                                    />
-                                )}
-                            />
-                            <InputField
-                                label="ID Proof Number (optional)"
-                                placeholder="Enter ID proof number"
-                                error={errors.idProof?.number?.message}
-                                {...register("idProof.number")}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Image Uploads Section */}
-                    <div className="space-y-4 pt-4">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div className="space-y-2">
-                                <ImageUploadField
-                                    key={`idProof-${visitorId}-${visitorData?.idProof?.image}`}
-                                    name="idProof.image"
-                                    label="ID Proof Image (optional)"
-                                    register={register}
-                                    setValue={setValue}
-                                    errors={errors.idProof?.image}
-                                    initialUrl={visitorData?.idProof?.image}
-                                    enableImageCapture={true}
-                                    onUploadStatusChange={setIsFileUploading}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <ImageUploadField
-                                    key={`photo-${visitorId}-${visitorData?.photo}`}
-                                    name="photo"
-                                    label="Visitor Photo (optional)"
-                                    register={register}
-                                    setValue={setValue}
-                                    errors={errors.photo}
-                                    initialUrl={visitorData?.photo}
-                                    enableImageCapture={true}
-                                    onUploadStatusChange={setIsFileUploading}
-                                />
-                            </div>
-                        </div>
-                    </div>
                 </div>
             )}
 
-            <div className={`flex w-full flex-col justify-end gap-2 sm:flex-row ${isPage ? "pt-4" : ""}`}>
-                <Button
+            <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-end">
+                <ActionButton
                     type="button"
                     variant="outline"
                     onClick={() => {
@@ -593,20 +557,22 @@ export function NewVisitorModal({
                         }
                     }}
                     disabled={isLoading || isFileUploading}
-                    className="w-full sm:w-auto"
+                    size="xl"
+                    className="w-full px-8 sm:w-auto"
                 >
                     Cancel
-                </Button>
-                <Button
+                </ActionButton>
+                <ActionButton
                     type="submit"
-                    variant="default"
+                    variant="outline-primary"
                     disabled={isLoading || isFileUploading}
-                    className="w-full sm:w-auto"
+                    size="xl"
+                    className="w-full min-w-[200px] px-8 sm:w-auto"
                 >
                     {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
                     <CheckCircle className="mr-2 h-4 w-4" />
                     {isEditMode ? "Update Visitor" : "Register Visitor"}
-                </Button>
+                </ActionButton>
             </div>
         </form>
     );
