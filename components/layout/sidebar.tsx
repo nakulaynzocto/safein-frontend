@@ -60,25 +60,12 @@ const settingsSubmenu = [
         href: routes.privateroute.PROFILE,
         icon: UserCircle,
     },
-    {
-        name: "Appointment Status",
-        href: routes.privateroute.SETTINGS_STATUS,
-        icon: CheckCircle,
-    },
-    {
-        name: "Notification",
-        href: routes.privateroute.NOTIFICATIONS,
-        icon: Bell,
-    },
+
+
     {
         name: "Appointment Links",
         href: routes.privateroute.APPOINTMENT_LINKS,
         icon: Calendar,
-    },
-    {
-        name: "Subscription",
-        href: routes.privateroute.ACTIVE_PLAN,
-        icon: Package,
     },
 ];
 
@@ -89,9 +76,8 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
     const isSettingsActive =
         pathname === routes.privateroute.SETTINGS ||
         pathname === routes.privateroute.PROFILE ||
-        pathname === routes.privateroute.NOTIFICATIONS ||
+
         pathname === routes.privateroute.SETTINGS_STATUS ||
-        pathname === routes.privateroute.ACTIVE_PLAN ||
         pathname === routes.privateroute.APPOINTMENT_LINKS ||
         pathname?.startsWith("/settings/") ||
         pathname?.startsWith("/appointment-links");
@@ -139,7 +125,7 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
             dispatch(logout());
             logoutMutation()
                 .unwrap()
-                .catch(() => {});
+                .catch(() => { });
             if (typeof window !== "undefined") {
                 localStorage.removeItem("token");
                 localStorage.removeItem("user");

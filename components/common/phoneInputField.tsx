@@ -15,6 +15,7 @@ interface PhoneInputFieldProps {
     disabled?: boolean;
     placeholder?: string;
     defaultCountry?: string;
+    className?: string; // Added className prop
 }
 
 export function PhoneInputField({
@@ -27,6 +28,7 @@ export function PhoneInputField({
     disabled = false,
     placeholder = "Enter phone number",
     defaultCountry = "in", // India as default
+    className,
 }: PhoneInputFieldProps) {
     return (
         <div className="space-y-2">
@@ -48,8 +50,8 @@ export function PhoneInputField({
                         "aria-label": label,
                     }}
                     containerClass="phone-input-container"
-                    inputClass="phone-input-field"
-                    buttonClass="phone-input-button"
+                    inputClass={`phone-input-field pl-4 h-12 !bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium w-full ${className || ""}`}
+                    buttonClass="phone-input-button !bg-muted/30 !rounded-l-xl !border-border hover:!bg-muted/30"
                     dropdownClass="phone-input-dropdown"
                     searchClass="phone-input-search"
                     containerStyle={{
@@ -57,16 +59,14 @@ export function PhoneInputField({
                     }}
                     inputStyle={{
                         width: "100%",
-                        height: "40px",
-                        fontSize: "14px",
-                        borderRadius: "6px",
+                        height: "48px", // h-12
+                        borderRadius: "12px", // rounded-xl
                         border: error ? "1px solid rgb(239 68 68)" : "1px solid rgb(226 232 240)",
-                        backgroundColor: disabled ? "rgb(248 250 252)" : "white",
                     }}
                     buttonStyle={{
-                        borderRadius: "6px 0 0 6px",
+                        borderRadius: "12px 0 0 12px", // rounded-xl
                         border: error ? "1px solid rgb(239 68 68)" : "1px solid rgb(226 232 240)",
-                        backgroundColor: disabled ? "rgb(248 250 252)" : "white",
+                        backgroundColor: "transparent",
                     }}
                     dropdownStyle={{}}
                     searchStyle={{

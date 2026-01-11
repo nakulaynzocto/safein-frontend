@@ -17,12 +17,17 @@ export const getStatusVariant = (status: string): StatusVariant => {
     }
 
     // Info statuses - Blue
-    if (["pending", "sent", "draft", "processing", "in_progress", "completed"].includes(normalizedStatus)) {
+    if (["sent", "draft", "processing", "in_progress", "completed"].includes(normalizedStatus)) {
         return "info";
     }
 
+    // Warning statuses - Yellow/Amber
+    if (["pending"].includes(normalizedStatus)) {
+        return "warning";
+    }
+
     // Error statuses - Red
-    if (["overdue", "expired", "cancelled", "rejected", "banned", "deleted", "time_out"].includes(normalizedStatus)) {
+    if (["overdue", "expired", "cancelled", "rejected", "banned", "deleted"].includes(normalizedStatus)) {
         return "error";
     }
 

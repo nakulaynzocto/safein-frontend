@@ -484,24 +484,39 @@ export function AppointmentTable({
 
     return (
         <div className="space-y-4 sm:space-y-6">
-            <Card className="card-hostinger p-3 sm:p-4">
-                <CardHeader className="px-0 pb-3 sm:pb-4">
-                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center sm:gap-4">
-                        <CardTitle className="flex min-w-0 flex-1 items-center gap-2 text-base font-semibold sm:text-lg">
-                            <Calendar className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                            <span className="truncate">{title || "Appointments"}</span>
-                        </CardTitle>
-                        <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:justify-start">
+
+
+            <div className="flex flex-col gap-3 sm:gap-4">
+                <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
+                    <SearchInput
+                        placeholder="Search appointments..."
+                        value={searchTerm}
+                        onChange={onSearchChange}
+                        debounceDelay={500}
+                        className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none"
+                    />
+                    <div className="flex shrink-0 items-center gap-2">
+                        <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
+                            <DateRangePicker
+                                onDateRangeChange={(r) => {
+                                    onDateFromChange?.(r.startDate || "");
+                                    onDateToChange?.(r.endDate || "");
+                                    onPageChange?.(1);
+                                }}
+                                initialValue={dateFrom && dateTo ? { startDate: dateFrom, endDate: dateTo } : undefined}
+                                className="w-full sm:w-auto"
+                            />
+                        </div>
+                        <div className="flex w-full items-center gap-2 sm:w-auto">
                             {hasReachedAppointmentLimit ? (
                                 <>
                                     <Button
                                         variant="outline-primary"
-                                        className="flex h-9 min-h-[40px] shrink-0 items-center gap-1.5 px-3 text-xs whitespace-nowrap sm:h-10 sm:min-h-0 sm:gap-2 sm:px-4 sm:text-sm"
+                                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs bg-muted/30 whitespace-nowrap sm:gap-2 sm:text-sm"
                                         onClick={() => setShowUpgradeModal(true)}
                                     >
                                         <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
                                         <span className="hidden sm:inline">Upgrade to Schedule More</span>
-                                        <span className="sm:hidden">Upgrade</span>
                                     </Button>
                                     <UpgradePlanModal
                                         isOpen={showUpgradeModal}
@@ -512,7 +527,7 @@ export function AppointmentTable({
                                 <>
                                     <Button
                                         variant="outline-primary"
-                                        className="flex h-9 min-h-[40px] shrink-0 items-center gap-1.5 px-3 text-xs whitespace-nowrap sm:h-10 sm:min-h-0 sm:gap-2 sm:px-4 sm:text-sm"
+                                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs bg-muted/30 whitespace-nowrap sm:gap-2 sm:text-sm"
                                         onClick={() => {
                                             if (hasReachedAppointmentLimit) {
                                                 setShowUpgradeModal(true);
@@ -523,7 +538,6 @@ export function AppointmentTable({
                                     >
                                         <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
                                         <span className="hidden sm:inline">Schedule Appointment</span>
-                                        <span className="sm:hidden">Schedule</span>
                                     </Button>
                                     <CreateAppointmentLinkModal
                                         open={showCreateLinkModal}
@@ -537,47 +551,21 @@ export function AppointmentTable({
                                         triggerButton={
                                             <Button
                                                 variant="outline-primary"
-                                                className="flex h-9 min-h-[40px] shrink-0 items-center gap-1.5 px-3 text-xs whitespace-nowrap sm:h-10 sm:min-h-0 sm:gap-2 sm:px-4 sm:text-sm"
+                                                className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs bg-muted/30 whitespace-nowrap sm:gap-2 sm:text-sm"
                                                 title="Create Appointment Link"
                                             >
                                                 <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
                                                 <span className="hidden sm:inline">Create Link</span>
-                                                <span className="sm:hidden">Link</span>
                                             </Button>
                                         }
-                                        onSuccess={() => {}}
+                                        onSuccess={() => { }}
                                     />
                                 </>
                             )}
                         </div>
                     </div>
-                </CardHeader>
-            </Card>
-
-            <Card className="card-hostinger gap-3 overflow-hidden p-3 sm:gap-4 sm:p-4">
-                <CardHeader className="px-0 pb-0">
-                    <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4">
-                        <SearchInput
-                            placeholder="Search appointments..."
-                            value={searchTerm}
-                            onChange={onSearchChange}
-                            debounceDelay={500}
-                            className="w-full sm:flex-1"
-                        />
-                        <div className="w-full sm:w-auto">
-                            <DateRangePicker
-                                onDateRangeChange={(r) => {
-                                    onDateFromChange?.(r.startDate || "");
-                                    onDateToChange?.(r.endDate || "");
-                                    onPageChange?.(1);
-                                }}
-                                initialValue={dateFrom && dateTo ? { startDate: dateFrom, endDate: dateTo } : undefined}
-                                className="w-full sm:w-auto"
-                            />
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent className="p-0">
+                </div>
+                <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
                     <DataTable
                         data={appointments}
                         columns={getColumns()}
@@ -597,8 +585,8 @@ export function AppointmentTable({
                         showCard={false}
                         isLoading={isLoading}
                     />
-                </CardContent>
-            </Card>
+                </div>
+            </div>
 
             {pagination && pagination.totalPages > 1 && (
                 <div className="flex justify-center">

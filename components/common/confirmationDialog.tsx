@@ -74,13 +74,15 @@ export function ConfirmationDialog({
                 )}
                 {children}
                 <DialogFooter>
-                    <Button variant="outline" onClick={handleCancelMemo}>
+                    <Button variant="outline" onClick={handleCancelMemo} size="xl" className="px-6">
                         {cancelText}
                     </Button>
                     <Button
                         variant={variant === "destructive" ? "destructive" : "default"}
                         onClick={handleConfirm}
                         disabled={disabled}
+                        size="xl"
+                        className="px-8"
                     >
                         {confirmText}
                     </Button>

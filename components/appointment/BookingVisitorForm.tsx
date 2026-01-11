@@ -186,7 +186,7 @@ export function BookingVisitorForm({
                         id="name"
                         {...register("name")}
                         placeholder="Enter full name"
-                        className={`h-9 w-full rounded-md border ${errors.name ? "border-red-500 focus:ring-red-500" : "border-border focus:ring-[#3882a5]"} bg-input text-foreground placeholder:text-muted-foreground px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none`}
+                        className={`h-12 w-full rounded-xl border ${errors.name ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-muted/30 text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium`}
                     />
                     {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
                 </div>
@@ -208,7 +208,7 @@ export function BookingVisitorForm({
                                         type="email"
                                         placeholder="Enter email address"
                                         value={initialEmail}
-                                        className={`h-9 w-full rounded-md border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-border focus:ring-[#3882a5]"} text-foreground placeholder:text-muted-foreground bg-gray-50 px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50`}
+                                        className={`h-12 w-full rounded-xl border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} text-foreground placeholder:text-muted-foreground bg-gray-50 px-4 py-2 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 font-medium`}
                                         disabled={true}
                                         readOnly={true}
                                     />
@@ -226,7 +226,7 @@ export function BookingVisitorForm({
                                 type="email"
                                 {...register("email")}
                                 placeholder="Enter email address"
-                                className={`h-9 w-full rounded-md border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-border focus:ring-[#3882a5]"} bg-input text-foreground placeholder:text-muted-foreground px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none`}
+                                className={`h-12 w-full rounded-xl border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-muted/30 text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium`}
                             />
                             {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
                         </>
@@ -293,7 +293,7 @@ export function BookingVisitorForm({
                                 id="address.street"
                                 placeholder="Enter company address"
                                 rows={3}
-                                className={`w-full rounded-md border ${errors.address?.street ? "border-red-500 focus:ring-red-500" : "border-border focus:ring-[#3882a5]"} bg-input text-foreground placeholder:text-muted-foreground resize-none px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none`}
+                                className={`w-full rounded-xl border ${errors.address?.street ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-muted/30 text-foreground placeholder:text-muted-foreground resize-none px-4 py-3 text-sm focus:outline-none font-medium`}
                             />
                             {errors.address?.street && (
                                 <p className="text-xs text-red-500">{errors.address.street.message}</p>
@@ -303,8 +303,26 @@ export function BookingVisitorForm({
                 />
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
-                <div className="space-y-1.5">
+            {/* ID Verification & Photos - Single Row on Large Screens */}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-start pt-2">
+                {/* 1. Visitor Photo */}
+                <div className="flex flex-col items-center space-y-1.5">
+                    <ImageUploadField
+                        name="photo"
+                        register={register}
+                        setValue={setValue}
+                        errors={errors.photo}
+                        initialUrl={initialValues?.photo}
+                        label="Visitor Photo"
+                        enableImageCapture={true}
+                        appointmentToken={appointmentToken}
+                        onUploadStatusChange={setIsFileUploading}
+                        variant="avatar"
+                    />
+                </div>
+
+                {/* 2. ID Proof Type */}
+                <div className="space-y-1.5 w-full pt-2">
                     <Label htmlFor="idProofType" className="text-foreground text-sm font-medium">
                         ID Proof Type <span className="text-red-500">*</span>
                     </Label>
@@ -316,7 +334,7 @@ export function BookingVisitorForm({
                                 <SelectField
                                     {...(field as any)}
                                     options={idProofTypes}
-                                    placeholder="Select ID proof type"
+                                    placeholder="Select Type"
                                 />
                                 {errors.idProof?.type && (
                                     <p className="text-xs text-red-500">{errors.idProof.type.message}</p>
@@ -326,66 +344,54 @@ export function BookingVisitorForm({
                     />
                 </div>
 
-                <div className="space-y-1.5">
+                {/* 3. ID Proof Number */}
+                <div className="space-y-1.5 w-full pt-2">
                     <Label htmlFor="idProofNumber" className="text-foreground text-sm font-medium">
                         ID Proof Number <span className="text-red-500">*</span>
                     </Label>
                     <Input
                         id="idProofNumber"
                         {...register("idProof.number")}
-                        placeholder="Enter ID proof number"
-                        className={`h-9 w-full rounded-md border ${errors.idProof?.number ? "border-red-500 focus:ring-red-500" : "border-border focus:ring-[#3882a5]"} bg-input text-foreground placeholder:text-muted-foreground px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none`}
+                        placeholder="Enter Number"
+                        className={`h-12 w-full rounded-xl border ${errors.idProof?.number ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-muted/30 text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium`}
                     />
                     {errors.idProof?.number && <p className="text-xs text-red-500">{errors.idProof.number.message}</p>}
                 </div>
-            </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
-                <div className="space-y-1.5">
-                    <Label
-                        htmlFor="idProofImage"
-                        className="text-foreground flex items-center gap-2 text-sm font-medium"
-                    >
-                        <FileText className="h-4 w-4" />
-                        ID Proof Document
-                    </Label>
+                {/* 4. ID Proof Image */}
+                <div className="flex flex-col items-center space-y-1.5">
                     <ImageUploadField
                         name="idProof.image"
                         register={register}
                         setValue={setValue}
                         errors={errors.idProof?.image}
                         initialUrl={initialValues?.idProof?.image}
-                        label="Take or Upload Photo"
+                        label="ID Proof Image"
                         enableImageCapture={true}
                         appointmentToken={appointmentToken}
                         onUploadStatusChange={setIsFileUploading}
-                    />
-                </div>
-
-                <div className="space-y-1.5">
-                    <Label htmlFor="photo" className="text-foreground flex items-center gap-2 text-sm font-medium">
-                        <Camera className="h-4 w-4" />
-                        Visitor Photo <span className="text-red-500">*</span>
-                    </Label>
-                    <ImageUploadField
-                        name="photo"
-                        register={register}
-                        setValue={setValue}
-                        errors={errors.photo}
-                        initialUrl={initialValues?.photo}
-                        label="Take or Upload Photo"
-                        enableImageCapture={true}
-                        appointmentToken={appointmentToken}
-                        onUploadStatusChange={setIsFileUploading}
+                        variant="avatar"
                     />
                 </div>
             </div>
 
-            <div className="flex flex-col justify-end gap-3 border-t pt-4 sm:flex-row sm:gap-4 sm:pt-6">
+            <div className="flex flex-col-reverse justify-end gap-3 border-t pt-4 sm:flex-row sm:gap-4 sm:pt-6">
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                        // Assuming this is used in context where cancel action is needed
+                        // Perhaps pass onCancel prop?
+                    }}
+                    className="h-12 w-full rounded-xl border-border px-8 font-medium sm:w-auto"
+                    disabled={isLoading}
+                >
+                    Cancel
+                </Button>
                 <Button
                     type="submit"
                     disabled={isLoading || isFileUploading}
-                    className="w-full bg-[#3882a5] text-white hover:bg-[#2d6a87] sm:w-auto"
+                    className="h-12 w-full rounded-xl bg-[#3882a5] px-8 text-white hover:bg-[#2d6a87] font-medium sm:w-auto"
                 >
                     {isLoading ? (
                         <>

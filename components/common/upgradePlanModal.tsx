@@ -154,17 +154,15 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
                                         key={plan._id}
                                         type="button"
                                         onClick={() => setSelectedPlanId(plan._id)}
-                                        className={`flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-xs transition sm:text-sm ${
-                                            isSelected
+                                        className={`flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-xs transition sm:text-sm ${isSelected
                                                 ? "bg-brand/10 border-brand border text-slate-900"
                                                 : "border border-transparent text-slate-800 hover:bg-slate-100"
-                                        }`}
+                                            }`}
                                     >
                                         <div className="flex items-center gap-2">
                                             <div
-                                                className={`h-3 w-3 rounded-full border ${
-                                                    isSelected ? "border-brand bg-brand" : "border-slate-400 bg-white"
-                                                }`}
+                                                className={`h-3 w-3 rounded-full border ${isSelected ? "border-brand bg-brand" : "border-slate-400 bg-white"
+                                                    }`}
                                             />
                                             <div className="font-medium">
                                                 {plan.name}
@@ -190,10 +188,10 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
                     {isLoading && <div className="text-muted-foreground text-xs">Loading plans...</div>}
 
                     <div className="flex justify-end space-x-2 pt-2">
-                        <Button variant="outline" onClick={onClose} disabled={isCreating}>
+                        <Button variant="outline" onClick={onClose} disabled={isCreating} className="h-12 rounded-xl px-6">
                             Cancel
                         </Button>
-                        <Button onClick={handleUpgradeClick} disabled={isCreating || !selectedPlanId}>
+                        <Button onClick={handleUpgradeClick} disabled={isCreating || !selectedPlanId} className="h-12 rounded-xl px-8">
                             {isCreating ? "Processing..." : "Upgrade Now"}
                         </Button>
                     </div>

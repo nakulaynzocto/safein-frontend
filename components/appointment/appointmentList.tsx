@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAppointmentOperations } from "@/hooks/useAppointmentOperations";
 import { AppointmentTable } from "./appointmentTable";
-import { Appointment } from "@/store/api/appointmentApi";
+import { Appointment, useGetAppointmentsQuery } from "@/store/api/appointmentApi";
+import { StatsGrid } from "@/components/dashboard/statsGrid";
+import { calculateAppointmentStats } from "@/components/dashboard/dashboardUtils";
 
 export function AppointmentList() {
     const router = useRouter();
@@ -41,6 +43,22 @@ export function AppointmentList() {
         sortOrder,
     } = useAppointmentOperations();
 
+    const timezoneOffsetMinutes = -new Date().getTimezoneOffset();
+
+    // Separate query for stats (fetch more items to get accurate counts)
+    const { data: statsData } = useGetAppointmentsQuery({
+        // If sorting or filtering is needed for stats, apply here. 
+        // For general stats, we might want "all" or "today's". 
+        // Based on dashboard logic, let's fetch a reasonable amount.
+        limit: 1000,
+        timezoneOffsetMinutes,
+    });
+
+    const stats = useMemo(() => {
+        const allAppointments = statsData?.appointments || [];
+        return calculateAppointmentStats(allAppointments);
+    }, [statsData?.appointments]);
+
     const handleView = useCallback(
         (appointment: Appointment) => {
             router.push(`/appointment/${appointment._id}`);
@@ -69,8 +87,25 @@ export function AppointmentList() {
         [setSortBy],
     );
 
+    const handleStatsCardClick = useCallback(
+        (status: string) => {
+            if (statusFilter === status) {
+                setStatusFilter("");
+            } else {
+                setStatusFilter(status);
+            }
+        },
+        [statusFilter, setStatusFilter],
+    );
+
     return (
         <div className="space-y-6">
+            <StatsGrid
+                stats={stats}
+                onStatusClick={handleStatsCardClick}
+                currentFilter={statusFilter}
+            />
+
             <AppointmentTable
                 appointments={appointments}
                 pagination={pagination || undefined}

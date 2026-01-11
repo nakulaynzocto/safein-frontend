@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
-import { Image as ImageIcon, X, CheckCircle, Camera, RotateCw } from "lucide-react";
+import { Image as ImageIcon, X, CheckCircle, Camera, RotateCw, Upload, Loader2 } from "lucide-react";
 import { useUploadFileMutation } from "@/store/api";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ImageUploadFieldProps {
     name: string;
@@ -17,6 +18,7 @@ interface ImageUploadFieldProps {
     enableImageCapture?: boolean;
     appointmentToken?: string; // Token for public upload endpoint
     onUploadStatusChange?: (isUploading: boolean) => void;
+    variant?: "default" | "avatar";
 }
 
 export function ImageUploadField({
@@ -29,6 +31,7 @@ export function ImageUploadField({
     enableImageCapture = false,
     appointmentToken,
     onUploadStatusChange,
+    variant = "default",
 }: ImageUploadFieldProps) {
     const [previewImage, setPreviewImage] = useState<string | null>(initialUrl || null);
     const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -291,6 +294,153 @@ export function ImageUploadField({
         }
     }, [initialUrl]);
 
+
+    if (variant === "avatar") {
+        return (
+            <div className="flex flex-col items-center space-y-3">
+                {label && <Label className="text-sm font-medium text-gray-700">{label}</Label>}
+
+                {/* Camera Modal (Reuse existing logic) */}
+                {isCapturing && (
+                    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black p-2 sm:p-4">
+                        <div className="relative mx-auto flex h-full w-full max-w-2xl flex-col justify-center">
+                            <video
+                                ref={videoRef}
+                                className="h-auto max-h-[85vh] w-full rounded-lg object-contain sm:max-h-[80vh]"
+                                autoPlay
+                                playsInline
+                                muted
+                            />
+                            <canvas ref={canvasRef} className="hidden" />
+
+                            <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
+                                <Button
+                                    type="button"
+                                    onClick={switchCamera}
+                                    className="bg-opacity-90 hover:bg-opacity-100 rounded-full bg-white p-2 text-black shadow-lg sm:p-3"
+                                    title={`Switch to ${facingMode === "environment" ? "Front" : "Back"} Camera`}
+                                >
+                                    <RotateCw className="h-4 w-4 sm:h-5 sm:w-5" />
+                                </Button>
+                            </div>
+
+                            <div className="absolute right-0 bottom-2 left-0 flex justify-center gap-2 px-2 sm:bottom-4 sm:gap-4">
+                                <Button
+                                    type="button"
+                                    onClick={capturePhoto}
+                                    className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm text-black shadow-lg hover:bg-gray-200 sm:px-6 sm:py-3 sm:text-base"
+                                >
+                                    <Camera className="h-4 w-4 sm:h-5 sm:w-5" />
+                                    <span className="hidden sm:inline">Capture Photo</span>
+                                    <span className="sm:hidden">Capture</span>
+                                </Button>
+                                <Button
+                                    type="button"
+                                    onClick={cancelCamera}
+                                    className="rounded-full bg-red-500 px-4 py-2 text-sm text-white shadow-lg hover:bg-red-600 sm:px-6 sm:py-3 sm:text-base"
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Source Selection Modal (Reuse existing logic) */}
+                {showCaptureOptions && (
+                    <div className="bg-opacity-50 fixed inset-0 z-40 flex items-center justify-center bg-black p-4">
+                        <div className="w-full max-w-xs rounded-xl bg-white p-4 shadow-2xl sm:w-80 sm:rounded-lg sm:p-6">
+                            <h3 className="mb-4 text-center text-base font-semibold sm:text-lg">Choose Image Source</h3>
+                            <div className="space-y-2 sm:space-y-3">
+                                <Button
+                                    onClick={handleCameraUpload}
+                                    className="h-12 w-full justify-start rounded-xl bg-blue-500 text-white hover:bg-blue-600 sm:text-base"
+                                >
+                                    <Camera className="mr-2 h-5 w-5" />
+                                    <span className="text-sm sm:text-base">Take Photo</span>
+                                </Button>
+                                <Button
+                                    onClick={handleGalleryUpload}
+                                    className="h-12 w-full justify-start rounded-xl bg-gray-500 text-white hover:bg-gray-600 sm:text-base"
+                                >
+                                    <ImageIcon className="mr-2 h-5 w-5" />
+                                    <span className="text-sm sm:text-base">Choose from Gallery</span>
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={cancelCapture}
+                                    className="h-12 w-full rounded-xl sm:text-base"
+                                >
+                                    <span className="text-sm sm:text-base">Cancel</span>
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+
+                <div className="flex-shrink-0 relative group">
+                    <Avatar className={`h-24 w-24 border-4 ${errors?.message ? "border-red-500" : "border-muted"}`}>
+                        <AvatarImage
+                            src={
+                                previewImage
+                                    ? previewImage.startsWith("blob:") ? previewImage : `${previewImage}${previewImage.includes("?") ? "&" : "?"}v=${previewImage?.length}`
+                                    : ""
+                            }
+                            className="object-cover"
+                        />
+                        <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
+                            <Camera className="h-8 w-8 opacity-50" />
+                        </AvatarFallback>
+                    </Avatar>
+
+                    <div
+                        onClick={triggerFileInput}
+                        className={`absolute inset-0 flex items-center justify-center bg-black/40 text-white transition-opacity rounded-full cursor-pointer ${isUploading || isImageLoading ? "opacity-100 cursor-not-allowed" : "opacity-0 group-hover:opacity-100"
+                            }`}
+                    >
+                        {isUploading || isImageLoading ? (
+                            <Loader2 className="animate-spin" size={24} />
+                        ) : (
+                            <div className="flex flex-col items-center">
+                                <Upload size={24} />
+                                <span className="text-[10px] mt-1 font-medium">Upload</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Error Indicator */}
+                    {imageError && !isUploading && (
+                        <div className="absolute -bottom-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-md z-20">
+                            <X size={12} />
+                        </div>
+                    )}
+
+                    {/* Success Indicator */}
+                    {uploadSuccess && !imageError && !isUploading && (
+                        <div className="absolute -bottom-2 -right-2 bg-green-500 text-white p-1 rounded-full shadow-md z-20 animate-bounce">
+                            <CheckCircle size={12} />
+                        </div>
+                    )}
+                </div>
+
+                <input
+                    id={fileInputId}
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                    }}
+                    disabled={isUploading}
+                    ref={fileInputRef}
+                />
+                {errors && <div className="text-xs text-red-600 text-center max-w-[120px]">{errors.message}</div>}
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-3 p-[3px]">
             {label && <Label className="text-sm font-medium text-gray-700">{label}</Label>}
@@ -347,26 +497,22 @@ export function ImageUploadField({
                             <h3 className="mb-4 text-center text-base font-semibold sm:text-lg">Choose Image Source</h3>
                             <div className="space-y-2 sm:space-y-3">
                                 <Button
-                                    type="button"
                                     onClick={handleCameraUpload}
-                                    className="w-full justify-start bg-blue-500 py-3 text-white hover:bg-blue-600 sm:py-2.5"
+                                    className="h-12 w-full justify-start rounded-xl bg-blue-500 text-white hover:bg-blue-600 sm:text-base"
                                 >
-                                    <Camera className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                                    <Camera className="mr-2 h-5 w-5" />
                                     <span className="text-sm sm:text-base">Take Photo</span>
                                 </Button>
                                 <Button
-                                    type="button"
                                     onClick={handleGalleryUpload}
-                                    className="w-full justify-start bg-gray-500 py-3 text-white hover:bg-gray-600 sm:py-2.5"
+                                    className="h-12 w-full justify-start rounded-xl bg-gray-500 text-white hover:bg-gray-600 sm:text-base"
                                 >
-                                    <ImageIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                                    <ImageIcon className="mr-2 h-5 w-5" />
                                     <span className="text-sm sm:text-base">Choose from Gallery</span>
                                 </Button>
                                 <Button
-                                    type="button"
-                                    onClick={cancelCapture}
                                     variant="outline"
-                                    className="w-full py-3 sm:py-2.5"
+                                    className="h-12 w-full rounded-xl sm:text-base"
                                 >
                                     <span className="text-sm sm:text-base">Cancel</span>
                                 </Button>
@@ -378,13 +524,12 @@ export function ImageUploadField({
                 {previewImage ? (
                     <div className="group relative">
                         <div
-                            className={`relative flex h-40 w-40 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 shadow-md transition-all duration-300 hover:shadow-lg sm:h-40 sm:w-40 sm:rounded-xl ${
-                                uploadSuccess
-                                    ? "border-green-400 bg-white ring-2 ring-green-200"
-                                    : imageError
-                                      ? "border-red-400 bg-red-50 ring-2 ring-red-200"
-                                      : "border-gray-300 bg-white hover:border-blue-500 hover:ring-2 hover:ring-blue-200"
-                            }`}
+                            className={`relative flex h-40 w-40 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 shadow-md transition-all duration-300 hover:shadow-lg sm:h-40 sm:w-40 sm:rounded-xl ${uploadSuccess
+                                ? "border-green-400 bg-white ring-2 ring-green-200"
+                                : imageError
+                                    ? "border-red-400 bg-red-50 ring-2 ring-red-200"
+                                    : "border-gray-300 bg-white hover:border-blue-500 hover:ring-2 hover:ring-blue-200"
+                                }`}
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -448,11 +593,10 @@ export function ImageUploadField({
                 ) : (
                     <div className="relative">
                         <div
-                            className={`group flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-gradient-to-br from-gray-50 to-gray-100 shadow-sm transition-all duration-300 hover:from-blue-50 hover:to-blue-100 hover:shadow-md sm:h-40 sm:w-40 sm:rounded-xl ${
-                                isUploading
-                                    ? "border-blue-400 bg-blue-50 ring-2 ring-blue-200"
-                                    : "border-gray-300 hover:border-blue-400 hover:ring-2 hover:ring-blue-200"
-                            }`}
+                            className={`group flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-gradient-to-br from-gray-50 to-gray-100 shadow-sm transition-all duration-300 hover:from-blue-50 hover:to-blue-100 hover:shadow-md sm:h-40 sm:w-40 sm:rounded-xl ${isUploading
+                                ? "border-blue-400 bg-blue-50 ring-2 ring-blue-200"
+                                : "border-gray-300 hover:border-blue-400 hover:ring-2 hover:ring-blue-200"
+                                }`}
                         >
                             {isUploading || isImageLoading ? (
                                 <div className="flex flex-col items-center justify-center p-4">

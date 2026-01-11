@@ -87,7 +87,7 @@ export function SettingsPageContent() {
                         <button
                             onClick={() => setEmailEnabled(!emailEnabled)}
                             className={cn(
-                                "relative h-6 w-12 self-start rounded-full p-1 transition-all duration-300 sm:self-auto",
+                                "relative h-5 w-9 self-start rounded-full p-1 transition-all duration-300 sm:self-auto",
                                 emailEnabled
                                     ? "bg-primary shadow-[0_0_8px_rgba(7,68,99,0.4)]"
                                     : "bg-muted border-border border",
@@ -95,9 +95,9 @@ export function SettingsPageContent() {
                         >
                             <div
                                 className={cn(
-                                    "h-4 w-4 rounded-full transition-all duration-300",
+                                    "h-3 w-3 rounded-full transition-all duration-300",
                                     emailEnabled
-                                        ? "bg-primary-foreground translate-x-6"
+                                        ? "bg-primary-foreground translate-x-4"
                                         : "bg-muted-foreground translate-x-0",
                                 )}
                             />
@@ -120,7 +120,7 @@ export function SettingsPageContent() {
                         <button
                             onClick={() => setWhatsappEnabled(!whatsappEnabled)}
                             className={cn(
-                                "relative h-6 w-12 self-start rounded-full p-1 transition-all duration-300 sm:self-auto",
+                                "relative h-5 w-9 self-start rounded-full p-1 transition-all duration-300 sm:self-auto",
                                 whatsappEnabled
                                     ? "bg-primary shadow-[0_0_8px_rgba(7,68,99,0.4)]"
                                     : "bg-muted border-border border",
@@ -128,9 +128,9 @@ export function SettingsPageContent() {
                         >
                             <div
                                 className={cn(
-                                    "h-4 w-4 rounded-full transition-all duration-300",
+                                    "h-3 w-3 rounded-full transition-all duration-300",
                                     whatsappEnabled
-                                        ? "bg-primary-foreground translate-x-6"
+                                        ? "bg-primary-foreground translate-x-4"
                                         : "bg-muted-foreground translate-x-0",
                                 )}
                             />
@@ -153,7 +153,7 @@ export function SettingsPageContent() {
                         <button
                             onClick={() => setSmsEnabled(!smsEnabled)}
                             className={cn(
-                                "relative h-6 w-12 self-start rounded-full p-1 transition-all duration-300 sm:self-auto",
+                                "relative h-5 w-9 self-start rounded-full p-1 transition-all duration-300 sm:self-auto",
                                 smsEnabled
                                     ? "bg-primary shadow-[0_0_8px_rgba(7,68,99,0.4)]"
                                     : "bg-muted border-border border",
@@ -161,9 +161,9 @@ export function SettingsPageContent() {
                         >
                             <div
                                 className={cn(
-                                    "h-4 w-4 rounded-full transition-all duration-300",
+                                    "h-3 w-3 rounded-full transition-all duration-300",
                                     smsEnabled
-                                        ? "bg-primary-foreground translate-x-6"
+                                        ? "bg-primary-foreground translate-x-4"
                                         : "bg-muted-foreground translate-x-0",
                                 )}
                             />
@@ -171,7 +171,7 @@ export function SettingsPageContent() {
                     </div>
 
                     <div className="border-t pt-4">
-                        <Button onClick={handleSave} disabled={isUpdating} className="w-full sm:w-auto">
+                        <Button onClick={handleSave} disabled={isUpdating} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium sm:w-auto sm:px-6">
                             {isUpdating ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -228,11 +228,11 @@ export function DashboardOverview() {
 
     return (
         <div className="space-y-4 sm:space-y-6">
-            <DashboardHeader companyName={user?.companyName} />
+
 
             <div className="hidden">{/* Removed DateRangePicker as per request */}</div>
 
-            <StatsGrid stats={stats} />
+
 
             <DashboardCharts
                 appointmentsData={appointments}
