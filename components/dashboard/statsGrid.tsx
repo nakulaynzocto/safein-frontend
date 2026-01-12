@@ -26,7 +26,7 @@ export const StatsGrid = memo(function StatsGrid({ stats, onStatusClick, current
                 icon: CalendarCheck,
                 description: "Awaiting approval",
                 colorClassName: "text-amber-600",
-                bgClassName: "bg-amber-100 border-amber-200",
+                bgClassName: "bg-muted/80 border-gray-200 shadow-sm hover:shadow-md hover:border-[#3882a5] transition-all",
             },
             {
                 title: "Approved",
@@ -35,7 +35,7 @@ export const StatsGrid = memo(function StatsGrid({ stats, onStatusClick, current
                 icon: CheckCircle,
                 description: "Scheduled appointments",
                 colorClassName: "text-emerald-600",
-                bgClassName: "bg-emerald-100 border-emerald-200",
+                bgClassName: "bg-muted/80 border-gray-200 shadow-sm hover:shadow-md hover:border-[#3882a5] transition-all",
             },
             {
                 title: "Completed",
@@ -43,8 +43,8 @@ export const StatsGrid = memo(function StatsGrid({ stats, onStatusClick, current
                 value: stats.completedAppointments,
                 icon: CalendarX,
                 description: "Finished appointments",
-                colorClassName: "text-blue-600",
-                bgClassName: "bg-blue-100 border-blue-200",
+                colorClassName: "text-[#3882a5]",
+                bgClassName: "bg-muted/80 border-gray-200 shadow-sm hover:shadow-md hover:border-[#3882a5] transition-all",
             },
             {
                 title: "Rejected",
@@ -53,7 +53,7 @@ export const StatsGrid = memo(function StatsGrid({ stats, onStatusClick, current
                 icon: CalendarX,
                 description: "Rejected appointments",
                 colorClassName: "text-red-600",
-                bgClassName: "bg-red-100 border-red-200",
+                bgClassName: "bg-muted/80 border-gray-200 shadow-sm hover:shadow-md hover:border-[#3882a5] transition-all",
             },
         ],
         [

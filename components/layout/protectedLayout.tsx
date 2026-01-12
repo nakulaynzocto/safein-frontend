@@ -32,7 +32,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
     return (
         <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
-            <Navbar variant="dashboard" />
+            {!isLoading && <Navbar variant="dashboard" />}
             <div className="flex flex-1 overflow-hidden">
                 {/* Only show sidebar if user has active subscription AND token */}
                 {shouldShowSidebar && <Sidebar />}
