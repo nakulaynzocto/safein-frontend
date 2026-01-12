@@ -32,7 +32,7 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
     ];
 
     return (
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap-3">
             {/* Sidebar Navigation */}
             <div className="w-full md:w-[150px] flex-shrink-0 md:sticky md:top-6 md:self-start">
                 <div className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible bg-white/50 p-1.5 rounded-xl border border-gray-200 shadow-sm backdrop-blur-sm">

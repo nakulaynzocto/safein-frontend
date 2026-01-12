@@ -125,19 +125,19 @@ export function DataTable<T extends Record<string, any>>({
     if (!Array.isArray(data) || data.length === 0) {
         const emptyStateProps = emptyData
             ? {
-                  title: emptyData.title,
-                  description: emptyData.description || description,
-                  primaryActionLabel: emptyData.primaryActionLabel,
-                  secondaryActionLabel: emptyData.secondaryActionLabel,
-                  onPrimaryAction: onPrimaryAction,
-                  onSecondaryAction: onSecondaryAction,
-              }
+                title: emptyData.title,
+                description: emptyData.description || description,
+                primaryActionLabel: emptyData.primaryActionLabel,
+                secondaryActionLabel: emptyData.secondaryActionLabel,
+                onPrimaryAction: onPrimaryAction,
+                onSecondaryAction: onSecondaryAction,
+            }
             : {
-                  title: emptyMessage,
-                  description: description,
-                  primaryActionLabel: "Add new item",
-                  onPrimaryAction: onPrimaryAction,
-              };
+                title: emptyMessage,
+                description: description,
+                primaryActionLabel: "Add new item",
+                onPrimaryAction: onPrimaryAction,
+            };
 
         return <EmptyState {...emptyStateProps} />;
     }
@@ -153,8 +153,8 @@ export function DataTable<T extends Record<string, any>>({
                                 className={cn(
                                     "px-6 py-4 font-bold",
                                     enableSorting &&
-                                        column.sortable &&
-                                        "hover:bg-muted/70 cursor-pointer transition-colors",
+                                    column.sortable &&
+                                    "hover:bg-muted/70 cursor-pointer transition-colors",
                                     column.className,
                                 )}
                                 onClick={() => enableSorting && column.sortable && handleSort(column.key as string)}
