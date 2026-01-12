@@ -86,7 +86,7 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                     </div>
 
                     {/* Info Boxes */}
-                    <div className="px-8 -mt-8 grid grid-cols-2 gap-8">
+                    <div className="px-8 grid grid-cols-2 gap-8">
                         {/* Invoice To */}
                         <div className="bg-white rounded-xl shadow-md border overflow-hidden">
                             <div
