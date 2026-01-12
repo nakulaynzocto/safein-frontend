@@ -32,7 +32,6 @@ export const StatCard = memo(function StatCard({ title, value, icon: Icon, descr
                 border shadow-sm transition-all duration-200 
                 ${bgClassName || "bg-card"} 
                 ${onClick ? "cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98]" : ""}
-                ${isActive ? "ring-2 ring-primary ring-offset-2" : ""}
             `}
         >
             <CardContent className="flex flex-col items-center justify-center py-1 px-2">

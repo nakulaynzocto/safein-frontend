@@ -59,7 +59,7 @@ export function SettingsPageContent() {
     }
 
     return (
-        <div className="mx-auto w-full max-w-full px-4 sm:px-6 lg:px-8">
+        <div className="w-full">
             <Card className="w-full">
                 <CardHeader className="px-4 pt-4 pb-4 sm:px-6 sm:pt-6">
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">

@@ -511,8 +511,8 @@ export function AppointmentTable({
                             {hasReachedAppointmentLimit ? (
                                 <>
                                     <Button
-                                        variant="outline-primary"
-                                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs bg-muted/30 whitespace-nowrap sm:gap-2 sm:text-sm"
+                                        variant="default"
+                                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm bg-[#3882a5] hover:bg-[#2d6a87] text-white shadow-md hover:shadow-lg transition-all"
                                         onClick={() => setShowUpgradeModal(true)}
                                     >
                                         <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
@@ -526,8 +526,8 @@ export function AppointmentTable({
                             ) : (
                                 <>
                                     <Button
-                                        variant="outline-primary"
-                                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs bg-muted/30 whitespace-nowrap sm:gap-2 sm:text-sm"
+                                        variant="default"
+                                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm bg-[#3882a5] hover:bg-[#2d6a87] text-white shadow-md hover:shadow-lg transition-all"
                                         onClick={() => {
                                             if (hasReachedAppointmentLimit) {
                                                 setShowUpgradeModal(true);
@@ -550,8 +550,8 @@ export function AppointmentTable({
                                         }}
                                         triggerButton={
                                             <Button
-                                                variant="outline-primary"
-                                                className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs bg-muted/30 whitespace-nowrap sm:gap-2 sm:text-sm"
+                                                variant="outline"
+                                                className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white"
                                                 title="Create Appointment Link"
                                             >
                                                 <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />

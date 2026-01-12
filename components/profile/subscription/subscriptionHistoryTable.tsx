@@ -329,7 +329,7 @@ export const SubscriptionHistoryTable = ({
                                 onClick={handlePrint}
                                 variant="outline"
                                 size="sm"
-                                className="gap-2 text-blue-600 border-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                                className="gap-2 text-[#3882a5] border-[#3882a5] hover:bg-[#3882a5]/10 hover:text-[#3882a5]"
                             >
                                 <Printer size={16} />
                                 Print / Download
