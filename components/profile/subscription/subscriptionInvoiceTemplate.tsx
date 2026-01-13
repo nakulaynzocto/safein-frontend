@@ -19,6 +19,7 @@ interface ExtendedSubscriptionItem {
     purchaseDate: string;
     remainingDaysFromPrevious?: number;
     source?: string; // Added to distinguish between admin and user subscriptions
+    invoiceNumber?: string; // Generated invoice number with dynamic date formatting
 }
 
 interface SubscriptionInvoiceTemplateProps {
@@ -78,7 +79,7 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                                 Invoice
                             </h1>
                             <div className="text-sm opacity-90 font-medium">
-                                <p>Invoice No: INV-{subscription._id.substring(0, 8).toUpperCase()}</p>
+                                <p>Invoice No: {subscription.invoiceNumber || `INV-${subscription._id.substring(0, 8).toUpperCase()}`}</p>
                                 <p>Date: {formatDate(subscription.startDate)}</p>
                                 <p>Status: {subscription.paymentStatus}</p>
                             </div>
