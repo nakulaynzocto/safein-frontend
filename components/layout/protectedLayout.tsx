@@ -24,6 +24,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
         isCurrentRoutePrivate,
         isSubscriptionPage,
         hasActiveSubscription,
+        shouldShowPrivateNavbar,
     } = useAuthSubscription();
 
     // 🔌 Initialize WebSocket for real-time appointment updates
@@ -32,7 +33,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
     return (
         <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
-            {!isLoading && <Navbar variant="dashboard" />}
+            {!isLoading && shouldShowPrivateNavbar && <Navbar variant="dashboard" />}
             <div className="flex flex-1 overflow-hidden">
                 {/* Only show sidebar if user has active subscription AND token */}
                 {shouldShowSidebar && <Sidebar />}
@@ -49,7 +50,20 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                                 {children}
                             </div>
                         ) : (
-                            <PageSkeleton />
+                            <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                <div className="text-muted-foreground">Redirecting to login...</div>
+                                <button
+                                    onClick={() => {
+                                        window.location.href = "/login";
+                                        localStorage.removeItem("token");
+                                        localStorage.removeItem("user");
+                                    }}
+                                    className="text-sm text-primary hover:underline"
+                                >
+                                    Click here if not redirected
+                                </button>
+                            </div>
                         )}
                     </div>
                 </main>
