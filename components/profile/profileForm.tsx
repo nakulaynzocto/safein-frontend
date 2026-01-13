@@ -31,22 +31,22 @@ const profileSchema = z.object({
         .min(2, "Company name must be at least 2 characters")
         .max(100, "Company name cannot exceed 100 characters"),
     email: z.string().email("Invalid email format").min(1, "Email is required"),
-    mobileNumber: z.string().optional().or(z.literal("")),
-    bio: z.string().max(500, "Biography must be less than 500 characters").optional().or(z.literal("")),
-    profilePicture: z.string().optional().or(z.literal("")),
+    mobileNumber: z.string().max(20, "Mobile number too long").optional(),
+    bio: z.string().max(500, "Biography must be less than 500 characters").optional(),
+    profilePicture: z.string().optional(),
     address: z.object({
-        street: z.string().optional().or(z.literal("")),
-        city: z.string().optional().or(z.literal("")),
-        state: z.string().optional().or(z.literal("")),
-        country: z.string().optional().or(z.literal("")),
-        pincode: z.string().optional().or(z.literal("")),
+        street: z.string().max(200, "Address too long").optional(),
+        city: z.string().max(100, "City too long").optional(),
+        state: z.string().max(100, "State too long").optional(),
+        country: z.string().max(100, "Country too long").optional(),
+        pincode: z.string().max(20, "Pincode too long").optional(),
     }),
     socialLinks: z.object({
         linkedin: z.string().url("Invalid LinkedIn URL").optional().or(z.literal("")),
         twitter: z.string().url("Invalid Twitter URL").optional().or(z.literal("")),
         website: z.string().url("Invalid website URL").optional().or(z.literal("")),
     }),
-    isActive: z.boolean().default(true),
+    isActive: z.boolean().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -367,8 +367,11 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                         <Input
                                             id="street"
                                             {...register("address.street")}
-                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.street ? "border-destructive" : ""}`}
                                         />
+                                        {errors.address?.street && (
+                                            <p className="text-xs text-destructive mt-1">{errors.address.street.message}</p>
+                                        )}
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
@@ -381,8 +384,11 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             <Input
                                                 id="city"
                                                 {...register("address.city")}
-                                                className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.city ? "border-destructive" : ""}`}
                                             />
+                                            {errors.address?.city && (
+                                                <p className="text-xs text-destructive mt-1">{errors.address.city.message}</p>
+                                            )}
                                         </div>
                                         <div className="space-y-2">
                                             <Label
@@ -394,8 +400,11 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             <Input
                                                 id="state"
                                                 {...register("address.state")}
-                                                className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.state ? "border-destructive" : ""}`}
                                             />
+                                            {errors.address?.state && (
+                                                <p className="text-xs text-destructive mt-1">{errors.address.state.message}</p>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
@@ -409,8 +418,11 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             <Input
                                                 id="country"
                                                 {...register("address.country")}
-                                                className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.country ? "border-destructive" : ""}`}
                                             />
+                                            {errors.address?.country && (
+                                                <p className="text-xs text-destructive mt-1">{errors.address.country.message}</p>
+                                            )}
                                         </div>
                                         <div className="space-y-2">
                                             <Label
@@ -422,8 +434,11 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             <Input
                                                 id="pincode"
                                                 {...register("address.pincode")}
-                                                className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.pincode ? "border-destructive" : ""}`}
                                             />
+                                            {errors.address?.pincode && (
+                                                <p className="text-xs text-destructive mt-1">{errors.address.pincode.message}</p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

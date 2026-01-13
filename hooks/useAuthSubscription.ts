@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { initializeAuth } from "@/store/slices/authSlice";
+import { initializeAuth, logout } from "@/store/slices/authSlice";
 import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionApi";
 import { routes, isPrivateRoute } from "@/utils/routes";
 
@@ -183,6 +183,19 @@ export function useAuthSubscription() {
             router.replace(routes.publicroute.LOGIN);
         }
     }, [isInitialized, isAuthenticated, token, isCurrentRoutePrivate, router]);
+
+    // Force redirect if authenticated but content is hidden (inactive/blocked) for too long
+    useEffect(() => {
+        if (isInitialized && isAuthenticated && isCurrentRoutePrivate && !shouldShowContent && !isLoading) {
+            const timer = setTimeout(() => {
+                // Double check specific conditions to handle "stuck" states
+                // If user is inactive effectively, force them to login
+                router.replace(routes.publicroute.LOGIN);
+                dispatch(logout()); // Clean up client state
+            }, 2000); // 2 second grace period
+            return () => clearTimeout(timer);
+        }
+    }, [isInitialized, isAuthenticated, isCurrentRoutePrivate, shouldShowContent, isLoading, router, dispatch]);
 
     // Redirect authenticated users from login/register to dashboard
     useEffect(() => {

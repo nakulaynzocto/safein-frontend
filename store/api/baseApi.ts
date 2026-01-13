@@ -44,7 +44,10 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
             if (!isLoginRequest && !isLogoutRequest && !isRegisterRequest) {
                 api.dispatch(logout());
 
+                // We rely on the authSlice/useAuthSubscription to handle the redirect based on isAuthenticated=false
+                // But as a failsafe for non-React contexts or race conditions:
                 if (typeof window !== "undefined") {
+                    // Clear storage immediately to prevent flicker
                     localStorage.removeItem("token");
                     localStorage.removeItem("user");
                     sessionStorage.clear();
@@ -57,7 +60,11 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
                         currentPath === routes.publicroute.RESET_PASSWORD;
 
                     if (!isOnAuthPage) {
-                        window.location.replace(routes.publicroute.LOGIN);
+                        // Use setTimeout to allow Redux to propagate if app is mounted
+                        // causing cleaner exit
+                        setTimeout(() => {
+                            window.location.href = routes.publicroute.LOGIN;
+                        }, 100);
                     }
                 }
             }
