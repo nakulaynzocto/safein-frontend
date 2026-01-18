@@ -526,8 +526,8 @@ export function AppointmentTable({
                             ) : (
                                 <>
                                     <Button
-                                        variant="default"
-                                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm bg-[#3882a5] hover:bg-[#2d6a87] text-white shadow-md hover:shadow-lg transition-all"
+                                        variant="outline"
+                                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white"
                                         onClick={() => {
                                             if (hasReachedAppointmentLimit) {
                                                 setShowUpgradeModal(true);
