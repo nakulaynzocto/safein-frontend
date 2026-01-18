@@ -25,6 +25,8 @@ export function PublicLayout({ children }: PublicLayoutProps) {
         routes.publicroute.FORGOT_PASSWORD,
         routes.publicroute.RESET_PASSWORD,
         routes.publicroute.VERIFY,
+        routes.publicroute.SUBSCRIPTION_SUCCESS,
+        routes.publicroute.SUBSCRIPTION_CANCEL,
     ];
 
     // Dynamically check if current route is an auth route
