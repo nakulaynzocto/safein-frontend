@@ -1,21 +1,26 @@
 import * as React from "react";
 import { Button, ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
 
 interface ActionButtonProps extends ButtonProps {
-    // Add any specific props if needed
+    icon?: LucideIcon;
+    label?: string;
 }
 
 export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProps>(
-    ({ className, variant = "outline-primary", size = "xl", ...props }, ref) => {
+    ({ icon: Icon, label, className, children, variant = "outline-primary", size = "default", ...props }, ref) => {
         return (
             <Button
                 ref={ref}
                 variant={variant}
                 size={size}
-                className={cn("bg-muted/30 font-medium", className)}
+                className={cn("gap-2", className)}
                 {...props}
-            />
+            >
+                {Icon && <Icon className="w-4 h-4" />}
+                {label || children}
+            </Button>
         );
     }
 );

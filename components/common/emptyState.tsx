@@ -1,7 +1,6 @@
 "use client";
 
 import { memo, type ReactNode } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { ActionButton } from "@/components/common/actionButton";
 import { GlobeIcon } from "lucide-react";
 
@@ -28,26 +27,24 @@ export const EmptyState = memo(function EmptyState({
     className,
 }: EmptyStateProps) {
     return (
-        <Card className={className}>
-            <CardContent className="flex flex-col items-center justify-center space-y-3 p-6 text-center sm:space-y-4 sm:p-10">
-                {/* Icon */}
-                <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full sm:h-16 sm:w-16">
-                    {icon || <GlobeIcon className="text-primary h-6 w-6 sm:h-8 sm:w-8" />}
-                </div>
+        <div className={`flex flex-col items-center justify-center h-64 bg-accent/50 rounded-xl border border-dashed border-border ${className || ""}`}>
+            {/* Icon */}
+            <div className="bg-muted/50 flex h-12 w-12 items-center justify-center rounded-full mb-4 sm:h-16 sm:w-16">
+                {icon || <GlobeIcon className="text-muted-foreground h-6 w-6 sm:h-8 sm:w-8" />}
+            </div>
 
-                {/* Title */}
-                <h2 className="text-foreground text-lg font-semibold sm:text-xl">{title}</h2>
+            {/* Title */}
+            <h3 className="text-foreground text-lg font-medium sm:text-xl">{title}</h3>
 
-                {/* Description */}
-                {description && <p className="text-muted-foreground max-w-md px-2 text-xs sm:text-sm">{description}</p>}
+            {/* Description */}
+            {description && <p className="text-muted-foreground max-w-md px-2 text-sm mt-1">{description}</p>}
 
-                {/* Primary Action */}
-                {primaryActionLabel && (
-                    <ActionButton onClick={onPrimaryAction} size="xl" className="w-full text-xs sm:w-auto sm:text-sm">
-                        {primaryActionLabel}
-                    </ActionButton>
-                )}
-            </CardContent>
-        </Card>
+            {/* Primary Action */}
+            {primaryActionLabel && (
+                <ActionButton onClick={onPrimaryAction} size="default" className="mt-4">
+                    {primaryActionLabel}
+                </ActionButton>
+            )}
+        </div>
     );
 });
