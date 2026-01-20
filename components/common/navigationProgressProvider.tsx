@@ -49,7 +49,7 @@ export function NavigationProgressProvider({ children }: { children: ReactNode }
                     if (url.origin === currentUrl.origin && url.pathname !== currentUrl.pathname) {
                         NProgress.start();
                     }
-                } catch (error) {}
+                } catch (error) { }
             }
         };
 
@@ -60,5 +60,5 @@ export function NavigationProgressProvider({ children }: { children: ReactNode }
         };
     }, []);
 
-    return <>{children}</>;
+    return children;
 }

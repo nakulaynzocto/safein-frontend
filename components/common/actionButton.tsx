@@ -18,8 +18,10 @@ export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProp
                 className={cn("gap-2", className)}
                 {...props}
             >
-                {Icon && <Icon className="w-4 h-4" />}
-                {label || children}
+                <span className="flex items-center gap-2">
+                    {Icon && <Icon className="w-4 h-4" />}
+                    {label || children}
+                </span>
             </Button>
         );
     }

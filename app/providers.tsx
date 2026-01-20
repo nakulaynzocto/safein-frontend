@@ -9,8 +9,10 @@ import { Toaster } from "sonner";
 export function Providers({ children }: { children: ReactNode }) {
     return (
         <Provider store={store}>
-            {children}
-            <Toaster position="top-right" richColors />
+            <>
+                {children}
+                <Toaster position="top-right" richColors />
+            </>
         </Provider>
     );
 }
