@@ -6,7 +6,8 @@ import { useAppDispatch } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 
 import { ProfileForm } from "@/components/profile/profileForm";
-import { EmptyState } from "@/components/common/emptyState";
+import { EmptyState } from "@/components/common/EmptyState";
+import { UserX } from "lucide-react";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 
 export function ProfilePageContent() {
@@ -102,6 +103,7 @@ export function ProfilePageContent() {
                             ? "There was an error loading your profile information. Please try again."
                             : "Your profile information could not be found."
                     }
+                    icon={UserX}
                 />
             </div>
         );
