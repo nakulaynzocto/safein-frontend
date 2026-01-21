@@ -4,9 +4,9 @@ import { type ReactNode, useState, useMemo, useCallback, isValidElement } from "
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { EmptyState } from "./emptyState";
+import { EmptyState } from "./EmptyState";
 import { TableSkeleton } from "./tableSkeleton";
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, Plus } from "lucide-react";
 
 interface Column<T> {
     key: keyof T | string;
@@ -22,6 +22,8 @@ interface EmptyData {
     primaryActionLabel?: string;
     secondaryActionLabel?: string;
     route?: string;
+    icon?: any;
+    onPrimaryAction?: () => void;
 }
 
 interface DataTableProps<T> {
@@ -123,23 +125,25 @@ export function DataTable<T extends Record<string, any>>({
     }
 
     if (!Array.isArray(data) || data.length === 0) {
-        const emptyStateProps = emptyData
-            ? {
-                title: emptyData.title,
-                description: emptyData.description || description,
-                primaryActionLabel: emptyData.primaryActionLabel,
-                secondaryActionLabel: emptyData.secondaryActionLabel,
-                onPrimaryAction: onPrimaryAction,
-                onSecondaryAction: onSecondaryAction,
-            }
-            : {
-                title: emptyMessage,
-                description: description,
-                primaryActionLabel: "Add new item",
-                onPrimaryAction: onPrimaryAction,
-            };
+        const action = (emptyData?.primaryActionLabel || onPrimaryAction) ? (
+            <Button
+                onClick={emptyData?.onPrimaryAction || onPrimaryAction}
+                variant="default"
+                className="bg-[#3882a5] hover:bg-[#2d6a87] text-white"
+            >
+                <Plus className="mr-2 h-4 w-4" />
+                {emptyData?.primaryActionLabel || "Add new item"}
+            </Button>
+        ) : null;
 
-        return <EmptyState {...emptyStateProps} />;
+        return (
+            <EmptyState
+                title={emptyData?.title || emptyMessage}
+                description={emptyData?.description || description}
+                action={action}
+                icon={emptyData?.icon}
+            />
+        );
     }
 
     const TableContent = () => (
