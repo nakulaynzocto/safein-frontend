@@ -221,49 +221,26 @@ export function EmployeeTable({
                     )}
                 </div>
                 <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
-                    {employees.length === 0 && !isLoading ? (
-                        <div className="flex flex-col items-center justify-center px-4 py-12">
-                            <div className="space-y-4 text-center">
-                                <div className="mx-auto w-fit rounded-full bg-gray-100 p-4">
-                                    <User className="h-12 w-12 text-gray-400" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-semibold text-gray-900">No employees yet</h3>
-                                    <p className="mt-1 text-sm text-gray-500">
-                                        Add your first employee to get started.
-                                    </p>
-                                </div>
-                                {hasReachedLimit ? (
-                                    <>
-                                        <Button className="mt-4" onClick={() => setShowUpgradeModal(true)}>
-                                            <Plus className="mr-2 h-4 w-4" />
-                                            Upgrade Plan
-                                        </Button>
-                                        <UpgradePlanModal
-                                            isOpen={showUpgradeModal}
-                                            onClose={() => setShowUpgradeModal(false)}
-                                        />
-                                    </>
-                                ) : (
-                                    <Button
-                                        className="mt-4"
-                                        onClick={() => router.push(routes.privateroute.EMPLOYEECREATE)}
-                                    >
-                                        <Plus className="mr-2 h-4 w-4" />
-                                        Add Employee
-                                    </Button>
-                                )}
-                            </div>
-                        </div>
-                    ) : (
-                        <DataTable
-                            data={employees}
-                            columns={getColumns()}
-                            emptyMessage="No employees found"
-                            showCard={false}
-                            isLoading={isLoading}
-                        />
-                    )}
+                    <DataTable
+                        data={employees}
+                        columns={getColumns()}
+                        emptyMessage="No employees found"
+                        showCard={false}
+                        isLoading={isLoading}
+                        emptyData={{
+                            title: "No employees yet",
+                            description: "Add your first employee to get started.",
+                            primaryActionLabel: hasReachedLimit ? "Upgrade Plan" : "Add Employee",
+                            icon: User
+                        }}
+                        onPrimaryAction={() => {
+                            if (hasReachedLimit) {
+                                setShowUpgradeModal(true);
+                            } else {
+                                router.push(routes.privateroute.EMPLOYEECREATE);
+                            }
+                        }}
+                    />
                 </div>
             </div>
 
