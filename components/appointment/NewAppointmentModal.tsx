@@ -270,7 +270,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
           <div className="max-h-[60vh] sm:max-h-[65vh] overflow-y-auto pr-1 sm:pr-2 -mr-1 sm:-mr-2">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {generalError && (
-              <Alert variant="destructive">
+              <Alert data-testid="appointment-error-alert" variant="destructive">
                 <AlertDescription>
                   {generalError}
                 </AlertDescription>
@@ -291,6 +291,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                     <SelectField
                       placeholder="Select visitor (type to search)"
                       options={visitorOptions}
+                      testId="appointment-visitor-select"
                       value={field.value}
                       onChange={(val) => {
                         console.log("Visitor select change", { val })
@@ -316,6 +317,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                   render={({ field }) => (
                     <SelectField
                       placeholder="Select employee (type to search)"
+                      testId="appointment-employee-select"
                       options={employeeOptions}
                       value={field.value}
                       onChange={(val) => {
@@ -345,6 +347,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                   render={({ field }) => (
                     <DatePicker
                       value={field.value}
+                      testId="appointment-date"
                       onChange={(e) => {
                         const value = e.target.value
                         // Validate date is not in the past
@@ -394,6 +397,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                     return (
                       <TimePicker
                         value={field.value}
+                        testId="appointment-time"
                         onChange={(e) => {
                           field.onChange(e)
                           // Clear date validation error when time changes
@@ -413,6 +417,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                 <Label className="font-medium">Accompanying People</Label>
                 <Input
                   type="number"
+                  data-testid="appointment-accompanying-count"
                   min={0}
                   max={20}
                   step={1}
@@ -434,6 +439,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                 </Label>
                 <Textarea
                   id="purpose"
+                  data-testid="appointment-purpose"
                   {...register("purpose")}
                   placeholder="Brief description of the visit purpose"
                   className={errors.purpose ? "border-destructive" : ""}
@@ -448,6 +454,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                 <Label htmlFor="notes" className="font-medium">Notes</Label>
                 <Textarea
                   id="notes"
+                  data-testid="appointment-notes"
                   {...register("notes")}
                   placeholder="Any additional information or special requirements"
                   className={errors.notes ? "border-destructive" : ""}
@@ -475,6 +482,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                   </Label>
                   <Input
                     id="vehicleNumber"
+                    data-testid="appointment-vehicle-number"
                     {...register("vehicleNumber")}
                     placeholder="e.g., DL01AB1234"
                     className={errors.vehicleNumber ? "border-destructive" : ""}
@@ -488,6 +496,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
                 <div className="flex items-start justify-center md:justify-start">
                   <ImageUploadField
                     name="vehiclePhoto"
+                    testId="appointment-vehicle-photo-upload"
                     label="Vehicle Photo (Optional)"
                     register={register}
                     setValue={setValue}
@@ -512,6 +521,7 @@ export function NewAppointmentModal({ appointmentId, triggerButton, onSuccess, o
               <Button 
                 type="submit" 
                 disabled={isLoading}
+                data-testid="appointment-submit-btn"
                 className={`w-full sm:w-auto ${isLoading ? 'pointer-events-none opacity-70' : ''}`}
               >
                 {isLoading ? (

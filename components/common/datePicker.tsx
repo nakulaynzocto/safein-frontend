@@ -12,10 +12,11 @@ interface DatePickerProps extends React.InputHTMLAttributes<HTMLInputElement> {
   helperText?: string
   minDate?: string
   required?: boolean
+  testId?:string
 }
 
 const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
-  ({ className, label, error, helperText, minDate, required = false, onChange, value, ...props }, ref) => {
+  ({ className, label, error, helperText, minDate, required = false, onChange, value,testId, ...props }, ref) => {
     // Always use today as minimum date to prevent past date selection
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -65,7 +66,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     })() : value
 
     return (
-      <div className="space-y-2">
+      <div className="space-y-2" data-testid={testId}>
         {label && (
           <label className="text-sm font-medium text-foreground">
             {label}

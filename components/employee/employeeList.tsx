@@ -131,8 +131,9 @@ export function EmployeeList() {
                   <NewEmployeeModal 
                     onSuccess={handleEmployeeCreated}
                     trigger={
-                      <Button className="btn-hostinger btn-hostinger-primary flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0">
+                      <Button data-testid="employee-add-btn" className="btn-hostinger btn-hostinger-primary  flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9 whitespace-nowrap shrink-0">
                         <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                        
                         <span className="hidden min-[375px]:inline">Add Employee</span>
                       </Button>
                     }

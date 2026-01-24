@@ -237,6 +237,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
                     Full Name <span className="text-destructive">*</span>
                   </Label>
                   <Input
+                    data-testid="employee-name" 
                     id="name"
                     {...register("name")}
                     placeholder="Enter employee's full name"
@@ -253,6 +254,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
                     Email Address <span className="text-destructive">*</span>
                   </Label>
                   <Input
+                    data-testid="employee-email"
                     id="email"
                     type="email"
                     {...register("email", { onChange: clearGeneralError })}
@@ -272,6 +274,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
                   control={control}
                   render={({ field }) => (
                     <PhoneInputField
+                      testId="employee-phone"
                       id="phone"
                       label="Phone Number"
                       value={field.value}
@@ -308,6 +311,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
                         Department <span className="text-destructive">*</span>
                       </Label>
                       <Input
+                        data-testid="employee-department"
                         id="department"
                         placeholder="Enter department"
                         value={field.value || ""}
@@ -332,6 +336,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
                         Position <span className="text-destructive">*</span>
                       </Label>
                       <Input
+                        data-testid="employee-designation"
                         id="designation"
                         placeholder="e.g., CEO, VP, HR, Manager"
                         value={field.value || ""}
@@ -353,6 +358,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
                     <div className="flex flex-col gap-2">
                       <Label className="font-medium">Status</Label>
                       <SelectField
+                        testId="employee-status"
                         placeholder="Select status"
                         options={statusOptions}
                         value={field.value}
@@ -368,6 +374,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
             <DialogFooter className="mt-6">
               <Button 
                 type="button" 
+                
                 variant="secondary" 
                 onClick={() => setOpen(false)}
                 disabled={isLoading}
@@ -375,6 +382,7 @@ export function NewEmployeeModal({ employeeId, trigger, onSuccess, open: control
                 Cancel
               </Button>
               <Button 
+              data-testid="employee-save-btn"
                 type="submit" 
                 disabled={isLoading || isLoadingEmployee}
               >

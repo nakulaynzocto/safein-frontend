@@ -235,6 +235,7 @@ export function EmployeeTable({
           <div className="flex items-center justify-between gap-3">
             <SearchInput
               placeholder="Search employees..."
+              testId="employee-search-input"
               value={searchTerm}
               onChange={onSearchChange}
               debounceDelay={500}
@@ -299,6 +300,7 @@ export function EmployeeTable({
         <div className="flex justify-center">
           <Pagination
             currentPage={pagination.currentPage}
+            testId="employee-pagination"
             totalPages={pagination.totalPages}
             totalItems={pagination.totalEmployees}
             pageSize={pageSize}

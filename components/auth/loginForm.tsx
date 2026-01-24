@@ -105,11 +105,12 @@ export function LoginForm() {
       <CardContent>
         {errorMessage && (
           <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{errorMessage}</AlertDescription>
+            <AlertDescription data-testid='login-error'>{errorMessage}</AlertDescription>
           </Alert>
         )}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <InputField
+            data-testid='email-input'
             label="Email"
             type="email"
             placeholder="Enter your email"
@@ -119,6 +120,7 @@ export function LoginForm() {
           />
 
           <InputField
+            data-testid='password-input'
             label="Password"
             type="password"
             placeholder="Enter your password"
@@ -136,7 +138,7 @@ export function LoginForm() {
             </Link>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" data-testid='login-btn' className="w-full" disabled={isLoading}>
             {isLoading ? "Signing in..." : "Sign In"}
           </Button>
         </form>

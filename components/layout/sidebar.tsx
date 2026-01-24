@@ -41,6 +41,7 @@ const navigation = [
     name: "Employees",
     href: routes.privateroute.EMPLOYEELIST,
     icon: Users,
+    testId: "sidebar-employees"
   },
   {
     name: "Visitors",
@@ -148,6 +149,7 @@ const SidebarContent = ({
         <nav className="flex-1 space-y-2 p-2 overflow-y-auto mt-2">
           {navigation.map((item) => (
             <Link
+              data-testid={item.testId}
               key={item.name}
               href={item.href!}
               prefetch={true}

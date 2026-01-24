@@ -13,10 +13,11 @@ interface TimePickerProps extends React.InputHTMLAttributes<HTMLInputElement> {
   minTime?: string
   show5MinuteIntervals?: boolean
   selectedDate?: string // ISO date string (YYYY-MM-DD)
+  testId?:string;
 }
 
 const TimePicker = forwardRef<HTMLInputElement, TimePickerProps>(
-  ({ className, label, error, helperText, required = false, minTime, show5MinuteIntervals = true, selectedDate, value, onChange, ...props }, ref) => {
+  ({ className, label, error, helperText, required = false, minTime, show5MinuteIntervals = true, selectedDate, value, onChange,testId, ...props }, ref) => {
     const formatTo12Hour = (time: string) => {
       const [h, m] = time.split(":").map(Number)
       const period = h >= 12 ? "PM" : "AM"
@@ -87,7 +88,7 @@ const TimePicker = forwardRef<HTMLInputElement, TimePickerProps>(
     
     if (show5MinuteIntervals && generateTimeSlots.length > 0) {
       return (
-        <div className="space-y-2">
+        <div className="space-y-2" data-testid={testId}>
           {label && (
             <label className="text-sm font-medium text-foreground">
               {label}

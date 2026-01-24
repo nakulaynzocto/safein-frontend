@@ -15,6 +15,7 @@ interface PhoneInputFieldProps {
   disabled?: boolean
   placeholder?: string
   defaultCountry?: string
+  testId?: string
 }
 
 export function PhoneInputField({
@@ -27,9 +28,10 @@ export function PhoneInputField({
   disabled = false,
   placeholder = "Enter phone number",
   defaultCountry = "in", // India as default
+  testId,
 }: PhoneInputFieldProps) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" data-testid={testId}>
       <Label htmlFor={id}>
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}

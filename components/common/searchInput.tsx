@@ -11,6 +11,7 @@ interface SearchInputProps {
   onDebouncedChange?: (value: string) => void
   debounceDelay?: number
   className?: string
+  testId?:string
 }
 
 export function SearchInput({
@@ -19,7 +20,8 @@ export function SearchInput({
   onChange,
   onDebouncedChange,
   debounceDelay = 500,
-  className = ""
+  className = "",
+  testId,
 }: SearchInputProps) {
   const debouncedValue = useDebounce(value, debounceDelay)
 
@@ -34,6 +36,7 @@ export function SearchInput({
       <Search className="h-5 w-5 text-gray-400 field__icon field__icon--left" />
       <input
         type="text"
+        data-testid={testId}
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}

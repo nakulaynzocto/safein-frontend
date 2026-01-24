@@ -257,214 +257,229 @@ export function NewVisitorModal({
               </div>
             ) : (
               <>
-              {generalError && (
-                <Alert variant="destructive">
-                  <AlertDescription>{generalError}</AlertDescription>
-                </Alert>
-              )}
+                {generalError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{generalError}</AlertDescription>
+                  </Alert>
+                )}
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">
-                      Full Name <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="name"
-                      {...register("name")}
-                      placeholder="Enter full name"
-                      className={errors.name ? "border-destructive" : ""}
-                    />
-                    {errors.name && (
-                      <span className="text-sm text-destructive">
-                        {errors.name.message}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">
-                      Email Address <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      {...register("email", { onChange: clearGeneralError })}
-                      placeholder="Enter email address"
-                      className={errors.email ? "border-destructive" : ""}
-                    />
-                    {errors.email && (
-                      <span className="text-sm text-destructive">
-                        {errors.email.message}
-                      </span>
-                    )}
-                  </div>
-
-                  <Controller
-                    name="phone"
-                    control={control}
-                    render={({ field }) => (
-                      <PhoneInputField
-                        id="phone"
-                        label="Phone Number"
-                        value={field.value}
-                        onChange={(value) => {
-                          field.onChange(value);
-                          clearGeneralError();
-                        }}
-                        error={errors.phone?.message}
-                        required
-                        placeholder="Enter phone number"
-                        defaultCountry="in"
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">
+                        Full Name <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="name"
+                        data-testid="name-input"
+                        {...register("name")}
+                        placeholder="Enter full name"
+                        className={errors.name ? "border-destructive" : ""}
                       />
-                    )}
-                  />
-                </div>
-              </div>
+                      {errors.name && (
+                        <span className="text-sm text-destructive">
+                          {errors.name.message}
+                        </span>
+                      )}
+                    </div>
 
-              {/* Address Information */}
-              <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">
+                        Email Address <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="email"
+                        data-testid="email-input"
+                        type="email"
+                        {...register("email", { onChange: clearGeneralError })}
+                        placeholder="Enter email address"
+                        className={errors.email ? "border-destructive" : ""}
+                      />
+                      {errors.email && (
+                        <span className="text-sm text-destructive">
+                          {errors.email.message}
+                        </span>
+                      )}
+                    </div>
 
-                <CountryStateCitySelect
-                  value={{
-                    country: watch("address.country") || "",
-                    state: watch("address.state") || "",
-                    city: watch("address.city") || "",
-                  }}
-                  onChange={(v) => {
-                    setValue("address.country", v.country)
-                    setValue("address.state", v.state)
-                    setValue("address.city", v.city)
-                  }}
-                  errors={{
-                    country: errors.address?.country?.message as string,
-                    state: errors.address?.state?.message as string,
-                    city: errors.address?.city?.message as string,
-                  }}
-                />
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                  <Label htmlFor="address.street">Company Address</Label>
-                  <Input
-                    id="address.street"
-                    {...register("address.street")}
-                    placeholder="Enter company address"
-                    className={
-                      errors.address?.street ? "border-destructive" : ""
-                    }
-                  />
-                  {errors.address?.street && (
-                    <span className="text-sm text-destructive">
-                      {errors.address.street.message}
-                    </span>
-                  )}
-                  </div>
-                  <Controller
-                    name="idProof.type"
-                    control={control}
-                    render={({ field }) => (
-                      <div className="space-y-2">
-                        <Label>ID Proof Type</Label>
-                        <SelectField
-                          placeholder="Select ID proof type"
-                          options={idProofTypes}
+                    <Controller
+                      name="phone"
+                      control={control}
+                      render={({ field }) => (
+                        <PhoneInputField
+                          id="phone"
+                          testId="phone-input"
+                          label="Phone Number"
                           value={field.value}
-                          onChange={(val) => field.onChange(val)}
-                          error={errors.idProof?.type?.message}
+                          onChange={(value) => {
+                            field.onChange(value);
+                            clearGeneralError();
+                          }}
+                          error={errors.phone?.message}
+                          required
+                          placeholder="Enter phone number"
+                          defaultCountry="in"
                         />
-                      </div>
-                    )}
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Address Information */}
+                <div className="space-y-4">
+
+                  <CountryStateCitySelect
+                    value={{
+                      country: watch("address.country") || "",
+                      testId: "country-select",
+                      state: watch("address.state") || "",
+                      city: watch("address.city") || "",
+                    }}
+                    onChange={(v) => {
+                      setValue("address.country", v.country)
+                      setValue("address.state", v.state)
+                      setValue("address.city", v.city)
+                    }}
+                    errors={{
+                      country: errors.address?.country?.message as string,
+                      state: errors.address?.state?.message as string,
+                      city: errors.address?.city?.message as string,
+                    }}
+                    testIds={{
+                      country: "visitor-country",
+                      state: "visitor-state",
+                      city: "visitor-city",
+                    }}
                   />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="idProof.number">ID Proof Number</Label>
-                    <Input
-                      id="idProof.number"
-                      {...register("idProof.number")}
-                      placeholder="Enter ID proof number"
-                      className={
-                        errors.idProof?.number ? "border-destructive" : ""
-                      }
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="address.street">Company Address</Label>
+                      <Input
+                        id="address.street"
+                        data-testid="address-street"
+                        {...register("address.street")}
+                        placeholder="Enter company address"
+                        className={
+                          errors.address?.street ? "border-destructive" : ""
+                        }
+                      />
+                      {errors.address?.street && (
+                        <span className="text-sm text-destructive">
+                          {errors.address.street.message}
+                        </span>
+                      )}
+                    </div>
+                    <Controller
+                      name="idProof.type"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="space-y-2">
+                          <Label>ID Proof Type</Label>
+                          <SelectField
+                            placeholder="Select ID proof type"
+                            testId="proof-select"
+                            options={idProofTypes}
+                            value={field.value}
+                            onChange={(val) => field.onChange(val)}
+                            error={errors.idProof?.type?.message}
+                          />
+                        </div>
+                      )}
                     />
-                    {errors.idProof?.number && (
-                      <span className="text-sm text-destructive">
-                        {errors.idProof.number.message}
-                      </span>
-                    )}
+
+                    <div className="space-y-2">
+                      <Label htmlFor="idProof.number">ID Proof Number</Label>
+                      <Input
+                        id="idProof.number"
+                        {...register("idProof.number")}
+                        data-testid="proof-number"
+                        placeholder="Enter ID proof number"
+                        className={
+                          errors.idProof?.number ? "border-destructive" : ""
+                        }
+                      />
+                      {errors.idProof?.number && (
+                        <span className="text-sm text-destructive">
+                          {errors.idProof.number.message}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* ID Proof & Photo */}
-              <div className="space-y-4">
-          
+                {/* ID Proof & Photo */}
+                <div className="space-y-4">
 
-                {/* Image Uploads */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-semibold flex items-center gap-2">
-                      <CreditCard className="h-4 w-4" />
-                      ID Proof Document
-                    </h4>
-                    <ImageUploadField
-                      key={`idProof-${visitorId}-${visitorData?.idProof?.image}`}
-                      name="idProof.image"
-                      register={register}
-                      setValue={setValue}
-                      errors={errors.idProof?.image}
-                      initialUrl={visitorData?.idProof?.image}
-                      enableImageCapture={true}
-                    />
-                  </div>
 
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-semibold flex items-center gap-2">
-                      <Camera className="h-4 w-4" />
-                      Visitor Photo
-                    </h4>
-                    <ImageUploadField
-                      key={`photo-${visitorId}-${visitorData?.photo}`}
-                      name="photo"
-                      register={register}
-                      setValue={setValue}
-                      errors={errors.photo}
-                      initialUrl={visitorData?.photo}
-                      enableImageCapture={true}
-                    />
+                  {/* Image Uploads */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold flex items-center gap-2">
+                        <CreditCard className="h-4 w-4" />
+                        ID Proof Document
+                      </h4>
+                      <ImageUploadField
+                        key={`idProof-${visitorId}-${visitorData?.idProof?.image}`}
+                        testId="proof-upload"
+                        name="idProof.image"
+                        register={register}
+                        setValue={setValue}
+                        errors={errors.idProof?.image}
+                        initialUrl={visitorData?.idProof?.image}
+                        enableImageCapture={true}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold flex items-center gap-2">
+                        <Camera className="h-4 w-4" />
+                        Visitor Photo
+                      </h4>
+                      <ImageUploadField
+                        key={`photo-${visitorId}-${visitorData?.photo}`}
+                        testId="visitor-photo-upload"
+                        name="photo"
+                        register={register}
+                        setValue={setValue}
+                        errors={errors.photo}
+                        initialUrl={visitorData?.photo}
+                        enableImageCapture={true}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-            <DialogFooter>
-  <div className="flex flex-col sm:flex-row gap-2 w-full justify-end">
-    <Button
-      type="button"
-      variant="outline"
-      onClick={() => setOpen(false)}
-      disabled={isLoading}
-      className="w-full sm:w-auto"
-    >
-      Cancel
-    </Button>
+                <DialogFooter>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setOpen(false)}
+                      disabled={isLoading}
+                      className="w-full sm:w-auto"
+                    >
+                      Cancel
+                    </Button>
 
-    <Button
-      type="submit"
-      disabled={isLoading}
-      className="w-full sm:w-auto"
-    >
-      {isLoading ? (
-        <LoadingSpinner size="sm" className="mr-2" />
-      ) : null}
-      <CheckCircle className="h-4 w-4 mr-2" />
-      {isEditMode ? "Update Visitor" : "Register Visitor"}
-    </Button>
-  </div>
-            </DialogFooter>
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full sm:w-auto"
+                      data-testid="submit-button"
+                    >
+                      {isLoading ? (
+                        <LoadingSpinner size="sm" className="mr-2" />
+                      ) : null}
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      {isEditMode ? "Update Visitor" : "Register Visitor"}
+                    </Button>
+                  </div>
+                </DialogFooter>
 
-            </>
-          )}
-        </form>
+              </>
+            )}
+          </form>
         </div>
       </DialogContent>
     </Dialog>

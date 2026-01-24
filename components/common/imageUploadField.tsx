@@ -14,7 +14,8 @@ interface ImageUploadFieldProps {
   setValue: any
   errors?: any
   initialUrl?: string
-  enableImageCapture?: boolean
+  enableImageCapture?: boolean,
+  testId?: string
 }
 
 export function ImageUploadField({ 
@@ -24,7 +25,8 @@ export function ImageUploadField({
   setValue, 
   errors, 
   initialUrl, 
-  enableImageCapture = false 
+  enableImageCapture = false,
+  testId
 }: ImageUploadFieldProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(initialUrl || null)
   const [uploadSuccess, setUploadSuccess] = useState(false)
@@ -392,6 +394,7 @@ export function ImageUploadField({
                   src={previewImage}
                   alt="Preview"
                   className="w-full h-full object-cover"
+                  data-testid={`${testId}-preview`}
                   onLoad={handleImageLoad}
                   onError={handleImageError}
                 />
@@ -400,6 +403,7 @@ export function ImageUploadField({
               {!imageError && !isImageLoading && !isUploading && (
                 <button
                   type="button"
+                  data-testid={`${testId}-remove`}
                   onClick={(e) => {
                     e.stopPropagation()
                     handleClearFile()
@@ -438,6 +442,7 @@ export function ImageUploadField({
               ) : (
                 <div 
                   className="flex flex-col items-center justify-center p-4 sm:p-6" 
+                  data-testid={`${testId}-trigger`}
                   onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
@@ -465,6 +470,7 @@ export function ImageUploadField({
 
         <input
           id={fileInputId}
+          data-testid={testId}
           type="file"
           className="hidden"
           accept="image/*"

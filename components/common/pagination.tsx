@@ -16,6 +16,7 @@ interface PaginationProps {
   showPageSizeSelector?: boolean
   pageSizeOptions?: number[]
   className?: string
+  testId?:string
 }
 
 export function Pagination({
@@ -29,11 +30,11 @@ export function Pagination({
   onPageSizeChange,
   showPageSizeSelector = false,
   pageSizeOptions = [10, 20, 50, 100],
-  className = ""
+  className = "",
+  testId
 }: PaginationProps) {
   const startItem = ((currentPage - 1) * pageSize) + 1
   const endItem = Math.min(currentPage * pageSize, totalItems)
-
   const handlePageClick = (event: { selected: number }) => {
     onPageChange(event.selected + 1)
   }
@@ -43,7 +44,7 @@ export function Pagination({
   }
 
   return (
-    <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-4", className)}>
+    <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-4", className)}  data-testid={testId}>
       {/* Items info */}
       <div className="text-sm text-gray-600 dark:text-gray-400">
         Showing <span className="font-medium">{startItem}</span> to <span className="font-medium">{endItem}</span> of <span className="font-medium">{totalItems}</span> items

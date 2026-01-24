@@ -33,6 +33,7 @@ export interface SelectFieldProps {
   disabled?: boolean
   menuZIndex?: number
   className?: string
+  testId?: string
 }
 
 const MENU_PORTAL_Z_INDEX = 2147483647 // Maximum z-index value
@@ -57,9 +58,11 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     isRtl,
     isDisabled,
     disabled,
+    testId,
   },
   ref
 ) {
+  console.log("Rendering SelectField:", { testId })
   const stableId = useId()
   const controlId = name ?? stableId
   const describedBy = error ? `${controlId}-error` : helperText ? `${controlId}-helper` : undefined
@@ -234,7 +237,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
   )
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("space-y-2", className)} data-testid={testId}>
       {label && (
         <label htmlFor={controlId} className="text-sm font-medium text-foreground">
           {label}
