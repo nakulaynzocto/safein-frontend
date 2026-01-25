@@ -85,7 +85,6 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
         },
         isActive: profile?.isActive ?? true,
     };
-
     const {
         register,
         handleSubmit,
@@ -96,6 +95,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     } = useForm<ProfileFormData>({
         resolver: zodResolver(profileSchema),
         defaultValues,
+        shouldUnregister: false,
     });
 
     useEffect(() => {
@@ -190,7 +190,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
 
     const handleFormSubmit = async (data: ProfileFormData) => {
         setIsSubmitting(true);
-        try {
+        try {            
             await onSubmit(data);
             showSuccessToast("Profile updated successfully!");
         } catch (error: any) {
