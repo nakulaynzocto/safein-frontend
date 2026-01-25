@@ -26,7 +26,17 @@ export function ProfilePageContent() {
     const handleProfileUpdate = useCallback(
         async (data: any) => {
             try {
-                const cleanPayload: UpdateProfileRequest = {};
+                // const cleanPayload: UpdateProfileRequest = {};
+                const cleanPayload: UpdateProfileRequest = {
+                    companyName: data.companyName?.trim(),
+                    email: data.email,
+                    mobileNumber: data.mobileNumber,
+                    bio: data.bio,
+                    profilePicture: data.profilePicture,
+                    address: data.address,
+                    socialLinks: data.socialLinks,
+                };
+
 
                 if (data?.companyName && typeof data.companyName === "string") {
                     cleanPayload.companyName = data.companyName.trim();

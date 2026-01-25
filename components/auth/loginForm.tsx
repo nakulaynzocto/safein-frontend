@@ -15,7 +15,7 @@ import { showErrorToast, showSuccessToast } from "@/utils/toast";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-
+import { encryptData } from "@/utils/crypto";
 const loginSchema = yup.object({
     email: yup.string().email("Invalid email address").required("Email is required"),
     password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
@@ -50,7 +50,13 @@ export function LoginForm() {
 
     const onSubmit = async (data: LoginFormData) => {
         try {
-            const result = await login(data).unwrap();
+            const encryptedEmail = encryptData(data.email);
+            const encryptedPassword = encryptData(data.password);
+            const result = await login({
+            email: encryptedEmail,
+            password: encryptedPassword,
+            }).unwrap();
+            // const result = await login(data).unwrap();
 
             if (!result.token || result.token === "undefined") {
                 throw new Error("No valid token received from server");

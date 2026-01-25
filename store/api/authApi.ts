@@ -62,6 +62,7 @@ export interface UpdateProfileRequest {
     companyName?: string;
     profilePicture?: string;
     mobileNumber?: string;
+    email?: string;
     bio?: string;
     address?: {
         street?: string;

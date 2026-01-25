@@ -15,6 +15,7 @@ import { setCredentials } from "@/store/slices/authSlice";
 import { routes } from "@/utils/routes";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { CheckCircle, Mail, ArrowLeft } from "lucide-react";
+import { encryptData } from "@/utils/crypto";
 
 const registerSchema = yup.object({
     companyName: yup.string().required("Company name is required"),
@@ -70,7 +71,14 @@ export function RegisterForm() {
     const onSubmit = async (data: RegisterFormData) => {
         try {
             setSubmitError(null);
-            const result = await register(data).unwrap();
+            const encryptedEmail = encryptData(data.email);
+            const encryptedPassword = encryptData(data.password);
+            const enctyptedCompanyNmae = encryptData(data.companyName);
+            const result = await register({
+                email:encryptedEmail,
+                password:encryptedPassword,
+                companyName:enctyptedCompanyNmae
+            }).unwrap();
 
             setUserEmail(data.email);
             setCurrentStep("otp");
