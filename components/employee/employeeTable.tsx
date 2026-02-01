@@ -150,7 +150,7 @@ export function EmployeeTable({
             key: "actions",
             header: "Actions",
             render: (employee: Employee) => (
-                <div className="flex justify-end">
+                <div className="flex justify-center">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">

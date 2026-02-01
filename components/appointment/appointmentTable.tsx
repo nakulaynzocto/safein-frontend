@@ -389,7 +389,7 @@ export function AppointmentTable({
                 const showOnlyView = isRejected || isCompleted;
 
                 return (
-                    <div className="flex justify-end">
+                    <div className="flex justify-center">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
