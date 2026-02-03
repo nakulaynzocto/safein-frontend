@@ -1,3 +1,5 @@
+import { User } from "@/store/api/authApi";
+
 export function formatDate(date: string | Date): string {
     const d = new Date(date);
     const day = d.getDate().toString().padStart(2, "0");
@@ -406,20 +408,31 @@ export function getAppointmentDateTime(appointment: AppointmentForStatus): Date 
 }
 
 /**
- * Check if appointment is timed out (past by more than 30 minutes)
+ * Check if appointment is timed out (scheduled date has passed)
  * @param appointment - Appointment object with appointmentDetails
- * @returns True if appointment time has passed by more than 30 minutes
+ * @returns True if scheduled date has passed (next day or later)
  */
 export function isAppointmentTimedOut(appointment: AppointmentForStatus): boolean {
     const scheduledDateTime = getAppointmentDateTime(appointment);
     if (!scheduledDateTime) return false;
 
     const now = new Date();
-    const diffInMinutes = (now.getTime() - scheduledDateTime.getTime()) / (1000 * 60);
+    
+    // Get date only (without time) for comparison
+    const scheduledDateOnly = new Date(
+        scheduledDateTime.getFullYear(),
+        scheduledDateTime.getMonth(),
+        scheduledDateTime.getDate()
+    );
+    const currentDateOnly = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate()
+    );
 
-    // Check if appointment time has passed by more than 30 minutes
-    // Only return true if the scheduled time is in the past AND more than 30 minutes have passed
-    return diffInMinutes > 30;
+    // Check if current date is after scheduled date (next day or later)
+    // If appointment is for 1/1/2026, it will timeout on 2/1/2026
+    return currentDateOnly.getTime() > scheduledDateOnly.getTime();
 }
 
 /**
@@ -433,8 +446,8 @@ export function getAppointmentStatus(appointment: AppointmentForStatus): string 
     // Only show 'time_out' if:
     // 1. Status is 'pending' (not approved/rejected/completed)
     // 2. Both scheduledDate and scheduledTime are available
-    // 3. Appointment scheduled date+time is in the past
-    // 4. More than 30 minutes have passed since scheduled date+time
+    // 3. Current date is after scheduled date (next day or later)
+    // Example: If appointment is for 1/1/2026, it will timeout on 2/1/2026
     if (status === "pending") {
         // Check if both date and time are available
         if (!appointment.appointmentDetails?.scheduledDate || !appointment.appointmentDetails?.scheduledTime) {
@@ -444,11 +457,22 @@ export function getAppointmentStatus(appointment: AppointmentForStatus): string 
         const scheduledDateTime = getAppointmentDateTime(appointment);
         if (scheduledDateTime) {
             const now = new Date();
-            const diffInMinutes = (now.getTime() - scheduledDateTime.getTime()) / (1000 * 60);
+            
+            // Get date only (without time) for comparison
+            const scheduledDateOnly = new Date(
+                scheduledDateTime.getFullYear(),
+                scheduledDateTime.getMonth(),
+                scheduledDateTime.getDate()
+            );
+            const currentDateOnly = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate()
+            );
 
-            // Check if scheduled date+time is in the past AND more than 30 minutes have passed
-            // diffInMinutes > 30 means: current time is more than 30 minutes after scheduled time
-            if (diffInMinutes > 30) {
+            // Check if current date is after scheduled date (next day or later)
+            // If appointment is for 1/1/2026, it will timeout on 2/1/2026
+            if (currentDateOnly.getTime() > scheduledDateOnly.getTime()) {
                 return "time_out";
             }
         }
@@ -475,4 +499,37 @@ export function getAppointmentStatsKey(
     };
 
     return statusMap[statusLower] ?? "pendingAppointments";
+}
+
+/**
+ * Check if a user is an employee
+ * Checks multiple conditions:
+ * 1. user.role === 'employee' (legacy field)
+ * 2. user.roles?.includes('employee') (preferred field)
+ * 3. user.employeeId exists and is not empty
+ * 
+ * @param user - User object to check
+ * @returns true if user is an employee, false otherwise
+ */
+export function isEmployee(user: User | null | undefined): boolean {
+    if (!user) {
+        return false;
+    }
+
+    // Check legacy role field
+    if (user.role === 'employee') {
+        return true;
+    }
+
+    // Check roles array (preferred method)
+    if (user.roles?.includes('employee')) {
+        return true;
+    }
+
+    // Check if employeeId exists and is not empty
+    if (user.employeeId && user.employeeId.trim() !== '') {
+        return true;
+    }
+
+    return false;
 }

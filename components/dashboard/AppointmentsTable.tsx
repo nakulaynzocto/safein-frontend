@@ -47,9 +47,9 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                     const visitorCompany = visitor?.company || "";
 
                     return (
-                        <div className="flex items-center gap-3">
-                            <div className="group relative">
-                                <Avatar className="h-8 w-8">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="group relative flex-shrink-0">
+                                <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
                                     <AvatarImage src={visitor?.photo} alt={visitorName} />
                                     <AvatarFallback>
                                         {visitorName
@@ -72,16 +72,16 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                                     </button>
                                 )}
                             </div>
-                            <div>
-                                <div className="text-sm font-medium">{visitorName}</div>
-                                <div className="flex items-center gap-1 text-xs text-gray-500">
-                                    <Phone className="h-3 w-3" />
-                                    {visitorPhone}
+                            <div className="min-w-0 flex-1">
+                                <div className="text-xs sm:text-sm font-medium truncate">{visitorName}</div>
+                                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500">
+                                    <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+                                    <span className="truncate">{visitorPhone}</span>
                                 </div>
                                 {visitorCompany && (
-                                    <div className="flex items-center gap-1 text-xs text-gray-400">
-                                        <Building className="h-3 w-3" />
-                                        {visitorCompany}
+                                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
+                                        <Building className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+                                        <span className="truncate">{visitorCompany}</span>
                                     </div>
                                 )}
                             </div>
@@ -100,8 +100,8 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                     const employeeDepartment = employee?.department || "";
 
                     return (
-                        <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <Avatar className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0">
                                 <AvatarFallback className="bg-blue-100 text-blue-600">
                                     {employeeName
                                         .split(" ")
@@ -110,16 +110,16 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                                         .substring(0, 2)}
                                 </AvatarFallback>
                             </Avatar>
-                            <div>
-                                <div className="text-sm font-medium">{employeeName}</div>
-                                <div className="flex items-center gap-1 text-xs text-gray-500">
-                                    <Mail className="h-3 w-3" />
-                                    {employeeEmail}
+                            <div className="min-w-0 flex-1">
+                                <div className="text-xs sm:text-sm font-medium truncate">{employeeName}</div>
+                                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500">
+                                    <Mail className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+                                    <span className="truncate">{employeeEmail}</span>
                                 </div>
                                 {employeeDepartment && (
-                                    <div className="flex items-center gap-1 text-xs text-gray-400">
-                                        <Building className="h-3 w-3" />
-                                        {employeeDepartment}
+                                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
+                                        <Building className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+                                        <span className="truncate">{employeeDepartment}</span>
                                     </div>
                                 )}
                             </div>
@@ -134,12 +134,12 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                         header: "Date & Time",
                         sortable: false,
                         render: (appointment: any) => (
-                            <div className="flex items-center gap-2 text-sm">
-                                <Calendar className="h-3 w-3" />
-                                {formatDateTime(
+                            <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                                <Calendar className="h-3 w-3 flex-shrink-0" />
+                                <span className="truncate">{formatDateTime(
                                     appointment.appointmentDetails?.scheduledDate,
                                     appointment.appointmentDetails?.scheduledTime,
-                                )}
+                                )}</span>
                             </div>
                         ),
                     },
@@ -150,7 +150,7 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                         header: "Time",
                         sortable: false,
                         render: (appointment: any) => (
-                            <div className="text-sm">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
+                            <div className="text-xs sm:text-sm">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
                         ),
                     },
                 ]),
@@ -159,17 +159,17 @@ export const AppointmentsTable = memo(function AppointmentsTable({
     );
 
     return (
-        <div className="flex flex-col gap-2 sm:gap-4">
-            <div className="flex flex-col gap-1 p-2 pb-0 sm:p-0 sm:pb-0">
-                <h3 className="flex items-center gap-2 text-base font-medium sm:text-lg">
+        <div className="flex flex-col gap-2 sm:gap-3 md:gap-4">
+            <div className="flex flex-col gap-1 px-2 pb-0 sm:px-0">
+                <h3 className="flex items-center gap-2 text-sm font-semibold sm:text-base md:text-lg">
                     <Calendar className="h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
                     <span className="truncate">{title}</span>
                 </h3>
                 <p className="text-muted-foreground text-xs sm:text-sm">{description}</p>
             </div>
-            <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
-                <div className="-mx-2 overflow-x-auto sm:mx-0">
-                    <div className="min-w-[500px] sm:min-w-0">
+            <div className="overflow-hidden rounded-lg border border-border bg-background shadow-xs sm:rounded-xl">
+                <div className="overflow-x-auto -mx-1 sm:mx-0">
+                    <div className="min-w-[600px] sm:min-w-0">
                         <DataTable
                             data={data}
                             columns={columns}

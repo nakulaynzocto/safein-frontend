@@ -23,6 +23,7 @@ interface AppointmentBookingFormProps {
     employeeId: string;
     employeeName: string;
     visitorEmail: string;
+    visitorName?: string;
     onSubmit: (data: any) => void;
     isLoading?: boolean;
 }
@@ -32,6 +33,7 @@ export function AppointmentBookingForm({
     employeeId,
     employeeName,
     visitorEmail,
+    visitorName,
     onSubmit,
     isLoading = false,
     appointmentToken,
@@ -114,7 +116,7 @@ export function AppointmentBookingForm({
                     <Label className="text-sm font-medium text-gray-600">Visitor</Label>
                     <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm font-medium text-gray-900">{visitorEmail || "Visitor"}</span>
+                        <span className="text-sm font-medium text-gray-900">{visitorName || visitorEmail || "Visitor"}</span>
                     </div>
                 </div>
                 <div className="space-y-1">
@@ -265,25 +267,34 @@ export function AppointmentBookingForm({
 
                 {showVehicleFields && (
                     <div className="animate-in fade-in slide-in-from-top-2 space-y-4 pt-4 duration-200">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
                             {/* Vehicle Photo */}
-                            <div className="flex items-start justify-center md:justify-start">
-                                <ImageUploadField
-                                    name="vehiclePhoto"
-                                    label="Vehicle Photo (optional)"
-                                    register={register}
-                                    setValue={setValue}
-                                    errors={errors.vehiclePhoto}
-                                    initialUrl={watch("vehiclePhoto")}
-                                    enableImageCapture={true}
-                                    appointmentToken={appointmentToken}
-                                    onUploadStatusChange={setIsFileUploading}
-                                />
+                            <div className="flex flex-col space-y-2">
+                                <Label className="text-foreground text-sm font-medium">
+                                    Vehicle Photo <span className="text-muted-foreground font-normal">(optional)</span>
+                                </Label>
+                                <div className="flex justify-start">
+                                    <ImageUploadField
+                                        name="vehiclePhoto"
+                                        label=""
+                                        register={register}
+                                        setValue={setValue}
+                                        errors={errors.vehiclePhoto}
+                                        initialUrl={watch("vehiclePhoto")}
+                                        enableImageCapture={true}
+                                        appointmentToken={appointmentToken}
+                                        onUploadStatusChange={setIsFileUploading}
+                                        variant="avatar"
+                                    />
+                                </div>
+                                {errors.vehiclePhoto && (
+                                    <p className="text-xs text-red-500 mt-1">{errors.vehiclePhoto.message}</p>
+                                )}
                             </div>
 
                             {/* Vehicle Number */}
-                            <div className="space-y-1.5">
-                                <Label htmlFor="vehicleNumber" className="text-sm font-medium">
+                            <div className="flex flex-col space-y-2">
+                                <Label htmlFor="vehicleNumber" className="text-foreground text-sm font-medium">
                                     Vehicle Number <span className="text-muted-foreground font-normal">(optional)</span>
                                 </Label>
                                 <Input
@@ -293,7 +304,7 @@ export function AppointmentBookingForm({
                                     className={`h-12 rounded-xl bg-muted/30 font-medium ${errors.vehicleNumber ? "border-destructive" : ""}`}
                                 />
                                 {errors.vehicleNumber && (
-                                    <span className="text-destructive text-xs">{errors.vehicleNumber.message}</span>
+                                    <p className="text-xs text-red-500 mt-1">{errors.vehicleNumber.message}</p>
                                 )}
                             </div>
                         </div>

@@ -467,25 +467,33 @@ export function NewAppointmentModal({
             {/* Vehicle Information Section (Optional) - Only shown when toggle is ON */}
             {showVehicleFields && (
                 <div className="animate-in fade-in slide-in-from-top-2 space-y-4 pt-4 duration-200">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
                         {/* Vehicle Photo */}
-                        <div className="flex items-start justify-center md:justify-start">
-                            <ImageUploadField
-                                name="vehiclePhoto"
-                                label="Vehicle Photo (optional)"
-                                register={register}
-                                setValue={setValue}
-                                errors={errors}
-                                initialUrl={watch("vehiclePhoto")}
-                                enableImageCapture={true}
-                                onUploadStatusChange={setIsFileUploading}
-                                variant="avatar"
-                            />
+                        <div className="flex flex-col space-y-2">
+                            <Label className="text-foreground text-sm font-medium">
+                                Vehicle Photo <span className="text-muted-foreground font-normal">(optional)</span>
+                            </Label>
+                            <div className="flex justify-start">
+                                <ImageUploadField
+                                    name="vehiclePhoto"
+                                    label=""
+                                    register={register}
+                                    setValue={setValue}
+                                    errors={errors.vehiclePhoto}
+                                    initialUrl={watch("vehiclePhoto")}
+                                    enableImageCapture={true}
+                                    onUploadStatusChange={setIsFileUploading}
+                                    variant="avatar"
+                                />
+                            </div>
+                            {errors.vehiclePhoto && (
+                                <p className="text-xs text-red-500 mt-1">{errors.vehiclePhoto.message}</p>
+                            )}
                         </div>
 
                         {/* Vehicle Number */}
-                        <div className="space-y-1.5">
-                            <Label htmlFor="vehicleNumber" className="text-sm font-medium">
+                        <div className="flex flex-col space-y-2">
+                            <Label htmlFor="vehicleNumber" className="text-foreground text-sm font-medium">
                                 Vehicle Number <span className="text-muted-foreground font-normal">(optional)</span>
                             </Label>
                             <Input
@@ -495,7 +503,7 @@ export function NewAppointmentModal({
                                 className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.vehicleNumber ? "border-destructive" : ""}`}
                             />
                             {errors.vehicleNumber && (
-                                <span className="text-destructive text-xs">{errors.vehicleNumber.message}</span>
+                                <p className="text-xs text-red-500 mt-1">{errors.vehicleNumber.message}</p>
                             )}
                         </div>
                     </div>

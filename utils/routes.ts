@@ -21,6 +21,9 @@ export const routes = {
 
         // Email Actions
         EMAIL_ACTION: "/email-action",
+
+        // Employee Setup
+        EMPLOYEE_SETUP: "/employee-setup",
     },
 
     privateroute: {
@@ -41,12 +44,12 @@ export const routes = {
         APPOINTMENTLIST: "/appointment/list",
         APPOINTMENTCREATE: "/appointment/create",
         APPOINTMENTEDIT: "/appointment/[id]", // Dynamic route pattern
+        APPOINTMENT_REQUESTS: "/appointment/requests",
         APPOINTMENT_LINKS: "/appointment-links",
 
         // Settings Routes
         SETTINGS: "/settings",
         PROFILE: "/settings/profile",
-
         SETTINGS_STATUS: "/settings/status",
     },
 } as const;

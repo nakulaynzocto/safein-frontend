@@ -2,16 +2,20 @@
 
 import { useCallback } from "react";
 import { useGetProfileQuery, useUpdateProfileMutation, UpdateProfileRequest } from "@/store/api/authApi";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 
 import { ProfileForm } from "@/components/profile/profileForm";
 import { EmptyState } from "@/components/common/EmptyState";
 import { UserX } from "lucide-react";
+import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 
 export function ProfilePageContent() {
     const dispatch = useAppDispatch();
+    const { user: currentUser } = useAppSelector((state) => state.auth);
+    const isEmployee = checkIsEmployee(currentUser);
+    
     const {
         data: profile,
         isLoading,
@@ -26,28 +30,36 @@ export function ProfilePageContent() {
     const handleProfileUpdate = useCallback(
         async (data: any) => {
             try {
-                // const cleanPayload: UpdateProfileRequest = {};
-                const cleanPayload: UpdateProfileRequest = {
-                    companyName: data.companyName?.trim(),
-                    email: data.email,
-                    mobileNumber: data.mobileNumber,
-                    bio: data.bio,
-                    profilePicture: data.profilePicture,
-                    address: data.address,
-                    socialLinks: data.socialLinks,
-                };
-
-
-                if (data?.companyName && typeof data.companyName === "string") {
-                    cleanPayload.companyName = data.companyName.trim();
+                // For employees, exclude company-related fields from update
+                const cleanPayload: UpdateProfileRequest = {};
+                
+                // Employees cannot update company fields
+                if (!isEmployee) {
+                    if (data?.companyName && typeof data.companyName === "string") {
+                        cleanPayload.companyName = data.companyName.trim();
+                    }
+                    
+                    if (
+                        data?.profilePicture &&
+                        typeof data.profilePicture === "string" &&
+                        data.profilePicture.trim() !== ""
+                    ) {
+                        cleanPayload.profilePicture = data.profilePicture.trim();
+                    }
                 }
-
-                if (
-                    data?.profilePicture &&
-                    typeof data.profilePicture === "string" &&
-                    data.profilePicture.trim() !== ""
-                ) {
-                    cleanPayload.profilePicture = data.profilePicture.trim();
+                
+                // All users can update these fields
+                if (data.mobileNumber !== undefined) {
+                    cleanPayload.mobileNumber = data.mobileNumber;
+                }
+                if (data.bio !== undefined) {
+                    cleanPayload.bio = data.bio;
+                }
+                if (data.address !== undefined) {
+                    cleanPayload.address = data.address;
+                }
+                if (data.socialLinks !== undefined) {
+                    cleanPayload.socialLinks = data.socialLinks;
                 }
 
                 let finalPayload: UpdateProfileRequest;
@@ -57,7 +69,8 @@ export function ProfilePageContent() {
                     throw new Error("Failed to prepare profile data: contains invalid data");
                 }
 
-                if (!finalPayload.companyName) {
+                // Company name is only required for admins
+                if (!isEmployee && !finalPayload.companyName && data.companyName) {
                     throw new Error("Company name is required");
                 }
 
@@ -88,7 +101,7 @@ export function ProfilePageContent() {
                 throw new Error(errorMessage);
             }
         },
-        [updateProfile, refetch, dispatch],
+        [updateProfile, refetch, dispatch, isEmployee],
     );
 
     const handleCancelEdit = () => {

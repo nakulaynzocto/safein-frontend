@@ -28,11 +28,8 @@ const bookingVisitorSchema = yup.object({
         country: yup.string().required("Country is required"),
     }),
     idProof: yup.object({
-        type: yup.string().required("ID Proof Type is required"),
-        number: yup
-            .string()
-            .required("ID Proof Number is required")
-            .min(2, "ID Proof Number must be at least 2 characters"),
+        type: yup.string().optional(),
+        number: yup.string().optional(),
         image: yup.string().optional(),
     }),
     photo: yup.string().required("Visitor Photo is required"),
@@ -96,7 +93,7 @@ export function BookingVisitorForm({
                 street: initialValues?.address?.street || undefined,
                 city: initialValues?.address?.city || "",
                 state: initialValues?.address?.state || "",
-                country: initialValues?.address?.country || "",
+                country: initialValues?.address?.country || "IN",
             },
             idProof: {
                 type: initialValues?.idProof?.type || undefined,
@@ -109,6 +106,14 @@ export function BookingVisitorForm({
 
     // Store separate states for each upload field if needed, or a global one
     const [isFileUploading, setIsFileUploading] = useState(false);
+
+    // Set default country to India if not set
+    useEffect(() => {
+        const currentCountry = watch("address.country");
+        if (!currentCountry) {
+            setValue("address.country", "IN", { shouldValidate: false, shouldDirty: false });
+        }
+    }, [setValue, watch]);
 
     useEffect(() => {
         const opts = { shouldValidate: false, shouldDirty: false };
@@ -125,7 +130,7 @@ export function BookingVisitorForm({
                         street: address.street || undefined,
                         city: address.city || "",
                         state: address.state || "",
-                        country: address.country || "",
+                        country: address.country || "IN",
                     } as any,
                     opts,
                 );
@@ -233,28 +238,23 @@ export function BookingVisitorForm({
                     )}
                 </div>
 
-                <div className="space-y-1.5">
-                    <Label htmlFor="phone" className="text-foreground text-sm font-medium">
-                        Phone Number <span className="text-red-500">*</span>
-                    </Label>
-                    <Controller
-                        name="phone"
-                        control={control}
-                        render={({ field }) => (
-                            <PhoneInputField
-                                {...(field as any)}
-                                id="phone"
-                                label=""
-                                value={field.value}
-                                onChange={(value) => field.onChange(value)}
-                                error={errors.phone?.message}
-                                required
-                                placeholder="Enter phone number"
-                                defaultCountry="in"
-                            />
-                        )}
-                    />
-                </div>
+                <Controller
+                    name="phone"
+                    control={control}
+                    render={({ field }) => (
+                        <PhoneInputField
+                            {...(field as any)}
+                            id="phone"
+                            label="Phone Number"
+                            value={field.value}
+                            onChange={(value) => field.onChange(value)}
+                            error={errors.phone?.message}
+                            required
+                            placeholder="Enter phone number"
+                            defaultCountry="in"
+                        />
+                    )}
+                />
             </div>
 
             {/* Address Information */}
@@ -303,75 +303,99 @@ export function BookingVisitorForm({
                 />
             </div>
 
-            {/* ID Verification & Photos - Single Row on Large Screens */}
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-start pt-2">
-                {/* 1. Visitor Photo */}
-                <div className="flex flex-col items-center space-y-1.5">
-                    <ImageUploadField
-                        name="photo"
-                        register={register}
-                        setValue={setValue}
-                        errors={errors.photo}
-                        initialUrl={initialValues?.photo}
-                        label="Visitor Photo"
-                        enableImageCapture={true}
-                        appointmentToken={appointmentToken}
-                        onUploadStatusChange={setIsFileUploading}
-                        variant="avatar"
-                    />
-                </div>
-
-                {/* 2. ID Proof Type */}
-                <div className="space-y-1.5 w-full pt-2">
-                    <Label htmlFor="idProofType" className="text-foreground text-sm font-medium">
-                        ID Proof Type <span className="text-red-500">*</span>
-                    </Label>
-                    <Controller
-                        name="idProof.type"
-                        control={control}
-                        render={({ field }) => (
-                            <div className="space-y-1">
-                                <SelectField
-                                    {...(field as any)}
-                                    options={idProofTypes}
-                                    placeholder="Select Type"
-                                />
-                                {errors.idProof?.type && (
-                                    <p className="text-xs text-red-500">{errors.idProof.type.message}</p>
-                                )}
-                            </div>
+            {/* ID Verification & Photos */}
+            <div className="space-y-4">
+                {/* Photo Uploads Row */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
+                    {/* Visitor Photo */}
+                    <div className="flex flex-col space-y-2">
+                        <Label className="text-foreground text-sm font-medium">
+                            Visitor Photo <span className="text-red-500">*</span>
+                        </Label>
+                        <div className="flex justify-start">
+                            <ImageUploadField
+                                name="photo"
+                                register={register}
+                                setValue={setValue}
+                                errors={errors.photo}
+                                initialUrl={initialValues?.photo}
+                                label=""
+                                enableImageCapture={true}
+                                appointmentToken={appointmentToken}
+                                onUploadStatusChange={setIsFileUploading}
+                                variant="avatar"
+                            />
+                        </div>
+                        {errors.photo && (
+                            <p className="text-xs text-red-500 mt-1">{errors.photo.message}</p>
                         )}
-                    />
+                    </div>
+
+                    {/* ID Proof Image */}
+                    <div className="flex flex-col space-y-2">
+                        <Label className="text-foreground text-sm font-medium">
+                            ID Proof Image
+                        </Label>
+                        <div className="flex justify-start">
+                            <ImageUploadField
+                                name="idProof.image"
+                                register={register}
+                                setValue={setValue}
+                                errors={errors.idProof?.image}
+                                initialUrl={initialValues?.idProof?.image}
+                                label=""
+                                enableImageCapture={true}
+                                appointmentToken={appointmentToken}
+                                onUploadStatusChange={setIsFileUploading}
+                                variant="avatar"
+                            />
+                        </div>
+                        {errors.idProof?.image && (
+                            <p className="text-xs text-red-500 mt-1">{errors.idProof.image.message}</p>
+                        )}
+                    </div>
                 </div>
 
-                {/* 3. ID Proof Number */}
-                <div className="space-y-1.5 w-full pt-2">
-                    <Label htmlFor="idProofNumber" className="text-foreground text-sm font-medium">
-                        ID Proof Number <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                        id="idProofNumber"
-                        {...register("idProof.number")}
-                        placeholder="Enter Number"
-                        className={`h-12 w-full rounded-xl border ${errors.idProof?.number ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-muted/30 text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium`}
-                    />
-                    {errors.idProof?.number && <p className="text-xs text-red-500">{errors.idProof.number.message}</p>}
-                </div>
+                {/* ID Proof Details Row */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
+                    {/* ID Proof Type */}
+                    <div className="flex flex-col space-y-2">
+                        <Label htmlFor="idProofType" className="text-foreground text-sm font-medium">
+                            ID Proof Type
+                        </Label>
+                        <Controller
+                            name="idProof.type"
+                            control={control}
+                            render={({ field }) => (
+                                <>
+                                    <SelectField
+                                        {...(field as any)}
+                                        options={idProofTypes}
+                                        placeholder="Select Type"
+                                    />
+                                    {errors.idProof?.type && (
+                                        <p className="text-xs text-red-500 mt-1">{errors.idProof.type.message}</p>
+                                    )}
+                                </>
+                            )}
+                        />
+                    </div>
 
-                {/* 4. ID Proof Image */}
-                <div className="flex flex-col items-center space-y-1.5">
-                    <ImageUploadField
-                        name="idProof.image"
-                        register={register}
-                        setValue={setValue}
-                        errors={errors.idProof?.image}
-                        initialUrl={initialValues?.idProof?.image}
-                        label="ID Proof Image"
-                        enableImageCapture={true}
-                        appointmentToken={appointmentToken}
-                        onUploadStatusChange={setIsFileUploading}
-                        variant="avatar"
-                    />
+                    {/* ID Proof Number */}
+                    <div className="flex flex-col space-y-2">
+                        <Label htmlFor="idProofNumber" className="text-foreground text-sm font-medium">
+                            ID Proof Number
+                        </Label>
+                        <Input
+                            id="idProofNumber"
+                            {...register("idProof.number")}
+                            placeholder="Enter Number"
+                            className={`h-12 w-full rounded-xl border ${errors.idProof?.number ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-muted/30 text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium`}
+                        />
+                        {errors.idProof?.number && (
+                            <p className="text-xs text-red-500 mt-1">{errors.idProof.number.message}</p>
+                        )}
+                    </div>
                 </div>
             </div>
 

@@ -11,8 +11,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
+import { PhoneInputField } from "@/components/common/phoneInputField";
+import { SelectField } from "@/components/common/selectField";
+import { CountryStateCitySelect } from "@/components/common/countryStateCity";
+import { TextareaField } from "@/components/common/textareaField";
+import { ImageUploadField } from "@/components/common/imageUploadField";
+import { Info, CreditCard, CheckCircle } from "lucide-react";
+import { InputField } from "@/components/common/inputField";
+import { LoadingSpinner } from "@/components/common/loadingSpinner";
+import { FormContainer } from "@/components/common/formContainer";
 import { VisitorFormFields } from "./visitorFormFields";
-import { visitorSchema, VisitorFormData } from "./visitorSchema";
+import { visitorSchema, VisitorFormData, idProofTypes } from "./visitorSchema";
+import { useCreateVisitorMutation, useUpdateVisitorMutation, useGetVisitorQuery, type CreateVisitorRequest } from "@/store/api/visitorApi";
+import { showSuccessToast, showErrorToast } from "@/utils/toast";
+import { routes } from "@/utils/routes";
 
 interface NewVisitorModalProps {
     visitorId?: string;
@@ -49,16 +62,22 @@ export function NewVisitorModal({
         skip: !isEditMode,
     });
 
-    const hasOptionalData =
+    // Separate states for ID Verification and Security sections
+    const hasIdVerificationData =
         visitorData &&
         (visitorData.idProof?.type ||
             visitorData.idProof?.number ||
             visitorData.idProof?.image ||
-            visitorData.photo ||
-            (visitorData as any).gender ||
+            visitorData.photo);
+    const hasSecurityData =
+        visitorData &&
+        ((visitorData as any).emergencyContact?.name ||
+            (visitorData as any).emergencyContact?.phone ||
             (visitorData as any).blacklisted ||
-            (visitorData as any).emergencyContact?.name);
-    const [showOptionalFields, setShowOptionalFields] = useState<boolean>(!!hasOptionalData);
+            (visitorData as any).tags);
+    
+    const [showIdVerificationFields, setShowIdVerificationFields] = useState<boolean>(!!hasIdVerificationData);
+    const [showSecurityFields, setShowSecurityFields] = useState<boolean>(!!hasSecurityData);
 
     const {
         register,
@@ -82,7 +101,7 @@ export function NewVisitorModal({
                 street: "",
                 city: "",
                 state: "",
-                country: "",
+                country: "IN",
             },
             idProof: {
                 type: "",
@@ -105,21 +124,31 @@ export function NewVisitorModal({
             reset();
             setGeneralError(null);
             clearErrors();
+        } else {
+            // Set default country to India when modal opens
+            const currentCountry = watch("address.country");
+            if (!currentCountry) {
+                setValue("address.country", "IN", { shouldValidate: false, shouldDirty: false });
+            }
         }
-    }, [open, reset, clearErrors]);
+    }, [open, reset, clearErrors, setValue, watch]);
 
     useEffect(() => {
         if (isEditMode && visitorData) {
-            const hasOptional = !!(
+            const hasIdVerification = !!(
                 visitorData.idProof?.type ||
                 visitorData.idProof?.number ||
                 visitorData.idProof?.image ||
-                visitorData.photo ||
-                (visitorData as any).gender ||
-                (visitorData as any).blacklisted ||
-                (visitorData as any).emergencyContact?.name
+                visitorData.photo
             );
-            setShowOptionalFields(hasOptional);
+            const hasSecurity = !!(
+                (visitorData as any).emergencyContact?.name ||
+                (visitorData as any).emergencyContact?.phone ||
+                (visitorData as any).blacklisted ||
+                (visitorData as any).tags
+            );
+            setShowIdVerificationFields(hasIdVerification);
+            setShowSecurityFields(hasSecurity);
 
             reset({
                 name: visitorData.name || "",
@@ -130,7 +159,7 @@ export function NewVisitorModal({
                     street: visitorData.address?.street || "",
                     city: visitorData.address?.city || "",
                     state: visitorData.address?.state || "",
-                    country: visitorData.address?.country || "",
+                    country: visitorData.address?.country || "IN",
                 },
                 idProof: {
                     type: visitorData.idProof?.type || "",
@@ -155,14 +184,19 @@ export function NewVisitorModal({
         }
     };
 
-    const handleToggleChange = (checked: boolean) => {
-        setShowOptionalFields(checked);
+    const handleToggleIdVerification = (checked: boolean) => {
+        setShowIdVerificationFields(checked);
         if (!checked) {
             setValue("idProof.type", "");
             setValue("idProof.number", "");
             setValue("idProof.image", "");
             setValue("photo", "");
-            setValue("gender", "" as any);
+        }
+    };
+
+    const handleToggleSecurity = (checked: boolean) => {
+        setShowSecurityFields(checked);
+        if (!checked) {
             setValue("blacklisted", false);
             setValue("blacklistReason", "");
             setValue("tags", "");
@@ -359,7 +393,7 @@ export function NewVisitorModal({
                         state: watch("address.state") || "",
                         city: watch("address.city") || "",
                     }}
-                    onChange={(v) => {
+                        onChange={(v: any) => {
                         setValue("address.country", v.country);
                         setValue("address.state", v.state);
                         setValue("address.city", v.city);
@@ -385,104 +419,152 @@ export function NewVisitorModal({
                 />
             </div>
 
-            {/* Optional Fields Toggle */}
+            {/* ID Verification & Photos Toggle */}
             <div className="border-t pt-4">
                 <div className="bg-muted/30 flex items-center justify-between rounded-lg border p-4">
                     <div className="flex items-center gap-3">
                         <Info className="text-muted-foreground h-5 w-5" />
                         <div>
-                            <Label htmlFor="optional-fields-toggle" className="cursor-pointer text-sm font-medium">
-                                Add Additional Information
+                            <Label htmlFor="id-verification-toggle" className="cursor-pointer text-sm font-medium">
+                                ID Verification & Photos
                             </Label>
                             <p className="text-muted-foreground mt-0.5 text-xs">
-                                Include optional details like ID proof, photos, and notes
+                                Add visitor photo and ID proof details
                             </p>
                         </div>
                     </div>
                     <Switch
-                        id="optional-fields-toggle"
-                        checked={showOptionalFields}
-                        onCheckedChange={handleToggleChange}
+                        id="id-verification-toggle"
+                        checked={showIdVerificationFields}
+                        onCheckedChange={handleToggleIdVerification}
                         className="data-[state=unchecked]:bg-gray-200 dark:data-[state=unchecked]:bg-gray-700"
                     />
                 </div>
             </div>
 
-            {/* Optional Fields Section - Only shown when toggle is ON */}
-            {showOptionalFields && (
+            {/* ID Verification & Photos Section - Only shown when toggle is ON */}
+            {showIdVerificationFields && (
                 <div className="animate-in fade-in slide-in-from-top-2 space-y-4 pt-4 duration-200">
-
-                    {/* ID Verification & Images - SINGLE ROW on Desktop */}
                     <div className="space-y-4 border-t pt-4">
                         <h4 className="text-muted-foreground text-sm font-bold tracking-wider uppercase">
                             ID Verification & Photos
                         </h4>
 
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-start">
-                            {/* 1. Visitor Photo */}
-                            <div className="flex flex-col items-center">
-                                <ImageUploadField
-                                    key={`photo-${visitorId}-${visitorData?.photo}`}
-                                    name="photo"
-                                    label="Visitor Photo"
-                                    register={register}
-                                    setValue={setValue}
-                                    errors={errors.photo}
-                                    initialUrl={visitorData?.photo}
-                                    enableImageCapture={true}
-                                    onUploadStatusChange={setIsFileUploading}
-                                    variant="avatar"
-                                />
-                            </div>
-
-                            {/* 2. ID Proof Type */}
-                            <div className="space-y-2 w-full pt-2">
-                                <Controller
-                                    name="idProof.type"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <SelectField
-                                            label="ID Proof Type"
-                                            placeholder="Select Type"
-                                            options={idProofTypes}
-                                            value={field.value || ""}
-                                            onChange={(val) => field.onChange(val)}
-                                            error={errors.idProof?.type?.message}
+                        <div className="space-y-4">
+                            {/* Photo Uploads Row */}
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
+                                {/* Visitor Photo */}
+                                <div className="flex flex-col space-y-2">
+                                    <Label className="text-foreground text-sm font-medium">
+                                        Visitor Photo
+                                    </Label>
+                                    <div className="flex justify-start">
+                                        <ImageUploadField
+                                            key={`photo-${visitorId}-${visitorData?.photo}`}
+                                            name="photo"
+                                            label=""
+                                            register={register}
+                                            setValue={setValue}
+                                            errors={errors.photo}
+                                            initialUrl={visitorData?.photo}
+                                            enableImageCapture={true}
+                                            onUploadStatusChange={setIsFileUploading}
+                                            variant="avatar"
                                         />
+                                    </div>
+                                    {errors.photo && (
+                                        <p className="text-xs text-red-500 mt-1">{errors.photo.message}</p>
                                     )}
-                                />
+                                </div>
+
+                                {/* ID Proof Image */}
+                                <div className="flex flex-col space-y-2">
+                                    <Label className="text-foreground text-sm font-medium">
+                                        ID Proof Image
+                                    </Label>
+                                    <div className="flex justify-start">
+                                        <ImageUploadField
+                                            key={`idProof-${visitorId}-${visitorData?.idProof?.image}`}
+                                            name="idProof.image"
+                                            label=""
+                                            register={register}
+                                            setValue={setValue}
+                                            errors={errors.idProof?.image}
+                                            initialUrl={visitorData?.idProof?.image}
+                                            enableImageCapture={true}
+                                            onUploadStatusChange={setIsFileUploading}
+                                            variant="avatar"
+                                        />
+                                    </div>
+                                    {errors.idProof?.image && (
+                                        <p className="text-xs text-red-500 mt-1">{errors.idProof.image.message}</p>
+                                    )}
+                                </div>
                             </div>
 
-                            {/* 3. ID Proof Number */}
-                            <div className="space-y-2 w-full pt-2">
-                                <InputField
-                                    label="ID Proof Number"
-                                    placeholder="Enter Number"
-                                    error={errors.idProof?.number?.message}
-                                    {...register("idProof.number")}
-                                />
-                            </div>
+                            {/* ID Proof Details Row */}
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
+                                {/* ID Proof Type */}
+                                <div className="flex flex-col space-y-2">
+                                    <Controller
+                                        name="idProof.type"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <>
+                                                <SelectField
+                                                    label="ID Proof Type"
+                                                    placeholder="Select Type"
+                                                    options={idProofTypes}
+                                                    value={field.value || ""}
+                                                    onChange={(val) => field.onChange(val)}
+                                                    error={errors.idProof?.type?.message}
+                                                />
+                                            </>
+                                        )}
+                                    />
+                                </div>
 
-                            {/* 4. ID Proof Image */}
-                            <div className="flex flex-col items-center">
-                                <ImageUploadField
-                                    key={`idProof-${visitorId}-${visitorData?.idProof?.image}`}
-                                    name="idProof.image"
-                                    label="ID Proof Image"
-                                    register={register}
-                                    setValue={setValue}
-                                    errors={errors.idProof?.image}
-                                    initialUrl={visitorData?.idProof?.image}
-                                    enableImageCapture={true}
-                                    onUploadStatusChange={setIsFileUploading}
-                                    variant="avatar"
-                                />
+                                {/* ID Proof Number */}
+                                <div className="flex flex-col space-y-2">
+                                    <InputField
+                                        label="ID Proof Number"
+                                        placeholder="Enter Number"
+                                        error={errors.idProof?.number?.message}
+                                        {...register("idProof.number")}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            )}
 
+            {/* Security & Emergency Toggle */}
+            <div className="border-t pt-4">
+                <div className="bg-muted/30 flex items-center justify-between rounded-lg border p-4">
+                    <div className="flex items-center gap-3">
+                        <CreditCard className="text-muted-foreground h-5 w-5" />
+                        <div>
+                            <Label htmlFor="security-toggle" className="cursor-pointer text-sm font-medium">
+                                Security & Emergency
+                            </Label>
+                            <p className="text-muted-foreground mt-0.5 text-xs">
+                                Add emergency contact and security details
+                            </p>
+                        </div>
+                    </div>
+                    <Switch
+                        id="security-toggle"
+                        checked={showSecurityFields}
+                        onCheckedChange={handleToggleSecurity}
+                        className="data-[state=unchecked]:bg-gray-200 dark:data-[state=unchecked]:bg-gray-700"
+                    />
+                </div>
+            </div>
 
-                    {/* Emergency Contact & Security Section */}
+            {/* Security & Emergency Section - Only shown when toggle is ON */}
+            {showSecurityFields && (
+                <div className="animate-in fade-in slide-in-from-top-2 space-y-4 pt-4 duration-200">
                     <div className="space-y-4 border-t pt-4">
                         <h4 className="text-muted-foreground flex items-center gap-2 text-sm font-bold tracking-wider uppercase">
                             <CreditCard className="h-4 w-4" /> Security & Emergency

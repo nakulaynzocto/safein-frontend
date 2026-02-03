@@ -23,13 +23,17 @@ import { Textarea } from "@/components/ui/textarea"; // Using Textarea component
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useUploadFileMutation } from "@/store/api";
 import { User as UserType } from "@/store/api/authApi";
+import { useAppSelector } from "@/store/hooks";
+import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 
 // Expanded Schema to match Super Admin
-const profileSchema = z.object({
-    companyName: z
-        .string()
-        .min(2, "Company name must be at least 2 characters")
-        .max(100, "Company name cannot exceed 100 characters"),
+// Note: Schema validation will be conditional based on user role
+const createProfileSchema = (isEmployee: boolean) => z.object({
+    companyName: isEmployee 
+        ? z.string().optional() // Optional for employees (will be ignored)
+        : z.string()
+            .min(2, "Company name must be at least 2 characters")
+            .max(100, "Company name cannot exceed 100 characters"),
     email: z.string().email("Invalid email format").min(1, "Email is required"),
     mobileNumber: z.string().max(20, "Mobile number too long").optional(),
     bio: z.string().max(500, "Biography must be less than 500 characters").optional(),
@@ -40,7 +44,7 @@ const profileSchema = z.object({
         state: z.string().max(100, "State too long").optional(),
         country: z.string().max(100, "Country too long").optional(),
         pincode: z.string().max(20, "Pincode too long").optional(),
-    }),
+    }).optional(),
     socialLinks: z.object({
         linkedin: z.string().url("Invalid LinkedIn URL").optional().or(z.literal("")),
         twitter: z.string().url("Invalid Twitter URL").optional().or(z.literal("")),
@@ -49,7 +53,27 @@ const profileSchema = z.object({
     isActive: z.boolean().optional(),
 });
 
-type ProfileFormData = z.infer<typeof profileSchema>;
+// Type will be inferred from schema created inside component
+type ProfileFormData = {
+    companyName?: string;
+    email: string;
+    mobileNumber?: string;
+    bio?: string;
+    profilePicture?: string;
+    address?: {
+        street?: string;
+        city?: string;
+        state?: string;
+        country?: string;
+        pincode?: string;
+    };
+    socialLinks?: {
+        linkedin?: string;
+        twitter?: string;
+        website?: string;
+    };
+    isActive?: boolean;
+};
 
 interface ProfileFormProps {
     profile: UserType;
@@ -58,6 +82,9 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
+    const { user: currentUser } = useAppSelector((state) => state.auth);
+    const isEmployee = checkIsEmployee(currentUser);
+    
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [profileImage, setProfileImage] = useState<string | null>(profile?.profilePicture || null);
     const [isUploading, setIsUploading] = useState(false);
@@ -85,6 +112,32 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
         },
         isActive: profile?.isActive ?? true,
     };
+    // Create schema based on employee status
+    const profileSchema = z.object({
+        companyName: isEmployee 
+            ? z.string().optional() // Optional for employees (will be ignored)
+            : z.string()
+                .min(2, "Company name must be at least 2 characters")
+                .max(100, "Company name cannot exceed 100 characters"),
+        email: z.string().email("Invalid email format").min(1, "Email is required"),
+        mobileNumber: z.string().max(20, "Mobile number too long").optional(),
+        bio: z.string().max(500, "Biography must be less than 500 characters").optional(),
+        profilePicture: z.string().optional(),
+        address: z.object({
+            street: z.string().max(200, "Address too long").optional(),
+            city: z.string().max(100, "City too long").optional(),
+            state: z.string().max(100, "State too long").optional(),
+            country: z.string().max(100, "Country too long").optional(),
+            pincode: z.string().max(20, "Pincode too long").optional(),
+        }),
+        socialLinks: z.object({
+            linkedin: z.string().url("Invalid LinkedIn URL").optional().or(z.literal("")),
+            twitter: z.string().url("Invalid Twitter URL").optional().or(z.literal("")),
+            website: z.string().url("Invalid website URL").optional().or(z.literal("")),
+        }),
+        isActive: z.boolean().optional(),
+    });
+    
     const {
         register,
         handleSubmit,
@@ -93,7 +146,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
         reset,
         watch,
     } = useForm<ProfileFormData>({
-        resolver: zodResolver(profileSchema),
+        resolver: zodResolver(profileSchema) as any,
         defaultValues,
         shouldUnregister: false,
     });
@@ -190,8 +243,17 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
 
     const handleFormSubmit = async (data: ProfileFormData) => {
         setIsSubmitting(true);
-        try {            
-            await onSubmit(data);
+        try {
+            // For employees, remove company-related fields before submitting
+            if (isEmployee) {
+                const employeeData = { ...data };
+                // Don't send company fields for employees
+                delete (employeeData as any).companyName;
+                delete (employeeData as any).profilePicture;
+                await onSubmit(employeeData);
+            } else {
+                await onSubmit(data);
+            }
             showSuccessToast("Profile updated successfully!");
         } catch (error: any) {
             const errorMessage = error?.message || "Failed to update profile";
@@ -228,24 +290,28 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                     {companyName?.substring(0, 2).toUpperCase() || "CN"}
                                 </AvatarFallback>
                             </Avatar>
-                            <label
-                                htmlFor="profile-upload"
-                                className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer"
-                            >
-                                {isUploading ? (
-                                    <Loader2 className="animate-spin" size={24} />
-                                ) : (
-                                    <Upload size={24} />
-                                )}
-                            </label>
-                            <input
-                                id="profile-upload"
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={handleFileChange}
-                                disabled={isUploading}
-                            />
+                            {!isEmployee && (
+                                <label
+                                    htmlFor="profile-upload"
+                                    className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer"
+                                >
+                                    {isUploading ? (
+                                        <Loader2 className="animate-spin" size={24} />
+                                    ) : (
+                                        <Upload size={24} />
+                                    )}
+                                </label>
+                            )}
+                            {!isEmployee && (
+                                <input
+                                    id="profile-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleFileChange}
+                                    disabled={isUploading}
+                                />
+                            )}
                         </div>
 
                         {/* Active Account Status - Top Right (Read-only for frontend user usually, but duplicating UI) */}
@@ -269,12 +335,18 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                     htmlFor="companyName"
                                     className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
                                 >
-                                    Company Name <span className="text-destructive">*</span>
+                                    Company Name {!isEmployee && <span className="text-destructive">*</span>}
+                                    {isEmployee && (
+                                        <span className="ml-2 text-xs text-muted-foreground font-normal">(Managed by administrator)</span>
+                                    )}
                                 </Label>
                                 <Input
                                     id="companyName"
                                     {...register("companyName")}
-                                    className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.companyName ? "border-destructive" : ""}`}
+                                    disabled={isEmployee}
+                                    readOnly={isEmployee}
+                                    className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${isEmployee ? "opacity-60 cursor-not-allowed bg-gray-100" : ""} ${errors.companyName ? "border-destructive" : ""}`}
+                                    style={isEmployee ? { pointerEvents: 'none', backgroundColor: '#f3f4f6' } : {}}
                                 />
                                 {errors.companyName && (
                                     <p className="text-xs text-destructive mt-1">{errors.companyName.message}</p>

@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { baseApi } from "./api/baseApi";
 import { approvalLinkApi } from "./api/approvalLinkApi";
+import { notificationApi } from "./api/notificationApi";
 import authReducer from "./slices/authSlice";
 import notificationReducer from "./slices/notificationSlice";
 
@@ -21,7 +22,7 @@ export const store = configureStore({
             },
         });
 
-        const apiMiddlewares = [baseApi.middleware, approvalLinkApi.middleware];
+        const apiMiddlewares = [baseApi.middleware, approvalLinkApi.middleware, notificationApi.middleware];
 
         // Filter out any duplicate middleware references
         const uniqueMiddlewares = apiMiddlewares.filter(

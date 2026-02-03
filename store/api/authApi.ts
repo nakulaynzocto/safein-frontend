@@ -4,7 +4,8 @@ export interface User {
     id: string;
     email: string;
     name: string;
-    role: string;
+    role?: string; // Legacy field, prefer roles array
+    roles?: string[]; // Backend returns roles array
     companyName: string;
     profilePicture?: string;
     department?: string;
@@ -87,6 +88,11 @@ export interface ResetPasswordRequest {
     newPassword: string;
 }
 
+export interface SetupEmployeePasswordRequest {
+    token: string;
+    newPassword: string;
+}
+
 export interface AuthResponse {
     user: User;
     token: string;
@@ -109,10 +115,15 @@ export const authApi = baseApi.injectEndpoints({
 
                 // Normalize user data in response
                 if (data && data.user) {
+                    // Backend returns roles as array, normalize it
+                    const roles = data.user.roles || (data.user.role ? [data.user.role] : ['admin']);
                     data.user = {
                         ...data.user,
                         id: data.user.id || data.user._id || data.user.id,
                         profilePicture: data.user.profilePicture || "",
+                        // Ensure both role (string) and roles (array) are set
+                        role: data.user.role || roles[0] || 'admin',
+                        roles: roles,
                     };
                 }
 
@@ -189,6 +200,9 @@ export const authApi = baseApi.injectEndpoints({
                         ...userData,
                         id: userData.id || userData._id,
                         profilePicture: userData.profilePicture || "",
+                        // Ensure role is set from roles array if not present
+                        role: userData.role || (userData.roles && userData.roles[0]) || 'admin',
+                        roles: userData.roles || (userData.role ? [userData.role] : ['admin']),
                     };
                 }
                 return userData;
@@ -218,6 +232,9 @@ export const authApi = baseApi.injectEndpoints({
                         ...userData,
                         id: userData.id || userData._id,
                         profilePicture: userData.profilePicture || "",
+                        // Ensure role is set from roles array if not present
+                        role: userData.role || (userData.roles && userData.roles[0]) || 'admin',
+                        roles: userData.roles || (userData.role ? [userData.role] : ['admin']),
                     };
                     return normalized;
                 }
@@ -316,6 +333,32 @@ export const authApi = baseApi.injectEndpoints({
             },
         }),
 
+        setupEmployeePassword: builder.mutation<AuthResponse, SetupEmployeePasswordRequest>({
+            query: (setupData) => ({
+                url: "/users/setup-employee-password",
+                method: "POST",
+                body: setupData,
+            }),
+            transformResponse: (response: any) => {
+                let data = response;
+                if (response.success && response.data) {
+                    data = response.data;
+                }
+
+                // Normalize user data in response
+                if (data && data.user) {
+                    data.user = {
+                        ...data.user,
+                        id: data.user.id || data.user._id || data.user.id,
+                        profilePicture: data.user.profilePicture || "",
+                    };
+                }
+
+                return data;
+            },
+            invalidatesTags: ["User"],
+        }),
+
         exchangeImpersonationToken: builder.mutation<AuthResponse, { code: string }>({
             query: ({ code }) => ({
                 url: "/users/exchange-impersonation-token",
@@ -355,5 +398,6 @@ export const {
     useUpdateProfileMutation,
     useForgotPasswordMutation,
     useResetPasswordMutation,
+    useSetupEmployeePasswordMutation,
     useExchangeImpersonationTokenMutation,
 } = authApi;

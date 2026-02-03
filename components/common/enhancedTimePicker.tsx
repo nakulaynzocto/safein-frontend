@@ -48,31 +48,34 @@ export function EnhancedTimePicker({
         if (isToday) {
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
-            const roundedMinute = Math.ceil(currentMinute / 5) * 5;
+            // Round up to next 5-minute interval
+            let roundedMinute = Math.ceil(currentMinute / 5) * 5;
             startHour = currentHour;
             startMinute = roundedMinute;
 
+            // If rounded minute is 60, move to next hour
             if (startMinute >= 60) {
                 startHour += 1;
                 startMinute = 0;
             }
 
-            if (startHour >= 24) {
-                return [];
-            }
-
+            // Ensure the start time is in the future
+            // If rounded time is still in the past (e.g., current is 20:11, rounded is 20:10), add 5 minutes
             const currentTimeInMinutes = currentHour * 60 + currentMinute;
             const startTimeInMinutes = startHour * 60 + startMinute;
-
-            if (startTimeInMinutes - currentTimeInMinutes < 15) {
-                startMinute += 15;
+            
+            if (startTimeInMinutes <= currentTimeInMinutes) {
+                // Add 5 more minutes to ensure it's in the future
+                startMinute += 5;
                 if (startMinute >= 60) {
                     startHour += 1;
                     startMinute = startMinute - 60;
                 }
-                if (startHour >= 24) {
-                    return [];
-                }
+            }
+
+            // If we've passed midnight, no slots available
+            if (startHour >= 24) {
+                return [];
             }
         } else if (normalizedSelectedDate && normalizedSelectedDate < today) {
             return [];
@@ -81,11 +84,19 @@ export function EnhancedTimePicker({
             startMinute = 0;
         }
 
+        // Get current time in minutes for comparison (only if today)
+        const currentTimeInMinutes = isToday ? now.getHours() * 60 + now.getMinutes() : 0;
+
         for (let hour = startHour; hour < 24; hour++) {
             const startMin = hour === startHour ? startMinute : 0;
             for (let minute = startMin; minute < 60; minute += 5) {
                 const timeStr = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-                slots.push(timeStr);
+                const slotTimeInMinutes = hour * 60 + minute;
+                
+                // Only add slots that are in the future (if today)
+                if (!isToday || slotTimeInMinutes > currentTimeInMinutes) {
+                    slots.push(timeStr);
+                }
             }
         }
 

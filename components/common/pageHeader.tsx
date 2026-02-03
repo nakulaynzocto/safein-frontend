@@ -19,12 +19,12 @@ interface PageHeaderProps {
 export const PageHeader = memo(function PageHeader({ title, description, children, className }: PageHeaderProps) {
     return (
         <Card className={cn("w-full", className)}>
-            <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-6">
+            <CardContent className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4 md:p-6">
                 {/* Left side: Title and Description */}
                 <div className="flex min-w-0 flex-col">
-                    <h2 className="text-foreground truncate text-xl font-semibold sm:text-2xl">{title}</h2>
+                    <h2 className="text-foreground text-lg font-bold sm:text-xl md:text-2xl break-words">{title}</h2>
                     {description && (
-                        <p className="text-muted-foreground mt-1 line-clamp-2 text-xs sm:text-sm">{description}</p>
+                        <p className="text-muted-foreground mt-0.5 text-xs sm:text-sm break-words">{description}</p>
                     )}
                 </div>
 

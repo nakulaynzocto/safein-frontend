@@ -16,7 +16,7 @@ import { useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { routes } from "@/utils/routes";
-import { formatCurrency } from "@/utils/helpers";
+import { formatCurrency, isEmployee as checkIsEmployee } from "@/utils/helpers";
 
 declare global {
     interface Window {
@@ -51,11 +51,20 @@ export function PricingModal({ open, onOpenChange, isRegistrationFlow = false }:
     const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation();
     const { user, isAuthenticated } = useAppSelector((state) => state.auth);
     const router = useRouter();
+    
+    // Check if user is an employee - employees cannot purchase subscriptions
+    const isEmployee = checkIsEmployee(user);
 
     const handleSubscribe = async (planId: string) => {
         if (!isAuthenticated || !user) {
             toast.error("Please login to subscribe");
             router.push(routes.publicroute.LOGIN);
+            return;
+        }
+
+        // Block employees from purchasing subscriptions
+        if (isEmployee) {
+            toast.error("Employees cannot purchase subscriptions. Your access is managed by your administrator.");
             return;
         }
 
@@ -220,15 +229,21 @@ export function PricingModal({ open, onOpenChange, isRegistrationFlow = false }:
                                             </div>
                                         ))}
                                     </div>
-                                    <Button
-                                        className={`w-full ${plan.isPopular ? "bg-brand text-white" : ""}`}
-                                        variant={plan.isPopular ? "default" : "outline"}
-                                        onClick={() => handleSubscribe(plan._id)}
-                                        disabled={isCreatingSession}
-                                    >
-                                        {isCreatingSession ? "Processing..." : "Subscribe Now"}
-                                        <ArrowRight className="ml-2 h-4 w-4" />
-                                    </Button>
+                                    {!isEmployee ? (
+                                        <Button
+                                            className={`w-full ${plan.isPopular ? "bg-brand text-white" : ""}`}
+                                            variant={plan.isPopular ? "default" : "outline"}
+                                            onClick={() => handleSubscribe(plan._id)}
+                                            disabled={isCreatingSession}
+                                        >
+                                            {isCreatingSession ? "Processing..." : "Subscribe Now"}
+                                            <ArrowRight className="ml-2 h-4 w-4" />
+                                        </Button>
+                                    ) : (
+                                        <div className="w-full p-3 text-center text-sm text-muted-foreground bg-muted rounded-md">
+                                            Subscription managed by administrator
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         ))}

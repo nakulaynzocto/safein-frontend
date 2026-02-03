@@ -27,12 +27,16 @@ export function PublicLayout({ children }: PublicLayoutProps) {
         routes.publicroute.VERIFY,
         routes.publicroute.SUBSCRIPTION_SUCCESS,
         routes.publicroute.SUBSCRIPTION_CANCEL,
+        routes.publicroute.EMPLOYEE_SETUP, // Employee setup page - hide navbar
     ];
 
     // Dynamically check if current route is an auth route
     // Also check if pathname starts with verify route (for dynamic routes like /verify/[token])
+    // Also check if pathname starts with employee-setup (for routes like /employee-setup?token=...)
     const isAuthRoute =
-        authRoutes.some((route) => pathname === route) || pathname?.startsWith(routes.publicroute.VERIFY + "/");
+        authRoutes.some((route) => pathname === route) || 
+        pathname?.startsWith(routes.publicroute.VERIFY + "/") ||
+        pathname?.startsWith(routes.publicroute.EMPLOYEE_SETUP);
     const shouldHideNavbar = isAuthRoute;
     const shouldHideFooter = isAuthRoute;
 

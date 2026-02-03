@@ -8,7 +8,8 @@ import { routes } from "@/utils/routes";
 import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan } from "@/store/api/subscriptionApi";
 import { useCreateCheckoutSessionMutation, useVerifyRazorpayPaymentMutation } from "@/store/api/subscriptionApi";
 import { toast } from "sonner";
-import { formatCurrency } from "@/utils/helpers";
+import { formatCurrency, isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { useAppSelector } from "@/store/hooks";
 
 declare global {
     interface Window {
@@ -38,6 +39,10 @@ interface UpgradePlanModalProps {
 
 export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
     const router = useRouter();
+    const { user } = useAppSelector((state) => state.auth);
+    
+    // Check if user is an employee - employees cannot purchase subscriptions
+    const isEmployee = checkIsEmployee(user);
     const { data, isLoading } = useGetAllSubscriptionPlansQuery({ isActive: true });
     const [createCheckoutSession, { isLoading: isCreating }] = useCreateCheckoutSessionMutation();
     const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation();
@@ -61,6 +66,12 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
             : null;
 
     const handleUpgradeClick = async () => {
+        // Block employees from purchasing subscriptions
+        if (isEmployee) {
+            toast.error("Employees cannot purchase subscriptions. Your access is managed by your administrator.");
+            return;
+        }
+
         try {
             if (!selectedPlanId) {
                 toast.error("Please select a plan to continue.");
@@ -191,9 +202,15 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
                         <Button variant="outline" onClick={onClose} disabled={isCreating} className="h-12 rounded-xl px-6">
                             Cancel
                         </Button>
-                        <Button onClick={handleUpgradeClick} disabled={isCreating || !selectedPlanId} className="h-12 rounded-xl px-8">
-                            {isCreating ? "Processing..." : "Upgrade Now"}
-                        </Button>
+                        {!isEmployee ? (
+                            <Button onClick={handleUpgradeClick} disabled={isCreating || !selectedPlanId} className="h-12 rounded-xl px-8">
+                                {isCreating ? "Processing..." : "Upgrade Now"}
+                            </Button>
+                        ) : (
+                            <div className="px-4 py-3 text-sm text-muted-foreground bg-muted rounded-xl">
+                                Subscription managed by administrator
+                            </div>
+                        )}
                     </div>
                 </div>
             </DialogContent>
