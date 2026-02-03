@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useVerifyTokenQuery, useUpdateStatusMutation } from "@/store/api/approvalLinkApi";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -39,12 +39,6 @@ export function VerifyAppointment() {
     });
 
     const [updateStatus] = useUpdateStatusMutation();
-
-    useEffect(() => {
-        if (error || (data && !data.success)) {
-            // Error will be handled in the render
-        }
-    }, [error, data]);
 
     // Handle case when token is missing
     if (!token) {

@@ -15,8 +15,10 @@ import {
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { logout, setUser } from "@/store/slices/authSlice";
 import { useLogoutMutation, useGetProfileQuery } from "@/store/api/authApi";
+import { useGetEmployeeQuery, useGetEmployeesQuery } from "@/store/api/employeeApi";
 import { routes } from "@/utils/routes";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
+import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { NotificationBell } from "@/components/common/NotificationBell";
 import { useNavbarScrollStyle } from "@/hooks/useScrollStyle";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
@@ -89,6 +91,31 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
     });
 
     const user = profileUser || authUser;
+
+    // Check if user is employee - employees shouldn't see upgrade options
+    const isEmployee = checkIsEmployee(user);
+
+    // Fetch employee data to get correct employee name
+    // Try to get employee by employeeId first, or by email as fallback
+    const { data: employeeData, isLoading: isLoadingEmployee } = useGetEmployeeQuery(user?.employeeId || "", {
+        skip: !isEmployee || !user?.employeeId,
+    });
+
+    // Also try to get employee by email if employeeId is not available
+    const { data: employeesListData } = useGetEmployeesQuery(
+        { page: 1, limit: 1, search: user?.email || "" },
+        { skip: !isEmployee || !user?.email || !!user?.employeeId || !!employeeData }
+    );
+
+    // Get employee from list if found by email
+    const employeeFromList = employeesListData?.employees?.find(
+        (emp) => emp.email?.toLowerCase().trim() === user?.email?.toLowerCase().trim()
+    );
+
+    // Get employee name - prioritize employee data name from API, then employee from list, then user name, then email
+    const employeeName = isEmployee
+        ? employeeData?.name || employeeFromList?.name || user?.name || user?.email || "Employee"
+        : null;
 
     useEffect(() => {
         setIsMounted(true);
@@ -216,57 +243,85 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
             <div className="w-full px-4 sm:px-6 lg:px-8">
                 <div className="flex h-20 items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link
-                            href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME}
-                            className="flex-shrink-0"
-                            prefetch={true}
-                        >
-                            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-gray-200 bg-white">
-                                <Image
-                                    src="/aynzo-logo.png"
-                                    alt="Aynzo Logo"
-                                    width={48}
-                                    height={48}
-                                    priority
-                                    className="h-full w-full object-contain p-1"
-                                    onError={(e) => {
-                                        // Fallback if logo fails to load
-                                        const target = e.currentTarget as HTMLImageElement;
-                                        target.src = "/aynzo-logo.svg";
-                                    }}
-                                />
-                            </div>
-                        </Link>
-                        {/* Visitor Management System Text - Show for all authenticated users */}
-                        {isActuallyAuthenticated && (
-                            <div className={`hidden items-center lg:flex`}>
-                                <div
-                                    className={`text-base font-bold tracking-tight transition-all duration-300 ${
-                                        shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white drop-shadow-lg"
-                                    }`}
+                        {/* Logo - Only show logo, hide text when sidebar is visible (to avoid duplicate branding) */}
+                        {variant === "dashboard" ? (
+                            // For dashboard variant, show minimal branding with text
+                            <>
+                                <Link
+                                    href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME}
+                                    className="flex-shrink-0"
+                                    prefetch={true}
                                 >
-                                    Visitor Management System
-                                </div>
-                            </div>
+                                    <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-gray-200 bg-white">
+                                        <Image
+                                            src="/aynzo-logo.png"
+                                            alt="Aynzo Logo"
+                                            width={40}
+                                            height={40}
+                                            priority
+                                            className="h-full w-full object-contain p-1"
+                                            onError={(e) => {
+                                                // Fallback if logo fails to load
+                                                const target = e.currentTarget as HTMLImageElement;
+                                                target.src = "/aynzo-logo.svg";
+                                            }}
+                                        />
+                                    </div>
+                                </Link>
+                                {/* Visitor Management System Text - Show for authenticated users */}
+                                {shouldShowPrivateNavbar && (
+                                    <div className={`hidden items-center lg:flex`}>
+                                        <div
+                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${
+                                                shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white drop-shadow-lg"
+                                            }`}
+                                        >
+                                            Visitor Management System
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            // For public variant, show full branding
+                            <>
+                                <Link
+                                    href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME}
+                                    className="flex-shrink-0"
+                                    prefetch={true}
+                                >
+                                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-gray-200 bg-white">
+                                        <Image
+                                            src="/aynzo-logo.png"
+                                            alt="Aynzo Logo"
+                                            width={48}
+                                            height={48}
+                                            priority
+                                            className="h-full w-full object-contain p-1"
+                                            onError={(e) => {
+                                                // Fallback if logo fails to load
+                                                const target = e.currentTarget as HTMLImageElement;
+                                                target.src = "/aynzo-logo.svg";
+                                            }}
+                                        />
+                                    </div>
+                                </Link>
+                                {/* Visitor Management System Text - Show for authenticated users */}
+                                {shouldShowPrivateNavbar && (
+                                    <div className={`hidden items-center lg:flex`}>
+                                        <div
+                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${
+                                                shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white drop-shadow-lg"
+                                            }`}
+                                        >
+                                            Visitor Management System
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
 
                     {/* Center: Navigation Links */}
-                    {/* Expiry warning - Only show on private pages (not public pages) */}
-                    {expiryWarning?.show && !isSubscriptionPage && !forcePublic && isActuallyAuthenticated && (
-                        <div className="absolute top-20 left-0 z-40 w-full bg-amber-500/90 px-4 py-1 text-center text-xs text-white shadow-md backdrop-blur-sm sm:text-sm">
-                            <span className="font-medium">
-                                ⚠️ Your plan expires in {expiryWarning.days} {expiryWarning.days === 1 ? "day" : "days"}
-                                .{" "}
-                            </span>
-                            <Link
-                                href={routes.publicroute.PRICING}
-                                className="ml-2 font-bold underline hover:text-amber-100"
-                            >
-                                Renew Now
-                            </Link>
-                        </div>
-                    )}
                     <div className="hidden flex-1 items-center justify-center lg:flex">
                         {!isActuallyAuthenticated && variant !== "dashboard" && (
                             <div className="flex items-center gap-2">
@@ -345,11 +400,11 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                     </div>
 
                     <div className="flex items-center gap-2">
-                        {/* Authenticated users - Show company info, notifications, and sidebar toggle */}
+                        {/* Authenticated users - Show company info or user profile, notifications, and sidebar toggle */}
                         {isActuallyAuthenticated && !isSubscriptionPage && (
                             <div className="flex items-center gap-3">
-                                {/* Company Name with Logo */}
-                                {user?.companyName && (
+                                {/* Company Name with Logo - For admins */}
+                                {user?.companyName && !isEmployee && (
                                     <div
                                         className={`hidden items-center gap-2 rounded-lg px-3 py-2 transition-all duration-200 sm:flex ${
                                             shouldShowWhiteNavbar
@@ -382,6 +437,43 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                         </span>
                                     </div>
                                 )}
+                                {/* Company Logo - Company Name (Employee Name) - For employees (plain text, no button) */}
+                                {isEmployee && (user?.companyName || user?.name || user?.email) && (
+                                    <div
+                                        className={`hidden items-center gap-2 rounded-lg px-3 py-2 transition-all duration-200 sm:flex ${
+                                            shouldShowWhiteNavbar
+                                                ? "bg-gray-50 text-gray-900"
+                                                : "bg-white/10 text-white"
+                                        }`}
+                                    >
+                                        {/* Company Logo - Use company profile picture or Building2 icon */}
+                                        {user?.profilePicture && user.profilePicture.trim() !== "" ? (
+                                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden bg-white rounded-full">
+                                                <Image
+                                                    src={`${user.profilePicture}${user.profilePicture.includes("?") ? "&" : "?"}v=${user.profilePicture.length}`}
+                                                    alt={user?.companyName || "Company Logo"}
+                                                    width={40}
+                                                    height={40}
+                                                    className="h-full w-full object-contain p-1"
+                                                    onError={(e) => {
+                                                        const target = e.currentTarget as HTMLImageElement;
+                                                        target.src = "/aynzo-logo.png";
+                                                        target.className = "h-full w-full object-contain p-1";
+                                                    }}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <Building2
+                                                className={`h-5 w-5 flex-shrink-0 ${shouldShowWhiteNavbar ? "text-gray-600" : "text-white"}`}
+                                            />
+                                        )}
+                                        <span className="text-sm font-semibold whitespace-nowrap">
+                                            {user?.companyName && employeeName
+                                                ? `${user.companyName} (${employeeName})`
+                                                : user?.companyName || employeeName || "Employee"}
+                                        </span>
+                                    </div>
+                                )}
                                 {/* Notification Bell */}
                                 <NotificationBell
                                     className={shouldShowWhiteNavbar ? "hover:bg-gray-100/80" : "hover:bg-white/10"}
@@ -408,8 +500,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                         {/* Show appropriate button based on subscription status */}
                         {isMounted && isAuthenticated && token && !isSubscriptionPage && (
                             <>
-                                {/* Private navbar: Show Upgrade ONLY for trial users or expired subscription */}
-                                {isActuallyAuthenticated && (isTrialingSubscription || !hasActiveSubscription) && (
+                                {/* Private navbar: Show Upgrade ONLY for trial users or expired subscription AND NOT for employees */}
+                                {isActuallyAuthenticated && !isEmployee && (isTrialingSubscription || !hasActiveSubscription) && (
                                     <button
                                         type="button"
                                         onClick={handleOpenUpgradeModal}

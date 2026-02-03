@@ -4,9 +4,9 @@ import { useEffect, useRef, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAppSelector } from "@/store/hooks";
 import { baseApi } from "@/store/api/baseApi";
+import { notificationApi } from "@/store/api/notificationApi";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
-import { addNotification } from "@/store/slices/notificationSlice";
 
 export enum SocketEvents {
     CONNECTION = "connection",
@@ -120,16 +120,6 @@ const showToast = (config: NotificationConfig) => {
     }
 };
 
-// Helper: Add notification to store
-const createNotification = (config: NotificationConfig, appointmentId: string) => {
-    return {
-        type: config.type,
-        title: config.title,
-        message: config.message,
-        appointmentId,
-        timestamp: new Date().toISOString(),
-    };
-};
 
 export function useSocket(options: UseSocketOptions = {}) {
     const { onAppointmentUpdated, onAppointmentStatusChanged, onConnect, onDisconnect, showToasts = true } = options;
@@ -145,6 +135,15 @@ export function useSocket(options: UseSocketOptions = {}) {
                 "Appointment",
                 { type: "Appointment", id: "LIST" },
                 { type: "Appointment", id: "STATS" },
+            ]),
+        );
+    }, [dispatch]);
+
+    const invalidateNotifications = useCallback(() => {
+        dispatch(
+            notificationApi.util.invalidateTags([
+                { type: "Notification", id: "LIST" },
+                { type: "Notification", id: "UNREAD_COUNT" },
             ]),
         );
     }, [dispatch]);
@@ -167,7 +166,8 @@ export function useSocket(options: UseSocketOptions = {}) {
             if (status === "approved" || status === "rejected") {
                 const config = getNotificationConfig(status, employeeName, visitorName);
 
-                dispatch(addNotification(createNotification(config, appointmentId)));
+                // Invalidate notifications to refetch from API (notifications are already saved in backend)
+                invalidateNotifications();
 
                 if (showToasts) {
                     showToast(config);
@@ -195,7 +195,8 @@ export function useSocket(options: UseSocketOptions = {}) {
             const { employeeName, visitorName } = extractNames(payload);
             const config = getNotificationConfig(status, employeeName, visitorName);
 
-            dispatch(addNotification(createNotification(config, appointmentId)));
+            // Invalidate notifications to refetch from API (notifications are already saved in backend)
+            invalidateNotifications();
 
             if (showToasts) {
                 showToast(config);
@@ -220,11 +221,26 @@ export function useSocket(options: UseSocketOptions = {}) {
         invalidateAppointments();
     }, [invalidateAppointments]);
 
+    // Fix: Use useRef for stable callbacks to prevent unnecessary re-renders
+    const onConnectRef = useRef(onConnect);
+    const onDisconnectRef = useRef(onDisconnect);
+    
+    useEffect(() => {
+        onConnectRef.current = onConnect;
+        onDisconnectRef.current = onDisconnect;
+    }, [onConnect, onDisconnect]);
+
     const connect = useCallback(() => {
         if (socketRef.current?.connected || !token) return;
 
         const socketUrl = getSocketUrl();
         if (!socketUrl) return;
+
+        // Clean up existing socket if any
+        if (socketRef.current) {
+            socketRef.current.removeAllListeners();
+            socketRef.current.disconnect();
+        }
 
         socketRef.current = io(socketUrl, {
             transports: ["websocket", "polling"],
@@ -238,23 +254,27 @@ export function useSocket(options: UseSocketOptions = {}) {
 
         const socket = socketRef.current;
 
-        socket.on("connect", () => {
+        // Store handlers for cleanup
+        const connectHandler = () => {
             isConnectedRef.current = true;
             if (user?.id) {
                 socket.emit(SocketEvents.JOIN_USER_ROOM, user.id);
             }
-            onConnect?.();
-        });
+            onConnectRef.current?.();
+        };
 
-        socket.on("disconnect", (reason) => {
+        const disconnectHandler = (reason: string) => {
             isConnectedRef.current = false;
-            onDisconnect?.(reason);
-        });
+            onDisconnectRef.current?.(reason);
+        };
 
-        socket.on("connect_error", () => {
+        const connectErrorHandler = () => {
             // Socket is optional for app functionality
-        });
+        };
 
+        socket.on("connect", connectHandler);
+        socket.on("disconnect", disconnectHandler);
+        socket.on("connect_error", connectErrorHandler);
         socket.on(SocketEvents.APPOINTMENT_STATUS_CHANGED, handleAppointmentStatusChange);
         socket.on(SocketEvents.APPOINTMENT_CREATED, handleAppointmentCreated);
         socket.on(SocketEvents.APPOINTMENT_UPDATED, handleAppointmentUpdated);
@@ -262,8 +282,6 @@ export function useSocket(options: UseSocketOptions = {}) {
     }, [
         token,
         user?.id,
-        onConnect,
-        onDisconnect,
         handleAppointmentStatusChange,
         handleAppointmentCreated,
         handleAppointmentUpdated,
@@ -272,6 +290,9 @@ export function useSocket(options: UseSocketOptions = {}) {
 
     const disconnect = useCallback(() => {
         if (socketRef.current) {
+            // Remove all event listeners before disconnecting
+            socketRef.current.removeAllListeners();
+            
             if (user?.id) {
                 socketRef.current.emit(SocketEvents.LEAVE_USER_ROOM, user.id);
             }
@@ -281,22 +302,23 @@ export function useSocket(options: UseSocketOptions = {}) {
         }
     }, [user?.id]);
 
+    // Fix: Properly handle socket connection lifecycle with stable references
     useEffect(() => {
-        if (typeof window !== "undefined" && token) {
-            const timeoutId = setTimeout(() => {
-                connect();
-            }, 1000);
-
-            return () => {
-                clearTimeout(timeoutId);
-                disconnect();
-            };
+        if (typeof window === "undefined" || !token) {
+            disconnect();
+            return;
         }
 
+        const timeoutId = setTimeout(() => {
+            connect();
+        }, 1000);
+
         return () => {
+            clearTimeout(timeoutId);
             disconnect();
         };
-    }, [token, connect, disconnect]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token]); // Only depend on token, connect/disconnect are stable
 
     return {
         isConnected: isConnectedRef.current,

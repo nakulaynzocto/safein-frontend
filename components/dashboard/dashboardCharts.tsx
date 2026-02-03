@@ -169,9 +169,8 @@ export const DashboardCharts = memo(function DashboardCharts({
     }, [filteredAppointments]);
 
     return (
-
-        <div className="space-y-4 sm:space-y-6">
-            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
+        <div className="space-y-3 sm:space-y-4 md:space-y-6">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6 md:grid-cols-2">
                 {/* Chart 1: Today's Appointment Status - Styled as Blue Bar Chart (User Growth Style) */}
                 <Card>
                     <CardHeader className="p-3 sm:p-4 md:p-6 pb-2">
@@ -184,7 +183,7 @@ export const DashboardCharts = memo(function DashboardCharts({
                         </p>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                        <div className="h-[250px] w-full mt-4">
+                        <div className="h-[200px] w-full mt-2 sm:h-[250px] sm:mt-4">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={todayStats.statusData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -244,7 +243,7 @@ export const DashboardCharts = memo(function DashboardCharts({
                         <p className="text-muted-foreground text-xs sm:text-sm">Appointments over the last 7 days</p>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                        <div className="h-[250px] w-full mt-4">
+                        <div className="h-[200px] w-full mt-2 sm:h-[250px] sm:mt-4">
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={dailyAppointmentsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                     <defs>
@@ -304,7 +303,7 @@ export const DashboardCharts = memo(function DashboardCharts({
                 </Card>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6 lg:grid-cols-2">
                 <Card>
                     <CardHeader className="p-3 sm:p-4 md:p-6 pb-2">
                         <CardTitle className="flex items-center gap-2 text-base font-semibold sm:text-lg">
@@ -316,7 +315,7 @@ export const DashboardCharts = memo(function DashboardCharts({
                         </p>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                        <div className="h-[250px] w-full mt-4">
+                        <div className="h-[200px] w-full mt-2 sm:h-[250px] sm:mt-4">
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={monthlyTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                     <defs>
@@ -386,7 +385,7 @@ export const DashboardCharts = memo(function DashboardCharts({
                         </p>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                        <div className="h-[250px] w-full mt-4">
+                        <div className="h-[200px] w-full mt-2 sm:h-[250px] sm:mt-4">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={hourlyDistributionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />

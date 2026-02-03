@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-
-import { DataTable } from "@/components/common/dataTable";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/store/hooks";
+import { ProtectedLayout } from "@/components/layout/protectedLayout";
+import { routes } from "@/utils/routes";
+import { LoadingSpinner } from "@/components/common/loadingSpinner";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DataTable } from "@/components/common/dataTable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SelectField } from "@/components/common/selectField";
 import { SearchInput } from "@/components/common/searchInput";
@@ -13,7 +17,7 @@ import { ConfirmationDialog } from "@/components/common/confirmationDialog";
 import { Pagination } from "@/components/common/pagination";
 import { useGetAllAppointmentLinksQuery, useDeleteAppointmentLinkMutation } from "@/store/api/appointmentLinkApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
-import { formatDate, formatDateTime } from "@/utils/helpers";
+import { formatDate, formatDateTime, isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { Link2, Trash2, CheckCircle, XCircle, Copy, Mail, Phone, Calendar, Maximize2 } from "lucide-react";
 import { AppointmentLink } from "@/store/api/appointmentLinkApi";
 import { getInitials, formatName } from "@/utils/helpers";
@@ -23,6 +27,12 @@ import { StatusBadge } from "@/components/common/statusBadge";
 import { ActionButton } from "@/components/common/actionButton";
 
 export default function AppointmentLinksPage() {
+    // ALL HOOKS MUST BE CALLED AT TOP LEVEL - BEFORE ANY CONDITIONAL RETURNS
+    const router = useRouter();
+    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+    const [isChecking, setIsChecking] = useState(true);
+    const isEmployee = checkIsEmployee(user);
+    
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
     const [isBooked, setIsBooked] = useState<boolean | undefined>(undefined);
@@ -30,6 +40,7 @@ export default function AppointmentLinksPage() {
     const [deleteLinkId, setDeleteLinkId] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
+    // Call all RTK Query hooks at top level - use skip to prevent unnecessary calls
     const { data, isLoading, error, refetch } = useGetAllAppointmentLinksQuery({
         page,
         limit,
@@ -37,10 +48,13 @@ export default function AppointmentLinksPage() {
         search: search || undefined,
         sortBy: "createdAt",
         sortOrder: "desc",
+    }, {
+        skip: !isAuthenticated || isChecking, // Skip query if not authenticated or checking
     });
 
     const [deleteAppointmentLink, { isLoading: isDeleting }] = useDeleteAppointmentLinkMutation();
 
+    // ALL HOOKS (useCallback, useMemo) MUST BE CALLED BEFORE CONDITIONAL RETURNS
     const handleDelete = useCallback(async () => {
         if (!deleteLinkId) return;
 
@@ -232,6 +246,27 @@ export default function AppointmentLinksPage() {
         }
         setPage(1);
     }, []);
+
+    // useEffect for redirects - must be after all other hooks
+    useEffect(() => {
+        if (!isAuthenticated) {
+            router.replace(routes.publicroute.LOGIN);
+            return;
+        }
+
+        setIsChecking(false);
+    }, [user, isAuthenticated, router]);
+
+    // Show loading state - ALL HOOKS HAVE BEEN CALLED ABOVE
+    if (!isAuthenticated || isChecking) {
+        return (
+            <ProtectedLayout>
+                <div className="flex min-h-screen items-center justify-center">
+                    <LoadingSpinner />
+                </div>
+            </ProtectedLayout>
+        );
+    }
 
     if (isLoading) {
         return <PageSkeleton />;

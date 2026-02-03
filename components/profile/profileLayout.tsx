@@ -3,6 +3,8 @@
 import { useState, ReactNode } from "react";
 import { User, CreditCard, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAppSelector } from "@/store/hooks";
+import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 
 type TabType = "profile" | "notification" | "subscription";
 
@@ -11,25 +13,34 @@ interface ProfileLayoutProps {
 }
 
 export function ProfileLayout({ children }: ProfileLayoutProps) {
+    const { user } = useAppSelector((state) => state.auth);
+    const isEmployee = checkIsEmployee(user);
     const [activeTab, setActiveTab] = useState<TabType>("profile");
 
-    const tabs = [
+    // Base tabs - all users see profile
+    const baseTabs = [
         {
             id: "profile" as const,
             label: "Profile Details",
             icon: User,
+            roles: ["admin", "employee"],
         },
         {
             id: "notification" as const,
             label: "Notification",
             icon: Calendar,
+            roles: ["admin", "employee"],
         },
         {
             id: "subscription" as const,
             label: "Subscription",
             icon: CreditCard,
+            roles: ["admin"], // Only admin can see subscription
         },
     ];
+    
+    // Filter tabs based on user role
+    const tabs = baseTabs.filter(tab => tab.roles.includes(user?.role || 'admin'));
 
     return (
         <div className="flex flex-col md:flex-row gap-3">

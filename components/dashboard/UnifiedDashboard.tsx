@@ -16,41 +16,25 @@ import { DashboardSkeleton } from "@/components/common/tableSkeleton";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { routes } from "@/utils/routes";
+import { getChartDateRange, getTimezoneOffset } from "@/utils/dateUtils";
+import { ErrorDisplay } from "@/components/common/ErrorDisplay";
+import { LoadingTimeoutDisplay } from "@/components/common/LoadingTimeoutDisplay";
+import { isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { getErrorMessage } from "@/utils/errorUtils";
 
-export function DashboardOverview() {
+export function UnifiedDashboard() {
     const router = useRouter();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [retryCount, setRetryCount] = useState(0);
     const [loadingTimeout, setLoadingTimeout] = useState(false);
 
-    const formatDate = (date: Date): string => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-    };
-
-    const getDefaultDateRange = (): { startDate: string; endDate: string } => {
-        const today = new Date();
-        const formattedToday = formatDate(today);
-        return { startDate: formattedToday, endDate: formattedToday };
-    };
-
-    const [statsDateRange] = useState(() => getDefaultDateRange());
-
-    const chartDateRange = useMemo(() => {
-        const end = new Date();
-        const start = new Date();
-        start.setDate(end.getDate() - 365); // Fetch 12 months of data for trend charts
-        return { startDate: formatDate(start), endDate: formatDate(end) };
-    }, []);
-
-    const timezoneOffset = useMemo(() => -new Date().getTimezoneOffset(), []);
+    const chartDateRange = useMemo(() => getChartDateRange(), []);
+    const timezoneOffset = useMemo(() => getTimezoneOffset(), []);
 
     const appointmentQueryParams = useMemo(
         () => ({
             page: 1,
-            limit: 5000,
+            limit: 100,
             sortBy: "createdAt",
             sortOrder: "desc" as const,
             timezoneOffsetMinutes: timezoneOffset,
@@ -79,7 +63,6 @@ export function DashboardOverview() {
     } = useGetEmployeesQuery(undefined, {
         refetchOnMountOrArgChange: true,
         refetchOnFocus: false,
-        skip: false,
     });
 
     const {
@@ -90,7 +73,6 @@ export function DashboardOverview() {
     } = useGetVisitorsQuery(undefined, {
         refetchOnMountOrArgChange: true,
         refetchOnFocus: false,
-        skip: false,
     });
 
     const { hasReachedAppointmentLimit, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
@@ -102,10 +84,13 @@ export function DashboardOverview() {
     const shouldShowSkeleton = isLoading && !hasData && retryCount < 2;
 
     useEffect(() => {
+        if (!isLoading) {
+            setLoadingTimeout(false);
+            return;
+        }
+
         const timer = setTimeout(() => {
-            if (isLoading) {
-                setLoadingTimeout(true);
-            }
+            setLoadingTimeout(true);
         }, 15000);
 
         return () => clearTimeout(timer);
@@ -145,13 +130,19 @@ export function DashboardOverview() {
             : calculatedStats;
     }, [appointments]);
 
+    const isEmployee = checkIsEmployee(user);
+
     const handleScheduleAppointment = useCallback(() => {
-        if (hasReachedAppointmentLimit) {
-            setShowUpgradeModal(true);
+        if (isEmployee) {
+            router.push(routes.privateroute.APPOINTMENT_LINKS);
         } else {
-            router.push(routes.privateroute.APPOINTMENTCREATE);
+            if (hasReachedAppointmentLimit) {
+                setShowUpgradeModal(true);
+            } else {
+                router.push(routes.privateroute.APPOINTMENTCREATE);
+            }
         }
-    }, [hasReachedAppointmentLimit, router]);
+    }, [isEmployee, hasReachedAppointmentLimit, router]);
 
     const hasError = useMemo(
         () => appointmentsError || employeesError || visitorsError,
@@ -173,67 +164,33 @@ export function DashboardOverview() {
     if (loadingTimeout && isLoading && !hasData && !hasError) {
         return (
             <div className="space-y-6">
-                <DashboardHeader companyName={user?.companyName} />
-                <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 sm:p-6">
-                    <h3 className="mb-2 text-base font-semibold text-yellow-800 sm:text-lg">
-                        Loading is taking longer than expected
-                    </h3>
-                    <p className="mb-4 text-sm text-yellow-600 sm:text-base">
-                        The dashboard is taking longer to load than usual. This may be due to network issues or server
-                        response delays.
-                    </p>
-                    <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
-                        <button
-                            onClick={handleRetry}
-                            className="min-h-[40px] rounded bg-yellow-600 px-4 py-2 text-sm text-white hover:bg-yellow-700 sm:text-base"
-                        >
-                            Retry
-                        </button>
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="min-h-[40px] rounded bg-yellow-700 px-4 py-2 text-sm text-white hover:bg-yellow-800 sm:text-base"
-                        >
-                            Reload Page
-                        </button>
-                    </div>
-                </div>
+                <DashboardHeader companyName={isEmployee ? (user?.name || user?.email || "Employee") : (user?.companyName || "Company")} />
+                <LoadingTimeoutDisplay onRetry={handleRetry} />
             </div>
         );
     }
 
     if (hasError && !hasData && !isLoading) {
+        const errorMessages = [
+            appointmentsError && `Appointments: ${getErrorMessage(appointmentsError)}`,
+            employeesError && `Employees: ${getErrorMessage(employeesError)}`,
+            visitorsError && `Visitors: ${getErrorMessage(visitorsError)}`,
+        ].filter(Boolean).join("\n");
+
         return (
             <div className="space-y-6">
-                <DashboardHeader companyName={user?.companyName} />
-                <div className="rounded-lg border border-red-200 bg-red-50 p-4 sm:p-6">
-                    <h3 className="mb-2 text-base font-semibold text-red-800 sm:text-lg">
-                        Failed to load dashboard data
-                    </h3>
-                    <p className="mb-4 text-sm whitespace-pre-line text-red-600 sm:text-base">
-                        {appointmentsError &&
-                            `Appointments: ${(appointmentsError as any)?.data?.message || "Failed to load"}`}
-                        {employeesError && `\nEmployees: ${(employeesError as any)?.data?.message || "Failed to load"}`}
-                        {visitorsError && `\nVisitors: ${(visitorsError as any)?.data?.message || "Failed to load"}`}
-                    </p>
-                    <button
-                        onClick={handleRetry}
-                        className="min-h-[40px] rounded bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700 sm:text-base"
-                    >
-                        Retry
-                    </button>
-                </div>
+                <DashboardHeader companyName={isEmployee ? (user?.name || user?.email || "Employee") : (user?.companyName || "Company")} />
+                <ErrorDisplay
+                    title="Failed to load dashboard data"
+                    message={errorMessages || "Failed to load dashboard data"}
+                    onRetry={handleRetry}
+                />
             </div>
         );
     }
 
     return (
-        <div className="space-y-4 sm:space-y-6">
-
-
-            <div className="hidden">{/* Removed DateRangePicker as per request */}</div>
-
-
-
+        <div className={`space-y-4 sm:space-y-6 ${isEmployee ? 'px-1 sm:px-0' : ''}`}>
             <DashboardCharts
                 appointmentsData={appointments}
                 employeesData={employees}
@@ -250,7 +207,9 @@ export function DashboardOverview() {
                 emptyData={{
                     title: "No recent appointments",
                     description: "No recent appointment activities found.",
-                    primaryActionLabel: hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment",
+                    primaryActionLabel: isEmployee 
+                        ? "Create Appointment Link" 
+                        : (hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment"),
                 }}
                 onPrimaryAction={handleScheduleAppointment}
             />
@@ -261,3 +220,4 @@ export function DashboardOverview() {
         </div>
     );
 }
+

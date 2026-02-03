@@ -1,4 +1,4 @@
-export { DashboardOverview } from "./DashboardOverview";
+export { UnifiedDashboard } from "./UnifiedDashboard";
 export { DashboardHeader } from "./DashboardHeader";
 export { StatsGrid } from "./statsGrid";
 export { StatCard } from "./statCard";

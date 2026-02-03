@@ -19,6 +19,7 @@ import {
     Maximize2,
 } from "lucide-react";
 import { StatusBadge } from "@/components/common/statusBadge";
+import { formatDateWithPattern } from "@/utils/dateUtils";
 
 interface AppointmentDetailsDialogProps {
     appointment: Appointment | null;
@@ -27,11 +28,7 @@ interface AppointmentDetailsDialogProps {
     on_close: () => void;
 }
 
-const formatDate = (value: string | null | undefined, formatStr: string, fallback: string = "N/A"): string => {
-    if (!value) return fallback;
-    const date = new Date(value);
-    return isNaN(date.getTime()) ? "Invalid Date" : format(date, formatStr);
-};
+const formatDate = formatDateWithPattern;
 
 const getFieldValue = (appointment: Appointment, key: string): any => {
     const fieldMap: Record<string, (appt: Appointment) => any> = {

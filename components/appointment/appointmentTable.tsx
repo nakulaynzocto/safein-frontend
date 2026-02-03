@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/store/hooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +54,7 @@ import {
 import { routes } from "@/utils/routes";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 
 export interface AppointmentTableProps {
     appointments: Appointment[];
@@ -162,7 +164,13 @@ export function AppointmentTable({
         return dateFrom === todayStr && dateTo === todayStr;
     };
 
-    const emptyPrimaryLabel = hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment";
+    // Check if user is employee
+    const { user } = useAppSelector((state) => state.auth);
+    const isEmployee = checkIsEmployee(user);
+    
+    const emptyPrimaryLabel = isEmployee 
+        ? "Create Appointment Link" 
+        : (hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment");
     const emptyTitle = isToday() ? "No appointments for today" : "No appointments yet";
 
     const handleDelete = async () => {
@@ -525,20 +533,22 @@ export function AppointmentTable({
                                 </>
                             ) : (
                                 <>
-                                    <Button
-                                        variant="outline"
-                                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white"
-                                        onClick={() => {
-                                            if (hasReachedAppointmentLimit) {
-                                                setShowUpgradeModal(true);
-                                            } else {
-                                                router.push(routes.privateroute.APPOINTMENTCREATE);
-                                            }
-                                        }}
-                                    >
-                                        <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                        <span className="hidden sm:inline">Schedule Appointment</span>
-                                    </Button>
+                                    {!isEmployee && (
+                                        <Button
+                                            variant="outline"
+                                            className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white"
+                                            onClick={() => {
+                                                if (hasReachedAppointmentLimit) {
+                                                    setShowUpgradeModal(true);
+                                                } else {
+                                                    router.push(routes.privateroute.APPOINTMENTCREATE);
+                                                }
+                                            }}
+                                        >
+                                            <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                            <span className="hidden sm:inline">Schedule Appointment</span>
+                                        </Button>
+                                    )}
                                     <CreateAppointmentLinkModal
                                         open={showCreateLinkModal}
                                         onOpenChange={(open) => {
@@ -576,7 +586,9 @@ export function AppointmentTable({
                             primaryActionLabel: emptyPrimaryLabel,
                         }}
                         onPrimaryAction={() => {
-                            if (hasReachedAppointmentLimit) {
+                            if (isEmployee) {
+                                router.push(routes.privateroute.APPOINTMENT_LINKS);
+                            } else if (hasReachedAppointmentLimit) {
                                 setShowUpgradeModal(true);
                             } else {
                                 router.push(routes.privateroute.APPOINTMENTCREATE);

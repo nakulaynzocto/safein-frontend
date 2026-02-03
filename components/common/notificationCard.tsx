@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, Clock, User, Calendar, Clock as ClockIcon } from "lucide-react";
 import { Appointment } from "@/store/api/appointmentApi";
+import { formatDateLong } from "@/utils/dateUtils";
 
 interface NotificationCardProps {
     appointment: Appointment;
@@ -24,14 +25,7 @@ export const NotificationCard = memo(function NotificationCard({
     onReject,
     isProcessing = false,
 }: NotificationCardProps) {
-    const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
-    };
+    const formatDate = formatDateLong;
 
     const statusIcon = useMemo(() => {
         switch (appointment.status) {

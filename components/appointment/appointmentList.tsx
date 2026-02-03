@@ -45,12 +45,11 @@ export function AppointmentList() {
 
     const timezoneOffsetMinutes = -new Date().getTimezoneOffset();
 
-    // Separate query for stats (fetch more items to get accurate counts)
+    // Separate query for stats (fetch reasonable amount for accurate counts)
+    // Reduced from 1000 to 200 for better performance
     const { data: statsData } = useGetAppointmentsQuery({
-        // If sorting or filtering is needed for stats, apply here. 
-        // For general stats, we might want "all" or "today's". 
-        // Based on dashboard logic, let's fetch a reasonable amount.
-        limit: 1000,
+        page: 1,
+        limit: 200, // Reduced from 1000 - sufficient for stats calculation
         timezoneOffsetMinutes,
     });
 

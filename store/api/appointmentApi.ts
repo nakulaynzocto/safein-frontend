@@ -168,6 +168,16 @@ export interface AppointmentStats {
     appointmentsByDate: Array<{ date: string; count: number }>;
 }
 
+export interface DashboardStats {
+    totalAppointments: number;
+    pendingAppointments: number;
+    approvedAppointments: number;
+    rejectedAppointments: number;
+    completedAppointments: number;
+    upcomingAppointments: number;
+    todayAppointments: number;
+}
+
 export const appointmentApi = baseApi.injectEndpoints({
     overrideExisting: true,
     endpoints: (builder) => ({
@@ -347,6 +357,18 @@ export const appointmentApi = baseApi.injectEndpoints({
                 { type: "Appointment", id: "LIST" },
             ],
         }),
+
+        // Dashboard stats (unified for admin and employee)
+        getDashboardStats: builder.query<DashboardStats, void>({
+            query: () => "/appointments/dashboard/stats",
+            transformResponse: (response: any) => {
+                if (response.success && response.data) {
+                    return response.data;
+                }
+                return response;
+            },
+            providesTags: ["DashboardStats"],
+        }),
     }),
 });
 
@@ -363,4 +385,5 @@ export const {
     useApproveAppointmentMutation,
     useRejectAppointmentMutation,
     useLazyGetAppointmentsQuery,
+    useGetDashboardStatsQuery,
 } = appointmentApi;

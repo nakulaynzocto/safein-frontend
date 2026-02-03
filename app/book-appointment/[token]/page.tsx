@@ -312,6 +312,7 @@ export default function BookAppointmentPage() {
                                 employeeId={extractIdString(appointmentLinkData.employeeId)}
                                 employeeName={appointmentLinkData.employee?.name || ""}
                                 visitorEmail={appointmentLinkData.visitorEmail}
+                                visitorName={visitorData?.name || appointmentLinkData.visitor?.name || ""}
                                 onSubmit={handleAppointmentSubmit}
                                 isLoading={isCreatingAppointment}
                                 appointmentToken={token}

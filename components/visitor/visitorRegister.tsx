@@ -27,16 +27,22 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
     const [generalError, setGeneralError] = useState<string | null>(null);
     const [isFileUploading, setIsFileUploading] = useState(false);
 
-    const hasOptionalData =
+    // Separate states for ID Verification and Security sections
+    const hasIdVerificationData =
         initialData &&
         (initialData.idProof?.type ||
             initialData.idProof?.number ||
             initialData.idProof?.image ||
-            initialData.photo ||
-            (initialData as any).gender ||
+            initialData.photo);
+    const hasSecurityData =
+        initialData &&
+        ((initialData as any).emergencyContact?.name ||
+            (initialData as any).emergencyContact?.phone ||
             (initialData as any).blacklisted ||
-            (initialData as any).emergencyContact?.name);
-    const [showOptionalFields, setShowOptionalFields] = useState<boolean>(!!hasOptionalData);
+            (initialData as any).tags);
+    
+    const [showIdVerificationFields, setShowIdVerificationFields] = useState<boolean>(!!hasIdVerificationData);
+    const [showSecurityFields, setShowSecurityFields] = useState<boolean>(!!hasSecurityData);
 
     const {
         register,
@@ -47,7 +53,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
         reset,
         control,
     } = useForm<VisitorFormData>({
-        resolver: yupResolver(visitorSchema),
+        resolver: yupResolver(visitorSchema) as any,
         defaultValues: {
             name: initialData?.name || "",
             email: initialData?.email || "",
@@ -57,7 +63,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                 street: initialData?.address?.street || "",
                 city: initialData?.address?.city || "",
                 state: initialData?.address?.state || "",
-                country: initialData?.address?.country || "",
+                country: initialData?.address?.country || "IN",
             },
             idProof: {
                 type: initialData?.idProof?.type || "",
@@ -83,14 +89,19 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
         }
     };
 
-    const handleToggleChange = (checked: boolean) => {
-        setShowOptionalFields(checked);
+    const handleToggleIdVerification = (checked: boolean) => {
+        setShowIdVerificationFields(checked);
         if (!checked) {
             setValue("idProof.type", "");
             setValue("idProof.number", "");
             setValue("idProof.image", "");
             setValue("photo", "");
-            setValue("gender", "" as any);
+        }
+    };
+
+    const handleToggleSecurity = (checked: boolean) => {
+        setShowSecurityFields(checked);
+        if (!checked) {
             setValue("blacklisted", false);
             setValue("blacklistReason", "");
             setValue("tags", "");
@@ -203,8 +214,12 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                 errors={errors}
                 watch={watch}
                 setValue={setValue}
-                showOptionalFields={showOptionalFields}
-                onToggleOptionalFields={handleToggleChange}
+                showOptionalFields={false}
+                onToggleOptionalFields={() => {}}
+                showIdVerificationFields={showIdVerificationFields}
+                onToggleIdVerificationFields={handleToggleIdVerification}
+                showSecurityFields={showSecurityFields}
+                onToggleSecurityFields={handleToggleSecurity}
                 setIsFileUploading={setIsFileUploading}
                 initialData={initialData}
             />
