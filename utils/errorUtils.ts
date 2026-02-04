@@ -15,13 +15,13 @@ export interface ErrorDisplayProps {
  */
 export function getErrorMessage(error: any): string {
     if (!error) return "An unknown error occurred";
-    
+
     if (typeof error === "string") return error;
-    
+
     if (error?.data?.message) return error.data.message;
     if (error?.message) return error.message;
     if (error?.error) return error.error;
-    
+
     return "An unknown error occurred";
 }
 
@@ -29,8 +29,8 @@ export function getErrorMessage(error: any): string {
  * Check if error is a network error
  */
 export function isNetworkError(error: any): boolean {
-    return error?.status === "FETCH_ERROR" || 
-           error?.message?.includes("network") ||
-           error?.message?.includes("Network");
+    return error?.status === "FETCH_ERROR" ||
+        error?.message?.includes("network") ||
+        error?.message?.includes("Network");
 }
 
