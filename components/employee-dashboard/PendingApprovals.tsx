@@ -76,7 +76,7 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-amber-600" />
+                    <Clock className="h-5 w-5 text-blue-600" />
                     Pending Approvals ({pendingAppointments.length})
                 </CardTitle>
                 <CardDescription>Appointments waiting for your approval</CardDescription>
@@ -89,20 +89,20 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
                     return (
                         <div
                             key={appointment._id}
-                            className="rounded-lg border border-amber-200 bg-amber-50/50 p-4 transition-all hover:shadow-md"
+                            className="rounded-lg border border-blue-200 bg-blue-50/50 p-4 transition-all hover:shadow-md"
                         >
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div className="flex-1 space-y-2">
                                     <div className="flex items-start gap-3">
-                                        <div className="rounded-full bg-amber-100 p-2">
-                                            <User className="h-4 w-4 text-amber-600" />
+                                        <div className="rounded-full bg-blue-100 p-2">
+                                            <User className="h-4 w-4 text-blue-600" />
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2">
                                                 <h4 className="font-semibold text-gray-900">
                                                     {(appointment.visitorId as any)?.name || appointment.visitor?.name || "Visitor"}
                                                 </h4>
-                                                <Badge variant="outline" className="bg-amber-100 text-amber-800">
+                                                <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
                                                     Pending
                                                 </Badge>
                                             </div>

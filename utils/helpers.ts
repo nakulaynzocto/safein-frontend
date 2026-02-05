@@ -436,6 +436,7 @@ export function isAppointmentTimedOut(appointment: AppointmentForStatus): boolea
         0, 0, 0, 0  // Set to 00:00:00 (midnight)
     );
 
+
     // Check if current date is after scheduled date (next day or later)
     // Example: If appointment is for 1/2/2026, it will timeout on 2/2/2026 at 00:00
     return currentDateOnly.getTime() > scheduledDateOnly.getTime();
