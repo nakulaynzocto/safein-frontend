@@ -67,7 +67,11 @@ export default function PricingPage() {
         );
     }
 
-    const plans = fetchedSubscriptionPlans?.data?.plans || [];
+    const allPlans = fetchedSubscriptionPlans?.data?.plans || [];
+    // Hide free trial for logged-in users - they already have it from registration
+    const plans = (isAuthenticated && token)
+        ? allPlans.filter((plan: ISubscriptionPlan) => plan.planType !== "free")
+        : allPlans;
 
     return (
         <>
@@ -233,8 +237,8 @@ export default function PricingPage() {
                                                             {plan.planType === "monthly"
                                                                 ? "1 Month"
                                                                 : plan.planType === "quarterly"
-                                                                  ? "3 Months"
-                                                                  : "12 Months"}
+                                                                    ? "3 Months"
+                                                                    : "12 Months"}
                                                         </div>
                                                         {plan.discountPercentage && plan.discountPercentage > 0 && (
                                                             <div className="mb-0.5 text-[10px] text-gray-400 line-through">

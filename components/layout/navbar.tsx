@@ -151,7 +151,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                     if (updatedUser && updatedUser.id) {
                         refetchProfile();
                     }
-                } catch (err) {}
+                } catch (err) { }
             }
         };
 
@@ -234,11 +234,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
 
     return (
         <nav
-            className={`${
-                shouldShowWhiteNavbar
+            className={`${shouldShowWhiteNavbar
                     ? "border-b border-gray-200/30 bg-white/90 shadow-lg backdrop-blur-md"
                     : "bg-hero-gradient backdrop-blur-0 border-transparent shadow-none"
-            } sticky top-0 z-50 transition-all duration-300`}
+                } sticky top-0 z-50 transition-all duration-300`}
         >
             <div className="w-full px-4 sm:px-6 lg:px-8">
                 <div className="flex h-20 items-center justify-between">
@@ -272,9 +271,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {shouldShowPrivateNavbar && (
                                     <div className={`hidden items-center lg:flex`}>
                                         <div
-                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${
-                                                shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white drop-shadow-lg"
-                                            }`}
+                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white drop-shadow-lg"
+                                                }`}
                                         >
                                             Visitor Management System
                                         </div>
@@ -309,9 +307,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {shouldShowPrivateNavbar && (
                                     <div className={`hidden items-center lg:flex`}>
                                         <div
-                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${
-                                                shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white drop-shadow-lg"
-                                            }`}
+                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white drop-shadow-lg"
+                                                }`}
                                         >
                                             Visitor Management System
                                         </div>
@@ -327,11 +324,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                             <div className="flex items-center gap-2">
                                 <Link
                                     href={routes.publicroute.HOME}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${
-                                        pathname === routes.publicroute.HOME
+                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.HOME
                                             ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
                                             : `border-transparent ${linkText}`
-                                    } group transition-colors duration-200 ${linkHoverBgClass}`}
+                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
                                     prefetch={true}
                                 >
                                     <span className="relative z-10">Home</span>
@@ -341,11 +337,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 </Link>
                                 <Link
                                     href={routes.publicroute.FEATURES}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${
-                                        pathname === routes.publicroute.FEATURES
+                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.FEATURES
                                             ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
                                             : `border-transparent ${linkText}`
-                                    } group transition-colors duration-200 ${linkHoverBgClass}`}
+                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
                                     prefetch={true}
                                 >
                                     <span className="relative z-10">Features</span>
@@ -355,11 +350,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 </Link>
                                 <Link
                                     href={routes.publicroute.PRICING}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${
-                                        pathname === routes.publicroute.PRICING
+                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.PRICING
                                             ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
                                             : `border-transparent ${linkText}`
-                                    } group transition-colors duration-200 ${linkHoverBgClass}`}
+                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
                                     prefetch={true}
                                 >
                                     <span className="relative z-10">Pricing</span>
@@ -369,11 +363,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 </Link>
                                 <Link
                                     href={routes.publicroute.CONTACT}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${
-                                        pathname === routes.publicroute.CONTACT
+                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.CONTACT
                                             ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
                                             : `border-transparent ${linkText}`
-                                    } group transition-colors duration-200 ${linkHoverBgClass}`}
+                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
                                     prefetch={true}
                                 >
                                     <span className="relative z-10">Contact</span>
@@ -383,11 +376,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 </Link>
                                 <Link
                                     href={routes.publicroute.HELP}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${
-                                        pathname === routes.publicroute.HELP
+                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.HELP
                                             ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
                                             : `border-transparent ${linkText}`
-                                    } group transition-colors duration-200 ${linkHoverBgClass}`}
+                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
                                     prefetch={true}
                                 >
                                     <span className="relative z-10">Help</span>
@@ -406,11 +398,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {/* Company Name with Logo - For admins */}
                                 {user?.companyName && !isEmployee && (
                                     <div
-                                        className={`hidden items-center gap-2 rounded-lg px-3 py-2 transition-all duration-200 sm:flex ${
-                                            shouldShowWhiteNavbar
+                                        className={`hidden items-center gap-2 rounded-lg px-3 py-2 transition-all duration-200 sm:flex ${shouldShowWhiteNavbar
                                                 ? "bg-gray-50 text-gray-900"
                                                 : "bg-white/10 text-white"
-                                        }`}
+                                            }`}
                                     >
                                         {user?.profilePicture && user.profilePicture.trim() !== "" ? (
                                             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden bg-white">
@@ -440,11 +431,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {/* Company Logo - Company Name (Employee Name) - For employees (plain text, no button) */}
                                 {isEmployee && (user?.companyName || user?.name || user?.email) && (
                                     <div
-                                        className={`hidden items-center gap-2 rounded-lg px-3 py-2 transition-all duration-200 sm:flex ${
-                                            shouldShowWhiteNavbar
+                                        className={`hidden items-center gap-2 rounded-lg px-3 py-2 transition-all duration-200 sm:flex ${shouldShowWhiteNavbar
                                                 ? "bg-gray-50 text-gray-900"
                                                 : "bg-white/10 text-white"
-                                        }`}
+                                            }`}
                                     >
                                         {/* Company Logo - Use company profile picture or Building2 icon */}
                                         {user?.profilePicture && user.profilePicture.trim() !== "" ? (
@@ -507,7 +497,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                         onClick={handleOpenUpgradeModal}
                                         className="hidden rounded-lg bg-[#3882a5] px-3 py-2 text-xs font-semibold text-white transition-all duration-300 hover:bg-[#2d6a87] sm:flex sm:px-4 sm:text-[14px]"
                                     >
-                                        Upgrade
+                                        UPGRADE
                                     </button>
                                 )}
                                 {/* Public navbar ONLY: Show My Account for logged-in users */}
@@ -562,11 +552,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className={`rounded-lg p-2 transition-all duration-200 lg:hidden ${
-                                    shouldShowWhiteNavbar
+                                className={`rounded-lg p-2 transition-all duration-200 lg:hidden ${shouldShowWhiteNavbar
                                         ? "text-gray-900 hover:bg-gray-100/80"
                                         : "text-white hover:bg-white/10"
-                                }`}
+                                    }`}
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                             >
                                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
