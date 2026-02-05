@@ -137,18 +137,19 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
                         </Button>
                         <Button
                             type="submit"
+                            variant="outline"
                             disabled={isSubmitting || isLoading}
-                            className="bg-green-600 hover:bg-green-700"
+                            className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-950/30"
                         >
                             {isSubmitting || isLoading ? (
                                 <>
-                                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
+                                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-blue-600" />
                                     Checking Out...
                                 </>
                             ) : (
                                 <>
                                     <LogOut className="mr-2 h-4 w-4" />
-                                    Check Out
+                                    Complete
                                 </>
                             )}
                         </Button>

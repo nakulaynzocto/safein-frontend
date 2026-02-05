@@ -408,7 +408,10 @@ export function getAppointmentDateTime(appointment: AppointmentForStatus): Date 
 }
 
 /**
- * Check if appointment is timed out (scheduled date has passed)
+ * Check if appointment is timed out (scheduled DATE has passed)
+ * Date-based timeout: Appointments are valid for the entire scheduled day
+ * and timeout at midnight (00:00) of the NEXT day
+ * Example: Appointment on 1/2/2026 at 2:00 AM will timeout on 2/2/2026 at 00:00
  * @param appointment - Appointment object with appointmentDetails
  * @returns True if scheduled date has passed (next day or later)
  */
@@ -417,21 +420,24 @@ export function isAppointmentTimedOut(appointment: AppointmentForStatus): boolea
     if (!scheduledDateTime) return false;
 
     const now = new Date();
-    
+
     // Get date only (without time) for comparison
+    // This ensures appointments are valid for the entire scheduled day
     const scheduledDateOnly = new Date(
         scheduledDateTime.getFullYear(),
         scheduledDateTime.getMonth(),
-        scheduledDateTime.getDate()
+        scheduledDateTime.getDate(),
+        0, 0, 0, 0  // Set to 00:00:00 (midnight)
     );
     const currentDateOnly = new Date(
         now.getFullYear(),
         now.getMonth(),
-        now.getDate()
+        now.getDate(),
+        0, 0, 0, 0  // Set to 00:00:00 (midnight)
     );
 
     // Check if current date is after scheduled date (next day or later)
-    // If appointment is for 1/1/2026, it will timeout on 2/1/2026
+    // Example: If appointment is for 1/2/2026, it will timeout on 2/2/2026 at 00:00
     return currentDateOnly.getTime() > scheduledDateOnly.getTime();
 }
 
@@ -457,7 +463,7 @@ export function getAppointmentStatus(appointment: AppointmentForStatus): string 
         const scheduledDateTime = getAppointmentDateTime(appointment);
         if (scheduledDateTime) {
             const now = new Date();
-            
+
             // Get date only (without time) for comparison
             const scheduledDateOnly = new Date(
                 scheduledDateTime.getFullYear(),

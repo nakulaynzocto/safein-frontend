@@ -10,6 +10,7 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { format } from "date-fns";
 import { CheckCircle, XCircle, Clock, User, Building2, Calendar } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { filterActivePendingAppointments } from "@/utils/appointmentUtils";
 
 interface PendingApprovalsProps {
     appointments: Appointment[];
@@ -23,8 +24,8 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
     const [rejectAppointment, { isLoading: isRejecting }] = useRejectAppointmentMutation();
     const [processingId, setProcessingId] = useState<string | null>(null);
 
-    // Calculate pending appointments after hooks
-    const pendingAppointments = appointments.filter((apt) => apt.status === "pending");
+    // Filter to show only active pending appointments (excluding timed-out ones)
+    const pendingAppointments = filterActivePendingAppointments(appointments);
 
     const handleApprove = async (appointmentId: string) => {
         try {
@@ -132,18 +133,20 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
                                 <div className="flex gap-2 sm:ml-4">
                                     <Button
                                         size="sm"
+                                        variant="outline"
                                         onClick={() => handleApprove(appointment._id)}
                                         disabled={isProcessing}
-                                        className="bg-emerald-600 hover:bg-emerald-700"
+                                        className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-950/30"
                                     >
                                         <CheckCircle className="mr-2 h-4 w-4" />
                                         {isProcessing && isApproving ? "Approving..." : "Approve"}
                                     </Button>
                                     <Button
                                         size="sm"
-                                        variant="destructive"
+                                        variant="outline"
                                         onClick={() => handleReject(appointment._id)}
                                         disabled={isProcessing}
+                                        className="border-red-600 text-red-600 hover:bg-red-50 dark:border-red-500 dark:text-red-400 dark:hover:bg-red-950/30"
                                     >
                                         <XCircle className="mr-2 h-4 w-4" />
                                         {isProcessing && isRejecting ? "Rejecting..." : "Reject"}

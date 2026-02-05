@@ -151,11 +151,10 @@ export function VerifyAppointment() {
                 <Card className="w-full max-w-md">
                     <CardHeader className="text-center">
                         <div
-                            className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${
-                                completedStatus === "approved"
-                                    ? "bg-green-100 dark:bg-green-900/20"
-                                    : "bg-red-100 dark:bg-red-900/20"
-                            }`}
+                            className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${completedStatus === "approved"
+                                ? "bg-green-100 dark:bg-green-900/20"
+                                : "bg-red-100 dark:bg-red-900/20"
+                                }`}
                         >
                             {completedStatus === "approved" ? (
                                 <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
@@ -339,80 +338,129 @@ export function VerifyAppointment() {
                     </div>
 
                     {/* Appointment Details Section */}
-                    <div className="bg-muted/50 space-y-3 rounded-lg border p-3 sm:space-y-4 sm:p-6">
-                        <h3 className="flex items-center gap-2 text-base font-semibold sm:text-lg">
-                            <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20 space-y-3 rounded-xl border border-blue-100 dark:border-blue-900/30 p-4 shadow-sm sm:space-y-4 sm:p-6">
+                        <h3 className="flex items-center gap-2 text-base font-semibold text-blue-900 dark:text-blue-100 sm:text-lg">
+                            <div className="rounded-lg bg-blue-500/10 p-2">
+                                <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400 sm:h-5 sm:w-5" />
+                            </div>
                             Appointment Details
                         </h3>
-                        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
-                            <div className="flex items-start gap-2 sm:gap-3">
-                                <Building2 className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-xs font-medium sm:text-sm">Employee</p>
-                                    <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                                        {appointment.employee.name}
-                                    </p>
-                                    {appointment.employee.department && (
-                                        <p className="text-muted-foreground text-xs break-words">
-                                            {appointment.employee.department}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="flex items-start gap-2 sm:gap-3">
-                                <Calendar className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-xs font-medium sm:text-sm">Date</p>
-                                    <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                                        {formattedDate}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start gap-2 sm:gap-3">
-                                <Clock className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-xs font-medium sm:text-sm">Time</p>
-                                    <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                                        {appointment.appointmentDetails.scheduledTime} (
-                                        {appointment.appointmentDetails.duration} min)
-                                    </p>
-                                </div>
-                            </div>
-
-                            {appointment.appointmentDetails.meetingRoom && (
-                                <div className="flex items-start gap-2 sm:gap-3">
-                                    <Building2 className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-xs font-medium sm:text-sm">Meeting Room</p>
-                                        <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                                            {appointment.appointmentDetails.meetingRoom}
+                        <div className="grid grid-cols-1 gap-4 sm:gap-5">
+                            {/* Date & Time Combined */}
+                            <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5">
+                                        <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">DATE & TIME</p>
+                                        <p className="text-base font-semibold text-gray-900 dark:text-gray-100 sm:text-lg mt-0.5">
+                                            {formattedDate} at {appointment.appointmentDetails.scheduledTime}
                                         </p>
                                     </div>
                                 </div>
-                            )}
+                            </div>
 
+                            {/* Visitor Name */}
+                            <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5">
+                                        <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">VISITOR</p>
+                                        <p className="text-base font-semibold text-gray-900 dark:text-gray-100 sm:text-lg mt-0.5 truncate">
+                                            {appointment.visitor.name}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Purpose */}
                             {appointment.appointmentDetails.purpose && (
-                                <div className="flex items-start gap-2 sm:gap-3 md:col-span-2">
-                                    <FileText className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-xs font-medium sm:text-sm">Purpose</p>
-                                        <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                                            {appointment.appointmentDetails.purpose}
-                                        </p>
+                                <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5 mt-0.5">
+                                            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">PURPOSE</p>
+                                            <p className="text-sm text-gray-700 dark:text-gray-300 mt-1.5 leading-relaxed break-words">
+                                                {appointment.appointmentDetails.purpose}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             )}
 
-                            {appointment.appointmentDetails.notes && (
-                                <div className="flex items-start gap-2 sm:gap-3 md:col-span-2">
-                                    <FileText className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-xs font-medium sm:text-sm">Notes</p>
-                                        <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                                            {appointment.appointmentDetails.notes}
+                            {/* Employee Info */}
+                            <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5">
+                                        <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">MEETING WITH</p>
+                                        <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mt-0.5 truncate">
+                                            {appointment.employee.name}
                                         </p>
+                                        {appointment.employee.department && (
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                                                {appointment.employee.department}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Meeting Room & Duration */}
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                {appointment.appointmentDetails.duration && (
+                                    <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5">
+                                                <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">DURATION</p>
+                                                <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mt-0.5">
+                                                    {appointment.appointmentDetails.duration} min
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {appointment.appointmentDetails.meetingRoom && (
+                                    <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5">
+                                                <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">ROOM</p>
+                                                <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mt-0.5 truncate">
+                                                    {appointment.appointmentDetails.meetingRoom}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Notes */}
+                            {appointment.appointmentDetails.notes && (
+                                <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5 mt-0.5">
+                                            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">ADDITIONAL NOTES</p>
+                                            <p className="text-sm text-gray-700 dark:text-gray-300 mt-1.5 leading-relaxed break-words">
+                                                {appointment.appointmentDetails.notes}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -426,7 +474,7 @@ export function VerifyAppointment() {
                             size="lg"
                             onClick={() => handleStatusUpdate("rejected")}
                             disabled={isProcessing}
-                            className="flex-1 sm:w-auto sm:flex-initial"
+                            className="flex-1 sm:w-auto sm:flex-initial border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
                         >
                             {isProcessing ? (
                                 <>
@@ -444,7 +492,7 @@ export function VerifyAppointment() {
                             size="lg"
                             onClick={() => handleStatusUpdate("approved")}
                             disabled={isProcessing}
-                            className="flex-1 sm:w-auto sm:flex-initial"
+                            className="flex-1 sm:w-auto sm:flex-initial bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700"
                         >
                             {isProcessing ? (
                                 <>
