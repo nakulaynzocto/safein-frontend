@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, type ReactNode } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useRouter } from "next/navigation";
@@ -17,12 +17,13 @@ import { SelectField } from "@/components/common/selectField";
 import { CountryStateCitySelect } from "@/components/common/countryStateCity";
 import { TextareaField } from "@/components/common/textareaField";
 import { ImageUploadField } from "@/components/common/imageUploadField";
-import { Info, CreditCard, CheckCircle } from "lucide-react";
+import { Info, CreditCard, CheckCircle, Plus, Trash2 } from "lucide-react";
 import { InputField } from "@/components/common/inputField";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { FormContainer } from "@/components/common/formContainer";
 import { VisitorFormFields } from "./visitorFormFields";
-import { visitorSchema, VisitorFormData, idProofTypes } from "./visitorSchema";
+import { EmergencyContactsField } from "./EmergencyContactsField";
+import { visitorSchema, VisitorFormData, idProofTypes, countryCodeOptions } from "./visitorSchema";
 import { useCreateVisitorMutation, useUpdateVisitorMutation, useGetVisitorQuery, type CreateVisitorRequest } from "@/store/api/visitorApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
@@ -71,11 +72,10 @@ export function NewVisitorModal({
             visitorData.photo);
     const hasSecurityData =
         visitorData &&
-        ((visitorData as any).emergencyContact?.name ||
-            (visitorData as any).emergencyContact?.phone ||
+        ((visitorData as any).emergencyContacts?.length > 0 ||
             (visitorData as any).blacklisted ||
             (visitorData as any).tags);
-    
+
     const [showIdVerificationFields, setShowIdVerificationFields] = useState<boolean>(!!hasIdVerificationData);
     const [showSecurityFields, setShowSecurityFields] = useState<boolean>(!!hasSecurityData);
 
@@ -112,10 +112,7 @@ export function NewVisitorModal({
             blacklisted: false,
             blacklistReason: "",
             tags: "",
-            emergencyContact: {
-                name: "",
-                phone: "",
-            },
+            emergencyContacts: [],
         },
     });
 
@@ -142,8 +139,7 @@ export function NewVisitorModal({
                 visitorData.photo
             );
             const hasSecurity = !!(
-                (visitorData as any).emergencyContact?.name ||
-                (visitorData as any).emergencyContact?.phone ||
+                (visitorData as any).emergencyContacts?.length > 0 ||
                 (visitorData as any).blacklisted ||
                 (visitorData as any).tags
             );
@@ -170,10 +166,7 @@ export function NewVisitorModal({
                 blacklisted: (visitorData as any).blacklisted || false,
                 blacklistReason: (visitorData as any).blacklistReason || "",
                 tags: (visitorData as any).tags?.join(", ") || "",
-                emergencyContact: {
-                    name: (visitorData as any).emergencyContact?.name || "",
-                    phone: (visitorData as any).emergencyContact?.phone || "",
-                },
+                emergencyContacts: (visitorData as any).emergencyContacts || [],
             });
         }
     }, [isEditMode, visitorData, reset]);
@@ -200,8 +193,7 @@ export function NewVisitorModal({
             setValue("blacklisted", false);
             setValue("blacklistReason", "");
             setValue("tags", "");
-            setValue("emergencyContact.name", "");
-            setValue("emergencyContact.phone", "");
+            setValue("emergencyContacts", []);
         }
     };
 
@@ -232,13 +224,9 @@ export function NewVisitorModal({
                 blacklisted: data.blacklisted,
                 blacklistReason: data.blacklistReason || undefined,
                 tags: data.tags ? data.tags.split(",").map((t) => t.trim()) : undefined,
-                emergencyContact:
-                    data.emergencyContact?.name || data.emergencyContact?.phone
-                        ? {
-                            name: data.emergencyContact.name || "",
-                            phone: data.emergencyContact.phone || "",
-                        }
-                        : undefined,
+                emergencyContacts: data.emergencyContacts && data.emergencyContacts.length > 0
+                    ? data.emergencyContacts
+                    : undefined,
             };
 
             if (isEditMode && visitorId) {
@@ -393,7 +381,7 @@ export function NewVisitorModal({
                         state: watch("address.state") || "",
                         city: watch("address.city") || "",
                     }}
-                        onChange={(v: any) => {
+                    onChange={(v: any) => {
                         setValue("address.country", v.country);
                         setValue("address.state", v.state);
                         setValue("address.city", v.city);
@@ -569,20 +557,12 @@ export function NewVisitorModal({
                         <h4 className="text-muted-foreground flex items-center gap-2 text-sm font-bold tracking-wider uppercase">
                             <CreditCard className="h-4 w-4" /> Security & Emergency
                         </h4>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <InputField
-                                label="Emergency Contact Name"
-                                placeholder="Enter contact name"
-                                {...register("emergencyContact.name")}
-                                error={errors.emergencyContact?.name?.message}
-                            />
-                            <InputField
-                                label="Emergency Contact Phone"
-                                placeholder="Enter contact phone"
-                                {...register("emergencyContact.phone")}
-                                error={errors.emergencyContact?.phone?.message}
-                            />
-                        </div>
+
+                        <EmergencyContactsField
+                            control={control}
+                            register={register}
+                            errors={errors}
+                        />
                     </div>
 
                     <div className="space-y-4 border-t pt-4">
