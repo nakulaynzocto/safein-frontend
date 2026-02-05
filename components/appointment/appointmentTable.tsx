@@ -167,9 +167,9 @@ export function AppointmentTable({
     // Check if user is employee
     const { user } = useAppSelector((state) => state.auth);
     const isEmployee = checkIsEmployee(user);
-    
-    const emptyPrimaryLabel = isEmployee 
-        ? "Create Appointment Link" 
+
+    const emptyPrimaryLabel = isEmployee
+        ? "Create Appointment Link"
         : (hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment");
     const emptyTitle = isToday() ? "No appointments for today" : "No appointments yet";
 
@@ -438,10 +438,12 @@ export function AppointmentTable({
                                             <X className="mr-2 h-4 w-4" />
                                             Reject
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleEdit(appointment)}>
-                                            <Edit className="mr-2 h-4 w-4" />
-                                            Edit
-                                        </DropdownMenuItem>
+                                        {!isEmployee && (
+                                            <DropdownMenuItem onClick={() => handleEdit(appointment)}>
+                                                <Edit className="mr-2 h-4 w-4" />
+                                                Edit
+                                            </DropdownMenuItem>
+                                        )}
                                     </>
                                 )}
 
