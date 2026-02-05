@@ -99,16 +99,16 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2">
                                                 <h4 className="font-semibold text-gray-900">
-                                                    {appointment.visitor?.name || "Visitor"}
+                                                    {(appointment.visitorId as any)?.name || appointment.visitor?.name || "Visitor"}
                                                 </h4>
                                                 <Badge variant="outline" className="bg-amber-100 text-amber-800">
                                                     Pending
                                                 </Badge>
                                             </div>
-                                            {appointment.visitor?.company && (
+                                            {((appointment.visitorId as any)?.company || appointment.visitor?.company) && (
                                                 <p className="mt-1 flex items-center gap-1 text-sm text-gray-600">
                                                     <Building2 className="h-3 w-3" />
-                                                    {appointment.visitor.company}
+                                                    {(appointment.visitorId as any)?.company || appointment.visitor?.company}
                                                 </p>
                                             )}
                                         </div>
