@@ -22,10 +22,11 @@ export interface Visitor {
     blacklisted?: boolean;
     blacklistReason?: string;
     tags?: string[];
-    emergencyContact?: {
+    emergencyContacts?: Array<{
         name: string;
+        countryCode: string;
         phone: string;
-    };
+    }>;
     createdBy: string;
     isDeleted: boolean;
     deletedAt?: string | null;
@@ -65,10 +66,11 @@ export interface CreateVisitorRequest {
     blacklisted?: boolean;
     blacklistReason?: string;
     tags?: string[];
-    emergencyContact?: {
+    emergencyContacts?: Array<{
         name: string;
+        countryCode: string;
         phone: string;
-    };
+    }>;
 }
 
 export interface UpdateVisitorRequest {
@@ -92,10 +94,11 @@ export interface UpdateVisitorRequest {
     blacklisted?: boolean;
     blacklistReason?: string;
     tags?: string[];
-    emergencyContact?: {
+    emergencyContacts?: Array<{
         name: string;
+        countryCode: string;
         phone: string;
-    };
+    }>;
 }
 
 export interface GetVisitorsQuery {
@@ -180,9 +183,9 @@ export const visitorApi = baseApi.injectEndpoints({
             providesTags: (result) =>
                 result?.visitors
                     ? [
-                          ...result.visitors.map(({ _id }) => ({ type: "Visitor" as const, id: _id })),
-                          { type: "Visitor" as const, id: "LIST" },
-                      ]
+                        ...result.visitors.map(({ _id }) => ({ type: "Visitor" as const, id: _id })),
+                        { type: "Visitor" as const, id: "LIST" },
+                    ]
                     : [{ type: "Visitor" as const, id: "LIST" }],
             keepUnusedDataFor: 300, // Keep data for 5 minutes
         }),

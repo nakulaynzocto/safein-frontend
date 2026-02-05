@@ -348,9 +348,9 @@ export function ImageUploadField({
 
                 {/* Source Selection Modal (Reuse existing logic) */}
                 {showCaptureOptions && (
-                    <div className="bg-opacity-50 fixed inset-0 z-40 flex items-center justify-center bg-black p-4">
-                        <div className="w-full max-w-xs rounded-xl bg-white p-4 shadow-2xl sm:w-80 sm:rounded-lg sm:p-6">
-                            <h3 className="mb-4 text-center text-base font-semibold sm:text-lg">Choose Image Source</h3>
+                    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+                        <div className="w-full max-w-xs rounded-xl bg-white p-4 shadow-2xl sm:w-80 sm:rounded-lg sm:p-6 dark:bg-gray-800">
+                            <h3 className="mb-4 text-center text-base font-semibold sm:text-lg dark:text-white">Choose Image Source</h3>
                             <div className="space-y-2 sm:space-y-3">
                                 <Button
                                     onClick={handleCameraUpload}
@@ -492,9 +492,9 @@ export function ImageUploadField({
                 )}
 
                 {showCaptureOptions && (
-                    <div className="bg-opacity-50 fixed inset-0 z-40 flex items-center justify-center bg-black p-4">
-                        <div className="w-full max-w-xs rounded-xl bg-white p-4 shadow-2xl sm:w-80 sm:rounded-lg sm:p-6">
-                            <h3 className="mb-4 text-center text-base font-semibold sm:text-lg">Choose Image Source</h3>
+                    <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+                        <div className="w-full max-w-xs rounded-xl bg-white p-4 shadow-2xl sm:w-80 sm:rounded-lg sm:p-6 dark:bg-gray-800">
+                            <h3 className="mb-4 text-center text-base font-semibold sm:text-lg dark:text-white">Choose Image Source</h3>
                             <div className="space-y-2 sm:space-y-3">
                                 <Button
                                     onClick={handleCameraUpload}
@@ -512,6 +512,7 @@ export function ImageUploadField({
                                 </Button>
                                 <Button
                                     variant="outline"
+                                    onClick={cancelCapture}
                                     className="h-12 w-full rounded-xl sm:text-base"
                                 >
                                     <span className="text-sm sm:text-base">Cancel</span>
