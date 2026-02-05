@@ -173,116 +173,119 @@ export function EmployeeTable({
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                         onClick={() => {
-                                            setSelectedEmployee(employee);
-                                            setShowDeleteDialog(true);
+                                            if ((employee as any).canDelete !== false) {
+                                                setSelectedEmployee(employee);
+                                                setShowDeleteDialog(true);
+                                            }
                                         }}
                                         className="text-destructive"
+                                        disabled={(employee as any).canDelete === false}
                                     >
                                         <Trash2 className="mr-2 h-4 w-4" />
-                                        Delete
+                                        {(employee as any).canDelete === false ? 'Cannot Delete (Has Appointments)' : 'Delete'}
                                     </DropdownMenuItem>
                                 </>
                             )}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            ),
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                        </div>
+                        ),
         });
 
-        return baseColumns;
+                        return baseColumns;
     };
 
-    if (error) {
+                        if (error) {
         return (
-            <Card>
-                <CardContent className="pt-6">
-                    <div className="text-center text-red-500">Failed to load employees. Please try again.</div>
-                </CardContent>
-            </Card>
-        );
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="text-center text-red-500">Failed to load employees. Please try again.</div>
+                            </CardContent>
+                        </Card>
+                        );
     }
 
-    return (
-        <div className="space-y-6">
-            {/* Main Table */}
-            <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
-                    <SearchInput
-                        placeholder="Search employees..."
-                        value={searchTerm}
-                        onChange={onSearchChange}
-                        debounceDelay={500}
-                        className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none"
-                    />
-                    {headerActions && (
-                        <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
-                            {headerActions}
+                        return (
+                        <div className="space-y-6">
+                            {/* Main Table */}
+                            <div className="flex flex-col gap-3 sm:gap-4">
+                                <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
+                                    <SearchInput
+                                        placeholder="Search employees..."
+                                        value={searchTerm}
+                                        onChange={onSearchChange}
+                                        debounceDelay={500}
+                                        className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none"
+                                    />
+                                    {headerActions && (
+                                        <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
+                                            {headerActions}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
+                                    <DataTable
+                                        data={employees}
+                                        columns={getColumns()}
+                                        emptyMessage="No employees found"
+                                        showCard={false}
+                                        isLoading={isLoading}
+                                        emptyData={{
+                                            title: "No employees yet",
+                                            description: "Add your first employee to get started.",
+                                            primaryActionLabel: hasReachedLimit ? "Upgrade Plan" : "Add Employee",
+                                            icon: User
+                                        }}
+                                        onPrimaryAction={() => {
+                                            if (hasReachedLimit) {
+                                                setShowUpgradeModal(true);
+                                            } else {
+                                                router.push(routes.privateroute.EMPLOYEECREATE);
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Pagination */}
+                            {pagination && pagination.totalPages > 1 && (
+                                <div className="flex justify-center">
+                                    <Pagination
+                                        currentPage={pagination.currentPage}
+                                        totalPages={pagination.totalPages}
+                                        totalItems={pagination.totalEmployees}
+                                        pageSize={pageSize}
+                                        hasNextPage={pagination.hasNextPage}
+                                        hasPrevPage={pagination.hasPrevPage}
+                                        onPageChange={onPageChange}
+                                        onPageSizeChange={onPageSizeChange}
+                                        showPageSizeSelector={true}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Confirmation Dialogs */}
+                            {onDelete && (
+                                <ConfirmationDialog
+                                    open={showDeleteDialog}
+                                    onOpenChange={setShowDeleteDialog}
+                                    title="Delete Employee"
+                                    description={`Are you sure you want to delete ${selectedEmployee?.name}?`}
+                                    onConfirm={handleDelete}
+                                    confirmText={isDeleting ? "Deleting..." : "Delete"}
+                                    variant="destructive"
+                                />
+                            )}
+
+                            {/* View Details Dialog */}
+                            <EmployeeDetailsDialog
+                                employee={selectedEmployee}
+                                mode="active"
+                                open={showViewDialog}
+                                on_close={() => setShowViewDialog(false)}
+                            />
+
+                            {/* Edit Employee handled via navigation (see useEffect) */}
                         </div>
-                    )}
-                </div>
-                <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
-                    <DataTable
-                        data={employees}
-                        columns={getColumns()}
-                        emptyMessage="No employees found"
-                        showCard={false}
-                        isLoading={isLoading}
-                        emptyData={{
-                            title: "No employees yet",
-                            description: "Add your first employee to get started.",
-                            primaryActionLabel: hasReachedLimit ? "Upgrade Plan" : "Add Employee",
-                            icon: User
-                        }}
-                        onPrimaryAction={() => {
-                            if (hasReachedLimit) {
-                                setShowUpgradeModal(true);
-                            } else {
-                                router.push(routes.privateroute.EMPLOYEECREATE);
-                            }
-                        }}
-                    />
-                </div>
-            </div>
-
-            {/* Pagination */}
-            {pagination && pagination.totalPages > 1 && (
-                <div className="flex justify-center">
-                    <Pagination
-                        currentPage={pagination.currentPage}
-                        totalPages={pagination.totalPages}
-                        totalItems={pagination.totalEmployees}
-                        pageSize={pageSize}
-                        hasNextPage={pagination.hasNextPage}
-                        hasPrevPage={pagination.hasPrevPage}
-                        onPageChange={onPageChange}
-                        onPageSizeChange={onPageSizeChange}
-                        showPageSizeSelector={true}
-                    />
-                </div>
-            )}
-
-            {/* Confirmation Dialogs */}
-            {onDelete && (
-                <ConfirmationDialog
-                    open={showDeleteDialog}
-                    onOpenChange={setShowDeleteDialog}
-                    title="Delete Employee"
-                    description={`Are you sure you want to delete ${selectedEmployee?.name}?`}
-                    onConfirm={handleDelete}
-                    confirmText={isDeleting ? "Deleting..." : "Delete"}
-                    variant="destructive"
-                />
-            )}
-
-            {/* View Details Dialog */}
-            <EmployeeDetailsDialog
-                employee={selectedEmployee}
-                mode="active"
-                open={showViewDialog}
-                on_close={() => setShowViewDialog(false)}
-            />
-
-            {/* Edit Employee handled via navigation (see useEffect) */}
-        </div>
-    );
+                        );
 }
