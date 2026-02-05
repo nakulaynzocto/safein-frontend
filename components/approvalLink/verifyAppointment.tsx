@@ -145,29 +145,36 @@ export function VerifyAppointment() {
         day: "numeric",
     });
 
-    if (actionCompleted) {
+    // Check if appointment is already processed (from server) or just processed (local state)
+    const currentStatus = completedStatus || appointment.status;
+    const isProcessed = actionCompleted || currentStatus === "approved" || currentStatus === "rejected";
+
+    if (isProcessed) {
+        const displayStatus = currentStatus === "approved" ? "approved" : "rejected";
         return (
             <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
                 <Card className="w-full max-w-md">
                     <CardHeader className="text-center">
                         <div
-                            className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${completedStatus === "approved"
+                            className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${displayStatus === "approved"
                                 ? "bg-green-100 dark:bg-green-900/20"
                                 : "bg-red-100 dark:bg-red-900/20"
                                 }`}
                         >
-                            {completedStatus === "approved" ? (
+                            {displayStatus === "approved" ? (
                                 <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
                             ) : (
                                 <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
                             )}
                         </div>
                         <CardTitle className="text-2xl">
-                            Appointment {completedStatus === "approved" ? "Approved" : "Rejected"}
+                            Appointment {displayStatus === "approved" ? "Approved" : "Rejected"}
                         </CardTitle>
                         <CardDescription className="mt-2">
-                            The appointment has been {completedStatus === "approved" ? "approved" : "rejected"}{" "}
-                            successfully.
+                            {actionCompleted
+                                ? `The appointment has been ${displayStatus} successfully.`
+                                : `This appointment is already ${displayStatus}.`
+                            }
                         </CardDescription>
                     </CardHeader>
                 </Card>
@@ -490,9 +497,10 @@ export function VerifyAppointment() {
                         </Button>
                         <Button
                             size="lg"
+                            variant="outline"
                             onClick={() => handleStatusUpdate("approved")}
                             disabled={isProcessing}
-                            className="flex-1 sm:w-auto sm:flex-initial bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700"
+                            className="flex-1 sm:w-auto sm:flex-initial border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-950/30"
                         >
                             {isProcessing ? (
                                 <>

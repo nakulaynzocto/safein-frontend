@@ -69,19 +69,6 @@ export function isAppointmentTimedOut(appointment: Appointment): boolean {
 
         const isTimedOut = currentDateOnly.getTime() > scheduledDateOnly.getTime();
 
-        // Debug logging (remove after fixing)
-        if (appointment.status === 'pending') {
-            console.log('⏰ Date-Based Timeout Check:', {
-                appointmentId: appointment._id.substring(0, 8),
-                scheduledDate,
-                scheduledTime,
-                scheduledDateOnly: scheduledDateOnly.toLocaleDateString(),
-                currentDateOnly: currentDateOnly.toLocaleDateString(),
-                isTimedOut,
-                daysAgo: Math.floor((currentDateOnly.getTime() - scheduledDateOnly.getTime()) / (1000 * 60 * 60 * 24))
-            });
-        }
-
         return isTimedOut;
     } catch (error) {
         console.error("Error checking appointment timeout:", error, appointment);
