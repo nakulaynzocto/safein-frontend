@@ -28,6 +28,7 @@ export interface TrialLimitsStatus {
     subscriptionStatus: string;
     isActive: boolean;
     isExpired: boolean;
+    isEmployeeContext?: boolean;
     limits: {
         employees: { limit: number; current: number; reached: boolean; canCreate: boolean };
         visitors: { limit: number; current: number; reached: boolean; canCreate: boolean };
