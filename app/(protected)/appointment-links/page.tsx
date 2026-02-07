@@ -18,13 +18,15 @@ import { Pagination } from "@/components/common/pagination";
 import { useGetAllAppointmentLinksQuery, useDeleteAppointmentLinkMutation } from "@/store/api/appointmentLinkApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { formatDate, formatDateTime, isEmployee as checkIsEmployee } from "@/utils/helpers";
-import { Link2, Trash2, CheckCircle, XCircle, Copy, Mail, Phone, Calendar, Maximize2 } from "lucide-react";
+import { Link2, Trash2, CheckCircle, XCircle, Copy, Mail, Phone, Calendar, Maximize2, Plus } from "lucide-react";
 import { AppointmentLink } from "@/store/api/appointmentLinkApi";
 import { getInitials, formatName } from "@/utils/helpers";
 import { CreateAppointmentLinkModal } from "@/components/appointment/CreateAppointmentLinkModal";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { StatusBadge } from "@/components/common/statusBadge";
 import { ActionButton } from "@/components/common/actionButton";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 
 export default function AppointmentLinksPage() {
     // ALL HOOKS MUST BE CALLED AT TOP LEVEL - BEFORE ANY CONDITIONAL RETURNS
@@ -32,13 +34,15 @@ export default function AppointmentLinksPage() {
     const { user, isAuthenticated } = useAppSelector((state) => state.auth);
     const [isChecking, setIsChecking] = useState(true);
     const isEmployee = checkIsEmployee(user);
-    
+
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
     const [isBooked, setIsBooked] = useState<boolean | undefined>(undefined);
     const [search, setSearch] = useState("");
     const [deleteLinkId, setDeleteLinkId] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const { hasReachedAppointmentLimit } = useSubscriptionStatus();
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     // Call all RTK Query hooks at top level - use skip to prevent unnecessary calls
     const { data, isLoading, error, refetch } = useGetAllAppointmentLinksQuery({
@@ -350,24 +354,42 @@ export default function AppointmentLinksPage() {
                             />
                         </div>
                         <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
-                            <CreateAppointmentLinkModal
-                                open={showCreateModal}
-                                onOpenChange={setShowCreateModal}
-                                triggerButton={
+                            {hasReachedAppointmentLimit ? (
+                                <>
                                     <ActionButton
-                                        variant="outline-primary"
+                                        variant="primary"
                                         size="xl"
-                                        className="flex w-full shrink-0 items-center justify-center gap-2 text-xs whitespace-nowrap sm:w-auto sm:text-sm"
+                                        className="flex w-full shrink-0 items-center justify-center gap-2 text-xs whitespace-nowrap sm:w-auto sm:text-sm bg-[#3882a5] hover:bg-[#2d6a87] text-white"
+                                        onClick={() => setShowUpgradeModal(true)}
                                     >
-                                        <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                        <span className="hidden sm:inline">Create Link</span>
+                                        <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                        <span className="hidden sm:inline">Upgrade to Schedule More</span>
                                     </ActionButton>
-                                }
-                                onSuccess={() => {
-                                    refetch();
-                                    setShowCreateModal(false);
-                                }}
-                            />
+                                    <UpgradePlanModal
+                                        isOpen={showUpgradeModal}
+                                        onClose={() => setShowUpgradeModal(false)}
+                                    />
+                                </>
+                            ) : (
+                                <CreateAppointmentLinkModal
+                                    open={showCreateModal}
+                                    onOpenChange={setShowCreateModal}
+                                    triggerButton={
+                                        <ActionButton
+                                            variant="outline-primary"
+                                            size="xl"
+                                            className="flex w-full shrink-0 items-center justify-center gap-2 text-xs whitespace-nowrap sm:w-auto sm:text-sm"
+                                        >
+                                            <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                            <span className="hidden sm:inline">Create Link</span>
+                                        </ActionButton>
+                                    }
+                                    onSuccess={() => {
+                                        refetch();
+                                        setShowCreateModal(false);
+                                    }}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
@@ -380,9 +402,17 @@ export default function AppointmentLinksPage() {
                         emptyData={{
                             title: "No appointment links found",
                             description: "Create your first appointment link to get started.",
-                            primaryActionLabel: "Create Appointment Link",
+                            primaryActionLabel: hasReachedAppointmentLimit
+                                ? "Upgrade Plan"
+                                : "Create Appointment Link",
                         }}
-                        onPrimaryAction={() => setShowCreateModal(true)}
+                        onPrimaryAction={() => {
+                            if (hasReachedAppointmentLimit) {
+                                setShowUpgradeModal(true);
+                            } else {
+                                setShowCreateModal(true);
+                            }
+                        }}
                     />
                 </div>
 

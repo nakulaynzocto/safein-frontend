@@ -20,7 +20,14 @@ import { encryptData } from "@/utils/crypto";
 const registerSchema = yup.object({
     companyName: yup.string().required("Company name is required"),
     email: yup.string().email("Invalid email address").required("Email is required"),
-    password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+    password: yup
+        .string()
+        .required("Password is required")
+        .min(8, "Password must be at least 8 characters")
+        .matches(
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/,
+            "Password must contain at least one capital letter, one lower case letter, and one number"
+        ),
 });
 
 const otpSchema = yup.object({
@@ -46,7 +53,7 @@ export function RegisterForm() {
     const [user, setUser] = useState<any>(null);
     const [token, setToken] = useState<string | null>(null);
 
-    useEffect(() => {}, [currentStep]);
+    useEffect(() => { }, [currentStep]);
 
     const {
         register: registerField,
@@ -75,9 +82,9 @@ export function RegisterForm() {
             const encryptedPassword = encryptData(data.password);
             const enctyptedCompanyNmae = encryptData(data.companyName);
             const result = await register({
-                email:encryptedEmail,
-                password:encryptedPassword,
-                companyName:enctyptedCompanyNmae
+                email: encryptedEmail,
+                password: encryptedPassword,
+                companyName: enctyptedCompanyNmae
             }).unwrap();
 
             setUserEmail(data.email);
@@ -244,15 +251,15 @@ export function RegisterForm() {
                     {currentStep === "success"
                         ? "Registration Complete!"
                         : currentStep === "otp"
-                          ? "Verify Your Email"
-                          : "Sign Up"}
+                            ? "Verify Your Email"
+                            : "Sign Up"}
                 </CardTitle>
                 <CardDescription>
                     {currentStep === "success"
                         ? "Your account has been successfully created"
                         : currentStep === "otp"
-                          ? "Enter the OTP sent to your email"
-                          : "Sign up for your account"}
+                            ? "Enter the OTP sent to your email"
+                            : "Sign up for your account"}
                 </CardDescription>
             </CardHeader>
             <CardContent>
