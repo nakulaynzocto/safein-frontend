@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { User } from "../api/authApi";
+import { clearAuthData } from "@/utils/helpers";
 
 interface AuthState {
     user: User | null;
@@ -21,11 +22,7 @@ const authSlice = createSlice({
             state.user = null;
             state.token = null;
             state.isAuthenticated = false;
-            if (typeof window !== "undefined") {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-                document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            }
+            clearAuthData();
         },
         setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
             if (!action.payload.token || action.payload.token === "undefined" || action.payload.token.length < 10) {
@@ -44,7 +41,7 @@ const authSlice = createSlice({
                 localStorage.setItem("user", JSON.stringify(action.payload.user));
                 const expires = new Date();
                 expires.setDate(expires.getDate() + 7);
-                document.cookie = `token=${action.payload.token}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+                document.cookie = `safein_auth_token=${action.payload.token}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
             }
         },
         setUser: (state, action: PayloadAction<User>) => {
@@ -73,11 +70,9 @@ const authSlice = createSlice({
 
                     const expires = new Date();
                     expires.setDate(expires.getDate() + 7);
-                    document.cookie = `token=${token}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+                    document.cookie = `safein_auth_token=${token}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
                 } else {
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("user");
-                    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    clearAuthData();
                 }
             }
         },

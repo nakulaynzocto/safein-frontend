@@ -540,3 +540,22 @@ export function isEmployee(user: User | null | undefined): boolean {
 
     return false;
 }
+/**
+ * Clear all authentication related data from local storage, session storage and cookies
+ */
+export function clearAuthData(): void {
+    if (typeof window === "undefined") return;
+
+    // Clear Storage
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    sessionStorage.clear();
+
+    // Clear authentication cookies
+    const deleteCookie = (name: string) => {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+    };
+
+    deleteCookie("safein_auth_token");
+    deleteCookie("token");
+}

@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../store";
 import { logout } from "../slices/authSlice";
 import { routes } from "../../utils/routes";
+import { clearAuthData } from "../../utils/helpers";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4010/api/v1";
 
@@ -47,10 +48,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
                 // We rely on the authSlice/useAuthSubscription to handle the redirect based on isAuthenticated=false
                 // But as a failsafe for non-React contexts or race conditions:
                 if (typeof window !== "undefined") {
-                    // Clear storage immediately to prevent flicker
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("user");
-                    sessionStorage.clear();
+                    clearAuthData();
 
                     const currentPath = window.location.pathname;
                     const isOnAuthPage =

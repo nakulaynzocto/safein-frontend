@@ -1,75 +1,19 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { routes } from "./utils/routes";
-
-function matchesRoute(pathname: string, routeList: string[]): boolean {
-    return routeList.some((route) => {
-        if (pathname === route) return true;
-
-        if (route.includes("[") && route.includes("]")) {
-            const pattern = route.replace(/\[.*?\]/g, "[^/]+");
-            const regex = new RegExp(`^${pattern}$`);
-            return regex.test(pathname);
-        }
-
-        return false;
-    });
-}
-
-function extractDynamicRoutePatterns(routeList: string[]): Array<{ basePath: string; staticRoutes: string[] }> {
-    const dynamicPatterns: Array<{ basePath: string; staticRoutes: string[] }> = [];
-
-    const dynamicRoutes = routeList.filter((route) => route.includes("[") && route.includes("]"));
-
-    for (const route of dynamicRoutes) {
-        const basePath = route.split("[")[0].replace(/\/$/, "");
-
-        const staticRoutes = routeList.filter((r) => r.startsWith(basePath + "/") && !r.includes("["));
-
-        dynamicPatterns.push({
-            basePath,
-            staticRoutes,
-        });
-    }
-
-    return dynamicPatterns;
-}
-
-function isPrivateRoute(pathname: string): boolean {
-    const privateRouteValues = Object.values(routes.privateroute);
-
-    if (matchesRoute(pathname, privateRouteValues)) return true;
-
-    const dynamicPatterns = extractDynamicRoutePatterns(privateRouteValues);
-
-    for (const pattern of dynamicPatterns) {
-        const { basePath, staticRoutes } = pattern;
-
-        if (pathname.startsWith(basePath + "/") && pathname !== basePath) {
-            const isStaticRoute = staticRoutes.some((staticRoute) => {
-                return pathname === staticRoute || pathname.startsWith(staticRoute + "/");
-            });
-
-            if (!isStaticRoute) {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-function isPublicRoute(pathname: string): boolean {
-    const publicRouteValues = Object.values(routes.publicroute);
-    return matchesRoute(pathname, publicRouteValues);
-}
+import { routes, isPrivateRoute, isPublicRoute } from "./utils/routes";
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    const token = request.cookies.get("token")?.value;
+    const token = request.cookies.get("safein_auth_token")?.value;
 
     const isAuthenticated = token && token !== "undefined" && token.length > 10;
+
+    // 1. Check if it's a Private Route
+    const isPrivate = isPrivateRoute(pathname);
+
+    // 2. Check if it's a Public Route
+    const isPublic = isPublicRoute(pathname);
 
     // Always allow these public pages (authenticated or not)
     const alwaysAllowedPages = [
@@ -78,38 +22,33 @@ export async function middleware(request: NextRequest) {
         routes.publicroute.HOME,
         routes.publicroute.FEATURES,
         routes.publicroute.CONTACT,
+        routes.publicroute.PRIVACY_POLICY,
     ];
 
     if (alwaysAllowedPages.some((page) => pathname === page || pathname.startsWith(`${page}/`))) {
         return NextResponse.next();
     }
 
-    // Allow email-action, verify, and book-appointment routes without authentication
-    if (
-        pathname.startsWith(`${routes.publicroute.EMAIL_ACTION}/`) ||
-        pathname.startsWith(`${routes.publicroute.VERIFY}/`) ||
-        pathname.startsWith("/book-appointment/")
-    ) {
+    // Special handling for subscription pages (Needs to be accessible even if logged in)
+    const subscriptionPages = [routes.publicroute.SUBSCRIPTION_SUCCESS, routes.publicroute.SUBSCRIPTION_CANCEL];
+    if (subscriptionPages.some((page) => pathname === page)) {
         return NextResponse.next();
     }
 
-    // Allow authenticated users to access subscription-success and subscription-cancel pages
-    const subscriptionPages = [routes.publicroute.SUBSCRIPTION_SUCCESS, routes.publicroute.SUBSCRIPTION_CANCEL];
-
-    if (isAuthenticated && isPublicRoute(pathname)) {
-        // Allow access to subscription pages
-        if (subscriptionPages.some((page) => pathname === page)) {
-            return NextResponse.next();
+    // AUTH LOGIC
+    if (isAuthenticated) {
+        // If logged in and trying to access login/register/forgot-password etc.
+        if (isPublic && !subscriptionPages.includes(pathname as any)) {
+            return NextResponse.redirect(new URL(routes.privateroute.DASHBOARD, request.url));
         }
-        // For other public routes, redirect to dashboard
-        return NextResponse.redirect(new URL(routes.privateroute.DASHBOARD, request.url));
+        return NextResponse.next();
+    } else {
+        // If NOT logged in and trying to access a private route
+        if (isPrivate) {
+            return NextResponse.redirect(new URL(routes.publicroute.LOGIN, request.url));
+        }
+        return NextResponse.next();
     }
-
-    if (!isAuthenticated && isPrivateRoute(pathname)) {
-        return NextResponse.redirect(new URL(routes.publicroute.LOGIN, request.url));
-    }
-
-    return NextResponse.next();
 }
 
 export const config = {
