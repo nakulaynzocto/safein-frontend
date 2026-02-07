@@ -15,7 +15,14 @@ import { routes } from "@/utils/routes";
 import { CheckCircle, Lock, ArrowLeft } from "lucide-react";
 
 const resetPasswordSchema = yup.object({
-    newPassword: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+    newPassword: yup
+        .string()
+        .required("Password is required")
+        .min(8, "Password must be at least 8 characters")
+        .matches(
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/,
+            "Password must contain at least one capital letter, one lower case letter, and one number"
+        ),
     confirmPassword: yup
         .string()
         .oneOf([yup.ref("newPassword")], "Passwords must match")
