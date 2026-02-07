@@ -18,7 +18,7 @@ import { useLogoutMutation, useGetProfileQuery } from "@/store/api/authApi";
 import { useGetEmployeeQuery, useGetEmployeesQuery } from "@/store/api/employeeApi";
 import { routes } from "@/utils/routes";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
-import { isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { isEmployee as checkIsEmployee, clearAuthData } from "@/utils/helpers";
 import { NotificationBell } from "@/components/common/NotificationBell";
 import { useNavbarScrollStyle } from "@/hooks/useScrollStyle";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
@@ -189,40 +189,24 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
 
     const handleLogout = useCallback(async () => {
         try {
-            // Clear data first
             dispatch(logout());
+            clearAuthData();
 
-            // Call logout API (but don't wait for it or show errors)
-            logoutMutation()
-                .unwrap()
-                .catch(() => {
-                    // Silently fail - we're logging out locally anyway
-                });
+            // Call logout API (silently)
+            logoutMutation().unwrap().catch(() => { });
 
+            // Robust redirection using window.location to ensure complete state reset
+            // This fixes the issue where the app might get stuck in a loading state
             if (typeof window !== "undefined") {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-                sessionStorage.clear();
+                window.location.href = routes.publicroute.LOGIN;
             }
-
-            // Redirect to login page after a short delay
-            setTimeout(() => {
-                router.replace(routes.publicroute.LOGIN);
-            }, 300);
         } catch (error) {
-            // Even on error, logout locally
             dispatch(logout());
             if (typeof window !== "undefined") {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
+                window.location.href = routes.publicroute.LOGIN;
             }
-
-            // Redirect to login page
-            setTimeout(() => {
-                router.replace(routes.publicroute.LOGIN);
-            }, 300);
         }
-    }, [logoutMutation, dispatch, router]);
+    }, [logoutMutation, dispatch]);
 
     const handleOpenUpgradeModal = useCallback(() => {
         setIsUpgradeModalOpen(true);
@@ -235,8 +219,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
     return (
         <nav
             className={`${shouldShowWhiteNavbar
-                    ? "border-b border-gray-200/30 bg-white/90 shadow-lg backdrop-blur-md"
-                    : "bg-hero-gradient backdrop-blur-0 border-transparent shadow-none"
+                ? "border-b border-gray-200/30 bg-white/90 shadow-lg backdrop-blur-md"
+                : "bg-hero-gradient backdrop-blur-0 border-transparent shadow-none"
                 } sticky top-0 z-50 transition-all duration-300`}
         >
             <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -325,8 +309,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 <Link
                                     href={routes.publicroute.HOME}
                                     className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.HOME
-                                            ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                            : `border-transparent ${linkText}`
+                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
+                                        : `border-transparent ${linkText}`
                                         } group transition-colors duration-200 ${linkHoverBgClass}`}
                                     prefetch={true}
                                 >
@@ -338,8 +322,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 <Link
                                     href={routes.publicroute.FEATURES}
                                     className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.FEATURES
-                                            ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                            : `border-transparent ${linkText}`
+                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
+                                        : `border-transparent ${linkText}`
                                         } group transition-colors duration-200 ${linkHoverBgClass}`}
                                     prefetch={true}
                                 >
@@ -351,8 +335,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 <Link
                                     href={routes.publicroute.PRICING}
                                     className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.PRICING
-                                            ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                            : `border-transparent ${linkText}`
+                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
+                                        : `border-transparent ${linkText}`
                                         } group transition-colors duration-200 ${linkHoverBgClass}`}
                                     prefetch={true}
                                 >
@@ -364,8 +348,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 <Link
                                     href={routes.publicroute.CONTACT}
                                     className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.CONTACT
-                                            ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                            : `border-transparent ${linkText}`
+                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
+                                        : `border-transparent ${linkText}`
                                         } group transition-colors duration-200 ${linkHoverBgClass}`}
                                     prefetch={true}
                                 >
@@ -377,8 +361,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 <Link
                                     href={routes.publicroute.HELP}
                                     className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.HELP
-                                            ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                            : `border-transparent ${linkText}`
+                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
+                                        : `border-transparent ${linkText}`
                                         } group transition-colors duration-200 ${linkHoverBgClass}`}
                                     prefetch={true}
                                 >
@@ -399,8 +383,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {user?.companyName && !isEmployee && (
                                     <div
                                         className={`hidden items-center gap-2 rounded-lg px-3 py-2 transition-all duration-200 sm:flex ${shouldShowWhiteNavbar
-                                                ? "bg-gray-50 text-gray-900"
-                                                : "bg-white/10 text-white"
+                                            ? "bg-gray-50 text-gray-900"
+                                            : "bg-white/10 text-white"
                                             }`}
                                     >
                                         {user?.profilePicture && user.profilePicture.trim() !== "" ? (
@@ -432,8 +416,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {isEmployee && (user?.companyName || user?.name || user?.email) && (
                                     <div
                                         className={`hidden items-center gap-2 rounded-lg px-3 py-2 transition-all duration-200 sm:flex ${shouldShowWhiteNavbar
-                                                ? "bg-gray-50 text-gray-900"
-                                                : "bg-white/10 text-white"
+                                            ? "bg-gray-50 text-gray-900"
+                                            : "bg-white/10 text-white"
                                             }`}
                                     >
                                         {/* Company Logo - Use company profile picture or Building2 icon */}
@@ -553,8 +537,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 variant="ghost"
                                 size="sm"
                                 className={`rounded-lg p-2 transition-all duration-200 lg:hidden ${shouldShowWhiteNavbar
-                                        ? "text-gray-900 hover:bg-gray-100/80"
-                                        : "text-white hover:bg-white/10"
+                                    ? "text-gray-900 hover:bg-gray-100/80"
+                                    : "text-white hover:bg-white/10"
                                     }`}
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                             >

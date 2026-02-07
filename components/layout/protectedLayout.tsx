@@ -8,6 +8,7 @@ import { Sidebar } from "./sidebar";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { useAppointmentSocket } from "@/hooks/useSocket";
 import { routes } from "@/utils/routes";
+import { clearAuthData } from "@/utils/helpers";
 
 interface ProtectedLayoutProps {
     children: ReactNode;
@@ -36,6 +37,12 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     // 🔌 Initialize WebSocket for real-time appointment updates
     // Auto-connects when user is authenticated and auto-disconnects on logout
     useAppointmentSocket();
+
+    // Immediate hard redirect for unauthenticated users in ProtectedLayout
+    // This is a fail-safe for the global useAuthSubscription redirect
+    if (typeof window !== "undefined" && isInitialized && !isLoading && !isAuthenticated && !token) {
+        window.location.href = routes.publicroute.LOGIN;
+    }
 
     return (
         <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
@@ -76,9 +83,8 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                                 <div className="text-muted-foreground">Redirecting to login...</div>
                                 <button
                                     onClick={() => {
-                                        window.location.href = "/login";
-                                        localStorage.removeItem("token");
-                                        localStorage.removeItem("user");
+                                        clearAuthData();
+                                        window.location.href = routes.publicroute.LOGIN;
                                     }}
                                     className="text-sm text-primary hover:underline"
                                 >
