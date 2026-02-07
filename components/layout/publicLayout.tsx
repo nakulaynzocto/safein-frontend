@@ -6,6 +6,7 @@ import { Navbar } from "./navbar";
 import { Footer } from "./footer";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { routes } from "@/utils/routes";
+import { PageSkeleton } from "@/components/common/pageSkeleton";
 
 interface PublicLayoutProps {
     children: React.ReactNode;
@@ -31,14 +32,13 @@ export function PublicLayout({ children }: PublicLayoutProps) {
     ];
 
     // Dynamically check if current route is an auth route
-    // Also check if pathname starts with verify route (for dynamic routes like /verify/[token])
-    // Also check if pathname starts with employee-setup (for routes like /employee-setup?token=...)
     const isAuthRoute =
-        authRoutes.some((route) => pathname === route) || 
-        pathname?.startsWith(routes.publicroute.VERIFY + "/") ||
+        authRoutes.some((route) => pathname === route) ||
+        pathname?.startsWith(routes.publicroute.VERIFY.split('[')[0]) ||
         pathname?.startsWith(routes.publicroute.EMPLOYEE_SETUP);
-    const shouldHideNavbar = isAuthRoute;
-    const shouldHideFooter = isAuthRoute;
+
+    const shouldHideNavbar = isAuthRoute || !isInitialized || !isClient;
+    const shouldHideFooter = isAuthRoute || !isInitialized || !isClient;
 
     // Check if user is logged in but doesn't have active subscription
     const shouldShowUpgradeButton = !!(isAuthenticated && token && !hasActiveSubscription);
@@ -57,16 +57,14 @@ export function PublicLayout({ children }: PublicLayoutProps) {
                 }}
             >
                 {!isClient || !isInitialized ? (
-                    <div
-                        className="min-h-[60vh] animate-pulse opacity-50"
-                        style={{ backgroundColor: "var(--background)" }}
-                    />
+                    <div className="container mx-auto px-4 py-8">
+                        <PageSkeleton />
+                    </div>
                 ) : isAuthenticated && token && !isAllowedPageForAuthenticated ? (
                     // Show loading for authenticated users on pages they shouldn't access (they should be redirected)
-                    <div
-                        className="min-h-[60vh] animate-pulse opacity-50"
-                        style={{ backgroundColor: "var(--background)" }}
-                    />
+                    <div className="container mx-auto px-4 py-8">
+                        <PageSkeleton />
+                    </div>
                 ) : (
                     // Show content for: unauthenticated users OR allowed pages (even if authenticated)
                     <div style={{ backgroundColor: "var(--background)", minHeight: "100%" }}>{children}</div>
