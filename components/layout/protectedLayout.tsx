@@ -9,6 +9,7 @@ import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { useAppointmentSocket } from "@/hooks/useSocket";
 import { routes } from "@/utils/routes";
 import { clearAuthData } from "@/utils/helpers";
+import { Banner } from "@/components/common/banner";
 
 interface ProtectedLayoutProps {
     children: ReactNode;
@@ -48,20 +49,35 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
         <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
             {shouldShowNavbar && <Navbar variant="dashboard" />}
             {/* Expiry warning banner - Only show on private pages (not subscription page) */}
-            {expiryWarning?.show && !isSubscriptionPage && isAuthenticated && (
-                <div className="w-full bg-amber-500/90 px-4 py-2 text-center text-xs text-white shadow-md backdrop-blur-sm sm:text-sm">
-                    <span className="font-medium">
-                        ⚠️ Your plan expires in {expiryWarning.days} {expiryWarning.days === 1 ? "day" : "days"}
-                        .{" "}
+            <Banner
+                show={!!(expiryWarning?.show && !isSubscriptionPage && isAuthenticated)}
+                variant={expiryWarning?.isExpired ? "error" : "warning"}
+                message={expiryWarning?.isExpired ? (
+                    <span>
+                        Your Current Plan Expired on <strong>{expiryWarning.formattedDate}</strong>. Service is interrupted.
                     </span>
+                ) : (
+                    <span>
+                        Your plan expires in <strong>{expiryWarning?.days} {expiryWarning?.days === 1 ? "day" : "days"}</strong> on <strong>{expiryWarning?.formattedDate}</strong>.
+                    </span>
+                )}
+                action={expiryWarning?.isExpired ? (
                     <Link
                         href={routes.publicroute.PRICING}
-                        className="ml-2 font-bold underline hover:text-amber-100"
+                        className="font-bold underline hover:text-red-100 flex items-center gap-1"
+                    >
+                        <span>Plan Expired. Renew Now</span>
+                        <span>→</span>
+                    </Link>
+                ) : (
+                    <Link
+                        href={routes.publicroute.PRICING}
+                        className="font-bold underline hover:text-amber-100 bg-white/20 px-3 py-1 rounded-full transition-colors hover:bg-white/30"
                     >
                         Renew Now
                     </Link>
-                </div>
-            )}
+                )}
+            />
             <div className="flex flex-1 overflow-hidden">
                 {/* Only show sidebar if user has active subscription AND token */}
                 {shouldShowSidebar && <Sidebar />}

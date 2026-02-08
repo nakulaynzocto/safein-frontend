@@ -11,10 +11,11 @@ interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
     error?: string;
     helperText?: string;
     required?: boolean;
+    icon?: React.ReactNode;
 }
 
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
-    ({ className, label, error, helperText, required = false, type = "text", autoComplete = "off", ...props }, ref) => {
+    ({ className, label, error, helperText, required = false, type = "text", autoComplete = "off", icon, ...props }, ref) => {
         const [showPassword, setShowPassword] = useState(false);
         const isPasswordField = type === "password";
         const inputType = isPasswordField && showPassword ? "text" : type;
@@ -28,11 +29,17 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                     </label>
                 )}
                 <div className="relative">
+                    {icon && (
+                        <div className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
+                            {icon}
+                        </div>
+                    )}
                     <input
                         type={inputType}
                         autoComplete={autoComplete}
                         className={cn(
                             "border-border bg-muted/30 text-foreground placeholder:text-muted-foreground focus:ring-ring flex h-12 w-full rounded-xl border px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+                            icon && "pl-10",
                             error && "border-destructive focus:ring-destructive",
                             isPasswordField && "pr-10",
                             className,

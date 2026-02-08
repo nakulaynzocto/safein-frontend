@@ -148,6 +148,7 @@
         transition: background-color 0.3s ease-in-out;
         /* Ensure background is always visible */
         overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
     }
 
     /* Prevent white flash during page transitions */
@@ -596,6 +597,7 @@
 
 /* Mobile Responsive Utilities */
 @media (max-width: 640px) {
+
     /* Better touch targets on mobile */
     button:not(.h-4):not(.h-5):not(.h-6):not(.w-4):not(.w-5):not(.w-6),
     [role="button"]:not(.h-4):not(.h-5):not(.h-6):not(.w-4):not(.w-5):not(.w-6) {
@@ -614,14 +616,14 @@
         /* Prevents iOS zoom on focus */
     }
 
-    /* Better scrolling on mobile */
-    .overflow-x-auto {
+    .overflow-x-auto,
+    .overflow-y-auto {
         -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
+        overscroll-behavior: contain;
     }
 
-    .overflow-x-auto::-webkit-scrollbar {
+    .overflow-x-auto::-webkit-scrollbar,
+    .overflow-y-auto::-webkit-scrollbar {
         display: none;
     }
 
@@ -643,6 +645,7 @@
 
 /* Extra small screens (< 480px) */
 @media (max-width: 479px) {
+
     /* Tighter spacing for very small screens */
     .container {
         padding-left: 12px;
@@ -652,6 +655,7 @@
 
 /* Mobile Navigation Improvements */
 @media (max-width: 768px) {
+
     /* Ensure mobile sidebar scrolls properly */
     [data-radix-scroll-area-viewport] {
         overscroll-behavior: contain;
@@ -722,7 +726,7 @@
 /* React Paginate Active Page Styles */
 .react-paginate .selected a,
 .react-paginate li.selected a,
-.react-paginate .selected > a {
+.react-paginate .selected>a {
     background-color: #3882a5 !important;
     border-color: #3882a5 !important;
     color: white !important;
@@ -730,7 +734,8 @@
 
 .react-paginate .selected a:hover,
 .react-paginate li.selected a:hover,
-.react-paginate .selected > a:hover {
+.react-paginate .selected>a:hover {
+
     .react-paginate li.selected a:hover,
     .react-paginate .selected a[aria-current="page"]:hover {
         background-color: #2d6a87 !important;

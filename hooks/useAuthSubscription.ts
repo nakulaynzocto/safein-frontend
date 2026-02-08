@@ -35,42 +35,43 @@ export function useAuthSubscription() {
         refetchOnFocus: true,
     });
 
-    const hasActiveSubscription = useMemo(() => {
-        if (!activeSubscriptionData?.data) return false;
-        const subscription = activeSubscriptionData.data;
-        return subscription.isActive === true && subscription.paymentStatus === "succeeded";
-    }, [activeSubscriptionData]);
+    const subscription = useMemo(() => activeSubscriptionData?.data, [activeSubscriptionData]);
 
-    const isTrialingSubscription = useMemo(() => {
-        if (!activeSubscriptionData?.data) return false;
-        return activeSubscriptionData.data.isTrialing === true;
-    }, [activeSubscriptionData]);
+    const hasActiveSubscription = useMemo(() => {
+        if (!subscription) return false;
+
+        if (subscription.hasActiveSubscription !== undefined) {
+            return subscription.hasActiveSubscription;
+        }
+
+        const endDate = new Date(subscription.endDate);
+        const now = new Date();
+        return (
+            subscription.isActive === true &&
+            subscription.paymentStatus === "succeeded" &&
+            endDate.getTime() > now.getTime()
+        );
+    }, [subscription]);
+
+    const isTrialingSubscription = useMemo(() => subscription?.isTrialing === true, [subscription]);
 
     // Check if user has ANY subscription (active or expired)
     // This is used to determine dashboard access and navbar button display
-    const hasAnySubscription = useMemo(() => {
-        return !!activeSubscriptionData?.data;
-    }, [activeSubscriptionData]);
+    const hasAnySubscription = useMemo(() => !!subscription, [subscription]);
 
-    const isCurrentRoutePrivate = useMemo(() => {
-        return isPrivateRoute(pathname);
-    }, [pathname]);
+    const isCurrentRoutePrivate = useMemo(() => isPrivateRoute(pathname), [pathname]);
 
     // Check if current route is a subscription-related page
     const isSubscriptionPage = useMemo(() => {
-        return (
-            pathname === routes.publicroute.SUBSCRIPTION_SUCCESS || pathname === routes.publicroute.SUBSCRIPTION_CANCEL
-        );
+        return pathname === routes.publicroute.SUBSCRIPTION_SUCCESS || pathname === routes.publicroute.SUBSCRIPTION_CANCEL;
     }, [pathname]);
 
     // Check if current route should hide sidebar
-    const shouldHideSidebar = useMemo(() => {
-        return pathname === routes.publicroute.SUBSCRIPTION_SUCCESS;
-    }, [pathname]);
+    const shouldHideSidebar = useMemo(() => pathname === routes.publicroute.SUBSCRIPTION_SUCCESS, [pathname]);
 
     // Pages that should show content even when authenticated (public pages)
-    const allowedPagesForAuthenticated = useMemo(
-        () => [
+    const isAllowedPageForAuthenticated = useMemo(() => {
+        const allowedPages = [
             routes.publicroute.LOGIN,
             routes.publicroute.REGISTER,
             routes.publicroute.SUBSCRIPTION_SUCCESS,
@@ -81,20 +82,13 @@ export function useAuthSubscription() {
             routes.publicroute.CONTACT,
             routes.publicroute.HELP,
             routes.publicroute.VERIFY,
-        ],
-        [],
-    );
-
-    const isAllowedPageForAuthenticated = useMemo(() => {
-        // Check exact match or if pathname starts with allowed page (for dynamic routes like /verify/[token])
-        return allowedPagesForAuthenticated.some((page) => pathname === page || pathname?.startsWith(page + "/"));
-    }, [pathname, allowedPagesForAuthenticated]);
+        ];
+        return allowedPages.some((page) => pathname === page || pathname?.startsWith(page + "/"));
+    }, [pathname]);
 
     // Determine if Navbar should show (private navbar)
     // Show private navbar if authenticated
-    const shouldShowPrivateNavbar = useMemo(() => {
-        return !!token && isAuthenticated;
-    }, [token, isAuthenticated]);
+    const shouldShowPrivateNavbar = useMemo(() => !!token && isAuthenticated, [token, isAuthenticated]);
 
     // Determine if Sidebar should show
     // Show sidebar only if authenticated AND not on pages that hide sidebar
@@ -102,80 +96,64 @@ export function useAuthSubscription() {
         return !!token && isAuthenticated && !shouldHideSidebar;
     }, [token, isAuthenticated, shouldHideSidebar]);
 
-    const canAccessDashboard = useMemo(() => {
-        return !!token && isAuthenticated;
-    }, [token, isAuthenticated]);
+    const canAccessDashboard = useMemo(() => !!token && isAuthenticated, [token, isAuthenticated]);
 
     // Determine if content should be shown (for protected routes)
     const shouldShowContent = useMemo(() => {
         // If not initialized or not authenticated, don't show content
-        if (!isInitialized || !isAuthenticated || !token) {
-            return false;
-        }
+        if (!isInitialized || !isAuthenticated || !token) return false;
 
-        // If on subscription page, always show content
-        if (isSubscriptionPage) {
-            return true;
-        }
-
-        // If on private route, show content if:
-        // 1. Has active subscription, OR
-        // 2. Subscription is still loading (give it time to fetch)
-        // This prevents showing loading state when subscription data is being refetched after payment
-        if (isCurrentRoutePrivate) {
-            // Allow access to private routes even if subscription is expired
-            // The individual components will handle limits (create button disabled, etc.)
-            return true;
-        }
+        // If on subscription page or private route, always show content
+        // The individual components will handle limits (create button disabled, etc.)
+        if (isSubscriptionPage || isCurrentRoutePrivate) return true;
 
         // For other routes, show if authenticated
         return true;
-    }, [
-        isInitialized,
-        isAuthenticated,
-        token,
-        isSubscriptionPage,
-        isCurrentRoutePrivate,
-        hasActiveSubscription,
-        isSubscriptionLoading,
-    ]);
+    }, [isInitialized, isAuthenticated, token, isSubscriptionPage, isCurrentRoutePrivate]);
 
     // Calculate remaining days and show warning if less than 5 days
     const expiryWarning = useMemo(() => {
-        if (!activeSubscriptionData?.data?.endDate) return { show: false, days: 0 };
+        if (!subscription?.endDate) return { show: false, days: 0, formattedDate: "", isExpired: false };
 
-        const endDate = new Date(activeSubscriptionData.data.endDate);
+        const endDate = new Date(subscription.endDate);
         const now = new Date();
         const timeDiff = endDate.getTime() - now.getTime();
-        const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        const daysRemaining = Math.max(0, Math.ceil(timeDiff / (1000 * 3600 * 24)));
+        const isExpired = subscription.subscriptionStatus === "expired" || timeDiff < 0;
 
+        // Format date and time
+        const formattedDate = endDate.toLocaleString('en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short'
+        });
+
+        // Show warning if expiring within 5 days OR already expired
         return {
-            show: daysRemaining <= 5 && daysRemaining >= 0,
+            show: (daysRemaining <= 5 && daysRemaining >= 0) || isExpired,
             days: daysRemaining,
+            formattedDate,
+            isExpired
         };
-    }, [activeSubscriptionData]);
+    }, [subscription]);
 
     // Determine if loading state should be shown
     const isLoading = useMemo(() => {
         // If not initialized, show loading
-        if (!isInitialized || !isClient) {
-            return true;
-        }
+        if (!isInitialized || !isClient) return true;
 
         // If on private route and subscription is loading, show loading
         // But only for a reasonable time (max 5 seconds) to prevent infinite loading
-        if (isCurrentRoutePrivate && isSubscriptionLoading) {
-            return true;
-        }
+        if (isCurrentRoutePrivate && isSubscriptionLoading) return true;
 
         // If on private route and no active subscription, still don't show loading
         // We want to show the content (dashboard)
-        if (isCurrentRoutePrivate && !hasActiveSubscription && !isSubscriptionLoading) {
-            return false;
-        }
+        // This condition is now implicitly handled by the above and the default return false
+        // if (isCurrentRoutePrivate && !hasActiveSubscription && !isSubscriptionLoading) {
+        //     return false;
+        // }
 
         return false;
-    }, [isInitialized, isClient, isCurrentRoutePrivate, isSubscriptionLoading, hasActiveSubscription]);
+    }, [isInitialized, isClient, isCurrentRoutePrivate, isSubscriptionLoading]);
 
     // Redirect logic for unauthenticated users on private routes
     useEffect(() => {
@@ -226,7 +204,7 @@ export function useAuthSubscription() {
         hasAnySubscription,
         isSubscriptionLoading,
         isSubscriptionFetching,
-        activeSubscriptionData: activeSubscriptionData?.data,
+        activeSubscriptionData: subscription,
         isTrialingSubscription,
         expiryWarning,
 

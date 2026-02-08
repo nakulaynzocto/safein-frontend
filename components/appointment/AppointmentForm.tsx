@@ -296,6 +296,7 @@ export function NewAppointmentModal({
                                     errors.visitorId?.message || (visitorsError ? "Failed to load visitors" : undefined)
                                 }
                                 isLoading={isLoadingVisitors}
+                                isClearable={false}
                                 required
                             />
                         )}
@@ -319,6 +320,7 @@ export function NewAppointmentModal({
                                     (employeesError ? "Failed to load employees" : undefined)
                                 }
                                 isLoading={isLoadingEmployees}
+                                isClearable={false}
                                 required
                             />
                         )}
@@ -552,7 +554,7 @@ export function NewAppointmentModal({
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>{triggerButton || defaultTrigger}</DialogTrigger>
 
-            <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-hidden bg-white p-4 sm:max-w-2xl sm:p-6 dark:bg-gray-900">
+            <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-hidden bg-white p-4 sm:max-w-2xl sm:p-6 dark:bg-gray-900 flex flex-col">
                 <FormContainer isPage={false} isLoading={isLoadingAppointment} isEditMode={isEditMode}>
                     {formContent}
                 </FormContainer>

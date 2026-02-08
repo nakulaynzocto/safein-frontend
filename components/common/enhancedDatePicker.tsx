@@ -97,7 +97,7 @@ export function EnhancedDatePicker({
                     {required && <span className="ml-1 text-red-500">*</span>}
                 </label>
             )}
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover open={open} onOpenChange={setOpen} modal={true}>
                 <PopoverTrigger asChild>
                     <Button
                         variant="outline"
@@ -113,7 +113,7 @@ export function EnhancedDatePicker({
                         )}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 shadow-lg" align="start">
+                <PopoverContent className="w-auto p-0 shadow-lg z-[999999]" align="start">
                     <Calendar
                         mode="single"
                         selected={dateValue}

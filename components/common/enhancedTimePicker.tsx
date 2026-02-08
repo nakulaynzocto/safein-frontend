@@ -63,7 +63,7 @@ export function EnhancedTimePicker({
             // If rounded time is still in the past (e.g., current is 20:11, rounded is 20:10), add 5 minutes
             const currentTimeInMinutes = currentHour * 60 + currentMinute;
             const startTimeInMinutes = startHour * 60 + startMinute;
-            
+
             if (startTimeInMinutes <= currentTimeInMinutes) {
                 // Add 5 more minutes to ensure it's in the future
                 startMinute += 5;
@@ -92,7 +92,7 @@ export function EnhancedTimePicker({
             for (let minute = startMin; minute < 60; minute += 5) {
                 const timeStr = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
                 const slotTimeInMinutes = hour * 60 + minute;
-                
+
                 // Only add slots that are in the future (if today)
                 if (!isToday || slotTimeInMinutes > currentTimeInMinutes) {
                     slots.push(timeStr);
@@ -136,7 +136,7 @@ export function EnhancedTimePicker({
                     {required && <span className="ml-1 text-red-500">*</span>}
                 </label>
             )}
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover open={open} onOpenChange={setOpen} modal={true}>
                 <PopoverTrigger asChild>
                     <Button
                         variant="outline"
@@ -152,8 +152,8 @@ export function EnhancedTimePicker({
                         )}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-2 shadow-lg" align="start">
-                    <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 max-h-[300px] overflow-y-auto">
+                <PopoverContent className="w-auto p-2 shadow-lg z-[999999]" align="start">
+                    <div className="h-[300px] overflow-y-auto px-1 pr-2 scrollbar-thin scrollbar-thumb-gray-200 touch-pan-y pointer-events-auto">
                         <div className="grid grid-cols-2 gap-1.5">
                             {timeSlots.length > 0 ? (
                                 timeSlots.map((time) => {

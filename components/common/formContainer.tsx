@@ -20,7 +20,9 @@ export function FormContainer({ children, isPage = false, isLoading = false, isE
                     <LoadingSpinner size="lg" />
                 </div>
             ) : (
-                <div className={isPage ? "" : "max-h-[65vh] overflow-y-auto pr-2"}>{children}</div>
+                <div className={isPage ? "" : "max-h-[65vh] overflow-y-auto pr-2 touch-pan-y pointer-events-auto"}>
+                    {children}
+                </div>
             )}
         </div>
     );

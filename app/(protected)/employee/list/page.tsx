@@ -4,7 +4,6 @@ import { Suspense, lazy, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
-import { ProtectedLayout } from "@/components/layout/protectedLayout";
 import { routes } from "@/utils/routes";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
@@ -39,44 +38,40 @@ export default function EmployeeListPage() {
 
     if (!isAuthenticated || isChecking) {
         return (
-            <ProtectedLayout>
-                <div className="flex min-h-screen items-center justify-center">
-                    <LoadingSpinner />
-                </div>
-            </ProtectedLayout>
+            <div className="flex min-h-[60vh] items-center justify-center">
+                <LoadingSpinner />
+            </div>
         );
     }
 
     if (isEmployee) {
         return (
-            <ProtectedLayout>
-                <div className="flex min-h-screen items-center justify-center p-4">
-                    <Card className="w-full max-w-md">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-red-600">
-                                <AlertCircle className="h-5 w-5" />
-                                Access Denied
-                            </CardTitle>
-                            <CardDescription>You don't have permission to access this page</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Alert variant="destructive">
-                                <AlertDescription>
-                                    Employee management is only accessible to administrators.
-                                </AlertDescription>
-                            </Alert>
-                            <div className="mt-4">
-                                <Button
-                                    onClick={() => router.push(routes.privateroute.DASHBOARD)}
-                                    className="w-full"
-                                >
-                                    Go to Dashboard
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </ProtectedLayout>
+            <div className="flex min-h-[60vh] items-center justify-center p-4">
+                <Card className="w-full max-w-md">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                            <AlertCircle className="h-5 w-5" />
+                            Access Denied
+                        </CardTitle>
+                        <CardDescription>You don't have permission to access this page</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Alert variant="destructive">
+                            <AlertDescription>
+                                Employee management is only accessible to administrators.
+                            </AlertDescription>
+                        </Alert>
+                        <div className="mt-4">
+                            <Button
+                                onClick={() => router.push(routes.privateroute.DASHBOARD)}
+                                className="w-full"
+                            >
+                                Go to Dashboard
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         );
     }
 

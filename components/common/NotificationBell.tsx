@@ -14,11 +14,9 @@ interface NotificationBellProps {
 
 export function NotificationBell({ className, iconClassName }: NotificationBellProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
+
     // Fetch unread count for badge
-    const { data: unreadCountData, isLoading: isLoadingCount } = useGetUnreadCountQuery(undefined, {
-        pollingInterval: 30000, // Poll every 30 seconds for unread count
-    });
+    const { data: unreadCountData, isLoading: isLoadingCount } = useGetUnreadCountQuery();
 
     const unreadCount = unreadCountData?.unreadCount || 0;
 

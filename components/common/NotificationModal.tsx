@@ -27,9 +27,7 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
     });
 
     // Fetch unread count separately for more reliable badge updates
-    const { data: unreadCountData } = useGetUnreadCountQuery(undefined, {
-        pollingInterval: 10000, // Poll every 10 seconds when modal is open
-    });
+    const { data: unreadCountData } = useGetUnreadCountQuery();
 
     const [markAsRead] = useMarkAsReadMutation();
     const [markAllAsRead] = useMarkAllAsReadMutation();
@@ -144,7 +142,7 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
                     "fixed right-0 z-[100] w-full max-w-md bg-white shadow-xl transition-transform duration-300 ease-in-out flex flex-col",
                     isOpen ? "translate-x-0" : "translate-x-full"
                 )}
-                style={{ 
+                style={{
                     top: '80px',
                     height: 'calc(100vh - 80px)',
                     maxHeight: 'calc(100vh - 80px)'
@@ -189,81 +187,81 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
                 {/* Notifications list - Scrollable */}
                 <div className="flex-1 overflow-hidden">
                     <ScrollArea className="h-full">
-                    {isLoading ? (
-                        <div className="flex items-center justify-center p-8">
-                            <LoadingSpinner />
-                        </div>
-                    ) : notifications.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
-                            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                                <Bell className="h-8 w-8 text-gray-400" />
+                        {isLoading ? (
+                            <div className="flex items-center justify-center p-8">
+                                <LoadingSpinner />
                             </div>
-                            <p className="font-medium text-gray-900">No notifications yet</p>
-                            <p className="mt-1 text-sm text-gray-500">You&apos;ll see appointment updates here</p>
-                        </div>
-                    ) : (
-                        <div className="divide-y divide-gray-100">
-                            {notifications.map((notification) => (
-                                <div
-                                    key={notification._id}
-                                    className={cn(
-                                        "flex cursor-pointer items-start gap-3 p-4 transition-colors hover:bg-gray-50",
-                                        !notification.read && "bg-blue-50/50",
-                                    )}
-                                    onClick={() => {
-                                        if (!notification.read) {
-                                            handleMarkAsRead(notification._id);
-                                        }
-                                    }}
-                                >
-                                    {/* Icon */}
+                        ) : notifications.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+                                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                                    <Bell className="h-8 w-8 text-gray-400" />
+                                </div>
+                                <p className="font-medium text-gray-900">No notifications yet</p>
+                                <p className="mt-1 text-sm text-gray-500">You&apos;ll see appointment updates here</p>
+                            </div>
+                        ) : (
+                            <div className="divide-y divide-gray-100">
+                                {notifications.map((notification) => (
                                     <div
+                                        key={notification._id}
                                         className={cn(
-                                            "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full",
-                                            notification.type === "appointment_approved" && "bg-green-100",
-                                            notification.type === "appointment_rejected" && "bg-red-100",
-                                            notification.type === "appointment_created" && "bg-yellow-100",
-                                            notification.type === "appointment_deleted" && "bg-orange-100",
-                                            notification.type === "general" && "bg-gray-100",
+                                            "flex cursor-pointer items-start gap-3 p-4 transition-colors hover:bg-gray-50",
+                                            !notification.read && "bg-blue-50/50",
                                         )}
+                                        onClick={() => {
+                                            if (!notification.read) {
+                                                handleMarkAsRead(notification._id);
+                                            }
+                                        }}
                                     >
-                                        {getNotificationIcon(notification.type)}
-                                    </div>
-
-                                    {/* Content */}
-                                    <div className="min-w-0 flex-1">
-                                        <p
+                                        {/* Icon */}
+                                        <div
                                             className={cn(
-                                                "text-sm",
-                                                !notification.read
-                                                    ? "font-semibold text-gray-900"
-                                                    : "font-medium text-gray-700",
+                                                "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full",
+                                                notification.type === "appointment_approved" && "bg-green-100",
+                                                notification.type === "appointment_rejected" && "bg-red-100",
+                                                notification.type === "appointment_created" && "bg-yellow-100",
+                                                notification.type === "appointment_deleted" && "bg-orange-100",
+                                                notification.type === "general" && "bg-gray-100",
                                             )}
                                         >
-                                            {notification.title}
-                                        </p>
-                                        <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">
-                                            {notification.message}
-                                        </p>
-                                        <p className="mt-1 text-xs text-gray-400">
-                                            {formatTime(notification.createdAt)}
-                                        </p>
-                                    </div>
+                                            {getNotificationIcon(notification.type)}
+                                        </div>
 
-                                    {/* Actions */}
-                                    <div className="flex flex-shrink-0 items-center gap-1">
-                                        {!notification.read && <div className="h-2 w-2 rounded-full bg-blue-500" />}
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 text-gray-400 hover:text-red-500"
-                                            onClick={(e) => handleDelete(notification._id, e)}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                        {/* Content */}
+                                        <div className="min-w-0 flex-1">
+                                            <p
+                                                className={cn(
+                                                    "text-sm",
+                                                    !notification.read
+                                                        ? "font-semibold text-gray-900"
+                                                        : "font-medium text-gray-700",
+                                                )}
+                                            >
+                                                {notification.title}
+                                            </p>
+                                            <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">
+                                                {notification.message}
+                                            </p>
+                                            <p className="mt-1 text-xs text-gray-400">
+                                                {formatTime(notification.createdAt)}
+                                            </p>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="flex flex-shrink-0 items-center gap-1">
+                                            {!notification.read && <div className="h-2 w-2 rounded-full bg-blue-500" />}
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-gray-400 hover:text-red-500"
+                                                onClick={(e) => handleDelete(notification._id, e)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
                             </div>
                         )}
                     </ScrollArea>

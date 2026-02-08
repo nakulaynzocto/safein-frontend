@@ -224,7 +224,7 @@ export function useSocket(options: UseSocketOptions = {}) {
     // Fix: Use useRef for stable callbacks to prevent unnecessary re-renders
     const onConnectRef = useRef(onConnect);
     const onDisconnectRef = useRef(onDisconnect);
-    
+
     useEffect(() => {
         onConnectRef.current = onConnect;
         onDisconnectRef.current = onDisconnect;
@@ -279,6 +279,9 @@ export function useSocket(options: UseSocketOptions = {}) {
         socket.on(SocketEvents.APPOINTMENT_CREATED, handleAppointmentCreated);
         socket.on(SocketEvents.APPOINTMENT_UPDATED, handleAppointmentUpdated);
         socket.on(SocketEvents.APPOINTMENT_DELETED, handleAppointmentDeleted);
+        socket.on(SocketEvents.NEW_NOTIFICATION, () => {
+            invalidateNotifications();
+        });
     }, [
         token,
         user?.id,
@@ -292,7 +295,7 @@ export function useSocket(options: UseSocketOptions = {}) {
         if (socketRef.current) {
             // Remove all event listeners before disconnecting
             socketRef.current.removeAllListeners();
-            
+
             if (user?.id) {
                 socketRef.current.emit(SocketEvents.LEAVE_USER_ROOM, user.id);
             }

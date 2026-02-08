@@ -179,7 +179,6 @@ export function UnifiedDashboard() {
 
         return (
             <div className="space-y-6">
-                <DashboardHeader companyName={isEmployee ? (user?.name || user?.email || "Employee") : (user?.companyName || "Company")} />
                 <ErrorDisplay
                     title="Failed to load dashboard data"
                     message={errorMessages || "Failed to load dashboard data"}
@@ -207,8 +206,8 @@ export function UnifiedDashboard() {
                 emptyData={{
                     title: "No recent appointments",
                     description: "No recent appointment activities found.",
-                    primaryActionLabel: isEmployee 
-                        ? "Create Appointment Link" 
+                    primaryActionLabel: isEmployee
+                        ? "Create Appointment Link"
                         : (hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment"),
                 }}
                 onPrimaryAction={handleScheduleAppointment}

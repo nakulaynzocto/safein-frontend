@@ -247,6 +247,7 @@ export const visitorApi = baseApi.injectEndpoints({
 export const {
     useCreateVisitorMutation,
     useGetVisitorsQuery,
+    useLazyGetVisitorsQuery, // Export Lazy Query
     useGetVisitorQuery,
     useUpdateVisitorMutation,
     useDeleteVisitorMutation,

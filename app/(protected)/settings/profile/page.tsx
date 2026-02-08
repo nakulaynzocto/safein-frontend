@@ -6,14 +6,13 @@ import { useAppSelector } from "@/store/hooks";
 import { ProfilePageContent } from "@/components/profile";
 import { routes } from "@/utils/routes";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
-import { ProtectedLayout } from "@/components/layout/protectedLayout";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 
 export default function ProfilePage() {
     const router = useRouter();
     const { user, isAuthenticated } = useAppSelector((state) => state.auth);
     const [isChecking, setIsChecking] = useState(true);
-    
+
     // Check if user is employee
     const isEmployee = checkIsEmployee(user);
 
@@ -39,22 +38,18 @@ export default function ProfilePage() {
             router.replace(routes.privateroute.DASHBOARD);
         }
         return (
-            <ProtectedLayout>
-                <div className="flex min-h-screen items-center justify-center">
-                    <LoadingSpinner />
-                </div>
-            </ProtectedLayout>
+            <div className="flex min-h-[60vh] items-center justify-center">
+                <LoadingSpinner />
+            </div>
         );
     }
 
     // Show loading while checking
     if (!isAuthenticated || isChecking) {
         return (
-            <ProtectedLayout>
-                <div className="flex min-h-screen items-center justify-center">
-                    <LoadingSpinner />
-                </div>
-            </ProtectedLayout>
+            <div className="flex min-h-[60vh] items-center justify-center">
+                <LoadingSpinner />
+            </div>
         );
     }
 

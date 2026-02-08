@@ -3,7 +3,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
-import { ProtectedLayout } from "@/components/layout/protectedLayout";
 import { routes } from "@/utils/routes";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,16 +10,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/common/dataTable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { InputField } from "@/components/common/inputField";
+import { Textarea } from "@/components/ui/textarea";
 import { SelectField } from "@/components/common/selectField";
 import { SearchInput } from "@/components/common/searchInput";
 import { ConfirmationDialog } from "@/components/common/confirmationDialog";
 import { Pagination } from "@/components/common/pagination";
 import { useGetAllAppointmentLinksQuery, useDeleteAppointmentLinkMutation } from "@/store/api/appointmentLinkApi";
+import { useGetAllSpecialBookingsQuery, useVerifySpecialBookingOtpMutation, useUpdateSpecialBookingNoteMutation } from "@/store/api/specialBookingApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { formatDate, formatDateTime, isEmployee as checkIsEmployee } from "@/utils/helpers";
-import { Link2, Trash2, CheckCircle, XCircle, Copy, Mail, Phone, Calendar, Maximize2, Plus } from "lucide-react";
+import { Link2, Trash2, CheckCircle, XCircle, Copy, Mail, Phone, Calendar, Maximize2, Plus, MessageSquare, Key } from "lucide-react";
 import { AppointmentLink } from "@/store/api/appointmentLinkApi";
 import { getInitials, formatName } from "@/utils/helpers";
+import { AppointmentLinkSelectionModal } from "@/components/appointment/AppointmentLinkSelectionModal";
 import { CreateAppointmentLinkModal } from "@/components/appointment/CreateAppointmentLinkModal";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { StatusBadge } from "@/components/common/statusBadge";
@@ -38,14 +42,44 @@ export default function AppointmentLinksPage() {
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
     const [isBooked, setIsBooked] = useState<boolean | undefined>(undefined);
+    const [filterType, setFilterType] = useState<string>("link");
     const [search, setSearch] = useState("");
     const [deleteLinkId, setDeleteLinkId] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const { hasReachedAppointmentLimit } = useSubscriptionStatus();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-    // Call all RTK Query hooks at top level - use skip to prevent unnecessary calls
-    const { data, isLoading, error, refetch } = useGetAllAppointmentLinksQuery({
+    // OTP Modal states
+    const [showOtpModal, setShowOtpModal] = useState(false);
+    const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+    const [otpValue, setOtpValue] = useState("");
+
+    // Note Modal states
+    const [showNoteModal, setShowNoteModal] = useState(false);
+    const [selectedNote, setSelectedNote] = useState("");
+    const [showEditNoteModal, setShowEditNoteModal] = useState(false);
+    const [noteValue, setNoteValue] = useState("");
+
+    // ... hooks ...
+
+    const [updateSpecialBookingNote, { isLoading: isUpdatingNote }] = useUpdateSpecialBookingNoteMutation();
+
+    const handleUpdateNote = async () => {
+        if (!selectedBookingId) return;
+        try {
+            await updateSpecialBookingNote({ bookingId: selectedBookingId, notes: noteValue }).unwrap();
+            showSuccessToast("Note updated successfully");
+            setShowEditNoteModal(false);
+            setNoteValue("");
+            refetchAll();
+        } catch (error: any) {
+            showErrorToast(error.data?.message || "Failed to update note");
+        }
+    };
+
+    // Fetch Appointment Links
+    // Fetch Appointment Links
+    const { data: linksData, isLoading: isLoadingLinks, error: linksError, refetch: refetchLinks } = useGetAllAppointmentLinksQuery({
         page,
         limit,
         isBooked,
@@ -53,10 +87,44 @@ export default function AppointmentLinksPage() {
         sortBy: "createdAt",
         sortOrder: "desc",
     }, {
-        skip: !isAuthenticated || isChecking, // Skip query if not authenticated or checking
+        skip: !isAuthenticated || isChecking || filterType === "special",
     });
 
+    // Fetch Special Bookings
+    const { data: specialData, isLoading: isLoadingSpecial, refetch: refetchSpecial } = useGetAllSpecialBookingsQuery({
+        page,
+        limit,
+        search: search || undefined,
+    }, {
+        skip: !isAuthenticated || isChecking || filterType === "link",
+    });
+
+    const [verifyOtp, { isLoading: isVerifying }] = useVerifySpecialBookingOtpMutation();
     const [deleteAppointmentLink, { isLoading: isDeleting }] = useDeleteAppointmentLinkMutation();
+
+    // Combined Data
+    const combinedList = useMemo(() => {
+        if (filterType === "link") {
+            return (linksData?.links || []).map(l => ({ ...l, entryType: 'link' }));
+        }
+
+        return (specialData?.bookings || []).map(b => ({
+            ...b,
+            entryType: 'special',
+            visitorEmail: b.visitorEmail,
+            isBooked: b.status === 'verified',
+        }));
+    }, [linksData, specialData, filterType]);
+
+    const isLoading = filterType === "link" ? isLoadingLinks : isLoadingSpecial;
+    const paginationData = filterType === "link" ? linksData?.pagination : specialData?.pagination;
+
+    // Refetch both
+    // Refetch active query
+    const refetchAll = useCallback(() => {
+        if (filterType === "link") refetchLinks();
+        if (filterType === "special") refetchSpecial();
+    }, [refetchLinks, refetchSpecial, filterType]);
 
     // ALL HOOKS (useCallback, useMemo) MUST BE CALLED BEFORE CONDITIONAL RETURNS
     const handleDelete = useCallback(async () => {
@@ -66,12 +134,25 @@ export default function AppointmentLinksPage() {
             await deleteAppointmentLink(deleteLinkId).unwrap();
             showSuccessToast("Appointment link deleted successfully");
             setDeleteLinkId(null);
-            refetch();
+            refetchAll();
         } catch (error: any) {
             const message = error?.data?.message || error?.message || "Failed to delete appointment link";
             showErrorToast(message);
         }
-    }, [deleteLinkId, deleteAppointmentLink, refetch]);
+    }, [deleteLinkId, deleteAppointmentLink, refetchAll]);
+
+    const handleVerifyOtp = async () => {
+        if (!selectedBookingId || !otpValue) return;
+        try {
+            await verifyOtp({ bookingId: selectedBookingId, otp: otpValue }).unwrap();
+            showSuccessToast("OTP verified and appointment scheduled!");
+            setShowOtpModal(false);
+            setOtpValue("");
+            refetchAll();
+        } catch (error: any) {
+            showErrorToast(error.data?.message || "Invalid OTP");
+        }
+    };
 
     const handleCopyLink = useCallback((link: AppointmentLink) => {
         // Generate booking URL if not provided by backend
@@ -91,17 +172,18 @@ export default function AppointmentLinksPage() {
             {
                 key: "visitorEmail",
                 header: "Visitor",
-                render: (link: AppointmentLink) => {
-                    // Check if visitorId is populated (object) or use visitor field
-                    const visitorId = (link as any).visitorId;
-                    const visitor =
-                        link.visitor || (typeof visitorId === "object" && visitorId !== null ? visitorId : null);
+                render: (item: any) => {
+                    const isSpecial = item.entryType === 'special';
+                    const visitorId = item.visitorId;
+                    const visitor = !isSpecial
+                        ? (item.visitor || (typeof visitorId === "object" && visitorId !== null ? visitorId : null))
+                        : { name: item.visitorName, phone: item.visitorPhone };
 
                     const visitorName = visitor?.name || "Unknown Visitor";
                     const formattedName = formatName(visitorName) || visitorName;
-                    const visitorEmail = link.visitorEmail;
+                    const visitorEmail = item.visitorEmail;
                     const visitorPhone = visitor?.phone || "N/A";
-                    const visitorPhoto = visitor?.photo || "";
+                    const visitorPhoto = (visitor as any)?.photo || "";
 
                     return (
                         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
@@ -130,7 +212,10 @@ export default function AppointmentLinksPage() {
                                 )}
                             </div>
                             <div className="min-w-0 flex-1">
-                                <div className="truncate text-sm font-medium sm:text-base">{formattedName}</div>
+                                <div className="truncate text-sm font-medium sm:text-base flex items-center gap-1">
+                                    {formattedName}
+                                    {isSpecial && <span className="text-[10px] bg-blue-100 text-blue-600 px-1 rounded uppercase font-bold">Special</span>}
+                                </div>
                                 <div className="flex items-center gap-1 truncate text-xs text-gray-500">
                                     <Mail className="h-3 w-3 shrink-0" />
                                     <span className="truncate">{visitorEmail}</span>
@@ -150,11 +235,10 @@ export default function AppointmentLinksPage() {
                 key: "employee",
                 header: "Meeting With",
                 className: "hidden lg:table-cell",
-                render: (link: AppointmentLink) => {
-                    // Check if employeeId is populated (object) or use employee field
-                    const employeeId = (link as any).employeeId;
+                render: (item: any) => {
+                    const employeeId = item.employeeId;
                     const employee =
-                        link.employee || (typeof employeeId === "object" && employeeId !== null ? employeeId : null);
+                        item.employee || (typeof employeeId === "object" && employeeId !== null ? employeeId : null);
 
                     if (!employee || typeof employee === "string") {
                         return <span className="text-gray-400">N/A</span>;
@@ -186,46 +270,104 @@ export default function AppointmentLinksPage() {
                 key: "status",
                 header: "Status",
                 className: "hidden sm:table-cell",
-                render: (link: AppointmentLink) => (
-                    <StatusBadge status={link.isBooked ? "booked" : "pending"} className="w-fit" />
+                render: (item: any) => (
+                    <StatusBadge status={item.isBooked ? "booked" : "pending"} className="w-fit" />
                 ),
             },
             {
-                key: "expiresAt",
-                header: "Expires At",
-                className: "hidden md:table-cell",
-                render: (link: AppointmentLink) => (
-                    <div className="flex items-center gap-1.5 text-xs sm:gap-2 sm:text-sm">
-                        <Calendar className="text-muted-foreground h-3 w-3 shrink-0" />
-                        <span className="whitespace-nowrap">{formatDate(link.expiresAt)}</span>
-                    </div>
+                key: "purpose",
+                header: "Purpose",
+                className: filterType === "special" ? "hidden md:table-cell" : "hidden",
+                render: (item: any) => (
+                    <span className="text-sm text-gray-600 italic">
+                        {item.purpose || "-"}
+                    </span>
+                ),
+            },
+            {
+                key: "notes",
+                header: "Notes",
+                className: filterType === "special" ? "hidden xl:table-cell" : "hidden",
+                render: (item: any) => (
+                    item.notes ? (
+                        <button
+                            onClick={() => {
+                                setSelectedNote(item.notes);
+                                setShowNoteModal(true);
+                            }}
+                            className="flex items-center gap-1 text-xs text-[#3882a5] hover:underline"
+                        >
+                            <MessageSquare className="h-3 w-3" />
+                            View Note
+                        </button>
+                    ) : (
+                        <span className="text-gray-300">-</span>
+                    )
                 ),
             },
             {
                 key: "createdAt",
-                header: "Created At",
-                className: "hidden xl:table-cell",
-                render: (link: AppointmentLink) => (
+                header: "Created",
+                className: "hidden md:table-cell",
+                render: (item: any) => (
                     <div className="flex items-center gap-1.5 text-xs sm:gap-2 sm:text-sm">
                         <Calendar className="text-muted-foreground h-3 w-3 shrink-0" />
-                        <span className="whitespace-nowrap">{formatDateTime(link.createdAt)}</span>
+                        <span className="whitespace-nowrap">{formatDateTime(item.createdAt)}</span>
                     </div>
                 ),
             },
             {
                 key: "actions",
                 header: "Actions",
-                render: (link: AppointmentLink) => (
-                    <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleCopyLink(link)} title="Copy link">
-                            <Copy className="h-4 w-4" />
-                        </Button>
+                className: "text-right",
+                render: (item: any) => (
+                    <div className="flex justify-end gap-1">
+                        {item.entryType === 'special' && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    setSelectedBookingId(item._id);
+                                    setNoteValue(item.notes || "");
+                                    setShowEditNoteModal(true);
+                                }}
+                                className="text-blue-600 hover:bg-blue-50"
+                                title="Add/Edit Note"
+                            >
+                                <MessageSquare className="h-4 w-4" />
+                            </Button>
+                        )}
+                        {item.entryType === 'special' && !item.isBooked && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    setSelectedBookingId(item._id);
+                                    setShowOtpModal(true);
+                                }}
+                                className="text-orange-600 hover:bg-orange-50 hover:text-orange-700"
+                                title="Fill OTP"
+                            >
+                                <Key className="h-4 w-4" />
+                            </Button>
+                        )}
+                        {item.entryType === 'link' && !item.isBooked && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleCopyLink(item)}
+                                className="text-[#3882a5] hover:bg-[#3882a5]/10 hover:text-[#3882a5]"
+                                title="Copy Link"
+                            >
+                                <Copy className="h-4 w-4" />
+                            </Button>
+                        )}
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setDeleteLinkId(link._id)}
-                            className="text-red-600 hover:text-red-700"
-                            title="Delete link"
+                            onClick={() => setDeleteLinkId(item._id)}
+                            className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                            title="Delete"
                         >
                             <Trash2 className="h-4 w-4" />
                         </Button>
@@ -233,21 +375,16 @@ export default function AppointmentLinksPage() {
                 ),
             },
         ],
-        [handleCopyLink],
+        [handleCopyLink, filterType],
     );
 
     const filterOptions = [
-        { value: "all", label: "All Links" },
-        { value: "true", label: "Booked" },
-        { value: "false", label: "Pending" },
+        { value: "link", label: "Send Link" },
+        { value: "special", label: "Special Visitor" },
     ];
 
     const handleFilterChange = useCallback((value: string) => {
-        if (value === "all") {
-            setIsBooked(undefined);
-        } else {
-            setIsBooked(value === "true");
-        }
+        setFilterType(value);
         setPage(1);
     }, []);
 
@@ -264,11 +401,9 @@ export default function AppointmentLinksPage() {
     // Show loading state - ALL HOOKS HAVE BEEN CALLED ABOVE
     if (!isAuthenticated || isChecking) {
         return (
-            <ProtectedLayout>
-                <div className="flex min-h-screen items-center justify-center">
-                    <LoadingSpinner />
-                </div>
-            </ProtectedLayout>
+            <div className="flex min-h-[60vh] items-center justify-center">
+                <LoadingSpinner />
+            </div>
         );
     }
 
@@ -282,7 +417,7 @@ export default function AppointmentLinksPage() {
 
 
             {/* Stats Cards */}
-            {data?.stats && (
+            {linksData?.stats && (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
                     <Card className="card-hostinger">
                         <CardContent className="p-4 sm:p-5">
@@ -290,7 +425,7 @@ export default function AppointmentLinksPage() {
                                 <div>
                                     <p className="text-muted-foreground mb-1 text-xs sm:text-sm">Total Links</p>
                                     <p className="text-accent text-xl font-bold sm:text-2xl">
-                                        {data.stats.totalBooked + data.stats.totalNotBooked}
+                                        {linksData.stats.totalBooked + linksData.stats.totalNotBooked}
                                     </p>
                                 </div>
                                 <div className="bg-accent/10 flex h-10 w-10 items-center justify-center rounded-full sm:h-12 sm:w-12">
@@ -305,7 +440,7 @@ export default function AppointmentLinksPage() {
                                 <div>
                                     <p className="text-muted-foreground mb-1 text-xs sm:text-sm">Booked</p>
                                     <p className="text-xl font-bold text-green-700 sm:text-2xl">
-                                        {data.stats.totalBooked}
+                                        {linksData.stats.totalBooked}
                                     </p>
                                 </div>
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 sm:h-12 sm:w-12">
@@ -320,7 +455,7 @@ export default function AppointmentLinksPage() {
                                 <div>
                                     <p className="text-muted-foreground mb-1 text-xs sm:text-sm">Pending</p>
                                     <p className="text-xl font-bold text-yellow-800 sm:text-2xl">
-                                        {data.stats.totalNotBooked}
+                                        {linksData.stats.totalNotBooked}
                                     </p>
                                 </div>
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100 sm:h-12 sm:w-12">
@@ -345,12 +480,13 @@ export default function AppointmentLinksPage() {
                         />
                     </div>
                     <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
-                        <div className="hidden shrink-0 sm:block sm:w-48">
+                        <div className="shrink-0 w-32 sm:w-40">
                             <SelectField
-                                value={isBooked === undefined ? "all" : isBooked ? "true" : "false"}
+                                value={filterType}
                                 onChange={handleFilterChange}
                                 options={filterOptions}
-                                placeholder="Filter by status"
+                                placeholder="Filter type"
+                                isClearable={false}
                             />
                         </div>
                         <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
@@ -371,31 +507,31 @@ export default function AppointmentLinksPage() {
                                     />
                                 </>
                             ) : (
-                                <CreateAppointmentLinkModal
-                                    open={showCreateModal}
-                                    onOpenChange={setShowCreateModal}
-                                    triggerButton={
-                                        <ActionButton
-                                            variant="outline-primary"
-                                            size="xl"
-                                            className="flex w-full shrink-0 items-center justify-center gap-2 text-xs whitespace-nowrap sm:w-auto sm:text-sm"
-                                        >
-                                            <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                            <span className="hidden sm:inline">Create Link</span>
-                                        </ActionButton>
-                                    }
-                                    onSuccess={() => {
-                                        refetch();
-                                        setShowCreateModal(false);
-                                    }}
-                                />
+                                <>
+                                    <AppointmentLinkSelectionModal
+                                        open={showCreateModal}
+                                        onOpenChange={setShowCreateModal}
+                                        onSuccess={() => {
+                                            refetchAll();
+                                        }}
+                                    />
+                                    <ActionButton
+                                        variant="outline-primary"
+                                        size="xl"
+                                        className="flex w-full shrink-0 items-center justify-center gap-2 text-xs whitespace-nowrap sm:w-auto sm:text-sm"
+                                        onClick={() => setShowCreateModal(true)}
+                                    >
+                                        <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                        <span className="hidden sm:inline">Create Link</span>
+                                    </ActionButton>
+                                </>
                             )}
                         </div>
                     </div>
                 </div>
                 <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
                     <DataTable
-                        data={data?.links || []}
+                        data={combinedList}
                         columns={columns}
                         isLoading={isLoading}
                         showCard={false}
@@ -416,16 +552,16 @@ export default function AppointmentLinksPage() {
                     />
                 </div>
 
-                {data?.pagination && data.pagination.totalPages > 1 && (
+                {combinedList.length > 0 && (
                     <div className="flex justify-center">
                         <Pagination
-                            currentPage={data.pagination.page}
-                            totalPages={data.pagination.totalPages}
-                            totalItems={data.pagination.total}
-                            pageSize={data.pagination.limit}
+                            currentPage={page}
+                            totalPages={paginationData?.totalPages || 1}
+                            totalItems={paginationData?.total || combinedList.length}
+                            pageSize={limit}
                             onPageChange={setPage}
-                            hasNextPage={data.pagination.page < data.pagination.totalPages}
-                            hasPrevPage={data.pagination.page > 1}
+                            hasNextPage={page < (paginationData?.totalPages || 1)}
+                            hasPrevPage={page > 1}
                         />
                     </div>
                 )}
@@ -440,6 +576,99 @@ export default function AppointmentLinksPage() {
                     cancelText="Cancel"
                     variant="destructive"
                 />
+
+                {/* OTP Verification Modal */}
+                <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
+                    <DialogContent className="sm:max-w-[400px]">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+                                <Key className="h-5 w-5 text-orange-600" />
+                                Verify OTP
+                            </DialogTitle>
+                            <DialogDescription>
+                                Enter the 4-digit OTP sent to the visitor's mobile.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-6">
+                            <InputField
+                                label="OTP Code"
+                                placeholder="0000"
+                                maxLength={4}
+                                value={otpValue}
+                                onChange={(e) => setOtpValue(e.target.value.replace(/\D/g, ''))}
+                                className="text-center text-3xl tracking-[1rem] font-bold h-16 border-2 focus:border-[#3882a5]"
+                                autoFocus
+                            />
+                        </div>
+                        <DialogFooter className="gap-2 sm:gap-0">
+                            <Button variant="outline" onClick={() => setShowOtpModal(false)} className="flex-1">
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleVerifyOtp}
+                                disabled={otpValue.length !== 4 || isVerifying}
+                                className="bg-[#3882a5] hover:bg-[#2d6a87] text-white flex-1 transition-all"
+                            >
+                                {isVerifying ? <LoadingSpinner size="sm" className="mr-2" /> : "Verify & Schedule"}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Note Viewer Modal */}
+                <Dialog open={showNoteModal} onOpenChange={setShowNoteModal}>
+                    <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+                                <MessageSquare className="h-5 w-5 text-[#3882a5]" />
+                                Visitor Note
+                            </DialogTitle>
+                        </DialogHeader>
+                        <div className="bg-blue-50/50 p-6 rounded-xl text-gray-700 whitespace-pre-wrap min-h-[120px] text-sm leading-relaxed border border-blue-100 italic">
+                            {selectedNote ? `"${selectedNote}"` : "No note provided."}
+                        </div>
+                        <DialogFooter>
+                            <Button onClick={() => setShowNoteModal(false)} className="bg-[#3882a5] hover:bg-[#2d6a87] text-white px-8">
+                                Close
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Edit Note Modal */}
+                <Dialog open={showEditNoteModal} onOpenChange={setShowEditNoteModal}>
+                    <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+                                <MessageSquare className="h-5 w-5 text-blue-600" />
+                                Add/Update Note
+                            </DialogTitle>
+                            <DialogDescription>
+                                Add special instructions or notes for this booking.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4">
+                            <Textarea
+                                placeholder="Type your note here..."
+                                value={noteValue}
+                                onChange={(e) => setNoteValue(e.target.value)}
+                                className="min-h-[150px] resize-none border-2 focus:border-blue-500"
+                            />
+                        </div>
+                        <DialogFooter className="gap-2 sm:gap-0">
+                            <Button variant="outline" onClick={() => setShowEditNoteModal(false)} className="flex-1">
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleUpdateNote}
+                                disabled={isUpdatingNote}
+                                className="bg-blue-600 hover:bg-blue-700 text-white flex-1"
+                            >
+                                {isUpdatingNote ? <LoadingSpinner size="sm" className="mr-2" /> : "Save Note"}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );
