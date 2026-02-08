@@ -34,7 +34,7 @@ interface NotificationConfig {
     type: NotificationType;
     title: string;
     message: string;
-    toastType: "success" | "error" | "info";
+    toastType: "success" | "error" | "info" | "warning";
 }
 
 // Helper: Get socket URL from environment
@@ -69,19 +69,21 @@ const extractNames = (payload: any): { employeeName: string; visitorName: string
 };
 
 // Helper: Get notification config based on status
-const getNotificationConfig = (status: string, employeeName: string, visitorName: string): NotificationConfig => {
+const getNotificationConfig = (status: string, employeeName: string, visitorName: string, isSpecialVisitor: boolean = false): NotificationConfig => {
     const configs: Record<string, NotificationConfig> = {
         pending: {
             type: "appointment_created",
             title: "New Appointment Request 📅",
             message: `${visitorName} has requested an appointment with ${employeeName}.`,
-            toastType: "info",
+            toastType: "warning",
         },
         approved: {
             type: "appointment_approved",
-            title: "Appointment Approved! ✅",
-            message: `${employeeName} has approved the appointment for ${visitorName}.`,
-            toastType: "success",
+            title: isSpecialVisitor ? "Special Visitor Scheduled 🌟" : "Appointment Approved! ✅",
+            message: isSpecialVisitor
+                ? `Special visitor ${visitorName} has been scheduled with ${employeeName}.`
+                : `${employeeName} has approved the appointment for ${visitorName}.`,
+            toastType: isSpecialVisitor ? "info" : "success",
         },
         rejected: {
             type: "appointment_rejected",
@@ -93,7 +95,7 @@ const getNotificationConfig = (status: string, employeeName: string, visitorName
             type: "appointment_created",
             title: "Appointment Completed ✓",
             message: `Appointment for ${visitorName} with ${employeeName} has been completed.`,
-            toastType: "success",
+            toastType: "info",
         },
     };
 
@@ -113,6 +115,9 @@ const showToast = (config: NotificationConfig) => {
             break;
         case "error":
             toast.error(config.title, toastOptions);
+            break;
+        case "warning":
+            toast.warning(config.title, toastOptions);
             break;
         case "info":
             toast.info(config.title, toastOptions);
@@ -177,7 +182,7 @@ export function useSocket(options: UseSocketOptions = {}) {
             invalidateAppointments();
             onAppointmentStatusChanged?.(data);
         },
-        [dispatch, showToasts, invalidateAppointments, onAppointmentStatusChanged],
+        [showToasts, invalidateAppointments, invalidateNotifications, onAppointmentStatusChanged],
     );
 
     // Handle appointment created
@@ -193,7 +198,10 @@ export function useSocket(options: UseSocketOptions = {}) {
             }
 
             const { employeeName, visitorName } = extractNames(payload);
-            const config = getNotificationConfig(status, employeeName, visitorName);
+
+            // Check if this is a special visitor booking (created directly in approved status)
+            const isSpecialVisitor = status === "approved";
+            const config = getNotificationConfig(status, employeeName, visitorName, isSpecialVisitor);
 
             // Invalidate notifications to refetch from API (notifications are already saved in backend)
             invalidateNotifications();
@@ -204,7 +212,7 @@ export function useSocket(options: UseSocketOptions = {}) {
 
             invalidateAppointments();
         },
-        [dispatch, showToasts, invalidateAppointments],
+        [showToasts, invalidateAppointments, invalidateNotifications],
     );
 
     // Handle appointment updated
@@ -220,6 +228,18 @@ export function useSocket(options: UseSocketOptions = {}) {
     const handleAppointmentDeleted = useCallback(() => {
         invalidateAppointments();
     }, [invalidateAppointments]);
+
+    // Handle new notification - Only invalidate, no toast (prevents duplicates)
+    // NOTE: Toast notifications are handled by specific event handlers:
+    // - handleAppointmentStatusChange for approve/reject
+    // - handleAppointmentCreated for new appointments
+    const handleNewNotification = useCallback(
+        () => {
+            // Only invalidate notifications to refresh inbox count and list
+            invalidateNotifications();
+        },
+        [invalidateNotifications],
+    );
 
     // Fix: Use useRef for stable callbacks to prevent unnecessary re-renders
     const onConnectRef = useRef(onConnect);
@@ -279,9 +299,7 @@ export function useSocket(options: UseSocketOptions = {}) {
         socket.on(SocketEvents.APPOINTMENT_CREATED, handleAppointmentCreated);
         socket.on(SocketEvents.APPOINTMENT_UPDATED, handleAppointmentUpdated);
         socket.on(SocketEvents.APPOINTMENT_DELETED, handleAppointmentDeleted);
-        socket.on(SocketEvents.NEW_NOTIFICATION, () => {
-            invalidateNotifications();
-        });
+        socket.on(SocketEvents.NEW_NOTIFICATION, handleNewNotification);
     }, [
         token,
         user?.id,
@@ -289,6 +307,7 @@ export function useSocket(options: UseSocketOptions = {}) {
         handleAppointmentCreated,
         handleAppointmentUpdated,
         handleAppointmentDeleted,
+        handleNewNotification,
     ]);
 
     const disconnect = useCallback(() => {

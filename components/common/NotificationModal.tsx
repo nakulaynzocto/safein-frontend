@@ -35,8 +35,11 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
     const [deleteAllNotifications] = useDeleteAllNotificationsMutation();
 
     const notifications = useMemo(() => notificationsData?.notifications || [], [notificationsData?.notifications]);
-    // Use unreadCount from dedicated query if available, otherwise fallback to notificationsData
-    const unreadCount = useMemo(() => unreadCountData?.unreadCount ?? notificationsData?.unreadCount ?? 0, [unreadCountData?.unreadCount, notificationsData?.unreadCount]);
+    const unreadCount = useMemo(() => {
+        // Prioritize count from notificationsData as it's fetched alongside the list
+        if (notificationsData?.unreadCount !== undefined) return notificationsData.unreadCount;
+        return unreadCountData?.unreadCount ?? 0;
+    }, [unreadCountData?.unreadCount, notificationsData?.unreadCount]);
     const pagination = useMemo(() => notificationsData?.pagination, [notificationsData?.pagination]);
 
     // Reset to page 1 when modal opens and prevent body scroll

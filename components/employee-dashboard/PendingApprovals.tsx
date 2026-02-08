@@ -102,7 +102,7 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
                                                 <h4 className="font-semibold text-gray-900">
                                                     {(appointment.visitorId as any)?.name || appointment.visitor?.name || "Visitor"}
                                                 </h4>
-                                                <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+                                                <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
                                                     Pending
                                                 </Badge>
                                             </div>

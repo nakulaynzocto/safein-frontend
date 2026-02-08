@@ -59,8 +59,12 @@ export const notificationApi = baseApi.injectEndpoints({
                     ? [
                         ...result.notifications.map(({ _id }) => ({ type: "Notification" as const, id: _id })),
                         { type: "Notification", id: "LIST" },
+                        { type: "Notification", id: "UNREAD_COUNT" },
                     ]
-                    : [{ type: "Notification", id: "LIST" }],
+                    : [
+                        { type: "Notification", id: "LIST" },
+                        { type: "Notification", id: "UNREAD_COUNT" },
+                    ],
             keepUnusedDataFor: 60, // Keep data for 1 minute
         }),
 
