@@ -394,6 +394,7 @@ export function NewEmployeeModal({
                                     value={field.value}
                                     onChange={(val) => field.onChange(val)}
                                     error={errors.status?.message}
+                                    isClearable={false}
                                     className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                 />
                             </div>
