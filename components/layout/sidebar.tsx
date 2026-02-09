@@ -66,13 +66,13 @@ const baseNavigation: Array<{
             roles: ["admin", "employee"], // Both admin and employee can see
         },
         {
-            name: "Appointment Requests",
+            name: "Visit Approvals",
             href: routes.privateroute.APPOINTMENT_REQUESTS,
             icon: ClipboardList,
             roles: ["employee"], // Only employee
         },
         {
-            name: "Send Appointment Link",
+            name: "Visitor Invites",
             href: routes.privateroute.APPOINTMENT_LINKS,
             icon: LinkIcon,
             roles: ["admin", "employee"], // Both admin and employee

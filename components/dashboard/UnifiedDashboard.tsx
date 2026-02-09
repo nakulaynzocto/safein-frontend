@@ -210,7 +210,7 @@ export function UnifiedDashboard() {
                     title: "No recent appointments",
                     description: "No recent appointment activities found.",
                     primaryActionLabel: isEmployee
-                        ? "Create Appointment Link"
+                        ? "Visitor Invites"
                         : (hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment"),
                 }}
                 onPrimaryAction={handleScheduleAppointment}

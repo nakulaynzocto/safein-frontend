@@ -428,7 +428,7 @@ export default function AppointmentLinksPage() {
                         <CardContent className="p-4 sm:p-5">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-muted-foreground mb-1 text-xs sm:text-sm">Total Links</p>
+                                    <p className="text-muted-foreground mb-1 text-xs sm:text-sm">Total Invites</p>
                                     <p className="text-accent text-xl font-bold sm:text-2xl">
                                         {linksData.stats.totalBooked + linksData.stats.totalNotBooked}
                                     </p>

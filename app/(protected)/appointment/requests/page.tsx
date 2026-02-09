@@ -74,8 +74,8 @@ export default function AppointmentRequestsPage() {
     return (
         <div className="space-y-4 sm:space-y-6">
             <PageHeader
-                title="New Appointment Requests"
-                description="Review and manage pending appointment requests"
+                title="Visit Approvals"
+                description="Review and manage incoming visit requests"
             />
 
             {appointmentsLoading ? (

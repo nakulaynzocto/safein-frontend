@@ -40,7 +40,7 @@ const employeeQuickActions: QuickAction[] = [
     {
         href: routes.privateroute.APPOINTMENT_REQUESTS,
         icon: ClipboardList,
-        label: "Appointment Requests",
+        label: "Visit Approvals",
     },
 ];
 
@@ -49,7 +49,7 @@ export function QuickActions() {
     const { user } = useAppSelector((state) => state.auth);
     const { hasReachedEmployeeLimit, hasReachedAppointmentLimit } = useSubscriptionStatus();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    
+
     // Check if user is employee
     const isEmployee = checkIsEmployee(user);
     const quickActions = isEmployee ? employeeQuickActions : adminQuickActions;
@@ -81,7 +81,7 @@ export function QuickActions() {
                                 onClick={() => router.push(routes.privateroute.APPOINTMENT_LINKS)}
                             >
                                 <Send className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                <span className="line-clamp-2 text-center">Create Appointment Link</span>
+                                <span className="line-clamp-2 text-center">Visitor Invites</span>
                             </Button>
                         ) : (
                             <Button

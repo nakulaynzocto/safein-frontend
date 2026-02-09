@@ -59,7 +59,7 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Clock className="h-5 w-5" />
-                        Pending Approvals
+                        Visit Approvals
                     </CardTitle>
                     <CardDescription>Appointments waiting for your approval</CardDescription>
                 </CardHeader>
@@ -77,7 +77,7 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-blue-600" />
-                    Pending Approvals ({pendingAppointments.length})
+                    Visit Approvals ({pendingAppointments.length})
                 </CardTitle>
                 <CardDescription>Appointments waiting for your approval</CardDescription>
             </CardHeader>
