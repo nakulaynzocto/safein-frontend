@@ -13,7 +13,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { InputField } from "@/components/common/inputField";
 import { Textarea } from "@/components/ui/textarea";
-import { SelectField } from "@/components/common/selectField";
 import { SearchInput } from "@/components/common/searchInput";
 import { ConfirmationDialog } from "@/components/common/confirmationDialog";
 import { Pagination } from "@/components/common/pagination";
@@ -21,11 +20,12 @@ import { useGetAllAppointmentLinksQuery, useDeleteAppointmentLinkMutation } from
 import { useGetAllSpecialBookingsQuery, useVerifySpecialBookingOtpMutation, useUpdateSpecialBookingNoteMutation } from "@/store/api/specialBookingApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { formatDate, formatDateTime, isEmployee as checkIsEmployee } from "@/utils/helpers";
-import { Link2, Trash2, CheckCircle, XCircle, Copy, Mail, Phone, Calendar, Maximize2, Plus, MessageSquare, Key } from "lucide-react";
+import { Link2, RefreshCw, User, Trash2, CheckCircle, XCircle, Copy, Mail, Phone, Calendar, Maximize2, Plus, MessageSquare, Key } from "lucide-react";
 import { AppointmentLink } from "@/store/api/appointmentLinkApi";
 import { getInitials, formatName } from "@/utils/helpers";
 import { AppointmentLinkSelectionModal } from "@/components/appointment/AppointmentLinkSelectionModal";
 import { CreateAppointmentLinkModal } from "@/components/appointment/CreateAppointmentLinkModal";
+import { QuickAppointmentModal } from "@/components/appointment/QuickAppointmentModal";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { StatusBadge } from "@/components/common/statusBadge";
 import { ActionButton } from "@/components/common/actionButton";
@@ -45,7 +45,8 @@ export default function AppointmentLinksPage() {
     const [filterType, setFilterType] = useState<string>("link");
     const [search, setSearch] = useState("");
     const [deleteLinkId, setDeleteLinkId] = useState<string | null>(null);
-    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showLinkModal, setShowLinkModal] = useState(false);
+    const [showVipModal, setShowVipModal] = useState(false);
     const { hasReachedAppointmentLimit } = useSubscriptionStatus();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
@@ -214,7 +215,7 @@ export default function AppointmentLinksPage() {
                             <div className="min-w-0 flex-1">
                                 <div className="truncate text-sm font-medium sm:text-base flex items-center gap-1">
                                     {formattedName}
-                                    {isSpecial && <span className="text-[10px] bg-blue-100 text-blue-600 px-1 rounded uppercase font-bold">Special</span>}
+                                    {isSpecial && <span className="text-[10px] bg-purple-100/50 text-purple-700 border border-purple-200 px-1.5 py-0.5 rounded-md uppercase font-bold tracking-wider shadow-sm">VIP</span>}
                                 </div>
                                 <div className="flex items-center gap-1 truncate text-xs text-gray-500">
                                     <Mail className="h-3 w-3 shrink-0" />
@@ -234,7 +235,7 @@ export default function AppointmentLinksPage() {
             {
                 key: "employee",
                 header: "Meeting With",
-                className: "hidden lg:table-cell",
+                className: "table-cell min-w-[150px]",
                 render: (item: any) => {
                     const employeeId = item.employeeId;
                     const employee =
@@ -269,7 +270,7 @@ export default function AppointmentLinksPage() {
             {
                 key: "status",
                 header: "Status",
-                className: "hidden sm:table-cell",
+                className: "table-cell",
                 render: (item: any) => (
                     <StatusBadge status={item.isBooked ? "booked" : "pending"} className="w-fit" />
                 ),
@@ -277,7 +278,7 @@ export default function AppointmentLinksPage() {
             {
                 key: "purpose",
                 header: "Purpose",
-                className: filterType === "special" ? "hidden md:table-cell" : "hidden",
+                className: filterType === "special" ? "table-cell min-w-[150px]" : "hidden",
                 render: (item: any) => (
                     <span className="text-sm text-gray-600 italic">
                         {item.purpose || "-"}
@@ -287,7 +288,7 @@ export default function AppointmentLinksPage() {
             {
                 key: "notes",
                 header: "Notes",
-                className: filterType === "special" ? "hidden xl:table-cell" : "hidden",
+                className: filterType === "special" ? "table-cell min-w-[120px]" : "hidden",
                 render: (item: any) => (
                     item.notes ? (
                         <button
@@ -308,7 +309,7 @@ export default function AppointmentLinksPage() {
             {
                 key: "createdAt",
                 header: "Created",
-                className: "hidden md:table-cell",
+                className: "table-cell min-w-[140px]",
                 render: (item: any) => (
                     <div className="flex items-center gap-1.5 text-xs sm:gap-2 sm:text-sm">
                         <Calendar className="text-muted-foreground h-3 w-3 shrink-0" />
@@ -320,68 +321,72 @@ export default function AppointmentLinksPage() {
                 key: "actions",
                 header: "Actions",
                 className: "text-right",
-                render: (item: any) => (
-                    <div className="flex justify-end gap-1">
-                        {item.entryType === 'special' && (
+                render: (item: any) => {
+                    const isCreator = user?._id && (
+                        item.createdBy === user._id ||
+                        (typeof item.createdBy === 'object' && item.createdBy?._id === user._id)
+                    );
+
+                    return (
+                        <div className="flex justify-end gap-1">
+                            {item.entryType === 'special' && isCreator && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setSelectedBookingId(item._id);
+                                        setNoteValue(item.notes || "");
+                                        setShowEditNoteModal(true);
+                                    }}
+                                    className="text-blue-600 hover:bg-blue-50"
+                                    title="Add/Edit Note"
+                                >
+                                    <MessageSquare className="h-4 w-4" />
+                                </Button>
+                            )}
+                            {item.entryType === 'special' && !item.isBooked && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setSelectedBookingId(item._id);
+                                        setShowOtpModal(true);
+                                    }}
+                                    className="text-orange-600 hover:bg-orange-50 hover:text-orange-700"
+                                    title="Fill OTP"
+                                >
+                                    <Key className="h-4 w-4" />
+                                </Button>
+                            )}
+                            {item.entryType === 'link' && !item.isBooked && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleCopyLink(item)}
+                                    className="text-[#3882a5] hover:bg-[#3882a5]/10 hover:text-[#3882a5]"
+                                    title="Copy Link"
+                                >
+                                    <Copy className="h-4 w-4" />
+                                </Button>
+                            )}
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => {
-                                    setSelectedBookingId(item._id);
-                                    setNoteValue(item.notes || "");
-                                    setShowEditNoteModal(true);
-                                }}
-                                className="text-blue-600 hover:bg-blue-50"
-                                title="Add/Edit Note"
+                                onClick={() => setDeleteLinkId(item._id)}
+                                className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                                title="Delete"
                             >
-                                <MessageSquare className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" />
                             </Button>
-                        )}
-                        {item.entryType === 'special' && !item.isBooked && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                    setSelectedBookingId(item._id);
-                                    setShowOtpModal(true);
-                                }}
-                                className="text-orange-600 hover:bg-orange-50 hover:text-orange-700"
-                                title="Fill OTP"
-                            >
-                                <Key className="h-4 w-4" />
-                            </Button>
-                        )}
-                        {item.entryType === 'link' && !item.isBooked && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleCopyLink(item)}
-                                className="text-[#3882a5] hover:bg-[#3882a5]/10 hover:text-[#3882a5]"
-                                title="Copy Link"
-                            >
-                                <Copy className="h-4 w-4" />
-                            </Button>
-                        )}
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeleteLinkId(item._id)}
-                            className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                            title="Delete"
-                        >
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    </div>
-                ),
+                        </div>
+                    );
+                },
             },
         ],
-        [handleCopyLink, filterType],
+        [handleCopyLink, filterType, user],
     );
 
-    const filterOptions = [
-        { value: "link", label: "Send Link" },
-        { value: "special", label: "Special Visitor" },
-    ];
+
 
     const handleFilterChange = useCallback((value: string) => {
         setFilterType(value);
@@ -469,8 +474,8 @@ export default function AppointmentLinksPage() {
 
             {/* Table Section */}
             <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
-                    <div className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none">
+                <div className="flex flex-col w-full gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <div className="w-full sm:w-[260px] sm:flex-none">
                         <SearchInput
                             placeholder="Search by visitor..."
                             value={search}
@@ -479,26 +484,50 @@ export default function AppointmentLinksPage() {
                             className="w-full"
                         />
                     </div>
-                    <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
-                        <div className="shrink-0 w-32 sm:w-40">
-                            <SelectField
-                                value={filterType}
-                                onChange={handleFilterChange}
-                                options={filterOptions}
-                                placeholder="Filter type"
-                                isClearable={false}
-                            />
+                    <div className="flex w-full items-center gap-2 sm:w-auto sm:justify-end">
+                        <div className="flex-1 sm:w-auto sm:flex-none">
+                            <div className="flex p-1 bg-gray-100/80 rounded-lg border border-gray-200">
+                                <button
+                                    onClick={() => handleFilterChange("link")}
+                                    className={`flex-1 sm:flex-none px-4 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${filterType === "link"
+                                        ? "bg-white text-[#3882a5] shadow-sm ring-1 ring-black/5"
+                                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+                                        }`}
+                                >
+                                    Send Link
+                                </button>
+                                <button
+                                    onClick={() => handleFilterChange("special")}
+                                    className={`flex-1 sm:flex-none px-4 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${filterType === "special"
+                                        ? "bg-white text-[#3882a5] shadow-sm ring-1 ring-black/5"
+                                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+                                        }`}
+                                >
+                                    VIP Booking
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={refetchAll}
+                            disabled={isLoading}
+                            className="shrink-0 h-9 w-9 sm:h-10 sm:w-10 border-gray-200 hover:bg-gray-50 bg-white shadow-sm transition-all active:scale-95"
+                            title="Refresh Table"
+                        >
+                            <RefreshCw className={`h-4 w-4 text-gray-500 ${isLoading ? 'animate-spin' : ''}`} />
+                        </Button>
+                        <div className="shrink-0">
                             {hasReachedAppointmentLimit ? (
                                 <>
                                     <ActionButton
                                         variant="primary"
                                         size="xl"
-                                        className="flex w-full shrink-0 items-center justify-center gap-2 text-xs whitespace-nowrap sm:w-auto sm:text-sm bg-[#3882a5] hover:bg-[#2d6a87] text-white"
+                                        className="flex items-center justify-center gap-2 text-xs whitespace-nowrap sm:text-sm bg-[#3882a5] hover:bg-[#2d6a87] text-white"
                                         onClick={() => setShowUpgradeModal(true)}
                                     >
                                         <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                        <span className="sm:hidden">Upgrade</span>
                                         <span className="hidden sm:inline">Upgrade to Schedule More</span>
                                     </ActionButton>
                                     <UpgradePlanModal
@@ -508,28 +537,52 @@ export default function AppointmentLinksPage() {
                                 </>
                             ) : (
                                 <>
-                                    <AppointmentLinkSelectionModal
-                                        open={showCreateModal}
-                                        onOpenChange={setShowCreateModal}
-                                        onSuccess={() => {
-                                            refetchAll();
-                                        }}
-                                    />
-                                    <ActionButton
-                                        variant="outline-primary"
-                                        size="xl"
-                                        className="flex w-full shrink-0 items-center justify-center gap-2 text-xs whitespace-nowrap sm:w-auto sm:text-sm"
-                                        onClick={() => setShowCreateModal(true)}
-                                    >
-                                        <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                        <span className="hidden sm:inline">Create Link</span>
-                                    </ActionButton>
+                                    <>
+                                        <CreateAppointmentLinkModal
+                                            open={showLinkModal}
+                                            onOpenChange={setShowLinkModal}
+                                            onSuccess={() => {
+                                                refetchAll();
+                                            }}
+                                        />
+                                        <QuickAppointmentModal
+                                            open={showVipModal}
+                                            onOpenChange={setShowVipModal}
+                                            onSuccess={() => {
+                                                refetchAll();
+                                            }}
+                                        />
+                                        <ActionButton
+                                            variant="outline-primary"
+                                            size="xl"
+                                            className="flex items-center justify-center sm:gap-2 text-xs whitespace-nowrap sm:text-sm"
+                                            onClick={() => {
+                                                if (filterType === "special") {
+                                                    setShowVipModal(true);
+                                                } else {
+                                                    setShowLinkModal(true);
+                                                }
+                                            }}
+                                        >
+                                            {filterType === "special" ? (
+                                                <>
+                                                    <User className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                                    <span className="hidden sm:inline">Book VIP</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                                    <span className="hidden sm:inline">Create Link</span>
+                                                </>
+                                            )}
+                                        </ActionButton>
+                                    </>
                                 </>
                             )}
                         </div>
                     </div>
                 </div>
-                <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
+                <div className="overflow-x-auto rounded-xl border border-border bg-background shadow-xs">
                     <DataTable
                         data={combinedList}
                         columns={columns}
@@ -540,13 +593,17 @@ export default function AppointmentLinksPage() {
                             description: "Create your first appointment link to get started.",
                             primaryActionLabel: hasReachedAppointmentLimit
                                 ? "Upgrade Plan"
-                                : "Create Appointment Link",
+                                : (filterType === "special" ? "Book VIP" : "Create Link"),
                         }}
                         onPrimaryAction={() => {
                             if (hasReachedAppointmentLimit) {
                                 setShowUpgradeModal(true);
                             } else {
-                                setShowCreateModal(true);
+                                if (filterType === "special") {
+                                    setShowVipModal(true);
+                                } else {
+                                    setShowLinkModal(true);
+                                }
                             }
                         }}
                     />
