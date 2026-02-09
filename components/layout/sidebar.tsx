@@ -78,6 +78,12 @@ const baseNavigation: Array<{
             icon: LinkIcon,
             roles: ["admin", "employee"], // Both admin and employee
         },
+        {
+            name: "Spot Pass",
+            href: routes.privateroute.SPOT_PASS,
+            icon: ClipboardList,
+            roles: ["admin"], // Only admin
+        },
     ];
 
 // Base settings submenu items
@@ -172,6 +178,10 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
                 pathname === routes.privateroute.APPOINTMENT_LINKS ||
                 pathname?.startsWith(routes.privateroute.APPOINTMENT_LINKS)
             );
+        }
+
+        if (href === routes.privateroute.SPOT_PASS) {
+            return pathname === routes.privateroute.SPOT_PASS;
         }
 
         return false;

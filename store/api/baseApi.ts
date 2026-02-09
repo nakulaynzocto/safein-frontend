@@ -104,6 +104,7 @@ export const baseApi = createApi({
         "Settings",
         "AppointmentLink",
         "Notification",
+        "SpotPass",
     ],
     endpoints: () => ({}),
     refetchOnMountOrArgChange: false,
