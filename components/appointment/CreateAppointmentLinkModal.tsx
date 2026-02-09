@@ -17,10 +17,11 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AsyncSelectField } from "@/components/common/asyncSelectField";
 import { SelectField } from "@/components/common/selectField";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { useCreateAppointmentLinkMutation, useCheckVisitorExistsQuery } from "@/store/api/appointmentLinkApi";
-import { useGetEmployeesQuery, useGetEmployeeQuery } from "@/store/api/employeeApi";
+import { useGetEmployeeQuery } from "@/store/api/employeeApi";
 import { useAppSelector } from "@/store/hooks";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { isValidEmail, isEmployee as checkIsEmployee } from "@/utils/helpers";
@@ -28,6 +29,7 @@ import { Link2, Mail, User } from "lucide-react";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { UpgradePlanModal } from "../common/upgradePlanModal";
 import { ActionButton } from "@/components/common/actionButton";
+import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
 
 const EXPIRATION_CONFIG = {
     "30m": { days: 0.0208, label: "30 minutes" },
@@ -113,109 +115,11 @@ export function CreateAppointmentLinkModal({
     // Check if current user is an employee
     const isEmployee = checkIsEmployee(user);
 
-    // Get employeeId from user object, or try to fetch it from employee data
+    // Get employeeId from user object
     const currentEmployeeId = user?.employeeId || null;
 
-    // Get all employees - backend now includes employee's own record even if created by admin
-    const {
-        data: employeesData,
-        isLoading: isLoadingEmployees,
-        error: employeesError,
-    } = useGetEmployeesQuery(
-        {
-            page: 1,
-            limit: 100,
-            status: "Active" as const,
-        },
-        {
-            skip: false, // Always fetch - backend now includes employee's own record
-        }
-    );
-
-    // If employee, try to get their own employee data by ID
-    // Note: This might fail if the employee was created by admin (controller checks createdBy)
-    // So we'll also try to find by email as a fallback
-    const { data: currentEmployeeData, isLoading: isLoadingCurrentEmployee } = useGetEmployeeQuery(
-        currentEmployeeId || "",
-        {
-            skip: !isEmployee || !currentEmployeeId,
-        }
-    );
-
-    // Find employee by email - always try this as a fallback
-    // Try to find employee by email in the employees list
-    const employeeByEmail = useMemo(() => {
-        if (!isEmployee || !user?.email || !employeesData?.employees || employeesData.employees.length === 0) {
-            return null;
-        }
-
-        // Always search by email as a fallback, even if we have currentEmployeeId
-        // This ensures we can find the employee if employeeId is not set in user object
-        const found = employeesData.employees.find(
-            (emp) => {
-                const empEmail = emp.email?.toLowerCase().trim();
-                const userEmail = user.email?.toLowerCase().trim();
-                return empEmail === userEmail;
-            }
-        );
-
-        return found || null;
-    }, [isEmployee, user?.email, employeesData?.employees]);
-
-    // If we have employee data but no employeeId from user, use the employee data's _id
-    // Priority: currentEmployeeId > currentEmployeeData?._id > employeeByEmail?._id
-    const finalEmployeeId = useMemo(() => {
-        if (!isEmployee) return null;
-
-        // Try multiple sources - employeeByEmail is now always checked
-        const id = currentEmployeeId ||
-            currentEmployeeData?._id ||
-            employeeByEmail?._id ||
-            null;
-
-        return id;
-    }, [isEmployee, currentEmployeeId, currentEmployeeData?._id, employeeByEmail?._id]);
-
-    // Fix: Better coordination of employee data loading to prevent race conditions
-    // Check if we're still loading employee data
-    // For employees, we need to wait for employees list to load so we can find by email
-    const isEmployeeDataLoading = useMemo(() => {
-        if (!isEmployee) return false;
-
-        // If we have a finalEmployeeId, we're ready
-        if (finalEmployeeId) return false;
-
-        // If there's an error and we've tried, don't keep loading
-        if (employeesError && employeesData === undefined) return false;
-
-        // Still loading if:
-        // 1. Employees list is loading
-        // 2. Current employee query is loading
-        // 3. No data yet and no error (still fetching)
-        return isLoadingEmployees ||
-            (isLoadingCurrentEmployee && currentEmployeeId) ||
-            (!employeesError && employeesData === undefined);
-    }, [
-        isEmployee,
-        finalEmployeeId,
-        isLoadingEmployees,
-        isLoadingCurrentEmployee,
-        currentEmployeeId,
-        employeesError,
-        employeesData,
-    ]);
-
-    // For admin: use all employees; for employee: use only their own data
-    const employees = isEmployee
-        ? (currentEmployeeData ? [currentEmployeeData] : (employeeByEmail ? [employeeByEmail] : []))
-        : (employeesData?.employees || []);
-
-    const employeeOptions = employees
-        .filter((emp) => emp.status === "Active" && !emp.isDeleted)
-        .map((emp) => ({
-            value: emp._id,
-            label: `${emp.name} (${emp.email})`,
-        }));
+    // Use common employee search hook
+    const { loadEmployeeOptions } = useEmployeeSearch();
 
     const {
         control,
@@ -237,14 +141,14 @@ export function CreateAppointmentLinkModal({
 
     // Reset form when modal opens for employees to ensure employeeId is set
     useEffect(() => {
-        if (isEmployee && finalEmployeeId && open) {
+        if (isEmployee && currentEmployeeId && open) {
             reset({
                 visitorEmail: "",
-                employeeId: finalEmployeeId,
+                employeeId: currentEmployeeId,
                 expiresInDays: 1,
             }, { keepDefaultValues: false });
             // Also set value explicitly to ensure it's registered (without validation for employees)
-            setValue("employeeId", finalEmployeeId, { shouldValidate: false, shouldDirty: true });
+            setValue("employeeId", currentEmployeeId, { shouldValidate: false, shouldDirty: true });
         } else if (!isEmployee && open) {
             reset({
                 visitorEmail: "",
@@ -252,14 +156,14 @@ export function CreateAppointmentLinkModal({
                 expiresInDays: 1,
             });
         }
-    }, [isEmployee, finalEmployeeId, open, reset, setValue]);
+    }, [isEmployee, currentEmployeeId, open, reset, setValue]);
 
-    // Ensure employeeId is always set for employees when finalEmployeeId changes
+    // Ensure employeeId is always set for employees when currentEmployeeId changes
     useEffect(() => {
-        if (isEmployee && finalEmployeeId && open) {
-            setValue("employeeId", finalEmployeeId, { shouldValidate: false, shouldDirty: true });
+        if (isEmployee && currentEmployeeId && open) {
+            setValue("employeeId", currentEmployeeId, { shouldValidate: false, shouldDirty: true });
         }
-    }, [isEmployee, finalEmployeeId, open, setValue]);
+    }, [isEmployee, currentEmployeeId, open, setValue]);
 
     const visitorEmail = watch("visitorEmail");
     const expiresInDaysValue = watch("expiresInDays");
@@ -305,12 +209,12 @@ export function CreateAppointmentLinkModal({
             // Set submitting state to prevent duplicate submissions
             setIsSubmitting(true);
 
-            // Ensure employeeId is set for employees - use finalEmployeeId from component state or fallback to data
+            // Ensure employeeId is set for employees - use currentEmployeeId from component state
             let submitEmployeeId = data.employeeId;
             if (isEmployee) {
-                submitEmployeeId = finalEmployeeId || currentEmployeeData?._id || employeeByEmail?._id || currentEmployeeId || data.employeeId;
+                submitEmployeeId = currentEmployeeId || currentEmployeeId || data.employeeId;
 
-                // For employees, if still no employeeId, show error but don't block if we have other sources
+                // For employees, if still no employeeId, show error
                 if (!submitEmployeeId) {
                     setGeneralError("Unable to find employee information. Please refresh and try again.");
                     showErrorToast("Unable to find employee information. Please refresh and try again.");
@@ -337,10 +241,10 @@ export function CreateAppointmentLinkModal({
 
                 showSuccessToast("Appointment link created and email sent successfully!");
                 // Reset form - for employees, keep employeeId; for admins, clear it
-                if (isEmployee && finalEmployeeId) {
+                if (isEmployee && currentEmployeeId) {
                     reset({
                         visitorEmail: "",
-                        employeeId: finalEmployeeId,
+                        employeeId: currentEmployeeId,
                         expiresInDays: 1,
                     });
                 } else {
@@ -357,7 +261,7 @@ export function CreateAppointmentLinkModal({
                 setIsSubmitting(false);
             }
         },
-        [createAppointmentLink, reset, setOpen, onSuccess, isEmployee, finalEmployeeId, currentEmployeeData, employeeByEmail, currentEmployeeId, hasReachedAppointmentLimit, isSubmitting, isCreating],
+        [createAppointmentLink, reset, setOpen, onSuccess, isEmployee, currentEmployeeId, currentEmployeeId, hasReachedAppointmentLimit, isSubmitting, isCreating],
     );
 
     const handleOpenChange = useCallback(
@@ -369,10 +273,10 @@ export function CreateAppointmentLinkModal({
             setOpen(isOpen);
             if (!isOpen) {
                 // Reset form - for employees, keep employeeId; for admins, clear it
-                if (isEmployee && finalEmployeeId) {
+                if (isEmployee && currentEmployeeId) {
                     reset({
                         visitorEmail: "",
-                        employeeId: finalEmployeeId,
+                        employeeId: currentEmployeeId,
                         expiresInDays: 1,
                     });
                 } else {
@@ -383,7 +287,7 @@ export function CreateAppointmentLinkModal({
                 setIsSubmitting(false);
             }
         },
-        [setOpen, reset, isEmployee, finalEmployeeId, isSubmitting, isCreating],
+        [setOpen, reset, isEmployee, currentEmployeeId, isSubmitting, isCreating],
     );
 
     const handleClose = useCallback(() => {
@@ -393,10 +297,10 @@ export function CreateAppointmentLinkModal({
         }
         setOpen(false);
         // Reset form - for employees, keep employeeId; for admins, clear it
-        if (isEmployee && finalEmployeeId) {
+        if (isEmployee && currentEmployeeId) {
             reset({
                 visitorEmail: "",
-                employeeId: finalEmployeeId,
+                employeeId: currentEmployeeId,
                 expiresInDays: 1,
             });
         } else {
@@ -405,7 +309,7 @@ export function CreateAppointmentLinkModal({
         setGeneralError(null);
         setVisitorExists(null);
         setIsSubmitting(false);
-    }, [setOpen, reset, isEmployee, finalEmployeeId, isSubmitting, isCreating]);
+    }, [setOpen, reset, isEmployee, currentEmployeeId, isSubmitting, isCreating]);
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -434,45 +338,27 @@ export function CreateAppointmentLinkModal({
                         // For employees, bypass validation completely and call onSubmit directly
                         if (isEmployee) {
                             // Wait for employee data to load if still loading
-                            if (isEmployeeDataLoading) {
+                            if (!currentEmployeeId) {
                                 setGeneralError("Loading employee information. Please wait...");
                                 showErrorToast("Loading employee information. Please wait...");
                                 return;
                             }
 
-                            // Get employeeId from finalEmployeeId or other sources
-                            // Try multiple sources in order of priority
-                            let submitEmployeeId = finalEmployeeId ||
-                                currentEmployeeData?._id ||
-                                employeeByEmail?._id ||
-                                currentEmployeeId;
+                            // Get employeeId from currentEmployeeId
+                            let submitEmployeeId = currentEmployeeId;
 
-                            // If still no employeeId, try to find by email one more time from employees list
-                            if (!submitEmployeeId && employeesData?.employees && user?.email) {
-                                const foundEmployee = employeesData.employees.find(
-                                    (emp) => {
-                                        const empEmail = emp.email?.toLowerCase().trim();
-                                        const userEmail = user.email?.toLowerCase().trim();
-                                        return empEmail === userEmail &&
-                                            emp.status === "Active" &&
-                                            !emp.isDeleted;
-                                    }
-                                );
-                                if (foundEmployee?._id) {
-                                    submitEmployeeId = foundEmployee._id;
-                                }
-                            }
-
+                            // If still no employeeId, show error
                             if (!submitEmployeeId) {
+
                                 // If we still don't have employeeId, check if employees list has loaded
-                                if (isLoadingEmployees) {
+                                if (false) {
                                     setGeneralError("Loading employee information. Please wait...");
                                     showErrorToast("Loading employee information. Please wait...");
                                     return;
                                 }
 
                                 // If employees list has loaded but we still can't find the employee
-                                if (employeesError) {
+                                if (false) {
                                     setGeneralError("Failed to load employee information. Please try again.");
                                     showErrorToast("Failed to load employee information. Please try again.");
                                     return;
@@ -561,34 +447,16 @@ export function CreateAppointmentLinkModal({
                                 control={control}
                                 render={({ field }) => (
                                     <div className="space-y-1">
-                                        <SelectField
+                                        <AsyncSelectField
                                             value={field.value || ""}
                                             onChange={field.onChange}
-                                            options={employeeOptions}
-                                            placeholder={
-                                                isLoadingEmployees
-                                                    ? "Loading employees..."
-                                                    : employeeOptions.length === 0
-                                                        ? "No active employees found"
-                                                        : "Select employee"
-                                            }
-                                            isLoading={isLoadingEmployees}
+                                            loadOptions={loadEmployeeOptions}
+                                            placeholder="Search employees..."
                                             isClearable={false}
-                                            className={errors.employeeId ? "border-red-500" : ""}
+                                            error={errors.employeeId?.message}
+                                            cacheOptions={true}
+                                            defaultOptions={true}
                                         />
-                                        {employeesError && (
-                                            <p className="text-sm text-red-500">
-                                                Failed to load employees. Please try again.
-                                            </p>
-                                        )}
-                                        {errors.employeeId && (
-                                            <p className="text-sm text-red-500">{errors.employeeId.message}</p>
-                                        )}
-                                        {!isLoadingEmployees && employeeOptions.length === 0 && !employeesError && (
-                                            <p className="text-sm text-yellow-600">
-                                                No active employees available. Please add employees first.
-                                            </p>
-                                        )}
                                     </div>
                                 )}
                             />
@@ -601,8 +469,8 @@ export function CreateAppointmentLinkModal({
                             name="employeeId"
                             control={control}
                             render={({ field }) => {
-                                // Always use finalEmployeeId if available, sync immediately
-                                const value = finalEmployeeId || field.value || "";
+                                // Always use currentEmployeeId if available, sync immediately
+                                const value = currentEmployeeId || field.value || "";
                                 if (value && value !== field.value) {
                                     field.onChange(value);
                                 }
@@ -648,7 +516,7 @@ export function CreateAppointmentLinkModal({
                             type="button"
                             variant="outline"
                             onClick={handleClose}
-                            disabled={isSubmitting || isCreating || !!(isEmployee && isEmployeeDataLoading)}
+                            disabled={isSubmitting || isCreating || !!(isEmployee && !currentEmployeeId)}
                             size="xl"
                             className="px-6"
                         >
@@ -657,7 +525,7 @@ export function CreateAppointmentLinkModal({
                         <ActionButton
                             type="submit"
                             variant="outline-primary"
-                            disabled={isSubmitting || isCreating || !!(isEmployee && isEmployeeDataLoading)}
+                            disabled={isSubmitting || isCreating || !!(isEmployee && !currentEmployeeId)}
                             size="xl"
                             className="px-6"
                         >
@@ -666,7 +534,7 @@ export function CreateAppointmentLinkModal({
                                     <LoadingSpinner size="sm" className="mr-2" />
                                     Creating...
                                 </>
-                            ) : isEmployee && isEmployeeDataLoading ? (
+                            ) : isEmployee && !currentEmployeeId ? (
                                 <>
                                     <LoadingSpinner size="sm" className="mr-2" />
                                     Loading...

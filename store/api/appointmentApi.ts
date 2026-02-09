@@ -219,11 +219,31 @@ export const appointmentApi = baseApi.injectEndpoints({
             providesTags: (result) =>
                 result?.appointments
                     ? [
-                          ...result.appointments.map(({ _id }) => ({ type: "Appointment" as const, id: _id })),
-                          { type: "Appointment", id: "LIST" },
-                      ]
+                        ...result.appointments.map(({ _id }) => ({ type: "Appointment" as const, id: _id })),
+                        { type: "Appointment", id: "LIST" },
+                    ]
                     : [{ type: "Appointment", id: "LIST" }],
             keepUnusedDataFor: 300, // Keep data for 5 minutes
+        }),
+
+        // Optimized stats endpoint for dashboard (no data fetching, only aggregation)
+        getAppointmentStats: builder.query<{
+            total: number;
+            pending: number;
+            approved: number;
+            rejected: number;
+            completed: number;
+            cancelled: number;
+        }, void>({
+            query: () => '/appointments/stats',
+            transformResponse: (response: any) => {
+                if (response.success && response.data) {
+                    return response.data;
+                }
+                return response;
+            },
+            providesTags: [{ type: 'Appointment', id: 'STATS' }],
+            keepUnusedDataFor: 60, // Keep stats data for 1 minute
         }),
 
         getAppointment: builder.query<Appointment, string>({
@@ -374,6 +394,7 @@ export const appointmentApi = baseApi.injectEndpoints({
 
 export const {
     useGetAppointmentsQuery,
+    useGetAppointmentStatsQuery,
     useGetAppointmentQuery,
     useCreateAppointmentMutation,
     useUpdateAppointmentMutation,

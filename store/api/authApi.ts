@@ -98,6 +98,20 @@ export interface AuthResponse {
     token: string;
 }
 
+const normalizeUser = (userData: any) => {
+    if (!userData) return userData;
+    const roles = userData.roles || (userData.role ? [userData.role] : ['admin']);
+    return {
+        ...userData,
+        id: userData.id || userData._id || userData.id,
+        profilePicture: userData.profilePicture || "",
+        role: userData.role || roles[0] || 'admin',
+        roles: roles,
+        // Ensure employeeId is set if user is an employee
+        employeeId: userData.employeeId || (roles.includes('employee') ? (userData._id || userData.id) : undefined),
+    };
+};
+
 export const authApi = baseApi.injectEndpoints({
     overrideExisting: true,
     endpoints: (builder) => ({
@@ -113,18 +127,8 @@ export const authApi = baseApi.injectEndpoints({
                     data = response.data;
                 }
 
-                // Normalize user data in response
                 if (data && data.user) {
-                    // Backend returns roles as array, normalize it
-                    const roles = data.user.roles || (data.user.role ? [data.user.role] : ['admin']);
-                    data.user = {
-                        ...data.user,
-                        id: data.user.id || data.user._id || data.user.id,
-                        profilePicture: data.user.profilePicture || "",
-                        // Ensure both role (string) and roles (array) are set
-                        role: data.user.role || roles[0] || 'admin',
-                        roles: roles,
-                    };
+                    data.user = normalizeUser(data.user);
                 }
 
                 return data;
@@ -160,11 +164,7 @@ export const authApi = baseApi.injectEndpoints({
 
                 // Normalize user data in response
                 if (data && data.user) {
-                    data.user = {
-                        ...data.user,
-                        id: data.user.id || data.user._id || data.user.id,
-                        profilePicture: data.user.profilePicture || "",
-                    };
+                    data.user = normalizeUser(data.user);
                 }
 
                 return data;
@@ -194,16 +194,9 @@ export const authApi = baseApi.injectEndpoints({
                     userData = response.data;
                 }
 
-                // Normalize user data: map _id to id and ensure profilePicture
+                // Normalize user data
                 if (userData && typeof userData === "object") {
-                    return {
-                        ...userData,
-                        id: userData.id || userData._id,
-                        profilePicture: userData.profilePicture || "",
-                        // Ensure role is set from roles array if not present
-                        role: userData.role || (userData.roles && userData.roles[0]) || 'admin',
-                        roles: userData.roles || (userData.role ? [userData.role] : ['admin']),
-                    };
+                    return normalizeUser(userData);
                 }
                 return userData;
             },
@@ -226,17 +219,9 @@ export const authApi = baseApi.injectEndpoints({
                     userData = response.data;
                 }
 
-                // Normalize user data: map _id to id and ensure profilePicture
+                // Normalize user data
                 if (userData && typeof userData === "object") {
-                    const normalized = {
-                        ...userData,
-                        id: userData.id || userData._id,
-                        profilePicture: userData.profilePicture || "",
-                        // Ensure role is set from roles array if not present
-                        role: userData.role || (userData.roles && userData.roles[0]) || 'admin',
-                        roles: userData.roles || (userData.role ? [userData.role] : ['admin']),
-                    };
-                    return normalized;
+                    return normalizeUser(userData);
                 }
                 return userData;
             },
@@ -284,14 +269,9 @@ export const authApi = baseApi.injectEndpoints({
                     }
                 }
 
-                // Normalize user data: map _id to id and ensure profilePicture
+                // Normalize user data
                 if (userData && typeof userData === "object") {
-                    const normalized = {
-                        ...userData,
-                        id: userData.id || userData._id,
-                        profilePicture: userData.profilePicture || "",
-                    };
-                    return normalized;
+                    return normalizeUser(userData);
                 }
                 return userData;
             },
@@ -347,11 +327,7 @@ export const authApi = baseApi.injectEndpoints({
 
                 // Normalize user data in response
                 if (data && data.user) {
-                    data.user = {
-                        ...data.user,
-                        id: data.user.id || data.user._id || data.user.id,
-                        profilePicture: data.user.profilePicture || "",
-                    };
+                    data.user = normalizeUser(data.user);
                 }
 
                 return data;
@@ -373,11 +349,7 @@ export const authApi = baseApi.injectEndpoints({
 
                 // Normalize user data in response
                 if (data && data.user) {
-                    data.user = {
-                        ...data.user,
-                        id: data.user.id || data.user._id || data.user.id,
-                        profilePicture: data.user.profilePicture || "",
-                    };
+                    data.user = normalizeUser(data.user);
                 }
 
                 return data;

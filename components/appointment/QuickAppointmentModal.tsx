@@ -15,8 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { InputField } from "@/components/common/inputField";
-import { SelectField } from "@/components/common/selectField";
-import { useGetEmployeesQuery } from "@/store/api/employeeApi";
+import { AsyncSelectField } from "@/components/common/asyncSelectField";
 import { appointmentLinkApi } from "@/store/api/appointmentLinkApi";
 import { useCreateSpecialBookingMutation } from "@/store/api/specialBookingApi";
 import { useLazyGetVisitorsQuery } from "@/store/api/visitorApi";
@@ -28,6 +27,7 @@ import { User, Mail, Phone, FileText, Info, Briefcase, Calendar, Clock } from "l
 import { ActionButton } from "@/components/common/actionButton";
 import { EnhancedDatePicker } from "@/components/common/enhancedDatePicker";
 import { EnhancedTimePicker } from "@/components/common/enhancedTimePicker";
+import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
 
 const quickAppointmentSchema = (isEmployee: boolean) => yup.object().shape({
     name: yup.string().required("Name is required"),
@@ -65,21 +65,8 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
     const [createSpecialBooking] = useCreateSpecialBookingMutation();
     const [triggerSearch, { isFetching: isSearchingVisitor }] = useLazyGetVisitorsQuery();
 
-    // Fetch employees only for admins
-    const { data: employeesData, isLoading: isLoadingEmployees } = useGetEmployeesQuery(
-        { page: 1, limit: 100, status: "Active" as const },
-        { skip: isEmployee || !open }
-    );
-
-    const employeeOptions = useMemo(() => {
-        if (!employeesData?.employees) return [];
-        return employeesData.employees
-            .filter(emp => !emp.isDeleted && emp.status === "Active")
-            .map(emp => ({
-                value: emp._id,
-                label: `${emp.name} (${emp.email})`
-            }));
-    }, [employeesData]);
+    // Use common employee search hook
+    const { loadEmployeeOptions } = useEmployeeSearch();
 
     const {
         register,
@@ -95,7 +82,7 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
         resolver: yupResolver(quickAppointmentSchema(isEmployee)) as any,
         defaultValues: {
             purpose: "Official VIP Meeting",
-            employeeId: isEmployee ? user?.employeeId : "",
+            employeeId: "",
             accompanyingCount: 0,
         }
     });
@@ -131,7 +118,7 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
         return () => clearTimeout(timeoutId);
     }, [watchedEmail, triggerSearch, reset]);
 
-    // Reset form when modal opens
+    // Reset form when modal opens and set employeeId for employees
     useEffect(() => {
         if (open) {
             reset({
@@ -139,7 +126,7 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                 email: "",
                 phone: "",
                 purpose: "Official VIP Meeting",
-                employeeId: isEmployee ? user?.employeeId : "",
+                employeeId: isEmployee ? (user?.employeeId || "") : "",
                 accompanyingCount: 0,
                 notes: "",
             });
@@ -150,9 +137,17 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
         setIsSubmitting(true);
         try {
             // Determine Employee ID
+
+
             const submitEmployeeId = isEmployee ? user?.employeeId : data.employeeId;
+
             if (!submitEmployeeId) {
-                throw new Error("Employee information is missing");
+                console.error('Employee ID missing');
+                throw new Error(
+                    isEmployee
+                        ? "Your employee information is not set up correctly. Please contact your administrator."
+                        : "Please select an employee"
+                );
             }
 
             // Create Special Booking (Pending OTP)
@@ -230,14 +225,15 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                                         name="employeeId"
                                         control={control}
                                         render={({ field }) => (
-                                            <SelectField
+                                            <AsyncSelectField
                                                 value={field.value || ""}
                                                 onChange={field.onChange}
-                                                options={employeeOptions}
-                                                placeholder={isLoadingEmployees ? "Loading..." : "Select Employee"}
-                                                isLoading={isLoadingEmployees}
+                                                loadOptions={loadEmployeeOptions}
+                                                placeholder="Search employees..."
                                                 isClearable={false}
                                                 error={errors.employeeId?.message}
+                                                cacheOptions={true}
+                                                defaultOptions={true}
                                             />
                                         )}
                                     />

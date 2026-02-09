@@ -4,9 +4,8 @@ import { useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAppointmentOperations } from "@/hooks/useAppointmentOperations";
 import { AppointmentTable } from "./appointmentTable";
-import { Appointment, useGetAppointmentsQuery } from "@/store/api/appointmentApi";
+import { Appointment, useGetAppointmentsQuery, useGetAppointmentStatsQuery } from "@/store/api/appointmentApi";
 import { StatsGrid } from "@/components/dashboard/statsGrid";
-import { calculateAppointmentStats } from "@/components/dashboard/dashboardUtils";
 
 export function AppointmentList() {
     const router = useRouter();
@@ -45,18 +44,32 @@ export function AppointmentList() {
 
     const timezoneOffsetMinutes = -new Date().getTimezoneOffset();
 
-    // Separate query for stats (fetch reasonable amount for accurate counts)
-    // Reduced from 1000 to 200 for better performance
-    const { data: statsData } = useGetAppointmentsQuery({
-        page: 1,
-        limit: 200, // Reduced from 1000 - sufficient for stats calculation
-        timezoneOffsetMinutes,
-    });
+    // Optimized: Use stats API instead of fetching 200 appointments
+    const { data: appointmentStatsData } = useGetAppointmentStatsQuery();
 
     const stats = useMemo(() => {
-        const allAppointments = statsData?.appointments || [];
-        return calculateAppointmentStats(allAppointments);
-    }, [statsData?.appointments]);
+        if (!appointmentStatsData) {
+            return {
+                totalAppointments: 0,
+                pendingAppointments: 0,
+                approvedAppointments: 0,
+                rejectedAppointments: 0,
+                completedAppointments: 0,
+                timeOutAppointments: 0,
+                todaysAppointments: 0, // Not available from stats API, could be added if needed
+            };
+        }
+
+        return {
+            totalAppointments: appointmentStatsData.total || 0,
+            pendingAppointments: appointmentStatsData.pending || 0,
+            approvedAppointments: appointmentStatsData.approved || 0,
+            rejectedAppointments: appointmentStatsData.rejected || 0,
+            completedAppointments: appointmentStatsData.completed || 0,
+            timeOutAppointments: appointmentStatsData.cancelled || 0,
+            todaysAppointments: 0, // Stats API doesn't filter by today, use total for now
+        };
+    }, [appointmentStatsData]);
 
     const handleView = useCallback(
         (appointment: Appointment) => {

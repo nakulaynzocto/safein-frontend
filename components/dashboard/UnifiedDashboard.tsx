@@ -3,11 +3,11 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
-import { useGetAppointmentsQuery } from "@/store/api/appointmentApi";
-import { useGetEmployeesQuery } from "@/store/api/employeeApi";
-import { useGetVisitorsQuery } from "@/store/api/visitorApi";
+import { useGetAppointmentsQuery, useGetAppointmentStatsQuery } from "@/store/api/appointmentApi";
+import { useGetEmployeeCountQuery } from "@/store/api/employeeApi";
+import { useGetVisitorCountQuery } from "@/store/api/visitorApi";
 import { DashboardHeader } from "./DashboardHeader";
-import { StatsGrid } from "./statsGrid";
+
 import { AppointmentsTable } from "./AppointmentsTable";
 import { QuickActions } from "./QuickActions";
 import { DashboardCharts } from "./dashboardCharts";
@@ -55,22 +55,32 @@ export function UnifiedDashboard() {
         refetchOnReconnect: true,
     });
 
+    // Optimized: Use count APIs instead of fetching all data
     const {
-        data: employeesData,
+        data: employeeCountData,
         isLoading: employeesLoading,
         error: employeesError,
         refetch: refetchEmployees,
-    } = useGetEmployeesQuery(undefined, {
+    } = useGetEmployeeCountQuery(undefined, {
         refetchOnMountOrArgChange: true,
         refetchOnFocus: false,
     });
 
     const {
-        data: visitorsData,
+        data: visitorCountData,
         isLoading: visitorsLoading,
         error: visitorsError,
         refetch: refetchVisitors,
-    } = useGetVisitorsQuery(undefined, {
+    } = useGetVisitorCountQuery(undefined, {
+        refetchOnMountOrArgChange: true,
+        refetchOnFocus: false,
+    });
+
+    const {
+        data: appointmentStatsData,
+        isLoading: statsLoading,
+        error: statsError,
+    } = useGetAppointmentStatsQuery(undefined, {
         refetchOnMountOrArgChange: true,
         refetchOnFocus: false,
     });
@@ -78,9 +88,9 @@ export function UnifiedDashboard() {
     const { hasReachedAppointmentLimit, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
     const { user } = useAppSelector((state) => state.auth);
 
-    const isLoading = appointmentsLoading || employeesLoading || visitorsLoading;
+    const isLoading = appointmentsLoading || employeesLoading || visitorsLoading || statsLoading;
 
-    const hasData = appointmentsData || employeesData || visitorsData;
+    const hasData = appointmentsData || employeeCountData || visitorCountData || appointmentStatsData;
     const shouldShowSkeleton = isLoading && !hasData && retryCount < 2;
 
     useEffect(() => {
@@ -97,38 +107,31 @@ export function UnifiedDashboard() {
     }, [isLoading]);
 
     const appointments = useMemo(() => appointmentsData?.appointments || [], [appointmentsData?.appointments]);
-    const employees = useMemo(() => employeesData?.employees || [], [employeesData?.employees]);
-    const visitors = useMemo(() => visitorsData?.visitors || [], [visitorsData?.visitors]);
 
     const recentAppointments = useMemo(() => appointments.slice(0, 5), [appointments]);
 
+    // Optimized: Use aggregated stats from backend instead of client-side calculation
     const stats = useMemo(() => {
-        const today = new Date().toDateString();
-        const todayAppointments = appointments.filter((apt) => {
-            const aptDate = new Date(apt.appointmentDetails?.scheduledDate || apt.createdAt);
-            return aptDate.toDateString() === today;
-        });
+        if (!appointmentStatsData) {
+            return {
+                totalAppointments: 0,
+                pendingAppointments: 0,
+                approvedAppointments: 0,
+                rejectedAppointments: 0,
+                completedAppointments: 0,
+                timeOutAppointments: 0,
+            };
+        }
 
-        const calculatedStats = calculateAppointmentStats(todayAppointments);
-        const {
-            pendingAppointments,
-            approvedAppointments,
-            rejectedAppointments,
-            completedAppointments,
-            timeOutAppointments,
-            totalAppointments,
-        } = calculatedStats;
-        const sumOfCategories =
-            pendingAppointments +
-            approvedAppointments +
-            rejectedAppointments +
-            completedAppointments +
-            timeOutAppointments;
-
-        return sumOfCategories !== totalAppointments
-            ? { ...calculatedStats, totalAppointments: sumOfCategories }
-            : calculatedStats;
-    }, [appointments]);
+        return {
+            totalAppointments: appointmentStatsData.total || 0,
+            pendingAppointments: appointmentStatsData.pending || 0,
+            approvedAppointments: appointmentStatsData.approved || 0,
+            rejectedAppointments: appointmentStatsData.rejected || 0,
+            completedAppointments: appointmentStatsData.completed || 0,
+            timeOutAppointments: appointmentStatsData.cancelled || 0,
+        };
+    }, [appointmentStatsData]);
 
     const isEmployee = checkIsEmployee(user);
 
@@ -192,8 +195,8 @@ export function UnifiedDashboard() {
         <div className={`space-y-4 sm:space-y-6 ${isEmployee ? 'px-1 sm:px-0' : ''}`}>
             <DashboardCharts
                 appointmentsData={appointments}
-                employeesData={employees}
-                visitorsData={visitors}
+                employeesData={[]} // Charts use appointments data mainly, employee/visitor lists not needed
+                visitorsData={[]}
                 dateRange={chartDateRange}
             />
 

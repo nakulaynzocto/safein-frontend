@@ -190,6 +190,19 @@ export const visitorApi = baseApi.injectEndpoints({
             keepUnusedDataFor: 300, // Keep data for 5 minutes
         }),
 
+        // Optimized count endpoint for dashboard (no data fetching)
+        getVisitorCount: builder.query<{ total: number }, void>({
+            query: () => '/visitors/count',
+            transformResponse: (response: any) => {
+                if (response.success && response.data) {
+                    return response.data;
+                }
+                return response;
+            },
+            providesTags: [{ type: 'Visitor' as const, id: 'COUNT' }],
+            keepUnusedDataFor: 60, // Keep count data for 1 minute
+        }),
+
         getVisitor: builder.query<Visitor, string>({
             query: (id) => `/visitors/${id}`,
             transformResponse: (response: any) => {
@@ -248,6 +261,7 @@ export const {
     useCreateVisitorMutation,
     useGetVisitorsQuery,
     useLazyGetVisitorsQuery, // Export Lazy Query
+    useGetVisitorCountQuery,
     useGetVisitorQuery,
     useUpdateVisitorMutation,
     useDeleteVisitorMutation,

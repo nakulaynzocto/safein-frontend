@@ -74,11 +74,24 @@ export const employeeApi = baseApi.injectEndpoints({
             providesTags: (result) =>
                 result?.employees
                     ? [
-                          ...result.employees.map(({ _id }) => ({ type: "Employee" as const, id: _id })),
-                          { type: "Employee", id: "LIST" },
-                      ]
+                        ...result.employees.map(({ _id }) => ({ type: "Employee" as const, id: _id })),
+                        { type: "Employee", id: "LIST" },
+                    ]
                     : [{ type: "Employee", id: "LIST" }],
             keepUnusedDataFor: 300, // Keep data for 5 minutes
+        }),
+
+        // Optimized count endpoint for dashboard (no data fetching)
+        getEmployeeCount: builder.query<{ total: number; active: number; inactive: number }, void>({
+            query: () => '/employees/count',
+            transformResponse: (response: any) => {
+                if (response.success && response.data) {
+                    return response.data;
+                }
+                return response;
+            },
+            providesTags: [{ type: 'Employee', id: 'COUNT' }],
+            keepUnusedDataFor: 60, // Keep count data for 1 minute
         }),
 
         getEmployee: builder.query<Employee, string>({
@@ -180,6 +193,8 @@ export const employeeApi = baseApi.injectEndpoints({
 
 export const {
     useGetEmployeesQuery,
+    useLazyGetEmployeesQuery,
+    useGetEmployeeCountQuery,
     useGetEmployeeQuery,
     useCreateEmployeeMutation,
     useUpdateEmployeeMutation,
