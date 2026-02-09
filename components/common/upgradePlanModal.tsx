@@ -111,17 +111,14 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
                             paymentId: rpResponse.razorpay_payment_id,
                             signature: rpResponse.razorpay_signature,
                         }).unwrap();
-                        onClose();
                         window.location.href = successUrl;
                     } catch (verificationError: any) {
                         toast.error(verificationError?.data?.message || "Payment verification failed.");
-                        onClose();
                         window.location.href = cancelUrl;
                     }
                 },
                 modal: {
                     ondismiss: function () {
-                        onClose();
                         window.location.href = cancelUrl;
                     },
                 },
@@ -130,8 +127,14 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
                 },
             };
 
-            const razorpay = new window.Razorpay(options);
-            razorpay.open();
+            // Close Dialog before opening Razorpay to prevent overlay conflicts
+            onClose();
+
+            // Small delay to ensure Dialog is fully closed
+            setTimeout(() => {
+                const razorpay = new window.Razorpay(options);
+                razorpay.open();
+            }, 100);
         } catch (error: any) {
             const message = error?.data?.message || error?.message || "Failed to start checkout.";
             toast.error(message);

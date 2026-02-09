@@ -51,7 +51,7 @@ export function PricingModal({ open, onOpenChange, isRegistrationFlow = false }:
     const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation();
     const { user, isAuthenticated } = useAppSelector((state) => state.auth);
     const router = useRouter();
-    
+
     // Check if user is an employee - employees cannot purchase subscriptions
     const isEmployee = checkIsEmployee(user);
 
@@ -118,8 +118,14 @@ export function PricingModal({ open, onOpenChange, isRegistrationFlow = false }:
                 },
             };
 
-            const razorpay = new window.Razorpay(options);
-            razorpay.open();
+            // Close Dialog before opening Razorpay to prevent overlay conflicts
+            onOpenChange(false);
+
+            // Small delay to ensure Dialog is fully closed
+            setTimeout(() => {
+                const razorpay = new window.Razorpay(options);
+                razorpay.open();
+            }, 100);
         } catch (err: any) {
             toast.error(err?.data?.message || "Failed to initiate checkout. Please try again.");
         }
