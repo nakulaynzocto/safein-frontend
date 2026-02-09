@@ -21,7 +21,6 @@ import { AsyncSelectField } from "@/components/common/asyncSelectField";
 import { SelectField } from "@/components/common/selectField";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { useCreateAppointmentLinkMutation, useCheckVisitorExistsQuery } from "@/store/api/appointmentLinkApi";
-import { useGetEmployeeQuery } from "@/store/api/employeeApi";
 import { useAppSelector } from "@/store/hooks";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { isValidEmail, isEmployee as checkIsEmployee } from "@/utils/helpers";
