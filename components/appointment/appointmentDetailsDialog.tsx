@@ -132,20 +132,20 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
                     <DialogTitle>Appointment Details</DialogTitle>
                 </DialogHeader>
 
-                <div className="space-y-6">
+                <div className="space-y-6 max-h-[80vh] overflow-y-auto px-1">
                     {/* Profile Header - LinkedIn/Facebook Style */}
-                    <div className="flex gap-6 border-b pb-6">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 border-b pb-6">
                         {/* Left Side - Visitor Photo */}
                         <div className="group relative shrink-0">
-                            <Avatar className="h-24 w-24">
+                            <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
                                 <AvatarImage src={visitorPhoto} alt={visitorName} />
-                                <AvatarFallback className="text-2xl">
+                                <AvatarFallback className="text-xl sm:text-2xl">
                                     {visitorName !== "N/A"
                                         ? visitorName
-                                              .split(" ")
-                                              .map((n: string) => n[0])
-                                              .join("")
-                                              .toUpperCase()
+                                            .split(" ")
+                                            .map((n: string) => n[0])
+                                            .join("")
+                                            .toUpperCase()
                                         : "V"}
                                 </AvatarFallback>
                             </Avatar>
@@ -161,24 +161,26 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
                         </div>
 
                         {/* Right Side - Visitor Info & Status */}
-                        <div className="flex-1 space-y-3">
+                        <div className="flex-1 space-y-3 text-center sm:text-left w-full">
                             <div>
-                                <h3 className="text-xl font-semibold">{visitorName}</h3>
-                                <div className="mt-1 flex items-center gap-2">
-                                    <Mail className="text-muted-foreground h-4 w-4" />
-                                    <span className="text-muted-foreground text-sm">
-                                        {getFieldValue(appointment, "visitorEmail")}
-                                    </span>
-                                </div>
-                                <div className="mt-1 flex items-center gap-2">
-                                    <Phone className="text-muted-foreground h-4 w-4" />
-                                    <span className="text-muted-foreground text-sm">
-                                        {getFieldValue(appointment, "visitorPhone")}
-                                    </span>
+                                <h3 className="text-lg sm:text-xl font-semibold">{visitorName}</h3>
+                                <div className="mt-2 flex flex-col sm:flex-row flex-wrap items-center sm:items-start gap-1 sm:gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <Mail className="text-muted-foreground h-3.5 w-3.5" />
+                                        <span className="text-muted-foreground text-xs sm:text-sm break-all">
+                                            {getFieldValue(appointment, "visitorEmail")}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Phone className="text-muted-foreground h-3.5 w-3.5" />
+                                        <span className="text-muted-foreground text-xs sm:text-sm break-all">
+                                            {getFieldValue(appointment, "visitorPhone")}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <StatusBadge status={status} className="text-sm" />
+                            <div className="flex justify-center sm:justify-start">
+                                <StatusBadge status={status} className="text-[10px] sm:text-xs" />
                             </div>
                         </div>
                     </div>

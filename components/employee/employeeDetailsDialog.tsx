@@ -78,30 +78,34 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
                     <DialogTitle>Employee Details</DialogTitle>
                 </DialogHeader>
 
-                <div className="space-y-6">
+                <div className="space-y-6 max-h-[80vh] overflow-y-auto px-1">
                     {/* Profile Header - LinkedIn/Facebook Style */}
-                    <div className="flex gap-6 border-b pb-6">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 border-b pb-6">
                         {/* Left Side - Employee Photo/Avatar */}
                         <div className="shrink-0">
-                            <Avatar className="h-24 w-24">
-                                <AvatarFallback className="text-2xl">{getInitials(employee.name)}</AvatarFallback>
+                            <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
+                                <AvatarFallback className="text-xl sm:text-2xl">{getInitials(employee.name)}</AvatarFallback>
                             </Avatar>
                         </div>
 
                         {/* Right Side - Employee Info & Status */}
-                        <div className="flex-1 space-y-3">
+                        <div className="flex-1 space-y-3 text-center sm:text-left">
                             <div>
-                                <h3 className="text-xl font-semibold">{employee.name}</h3>
-                                <div className="mt-1 flex items-center gap-2">
-                                    <Mail className="text-muted-foreground h-4 w-4" />
-                                    <span className="text-muted-foreground text-sm">{employee.email}</span>
-                                </div>
-                                <div className="mt-1 flex items-center gap-2">
-                                    <Phone className="text-muted-foreground h-4 w-4" />
-                                    <span className="text-muted-foreground text-sm">{employee.phone}</span>
+                                <h3 className="text-lg sm:text-xl font-semibold">{employee.name}</h3>
+                                <div className="mt-2 flex flex-col sm:flex-row flex-wrap items-center sm:items-start gap-1 sm:gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <Mail className="text-muted-foreground h-3.5 w-3.5" />
+                                        <span className="text-muted-foreground text-xs sm:text-sm">{employee.email}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Phone className="text-muted-foreground h-3.5 w-3.5" />
+                                        <span className="text-muted-foreground text-xs sm:text-sm">{employee.phone}</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div>{renderFieldValue("status", employee.status)}</div>
+                            <div className="flex justify-center sm:justify-start">
+                                {renderFieldValue("status", employee.status)}
+                            </div>
                         </div>
                     </div>
 
@@ -124,9 +128,9 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
                                         {icon}
                                         {label}
                                     </div>
-                                    <div className="text-foreground text-sm font-semibold">
+                                    <div className="text-foreground text-sm font-semibold break-all">
                                         {key === "_id" ? (
-                                            <span className="font-mono text-xs">{value}</span>
+                                            <span className="font-mono text-xs break-all">{value}</span>
                                         ) : (
                                             renderFieldValue(key, value, formatFn)
                                         )}

@@ -12,6 +12,7 @@ import { logout } from "@/store/slices/authSlice";
 import { useLogoutMutation } from "@/store/api/authApi";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     LayoutDashboard,
     Users,
@@ -301,16 +302,35 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
                     )}
                 </nav>
 
-                <div className="border-t bg-gray-50 p-4">
-                    <button
-                        onClick={handleLogout}
-                        disabled={isLoggingOut}
-                        className="mb-4 flex w-full items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 active:bg-red-100 disabled:opacity-50"
-                    >
-                        <LogOut className="h-5 w-5 shrink-0" />
-                        <span className="truncate">{isLoggingOut ? "Logging out..." : "Logout"}</span>
-                    </button>
-                    <p className="text-center text-xs text-gray-500">© 2024 Aynzo. All rights reserved.</p>
+                <div className="border-t bg-gray-50/50 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                        {user && (
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                                <Avatar className="h-8 w-8 shrink-0 border border-primary/10">
+                                    <AvatarImage src={user.profilePicture} alt={user.name} />
+                                    <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
+                                        {(isEmployee ? (user.name || "E") : (user.companyName || user.name || "A")).charAt(0).toUpperCase()}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col min-w-0">
+                                    <p className="text-xs font-bold text-gray-900 truncate leading-tight">
+                                        {isEmployee ? (user?.name || "Employee") : (user?.companyName || user?.name || "Admin")}
+                                    </p>
+                                    <p className="text-[10px] text-gray-500 truncate mt-0.5 leading-none">
+                                        {user.email}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                        <button
+                            onClick={handleLogout}
+                            disabled={isLoggingOut}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50 shrink-0"
+                            title="Logout"
+                        >
+                            <LogOut className="h-4 w-4" />
+                        </button>
+                    </div>
                 </div>
             </div>
         );

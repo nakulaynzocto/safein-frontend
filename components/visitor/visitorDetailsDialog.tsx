@@ -67,14 +67,14 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
                     <DialogTitle>Visitor Details</DialogTitle>
                 </DialogHeader>
 
-                <div className="space-y-6">
+                <div className="space-y-6 max-h-[80vh] overflow-y-auto px-1">
                     {/* Profile Header - LinkedIn/Facebook Style */}
-                    <div className="flex gap-6 border-b pb-6">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 border-b pb-6">
                         {/* Left Side - Visitor Photo */}
                         <div className="group relative shrink-0">
-                            <Avatar className="h-24 w-24">
+                            <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
                                 <AvatarImage src={visitor.photo} alt={visitor.name} />
-                                <AvatarFallback className="text-2xl">
+                                <AvatarFallback className="text-xl sm:text-2xl">
                                     {visitor.name
                                         .split(" ")
                                         .map((n) => n[0])
@@ -94,23 +94,23 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
                         </div>
 
                         {/* Right Side - Visitor Info */}
-                        <div className="flex-1 space-y-3">
+                        <div className="flex-1 space-y-3 text-center sm:text-left">
                             <div>
-                                <h3 className="text-xl font-semibold">{visitor.name}</h3>
+                                <h3 className="text-lg sm:text-xl font-semibold">{visitor.name}</h3>
                                 {visitor._id && (
-                                    <p className="text-muted-foreground mt-1 font-mono text-sm">ID: {visitor._id}</p>
+                                    <p className="text-muted-foreground mt-1 font-mono text-[10px] sm:text-xs break-all">ID: {visitor._id}</p>
                                 )}
-                                <div className="mt-2 flex flex-wrap items-center gap-2">
+                                <div className="mt-2 flex flex-col sm:flex-row flex-wrap items-center sm:items-start gap-1 sm:gap-3">
                                     <div className="flex items-center gap-2">
-                                        <Mail className="text-muted-foreground h-4 w-4" />
-                                        <span className="text-muted-foreground text-sm break-all">{visitor.email}</span>
+                                        <Mail className="text-muted-foreground h-3.5 w-3.5" />
+                                        <span className="text-muted-foreground text-xs sm:text-sm break-all">{visitor.email}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <Phone className="text-muted-foreground h-4 w-4" />
-                                        <span className="text-muted-foreground text-sm">{visitor.phone}</span>
+                                        <Phone className="text-muted-foreground h-3.5 w-3.5" />
+                                        <span className="text-muted-foreground text-xs sm:text-sm break-all">{visitor.phone}</span>
                                     </div>
                                     {visitor.gender && (
-                                        <Badge variant="secondary" className="h-5 text-[10px] capitalize">
+                                        <Badge variant="secondary" className="h-5 text-[9px] sm:text-[10px] capitalize">
                                             {visitor.gender}
                                         </Badge>
                                     )}
@@ -197,14 +197,14 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
                         )}
 
                         {/* Emergency Contact */}
-                        {visitor.emergencyContact?.name && (
+                        {visitor.emergencyContacts && visitor.emergencyContacts.length > 0 && (
                             <div className="space-y-1">
                                 <div className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
                                     <Users className="h-4 w-4" />
                                     Emergency Contact
                                 </div>
                                 <div className="text-foreground text-sm font-semibold">
-                                    {visitor.emergencyContact.name} ({visitor.emergencyContact.phone || "No phone"})
+                                    {visitor.emergencyContacts[0].name} ({visitor.emergencyContacts[0].phone || "No phone"})
                                 </div>
                             </div>
                         )}
