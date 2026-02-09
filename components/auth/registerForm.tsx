@@ -288,9 +288,9 @@ export function RegisterForm() {
 
                 {/* OTP Sent Message */}
                 {currentStep === "otp" && (
-                    <Alert className="mb-4 border-blue-200 bg-blue-50">
-                        <Mail className="h-4 w-4 text-blue-600" />
-                        <AlertDescription className="text-blue-800">
+                    <Alert className="mb-4 border-[#3882a5]/20 bg-[#3882a5]/5">
+                        <Mail className="h-4 w-4 text-[#3882a5]" />
+                        <AlertDescription className="text-[#074463]">
                             OTP sent to {userEmail}. Please enter it below to complete registration.
                         </AlertDescription>
                     </Alert>
@@ -327,7 +327,7 @@ export function RegisterForm() {
                             />
                         </div>
 
-                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
                             {isLoading ? "Registering..." : "Register"}
                         </Button>
                     </form>
@@ -390,7 +390,7 @@ export function RegisterForm() {
                                 </p>
                             </div>
 
-                            <Button type="submit" className="w-full" disabled={isVerifyingOtp || otpValue.length !== 6}>
+                            <Button type="submit" variant="primary" className="w-full" disabled={isVerifyingOtp || otpValue.length !== 6}>
                                 {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
                             </Button>
                         </form>
@@ -419,7 +419,7 @@ export function RegisterForm() {
                         </div>
 
                         <div className="flex flex-col gap-3 sm:flex-row">
-                            <Button onClick={handleGoToDashboard} className="flex-1">
+                            <Button onClick={handleGoToDashboard} variant="primary" className="flex-1">
                                 Go to Dashboard
                             </Button>
                             <Button variant="outline" onClick={handleGoToLogin} className="flex-1">

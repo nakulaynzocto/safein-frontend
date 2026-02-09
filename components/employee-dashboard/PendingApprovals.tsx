@@ -76,7 +76,7 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-blue-600" />
+                    <Clock className="h-5 w-5 text-[#3882a5]" />
                     Visit Approvals ({pendingAppointments.length})
                 </CardTitle>
                 <CardDescription>Appointments waiting for your approval</CardDescription>
@@ -89,13 +89,13 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
                     return (
                         <div
                             key={appointment._id}
-                            className="rounded-lg border border-blue-200 bg-blue-50/50 p-4 transition-all hover:shadow-md"
+                            className="rounded-lg border border-[#3882a5]/20 bg-[#3882a5]/5 p-4 transition-all hover:shadow-md"
                         >
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div className="flex-1 space-y-2">
                                     <div className="flex items-start gap-3">
-                                        <div className="rounded-full bg-blue-100 p-2">
-                                            <User className="h-4 w-4 text-blue-600" />
+                                        <div className="rounded-full bg-[#3882a5]/10 p-2">
+                                            <User className="h-4 w-4 text-[#3882a5]" />
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2">
@@ -133,10 +133,9 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
                                 <div className="flex gap-2 sm:ml-4">
                                     <Button
                                         size="sm"
-                                        variant="outline"
+                                        variant="primary"
                                         onClick={() => handleApprove(appointment._id)}
                                         disabled={isProcessing}
-                                        className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-950/30"
                                     >
                                         <CheckCircle className="mr-2 h-4 w-4" />
                                         {isProcessing && isApproving ? "Approving..." : "Approve"}

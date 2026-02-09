@@ -279,9 +279,9 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                         </Button>
                         <ActionButton
                             type="submit"
-                            variant="outline-primary"
+                            variant="primary"
                             disabled={isSubmitting}
-                            className="bg-[#3882a5] hover:bg-[#2d6a87] text-white px-8"
+                            className="px-8"
                         >
                             {isSubmitting ? (
                                 <>

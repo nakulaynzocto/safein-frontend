@@ -40,7 +40,7 @@ interface UpgradePlanModalProps {
 export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
     const router = useRouter();
     const { user } = useAppSelector((state) => state.auth);
-    
+
     // Check if user is an employee - employees cannot purchase subscriptions
     const isEmployee = checkIsEmployee(user);
     const { data, isLoading } = useGetAllSubscriptionPlansQuery({ isActive: true });
@@ -151,7 +151,7 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
 
                 <div className="mt-4 space-y-4">
                     {!isLoading && startingPriceText && (
-                        <div className="rounded-md border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+                        <div className="rounded-md border border-[#3882a5]/20 bg-[#3882a5]/5 px-4 py-3 text-sm text-[#074463]">
                             Paid plans start from <span className="font-semibold">{startingPriceText}</span>.
                         </div>
                     )}
@@ -166,19 +166,19 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
                                         type="button"
                                         onClick={() => setSelectedPlanId(plan._id)}
                                         className={`flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-xs transition sm:text-sm ${isSelected
-                                                ? "bg-brand/10 border-brand border text-slate-900"
-                                                : "border border-transparent text-slate-800 hover:bg-slate-100"
+                                            ? "bg-[#3882a5]/10 border-[#3882a5] border text-slate-900"
+                                            : "border border-transparent text-slate-800 hover:bg-slate-100"
                                             }`}
                                     >
                                         <div className="flex items-center gap-2">
                                             <div
-                                                className={`h-3 w-3 rounded-full border ${isSelected ? "border-brand bg-brand" : "border-slate-400 bg-white"
+                                                className={`h-3 w-3 rounded-full border ${isSelected ? "border-[#3882a5] bg-[#3882a5]" : "border-slate-400 bg-white"
                                                     }`}
                                             />
                                             <div className="font-medium">
                                                 {plan.name}
                                                 {plan.isPopular && (
-                                                    <span className="bg-brand/10 text-brand ml-2 rounded-full px-2 py-0.5 text-[10px] tracking-wide uppercase">
+                                                    <span className="bg-[#3882a5]/10 text-[#3882a5] ml-2 rounded-full px-2 py-0.5 text-[10px] tracking-wide uppercase">
                                                         Popular
                                                     </span>
                                                 )}
@@ -203,7 +203,7 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
                             Cancel
                         </Button>
                         {!isEmployee ? (
-                            <Button onClick={handleUpgradeClick} disabled={isCreating || !selectedPlanId} className="h-12 rounded-xl px-8">
+                            <Button onClick={handleUpgradeClick} variant="primary" disabled={isCreating || !selectedPlanId} className="h-12 rounded-xl px-8">
                                 {isCreating ? "Processing..." : "Upgrade Now"}
                             </Button>
                         ) : (

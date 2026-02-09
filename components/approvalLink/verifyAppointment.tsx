@@ -310,7 +310,7 @@ export function VerifyAppointment() {
                                                     onClick={() =>
                                                         window.open(appointment.visitor.idProof?.image, "_blank")
                                                     }
-                                                    className="mt-1 flex cursor-pointer items-center gap-2 font-mono text-xs break-all text-blue-600 hover:text-blue-800 hover:underline sm:text-sm"
+                                                    className="mt-1 flex cursor-pointer items-center gap-2 font-mono text-xs break-all text-[#3882a5] hover:text-[#2d6a87] hover:underline sm:text-sm"
                                                 >
                                                     <span>{appointment.visitor.idProof.number || "N/A"}</span>
                                                     <ExternalLink className="h-3 w-3 flex-shrink-0 sm:h-4 sm:w-4" />
@@ -345,10 +345,10 @@ export function VerifyAppointment() {
                     </div>
 
                     {/* Appointment Details Section */}
-                    <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20 space-y-3 rounded-xl border border-blue-100 dark:border-blue-900/30 p-4 shadow-sm sm:space-y-4 sm:p-6">
-                        <h3 className="flex items-center gap-2 text-base font-semibold text-blue-900 dark:text-blue-100 sm:text-lg">
-                            <div className="rounded-lg bg-blue-500/10 p-2">
-                                <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400 sm:h-5 sm:w-5" />
+                    <div className="bg-gradient-to-br from-[#3882a5]/5 to-[#3882a5]/10 dark:from-[#3882a5]/10 dark:to-[#3882a5]/5 space-y-3 rounded-xl border border-[#3882a5]/20 dark:border-[#3882a5]/10 p-4 shadow-sm sm:space-y-4 sm:p-6">
+                        <h3 className="flex items-center gap-2 text-base font-semibold text-[#074463] dark:text-[#3882a5] sm:text-lg">
+                            <div className="rounded-lg bg-[#3882a5]/10 p-2">
+                                <Calendar className="h-4 w-4 text-[#3882a5] dark:text-[#3882a5] sm:h-5 sm:w-5" />
                             </div>
                             Appointment Details
                         </h3>
@@ -356,8 +356,8 @@ export function VerifyAppointment() {
                             {/* Date & Time Combined */}
                             <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5">
-                                        <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
+                                        <Calendar className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">DATE & TIME</p>
@@ -371,8 +371,8 @@ export function VerifyAppointment() {
                             {/* Visitor Name */}
                             <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5">
-                                        <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
+                                        <User className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">VISITOR</p>
@@ -387,8 +387,8 @@ export function VerifyAppointment() {
                             {appointment.appointmentDetails.purpose && (
                                 <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
                                     <div className="flex items-start gap-3">
-                                        <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5 mt-0.5">
-                                            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                        <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5 mt-0.5">
+                                            <FileText className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">PURPOSE</p>
@@ -403,8 +403,8 @@ export function VerifyAppointment() {
                             {/* Employee Info */}
                             <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5">
-                                        <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
+                                        <Building2 className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">MEETING WITH</p>
@@ -425,8 +425,8 @@ export function VerifyAppointment() {
                                 {appointment.appointmentDetails.duration && (
                                     <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
                                         <div className="flex items-center gap-3">
-                                            <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5">
-                                                <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                            <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
+                                                <Clock className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
                                             </div>
                                             <div className="flex-1">
                                                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">DURATION</p>
@@ -441,8 +441,8 @@ export function VerifyAppointment() {
                                 {appointment.appointmentDetails.meetingRoom && (
                                     <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
                                         <div className="flex items-center gap-3">
-                                            <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5">
-                                                <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                            <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
+                                                <Building2 className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">ROOM</p>
@@ -459,8 +459,8 @@ export function VerifyAppointment() {
                             {appointment.appointmentDetails.notes && (
                                 <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
                                     <div className="flex items-start gap-3">
-                                        <div className="flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 p-2.5 mt-0.5">
-                                            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                        <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5 mt-0.5">
+                                            <FileText className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">ADDITIONAL NOTES</p>
@@ -497,10 +497,10 @@ export function VerifyAppointment() {
                         </Button>
                         <Button
                             size="lg"
-                            variant="outline"
+                            variant="primary"
                             onClick={() => handleStatusUpdate("approved")}
                             disabled={isProcessing}
-                            className="flex-1 sm:w-auto sm:flex-initial border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-950/30"
+                            className="flex-1 sm:w-auto sm:flex-initial"
                         >
                             {isProcessing ? (
                                 <>

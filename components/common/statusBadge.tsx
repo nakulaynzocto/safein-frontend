@@ -70,7 +70,7 @@ export function StatusBadge({ status, variant, className }: StatusBadgeProps) {
         warning:
             "bg-amber-100/80 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
         error: "bg-rose-100/80 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20",
-        info: "bg-blue-100/80 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
+        info: "bg-[#3882a5]/10 text-[#3882a5] border-[#3882a5]/20 dark:bg-[#3882a5]/10 dark:text-[#3882a5] dark:border-[#3882a5]/20",
         default:
             "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
     };
@@ -79,7 +79,7 @@ export function StatusBadge({ status, variant, className }: StatusBadgeProps) {
         success: "bg-emerald-500",
         warning: "bg-amber-500",
         error: "bg-rose-500",
-        info: "bg-blue-500",
+        info: "bg-[#3882a5]",
         default: "bg-slate-400",
     };
 

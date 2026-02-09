@@ -89,7 +89,7 @@ export function SettingsPageContent() {
                             className={cn(
                                 "relative h-5 w-9 self-start rounded-full p-1 transition-all duration-300 sm:self-auto",
                                 emailEnabled
-                                    ? "bg-primary shadow-[0_0_8px_rgba(7,68,99,0.4)]"
+                                    ? "bg-[#3882a5] shadow-[0_0_8px_rgba(56,130,165,0.4)]"
                                     : "bg-muted border-border border",
                             )}
                         >
@@ -122,7 +122,7 @@ export function SettingsPageContent() {
                             className={cn(
                                 "relative h-5 w-9 self-start rounded-full p-1 transition-all duration-300 sm:self-auto",
                                 whatsappEnabled
-                                    ? "bg-primary shadow-[0_0_8px_rgba(7,68,99,0.4)]"
+                                    ? "bg-[#3882a5] shadow-[0_0_8px_rgba(56,130,165,0.4)]"
                                     : "bg-muted border-border border",
                             )}
                         >
@@ -143,7 +143,7 @@ export function SettingsPageContent() {
                                 htmlFor="sms-enabled"
                                 className="flex cursor-pointer items-center gap-2 text-sm font-medium sm:text-base"
                             >
-                                <Phone className="h-4 w-4 flex-shrink-0 text-blue-600" />
+                                <Phone className="h-4 w-4 flex-shrink-0 text-[#3882a5]" />
                                 SMS Notifications
                             </Label>
                             <p className="text-muted-foreground mt-1 text-xs sm:text-sm">
@@ -155,7 +155,7 @@ export function SettingsPageContent() {
                             className={cn(
                                 "relative h-5 w-9 self-start rounded-full p-1 transition-all duration-300 sm:self-auto",
                                 smsEnabled
-                                    ? "bg-primary shadow-[0_0_8px_rgba(7,68,99,0.4)]"
+                                    ? "bg-[#3882a5] shadow-[0_0_8px_rgba(56,130,165,0.4)]"
                                     : "bg-muted border-border border",
                             )}
                         >
@@ -171,7 +171,7 @@ export function SettingsPageContent() {
                     </div>
 
                     <div className="border-t pt-4">
-                        <Button onClick={handleSave} disabled={isUpdating} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium sm:w-auto sm:px-6">
+                        <Button onClick={handleSave} disabled={isUpdating} variant="primary" className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium sm:w-auto sm:px-6">
                             {isUpdating ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

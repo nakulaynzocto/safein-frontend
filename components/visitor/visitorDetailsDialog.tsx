@@ -184,7 +184,7 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
                                     {visitor.idProof.image ? (
                                         <button
                                             onClick={() => window.open(visitor?.idProof?.image, "_blank")}
-                                            className="flex cursor-pointer items-center gap-2 font-mono text-blue-600 hover:text-blue-800 hover:underline"
+                                            className="flex cursor-pointer items-center gap-2 font-mono text-[#3882a5] hover:text-[#2d6a87] hover:underline"
                                         >
                                             <span>{visitor.idProof.number || "N/A"}</span>
                                             <ExternalLink className="h-4 w-4" />

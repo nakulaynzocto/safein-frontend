@@ -55,11 +55,11 @@ const statusConfig = {
     },
     info: {
         icon: AlertCircle,
-        iconColor: "text-blue-600",
-        iconBg: "bg-blue-50",
-        borderColor: "border-blue-200",
-        bgColor: "bg-blue-50",
-        titleColor: "text-blue-600",
+        iconColor: "text-[#3882a5]",
+        iconBg: "bg-[#3882a5]/5",
+        borderColor: "border-[#3882a5]/20",
+        bgColor: "bg-[#3882a5]/5",
+        titleColor: "text-[#3882a5]",
     },
 };
 

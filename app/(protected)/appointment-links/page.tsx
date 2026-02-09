@@ -523,12 +523,12 @@ export default function AppointmentLinksPage() {
                                     <ActionButton
                                         variant="primary"
                                         size="xl"
-                                        className="flex items-center justify-center gap-2 text-xs whitespace-nowrap sm:text-sm bg-[#3882a5] hover:bg-[#2d6a87] text-white"
+                                        className="flex items-center justify-center gap-2 text-xs whitespace-nowrap sm:text-sm"
                                         onClick={() => setShowUpgradeModal(true)}
                                     >
                                         <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                        <span className="sm:hidden">Upgrade</span>
-                                        <span className="hidden sm:inline">Upgrade to Schedule More</span>
+                                        <span className="sm:hidden">UPGRADE</span>
+                                        <span className="hidden sm:inline">UPGRADE TO SCHEDULE MORE</span>
                                     </ActionButton>
                                     <UpgradePlanModal
                                         isOpen={showUpgradeModal}
@@ -664,7 +664,8 @@ export default function AppointmentLinksPage() {
                             <Button
                                 onClick={handleVerifyOtp}
                                 disabled={otpValue.length !== 4 || isVerifying}
-                                className="bg-[#3882a5] hover:bg-[#2d6a87] text-white flex-1 transition-all"
+                                variant="primary"
+                                className="flex-1"
                             >
                                 {isVerifying ? <LoadingSpinner size="sm" className="mr-2" /> : "Verify & Schedule"}
                             </Button>
@@ -685,7 +686,7 @@ export default function AppointmentLinksPage() {
                             {selectedNote ? `"${selectedNote}"` : "No note provided."}
                         </div>
                         <DialogFooter>
-                            <Button onClick={() => setShowNoteModal(false)} className="bg-[#3882a5] hover:bg-[#2d6a87] text-white px-8">
+                            <Button onClick={() => setShowNoteModal(false)} variant="primary" className="px-8">
                                 Close
                             </Button>
                         </DialogFooter>
@@ -697,7 +698,7 @@ export default function AppointmentLinksPage() {
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
                             <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-                                <MessageSquare className="h-5 w-5 text-blue-600" />
+                                <MessageSquare className="h-5 w-5 text-[#3882a5]" />
                                 Add/Update Note
                             </DialogTitle>
                             <DialogDescription>
@@ -709,7 +710,7 @@ export default function AppointmentLinksPage() {
                                 placeholder="Type your note here..."
                                 value={noteValue}
                                 onChange={(e) => setNoteValue(e.target.value)}
-                                className="min-h-[150px] resize-none border-2 focus:border-blue-500"
+                                className="min-h-[150px] resize-none border-2 focus:border-[#3882a5]"
                             />
                         </div>
                         <DialogFooter className="gap-2 sm:gap-0">
@@ -719,7 +720,8 @@ export default function AppointmentLinksPage() {
                             <Button
                                 onClick={handleUpdateNote}
                                 disabled={isUpdatingNote}
-                                className="bg-blue-600 hover:bg-blue-700 text-white flex-1"
+                                variant="primary"
+                                className="flex-1"
                             >
                                 {isUpdatingNote ? <LoadingSpinner size="sm" className="mr-2" /> : "Save Note"}
                             </Button>

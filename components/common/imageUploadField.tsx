@@ -354,7 +354,7 @@ export function ImageUploadField({
                             <div className="space-y-2 sm:space-y-3">
                                 <Button
                                     onClick={handleCameraUpload}
-                                    className="h-12 w-full justify-start rounded-xl bg-blue-500 text-white hover:bg-blue-600 sm:text-base"
+                                    className="h-12 w-full justify-start rounded-xl bg-[#3882a5] text-white hover:bg-[#2d6a87] sm:text-base"
                                 >
                                     <Camera className="mr-2 h-5 w-5" />
                                     <span className="text-sm sm:text-base">Take Photo</span>
@@ -498,7 +498,7 @@ export function ImageUploadField({
                             <div className="space-y-2 sm:space-y-3">
                                 <Button
                                     onClick={handleCameraUpload}
-                                    className="h-12 w-full justify-start rounded-xl bg-blue-500 text-white hover:bg-blue-600 sm:text-base"
+                                    className="h-12 w-full justify-start rounded-xl bg-[#3882a5] text-white hover:bg-[#2d6a87] sm:text-base"
                                 >
                                     <Camera className="mr-2 h-5 w-5" />
                                     <span className="text-sm sm:text-base">Take Photo</span>
@@ -529,7 +529,7 @@ export function ImageUploadField({
                                 ? "border-green-400 bg-white ring-2 ring-green-200"
                                 : imageError
                                     ? "border-red-400 bg-red-50 ring-2 ring-red-200"
-                                    : "border-gray-300 bg-white hover:border-blue-500 hover:ring-2 hover:ring-blue-200"
+                                    : "border-gray-300 bg-white hover:border-[#3882a5] hover:ring-2 hover:ring-[#3882a5]/20"
                                 }`}
                             onClick={(e) => {
                                 e.preventDefault();
@@ -542,11 +542,11 @@ export function ImageUploadField({
                             {isUploading && (
                                 <div className="bg-opacity-95 absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white">
                                     <div className="flex flex-col items-center">
-                                        <div className="h-8 w-8 animate-spin rounded-full border-3 border-blue-200 border-t-blue-500"></div>
-                                        <span className="mt-3 text-xs font-medium text-blue-600 sm:text-sm">
+                                        <div className="h-8 w-8 animate-spin rounded-full border-3 border-[#3882a5]/20 border-t-[#3882a5]"></div>
+                                        <span className="mt-3 text-xs font-medium text-[#3882a5] sm:text-sm">
                                             Uploading...
                                         </span>
-                                        <span className="mt-1 text-xs text-blue-500">Please wait</span>
+                                        <span className="mt-1 text-xs text-[#3882a5]/70">Please wait</span>
                                     </div>
                                 </div>
                             )}
@@ -594,21 +594,22 @@ export function ImageUploadField({
                 ) : (
                     <div className="relative">
                         <div
-                            className={`group flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-gradient-to-br from-gray-50 to-gray-100 shadow-sm transition-all duration-300 hover:from-blue-50 hover:to-blue-100 hover:shadow-md sm:h-40 sm:w-40 sm:rounded-xl ${isUploading
-                                ? "border-blue-400 bg-blue-50 ring-2 ring-blue-200"
-                                : "border-gray-300 hover:border-blue-400 hover:ring-2 hover:ring-blue-200"
-                                }`}
+                            className={`group flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-gradient-to-br from-gray-50 to-gray-100 shadow-sm transition-all duration-300 hover:from-[#3882a5]/5 hover:to-[#3882a5]/10 hover:shadow-md sm:h-40 sm:w-40 sm:rounded-xl ${isUploading
+                                ? "border-[#3882a5]/40 bg-[#3882a5]/5 ring-2 ring-[#3882a5]/20"
+                                : "border-gray-300 hover:border-[#3882a5]/40 hover:ring-2 hover:ring-[#3882a5]/20"
+                                }`
+                            }
                         >
                             {isUploading || isImageLoading ? (
                                 <div className="flex flex-col items-center justify-center p-4">
                                     <div className="relative">
-                                        <div className="h-8 w-8 animate-spin rounded-full border-3 border-blue-200"></div>
-                                        <div className="absolute top-0 left-0 h-8 w-8 animate-spin rounded-full border-3 border-blue-500 border-t-transparent"></div>
+                                        <div className="h-8 w-8 animate-spin rounded-full border-3 border-[#3882a5]/20"></div>
+                                        <div className="absolute top-0 left-0 h-8 w-8 animate-spin rounded-full border-3 border-[#3882a5] border-t-transparent"></div>
                                     </div>
-                                    <span className="mt-3 animate-pulse text-xs font-medium text-blue-600 sm:text-sm">
+                                    <span className="mt-3 animate-pulse text-xs font-medium text-[#3882a5] sm:text-sm">
                                         {isUploading ? "Uploading..." : "Loading..."}
                                     </span>
-                                    <span className="mt-1 text-xs text-blue-500">Please wait</span>
+                                    <span className="mt-1 text-xs text-[#3882a5]/70">Please wait</span>
                                 </div>
                             ) : (
                                 <div
@@ -619,14 +620,14 @@ export function ImageUploadField({
                                         triggerFileInput(e);
                                     }}
                                 >
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 shadow-inner transition-all duration-300 group-hover:bg-blue-200 group-hover:shadow-md sm:h-14 sm:w-14">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 shadow-inner transition-all duration-300 group-hover:bg-[#3882a5]/10 group-hover:shadow-md sm:h-14 sm:w-14">
                                         {enableImageCapture ? (
-                                            <Camera className="h-6 w-6 text-gray-500 transition-colors duration-300 group-hover:text-blue-600 sm:h-7 sm:w-7" />
+                                            <Camera className="h-6 w-6 text-gray-500 transition-colors duration-300 group-hover:text-[#3882a5] sm:h-7 sm:w-7" />
                                         ) : (
-                                            <ImageIcon className="h-6 w-6 text-gray-500 transition-colors duration-300 group-hover:text-blue-600 sm:h-7 sm:w-7" />
+                                            <ImageIcon className="h-6 w-6 text-gray-500 transition-colors duration-300 group-hover:text-[#3882a5] sm:h-7 sm:w-7" />
                                         )}
                                     </div>
-                                    <span className="mt-3 text-center text-xs font-medium text-gray-600 transition-colors duration-300 group-hover:text-blue-600 sm:mt-4 sm:text-sm">
+                                    <span className="mt-3 text-center text-xs font-medium text-gray-600 transition-colors duration-300 group-hover:text-[#3882a5] sm:mt-4 sm:text-sm">
                                         {enableImageCapture ? "Take or Upload Photo" : "Upload Image"}
                                     </span>
                                     <span className="mt-1.5 text-center text-xs text-gray-400 sm:mt-2">

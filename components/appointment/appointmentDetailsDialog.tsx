@@ -106,7 +106,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
             return (
                 <button
                     onClick={() => window.open(appointment.appointmentDetails?.vehiclePhoto, "_blank")}
-                    className="flex cursor-pointer items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline"
+                    className="flex cursor-pointer items-center gap-2 text-[#3882a5] hover:text-[#2d6a87] hover:underline"
                 >
                     <span>{value}</span>
                     <ExternalLink className="h-4 w-4" />

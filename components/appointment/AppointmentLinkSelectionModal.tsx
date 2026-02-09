@@ -55,7 +55,7 @@ export function AppointmentLinkSelectionModal({
                                 "border-border hover:border-[#3882a5] hover:bg-[#3882a5]/5"
                             )}
                         >
-                            <div className="p-4 rounded-full bg-blue-50 text-[#3882a5] group-hover:scale-110 transition-transform">
+                            <div className="p-4 rounded-full bg-[#3882a5]/5 text-[#3882a5] group-hover:scale-110 transition-transform">
                                 <Link2 className="h-8 w-8" />
                             </div>
                             <div className="text-center">

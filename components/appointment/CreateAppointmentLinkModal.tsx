@@ -316,7 +316,7 @@ export function CreateAppointmentLinkModal({
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <Link2 className="h-5 w-5 text-blue-500" />
+                        <Link2 className="h-5 w-5 text-[#3882a5]" />
                         Create Appointment Link
                     </DialogTitle>
                     <DialogDescription>
@@ -423,7 +423,7 @@ export function CreateAppointmentLinkModal({
                                                     This visitor is already registered
                                                 </span>
                                             ) : (
-                                                <span className="flex items-center gap-1 text-blue-600">
+                                                <span className="flex items-center gap-1 text-[#3882a5]">
                                                     <User className="h-4 w-4" />
                                                     New visitor - will be registered during booking
                                                 </span>
@@ -523,7 +523,7 @@ export function CreateAppointmentLinkModal({
                         </ActionButton>
                         <ActionButton
                             type="submit"
-                            variant="outline-primary"
+                            variant="primary"
                             disabled={isSubmitting || isCreating || !!(isEmployee && !currentEmployeeId)}
                             size="xl"
                             className="px-6"
