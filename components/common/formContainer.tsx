@@ -20,8 +20,14 @@ export function FormContainer({ children, isPage = false, isLoading = false, isE
                     <LoadingSpinner size="lg" />
                 </div>
             ) : (
-                <div className={isPage ? "" : "max-h-[65vh] overflow-y-auto pr-2 touch-pan-y pointer-events-auto"}>
+                <div className={isPage ? "" : "max-h-[calc(65vh-40px)] overflow-y-auto overflow-x-hidden pr-2 pb-4 scroll-smooth overscroll-contain [-webkit-overflow-scrolling:touch]"}>
                     {children}
+                    {/* Simple footer strip for mobile */}
+                    {!isPage && (
+                        <div className="mt-6 pt-4 border-t border-border/50">
+                            <div className="h-2 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-full"></div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

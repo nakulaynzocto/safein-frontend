@@ -59,7 +59,7 @@ export const createUpdateAppointmentPayload = (data: AppointmentFormData, existi
  * Format employee label for select option
  */
 export const formatEmployeeLabel = (emp: any): string => {
-    return `${emp.name} (${emp.status}) - ${emp.department}`;
+    return `${emp.name} (${emp.email})`;
 };
 
 /**
@@ -73,7 +73,7 @@ export const formatEmployeeSearchKeywords = (emp: any): string => {
  * Format visitor label for select option
  */
 export const formatVisitorLabel = (visitor: any): string => {
-    return `${visitor.name} - ${visitor.email}`;
+    return `${visitor.name} (${visitor.email})`;
 };
 
 /**

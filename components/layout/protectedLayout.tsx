@@ -82,10 +82,15 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                 {/* Only show sidebar if user has active subscription AND token */}
                 {shouldShowSidebar && <Sidebar />}
                 <main
-                    className="flex-1 overflow-x-hidden overflow-y-auto transition-opacity duration-200"
-                    style={{ backgroundColor: "var(--background)" }}
+                    className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto transition-opacity duration-200"
+                    style={{
+                        backgroundColor: "var(--background)",
+                        WebkitOverflowScrolling: "touch",
+                        scrollBehavior: "smooth",
+                        overscrollBehaviorY: "contain"
+                    }}
                 >
-                    <div className="container mx-auto max-w-full px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 lg:px-6 lg:py-6">
+                    <div className="flex-1 container mx-auto max-w-full px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 lg:px-6 lg:py-6 pb-6 sm:pb-8">
                         {isLoading ? (
                             <PageSkeleton />
                         ) : shouldShowContent ? (
@@ -109,6 +114,14 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                             </div>
                         )}
                     </div>
+                    {/* Footer matching sidebar style - always at bottom */}
+                    <footer className="border-t bg-gray-50/50 flex-shrink-0" style={{ height: '64px' }}>
+                        <div className="container mx-auto max-w-full h-full flex items-center justify-center">
+                            <div className="text-xs text-gray-500 font-medium">
+                                © 2026 Visitor Management System
+                            </div>
+                        </div>
+                    </footer>
                 </main>
             </div>
         </div>

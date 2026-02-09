@@ -147,8 +147,25 @@ export function DataTable<T extends Record<string, any>>({
     }
 
     const TableContent = () => (
-        <div className={cn("-mx-1 overflow-x-auto sm:mx-0", className)}>
-            <table className="w-full text-left text-sm">
+        <div
+            className={cn("-mx-1 sm:mx-0", className)}
+            style={{
+                // Manual overflow control
+                overflowX: "auto",
+                overflowY: "visible",
+                WebkitOverflowScrolling: "touch",
+                scrollBehavior: "smooth",
+                // Remove all touch-action restrictions - let browser decide naturally
+                userSelect: "none",
+                WebkitUserSelect: "none"
+            }}
+        >
+            <table
+                className="w-full text-left text-sm"
+                style={{
+                    userSelect: "none"
+                }}
+            >
                 <thead className="bg-muted/80 border-border text-muted-foreground border-b text-[10px] font-bold tracking-wider uppercase">
                     <tr>
                         {columns.map((column, index) => (

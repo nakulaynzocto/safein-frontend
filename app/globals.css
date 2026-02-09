@@ -135,6 +135,12 @@
         min-height: 100%;
         /* Prevent white screen during page transitions */
         transition: background-color 0.3s ease-in-out;
+        /* Smooth scrolling for entire app */
+        scroll-behavior: smooth;
+        /* Optimize for mobile touch */
+        -webkit-tap-highlight-color: transparent;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     body {
@@ -148,7 +154,14 @@
         transition: background-color 0.3s ease-in-out;
         /* Ensure background is always visible */
         overflow-x: hidden;
+        /* Smooth momentum scrolling for iOS and modern browsers */
         -webkit-overflow-scrolling: touch;
+        /* Contain overscroll to prevent bounce effect on mobile */
+        overscroll-behavior-y: contain;
+        /* Allow smooth touch scrolling */
+        touch-action: pan-y pinch-zoom;
+        /* Smooth scroll behavior */
+        scroll-behavior: smooth;
     }
 
     /* Prevent white flash during page transitions */
@@ -616,12 +629,14 @@
         /* Prevents iOS zoom on focus */
     }
 
+    /* Smooth scrolling for overflow elements on mobile */
     .overflow-x-auto,
     .overflow-y-auto {
         -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
+        scroll-behavior: smooth;
     }
 
+    /* Hide scrollbars on mobile for cleaner look */
     .overflow-x-auto::-webkit-scrollbar,
     .overflow-y-auto::-webkit-scrollbar {
         display: none;
@@ -635,11 +650,32 @@
     /* Mobile table improvements */
     table {
         font-size: 12px;
+        /* Allow scrolling when touching table */
+        pointer-events: auto;
+        /* Prevent text selection while scrolling */
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     table th,
     table td {
         padding: 8px 6px;
+    }
+
+    /* Allow table interactive elements to work */
+    table button,
+    table a,
+    table [role="button"] {
+        user-select: auto;
+        -webkit-user-select: auto;
+    }
+
+    /* Smooth scrolling for all main containers on mobile */
+    main,
+    [role="main"],
+    .container {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
     }
 }
 
