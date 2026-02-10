@@ -10,6 +10,9 @@ import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { logout } from "@/store/slices/authSlice";
 import { useLogoutMutation } from "@/store/api/authApi";
+// Import Chat Query
+import { useGetChatsQuery } from "@/store/api/chatApi";
+
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,6 +32,7 @@ import {
     Menu,
     ClipboardList,
     Link as LinkIcon,
+    MessageSquare,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -84,6 +88,12 @@ const baseNavigation: Array<{
             icon: ClipboardList,
             roles: ["admin"], // Only admin
         },
+        {
+            name: "Messages",
+            href: routes.privateroute.MESSAGES,
+            icon: MessageSquare,
+            roles: ["admin", "employee"], // Both admin and employee
+        },
     ];
 
 // Base settings submenu items
@@ -101,6 +111,15 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
     const router = useRouter();
     const dispatch = useAppDispatch();
     const { user } = useAppSelector((state) => state.auth);
+
+    // Fetch Chats for Badge Count
+    const { data: chats } = useGetChatsQuery(undefined, { skip: !user });
+
+    // Calculate total unread messages
+    const unreadMessagesCount = (chats || []).reduce((acc, chat) => {
+        const userId = user?.id || (user as any)?._id;
+        return acc + (chat.unreadCounts?.[userId] || 0);
+    }, 0);
 
     // Check if user is employee
     const isEmployee = checkIsEmployee(user);
@@ -242,13 +261,14 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
                 <nav className="flex-1 space-y-2 overflow-y-auto p-2">
                     {navigation.map((item) => {
                         if (!item.href) return null;
+                        const isMessages = item.name === "Messages";
                         return (
                             <Link
                                 key={item.name}
                                 href={item.href}
                                 prefetch={true}
                                 className={cn(
-                                    "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200",
+                                    "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 relative",
                                     isActive(item.href)
                                         ? "bg-primary/10 text-primary shadow-sm"
                                         : "text-gray-700 hover:bg-gray-100 active:bg-gray-200",
@@ -257,6 +277,11 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
                             >
                                 <item.icon className="h-5 w-5 shrink-0" />
                                 <span className="truncate">{item.name}</span>
+                                {isMessages && unreadMessagesCount > 0 && (
+                                    <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full shadow-sm">
+                                        {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                                    </span>
+                                )}
                             </Link>
                         );
                     })}
@@ -352,18 +377,26 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
             <nav className="mt-8 flex-1 space-y-2 overflow-y-auto p-2">
                 {navigation.map((item) => {
                     if (!item.href) return null;
+                    const isMessages = item.name === "Messages";
                     return (
                         <Link
                             key={item.name}
                             href={item.href}
                             prefetch={true}
                             className={cn(
-                                "sidebar-item rounded-lg border-0 text-base",
+                                "sidebar-item rounded-lg border-0 text-base flex justify-between items-center pr-3",
                                 isActive(item.href) && "active bg-primary/10 text-primary",
                             )}
                         >
-                            <item.icon className="sidebar-item-icon" />
-                            <span className="sidebar-item-text font-medium tracking-wide">{item.name}</span>
+                            <div className="flex items-center">
+                                <item.icon className="sidebar-item-icon" />
+                                <span className="sidebar-item-text font-medium tracking-wide">{item.name}</span>
+                            </div>
+                            {isMessages && unreadMessagesCount > 0 && (
+                                <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full shadow-sm animate-in fade-in zoom-in duration-300">
+                                    {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                                </span>
+                            )}
                         </Link>
                     );
                 })}

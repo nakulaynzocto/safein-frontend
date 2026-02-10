@@ -56,6 +56,7 @@ export const routes = {
         SETTINGS_STATUS: "/settings/status",
         SPOT_PASS: "/spot-pass",
         SPOT_PASS_CREATE: "/spot-pass/create",
+        MESSAGES: "/messages",
     },
 } as const;
 

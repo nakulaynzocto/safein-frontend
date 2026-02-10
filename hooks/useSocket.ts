@@ -18,6 +18,18 @@ export enum SocketEvents {
     APPOINTMENT_DELETED = "appointment_deleted",
     APPOINTMENT_STATUS_CHANGED = "appointment_status_changed",
     NEW_NOTIFICATION = "new_notification",
+
+    // Chat Events
+    JOIN_CHAT_ROOM = "join_chat_room",
+    LEAVE_CHAT_ROOM = "leave_chat_room",
+    SEND_MESSAGE = "send_message",
+    RECEIVE_MESSAGE = "receive_message",
+    TYPING = "typing",
+    STOP_TYPING = "stop_typing",
+    READ_RECEIPT = "read_receipt",
+    USER_ONLINE = "user_online",
+    USER_OFFLINE = "user_offline",
+    GET_ONLINE_USERS = "get_online_users",
 }
 
 interface UseSocketOptions {
@@ -263,7 +275,7 @@ export function useSocket(options: UseSocketOptions = {}) {
         }
 
         socketRef.current = io(socketUrl, {
-            transports: ["websocket", "polling"],
+            transports: ["websocket"],
             autoConnect: true,
             reconnection: true,
             reconnectionAttempts: 3,

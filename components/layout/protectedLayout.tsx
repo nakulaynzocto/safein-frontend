@@ -10,6 +10,7 @@ import { useAppointmentSocket } from "@/hooks/useSocket";
 import { routes } from "@/utils/routes";
 import { clearAuthData } from "@/utils/helpers";
 import { Banner } from "@/components/common/banner";
+import { useChatNotifications } from "@/hooks/useChatNotifications";
 
 interface ProtectedLayoutProps {
     children: ReactNode;
@@ -37,7 +38,12 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
     // 🔌 Initialize WebSocket for real-time appointment updates
     // Auto-connects when user is authenticated and auto-disconnects on logout
+    // 🔌 Initialize WebSocket for real-time appointment updates
+    // Auto-connects when user is authenticated and auto-disconnects on logout
     useAppointmentSocket();
+
+    // 🔔 Listen for Chat Notifications globally
+    useChatNotifications();
 
     // Immediate hard redirect for unauthenticated users in ProtectedLayout
     // This is a fail-safe for the global useAuthSubscription redirect
