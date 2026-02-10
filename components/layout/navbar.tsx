@@ -18,7 +18,7 @@ import { useLogoutMutation, useGetProfileQuery } from "@/store/api/authApi";
 import { useGetEmployeeQuery, useGetEmployeesQuery } from "@/store/api/employeeApi";
 import { routes } from "@/utils/routes";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
-import { isEmployee as checkIsEmployee, clearAuthData } from "@/utils/helpers";
+import { isEmployee as checkIsEmployee, clearAuthData, formatName } from "@/utils/helpers";
 import { NotificationBell } from "@/components/common/NotificationBell";
 import { useNavbarScrollStyle } from "@/hooks/useScrollStyle";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
@@ -114,7 +114,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
 
     // Get employee name - prioritize employee data name from API, then employee from list, then user name, then email
     const employeeName = isEmployee
-        ? employeeData?.name || employeeFromList?.name || user?.name || user?.email || "Employee"
+        ? formatName(employeeData?.name || employeeFromList?.name || user?.name || "") || user?.email || "Employee"
         : null;
 
     useEffect(() => {
@@ -408,7 +408,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                             />
                                         )}
                                         <span className="text-sm font-semibold whitespace-nowrap">
-                                            {user.companyName}
+                                            {formatName(user.companyName)}
                                         </span>
                                     </div>
                                 )}
@@ -443,8 +443,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                         )}
                                         <span className="text-sm font-semibold whitespace-nowrap">
                                             {user?.companyName && employeeName
-                                                ? `${user.companyName} (${employeeName})`
-                                                : user?.companyName || employeeName || "Employee"}
+                                                ? `${formatName(user.companyName)} (${employeeName})`
+                                                : formatName(user?.companyName || "") || employeeName || "Employee"}
                                         </span>
                                     </div>
                                 )}

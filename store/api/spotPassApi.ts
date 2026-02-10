@@ -12,7 +12,7 @@ export interface SpotPass {
     photo?: string;
     vehicleNumber?: string;
     notes?: string;
-    employeeId?: { _id: string; name: string } | string;
+    employeeId?: { _id: string; name: string; photo?: string } | string;
     checkInTime: string;
     checkOutTime?: string;
     status: "checked-in" | "checked-out";

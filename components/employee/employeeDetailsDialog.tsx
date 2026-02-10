@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { Employee } from "@/store/api/employeeApi";
 import { User, Mail, Phone, Building, Briefcase, Calendar, Clock } from "lucide-react";
 import { StatusBadge } from "@/components/common/statusBadge";
+import { formatName } from "@/utils/helpers";
 
 const formatDate = (value: string | null | undefined, formatStr: string, fallback: string = "N/A"): string => {
     if (!value) return fallback;
@@ -91,7 +92,7 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
                         {/* Right Side - Employee Info & Status */}
                         <div className="flex-1 space-y-3 text-center sm:text-left">
                             <div>
-                                <h3 className="text-lg sm:text-xl font-semibold">{employee.name}</h3>
+                                <h3 className="text-lg sm:text-xl font-semibold">{formatName(employee.name)}</h3>
                                 <div className="mt-2 flex flex-col sm:flex-row flex-wrap items-center sm:items-start gap-1 sm:gap-4">
                                     <div className="flex items-center gap-2">
                                         <Mail className="text-muted-foreground h-3.5 w-3.5" />
@@ -132,7 +133,7 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
                                         {key === "_id" ? (
                                             <span className="font-mono text-xs break-all">{value}</span>
                                         ) : (
-                                            renderFieldValue(key, value, formatFn)
+                                            key === "department" || key === "designation" ? formatName(renderFieldValue(key, value, formatFn)) : renderFieldValue(key, value, formatFn)
                                         )}
                                     </div>
                                 </div>

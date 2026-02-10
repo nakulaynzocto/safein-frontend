@@ -42,7 +42,15 @@ const spotPassSchema = yup.object({
     photo: yup.string().default(""),
 });
 
-type SpotPassFormData = yup.InferType<typeof spotPassSchema>;
+type SpotPassFormData = {
+    name: string;
+    phone: string;
+    gender: string;
+    address: string;
+    notes?: string;
+    employeeId?: string;
+    photo?: string;
+};
 
 export function SpotPassCreateForm() {
     const router = useRouter();

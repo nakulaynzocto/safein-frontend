@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { formatDate, formatDateTime } from "@/utils/helpers";
+import { formatDate, formatDateTime, formatName } from "@/utils/helpers";
 import { Visitor } from "@/store/api/visitorApi";
 import {
     User,
@@ -96,7 +96,7 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
                         {/* Right Side - Visitor Info */}
                         <div className="flex-1 space-y-3 text-center sm:text-left">
                             <div>
-                                <h3 className="text-lg sm:text-xl font-semibold">{visitor.name}</h3>
+                                <h3 className="text-lg sm:text-xl font-semibold">{formatName(visitor.name)}</h3>
                                 {visitor._id && (
                                     <p className="text-muted-foreground mt-1 font-mono text-[10px] sm:text-xs break-all">ID: {visitor._id}</p>
                                 )}
@@ -204,7 +204,7 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
                                     Emergency Contact
                                 </div>
                                 <div className="text-foreground text-sm font-semibold">
-                                    {visitor.emergencyContacts[0].name} ({visitor.emergencyContacts[0].phone || "No phone"})
+                                    {formatName(visitor.emergencyContacts[0].name)} ({visitor.emergencyContacts[0].phone || "No phone"})
                                 </div>
                             </div>
                         )}

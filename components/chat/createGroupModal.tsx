@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scrollArea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatName } from "@/utils/helpers";
+import { formatName, getInitials } from "@/utils/helpers";
 import { Search } from "lucide-react";
 
 interface User {
@@ -105,7 +105,9 @@ export function CreateGroupModal({
                                     />
                                     <Avatar className="h-8 w-8">
                                         <AvatarImage src={emp.avatar} />
-                                        <AvatarFallback>{formatName(emp.name).charAt(0)}</AvatarFallback>
+                                        <AvatarFallback className="flex items-center justify-center leading-none text-xs">
+                                            {getInitials(emp.name)}
+                                        </AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate">{formatName(emp.name)}</p>

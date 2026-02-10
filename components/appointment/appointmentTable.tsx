@@ -35,7 +35,6 @@ import {
     CheckCircle,
     X,
     Edit,
-    Link2,
     Maximize2,
 } from "lucide-react";
 import { Appointment } from "@/store/api/appointmentApi";
@@ -43,7 +42,6 @@ import { SearchInput } from "@/components/common/searchInput";
 import DateRangePicker from "@/components/common/dateRangePicker";
 import { AppointmentDetailsDialog } from "./appointmentDetailsDialog";
 import { CheckOutDialog } from "./checkOutDialog";
-import { CreateAppointmentLinkModal } from "./CreateAppointmentLinkModal";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -128,7 +126,6 @@ export function AppointmentTable({
     const router = useRouter();
     const { hasReachedAppointmentLimit, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    const [showCreateLinkModal, setShowCreateLinkModal] = useState(false);
 
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showViewDialog, setShowViewDialog] = useState(false);
@@ -256,7 +253,9 @@ export function AppointmentTable({
                                             e.currentTarget.style.display = "none";
                                         }}
                                     />
-                                    <AvatarFallback>{getInitials(visitorName, 2)}</AvatarFallback>
+                                    <AvatarFallback className="flex items-center justify-center leading-none text-xs">
+                                        {getInitials(visitorName, 2)}
+                                    </AvatarFallback>
                                 </Avatar>
                                 {visitorPhoto && (
                                     <button
@@ -284,7 +283,7 @@ export function AppointmentTable({
                                     <span>{visitorPhone}</span>
                                 </div>
                                 {visitorCompany && (
-                                    <div className="mt-0.5 truncate text-xs text-gray-400">{visitorCompany}</div>
+                                    <div className="mt-0.5 truncate text-xs text-gray-400">{formatName(visitorCompany)}</div>
                                 )}
                             </div>
                         </div>
@@ -300,14 +299,38 @@ export function AppointmentTable({
                     const employeeName = formatName(employeeNameRaw) || employeeNameRaw;
                     const employeeEmail = employee?.email || "N/A";
                     const employeeDepartment = employee?.department || "";
+                    // Get photo from employee object, handle both populated and non-populated cases
+                    const employeePhoto = employee?.photo || (employee as any)?.profilePicture || "";
 
                     return (
                         <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                                <AvatarFallback className="bg-blue-100 text-blue-600">
-                                    {getInitials(employeeName, 2)}
-                                </AvatarFallback>
-                            </Avatar>
+                            <div className="group relative shrink-0">
+                                <Avatar className="h-10 w-10">
+                                    <AvatarImage
+                                        src={employeePhoto}
+                                        alt={employeeName}
+                                        onError={(e) => {
+                                            // Hide image on error, fallback will show
+                                            e.currentTarget.style.display = "none";
+                                        }}
+                                    />
+                                    <AvatarFallback className="bg-blue-100 text-blue-600 flex items-center justify-center leading-none text-xs">
+                                        {getInitials(employeeName, 2)}
+                                    </AvatarFallback>
+                                </Avatar>
+                                {employeePhoto && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            window.open(employeePhoto, "_blank");
+                                        }}
+                                        className="absolute -right-1 -bottom-1 rounded-full bg-[#3882a5] p-1 text-white opacity-0 shadow-md transition-colors group-hover:opacity-100 hover:bg-[#2d6a87]"
+                                        title="View full image"
+                                    >
+                                        <Maximize2 className="h-2.5 w-2.5" />
+                                    </button>
+                                )}
+                            </div>
                             <div>
                                 <div className="font-medium">{employeeName}</div>
                                 <div className="text-sm text-gray-500">{formatName(employeeDepartment) || "N/A"}</div>
@@ -331,7 +354,7 @@ export function AppointmentTable({
                                 className="max-w-[200px] truncate text-sm"
                                 title={appointment.appointmentDetails?.purpose || "N/A"}
                             >
-                                {appointment.appointmentDetails?.purpose || "N/A"}
+                                {formatName(appointment.appointmentDetails?.purpose) || "N/A"}
                             </div>
                             {appointment.appointmentDetails?.meetingRoom && (
                                 <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -551,27 +574,6 @@ export function AppointmentTable({
                                             <span className="hidden sm:inline">Schedule Appointment</span>
                                         </Button>
                                     )}
-                                    <CreateAppointmentLinkModal
-                                        open={showCreateLinkModal}
-                                        onOpenChange={(open) => {
-                                            if (open && hasReachedAppointmentLimit) {
-                                                setShowUpgradeModal(true);
-                                            } else {
-                                                setShowCreateLinkModal(open);
-                                            }
-                                        }}
-                                        triggerButton={
-                                            <Button
-                                                variant="outline"
-                                                className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white"
-                                                title="Create Appointment Link"
-                                            >
-                                                <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                                <span className="hidden sm:inline">Create Link</span>
-                                            </Button>
-                                        }
-                                        onSuccess={() => { }}
-                                    />
                                 </>
                             )}
                         </div>
@@ -600,7 +602,7 @@ export function AppointmentTable({
                         isLoading={isLoading}
                     />
                 </div>
-            </div>
+            </div >
 
             {pagination && pagination.totalPages > 1 && (
                 <div className="flex justify-center">
@@ -616,36 +618,40 @@ export function AppointmentTable({
                 </div>
             )}
 
-            {onDelete && (
-                <ConfirmationDialog
-                    open={showDeleteDialog}
-                    onOpenChange={setShowDeleteDialog}
-                    title="Delete Appointment"
-                    description={`Are you sure you want to delete appointment ${selectedAppointment?._id}? This will move the appointment to trash.`}
-                    onConfirm={handleDelete}
-                    confirmText={isDeleting ? "Deleting..." : "Delete"}
-                    variant="destructive"
-                />
-            )}
+            {
+                onDelete && (
+                    <ConfirmationDialog
+                        open={showDeleteDialog}
+                        onOpenChange={setShowDeleteDialog}
+                        title="Delete Appointment"
+                        description={`Are you sure you want to delete appointment ${selectedAppointment?._id}? This will move the appointment to trash.`}
+                        onConfirm={handleDelete}
+                        confirmText={isDeleting ? "Deleting..." : "Delete"}
+                        variant="destructive"
+                    />
+                )
+            }
 
-            {onApprove && (
-                <ConfirmationDialog
-                    open={showApproveDialog}
-                    onOpenChange={setShowApproveDialog}
-                    title="Approve Appointment"
-                    description={`Are you sure you want to approve appointment ${selectedAppointment?._id}? This will change the status to approved.`}
-                    onConfirm={() => {
-                        if (selectedAppointment) {
-                            handleApprove(selectedAppointment._id);
-                            setShowApproveDialog(false);
+            {
+                onApprove && (
+                    <ConfirmationDialog
+                        open={showApproveDialog}
+                        onOpenChange={setShowApproveDialog}
+                        title="Approve Appointment"
+                        description={`Are you sure you want to approve appointment ${selectedAppointment?._id}? This will change the status to approved.`}
+                        onConfirm={() => {
+                            if (selectedAppointment) {
+                                handleApprove(selectedAppointment._id);
+                                setShowApproveDialog(false);
+                            }
+                        }}
+                        confirmText={
+                            isApproving || isAppointmentLoading(selectedAppointment?._id || "") ? "Approving..." : "Approve"
                         }
-                    }}
-                    confirmText={
-                        isApproving || isAppointmentLoading(selectedAppointment?._id || "") ? "Approving..." : "Approve"
-                    }
-                    variant="default"
-                />
-            )}
+                        variant="default"
+                    />
+                )
+            }
 
             <ConfirmationDialog
                 open={showRejectDialog}
@@ -664,15 +670,17 @@ export function AppointmentTable({
                 variant="destructive"
             />
 
-            {onCheckOut && (
-                <CheckOutDialog
-                    appointment={selectedAppointment}
-                    open={showCheckOutDialog}
-                    onClose={() => setShowCheckOutDialog(false)}
-                    onConfirm={handleCheckOut}
-                    isLoading={isCheckingOut}
-                />
-            )}
+            {
+                onCheckOut && (
+                    <CheckOutDialog
+                        appointment={selectedAppointment}
+                        open={showCheckOutDialog}
+                        onClose={() => setShowCheckOutDialog(false)}
+                        onConfirm={handleCheckOut}
+                        isLoading={isCheckingOut}
+                    />
+                )
+            }
 
             <AppointmentDetailsDialog
                 appointment={selectedAppointment}
@@ -680,6 +688,6 @@ export function AppointmentTable({
                 open={showViewDialog}
                 on_close={() => setShowViewDialog(false)}
             />
-        </div>
+        </div >
     );
 }

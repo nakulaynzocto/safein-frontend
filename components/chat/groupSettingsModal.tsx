@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scrollArea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatName } from "@/utils/helpers";
+import { formatName, getInitials } from "@/utils/helpers";
 import { Search, X, UserPlus, Trash2, Settings, Shield, UserMinus, Camera, Loader2 } from "lucide-react";
 import { useGetEmployeesQuery } from "@/store/api/employeeApi";
 import { useUploadFileMutation } from "@/store/api/uploadApi";
@@ -204,8 +204,8 @@ export function GroupSettingsModal({
                             <div className="relative shrink-0">
                                 <Avatar className="h-20 w-20 sm:h-28 w-28 border-4 border-gray-50 shadow-2xl transition-transform hover:scale-105 duration-300">
                                     <AvatarImage src={activeChat?.groupPicture} className="object-cover" />
-                                    <AvatarFallback className="bg-[#074463] text-white text-2xl sm:text-4xl font-black">
-                                        {formatName(activeChat?.groupName || "G").charAt(0)}
+                                    <AvatarFallback className="bg-[#074463] text-white text-2xl sm:text-4xl font-black flex items-center justify-center leading-none">
+                                        {getInitials(activeChat?.groupName || "G")}
                                     </AvatarFallback>
                                 </Avatar>
                                 {isGroupAdmin && (
@@ -293,9 +293,9 @@ export function GroupSettingsModal({
                                                     <div key={emp._id} className="flex items-center justify-between p-2.5 hover:bg-white rounded-2xl transition-all group border border-transparent hover:border-gray-100 hover:shadow-md">
                                                         <div className="flex items-center gap-3">
                                                             <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
-                                                                <AvatarImage src={emp.profilePicture} />
-                                                                <AvatarFallback className="bg-[#074463] text-white text-xs font-bold">
-                                                                    {formatName(emp.name).charAt(0)}
+                                                                <AvatarImage src={emp.photo} />
+                                                                <AvatarFallback className="bg-[#074463] text-white text-xs font-bold flex items-center justify-center leading-none">
+                                                                    {getInitials(emp.name)}
                                                                 </AvatarFallback>
                                                             </Avatar>
                                                             <div>
@@ -326,8 +326,8 @@ export function GroupSettingsModal({
                                                     <div className="relative">
                                                         <Avatar className="h-11 w-11 border-2 border-white shadow-md">
                                                             <AvatarImage src={p.profilePicture || p.avatar} />
-                                                            <AvatarFallback className="bg-gray-100 text-[#074463] font-black text-sm">
-                                                                {formatName(p.name).charAt(0)}
+                                                            <AvatarFallback className="bg-gray-100 text-[#074463] font-black text-sm flex items-center justify-center leading-none">
+                                                                {getInitials(p.name)}
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         {String(activeChat?.groupAdmin) === String(p._id) && (

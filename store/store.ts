@@ -7,6 +7,8 @@ import notificationReducer from "./slices/notificationSlice";
 
 // Import injected APIs to ensure endpoints are registered
 import "./api/appointmentLinkApi";
+import "./api/employeeApi";
+import "./api/uploadApi";
 
 export const store = configureStore({
     reducer: {

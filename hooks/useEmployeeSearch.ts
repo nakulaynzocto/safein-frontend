@@ -24,6 +24,7 @@ export function useEmployeeSearch() {
                         .map((emp: Employee) => ({
                             value: emp._id,
                             label: `${emp.name} (${emp.email})`,
+                            image: emp.photo,
                         })) || []
                 );
             } catch (error) {

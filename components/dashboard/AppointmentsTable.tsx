@@ -4,7 +4,7 @@ import { memo, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/common/dataTable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatDateTime } from "@/utils/helpers";
+import { formatDateTime, formatName } from "@/utils/helpers";
 import { Calendar, Phone, Mail, Building, Maximize2 } from "lucide-react";
 
 interface AppointmentsTableProps {
@@ -42,7 +42,7 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                 sortable: false,
                 render: (appointment: any) => {
                     const visitor = appointment.visitorId || appointment.visitor;
-                    const visitorName = visitor?.name || "Unknown Visitor";
+                    const visitorName = formatName(visitor?.name || "Unknown Visitor");
                     const visitorPhone = visitor?.phone || "N/A";
                     const visitorCompany = visitor?.company || "";
 
@@ -81,7 +81,7 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                                 {visitorCompany && (
                                     <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
                                         <Building className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
-                                        <span className="truncate">{visitorCompany}</span>
+                                        <span className="truncate">{formatName(visitorCompany)}</span>
                                     </div>
                                 )}
                             </div>
@@ -95,7 +95,7 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                 sortable: false,
                 render: (appointment: any) => {
                     const employee = appointment.employeeId || appointment.employee;
-                    const employeeName = employee?.name || "Unknown Employee";
+                    const employeeName = formatName(employee?.name || "Unknown Employee");
                     const employeeEmail = employee?.email || "N/A";
                     const employeeDepartment = employee?.department || "";
 
@@ -119,7 +119,7 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                                 {employeeDepartment && (
                                     <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
                                         <Building className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
-                                        <span className="truncate">{employeeDepartment}</span>
+                                        <span className="truncate">{formatName(employeeDepartment)}</span>
                                     </div>
                                 )}
                             </div>

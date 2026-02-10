@@ -106,6 +106,7 @@ export const baseApi = createApi({
         "Notification",
         "SpotPass",
         "Chat",
+        "DashboardStats",
     ],
     endpoints: () => ({}),
     refetchOnMountOrArgChange: false,

@@ -10,6 +10,7 @@ export interface OptionItem {
     status?: "Active" | "Inactive" | string;
     department?: string;
     designation?: string;
+    photo?: string;
 }
 
 export interface CreateOptionsParams<T extends OptionItem> {
@@ -41,6 +42,7 @@ export const createSelectOptions = <T extends OptionItem>({
         value: item._id,
         label: formatLabel(item),
         searchKeywords: formatSearchKeywords(item),
+        image: item.photo,
     }));
 
     // Include selected item if not in current options
@@ -55,6 +57,7 @@ export const createSelectOptions = <T extends OptionItem>({
                 value: foundItem._id,
                 label: formatLabel(foundItem),
                 searchKeywords: formatSearchKeywords(foundItem),
+                image: foundItem.photo,
             });
         }
     }

@@ -7,7 +7,7 @@ import { Search, Users } from "lucide-react";
 import { CreateGroupModal } from "./createGroupModal";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { formatName } from "@/utils/helpers";
+import { formatName, getInitials } from "@/utils/helpers";
 
 interface ChatUser {
     id: string;
@@ -113,11 +113,11 @@ export function ChatSidebar({
                                         <AvatarImage src={user.avatar} />
                                         <AvatarFallback
                                             className={cn(
-                                                "font-medium bg-gray-100 text-gray-600",
+                                                "font-medium bg-gray-100 text-gray-600 flex items-center justify-center leading-none",
                                                 activeUserId === user.id && "bg-blue-100 text-blue-600"
                                             )}
                                         >
-                                            {formatName(user.name).charAt(0)}
+                                            {getInitials(user.name)}
                                         </AvatarFallback>
                                     </Avatar>
                                     {user.isOnline && (

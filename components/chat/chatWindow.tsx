@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Phone, Video, Check, CheckCheck, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChatInput } from "./chatInput";
-import { formatName } from "@/utils/helpers";
+import { formatName, getInitials } from "@/utils/helpers";
 
 interface Message {
     id: string;
@@ -128,8 +128,8 @@ export function ChatWindow({
                     <div className="relative">
                         <Avatar className="h-10 w-10 border-2 border-white shadow-sm ring-1 ring-gray-100">
                             <AvatarImage src={activeUser.avatar} />
-                            <AvatarFallback className="bg-gradient-to-br from-[#074463] to-[#0a5a82] text-white font-bold">
-                                {formatName(activeUser.name).charAt(0)}
+                            <AvatarFallback className="bg-gradient-to-br from-[#074463] to-[#0a5a82] text-white font-bold flex items-center justify-center leading-none">
+                                {getInitials(activeUser.name)}
                             </AvatarFallback>
                         </Avatar>
                         {activeUser.isOnline && (
@@ -203,8 +203,8 @@ export function ChatWindow({
                                         <div className="pt-1">
                                             <Avatar className="h-8 w-8 border border-white shadow-sm">
                                                 <AvatarImage src={msg.senderAvatar} />
-                                                <AvatarFallback className="bg-gray-100 text-[#074463] text-[10px] font-bold">
-                                                    {formatName(msg.senderName || "U").charAt(0)}
+                                                <AvatarFallback className="bg-gray-100 text-[#074463] text-[10px] font-bold flex items-center justify-center leading-none">
+                                                    {getInitials(msg.senderName || "U")}
                                                 </AvatarFallback>
                                             </Avatar>
                                         </div>

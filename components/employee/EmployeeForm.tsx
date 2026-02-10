@@ -12,11 +12,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle } from "lucide-react";
+import { ImageUploadField } from "@/components/common/imageUploadField";
 import { SelectField } from "@/components/common/selectField";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { FormContainer } from "@/components/common/formContainer";
-import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQuery } from "@/store/api/employeeApi";
+import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQuery } from "@/store/api";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
 
@@ -30,7 +31,7 @@ const employeeSchema = yup.object({
     phone: yup
         .string()
         .required("Phone number is required")
-        .matches(/^[\+]?[1-9][\d]{0,15}$/, "Please enter a valid phone number"),
+        .matches(/^[\+]?[0-9]{10,15}$/, "Please enter a valid phone number"),
     department: yup
         .string()
         .required("Department is required")
@@ -42,6 +43,7 @@ const employeeSchema = yup.object({
         .min(2, "Position must be at least 2 characters")
         .max(100, "Position cannot exceed 100 characters"),
     status: yup.string().oneOf(["Active", "Inactive"]).default("Active"),
+    photo: yup.string().default(""),
 });
 
 type EmployeeFormData = {
@@ -51,6 +53,7 @@ type EmployeeFormData = {
     department: string;
     designation: string;
     status: "Active" | "Inactive";
+    photo: string;
 };
 
 const statusOptions = [
@@ -101,6 +104,8 @@ export function NewEmployeeModal({
         reset,
         setError,
         clearErrors,
+        setValue,
+        watch,
     } = useForm<EmployeeFormData>({
         resolver: yupResolver(employeeSchema),
         defaultValues: {
@@ -110,6 +115,7 @@ export function NewEmployeeModal({
             department: "",
             designation: "",
             status: "Active",
+            photo: "",
         },
     });
 
@@ -122,6 +128,7 @@ export function NewEmployeeModal({
                 department: employeeData.department,
                 designation: employeeData.designation || "",
                 status: employeeData.status,
+                photo: employeeData.photo || "",
             });
         }
     }, [isEditMode, employeeData, reset]);
@@ -196,7 +203,7 @@ export function NewEmployeeModal({
             if (error?.data?.errors && Array.isArray(error.data.errors)) {
                 error.data.errors.forEach((fieldError: any) => {
                     if (fieldError.field && fieldError.message) {
-                        setError(fieldError.field, {
+                        setError(fieldError.field as keyof EmployeeFormData, {
                             type: "server",
                             message: fieldError.message,
                         });
@@ -272,134 +279,157 @@ export function NewEmployeeModal({
                 </Alert>
             )}
 
-            {/* Personal Information Section */}
-            <div className="space-y-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="name" className="text-sm font-medium">
-                            Full Name <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
-                            id="name"
-                            {...register("name")}
-                            placeholder="Enter employee's full name"
-                            aria-required="true"
-                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.name ? "border-destructive" : ""}`}
+            <div className="flex flex-col gap-8 md:flex-row">
+                {/* Employee Photo Section (Left Side) */}
+                <div className="flex flex-col items-center shrink-0">
+                    <label className="mb-4 block text-sm font-bold uppercase tracking-widest text-[#3882a5]">
+                        Employee Photo
+                    </label>
+                    <div className="relative">
+                        <ImageUploadField
+                            name="photo"
+                            register={register}
+                            setValue={setValue}
+                            errors={errors.photo}
+                            initialUrl={watch("photo")}
+                            enableImageCapture={true}
+                            variant="avatar"
                         />
-                        {errors.name && <span className="text-destructive text-xs">{errors.name.message}</span>}
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="email" className="text-sm font-medium">
-                            Email Address <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            {...register("email", { onChange: clearGeneralError })}
-                            placeholder="Enter email address"
-                            aria-required="true"
-                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.email ? "border-destructive" : ""}`}
-                        />
-                        {errors.email && <span className="text-destructive text-xs">{errors.email.message}</span>}
                     </div>
                 </div>
-            </div>
 
-            <div className="space-y-4 pt-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <Controller
-                        name="phone"
-                        control={control}
-                        render={({ field }) => (
-                            <PhoneInputField
-                                id="phone"
-                                label="Phone Number"
-                                value={field.value}
-                                onChange={(value) => {
-                                    field.onChange(value);
-                                    clearGeneralError();
-                                }}
-                                error={errors.phone?.message}
-                                required
-                                placeholder="Enter phone number"
-                                defaultCountry="in"
-                                className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                {/* Information Section (Right Side) */}
+                <div className="flex-1 space-y-4">
+                    <h3 className="text-sm font-bold uppercase tracking-widest text-[#3882a5] mb-2">
+                        Personal Information
+                    </h3>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="name" className="text-sm font-medium">
+                                Full Name <span className="text-destructive">*</span>
+                            </Label>
+                            <Input
+                                id="name"
+                                {...register("name")}
+                                placeholder="Enter employee's full name"
+                                aria-required="true"
+                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.name ? "border-destructive" : ""}`}
                             />
-                        )}
-                    />
+                            {errors.name && <span className="text-destructive text-xs">{errors.name.message}</span>}
+                        </div>
 
-                    <Controller
-                        name="department"
-                        control={control}
-                        rules={{ required: "Department is required" }}
-                        render={({ field }) => (
-                            <div className="flex flex-col gap-1.5">
-                                <Label className="text-sm font-medium">
-                                    Department <span className="text-destructive">*</span>
-                                </Label>
-                                <Input
-                                    id="department"
-                                    placeholder="Enter department"
-                                    value={field.value || ""}
-                                    onChange={(e) => field.onChange(e.target.value)}
-                                    aria-required="true"
-                                    className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.department ? "border-destructive" : ""}`}
-                                />
-                                {errors.department && (
-                                    <span className="text-destructive text-xs">{errors.department.message}</span>
-                                )}
-                            </div>
-                        )}
-                    />
-                </div>
-            </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="email" className="text-sm font-medium">
+                                Email Address <span className="text-destructive">*</span>
+                            </Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                {...register("email", { onChange: clearGeneralError })}
+                                placeholder="Enter email address"
+                                aria-required="true"
+                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.email ? "border-destructive" : ""}`}
+                            />
+                            {errors.email && <span className="text-destructive text-xs">{errors.email.message}</span>}
+                        </div>
+                    </div>
 
-            {/* Professional Information Section */}
-            <div className="space-y-4 pt-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <Controller
-                        name="designation"
-                        control={control}
-                        rules={{ required: "Position is required" }}
-                        render={({ field }) => (
-                            <div className="flex flex-col gap-1.5">
-                                <Label className="text-sm font-medium">
-                                    Position <span className="text-destructive">*</span>
-                                </Label>
-                                <Input
-                                    id="designation"
-                                    placeholder="e.g., CEO, VP, HR, Manager"
-                                    value={field.value || ""}
-                                    onChange={(e) => field.onChange(e.target.value)}
-                                    aria-required="true"
-                                    className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.designation ? "border-destructive" : ""}`}
-                                />
-                                {errors.designation && (
-                                    <span className="text-destructive text-xs">{errors.designation.message}</span>
-                                )}
-                            </div>
-                        )}
-                    />
-
-                    <Controller
-                        name="status"
-                        control={control}
-                        render={({ field }) => (
-                            <div className="flex flex-col gap-1.5">
-                                <Label className="text-sm font-medium">Status</Label>
-                                <SelectField
-                                    placeholder="Select status"
-                                    options={statusOptions}
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 pt-2">
+                        <Controller
+                            name="phone"
+                            control={control}
+                            render={({ field }) => (
+                                <PhoneInputField
+                                    id="phone"
+                                    label="Phone Number"
                                     value={field.value}
-                                    onChange={(val) => field.onChange(val)}
-                                    error={errors.status?.message}
-                                    isClearable={false}
+                                    onChange={(value) => {
+                                        field.onChange(value);
+                                        clearGeneralError();
+                                    }}
+                                    error={errors.phone?.message}
+                                    required
+                                    placeholder="Enter phone number"
+                                    defaultCountry="in"
                                     className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                 />
-                            </div>
-                        )}
-                    />
+                            )}
+                        />
+
+                        <Controller
+                            name="department"
+                            control={control}
+                            rules={{ required: "Department is required" }}
+                            render={({ field }) => (
+                                <div className="flex flex-col gap-1.5">
+                                    <Label className="text-sm font-medium">
+                                        Department <span className="text-destructive">*</span>
+                                    </Label>
+                                    <Input
+                                        id="department"
+                                        placeholder="Enter department"
+                                        value={field.value || ""}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                        aria-required="true"
+                                        className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.department ? "border-destructive" : ""}`}
+                                    />
+                                    {errors.department && (
+                                        <span className="text-destructive text-xs">{errors.department.message}</span>
+                                    )}
+                                </div>
+                            )}
+                        />
+                    </div>
+
+                    <h3 className="text-sm font-bold uppercase tracking-widest text-[#3882a5] mt-6 mb-2">
+                        Professional Information
+                    </h3>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <Controller
+                            name="designation"
+                            control={control}
+                            rules={{ required: "Position is required" }}
+                            render={({ field }) => (
+                                <div className="flex flex-col gap-1.5">
+                                    <Label className="text-sm font-medium">
+                                        Position <span className="text-destructive">*</span>
+                                    </Label>
+                                    <Input
+                                        id="designation"
+                                        placeholder="e.g., CEO, VP, HR, Manager"
+                                        value={field.value || ""}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                        aria-required="true"
+                                        className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.designation ? "border-destructive" : ""}`}
+                                    />
+                                    {errors.designation && (
+                                        <span className="text-destructive text-xs">{errors.designation.message}</span>
+                                    )}
+                                </div>
+                            )}
+                        />
+
+                        <Controller
+                            name="status"
+                            control={control}
+                            render={({ field }) => (
+                                <div className="flex flex-col gap-1.5">
+                                    <Label className="text-sm font-medium">Status</Label>
+                                    <SelectField
+                                        placeholder="Select status"
+                                        options={statusOptions}
+                                        value={field.value}
+                                        onChange={(val) => field.onChange(val)}
+                                        error={errors.status?.message}
+                                        isClearable={false}
+                                        className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                    />
+                                </div>
+                            )}
+                        />
+                    </div>
                 </div>
             </div>
 

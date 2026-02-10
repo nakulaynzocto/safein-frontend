@@ -32,6 +32,7 @@ export interface EmployeeDetails {
     phone: string;
     department: string;
     designation: string;
+    photo?: string;
     status: "Active" | "Inactive";
 }
 

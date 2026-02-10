@@ -8,6 +8,7 @@ export interface Employee {
     phone: string;
     department: string;
     designation?: string;
+    photo?: string;
     status: "Active" | "Inactive";
     isDeleted: boolean;
     deletedAt?: string;
@@ -21,6 +22,7 @@ export interface CreateEmployeeRequest {
     phone: string;
     department: string;
     designation?: string;
+    photo?: string;
     status?: "Active" | "Inactive";
 }
 
@@ -31,6 +33,7 @@ export interface UpdateEmployeeRequest {
     phone?: string;
     department?: string;
     designation?: string;
+    photo?: string;
     status?: "Active" | "Inactive";
 }
 

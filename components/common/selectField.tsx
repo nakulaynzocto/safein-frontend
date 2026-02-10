@@ -3,15 +3,18 @@
 import { forwardRef, useId, useMemo, useState, useEffect, useCallback } from "react";
 import Select, { type GroupBase, type StylesConfig, type SingleValue } from "react-select";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from "@/utils/helpers";
 
 export interface Option {
     value: string | number;
     label: string;
     color?: string;
     searchKeywords?: string;
+    image?: string;
 }
 
-type RSOption = { value: string; label: string; color?: string; searchKeywords?: string };
+type RSOption = { value: string; label: string; color?: string; searchKeywords?: string; image?: string };
 
 export interface SelectFieldProps {
     label?: string;
@@ -79,6 +82,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
             label: o.label,
             color: o.color,
             searchKeywords: o.searchKeywords,
+            image: o.image,
         }));
 
         // If there's a selected value that's not in the options, we should NOT add a placeholder
@@ -273,6 +277,17 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 escapeClearsValue={false}
                 backspaceRemovesValue={true}
                 menuShouldScrollIntoView={false}
+                formatOptionLabel={(option) => (
+                    <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8 border border-border">
+                            <AvatarImage src={option.image} alt={option.label} className="object-cover" />
+                            <AvatarFallback className="text-xs font-medium leading-none bg-secondary text-secondary-foreground flex items-center justify-center">
+                                {getInitials(option.label)}
+                            </AvatarFallback>
+                        </Avatar>
+                        <span className="truncate">{option.label}</span>
+                    </div>
+                )}
             />
 
             {error && (

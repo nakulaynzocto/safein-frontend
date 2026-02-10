@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { StatusBadge } from "@/components/common/statusBadge";
 import { formatDateWithPattern } from "@/utils/dateUtils";
+import { getInitials, formatName } from "@/utils/helpers";
 
 interface AppointmentDetailsDialogProps {
     appointment: Appointment | null;
@@ -122,7 +123,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
     };
 
     const visitorPhoto = getFieldValue(appointment, "visitorPhoto");
-    const visitorName = getFieldValue(appointment, "visitorName");
+    const visitorName = formatName(getFieldValue(appointment, "visitorName"));
     const status = appointment.status;
 
     return (
@@ -139,14 +140,8 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
                         <div className="group relative shrink-0">
                             <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
                                 <AvatarImage src={visitorPhoto} alt={visitorName} />
-                                <AvatarFallback className="text-xl sm:text-2xl">
-                                    {visitorName !== "N/A"
-                                        ? visitorName
-                                            .split(" ")
-                                            .map((n: string) => n[0])
-                                            .join("")
-                                            .toUpperCase()
-                                        : "V"}
+                                <AvatarFallback className="text-xl sm:text-2xl flex items-center justify-center leading-none">
+                                    {getInitials(visitorName, 2)}
                                 </AvatarFallback>
                             </Avatar>
                             {visitorPhoto && (
@@ -220,7 +215,22 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
                                         {label}
                                     </div>
                                     <div className="text-foreground text-sm font-semibold">
-                                        {renderFieldValue(key, value, format)}
+                                        {key === "employeeName" ? (
+                                            <div className="flex items-center gap-2">
+                                                <Avatar className="h-6 w-6">
+                                                    <AvatarImage
+                                                        src={(appointment as any).employeeId?.photo || appointment.employee?.photo || (appointment as any).employeeId?.profilePicture || (appointment.employee as any)?.profilePicture || ""}
+                                                        alt={value}
+                                                    />
+                                                    <AvatarFallback className="text-[10px] flex items-center justify-center leading-none">
+                                                        {getInitials(value, 2)}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <span>{formatName(renderFieldValue(key, value, format)) || "N/A"}</span>
+                                            </div>
+                                        ) : (
+                                            key === "purpose" ? formatName(renderFieldValue(key, value, format)) : renderFieldValue(key, value, format)
+                                        )}
                                     </div>
                                 </div>
                             );

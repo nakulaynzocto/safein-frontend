@@ -147,8 +147,23 @@ export function truncateText(text: string, maxLength: number, suffix: string = "
  */
 export function getInitials(name: string, maxInitials: number = 2): string {
     if (!name) return "U";
-    const words = name.trim().split(/\s+/);
-    if (words.length === 0) return "U";
+
+    // Clean the name: replace common delimiters/punctuation with spaces
+    // This handles "Name-Surname", "Name (Dept)", "Name_Last"
+    const cleanName = name
+        .replace(/[(){}[\].,\-_"']/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    if (!cleanName) return name.charAt(0).toUpperCase() || "U";
+
+    const words = cleanName.split(" ");
+
+    // If only one word, return first letter (or first 2 letters if preferred?)
+    // Standard practice is often first letter only for single names.
+    // However, to ensure visibility and consistency, let's stick to initials from words.
+    // If user specifically wants 2 letters for single words (e.g. "Google" -> "Go"), we can change.
+    // But usually "G" is fine.
 
     if (words.length === 1) {
         return words[0].charAt(0).toUpperCase();

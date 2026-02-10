@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatDate } from "@/utils/helpers";
+import { formatDate, getInitials, formatName } from "@/utils/helpers";
 import { format } from "date-fns";
 import { SpotPass } from "@/store/api/spotPassApi";
 import {
@@ -48,8 +48,8 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
                         <div className="group relative shrink-0">
                             <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-[#3882a5]/10 shadow-lg">
                                 <AvatarImage src={spotPass.photo} alt={spotPass.name} className="object-cover" />
-                                <AvatarFallback className="text-3xl font-bold bg-[#3882a5]/5 text-[#3882a5]">
-                                    {spotPass.name.charAt(0).toUpperCase()}
+                                <AvatarFallback className="text-3xl font-bold bg-[#3882a5]/5 text-[#3882a5] flex items-center justify-center leading-none">
+                                    {getInitials(spotPass.name, 2)}
                                 </AvatarFallback>
                             </Avatar>
                             {spotPass.photo && (
@@ -66,7 +66,7 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
                         {/* Basic Info */}
                         <div className="flex-1 space-y-4 text-center sm:text-left">
                             <div>
-                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white capitalize">{spotPass.name}</h3>
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{formatName(spotPass.name)}</h3>
                                 <div className="mt-3 flex flex-wrap justify-center sm:justify-start gap-3">
                                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                                         <Phone className="h-3.5 w-3.5 text-[#3882a5]" />
@@ -113,15 +113,25 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
                                 </div>
 
                                 {spotPass.employeeId && (
-                                    <div className="flex items-start gap-4">
-                                        <div className="mt-1 p-2 rounded-lg bg-[#3882a5]/5 text-[#3882a5]">
-                                            <Briefcase className="h-4 w-4" />
+                                    <div className="flex items-center gap-4">
+                                        <div className="shrink-0">
+                                            {typeof spotPass.employeeId === 'object' ? (
+                                                <Avatar className="h-10 w-10 border border-gray-200 shadow-sm">
+                                                    <AvatarImage src={spotPass.employeeId.photo} alt={spotPass.employeeId.name} className="object-cover" />
+                                                    <AvatarFallback className="bg-[#3882a5]/10 text-[#3882a5] text-xs font-bold flex items-center justify-center leading-none">
+                                                        {getInitials(spotPass.employeeId.name)}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                            ) : (
+                                                <div className="p-2 rounded-lg bg-[#3882a5]/5 text-[#3882a5]">
+                                                    <Briefcase className="h-5 w-5" />
+                                                </div>
+                                            )}
                                         </div>
                                         <div>
-                                            <p className="text-xs text-gray-500 font-medium">Meet To</p>
-                                            <p className="text-sm font-semibold capitalize">
-                                                {/* @ts-ignore */}
-                                                {typeof spotPass.employeeId === 'object' ? spotPass.employeeId.name : "N/A"}
+                                            <p className="text-xs text-gray-500 font-medium mb-0.5">Meet To</p>
+                                            <p className="text-sm font-semibold capitalize text-gray-900 dark:text-gray-100">
+                                                {typeof spotPass.employeeId === 'object' ? formatName(spotPass.employeeId.name) : "N/A"}
                                             </p>
                                         </div>
                                     </div>

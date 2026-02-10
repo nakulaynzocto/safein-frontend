@@ -17,6 +17,7 @@ import {
     Eye,
     Maximize2
 } from "lucide-react";
+import { getInitials } from "@/utils/helpers";
 import { StatusBadge } from "@/components/common/statusBadge";
 import { SearchInput } from "@/components/common/searchInput";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
@@ -145,10 +146,28 @@ export function SpotPassList() {
             header: "Meet To",
             key: "employeeId",
             render: (item: SpotPass) => (
-                <span className="text-sm font-medium text-gray-700">
+                <div className="flex items-center gap-2">
                     {/* @ts-ignore - employeeId might be populated object or string */}
-                    {item.employeeId?.name || "N/A"}
-                </span>
+                    {item.employeeId && typeof item.employeeId === 'object' && item.employeeId.photo ? (
+                        <Avatar className="h-8 w-8 border border-gray-200">
+                            {/* @ts-ignore */}
+                            <AvatarImage src={item.employeeId.photo} className="object-cover" />
+                            {/* @ts-ignore */}
+                            <AvatarFallback className="bg-[#3882a5]/10 text-[#3882a5] text-[10px] font-bold flex items-center justify-center leading-none">
+                                {/* @ts-ignore */}
+                                {getInitials(item.employeeId.name)}
+                            </AvatarFallback>
+                        </Avatar>
+                    ) : (
+                        <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+                            <User className="h-4 w-4" />
+                        </div>
+                    )}
+                    <span className="text-sm font-medium text-gray-700">
+                        {/* @ts-ignore */}
+                        {item.employeeId?.name || "N/A"}
+                    </span>
+                </div>
             )
         },
         {

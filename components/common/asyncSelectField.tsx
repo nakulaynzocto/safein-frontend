@@ -4,15 +4,18 @@ import { forwardRef, useId, useState, useCallback, useEffect } from "react";
 import AsyncSelect from "react-select/async";
 import { type GroupBase, type StylesConfig, type SingleValue } from "react-select";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from "@/utils/helpers";
 
 export interface Option {
     value: string;
     label: string;
     color?: string;
     searchKeywords?: string;
+    image?: string;
 }
 
-type RSOption = { value: string; label: string; color?: string; searchKeywords?: string };
+type RSOption = { value: string; label: string; color?: string; searchKeywords?: string; image?: string };
 
 export interface AsyncSelectFieldProps {
     label?: string;
@@ -75,6 +78,7 @@ const AsyncSelectField = forwardRef<any, AsyncSelectFieldProps>(function AsyncSe
                 label: o.label,
                 color: o.color,
                 searchKeywords: o.searchKeywords,
+                image: o.image,
             }));
         },
         [loadOptions]
@@ -249,6 +253,17 @@ const AsyncSelectField = forwardRef<any, AsyncSelectFieldProps>(function AsyncSe
                 escapeClearsValue={false}
                 backspaceRemovesValue={true}
                 menuShouldScrollIntoView={false}
+                formatOptionLabel={(option) => (
+                    <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8 border border-border">
+                            <AvatarImage src={option.image} alt={option.label} className="object-cover" />
+                            <AvatarFallback className="text-xs font-medium leading-none bg-secondary text-secondary-foreground flex items-center justify-center">
+                                {getInitials(option.label)}
+                            </AvatarFallback>
+                        </Avatar>
+                        <span className="truncate">{option.label}</span>
+                    </div>
+                )}
             />
 
             {error && (
