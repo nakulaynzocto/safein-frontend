@@ -83,6 +83,7 @@ export const chatApi = baseApi.injectEndpoints({
                 body,
             }),
             invalidatesTags: (result, error, { chatId }) => ["Chat"],
+            transformResponse: (response: any) => response.data,
         }),
         addParticipants: builder.mutation<Chat, { chatId: string; participantIds: string[] }>({
             query: ({ chatId, participantIds }) => ({
@@ -91,6 +92,7 @@ export const chatApi = baseApi.injectEndpoints({
                 body: { participantIds },
             }),
             invalidatesTags: (result, error, { chatId }) => ["Chat"],
+            transformResponse: (response: any) => response.data,
         }),
         removeParticipant: builder.mutation<Chat, { chatId: string; participantId: string }>({
             query: ({ chatId, participantId }) => ({
@@ -98,6 +100,7 @@ export const chatApi = baseApi.injectEndpoints({
                 method: "DELETE",
             }),
             invalidatesTags: (result, error, { chatId }) => ["Chat"],
+            transformResponse: (response: any) => response.data,
         }),
         deleteChat: builder.mutation<void, string>({
             query: (chatId) => ({

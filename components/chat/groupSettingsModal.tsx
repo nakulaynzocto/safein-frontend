@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,14 +46,31 @@ export function GroupSettingsModal({
     const [showAddSection, setShowAddSection] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
 
-    // Update stable chat and group name when props change
+    // Update stable chat when props change
     useEffect(() => {
         if (propActiveChat) {
             setStableChat(propActiveChat);
-            // Only update input if it hasn't been touched or matches previous state
-            setGroupName((prev) => (isUpdating ? prev : propActiveChat.groupName || ""));
+            // We DO NOT update groupName here anymore. 
+            // Once opened, the input is fully controlled by the user to prevent cursor jumps/overwrites.
         }
-    }, [propActiveChat, isUpdating]);
+    }, [propActiveChat]);
+
+    // Track previous open state
+    const wasOpen = useRef(isOpen);
+
+    // Force sync when opening to prevent stale state
+    useEffect(() => {
+        // Only trigger reset if transitioning from closed to open
+        if (isOpen && !wasOpen.current && propActiveChat) {
+            setStableChat(propActiveChat);
+            setGroupName(propActiveChat.groupName || "");
+            setConfirmDeleteGroup(false);
+            setConfirmRemoveMember(null);
+            setShowAddSection(false); // Reset add section on fresh open
+            setIsUpdating(false);
+        }
+        wasOpen.current = isOpen;
+    }, [isOpen, propActiveChat]); // Re-run when opening
 
     // Confirmation States
     const [confirmDeleteGroup, setConfirmDeleteGroup] = useState(false);
@@ -67,7 +84,12 @@ export function GroupSettingsModal({
     // Use stableChat for all rendering logic
     const activeChat = stableChat;
 
-    const isGroupAdmin = activeChat ? String(activeChat.groupAdmin) === currentUserId : false;
+    const isGroupAdmin = useMemo(() => {
+        if (!activeChat) return false;
+        const rawAdmin = activeChat.groupAdmin;
+        const adminId = (rawAdmin as any)?._id || (rawAdmin as any)?.id || rawAdmin;
+        return String(adminId) === String(currentUserId);
+    }, [activeChat, currentUserId]);
 
     // Filter employees who are NOT already in the group
     const availableEmployees = useMemo(() => {
@@ -164,9 +186,11 @@ export function GroupSettingsModal({
                 <DialogHeader className="bg-white border-b border-gray-100 px-8 py-6 shrink-0 relative">
                     <div className="flex justify-between items-center relative z-10">
                         <div className="space-y-1">
-                            <DialogTitle className="text-xl font-bold text-gray-900 tracking-tight leading-none">Group Information</DialogTitle>
+                            <DialogTitle className="text-xl font-bold text-gray-900 tracking-tight leading-none">
+                                {isGroupAdmin ? "Manage Group" : "Group Info"}
+                            </DialogTitle>
                             <div className="flex items-center gap-2">
-                                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                                <span className={cn("h-1.5 w-1.5 rounded-full", isGroupAdmin ? "bg-blue-500" : "bg-gray-400")} />
                                 <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.15em]">
                                     {participantsCount > 0 ? `${participantsCount} Members` : "Group Management"}
                                 </p>
@@ -209,14 +233,19 @@ export function GroupSettingsModal({
                                             className="bg-gray-50 border-gray-100 focus:ring-[#074463] rounded-2xl h-11 text-sm font-semibold"
                                             placeholder="Enter group name..."
                                         />
-                                        {isGroupAdmin && groupName !== activeChat?.groupName && (
+                                        {isGroupAdmin && (
                                             <Button
                                                 onClick={handleUpdateName}
-                                                disabled={isUpdating}
+                                                disabled={isUpdating || !groupName.trim() || groupName === activeChat?.groupName}
                                                 size="sm"
-                                                className="bg-[#074463] hover:bg-[#0a5a82] text-white rounded-xl px-5 h-11"
+                                                className={cn(
+                                                    "rounded-xl px-5 h-11 transition-all duration-300",
+                                                    (groupName === activeChat?.groupName)
+                                                        ? "bg-gray-100 text-gray-400 opacity-50 cursor-not-allowed"
+                                                        : "bg-[#074463] hover:bg-[#0a5a82] text-white shadow-md hover:shadow-lg"
+                                                )}
                                             >
-                                                Save
+                                                {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
                                             </Button>
                                         )}
                                     </div>
