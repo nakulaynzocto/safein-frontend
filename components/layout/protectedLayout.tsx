@@ -52,7 +52,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     }
 
     return (
-        <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
+        <div className="flex h-[100dvh] flex-col overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
             {shouldShowNavbar && <Navbar variant="dashboard" />}
             {/* Expiry warning banner - Only show on private pages (not subscription page) */}
             <Banner
