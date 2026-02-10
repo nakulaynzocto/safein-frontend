@@ -2,7 +2,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatDate, formatDateTime } from "@/utils/helpers";
+import { formatDate } from "@/utils/helpers";
+import { format } from "date-fns";
 import { SpotPass } from "@/store/api/spotPassApi";
 import {
     User,
@@ -10,7 +11,7 @@ import {
     MapPin,
     Calendar,
     Maximize2,
-    Car,
+    Briefcase,
     FileText,
     Clock,
     CheckCircle2,
@@ -111,14 +112,17 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
                                     </div>
                                 </div>
 
-                                {spotPass.vehicleNumber && (
+                                {spotPass.employeeId && (
                                     <div className="flex items-start gap-4">
                                         <div className="mt-1 p-2 rounded-lg bg-[#3882a5]/5 text-[#3882a5]">
-                                            <Car className="h-4 w-4" />
+                                            <Briefcase className="h-4 w-4" />
                                         </div>
                                         <div>
-                                            <p className="text-xs text-gray-500 font-medium">Vehicle Number</p>
-                                            <p className="text-sm font-bold text-[#3882a5] uppercase tracking-wider">{spotPass.vehicleNumber}</p>
+                                            <p className="text-xs text-gray-500 font-medium">Meet To</p>
+                                            <p className="text-sm font-semibold capitalize">
+                                                {/* @ts-ignore */}
+                                                {typeof spotPass.employeeId === 'object' ? spotPass.employeeId.name : "N/A"}
+                                            </p>
                                         </div>
                                     </div>
                                 )}
@@ -137,7 +141,7 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
                                     <div>
                                         <p className="text-xs text-gray-500 font-medium">Check-in Time</p>
                                         <p className="text-sm font-semibold">
-                                            {formatDateTime(spotPass.checkInTime)}
+                                            {format(new Date(spotPass.checkInTime), "dd/MM/yyyy hh:mm a")}
                                         </p>
                                     </div>
                                 </div>
@@ -150,23 +154,11 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
                                         <div>
                                             <p className="text-xs text-gray-500 font-medium">Check-out Time</p>
                                             <p className="text-sm font-semibold">
-                                                {formatDateTime(spotPass.checkOutTime)}
+                                                {format(new Date(spotPass.checkOutTime), "dd/MM/yyyy hh:mm a")}
                                             </p>
                                         </div>
                                     </div>
                                 )}
-
-                                <div className="flex items-start gap-4">
-                                    <div className="mt-1 p-2 rounded-lg bg-purple-500/5 text-purple-600">
-                                        <Calendar className="h-4 w-4" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 font-medium">Created On</p>
-                                        <p className="text-sm font-semibold">
-                                            {formatDateTime(spotPass.createdAt)}
-                                        </p>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 

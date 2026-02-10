@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useRouter } from "next/navigation";
@@ -10,10 +10,12 @@ import { InputField } from "@/components/common/inputField";
 import { SelectField } from "@/components/common/selectField";
 import { ImageUploadField } from "@/components/common/imageUploadField";
 import { TextareaField } from "@/components/common/textareaField";
+import { AsyncSelectField } from "@/components/common/asyncSelectField";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, X } from "lucide-react";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useCreateSpotPassMutation } from "@/store/api/spotPassApi";
+import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
 
 // Form Schema
 const spotPassSchema = yup.object({
@@ -35,14 +37,8 @@ const spotPassSchema = yup.object({
         .trim()
         .min(5, "Address must be at least 5 characters")
         .max(500, "Address cannot exceed 500 characters"),
-    vehicleNumber: yup
-        .string()
-        .optional()
-        .default("")
-        .trim()
-        .max(20, "Vehicle number cannot exceed 20 characters")
-        .matches(/^[a-zA-Z0-9\s]*$/, "Vehicle number must be alphanumeric"),
     notes: yup.string().default("").trim(),
+    employeeId: yup.string().optional(),
     photo: yup.string().default(""),
 });
 
@@ -51,12 +47,14 @@ type SpotPassFormData = yup.InferType<typeof spotPassSchema>;
 export function SpotPassCreateForm() {
     const router = useRouter();
     const [createSpotPass, { isLoading }] = useCreateSpotPassMutation();
+    const { loadEmployeeOptions } = useEmployeeSearch();
 
     const {
         register,
         handleSubmit,
         setValue,
         watch,
+        control,
         formState: { errors },
     } = useForm<SpotPassFormData>({
         resolver: yupResolver(spotPassSchema),
@@ -65,15 +63,18 @@ export function SpotPassCreateForm() {
             phone: "",
             gender: "male",
             address: "",
-            vehicleNumber: "",
             notes: "",
+            employeeId: undefined,
             photo: "",
         },
     });
 
     const onSubmit = async (data: SpotPassFormData) => {
         try {
-            await createSpotPass(data).unwrap();
+            await createSpotPass({
+                ...data,
+                employeeId: data.employeeId || undefined
+            }).unwrap();
             showSuccessToast("Spot Pass generated successfully!");
             router.push(routes.privateroute.SPOT_PASS);
         } catch (error: any) {
@@ -123,6 +124,7 @@ export function SpotPassCreateForm() {
                                     {...register("phone")}
                                     error={errors.phone?.message}
                                     required
+                                    maxLength={15}
                                 />
                                 <SelectField
                                     label="Gender"
@@ -136,12 +138,28 @@ export function SpotPassCreateForm() {
                                     error={errors.gender?.message}
                                     required
                                 />
-                                <InputField
-                                    label="Vehicle Number (Optional)"
-                                    placeholder="e.g. MH 12 AB 1234"
-                                    {...register("vehicleNumber")}
-                                    error={errors.vehicleNumber?.message}
-                                />
+
+                                <div className="space-y-1">
+                                    <label className="text-sm font-bold text-gray-700">
+                                        Meet to Employee (Optional)
+                                    </label>
+                                    <Controller
+                                        name="employeeId"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <AsyncSelectField
+                                                value={field.value || ""}
+                                                onChange={field.onChange}
+                                                loadOptions={loadEmployeeOptions}
+                                                placeholder="Search employees..."
+                                                isClearable={true}
+                                                error={errors.employeeId?.message}
+                                                cacheOptions={true}
+                                                defaultOptions={true}
+                                            />
+                                        )}
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">

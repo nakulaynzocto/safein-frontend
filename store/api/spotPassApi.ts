@@ -12,6 +12,7 @@ export interface SpotPass {
     photo?: string;
     vehicleNumber?: string;
     notes?: string;
+    employeeId?: { _id: string; name: string } | string;
     checkInTime: string;
     checkOutTime?: string;
     status: "checked-in" | "checked-out";
@@ -27,6 +28,7 @@ export interface CreateSpotPassRequest {
     photo?: string;
     vehicleNumber?: string;
     notes?: string;
+    employeeId?: string;
 }
 
 export interface GetSpotPassesQuery {

@@ -213,6 +213,7 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                                 {...register("phone")}
                                 error={errors.phone?.message}
                                 required
+                                maxLength={15}
                             />
 
                             {!isEmployee && (

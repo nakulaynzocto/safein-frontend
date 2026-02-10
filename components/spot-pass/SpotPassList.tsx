@@ -142,10 +142,13 @@ export function SpotPassList() {
             ),
         },
         {
-            header: "Gender",
-            key: "gender",
+            header: "Meet To",
+            key: "employeeId",
             render: (item: SpotPass) => (
-                <span className="capitalize text-sm font-medium">{item.gender}</span>
+                <span className="text-sm font-medium text-gray-700">
+                    {/* @ts-ignore - employeeId might be populated object or string */}
+                    {item.employeeId?.name || "N/A"}
+                </span>
             )
         },
         {
