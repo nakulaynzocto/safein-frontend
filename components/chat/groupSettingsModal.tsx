@@ -50,8 +50,6 @@ export function GroupSettingsModal({
     useEffect(() => {
         if (propActiveChat) {
             setStableChat(propActiveChat);
-            // We DO NOT update groupName here anymore. 
-            // Once opened, the input is fully controlled by the user to prevent cursor jumps/overwrites.
         }
     }, [propActiveChat]);
 
