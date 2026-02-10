@@ -53,6 +53,22 @@ export function RegisterForm() {
     const [user, setUser] = useState<any>(null);
     const [token, setToken] = useState<string | null>(null);
 
+    const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, result: 0 });
+    const [captchaInput, setCaptchaInput] = useState("");
+    const [captchaError, setCaptchaError] = useState<string | null>(null);
+
+    const generateCaptcha = () => {
+        const n1 = Math.floor(Math.random() * 10) + 1;
+        const n2 = Math.floor(Math.random() * 10) + 1;
+        setCaptcha({ num1: n1, num2: n2, result: n1 + n2 });
+        setCaptchaInput("");
+        setCaptchaError(null);
+    };
+
+    useEffect(() => {
+        generateCaptcha();
+    }, []);
+
     useEffect(() => { }, [currentStep]);
 
     const {
@@ -76,6 +92,12 @@ export function RegisterForm() {
     });
 
     const onSubmit = async (data: RegisterFormData) => {
+        if (parseInt(captchaInput) !== captcha.result) {
+            setCaptchaError("Incorrect answer. Please solve the math problem.");
+            generateCaptcha();
+            return;
+        }
+
         try {
             setSubmitError(null);
             const encryptedEmail = encryptData(data.email);
@@ -98,6 +120,7 @@ export function RegisterForm() {
                 errorMessage = error.message;
             }
             setSubmitError(errorMessage);
+            generateCaptcha();
         }
     };
 
@@ -325,9 +348,35 @@ export function RegisterForm() {
                                 {...registerField("password")}
                                 required
                             />
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    Security Check: {captcha.num1} + {captcha.num2} = ?
+                                </label>
+                                <div className="flex gap-2">
+                                    <InputField
+                                        placeholder="Answer"
+                                        type="number"
+                                        value={captchaInput}
+                                        onChange={(e) => setCaptchaInput(e.target.value)}
+                                        error={captchaError || undefined}
+                                        className="flex-1 h-12 rounded-xl"
+                                        required
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={generateCaptcha}
+                                        className="h-12 w-12 rounded-xl"
+                                        title="Refresh Captcha"
+                                    >
+                                        🔄
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
 
-                        <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
+                        <Button type="submit" variant="primary" className="w-full h-12 rounded-xl font-bold" disabled={isLoading}>
                             {isLoading ? "Registering..." : "Register"}
                         </Button>
                     </form>
