@@ -150,9 +150,11 @@ export function ChatWindow({
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <Button onClick={onSettings} variant="ghost" size="icon" className="h-9 w-9 text-gray-500 hover:text-[#074463] hover:bg-blue-50/50 rounded-full transition-all">
-                        <Info className="h-4 w-4" />
-                    </Button>
+                    {(activeUser?.role === 'group' || (activeUser as any)?.isGroup) && (
+                        <Button onClick={onSettings} variant="ghost" size="icon" className="h-9 w-9 text-gray-500 hover:text-[#074463] hover:bg-blue-50/50 rounded-full transition-all">
+                            <Info className="h-4 w-4" />
+                        </Button>
+                    )}
                 </div>
             </div>
 

@@ -17,7 +17,7 @@ import {
     Eye,
     Maximize2
 } from "lucide-react";
-import { getInitials } from "@/utils/helpers";
+import { getInitials, formatName } from "@/utils/helpers";
 import { StatusBadge } from "@/components/common/statusBadge";
 import { SearchInput } from "@/components/common/searchInput";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
@@ -129,7 +129,7 @@ export function SpotPassList() {
                         )}
                     </div>
                     <div className="flex flex-col min-w-0">
-                        <span className="font-semibold text-sm text-gray-900 truncate">{item.name}</span>
+                        <span className="font-semibold text-sm text-gray-900 truncate">{formatName(item.name)}</span>
                         <div className="flex flex-col gap-0.5">
                             <span className="text-xs text-muted-foreground">{item.phone}</span>
                             {item.vehicleNumber && (
@@ -165,7 +165,7 @@ export function SpotPassList() {
                     )}
                     <span className="text-sm font-medium text-gray-700">
                         {/* @ts-ignore */}
-                        {item.employeeId?.name || "N/A"}
+                        {formatName(item.employeeId?.name || "") || "N/A"}
                     </span>
                 </div>
             )
