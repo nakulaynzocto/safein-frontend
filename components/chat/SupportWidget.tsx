@@ -14,10 +14,10 @@ import { supportSocketService } from "@/lib/support-socket";
 import { useLazyGetTicketHistoryQuery } from "@/store/api/supportApi";
 
 // Project color scheme - matching your existing brand
-const GRADIENT_PRIMARY = "linear-gradient(135deg, #074463 0%, #3882a5 100%)";
-const GRADIENT_ACCENT = "linear-gradient(135deg, #3882a5 0%, #98c7dd 100%)";
+const GRADIENT_PRIMARY = "linear-gradient(135deg, #074463 0%, #2563eb 100%)";
+const GRADIENT_ACCENT = "linear-gradient(135deg, #2563eb 0%, #98c7dd 100%)";
 const COLOR_PRIMARY = "#074463";
-const COLOR_ACCENT = "#3882a5";
+const COLOR_ACCENT = "#2563eb";
 
 export default function SupportWidget() {
 
@@ -168,16 +168,24 @@ export default function SupportWidget() {
                 setMessages(data.messages);
             }
         }).catch(err => {
-            console.error("Failed to fetch history:", err);
-            // If history fetch fails, might be stale session
-            // Clear tokens and force re-login
-            if (userMode === "public_verified") {
-
-                localStorage.removeItem("safein_support_g_token");
+            console.error("[SupportWidget] History fetch failed:", err);
+            // If ticket not found (404), clear it so a new one can be created
+            if (err.status === 404) {
+                console.log("[SupportWidget] Stale ticket ID found, clearing...");
                 localStorage.removeItem("safein_support_ticket_id");
-                setGoogleToken(null);
-                setUserMode("none");
                 setTicketId(null);
+                setMessages([]);
+            }
+
+            // If auth failed, clear session
+            if (err.status === 401 || err.status === 403) {
+                if (userMode === "public_verified") {
+                    localStorage.removeItem("safein_support_g_token");
+                    localStorage.removeItem("safein_support_ticket_id");
+                    setGoogleToken(null);
+                    setUserMode("none");
+                    setTicketId(null);
+                }
             }
         });
     };

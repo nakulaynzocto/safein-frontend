@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
 // Constants
-const GRADIENT_PRIMARY = "linear-gradient(135deg, #074463 0%, #3882a5 100%)";
+const GRADIENT_PRIMARY = "linear-gradient(135deg, #074463 0%, #2563eb 100%)";
 
 interface Message {
     sender: string;
@@ -75,20 +75,20 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                             isMe ? "items-end" : "items-start"
                         )}>
                             <div className={cn(
-                                "px-4 py-2.5 text-sm shadow-lg relative group",
+                                "px-4 py-2.5 text-sm shadow-md relative group transition-all duration-300",
                                 isMe
-                                    ? "text-white rounded-2xl rounded-tr-md"
+                                    ? "text-white rounded-2xl rounded-tr-md ring-1 ring-white/10"
                                     : "bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-100 border border-gray-100 dark:border-slate-700 rounded-2xl rounded-tl-md"
                             )}
                                 style={isMe ? { background: GRADIENT_PRIMARY } : {}}
                             >
-                                <p className="leading-relaxed">{msg.content}</p>
+                                <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                                 <div className={cn(
-                                    "text-[9px] mt-1 flex justify-end items-center gap-1.5",
-                                    isMe ? "text-blue-100" : "text-gray-400"
+                                    "text-[9px] mt-1.5 flex justify-end items-center gap-1.5 font-medium",
+                                    isMe ? "text-blue-100/80" : "text-gray-400"
                                 )}>
                                     {format(new Date(msg.createdAt), "HH:mm")}
-                                    {isMe && <CheckCheck className="w-3 h-3" />}
+                                    {isMe && <CheckCheck className="w-3 h-3 text-emerald-300" />}
                                 </div>
                             </div>
                         </div>

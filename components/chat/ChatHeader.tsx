@@ -3,7 +3,7 @@ import { RefreshCcw, Maximize2, Minimize2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // Constants
-const GRADIENT_PRIMARY = "linear-gradient(135deg, #074463 0%, #3882a5 100%)";
+const GRADIENT_PRIMARY = "linear-gradient(135deg, #074463 0%, #2563eb 100%)";
 
 interface ChatHeaderProps {
     refreshHistory: () => void;

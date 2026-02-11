@@ -29,15 +29,21 @@ export const supportApi = createApi({
                 console.log('[Support API] Fetching history for ticket:', ticketId);
                 return `/tickets/${ticketId}/history`;
             },
+            transformResponse: (response: { data: any }) => response.data,
             providesTags: (result, error, ticketId) => {
                 if (error) {
-                    console.error('[Support API] Error fetching history:', error);
+                    console.error('[Frontend Support API] Error fetching history:', {
+                        status: (error as any).status,
+                        data: (error as any).data,
+                        originalError: error
+                    });
                 }
                 return [{ type: 'SupportMessage', id: ticketId }];
             },
         }),
         getUserTickets: builder.query<any, string>({
             query: (email) => `/tickets?email=${email}`,
+            transformResponse: (response: { data: any }) => response.data || [],
             providesTags: ['SupportTicket'],
         }),
     }),
