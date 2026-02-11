@@ -91,10 +91,12 @@ export default function MessagesPage() {
 
             // Find existing entry by ID or Email
             let existingId: string | undefined;
+            const userEmail = chatUser.email ? chatUser.email.toLowerCase() : "";
+
             if (uniqueChatsMap.has(chatUser.targetUserId)) {
                 existingId = chatUser.targetUserId;
-            } else if (chatUser.email && emailMap.has(chatUser.email)) {
-                existingId = emailMap.get(chatUser.email);
+            } else if (userEmail && emailMap.has(userEmail)) {
+                existingId = emailMap.get(userEmail);
             }
 
             if (existingId) {
@@ -119,37 +121,42 @@ export default function MessagesPage() {
                 const loser = keepNew ? existing : chatUser;
 
                 // Merge Data (Take best attributes)
-                winner.isOnline = winner.isOnline || loser.isOnline; // Combine online status
+                // 1. Online Status: If ANY is online, the merged user is online
+                winner.isOnline = winner.isOnline || loser.isOnline;
 
-                // Name: Prefer non-email name (often Virtual Employee has better name than Raw User)
+                // 2. Name: Prefer Real Name over Email/Unknown
+                // Often the Virtual Employee has the correct name, while the User has "email@..." or "Unknown"
+                // Or vice versa. We want the one that looks like a real name.
                 const winnerNameBad = !winner.name || winner.name === winner.email || winner.name === "Unknown User";
                 const loserNameGood = loser.name && loser.name !== loser.email && loser.name !== "Unknown User";
+
                 if (winnerNameBad && loserNameGood) {
                     winner.name = loser.name;
                 }
 
-                // Avatar: Prefer existing avatar
+                // 3. Avatar: Prefer existing/better avatar
                 if (!winner.avatar && loser.avatar) {
                     winner.avatar = loser.avatar;
                 }
 
                 // Update Maps
                 if (keepNew) {
-                    // Remove old, add new
+                    // Remove old reference, add new
                     uniqueChatsMap.delete(existingId);
                     uniqueChatsMap.set(winner.targetUserId, winner);
-                    if (winner.email) emailMap.set(winner.email, winner.targetUserId);
+
+                    // Update email mapping to point to the new winner ID
+                    if (userEmail) emailMap.set(userEmail, winner.targetUserId);
                 } else {
-                    // Update existing (in-place modification is unsafe if React strictly tracked, but here rawChats are new objects this render pass)
-                    // existing object is already in uniqueChatsMap, properties updated above
-                    // Update email map just in case ID changed (unlikely here as existingId matched)
-                    if (winner.email) emailMap.set(winner.email, winner.targetUserId);
+                    // Existing won. It's already in uniqueChatsMap. properties updated in-place.
+                    // Ensure email map points to it (if not already)
+                    if (userEmail) emailMap.set(userEmail, winner.targetUserId);
                 }
 
             } else {
                 // New Entry
                 uniqueChatsMap.set(chatUser.targetUserId, chatUser);
-                if (chatUser.email) emailMap.set(chatUser.email, chatUser.targetUserId);
+                if (userEmail) emailMap.set(userEmail, chatUser.targetUserId);
             }
         });
 
