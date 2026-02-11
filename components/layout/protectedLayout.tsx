@@ -34,10 +34,8 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     } = useAuthSubscription();
 
     // Show navbar for all authenticated users
-    const shouldShowNavbar = !isLoading && shouldShowPrivateNavbar;
+    const shouldShowNavbar = isClient && !isLoading && shouldShowPrivateNavbar;
 
-    // 🔌 Initialize WebSocket for real-time appointment updates
-    // Auto-connects when user is authenticated and auto-disconnects on logout
     // 🔌 Initialize WebSocket for real-time appointment updates
     // Auto-connects when user is authenticated and auto-disconnects on logout
     useAppointmentSocket();
@@ -56,7 +54,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
             {shouldShowNavbar && <Navbar variant="dashboard" />}
             {/* Expiry warning banner - Only show on private pages (not subscription page) */}
             <Banner
-                show={!!(expiryWarning?.show && !isSubscriptionPage && isAuthenticated)}
+                show={!!(isClient && expiryWarning?.show && !isSubscriptionPage && isAuthenticated)}
                 variant={expiryWarning?.isExpired ? "error" : "warning"}
                 message={expiryWarning?.isExpired ? (
                     <span>
@@ -86,7 +84,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
             />
             <div className="flex flex-1 overflow-hidden">
                 {/* Only show sidebar if user has active subscription AND token */}
-                {shouldShowSidebar && <Sidebar />}
+                {isClient && !isLoading && shouldShowSidebar && <Sidebar />}
                 <main
                     className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto transition-opacity duration-200"
                     style={{

@@ -6,13 +6,22 @@ import { Provider } from "react-redux";
 import { store } from "../store/store";
 import { Toaster } from "sonner";
 
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import SupportWidget from "@/components/chat/SupportWidget";
+
 export function Providers({ children }: { children: ReactNode }) {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "your-google-client-id";
+    console.log("SafeIn Google Client ID:", clientId.substring(0, 10) + "...");
+
     return (
         <Provider store={store}>
-            <>
-                {children}
-                <Toaster position="top-right" richColors />
-            </>
+            <GoogleOAuthProvider clientId={clientId}>
+                <>
+                    {children}
+                    <Toaster position="top-right" richColors />
+                    <SupportWidget />
+                </>
+            </GoogleOAuthProvider>
         </Provider>
     );
 }

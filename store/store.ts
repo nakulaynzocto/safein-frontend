@@ -4,6 +4,7 @@ import { approvalLinkApi } from "./api/approvalLinkApi";
 import { notificationApi } from "./api/notificationApi";
 import authReducer from "./slices/authSlice";
 import notificationReducer from "./slices/notificationSlice";
+import { supportApi } from "./api/supportApi";
 
 // Import injected APIs to ensure endpoints are registered
 import "./api/appointmentLinkApi";
@@ -16,6 +17,7 @@ export const store = configureStore({
         notification: notificationReducer,
         [baseApi.reducerPath]: baseApi.reducer,
         [approvalLinkApi.reducerPath]: approvalLinkApi.reducer,
+        [supportApi.reducerPath]: supportApi.reducer,
     },
     middleware: (getDefaultMiddleware) => {
         const defaultMiddleware = getDefaultMiddleware({
@@ -24,7 +26,12 @@ export const store = configureStore({
             },
         });
 
-        const apiMiddlewares = [baseApi.middleware, approvalLinkApi.middleware, notificationApi.middleware];
+        const apiMiddlewares = [
+            baseApi.middleware,
+            approvalLinkApi.middleware,
+            notificationApi.middleware,
+            supportApi.middleware
+        ];
 
         // Filter out any duplicate middleware references
         const uniqueMiddlewares = apiMiddlewares.filter(
