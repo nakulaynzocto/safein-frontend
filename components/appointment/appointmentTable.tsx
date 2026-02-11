@@ -470,7 +470,7 @@ export function AppointmentTable({
                                     </>
                                 )}
 
-                                {isApproved && onCheckOut && (
+                                {isApproved && onCheckOut && isAppointmentDatePast(appointment) && (
                                     <>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem
@@ -687,6 +687,14 @@ export function AppointmentTable({
                 mode="active"
                 open={showViewDialog}
                 on_close={() => setShowViewDialog(false)}
+                onCheckOut={
+                    onCheckOut
+                        ? () => {
+                            setShowViewDialog(false);
+                            setShowCheckOutDialog(true);
+                        }
+                        : undefined
+                }
             />
         </div >
     );

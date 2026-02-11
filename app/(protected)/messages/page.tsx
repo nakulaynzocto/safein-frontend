@@ -76,8 +76,9 @@ export default function MessagesPage() {
             };
         });
 
-        // Deduplicate Chats by Target User ID (Only for non-group chats)
+        // Deduplicate Chats by Target User ID AND Email (Robust Merge)
         const uniqueChatsMap = new Map<string, typeof rawChats[0]>();
+        const emailMap = new Map<string, string>(); // Email -> targetUserId of the stored chat
         const groupChats: typeof rawChats = [];
 
         rawChats.forEach(chatUser => {
@@ -88,21 +89,67 @@ export default function MessagesPage() {
 
             if (!chatUser.targetUserId) return;
 
-            const existing = uniqueChatsMap.get(chatUser.targetUserId);
-            if (!existing) {
-                uniqueChatsMap.set(chatUser.targetUserId, chatUser);
-            } else {
-                // Prefer real chats over virtual ones
+            // Find existing entry by ID or Email
+            let existingId: string | undefined;
+            if (uniqueChatsMap.has(chatUser.targetUserId)) {
+                existingId = chatUser.targetUserId;
+            } else if (chatUser.email && emailMap.has(chatUser.email)) {
+                existingId = emailMap.get(chatUser.email);
+            }
+
+            if (existingId) {
+                const existing = uniqueChatsMap.get(existingId);
+                if (!existing) return; // Should not happen
+
+                // Merge Logic: Determine which one to keep as the "Base"
+                // 1. Prefer Real Chat
+                let keepNew = false;
                 if (chatUser.isChat && !existing.isChat) {
-                    uniqueChatsMap.set(chatUser.targetUserId, chatUser);
-                } else if (chatUser.isChat === existing.isChat) {
-                    // If equal status, prefer newer
-                    const newTime = chatUser.lastMessageTime ? new Date(chatUser.lastMessageTime).getTime() : 0;
-                    const existingTime = existing.lastMessageTime ? new Date(existing.lastMessageTime).getTime() : 0;
-                    if (newTime > existingTime) {
-                        uniqueChatsMap.set(chatUser.targetUserId, chatUser);
-                    }
+                    keepNew = true;
+                } else if (!chatUser.isChat && existing.isChat) {
+                    keepNew = false;
+                } else {
+                    // 2. Tie-breaker: Newer message wins
+                    const timeNew = chatUser.lastMessageTime ? new Date(chatUser.lastMessageTime).getTime() : 0;
+                    const timeOld = existing.lastMessageTime ? new Date(existing.lastMessageTime).getTime() : 0;
+                    keepNew = timeNew > timeOld;
                 }
+
+                const winner = keepNew ? chatUser : existing;
+                const loser = keepNew ? existing : chatUser;
+
+                // Merge Data (Take best attributes)
+                winner.isOnline = winner.isOnline || loser.isOnline; // Combine online status
+
+                // Name: Prefer non-email name (often Virtual Employee has better name than Raw User)
+                const winnerNameBad = !winner.name || winner.name === winner.email || winner.name === "Unknown User";
+                const loserNameGood = loser.name && loser.name !== loser.email && loser.name !== "Unknown User";
+                if (winnerNameBad && loserNameGood) {
+                    winner.name = loser.name;
+                }
+
+                // Avatar: Prefer existing avatar
+                if (!winner.avatar && loser.avatar) {
+                    winner.avatar = loser.avatar;
+                }
+
+                // Update Maps
+                if (keepNew) {
+                    // Remove old, add new
+                    uniqueChatsMap.delete(existingId);
+                    uniqueChatsMap.set(winner.targetUserId, winner);
+                    if (winner.email) emailMap.set(winner.email, winner.targetUserId);
+                } else {
+                    // Update existing (in-place modification is unsafe if React strictly tracked, but here rawChats are new objects this render pass)
+                    // existing object is already in uniqueChatsMap, properties updated above
+                    // Update email map just in case ID changed (unlikely here as existingId matched)
+                    if (winner.email) emailMap.set(winner.email, winner.targetUserId);
+                }
+
+            } else {
+                // New Entry
+                uniqueChatsMap.set(chatUser.targetUserId, chatUser);
+                if (chatUser.email) emailMap.set(chatUser.email, chatUser.targetUserId);
             }
         });
 
@@ -128,8 +175,8 @@ export default function MessagesPage() {
                 chatUsers.unshift({
                     id: adminId,
                     targetUserId: adminId,
-                    name: "Support Team",
-                    email: "support@safein.com",
+                    name: (user as any).companyName || "Support Team",
+                    email: (user as any).email || "support@safein.com",
                     avatar: "",
                     lastMessage: "Contact Admin",
                     lastMessageTime: undefined,

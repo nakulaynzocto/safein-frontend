@@ -39,8 +39,6 @@ export const formatChatUser = (user: any): FormattedChatUser => {
         };
     }
 
-    const name = user.name || user.email || "Unknown User";
-
     // Determine Role
     let role = "user";
     if (user.role) {
@@ -48,6 +46,13 @@ export const formatChatUser = (user: any): FormattedChatUser => {
     } else if (user.roles && Array.isArray(user.roles)) {
         if (user.roles.includes('admin') || user.roles.includes('super_admin')) role = 'admin';
         else if (user.roles.includes('employee')) role = 'employee';
+    }
+
+    let name = user.name || user.email || "Unknown User";
+
+    // If admin, check company name and prioritize it
+    if ((role === 'admin' || role === 'super_admin') && user.companyName) {
+        name = user.companyName;
     }
 
     return {
@@ -119,8 +124,21 @@ export const buildParticipantsMap = (
         const id = String(u._id || u.userId || u.id || "");
         if (!id) return;
 
-        const currentName = u.name || u.username;
+        let role = u.role;
+        if (!role && u.roles && Array.isArray(u.roles)) {
+            if (u.roles.includes('admin') || u.roles.includes('super_admin')) role = 'admin';
+            else if (u.roles.includes('employee')) role = 'employee';
+        } else if (role) {
+            role = role.toLowerCase();
+        }
+
+        let currentName = u.name || u.username;
         const currentEmail = u.email;
+
+        // Prioritize company name for admins
+        if ((role === 'admin' || role === 'super_admin') && u.companyName) {
+            currentName = u.companyName;
+        }
 
         // Determine best display name
         let displayName = currentName;

@@ -17,16 +17,18 @@ import {
     CheckCircle,
     XCircle,
     Maximize2,
+    LogOut,
 } from "lucide-react";
 import { StatusBadge } from "@/components/common/statusBadge";
 import { formatDateWithPattern } from "@/utils/dateUtils";
-import { getInitials, formatName } from "@/utils/helpers";
+import { getAppointmentDateTime, getInitials, formatName } from "@/utils/helpers";
 
 interface AppointmentDetailsDialogProps {
     appointment: Appointment | null;
     mode: "active";
     open: boolean;
     on_close: () => void;
+    onCheckOut?: () => void;
 }
 
 const formatDate = formatDateWithPattern;
@@ -95,7 +97,7 @@ const fieldConfig = [
     },
 ];
 
-export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: AppointmentDetailsDialogProps) {
+export function AppointmentDetailsDialog({ appointment, mode, open, on_close, onCheckOut }: AppointmentDetailsDialogProps) {
     if (!appointment) return null;
 
     const renderFieldValue = (key: string, value: any, formatFn?: (val: string) => string) => {
@@ -125,6 +127,14 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
     const visitorPhoto = getFieldValue(appointment, "visitorPhoto");
     const visitorName = formatName(getFieldValue(appointment, "visitorName"));
     const status = appointment.status;
+
+    const isAppointmentDatePast = () => {
+        if (!appointment) return false;
+        const scheduledDateTime = getAppointmentDateTime(appointment);
+        if (!scheduledDateTime) return false;
+        const now = new Date();
+        return scheduledDateTime < now;
+    };
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && on_close()}>
@@ -237,7 +247,18 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: 
                         })}
                     </div>
 
-                    <div className="flex justify-end border-t pt-4">
+                    <div className="flex justify-end gap-2 border-t pt-4">
+                        {onCheckOut && appointment.status === "approved" && isAppointmentDatePast() && (
+                            <Button
+                                type="button"
+                                onClick={onCheckOut}
+                                variant="destructive"
+                                className="bg-red-50 text-red-600 hover:bg-red-100 border-red-200 border"
+                            >
+                                <LogOut className="mr-2 h-4 w-4" />
+                                Check Out
+                            </Button>
+                        )}
                         <Button type="button" onClick={on_close} variant="outline">
                             Close
                         </Button>
