@@ -11,7 +11,6 @@ import SupportWidget from "@/components/chat/SupportWidget";
 
 export function Providers({ children }: { children: ReactNode }) {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "your-google-client-id";
-    console.log("SafeIn Google Client ID:", clientId.substring(0, 10) + "...");
 
     return (
         <Provider store={store}>
