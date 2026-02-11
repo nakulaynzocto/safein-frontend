@@ -49,4 +49,4 @@ export const supportApi = createApi({
     }),
 });
 
-export const { useGetTicketHistoryQuery, useLazyGetTicketHistoryQuery, useGetUserTicketsQuery } = supportApi;
+export const { useGetTicketHistoryQuery, useLazyGetTicketHistoryQuery, useGetUserTicketsQuery, useLazyGetUserTicketsQuery } = supportApi;

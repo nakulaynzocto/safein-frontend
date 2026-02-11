@@ -3,7 +3,7 @@ import { RefreshCcw, Maximize2, Minimize2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // Constants
-const GRADIENT_PRIMARY = "linear-gradient(135deg, #074463 0%, #2563eb 100%)";
+const GRADIENT_PRIMARY = "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)";
 
 interface ChatHeaderProps {
     refreshHistory: () => void;
@@ -27,7 +27,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 
             {/* Animated Patterns */}
             <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/10 blur-3xl -translate-y-10 translate-x-10 animate-pulse"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-[#98c7dd]/20 blur-2xl translate-y-8 -translate-x-8"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-primary-light/20 blur-2xl translate-y-8 -translate-x-8"></div>
 
             {/* Content */}
             <div className="relative z-10 flex flex-col">

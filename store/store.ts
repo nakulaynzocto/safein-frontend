@@ -4,6 +4,7 @@ import { approvalLinkApi } from "./api/approvalLinkApi";
 import { notificationApi } from "./api/notificationApi";
 import authReducer from "./slices/authSlice";
 import notificationReducer from "./slices/notificationSlice";
+import uiReducer from "./slices/uiSlice";
 import { supportApi } from "./api/supportApi";
 
 // Import injected APIs to ensure endpoints are registered
@@ -15,6 +16,7 @@ export const store = configureStore({
     reducer: {
         auth: authReducer,
         notification: notificationReducer,
+        ui: uiReducer,
         [baseApi.reducerPath]: baseApi.reducer,
         [approvalLinkApi.reducerPath]: approvalLinkApi.reducer,
         [supportApi.reducerPath]: supportApi.reducer,

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdownMenu";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { logout, setUser } from "@/store/slices/authSlice";
+import { toggleAssistant } from "@/store/slices/uiSlice";
 import { useLogoutMutation, useGetProfileQuery } from "@/store/api/authApi";
 import { useGetEmployeeQuery, useGetEmployeesQuery } from "@/store/api/employeeApi";
 import { routes } from "@/utils/routes";
@@ -40,6 +41,7 @@ import {
     Mail,
     Bell,
     CreditCard,
+    Sparkles,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { usePathname } from "next/navigation";
@@ -448,6 +450,34 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                         </span>
                                     </div>
                                 )}
+
+                                {/* ✨ Ask Assistant Button */}
+                                <button
+                                    onClick={() => dispatch(toggleAssistant())}
+                                    className={cn(
+                                        "flex items-center gap-1.5 sm:gap-2 group px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border-2 transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer",
+                                        shouldShowWhiteNavbar
+                                            ? "border-primary/20 hover:border-primary/40 bg-white"
+                                            : "border-white/20 hover:border-white/40 bg-white/10 backdrop-blur-sm"
+                                    )}
+                                >
+                                    <div className="relative">
+                                        <Sparkles className={cn(
+                                            "w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform",
+                                            shouldShowWhiteNavbar ? "text-primary" : "text-white"
+                                        )} />
+                                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full border border-white dark:border-slate-800 animate-pulse"></div>
+                                    </div>
+                                    <span className={cn(
+                                        "hidden xs:inline-block text-[12px] sm:text-[13px] font-bold transition-opacity group-hover:opacity-80",
+                                        shouldShowWhiteNavbar
+                                            ? "bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+                                            : "text-white"
+                                    )}>
+                                        Ask SafeIn
+                                    </span>
+                                </button>
+
                                 {/* Notification Bell */}
                                 <NotificationBell
                                     className={shouldShowWhiteNavbar ? "hover:bg-gray-100/80" : "hover:bg-white/10"}
@@ -488,7 +518,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {forcePublic && isLoggedInPublic && (
                                     <Link
                                         href={routes.privateroute.DASHBOARD}
-                                        className={`hidden rounded-lg px-6 py-2 text-[14px] font-semibold transition-all duration-300 sm:flex ${ctaBtn}`}
+                                        className={cn(
+                                            "rounded-lg px-3 py-1.5 sm:px-6 sm:py-2 text-[12px] sm:text-[14px] font-semibold transition-all duration-300 flex items-center justify-center",
+                                            ctaBtn
+                                        )}
                                         prefetch={true}
                                     >
                                         My Account
@@ -515,7 +548,11 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={`hidden rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 sm:flex ${linkHoverBgClass} ${linkText}`}
+                                    className={cn(
+                                        "rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 text-[12px] sm:text-sm font-medium transition-all duration-200 flex items-center justify-center",
+                                        linkHoverBgClass,
+                                        linkText
+                                    )}
                                 >
                                     <Link href={routes.publicroute.LOGIN} prefetch={true}>
                                         Sign in

@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
 // Constants
-const GRADIENT_PRIMARY = "linear-gradient(135deg, #074463 0%, #2563eb 100%)";
+const GRADIENT_PRIMARY = "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)";
 
 interface Message {
     sender: string;
@@ -39,28 +39,8 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
     return (
         <div
             ref={scrollRef}
-            className="flex-1 overflow-y-auto p-5 space-y-4"
+            className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4"
         >
-            {/* User Identity Info */}
-            <div className="flex flex-col items-center mb-6 pt-2 animate-in fade-in zoom-in duration-500">
-                <div className="relative">
-                    <Avatar className="w-14 h-14 border-3 border-white shadow-xl ring-2 ring-[#98c7dd]/30 dark:ring-[#074463]/50 mb-3">
-                        <AvatarImage src={user?.profilePicture || ""} />
-                        <AvatarFallback
-                            className="text-white font-bold text-lg"
-                            style={{ background: GRADIENT_PRIMARY }}
-                        >
-                            {(user?.name || user?.email || "U").charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                    </Avatar>
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-400 border-2 border-white dark:border-slate-900 rounded-full"></div>
-                </div>
-                <h4 className="font-bold text-gray-900 dark:text-white text-base">
-                    {user?.name || user?.email?.split('@')[0] || "Supporter"}
-                </h4>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || "Authenticated"}</p>
-            </div>
-
             {messages.map((msg, i) => {
                 // Improved isMe logic: Check sender type and sender id/email
                 // Note: Frontend user is 'user'. Backend agent is 'agent'.
@@ -111,8 +91,8 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
             {messages.length === 0 && !isLoading && (
                 <div className="text-center text-sm text-gray-400 dark:text-gray-500 mt-10 space-y-2">
-                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-[#98c7dd]/20 to-[#3882a5]/20 dark:from-[#074463]/20 dark:to-[#3882a5]/20 flex items-center justify-center mb-3">
-                        <MessageSquare className="w-8 h-8 text-[#074463]" />
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary-light/20 to-accent/20 dark:from-primary/20 dark:to-accent/20 flex items-center justify-center mb-3">
+                        <MessageSquare className="w-8 h-8 text-primary" />
                     </div>
                     <p className="font-medium">Start a conversation</p>
                     <p className="text-xs">Type your message below to begin</p>
