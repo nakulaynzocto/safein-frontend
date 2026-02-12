@@ -69,23 +69,17 @@ export default function SupportWidget() {
 
         let socket: any = null;
 
-        if (user && token) {
-            setUserMode("employee");
-            socket = supportSocketService.connect(token, undefined);
+        const savedGoogleToken = localStorage.getItem("safein_support_g_token");
+        // Hard check to ensure it's not a string "undefined" or empty
+        if (savedGoogleToken && savedGoogleToken !== "undefined" && savedGoogleToken !== "null") {
+            setGoogleToken(savedGoogleToken);
+            setUserMode("public_verified");
+            socket = supportSocketService.connect(undefined, savedGoogleToken);
             socketRef.current = socket;
         } else {
-            const savedGoogleToken = localStorage.getItem("safein_support_g_token");
-            // Hard check to ensure it's not a string "undefined" or empty
-            if (savedGoogleToken && savedGoogleToken !== "undefined" && savedGoogleToken !== "null") {
-                setGoogleToken(savedGoogleToken);
-                setUserMode("public_verified");
-                socket = supportSocketService.connect(undefined, savedGoogleToken);
-                socketRef.current = socket;
-            } else {
-                if (savedGoogleToken) localStorage.removeItem("safein_support_g_token");
-                setUserMode("none");
-                return;
-            }
+            if (savedGoogleToken) localStorage.removeItem("safein_support_g_token");
+            setUserMode("none");
+            return;
         }
 
         if (!socket) return;
@@ -142,7 +136,7 @@ export default function SupportWidget() {
             socket.off("connect_error", onConnectError);
             socket.off("disconnect", onDisconnect);
         };
-    }, [user, token, mounted, googleToken]); // Added googleToken here
+    }, [mounted, googleToken]);
 
     // 2. Auto-scroll to bottom of chat
     useEffect(() => {
@@ -218,6 +212,43 @@ export default function SupportWidget() {
         setInput("");
         setIsSending(true);
 
+        // Use Socket if connected, otherwise fallback to REST
+        if (socketRef.current && isConnected) {
+            if (!ticketId) {
+                // Create ticket via socket
+                socketRef.current.emit("create_ticket", { subject: "Support Chat", message: msgContent }, (response: any) => {
+                    setIsSending(false);
+                    if (response.status === "ok") {
+                        const newTicketId = response.ticket.ticketId;
+                        setTicketId(newTicketId);
+                        localStorage.setItem("safein_support_ticket_id", newTicketId);
+
+                        // Force a history sync to get the auto-reply message from server immediately
+                        syncTicketAndHistory(socketRef.current);
+                    } else {
+                        setInput(msgContent);
+                        toast.error(response.message || "Failed to start chat");
+                    }
+                });
+            } else {
+                // Send message via socket
+                socketRef.current.emit("send_message", { ticketId, content: msgContent }, (response: any) => {
+                    setIsSending(false);
+                    if (response.status === "ok") {
+                        setMessages(prev => {
+                            if (prev.some(m => m._id === response.message._id)) return prev;
+                            return [...prev, response.message];
+                        });
+                    } else {
+                        setInput(msgContent);
+                        toast.error(response.message || "Failed to send message");
+                    }
+                });
+            }
+            return;
+        }
+
+        // Fallback to REST API if socket not connected
         try {
             if (!ticketId) {
                 const response: any = await restCreateTicket({ subject: "Support Chat", message: msgContent }).unwrap();
@@ -240,9 +271,10 @@ export default function SupportWidget() {
                     });
                 }
             }
-        } catch (error) {
+        } catch (error: any) {
             setIsSending(false);
             setInput(msgContent);
+            toast.error(error.data?.message || "Connection error. Please try again.");
         }
     };
 
@@ -322,8 +354,8 @@ export default function SupportWidget() {
                             </div>
                         )}
 
-                        {/* B. Chat Area (Employee OR Verified Public) */}
-                        {(userMode === "employee" || userMode === "public_verified") && (
+                        {/* B. Chat Area (Verified Public) */}
+                        {userMode === "public_verified" && (
                             <>
                                 <ChatMessages
                                     messages={messages}

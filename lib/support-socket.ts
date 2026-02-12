@@ -8,6 +8,7 @@ const SUPPORT_URL = `${BASE_SUPER_ADMIN_URL}/support`;
 
 export class SupportSocketService {
     private socket: Socket | null = null;
+    private isConnecting: boolean = false;
     private static instance: SupportSocketService;
 
     // Singleton Pattern
@@ -19,22 +20,30 @@ export class SupportSocketService {
     }
 
     public connect(token?: string, googleToken?: string): Socket {
-        if (this.socket && this.socket.connected) return this.socket;
+        if (this.socket && (this.socket.connected || this.isConnecting)) {
+            return this.socket;
+        }
 
+        this.isConnecting = true;
         this.socket = io(SUPPORT_URL, {
             auth: {
                 token,       // For Employees
                 googleToken  // For Public Users
             },
+            transports: ['websocket'],
             reconnectionAttempts: 5
         });
 
+        this.socket.on('connect', () => {
+            this.isConnecting = false;
+        });
 
         this.socket.on('connect_error', (err) => {
+            this.isConnecting = false;
             if (err.message && (err.message.includes('Authentication') || err.message.includes('Auth'))) {
                 console.warn('Support Chat Authentication failed (falling back to REST):', err.message);
-            } else if (err.message && err.message.includes('xhr poll error')) {
-                console.warn('Support Chat: Live server unreachable. Messages will be sent via REST API.');
+            } else if (err.message && (err.message.includes('xhr poll error') || err.message.includes('websocket error') || err.message.includes('failed'))) {
+                console.warn('Support Chat: Real-time server unreachable. Falling back to REST API for messages.');
             } else {
                 console.error('Support Chat Connection Error:', err.message);
             }
