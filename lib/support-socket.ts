@@ -1,6 +1,10 @@
 import { io, Socket } from 'socket.io-client';
 
-const SUPPORT_URL = process.env.NEXT_PUBLIC_SUPPORT_API_URL || 'http://localhost:4011/support';
+const BASE_SUPER_ADMIN_URL = process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL
+    ? process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL.replace(/\/api$/, '')
+    : 'http://localhost:4011';
+
+const SUPPORT_URL = `${BASE_SUPER_ADMIN_URL}/support`;
 
 export class SupportSocketService {
     private socket: Socket | null = null;
