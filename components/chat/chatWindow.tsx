@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Phone, Video, Check, CheckCheck, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ChatInput } from "./chatInput";
+import { ChatInput } from "./InternalChatInput";
 import { formatName, getInitials } from "@/utils/helpers";
 
 interface Message {
