@@ -4,7 +4,6 @@ const SUPPORT_API_BASE_URL = process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL
     ? `${process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL}/support`
     : "http://localhost:4011/api/support";
 
-console.log('[Support API] Base URL:', SUPPORT_API_BASE_URL);
 
 export const supportApi = createApi({
     reducerPath: 'supportApi',
@@ -25,28 +24,39 @@ export const supportApi = createApi({
     tagTypes: ['SupportTicket', 'SupportMessage'],
     endpoints: (builder) => ({
         getTicketHistory: builder.query<any, string>({
-            query: (ticketId) => {
-                console.log('[Support API] Fetching history for ticket:', ticketId);
-                return `/tickets/${ticketId}/history`;
-            },
+            query: (ticketId) => `/tickets/${ticketId}/history`,
             transformResponse: (response: { data: any }) => response.data,
-            providesTags: (result, error, ticketId) => {
-                if (error) {
-                    console.error('[Frontend Support API] Error fetching history:', {
-                        status: (error as any).status,
-                        data: (error as any).data,
-                        originalError: error
-                    });
-                }
-                return [{ type: 'SupportMessage', id: ticketId }];
-            },
+            providesTags: (result, error, ticketId) => [{ type: 'SupportMessage', id: ticketId }],
         }),
         getUserTickets: builder.query<any, string>({
             query: (email) => `/tickets?email=${email}`,
             transformResponse: (response: { data: any }) => response.data || [],
             providesTags: ['SupportTicket'],
         }),
+        createTicket: builder.mutation<any, { subject: string; message: string }>({
+            query: (data) => ({
+                url: '/tickets',
+                method: 'POST',
+                body: data,
+            }),
+            invalidatesTags: ['SupportTicket'],
+        }),
+        sendMessage: builder.mutation<any, { ticketId: string; content: string; type?: string }>({
+            query: ({ ticketId, ...data }) => ({
+                url: `/tickets/${ticketId}/messages`,
+                method: 'POST',
+                body: data,
+            }),
+            invalidatesTags: (result, error, { ticketId }) => [{ type: 'SupportMessage', id: ticketId }],
+        }),
     }),
 });
 
-export const { useGetTicketHistoryQuery, useLazyGetTicketHistoryQuery, useGetUserTicketsQuery, useLazyGetUserTicketsQuery } = supportApi;
+export const {
+    useGetTicketHistoryQuery,
+    useLazyGetTicketHistoryQuery,
+    useGetUserTicketsQuery,
+    useLazyGetUserTicketsQuery,
+    useCreateTicketMutation,
+    useSendMessageMutation
+} = supportApi;

@@ -11,7 +11,7 @@ import { ChatMessages } from './ChatMessages';
 import { ChatInput } from './ChatInput';
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { supportSocketService } from "@/lib/support-socket";
-import { useLazyGetTicketHistoryQuery } from "@/store/api/supportApi";
+import { useLazyGetTicketHistoryQuery, useCreateTicketMutation, useSendMessageMutation } from "@/store/api/supportApi";
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setAssistantOpen } from '@/store/slices/uiSlice';
 
@@ -47,6 +47,8 @@ export default function SupportWidget() {
 
     // RTK Query hooks
     const [fetchHistory] = useLazyGetTicketHistoryQuery();
+    const [restCreateTicket] = useCreateTicketMutation();
+    const [restSendMessage] = useSendMessageMutation();
 
     // --- Effects ---
 
@@ -73,12 +75,14 @@ export default function SupportWidget() {
             socketRef.current = socket;
         } else {
             const savedGoogleToken = localStorage.getItem("safein_support_g_token");
-            if (savedGoogleToken) {
+            // Hard check to ensure it's not a string "undefined" or empty
+            if (savedGoogleToken && savedGoogleToken !== "undefined" && savedGoogleToken !== "null") {
                 setGoogleToken(savedGoogleToken);
                 setUserMode("public_verified");
                 socket = supportSocketService.connect(undefined, savedGoogleToken);
                 socketRef.current = socket;
             } else {
+                if (savedGoogleToken) localStorage.removeItem("safein_support_g_token");
                 setUserMode("none");
                 return;
             }
@@ -106,11 +110,16 @@ export default function SupportWidget() {
 
         const onConnectError = (err: any) => {
             setIsLoading(false);
-            if (err.message && err.message.includes("Authentication error")) {
-                console.error("Auth failed, clearing session...");
+            // Handle both "Authentication error" and "Authentication failed" messages
+            if (err.message && (err.message.includes("Authentication error") || err.message.includes("Authentication failed"))) {
+                console.warn("[Support Chat] Auth failed, reverting to guest mode...");
                 localStorage.removeItem("safein_support_g_token");
                 setGoogleToken(null);
                 setUserMode("none");
+                // Stop the socket from constantly retrying with a bad token
+                if (socket) socket.disconnect();
+            } else {
+                console.error("[Support Chat] Connection error:", err.message);
             }
         };
 
@@ -152,34 +161,22 @@ export default function SupportWidget() {
     // --- Handlers ---
 
     const syncTicketAndHistory = (socket: any) => {
-        // If reconnecting, rejoin ticket room and fetch history
         const savedTicket = localStorage.getItem("safein_support_ticket_id");
-
-        if (!savedTicket) {
-            return;
-        }
-
+        if (!savedTicket) return;
 
         setTicketId(savedTicket);
         socket.emit("join_ticket", savedTicket);
 
-        // Fetch history via RTK Query
         fetchHistory(savedTicket).unwrap().then((data) => {
-            if (data && data.messages) {
-
+            if (data?.messages) {
                 setMessages(data.messages);
             }
         }).catch(err => {
-            console.error("[SupportWidget] History fetch failed:", err);
-            // If ticket not found (404), clear it so a new one can be created
             if (err.status === 404) {
-                console.log("[SupportWidget] Stale ticket ID found, clearing...");
                 localStorage.removeItem("safein_support_ticket_id");
                 setTicketId(null);
                 setMessages([]);
             }
-
-            // If auth failed, clear session
             if (err.status === 401 || err.status === 403) {
                 if (userMode === "public_verified") {
                     localStorage.removeItem("safein_support_g_token");
@@ -192,37 +189,19 @@ export default function SupportWidget() {
         });
     };
 
-    // Google Login Hook
     const loginWithGoogle = useGoogleLogin({
-        scope: "email profile", // Explicitly request email and profile
+        scope: "email profile",
         onSuccess: async (tokenResponse) => {
-            // We use the access_token or id_token depending on backend requirement
-            // Usually for "Sign In with Google" backend needs ID Token
-            // But typical prompt gives Access Token. 
-            // Let's assume we fetch user info or exchange.
-            // Simplified: We really need ID Token (JWT) from Google.
-            // Use 'id_token' flow if configured, but let's try getting profile info then.
-
-            // NOTE: Ideally use `google - auth - library` on backend with ID Token.
-            // For now, let's assume we pass the access token to backend and let it verify via introspection API?
-            // OR use `response_type: "id_token"` in config.
-
-            // Let's simulate we have a token to identifying user:
-            const gToken = tokenResponse.access_token; // Or ID Token
-
-            // IMPORTANT: In production, pass ID Token. Here passing access_token for now.
+            const gToken = tokenResponse.access_token;
             localStorage.setItem("safein_support_g_token", gToken);
             setGoogleToken(gToken);
             setUserMode("public_verified");
-            // No need to call connectSocket, the useEffect will handle it because googleToken changed
         },
         onError: () => {
-            console.error("Google Login Failed");
-            toast.error("Login Failed");
+            toast.error("Google Login Failed");
         }
     });
 
-    // Helper for refresh
     const refreshHistory = () => {
         if (socketRef.current) {
             syncTicketAndHistory(socketRef.current);
@@ -231,33 +210,39 @@ export default function SupportWidget() {
             toast.error("Not connected");
         }
     };
-    const handleSendMessage = () => {
-        if (!input.trim() || !socketRef.current) return;
+
+    const handleSendMessage = async () => {
+        if (!input.trim()) return;
 
         const msgContent = input;
-        setInput(""); // Optimistic clear
+        setInput("");
         setIsSending(true);
 
-        if (!ticketId) {
-            // First Message -> Create Ticket
-            socketRef.current.emit("create_ticket", { subject: "Support Chat", message: msgContent }, (response: any) => {
+        try {
+            if (!ticketId) {
+                const response: any = await restCreateTicket({ subject: "Support Chat", message: msgContent }).unwrap();
                 setIsSending(false);
-                if (response.status === "ok") {
-                    setTicketId(response.ticket.ticketId);
-                    localStorage.setItem("safein_support_ticket_id", response.ticket.ticketId);
-                    setMessages([response.message]);
-                } else {
-                    alert("Failed to start chat. Please try again.");
+                if (response.success) {
+                    setTicketId(response.data.ticket.ticketId);
+                    localStorage.setItem("safein_support_ticket_id", response.data.ticket.ticketId);
+                    setMessages(prev => {
+                        if (prev.some(m => m._id === response.data.message._id)) return prev;
+                        return [...prev, response.data.message];
+                    });
                 }
-            });
-        } else {
-            // Append Message
-            socketRef.current.emit("send_message", { ticketId, content: msgContent }, (response: any) => {
+            } else {
+                const response: any = await restSendMessage({ ticketId, content: msgContent }).unwrap();
                 setIsSending(false);
-                if (response.status !== "ok") {
-                    alert("Failed to send message");
+                if (response.success) {
+                    setMessages(prev => {
+                        if (prev.some(m => m._id === response.data._id)) return prev;
+                        return [...prev, response.data];
+                    });
                 }
-            });
+            }
+        } catch (error) {
+            setIsSending(false);
+            setInput(msgContent);
         }
     };
 

@@ -29,12 +29,15 @@ export class SupportSocketService {
             reconnectionAttempts: 5
         });
 
-        this.socket.on('connect', () => {
-            console.log('Connected to Support Chat System');
-        });
 
         this.socket.on('connect_error', (err) => {
-            console.error('Support Chat Connection Error:', err.message);
+            if (err.message && (err.message.includes('Authentication') || err.message.includes('Auth'))) {
+                console.warn('Support Chat Authentication failed (falling back to REST):', err.message);
+            } else if (err.message && err.message.includes('xhr poll error')) {
+                console.warn('Support Chat: Live server unreachable. Messages will be sent via REST API.');
+            } else {
+                console.error('Support Chat Connection Error:', err.message);
+            }
         });
 
         return this.socket;
