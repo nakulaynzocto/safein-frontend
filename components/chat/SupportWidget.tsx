@@ -273,15 +273,15 @@ export default function SupportWidget() {
     if (!mounted) return null;
 
     return (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999] flex flex-col items-end font-sans animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="fixed inset-0 z-[9999] pointer-events-none flex flex-col items-end justify-end p-4 sm:p-6 font-sans">
             {/* 1. Chat Window */}
             {isOpen && (
                 <div
                     className={cn(
-                        "bg-white dark:bg-slate-900 shadow-2xl overflow-hidden flex flex-col transition-all duration-500 ease-in-out border border-gray-100 dark:border-slate-800",
+                        "bg-white dark:bg-slate-900 shadow-2xl overflow-hidden flex flex-col transition-all duration-500 ease-in-out border border-gray-100 dark:border-slate-800 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-500",
                         isExpanded
-                            ? "fixed inset-0 sm:inset-4 w-full h-full sm:w-auto sm:h-auto rounded-none sm:rounded-3xl"
-                            : "fixed bottom-0 right-0 w-full h-[100dvh] sm:absolute sm:bottom-20 sm:right-0 sm:w-[400px] sm:h-[600px] rounded-none sm:rounded-3xl"
+                            ? "fixed inset-0 sm:inset-10 w-full h-full sm:w-auto sm:h-auto rounded-none sm:rounded-3xl"
+                            : "w-full sm:w-[400px] h-[500px] sm:h-[650px] max-h-[calc(100dvh-100px)] rounded-3xl mb-4"
                     )}
                 >
                     {/* A. Header */}
@@ -366,7 +366,7 @@ export default function SupportWidget() {
             {(!isCurrentRoutePrivate || !isAuthenticated) && (
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="group relative h-16 w-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 overflow-hidden"
+                    className="group relative h-16 w-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 overflow-hidden pointer-events-auto shrink-0"
                     style={{ background: GRADIENT_PRIMARY }}
                 >
                     <div className="absolute inset-0 rounded-full bg-accent animate-ping opacity-20"></div>
