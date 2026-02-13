@@ -46,6 +46,12 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                         )}
                         ref={ref}
                         {...props}
+                        onFocus={(e) => {
+                            if (type === "number" && e.target.value === "0") {
+                                e.target.select();
+                            }
+                            props.onFocus?.(e);
+                        }}
                     />
                     {isPasswordField && (
                         <button

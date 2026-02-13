@@ -15,6 +15,12 @@ function Input({ className, type, autoComplete = "off", ...props }: React.Compon
                 className,
             )}
             {...props}
+            onFocus={(e) => {
+                if (type === "number" && e.target.value === "0") {
+                    e.target.select();
+                }
+                props.onFocus?.(e);
+            }}
         />
     );
 }
