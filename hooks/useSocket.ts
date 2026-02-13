@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAppSelector } from "@/store/hooks";
 import { baseApi } from "@/store/api/baseApi";
@@ -80,6 +80,22 @@ const extractNames = (payload: any): { employeeName: string; visitorName: string
     };
 };
 
+// Helper: Play Voice Alert
+const playVoiceAlert = (text: string = "SafeIn") => {
+    try {
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            utterance.volume = 0.9;
+            window.speechSynthesis.speak(utterance);
+        }
+    } catch (e) {
+        console.error("Voice alert failed", e);
+    }
+};
+
 // Helper: Get notification config based on status
 const getNotificationConfig = (status: string, employeeName: string, visitorName: string, isSpecialVisitor: boolean = false): NotificationConfig => {
     const configs: Record<string, NotificationConfig> = {
@@ -144,6 +160,7 @@ export function useSocket(options: UseSocketOptions = {}) {
     const socketRef = useRef<Socket | null>(null);
     const dispatch = useDispatch();
     const { token, user } = useAppSelector((state) => state.auth);
+    const [isConnected, setIsConnected] = useState(false);
     const isConnectedRef = useRef(false);
 
     const invalidateAppointments = useCallback(() => {
@@ -180,21 +197,27 @@ export function useSocket(options: UseSocketOptions = {}) {
             const { employeeName, visitorName } = extractNames(payload);
             const status = payload?.status;
 
+            const isAdmin = user?.role === 'admin' || (user as any)?.roles?.includes('admin');
+            const isEmployee = user?.role === 'employee' || (user as any)?.roles?.includes('employee');
+
             if (status === "approved" || status === "rejected") {
                 const config = getNotificationConfig(status, employeeName, visitorName);
-
-                // Invalidate notifications to refetch from API (notifications are already saved in backend)
                 invalidateNotifications();
 
                 if (showToasts) {
-                    showToast(config);
+                    // ADMIN gets all status change notifications with sound
+                    // EMPLOYEE does NOT get sound/toast for status changes (they usually perform them)
+                    if (isAdmin) {
+                        showToast(config);
+                        playVoiceAlert();
+                    }
                 }
             }
 
             invalidateAppointments();
             onAppointmentStatusChanged?.(data);
         },
-        [showToasts, invalidateAppointments, invalidateNotifications, onAppointmentStatusChanged],
+        [showToasts, invalidateAppointments, invalidateNotifications, onAppointmentStatusChanged, user],
     );
 
     // Handle appointment created
@@ -211,20 +234,27 @@ export function useSocket(options: UseSocketOptions = {}) {
 
             const { employeeName, visitorName } = extractNames(payload);
 
+            const isAdmin = user?.role === 'admin' || (user as any)?.roles?.includes('admin');
+            const isEmployee = user?.role === 'employee' || (user as any)?.roles?.includes('employee');
+
             // Check if this is a special visitor booking (created directly in approved status)
             const isSpecialVisitor = status === "approved";
             const config = getNotificationConfig(status, employeeName, visitorName, isSpecialVisitor);
 
-            // Invalidate notifications to refetch from API (notifications are already saved in backend)
             invalidateNotifications();
 
             if (showToasts) {
-                showToast(config);
+                // ADMIN gets all creations with sound
+                // EMPLOYEE ONLY gets sound for 'pending' (New Request)
+                if (isAdmin || (isEmployee && status === 'pending')) {
+                    showToast(config);
+                    playVoiceAlert();
+                }
             }
 
             invalidateAppointments();
         },
-        [showToasts, invalidateAppointments, invalidateNotifications],
+        [showToasts, invalidateAppointments, invalidateNotifications, user],
     );
 
     // Handle appointment updated
@@ -289,6 +319,7 @@ export function useSocket(options: UseSocketOptions = {}) {
         // Store handlers for cleanup
         const connectHandler = () => {
             isConnectedRef.current = true;
+            setIsConnected(true);
             if (user?.id) {
                 socket.emit(SocketEvents.JOIN_USER_ROOM, user.id);
             }
@@ -297,6 +328,7 @@ export function useSocket(options: UseSocketOptions = {}) {
 
         const disconnectHandler = (reason: string) => {
             isConnectedRef.current = false;
+            setIsConnected(false);
             onDisconnectRef.current?.(reason);
         };
 
@@ -355,7 +387,7 @@ export function useSocket(options: UseSocketOptions = {}) {
     }, [token]); // Only depend on token, connect/disconnect are stable
 
     return {
-        isConnected: isConnectedRef.current,
+        isConnected: isConnected,
         socket: socketRef.current,
         connect,
         disconnect,

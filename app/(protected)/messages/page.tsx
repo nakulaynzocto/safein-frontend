@@ -244,19 +244,6 @@ export default function MessagesPage() {
         return messages.map(msg => transformMessageForDisplay(msg, participantsMap));
     }, [messages, participantsMap]);
 
-    // Notification Sound Logic
-    useEffect(() => {
-        if (messages.length > 0 && activeChat) {
-            const lastMsg = messages[messages.length - 1];
-            const senderId = String(typeof lastMsg.senderId === 'object' ? lastMsg.senderId._id : lastMsg.senderId);
-            const currentId = getCurrentUserId(user);
-
-            if (senderId !== currentId) {
-                const audio = new Audio('/sounds/notification.mp3');
-                audio.play().catch(() => { }); // Catch browser blocking autoplay
-            }
-        }
-    }, [messages.length, activeChat?._id, user]);
 
     useEffect(() => {
         // Prevent layout-level scrolling for the messages page to achieve an app-like feel
