@@ -1,14 +1,15 @@
 import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useAppointmentSocket, SocketEvents } from "./useSocket";
+import { useSocket, SocketEvents } from "./useSocket";
 import { useAuthSubscription } from "./useAuthSubscription";
 import { chatApi, useGetChatsQuery } from "@/store/api/chatApi";
 import { useAppDispatch } from "@/store/hooks";
 import { Chat } from "@/store/api/chatApi";
 
 export function useChatNotifications() {
-    const { socket, isConnected } = useAppointmentSocket();
+    // Disable toasts here to prevent duplicates (handled in ProtectedLayout)
+    const { socket, isConnected } = useSocket({ showToasts: false });
     const pathname = usePathname();
     const router = useRouter();
     const dispatch = useAppDispatch();

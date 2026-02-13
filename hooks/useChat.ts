@@ -14,14 +14,15 @@ import {
     Chat,
     Message
 } from "@/store/api/chatApi";
-import { useAppointmentSocket, SocketEvents } from "./useSocket";
+import { useSocket, SocketEvents } from "./useSocket";
 import { useAuthSubscription } from "./useAuthSubscription";
 import { getCurrentUserId } from "@/lib/chat-utils";
 
 export function useChat() {
     const dispatch = useAppDispatch();
     const { user } = useAuthSubscription();
-    const { socket, isConnected } = useAppointmentSocket();
+    // Disable toasts here to prevent duplicates (handled in ProtectedLayout)
+    const { socket, isConnected } = useSocket({ showToasts: false });
 
     // State
     const [activeChat, setActiveChat] = useState<Chat | null>(null);
