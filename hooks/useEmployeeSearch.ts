@@ -28,7 +28,6 @@ export function useEmployeeSearch() {
                         })) || []
                 );
             } catch (error) {
-                console.error("Failed to load employees:", error);
                 return [];
             }
         },

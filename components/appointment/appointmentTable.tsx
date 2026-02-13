@@ -36,8 +36,9 @@ import {
     X,
     Edit,
     Maximize2,
+    Send,
 } from "lucide-react";
-import { Appointment } from "@/store/api/appointmentApi";
+import { Appointment, useResendAppointmentNotificationMutation } from "@/store/api/appointmentApi";
 import { SearchInput } from "@/components/common/searchInput";
 import DateRangePicker from "@/components/common/dateRangePicker";
 import { AppointmentDetailsDialog } from "./appointmentDetailsDialog";
@@ -53,6 +54,7 @@ import { routes } from "@/utils/routes";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { useCooldown } from "@/hooks/useCooldown";
 
 export interface AppointmentTableProps {
     appointments: Appointment[];
@@ -136,6 +138,10 @@ export function AppointmentTable({
 
     const [loadingAppointments, setLoadingAppointments] = useState<Set<string>>(new Set());
 
+    // Resend functionality - use cooldown hook
+    const [resendNotification] = useResendAppointmentNotificationMutation();
+    const { cooldowns, startCooldown, isOnCooldown } = useCooldown();
+
     const setAppointmentLoading = (appointmentId: string, isLoading: boolean) => {
         setLoadingAppointments((prev) => {
             const newSet = new Set(prev);
@@ -216,6 +222,18 @@ export function AppointmentTable({
 
     const handleEdit = (appointment: Appointment) => {
         router.push(routes.privateroute.APPOINTMENTEDIT.replace("[id]", appointment._id));
+    };
+
+    const handleResend = async (appointmentId: string) => {
+        if (isOnCooldown(appointmentId)) return;
+
+        try {
+            await resendNotification(appointmentId).unwrap();
+            // Success toast will be shown automatically if needed
+            startCooldown(appointmentId);
+        } catch (error: any) {
+            // Error toast will be shown automatically if needed
+        }
     };
 
     // Using common functions from utils/helpers
@@ -467,6 +485,15 @@ export function AppointmentTable({
                                                 Edit
                                             </DropdownMenuItem>
                                         )}
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            onClick={() => handleResend(appointment._id)}
+                                            disabled={!!cooldowns[appointment._id]}
+                                            className={cooldowns[appointment._id] ? 'opacity-50' : ''}
+                                        >
+                                            <Send className="mr-2 h-4 w-4" />
+                                            {cooldowns[appointment._id] ? `Resend (${cooldowns[appointment._id]}s)` : 'Resend'}
+                                        </DropdownMenuItem>
                                     </>
                                 )}
 

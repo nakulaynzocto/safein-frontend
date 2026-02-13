@@ -46,7 +46,6 @@ export function isAppointmentTimedOut(appointment: Appointment): boolean {
 
         // Validate the date
         if (isNaN(scheduledDateTime.getTime())) {
-            console.error('Invalid date:', { scheduledDate, scheduledTime });
             return false;
         }
 
@@ -71,7 +70,6 @@ export function isAppointmentTimedOut(appointment: Appointment): boolean {
 
         return isTimedOut;
     } catch (error) {
-        console.error("Error checking appointment timeout:", error, appointment);
         return false;
     }
 }

@@ -190,7 +190,7 @@ export function useChat() {
                 try {
                     await markRead({ chatId });
                 } catch (error) {
-                    console.error("Failed to mark read", error);
+                    // Silently handle error
                 }
             }
         }
@@ -212,7 +212,6 @@ export function useChat() {
             setIsSending(false);
 
         } catch (error) {
-            console.error("SendMessage Error", error);
             setIsSending(false);
         }
     }, [activeChat, socket, isConnected, currentUserId]);
@@ -222,7 +221,7 @@ export function useChat() {
             const chat = await initiateChat({ targetUserId: employeeId }).unwrap();
             setActiveChat(chat);
         } catch (error) {
-            console.error("Failed to initiate chat", error);
+            throw error;
         }
     }, [initiateChat]);
 
@@ -232,7 +231,6 @@ export function useChat() {
             setActiveChat(chat);
             return chat;
         } catch (error) {
-            console.error("Failed to create group", error);
             throw error;
         }
     }, [createGroupMutation]);
@@ -243,7 +241,6 @@ export function useChat() {
             if (activeChat?._id === chatId) setActiveChat(chat);
             return chat;
         } catch (error) {
-            console.error("Failed to update group", error);
             throw error;
         }
     }, [updateGroupMutation, activeChat]);
@@ -254,7 +251,6 @@ export function useChat() {
             if (activeChat?._id === chatId) setActiveChat(chat);
             return chat;
         } catch (error) {
-            console.error("Failed to add participants", error);
             throw error;
         }
     }, [addParticipantsMutation, activeChat]);
@@ -265,7 +261,6 @@ export function useChat() {
             if (activeChat?._id === chatId) setActiveChat(chat);
             return chat;
         } catch (error) {
-            console.error("Failed to remove participant", error);
             throw error;
         }
     }, [removeParticipantMutation, activeChat]);
@@ -275,7 +270,6 @@ export function useChat() {
             await deleteChatMutation(chatId).unwrap();
             if (activeChat?._id === chatId) setActiveChat(null);
         } catch (error) {
-            console.error("Failed to delete chat", error);
             throw error;
         }
     }, [deleteChatMutation, activeChat]);

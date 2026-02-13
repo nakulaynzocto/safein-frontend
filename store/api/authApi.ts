@@ -250,7 +250,6 @@ export const authApi = baseApi.injectEndpoints({
                 try {
                     JSON.stringify(cleanBody);
                 } catch (e) {
-                    console.error("Profile data contains circular reference:", e);
                     throw new Error("Invalid profile data");
                 }
 

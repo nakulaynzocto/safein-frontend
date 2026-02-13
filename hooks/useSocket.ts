@@ -92,7 +92,7 @@ const playVoiceAlert = (text: string = "SafeIn") => {
             window.speechSynthesis.speak(utterance);
         }
     } catch (e) {
-        console.error("Voice alert failed", e);
+        // Silently handle error
     }
 };
 

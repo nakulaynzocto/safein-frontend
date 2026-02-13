@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { routes } from "@/utils/routes";
@@ -16,14 +16,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { SearchInput } from "@/components/common/searchInput";
 import { ConfirmationDialog } from "@/components/common/confirmationDialog";
 import { Pagination } from "@/components/common/pagination";
-import { useGetAllAppointmentLinksQuery, useDeleteAppointmentLinkMutation } from "@/store/api/appointmentLinkApi";
-import { useGetAllSpecialBookingsQuery, useVerifySpecialBookingOtpMutation, useUpdateSpecialBookingNoteMutation } from "@/store/api/specialBookingApi";
+import { useGetAllAppointmentLinksQuery, useDeleteAppointmentLinkMutation, useResendAppointmentLinkMutation } from "@/store/api/appointmentLinkApi";
+import { useGetAllSpecialBookingsQuery, useVerifySpecialBookingOtpMutation, useUpdateSpecialBookingNoteMutation, useResendOtpMutation } from "@/store/api/specialBookingApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { formatDate, formatDateTime, isEmployee as checkIsEmployee } from "@/utils/helpers";
-import { Link2, RefreshCw, User, Trash2, CheckCircle, XCircle, Copy, Mail, Phone, Calendar, Maximize2, Plus, MessageSquare, Key } from "lucide-react";
+import { Link2, RefreshCw, User, Trash2, CheckCircle, XCircle, Copy, Mail, Phone, Calendar, Maximize2, Plus, MessageSquare, Key, Send } from "lucide-react";
 import { AppointmentLink } from "@/store/api/appointmentLinkApi";
 import { getInitials, formatName } from "@/utils/helpers";
 import { AppointmentLinkSelectionModal } from "@/components/appointment/AppointmentLinkSelectionModal";
+import { useCooldown } from "@/hooks/useCooldown";
 import { CreateAppointmentLinkModal } from "@/components/appointment/CreateAppointmentLinkModal";
 import { QuickAppointmentModal } from "@/components/appointment/QuickAppointmentModal";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
@@ -60,6 +61,9 @@ export default function AppointmentLinksPage() {
     const [selectedNote, setSelectedNote] = useState("");
     const [showEditNoteModal, setShowEditNoteModal] = useState(false);
     const [noteValue, setNoteValue] = useState("");
+
+    // Use cooldown hook
+    const { cooldowns, startCooldown, isOnCooldown } = useCooldown();
 
     // ... hooks ...
 
@@ -102,6 +106,24 @@ export default function AppointmentLinksPage() {
 
     const [verifyOtp, { isLoading: isVerifying }] = useVerifySpecialBookingOtpMutation();
     const [deleteAppointmentLink, { isLoading: isDeleting }] = useDeleteAppointmentLinkMutation();
+    const [resendLink] = useResendAppointmentLinkMutation();
+    const [resendOtp] = useResendOtpMutation();
+
+    const handleResend = useCallback(async (item: any) => {
+        if (isOnCooldown(item._id)) return;
+
+        try {
+            if (item.entryType === 'special') {
+                await resendOtp({ bookingId: item._id }).unwrap();
+            } else {
+                await resendLink(item._id).unwrap();
+            }
+            showSuccessToast("Notification resent successfully");
+            startCooldown(item._id);
+        } catch (error: any) {
+            showErrorToast(error.data?.message || "Failed to resend notification");
+        }
+    }, [isOnCooldown, startCooldown, resendOtp, resendLink]);
 
     // Combined Data
     const combinedList = useMemo(() => {
@@ -369,6 +391,19 @@ export default function AppointmentLinksPage() {
                                     <Copy className="h-4 w-4" />
                                 </Button>
                             )}
+                            {!item.isBooked && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleResend(item)}
+                                    disabled={!!cooldowns[item._id]}
+                                    className={`${cooldowns[item._id] ? 'text-gray-400' : 'text-blue-600 hover:bg-blue-50'}`}
+                                    title={cooldowns[item._id] ? `Wait ${cooldowns[item._id]}s` : "Resend"}
+                                >
+                                    <Send className="h-4 w-4" />
+                                    {cooldowns[item._id] && <span className="ml-1 text-[10px] tabular-nums">{cooldowns[item._id]}s</span>}
+                                </Button>
+                            )}
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -383,7 +418,9 @@ export default function AppointmentLinksPage() {
                 },
             },
         ],
-        [handleCopyLink, filterType, user],
+        // Don't include cooldowns in dependencies to prevent re-render on every tick
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [handleCopyLink, handleResend, filterType, user],
     );
 
 

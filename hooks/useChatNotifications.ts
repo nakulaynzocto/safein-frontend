@@ -88,7 +88,7 @@ export function useChatNotifications() {
                         window.speechSynthesis.speak(utterance);
                     }
                 } catch (e) {
-                    console.error("Voice notification failed", e);
+                    // Silently handle error
                 }
 
                 toast.info(`New message from ${message.senderId?.name || "User"}`, {

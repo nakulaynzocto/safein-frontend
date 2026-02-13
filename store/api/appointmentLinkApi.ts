@@ -109,6 +109,14 @@ export const appointmentLinkApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [{ type: "AppointmentLink", id: "LIST" }],
         }),
+        resendAppointmentLink: builder.mutation<any, string>({
+            query: (id) => ({
+                url: `/appointment-links/resend/${id}`,
+                method: "POST",
+            }),
+            // Don't invalidate any tags to prevent table re-fetch/blink
+            invalidatesTags: [],
+        }),
 
         createVisitorThroughLink: builder.mutation<Visitor, { token: string; visitorData: CreateVisitorRequest }>({
             query: ({ token, visitorData }) => ({
@@ -140,6 +148,7 @@ export const {
     useGetAppointmentLinkByTokenQuery,
     useCheckVisitorExistsQuery,
     useDeleteAppointmentLinkMutation,
+    useResendAppointmentLinkMutation,
     useCreateVisitorThroughLinkMutation,
     useCreateAppointmentThroughLinkMutation,
 } = appointmentLinkApi;

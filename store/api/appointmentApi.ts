@@ -390,6 +390,14 @@ export const appointmentApi = baseApi.injectEndpoints({
             },
             providesTags: ["DashboardStats"],
         }),
+        resendAppointmentNotification: builder.mutation<any, string>({
+            query: (id) => ({
+                url: `/appointments/${id}/resend`,
+                method: "POST",
+            }),
+            // Don't invalidate any tags to prevent table re-fetch/blink
+            invalidatesTags: [],
+        }),
     }),
 });
 
@@ -408,4 +416,5 @@ export const {
     useRejectAppointmentMutation,
     useLazyGetAppointmentsQuery,
     useGetDashboardStatsQuery,
+    useResendAppointmentNotificationMutation,
 } = appointmentApi;

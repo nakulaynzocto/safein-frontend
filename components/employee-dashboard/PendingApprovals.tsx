@@ -5,12 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Appointment } from "@/store/api/appointmentApi";
-import { useApproveAppointmentMutation, useRejectAppointmentMutation } from "@/store/api/appointmentApi";
+import { useApproveAppointmentMutation, useRejectAppointmentMutation, useResendAppointmentNotificationMutation } from "@/store/api/appointmentApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { format } from "date-fns";
-import { CheckCircle, XCircle, Clock, User, Building2, Calendar } from "lucide-react";
+import { CheckCircle, XCircle, Clock, User, Building2, Calendar, Send } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { filterActivePendingAppointments } from "@/utils/appointmentUtils";
+import { useCooldown } from "@/hooks/useCooldown";
 
 interface PendingApprovalsProps {
     appointments: Appointment[];
@@ -22,7 +23,11 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
     // Always call hooks at the top level - before any conditional logic (unified API)
     const [approveAppointment, { isLoading: isApproving }] = useApproveAppointmentMutation();
     const [rejectAppointment, { isLoading: isRejecting }] = useRejectAppointmentMutation();
+    const [resendNotification] = useResendAppointmentNotificationMutation();
     const [processingId, setProcessingId] = useState<string | null>(null);
+
+    // Use cooldown hook
+    const { cooldowns, startCooldown, isOnCooldown } = useCooldown();
 
     // Filter to show only active pending appointments (excluding timed-out ones)
     const pendingAppointments = filterActivePendingAppointments(appointments);
@@ -50,6 +55,18 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
             showErrorToast(error?.data?.message || "Failed to reject appointment");
         } finally {
             setProcessingId(null);
+        }
+    };
+
+    const handleResend = async (appointmentId: string) => {
+        if (isOnCooldown(appointmentId)) return;
+
+        try {
+            await resendNotification(appointmentId).unwrap();
+            showSuccessToast("Notification resent successfully");
+            startCooldown(appointmentId);
+        } catch (error: any) {
+            showErrorToast(error?.data?.message || "Failed to resend notification");
         }
     };
 
@@ -130,7 +147,18 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2 sm:ml-4">
+                                <div className="flex flex-wrap gap-2 sm:ml-4">
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => handleResend(appointment._id)}
+                                        disabled={!!cooldowns[appointment._id]}
+                                        className={`${cooldowns[appointment._id] ? 'text-gray-400' : 'text-blue-600 hover:bg-blue-50'}`}
+                                        title={cooldowns[appointment._id] ? `Wait ${cooldowns[appointment._id]}s` : "Resend"}
+                                    >
+                                        <Send className="mr-1 h-4 w-4" />
+                                        {cooldowns[appointment._id] && <span className="ml-1 text-[10px] tabular-nums">{cooldowns[appointment._id]}s</span>}
+                                    </Button>
                                     <Button
                                         size="sm"
                                         variant="primary"

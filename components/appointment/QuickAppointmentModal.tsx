@@ -142,7 +142,6 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
             const submitEmployeeId = isEmployee ? user?.employeeId : data.employeeId;
 
             if (!submitEmployeeId) {
-                console.error('Employee ID missing');
                 throw new Error(
                     isEmployee
                         ? "Your employee information is not set up correctly. Please contact your administrator."
@@ -166,7 +165,6 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
             onOpenChange(false);
             onSuccess?.();
         } catch (error: any) {
-            console.error("Special visitor error:", error);
             showErrorToast(error?.data?.message || error?.message || "Failed to create special visitor booking");
         } finally {
             setIsSubmitting(false);

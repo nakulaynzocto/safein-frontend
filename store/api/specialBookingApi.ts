@@ -36,6 +36,7 @@ export interface SpecialBookingListResponse {
 }
 
 export const specialBookingApi = baseApi.injectEndpoints({
+    overrideExisting: true,
     endpoints: (builder) => ({
         createSpecialBooking: builder.mutation<SpecialBooking, any>({
             query: (data) => ({
@@ -76,6 +77,16 @@ export const specialBookingApi = baseApi.injectEndpoints({
             transformResponse: (response: any) => response.data || response,
             invalidatesTags: [{ type: "AppointmentLink", id: "LIST" }],
         }),
+        resendOtp: builder.mutation<any, { bookingId: string }>({
+            query: (data) => ({
+                url: "/special-bookings/resend",
+                method: "POST",
+                body: data,
+            }),
+            transformResponse: (response: any) => response.data || response,
+            // Don't invalidate any tags to prevent table re-fetch/blink
+            invalidatesTags: [],
+        }),
     }),
 });
 
@@ -84,4 +95,5 @@ export const {
     useGetAllSpecialBookingsQuery,
     useVerifySpecialBookingOtpMutation,
     useUpdateSpecialBookingNoteMutation,
+    useResendOtpMutation,
 } = specialBookingApi;
