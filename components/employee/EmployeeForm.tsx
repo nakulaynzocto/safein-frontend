@@ -87,7 +87,6 @@ export function NewEmployeeModal({
     const [createEmployee, { isLoading: isCreating }] = useCreateEmployeeMutation();
     const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
-    const [success, setSuccess] = useState(false);
 
     const isEditMode = !!employeeId;
     const isLoading = isCreating || isUpdating;
@@ -138,7 +137,6 @@ export function NewEmployeeModal({
             reset();
             setGeneralError(null);
             clearErrors();
-            setSuccess(false);
         }
     }, [open, reset, clearErrors]);
 
@@ -153,21 +151,10 @@ export function NewEmployeeModal({
             router.push(routes.privateroute.EMPLOYEELIST);
         } else {
             setOpen(false);
-            if (onSuccess && success) {
-                onSuccess();
-            }
         }
     };
 
-    const handleSuccessClose = () => {
-        if (isPage) {
-            router.push(routes.privateroute.EMPLOYEELIST);
-        } else {
-            setOpen(false);
-            if (onSuccess) onSuccess();
-        }
-        setSuccess(false); // Reset success state
-    };
+
 
 
     const onSubmit = async (data: EmployeeFormData) => {
@@ -194,9 +181,18 @@ export function NewEmployeeModal({
                 }
             } else {
                 await createEmployee(employeeData).unwrap();
-                // showSuccessToast("Employee created successfully"); // Removed standard toast in favor of success modal
-                setSuccess(true);
+                showSuccessToast("Employee created successfully");
                 reset();
+
+                if (onSuccess) {
+                    onSuccess();
+                } else {
+                    router.push(routes.privateroute.EMPLOYEELIST);
+                }
+
+                if (!isPage) {
+                    setOpen(false);
+                }
             }
 
         } catch (error: any) {
@@ -232,44 +228,6 @@ export function NewEmployeeModal({
     };
 
     const defaultTrigger = <Button variant="default">{isEditMode ? "Edit Employee" : "New Employee"}</Button>;
-
-    // Success View
-    if (success) {
-        const successContent = (
-            <div className="flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in duration-300">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                    <CheckCircle className="h-8 w-8 text-green-600" />
-                </div>
-                <h2 className="mb-2 text-xl font-semibold text-gray-900">Employee Created Successfully</h2>
-                <p className="mb-6 text-sm text-gray-600 max-w-sm">
-                    The employee has been added to the system. Please inform them to check their email to reset their password and access their dashboard.
-                </p>
-                <Button
-                    onClick={handleSuccessClose}
-                    className="w-full sm:w-auto min-w-[140px] bg-[#3882a5] hover:bg-[#2d6a87]"
-                >
-                    Close
-                </Button>
-            </div>
-        );
-
-        if (isPage) {
-            return (
-                <div className="max-w-xl mx-auto mt-10 rounded-xl border border-gray-200 bg-white shadow-sm p-6">
-                    {successContent}
-                </div>
-            );
-        }
-
-        return (
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
-                <DialogContent className="max-w-md bg-white p-0 overflow-hidden">
-                    {successContent}
-                </DialogContent>
-            </Dialog>
-        );
-    }
 
     const formContent = (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-2">
@@ -387,6 +345,8 @@ export function NewEmployeeModal({
                     </h3>
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+
                         <Controller
                             name="designation"
                             control={control}
@@ -411,24 +371,26 @@ export function NewEmployeeModal({
                             )}
                         />
 
-                        <Controller
-                            name="status"
-                            control={control}
-                            render={({ field }) => (
-                                <div className="flex flex-col gap-1.5">
-                                    <Label className="text-sm font-medium">Status</Label>
-                                    <SelectField
-                                        placeholder="Select status"
-                                        options={statusOptions}
-                                        value={field.value}
-                                        onChange={(val) => field.onChange(val)}
-                                        error={errors.status?.message}
-                                        isClearable={false}
-                                        className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
-                                    />
-                                </div>
-                            )}
-                        />
+                        {(isEditMode && employeeData?.isVerified) && (
+                            <Controller
+                                name="status"
+                                control={control}
+                                render={({ field }) => (
+                                    <div className="flex flex-col gap-1.5">
+                                        <Label className="text-sm font-medium">Status</Label>
+                                        <SelectField
+                                            placeholder="Select status"
+                                            options={statusOptions}
+                                            value={field.value}
+                                            onChange={(val) => field.onChange(val)}
+                                            error={errors.status?.message}
+                                            isClearable={false}
+                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                        />
+                                    </div>
+                                )}
+                            />
+                        )}
                     </div>
                 </div>
             </div>

@@ -24,6 +24,11 @@ import {
 import { routes } from "@/utils/routes";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { formatName, getInitials } from "@/utils/helpers";
+import { EmployeeVerificationModal } from "./EmployeeVerificationModal";
+import { ShieldCheck } from "lucide-react";
+
+import { useUpdateEmployeeMutation } from "@/store/api/employeeApi";
+import { showErrorToast, showSuccessToast } from "@/utils/toast";
 
 export interface EmployeeTableProps {
     employees: Employee[];
@@ -75,8 +80,20 @@ export function EmployeeTable({
 
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showViewDialog, setShowViewDialog] = useState(false);
+    const [showVerifyDialog, setShowVerifyDialog] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+    const [updateEmployee] = useUpdateEmployeeMutation();
+
+    const handleStatusUpdate = async (employee: Employee, newStatus: string) => {
+        try {
+            await updateEmployee({ id: employee._id, status: newStatus as any }).unwrap();
+            showSuccessToast(`Employee status updated to ${newStatus}`);
+        } catch (err: any) {
+            showErrorToast(err?.data?.message || "Failed to update status");
+        }
+    };
 
     const handleDelete = async () => {
         if (!selectedEmployee || !onDelete) return;
@@ -90,12 +107,17 @@ export function EmployeeTable({
         setShowViewDialog(true);
     };
 
+    const handleVerify = (employee: Employee) => {
+        setSelectedEmployee(employee);
+        setShowVerifyDialog(true);
+    };
+
     const handleEditEmployee = (employee: Employee) => {
         router.push(routes.privateroute.EMPLOYEEEDIT.replace("[id]", employee._id));
     };
 
     const getColumns = () => {
-        const baseColumns = [
+        const baseColumns: any[] = [
             {
                 key: "employee",
                 header: "Employee",
@@ -106,7 +128,12 @@ export function EmployeeTable({
                             <AvatarFallback>{getInitials(formatName(employee.name) || employee.name)}</AvatarFallback>
                         </Avatar>
                         <div>
-                            <div className="font-medium">{formatName(employee.name)}</div>
+                            <div className="font-medium flex items-center gap-2">
+                                {formatName(employee.name)}
+                                {employee.isVerified && (
+                                    <ShieldCheck className="h-3.5 w-3.5 text-green-500" />
+                                )}
+                            </div>
                         </div>
                     </div>
                 ),
@@ -143,7 +170,34 @@ export function EmployeeTable({
             key: "status",
             header: "Status",
             render: (employee: Employee) => (
-                <StatusBadge status={employee.status.toLowerCase() as any} className="capitalize" />
+                <div className="flex flex-col gap-1 items-start">
+                    {!employee.isVerified ? (
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            className="h-6 text-xs px-2 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-200"
+                            onClick={() => handleVerify(employee)}
+                        >
+                            Verify Now
+                        </Button>
+                    ) : (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
+                                    <StatusBadge status={employee.status.toLowerCase() as any} className="capitalize cursor-pointer" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                                <DropdownMenuItem onClick={() => handleStatusUpdate(employee, "Active")}>
+                                    Active
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleStatusUpdate(employee, "Inactive")}>
+                                    Inactive
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
+                </div>
             ),
         });
 
@@ -169,6 +223,12 @@ export function EmployeeTable({
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
                             </DropdownMenuItem>
+                            {!employee.isVerified && (
+                                <DropdownMenuItem onClick={() => handleVerify(employee)}>
+                                    <ShieldCheck className="mr-2 h-4 w-4 text-primary" />
+                                    Verify Employee
+                                </DropdownMenuItem>
+                            )}
                             {onDelete && (
                                 <>
                                     <DropdownMenuSeparator />
@@ -286,7 +346,19 @@ export function EmployeeTable({
                 on_close={() => setShowViewDialog(false)}
             />
 
-            {/* Edit Employee handled via navigation (see useEffect) */}
+            {/* Verification Modal */}
+            {selectedEmployee && (
+                <EmployeeVerificationModal
+                    open={showVerifyDialog}
+                    onOpenChange={setShowVerifyDialog}
+                    employeeId={selectedEmployee._id}
+                    employeeName={selectedEmployee.name}
+                    email={selectedEmployee.email}
+                    onSuccess={() => {
+                        // Optional: Refresh list logic is usually handled by cache invalidation
+                    }}
+                />
+            )}
         </div>
     );
 }

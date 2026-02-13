@@ -14,6 +14,7 @@ export interface Employee {
     deletedAt?: string;
     createdAt: string;
     updatedAt: string;
+    isVerified: boolean;
 }
 
 export interface CreateEmployeeRequest {
@@ -191,6 +192,25 @@ export const employeeApi = baseApi.injectEndpoints({
             },
             invalidatesTags: [{ type: "Employee", id: "LIST" }],
         }),
+
+        employeeSendOtp: builder.mutation<void, string>({
+            query: (id) => ({
+                url: `/employees/${id}/send-otp`,
+                method: "POST",
+            }),
+        }),
+
+        employeeVerifyOtp: builder.mutation<void, { id: string; otp: string }>({
+            query: ({ id, otp }) => ({
+                url: `/employees/${id}/verify-otp`,
+                method: "POST",
+                body: { otp },
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: "Employee", id },
+                { type: "Employee", id: "LIST" },
+            ],
+        }),
     }),
 });
 
@@ -202,6 +222,7 @@ export const {
     useCreateEmployeeMutation,
     useUpdateEmployeeMutation,
     useDeleteEmployeeMutation,
-
     useBulkCreateEmployeesMutation,
+    useEmployeeSendOtpMutation,
+    useEmployeeVerifyOtpMutation,
 } = employeeApi;
