@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { routes, isPrivateRoute, isPublicRoute } from "./utils/routes";
+import { routes, isPrivateRoute, isPublicRoute, isGuestOnlyRoute, isPublicActionRoute } from "@/utils/routes";
 
 export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
@@ -37,8 +37,9 @@ export async function proxy(request: NextRequest) {
 
     // AUTH LOGIC
     if (isAuthenticated) {
-        // If logged in and trying to access login/register/forgot-password etc.
-        if (isPublic && !subscriptionPages.includes(pathname as any)) {
+        // If logged in and trying to access login/register/forgot-password/reset-password etc.
+        // These are Guest-Only pages.
+        if (isGuestOnlyRoute(pathname) && !isPublicActionRoute(pathname)) {
             return NextResponse.redirect(new URL(routes.privateroute.DASHBOARD, request.url));
         }
         return NextResponse.next();

@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { initializeAuth, logout } from "@/store/slices/authSlice";
 import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionApi";
-import { routes, isPrivateRoute } from "@/utils/routes";
+import { routes, isPrivateRoute, isPublicRoute, isGuestOnlyRoute, isPublicActionRoute } from "@/utils/routes";
 
 export function useAuthSubscription() {
     const router = useRouter();
@@ -71,19 +71,8 @@ export function useAuthSubscription() {
 
     // Pages that should show content even when authenticated (public pages)
     const isAllowedPageForAuthenticated = useMemo(() => {
-        const allowedPages = [
-            routes.publicroute.LOGIN,
-            routes.publicroute.REGISTER,
-            routes.publicroute.SUBSCRIPTION_SUCCESS,
-            routes.publicroute.SUBSCRIPTION_CANCEL,
-            routes.publicroute.PRICING,
-            routes.publicroute.HOME,
-            routes.publicroute.FEATURES,
-            routes.publicroute.CONTACT,
-            routes.publicroute.HELP,
-            routes.publicroute.VERIFY,
-        ];
-        return allowedPages.some((page) => pathname === page || pathname?.startsWith(page + "/"));
+        // Use the centralized utility to check if the current path is a public route
+        return isPublicRoute(pathname);
     }, [pathname]);
 
     // Determine if Navbar should show (private navbar)
@@ -178,8 +167,8 @@ export function useAuthSubscription() {
     // Redirect authenticated users from login/register to dashboard
     useEffect(() => {
         if (isInitialized && isAuthenticated && token) {
-            const authPages = [routes.publicroute.LOGIN, routes.publicroute.REGISTER];
-            if (authPages.some((page) => pathname === page)) {
+            // Check if current route is guest-only using utility
+            if (isGuestOnlyRoute(pathname) && !isPublicActionRoute(pathname)) {
                 // Small delay to allow page to render, then redirect
                 const timer = setTimeout(() => {
                     router.replace(routes.privateroute.DASHBOARD);

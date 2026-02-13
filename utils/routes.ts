@@ -133,3 +133,31 @@ export const getPrivateRouteKey = (path: string): keyof typeof routes.privaterou
 
 export const publicRoutes = routes.publicroute;
 export const privateRoutes = routes.privateroute;
+
+/**
+ * Check if the route is strictly for guests (unauthenticated users).
+ * Authenticated users should typically be redirected to dashboard from these pages.
+ */
+export const isGuestOnlyRoute = (path: string): boolean => {
+    const guestOnlyPages = [
+        routes.publicroute.LOGIN,
+        routes.publicroute.REGISTER,
+        routes.publicroute.FORGOT_PASSWORD,
+        routes.publicroute.RESET_PASSWORD,
+    ];
+    // Check exact match or sub-path (e.g. /login/something)
+    return guestOnlyPages.some(page => path === page || path.startsWith(`${page}/`));
+};
+
+/**
+ * Check if the route is a public action route (like verifying email, booking appointment).
+ * These routes should be accessible even if the user is authenticated.
+ */
+export const isPublicActionRoute = (path: string): boolean => {
+    return (
+        path.startsWith("/verify/") ||
+        path.startsWith("/book-appointment/") ||
+        path.startsWith("/email-action/") ||
+        path.startsWith("/employee-setup")
+    );
+};

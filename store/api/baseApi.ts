@@ -35,9 +35,16 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 
             if (typeof window !== "undefined") {
                 const currentPath = window.location.pathname;
-                const isOnPublicBookingPage = currentPath?.includes("/book-appointment/");
+                const searchParams = new URLSearchParams(window.location.search);
+                const hasAppointmentToken = searchParams.has("token") || searchParams.has("appointmentToken");
 
-                if (isOnPublicBookingPage) {
+                const isOnPublicBookingPage =
+                    currentPath?.includes("/book-appointment/") ||
+                    currentPath?.includes("/verify/") ||
+                    currentPath?.includes("/email-action/") ||
+                    hasAppointmentToken;
+
+                if (isOnPublicBookingPage || isUploadRequest) {
                     return result;
                 }
             }

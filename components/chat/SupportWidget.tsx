@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, MessageSquareText, Sparkles, X } from 'lucide-react';
+import { MessageSquare, MessageSquareText, X } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { toast } from 'sonner';
 import { ChatHeader } from './ChatHeader';
@@ -325,9 +325,7 @@ export default function SupportWidget() {
                                     <div className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-2xl shadow-primary/30 animate-in zoom-in duration-500" style={{ background: GRADIENT_PRIMARY }}>
                                         <MessageSquare className="w-10 h-10 text-white" />
                                     </div>
-                                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-lg animate-bounce" style={{ background: GRADIENT_ACCENT }}>
-                                        <Sparkles className="w-4 h-4 text-white" />
-                                    </div>
+
                                 </div>
 
                                 <div className="space-y-3 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-150">
