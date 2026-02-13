@@ -121,7 +121,7 @@ export const employeeApi = baseApi.injectEndpoints({
                 }
                 return response;
             },
-            invalidatesTags: [{ type: "Employee", id: "LIST" }],
+            invalidatesTags: [{ type: "Employee", id: "LIST" }, { type: "Chat" }],
         }),
 
         updateEmployee: builder.mutation<Employee, UpdateEmployeeRequest>({
@@ -139,6 +139,7 @@ export const employeeApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, { id }) => [
                 { type: "Employee", id },
                 { type: "Employee", id: "LIST" },
+                { type: "Chat" },
             ],
         }),
 
@@ -150,6 +151,7 @@ export const employeeApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, id) => [
                 { type: "Employee", id },
                 { type: "Employee", id: "LIST" },
+                { type: "Chat" },
             ],
         }),
 
@@ -190,7 +192,7 @@ export const employeeApi = baseApi.injectEndpoints({
                 }
                 return response;
             },
-            invalidatesTags: [{ type: "Employee", id: "LIST" }],
+            invalidatesTags: [{ type: "Employee", id: "LIST" }, { type: "Chat" }],
         }),
 
         employeeSendOtp: builder.mutation<void, string>({
@@ -209,6 +211,7 @@ export const employeeApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, { id }) => [
                 { type: "Employee", id },
                 { type: "Employee", id: "LIST" },
+                { type: "Chat" },
             ],
         }),
     }),
