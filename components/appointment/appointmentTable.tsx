@@ -263,14 +263,13 @@ export function AppointmentTable({
                         <div className="flex min-w-0 items-center gap-3">
                             <div className="group relative shrink-0">
                                 <Avatar className="h-10 w-10">
-                                    <AvatarImage
-                                        src={visitorPhoto}
-                                        alt={visitorName}
-                                        onError={(e) => {
-                                            // Hide image on error, fallback will show
-                                            e.currentTarget.style.display = "none";
-                                        }}
-                                    />
+                                    {visitorPhoto ? (
+                                        <AvatarImage
+                                            key={visitorPhoto}
+                                            src={visitorPhoto}
+                                            alt={visitorName}
+                                        />
+                                    ) : null}
                                     <AvatarFallback className="flex items-center justify-center leading-none text-xs">
                                         {getInitials(visitorName, 2)}
                                     </AvatarFallback>
@@ -324,14 +323,13 @@ export function AppointmentTable({
                         <div className="flex items-center gap-3">
                             <div className="group relative shrink-0">
                                 <Avatar className="h-10 w-10">
-                                    <AvatarImage
-                                        src={employeePhoto}
-                                        alt={employeeName}
-                                        onError={(e) => {
-                                            // Hide image on error, fallback will show
-                                            e.currentTarget.style.display = "none";
-                                        }}
-                                    />
+                                    {employeePhoto ? (
+                                        <AvatarImage
+                                            key={employeePhoto}
+                                            src={employeePhoto}
+                                            alt={employeeName}
+                                        />
+                                    ) : null}
                                     <AvatarFallback className="bg-blue-100 text-blue-600 flex items-center justify-center leading-none text-xs">
                                         {getInitials(employeeName, 2)}
                                     </AvatarFallback>

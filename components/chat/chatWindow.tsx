@@ -113,9 +113,9 @@ export function ChatWindow({
     };
 
     return (
-        <div className={cn("flex flex-col h-full bg-[#f8fafc] overflow-hidden", className)}>
+        <div className={cn("flex flex-col h-full bg-[#f8fafc] relative", className)}>
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-white border-b shadow-sm z-10">
+            <div className="flex items-center justify-between px-4 py-3 bg-white border-b shadow-sm z-20 shrink-0">
                 <div className="flex items-center gap-3">
                     <Button
                         variant="ghost"
@@ -162,7 +162,7 @@ export function ChatWindow({
             <div
                 ref={scrollRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto px-4 py-6 space-y-2 scroll-smooth scrollbar-thin scrollbar-thumb-gray-200"
+                className="flex-1 overflow-y-auto px-4 py-6 space-y-2 scroll-smooth scrollbar-thin scrollbar-thumb-gray-200 overscroll-contain"
             >
                 {/* Loader for older messages */}
                 {isFetching && (

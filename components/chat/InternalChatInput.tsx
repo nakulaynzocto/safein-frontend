@@ -21,6 +21,15 @@ export function ChatInput({ onSendMessage, isLoading, isAdmin }: ChatInputProps)
         }
     }, [message]);
 
+    const handleFocus = () => {
+        // Scroll input into view on mobile when keyboard appears
+        if (textareaRef.current && window.innerWidth < 768) {
+            setTimeout(() => {
+                textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300); // Delay for keyboard animation
+        }
+    };
+
     const handleSend = () => {
         if (!message.trim()) return;
         onSendMessage(message);
@@ -36,7 +45,7 @@ export function ChatInput({ onSendMessage, isLoading, isAdmin }: ChatInputProps)
     };
 
     return (
-        <div className="bg-white/80 backdrop-blur-md border-t border-gray-100 p-3 sm:p-5 flex flex-col gap-2 sm:gap-3 relative">
+        <div className="sticky bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-100 p-3 sm:p-5 flex flex-col gap-2 sm:gap-3 z-30 safe-area-bottom">
             <div className="flex items-end gap-2 sm:gap-3 max-w-5xl mx-auto w-full">
                 <div className="relative flex-1 group">
                     <Textarea
@@ -44,6 +53,7 @@ export function ChatInput({ onSendMessage, isLoading, isAdmin }: ChatInputProps)
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
+                        onFocus={handleFocus}
                         placeholder={isAdmin ? "Compose..." : "Message..."}
                         className={cn(
                             "min-h-[44px] sm:min-h-[52px] max-h-[120px] sm:max-h-[160px] resize-none py-2.5 sm:py-3.5 px-4 sm:px-5 transition-all duration-300",
