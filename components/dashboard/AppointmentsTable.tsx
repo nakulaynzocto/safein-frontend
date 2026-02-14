@@ -1,30 +1,24 @@
-"use client"
+"use client";
 
-import { memo, useMemo } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { DataTable } from "@/components/common/dataTable"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { formatDateTime } from "@/utils/helpers"
-import { 
-  Calendar, 
-  Phone, 
-  Mail, 
-  Building,
-  Maximize2
-} from "lucide-react"
+import { memo, useMemo } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataTable } from "@/components/common/dataTable";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { formatDateTime, formatName } from "@/utils/helpers";
+import { Calendar, Phone, Mail, Building, Maximize2 } from "lucide-react";
 
 interface AppointmentsTableProps {
-  title: string
-  description: string
-  data: any[]
-  isLoading: boolean
-  showDateTime?: boolean
-  emptyData: {
-    title: string
-    description: string
-    primaryActionLabel: string
-  }
-  onPrimaryAction: () => void
+    title: string;
+    description: string;
+    data: any[];
+    isLoading: boolean;
+    showDateTime?: boolean;
+    emptyData: {
+        title: string;
+        description: string;
+        primaryActionLabel: string;
+    };
+    onPrimaryAction: () => void;
 }
 
 /**
@@ -32,149 +26,163 @@ interface AppointmentsTableProps {
  * Optimized with React.memo and useMemo for column definitions
  */
 export const AppointmentsTable = memo(function AppointmentsTable({
-  title,
-  description,
-  data,
-  isLoading,
-  showDateTime = false,
-  emptyData,
-  onPrimaryAction,
+    title,
+    description,
+    data,
+    isLoading,
+    showDateTime = false,
+    emptyData,
+    onPrimaryAction,
 }: AppointmentsTableProps) {
-  const columns = useMemo(() => [
-    {
-      key: "visitorName",
-      header: "Visitor",
-      sortable: true,
-      render: (appointment: any) => {
-        const visitor = appointment.visitorId || appointment.visitor;
-        const visitorName = visitor?.name || "Unknown Visitor";
-        const visitorPhone = visitor?.phone || "N/A";
-        const visitorCompany = visitor?.company || "";
-        
-        return (
-          <div className="flex items-center gap-3">
-            <div className="relative group">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={visitor?.photo} alt={visitorName} />
-                <AvatarFallback>
-                  {visitorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
-                </AvatarFallback>
-              </Avatar>
-              {visitor?.photo && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.open(visitor.photo, '_blank');
-                  }}
-                  className="absolute -bottom-1 -right-1 bg-[#3882a5] text-white rounded-full p-1 shadow-md hover:bg-[#2d6a87] transition-colors opacity-0 group-hover:opacity-100"
-                  title="View full image"
-                >
-                  <Maximize2 className="h-2.5 w-2.5" />
-                </button>
-              )}
-            </div>
-            <div>
-              <div className="font-medium text-sm">{visitorName}</div>
-              <div className="flex items-center gap-1 text-xs text-gray-500">
-                <Phone className="h-3 w-3" />
-                {visitorPhone}
-              </div>
-              {visitorCompany && (
-                <div className="flex items-center gap-1 text-xs text-gray-400">
-                  <Building className="h-3 w-3" />
-                  {visitorCompany}
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      key: "employeeName",
-      header: "Meeting With",
-      sortable: true,
-      render: (appointment: any) => {
-        const employee = appointment.employeeId || appointment.employee;
-        const employeeName = employee?.name || "Unknown Employee";
-        const employeeEmail = employee?.email || "N/A";
-        const employeeDepartment = employee?.department || "";
-        
-        return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-blue-100 text-blue-600">
-                {employeeName.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="font-medium text-sm">{employeeName}</div>
-              <div className="flex items-center gap-1 text-xs text-gray-500">
-                <Mail className="h-3 w-3" />
-                {employeeEmail}
-              </div>
-              {employeeDepartment && (
-                <div className="flex items-center gap-1 text-xs text-gray-400">
-                  <Building className="h-3 w-3" />
-                  {employeeDepartment}
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      },
-    },
-    ...(showDateTime
-      ? [
-          {
-            key: "appointmentDate",
-            header: "Date & Time",
-            sortable: true,
-            render: (appointment: any) => (
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="h-3 w-3" />
-                {formatDateTime(appointment.appointmentDetails?.scheduledDate, appointment.appointmentDetails?.scheduledTime)}
-              </div>
-            ),
-          },
-        ]
-      : [
-          {
-            key: "appointmentTime",
-            header: "Time",
-            sortable: true,
-            render: (appointment: any) => (
-              <div className="text-sm">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
-            ),
-          },
-        ]),
-  ], [showDateTime])
+    const columns = useMemo(
+        () => [
+            {
+                key: "visitorName",
+                header: "Visitor",
+                sortable: false,
+                render: (appointment: any) => {
+                    const visitor = appointment.visitorId || appointment.visitor;
+                    const visitorName = formatName(visitor?.name || "Unknown Visitor");
+                    const visitorPhone = visitor?.phone || "N/A";
+                    const visitorCompany = visitor?.company || "";
 
-  return (
-    <Card className="card-hostinger p-2 sm:p-4">
-      <CardHeader className="pb-2 sm:pb-4 p-2 sm:p-4">
-        <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-medium">
-          <Calendar className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-          <span className="truncate">{title}</span>
-        </CardTitle>
-        <CardDescription className="text-xs sm:text-sm">{description}</CardDescription>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto -mx-2 sm:mx-0">
-          <div className="min-w-[500px] sm:min-w-0">
-            <DataTable
-              data={data}
-              columns={columns}
-              isLoading={isLoading}
-              emptyMessage={`No ${title.toLowerCase()}`}
-              showCard={false}
-              enableSorting={true}
-              emptyData={emptyData}
-              onPrimaryAction={onPrimaryAction}
-            />
-          </div>
+                    return (
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="group relative flex-shrink-0">
+                                <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
+                                    <AvatarImage src={visitor?.photo} alt={visitorName} />
+                                    <AvatarFallback>
+                                        {visitorName
+                                            .split(" ")
+                                            .map((n: string) => n[0])
+                                            .join("")
+                                            .substring(0, 2)}
+                                    </AvatarFallback>
+                                </Avatar>
+                                {visitor?.photo && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            window.open(visitor.photo, "_blank");
+                                        }}
+                                        className="absolute -right-1 -bottom-1 rounded-full bg-[#3882a5] p-1 text-white opacity-0 shadow-md transition-colors group-hover:opacity-100 hover:bg-[#2d6a87]"
+                                        title="View full image"
+                                    >
+                                        <Maximize2 className="h-2.5 w-2.5" />
+                                    </button>
+                                )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="text-xs sm:text-sm font-medium truncate">{visitorName}</div>
+                                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500">
+                                    <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+                                    <span className="truncate">{visitorPhone}</span>
+                                </div>
+                                {visitorCompany && (
+                                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
+                                        <Building className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+                                        <span className="truncate">{formatName(visitorCompany)}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                },
+            },
+            {
+                key: "employeeName",
+                header: "Meeting With",
+                sortable: false,
+                render: (appointment: any) => {
+                    const employee = appointment.employeeId || appointment.employee;
+                    const employeeName = formatName(employee?.name || "Unknown Employee");
+                    const employeeEmail = employee?.email || "N/A";
+                    const employeeDepartment = employee?.department || "";
+
+                    return (
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <Avatar className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0">
+                                <AvatarFallback className="bg-blue-100 text-blue-600">
+                                    {employeeName
+                                        .split(" ")
+                                        .map((n: string) => n[0])
+                                        .join("")
+                                        .substring(0, 2)}
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex-1">
+                                <div className="text-xs sm:text-sm font-medium truncate">{employeeName}</div>
+                                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500">
+                                    <Mail className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+                                    <span className="truncate">{employeeEmail}</span>
+                                </div>
+                                {employeeDepartment && (
+                                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
+                                        <Building className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+                                        <span className="truncate">{formatName(employeeDepartment)}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                },
+            },
+            ...(showDateTime
+                ? [
+                    {
+                        key: "appointmentDate",
+                        header: "Date & Time",
+                        sortable: false,
+                        render: (appointment: any) => (
+                            <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                                <Calendar className="h-3 w-3 flex-shrink-0" />
+                                <span className="truncate">{formatDateTime(
+                                    appointment.appointmentDetails?.scheduledDate,
+                                    appointment.appointmentDetails?.scheduledTime,
+                                )}</span>
+                            </div>
+                        ),
+                    },
+                ]
+                : [
+                    {
+                        key: "appointmentTime",
+                        header: "Time",
+                        sortable: false,
+                        render: (appointment: any) => (
+                            <div className="text-xs sm:text-sm">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
+                        ),
+                    },
+                ]),
+        ],
+        [showDateTime],
+    );
+
+    return (
+        <div className="flex flex-col gap-2 sm:gap-3 md:gap-4">
+            <div className="flex flex-col gap-1 px-2 pb-0 sm:px-0">
+                <h3 className="flex items-center gap-2 text-sm font-semibold sm:text-base md:text-lg">
+                    <Calendar className="h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
+                    <span className="truncate">{title}</span>
+                </h3>
+                <p className="text-muted-foreground text-xs sm:text-sm">{description}</p>
+            </div>
+            <div className="overflow-hidden rounded-lg border border-border bg-background shadow-xs sm:rounded-xl">
+                <div className="overflow-x-auto -mx-1 sm:mx-0">
+                    <div className="min-w-[600px] sm:min-w-0">
+                        <DataTable
+                            data={data}
+                            columns={columns}
+                            isLoading={isLoading}
+                            emptyMessage={`No ${title.toLowerCase()}`}
+                            showCard={false}
+                            enableSorting={false}
+                            emptyData={emptyData}
+                            onPrimaryAction={onPrimaryAction}
+                        />
+                    </div>
+                </div>
+            </div>
         </div>
-      </CardContent>
-    </Card>
-  )
-})
+    );
+});

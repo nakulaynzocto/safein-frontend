@@ -1,220 +1,270 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { format } from "date-fns"
-import { Appointment } from "@/store/api/appointmentApi"
-import { ExternalLink, User, Mail, Phone, Calendar, Clock, Briefcase, FileText, Car, CheckCircle, XCircle, Maximize2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { format } from "date-fns";
+import { Appointment } from "@/store/api/appointmentApi";
+import {
+    ExternalLink,
+    User,
+    Mail,
+    Phone,
+    Calendar,
+    Clock,
+    Briefcase,
+    FileText,
+    Car,
+    CheckCircle,
+    XCircle,
+    Maximize2,
+    LogOut,
+} from "lucide-react";
+import { StatusBadge } from "@/components/common/statusBadge";
+import { formatDateWithPattern } from "@/utils/dateUtils";
+import { getAppointmentDateTime, getInitials, formatName } from "@/utils/helpers";
 
 interface AppointmentDetailsDialogProps {
-  appointment: Appointment | null
-  mode: 'active'
-  open: boolean
-  on_close: () => void
+    appointment: Appointment | null;
+    mode: "active";
+    open: boolean;
+    on_close: () => void;
+    onCheckOut?: () => void;
 }
 
-const formatDate = (value: string | null | undefined, formatStr: string, fallback: string = "N/A"): string => {
-  if (!value) return fallback
-  const date = new Date(value)
-  return isNaN(date.getTime()) ? "Invalid Date" : format(date, formatStr)
-}
+const formatDate = formatDateWithPattern;
 
 const getFieldValue = (appointment: Appointment, key: string): any => {
-  const fieldMap: Record<string, (appt: Appointment) => any> = {
-    _id: (appt) => appt._id || 'N/A',
-    visitorName: (appt) => (appt as any).visitorId?.name || appt.visitor?.name || 'N/A',
-    visitorEmail: (appt) => (appt as any).visitorId?.email || appt.visitor?.email || 'N/A',
-    visitorPhone: (appt) => (appt as any).visitorId?.phone || appt.visitor?.phone || 'N/A',
-    visitorPhoto: (appt) => (appt as any).visitorId?.photo || (appt as any).visitor?.photo || '',
-    employeeName: (appt) => (appt as any).employeeId?.name || appt.employee?.name || 'N/A',
-    purpose: (appt) => appt.appointmentDetails?.purpose || 'N/A',
-    appointmentDate: (appt) => appt.appointmentDetails?.scheduledDate || 'N/A',
-    appointmentTime: (appt) => appt.appointmentDetails?.scheduledTime || 'N/A',
-    notes: (appt) => appt.appointmentDetails?.notes || 'N/A',
-    vehicleNumber: (appt) => appt.appointmentDetails?.vehicleNumber || '',
-    vehiclePhoto: (appt) => appt.appointmentDetails?.vehiclePhoto || '',
-    checkInTime: (appt) => appt.checkInTime || null,
-    checkOutTime: (appt) => appt.checkOutTime || null,
-  }
+    const fieldMap: Record<string, (appt: Appointment) => any> = {
+        _id: (appt) => appt._id || "N/A",
+        visitorName: (appt) => (appt as any).visitorId?.name || appt.visitor?.name || "N/A",
+        visitorEmail: (appt) => (appt as any).visitorId?.email || appt.visitor?.email || "N/A",
+        visitorPhone: (appt) => (appt as any).visitorId?.phone || appt.visitor?.phone || "N/A",
+        visitorPhoto: (appt) => (appt as any).visitorId?.photo || (appt as any).visitor?.photo || "",
+        employeeName: (appt) => (appt as any).employeeId?.name || appt.employee?.name || "N/A",
+        purpose: (appt) => appt.appointmentDetails?.purpose || "N/A",
+        appointmentDate: (appt) => appt.appointmentDetails?.scheduledDate || "N/A",
+        appointmentTime: (appt) => appt.appointmentDetails?.scheduledTime || "N/A",
+        notes: (appt) => appt.appointmentDetails?.notes || "N/A",
+        vehicleNumber: (appt) => appt.appointmentDetails?.vehicleNumber || "",
+        vehiclePhoto: (appt) => appt.appointmentDetails?.vehiclePhoto || "",
+        checkInTime: (appt) => appt.checkInTime || null,
+        checkOutTime: (appt) => appt.checkOutTime || null,
+    };
 
-  const handler = fieldMap[key]
-  return handler ? handler(appointment) : appointment[key as keyof Appointment] || 'N/A'
-}
+    const handler = fieldMap[key];
+    return handler ? handler(appointment) : appointment[key as keyof Appointment] || "N/A";
+};
 
-const statusVariants: Record<string, 'secondary' | 'default' | 'destructive' | 'outline'> = {
-  pending: 'secondary',
-  approved: 'default',
-  rejected: 'destructive',
-  completed: 'default',
-  'checked-out': 'outline',
-}
+const statusVariants: Record<string, "secondary" | "default" | "destructive" | "outline"> = {
+    pending: "secondary",
+    approved: "default",
+    rejected: "destructive",
+    completed: "default",
+    "checked-out": "outline",
+};
 
 const fieldConfig = [
-  { key: "_id", label: "Appointment ID" },
-  { key: "visitorName", label: "Visitor Name" },
-  { key: "visitorEmail", label: "Visitor Email" },
-  { key: "visitorPhone", label: "Visitor Phone" },
-  { key: "employeeName", label: "Meeting With" },
-  { key: "purpose", label: "Purpose" },
-  { 
-    key: "appointmentDate", 
-    label: "Appointment Date",
-    format: (val: string) => formatDate(val, "MMM dd, yyyy")
-  },
-  { key: "appointmentTime", label: "Appointment Time" },
-  { key: "status", label: "Status" },
-  { key: "notes", label: "Notes", optional: true },
-  { key: "vehicleNumber", label: "Vehicle Number", optional: true },
-  { 
-    key: "checkInTime", 
-    label: "Check In Time",
-    format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm", "Not checked in")
-  },
-  { 
-    key: "checkOutTime", 
-    label: "Check Out Time",
-    showOnlyForCompleted: true,
-    format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm", "Not checked out")
-  },
-  { 
-    key: "createdAt", 
-    label: "Created At",
-    format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm")
-  },
-]
+    { key: "_id", label: "Appointment ID" },
+    { key: "visitorName", label: "Visitor Name" },
+    { key: "visitorEmail", label: "Visitor Email" },
+    { key: "visitorPhone", label: "Visitor Phone" },
+    { key: "employeeName", label: "Meeting With" },
+    { key: "purpose", label: "Purpose" },
+    {
+        key: "appointmentDate",
+        label: "Appointment Date",
+        format: (val: string) => formatDate(val, "MMM dd, yyyy"),
+    },
+    { key: "appointmentTime", label: "Appointment Time" },
+    { key: "status", label: "Status" },
+    { key: "notes", label: "Notes", optional: true },
+    { key: "vehicleNumber", label: "Vehicle Number", optional: true },
+    {
+        key: "checkInTime",
+        label: "Check In Time",
+        format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm", "Not checked in"),
+    },
+    {
+        key: "checkOutTime",
+        label: "Check Out Time",
+        showOnlyForCompleted: true,
+        format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm", "Not checked out"),
+    },
+    {
+        key: "createdAt",
+        label: "Created At",
+        format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm"),
+    },
+];
 
-export function AppointmentDetailsDialog({ appointment, mode, open, on_close }: AppointmentDetailsDialogProps) {
-  if (!appointment) return null
+export function AppointmentDetailsDialog({ appointment, mode, open, on_close, onCheckOut }: AppointmentDetailsDialogProps) {
+    if (!appointment) return null;
 
-  const renderFieldValue = (key: string, value: any, formatFn?: (val: string) => string) => {
-    if (key === 'status') {
-      return (
-        <Badge variant={statusVariants[value] || 'secondary'}>
-          {value}
-        </Badge>
-      )
-    }
+    const renderFieldValue = (key: string, value: any, formatFn?: (val: string) => string) => {
+        if (key === "status") {
+            return <StatusBadge status={value} />;
+        }
 
-    if (key === 'vehicleNumber' && appointment.appointmentDetails?.vehiclePhoto) {
-      return (
-        <button
-          onClick={() => window.open(appointment.appointmentDetails?.vehiclePhoto, '_blank')}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-        >
-          <span>{value}</span>
-          <ExternalLink className="h-4 w-4" />
-        </button>
-      )
-    }
-
-    if (formatFn && value) {
-      return formatFn(value as string)
-    }
-
-    return value || 'N/A'
-  }
-
-  const visitorPhoto = getFieldValue(appointment, 'visitorPhoto')
-  const visitorName = getFieldValue(appointment, 'visitorName')
-  const status = appointment.status
-
-  return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && on_close()}>
-      <DialogContent className="max-w-4xl bg-white dark:bg-gray-900">
-        <DialogHeader>
-          <DialogTitle>Appointment Details</DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-6">
-          {/* Profile Header - LinkedIn/Facebook Style */}
-          <div className="flex gap-6 pb-6 border-b">
-            {/* Left Side - Visitor Photo */}
-            <div className="shrink-0 relative group">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src={visitorPhoto} alt={visitorName} />
-                <AvatarFallback className="text-2xl">
-                  {visitorName !== 'N/A' ? visitorName.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'V'}
-                </AvatarFallback>
-              </Avatar>
-              {visitorPhoto && (
+        if (key === "vehicleNumber" && appointment.appointmentDetails?.vehiclePhoto) {
+            return (
                 <button
-                  onClick={() => window.open(visitorPhoto, '_blank')}
-                  className="absolute bottom-0 right-0 bg-[#3882a5] text-white rounded-full p-1.5 shadow-lg hover:bg-[#2d6a87] transition-colors opacity-0 group-hover:opacity-100"
-                  title="View full image"
+                    onClick={() => window.open(appointment.appointmentDetails?.vehiclePhoto, "_blank")}
+                    className="flex cursor-pointer items-center gap-2 text-[#3882a5] hover:text-[#2d6a87] hover:underline"
                 >
-                  <Maximize2 className="h-3.5 w-3.5" />
+                    <span>{value}</span>
+                    <ExternalLink className="h-4 w-4" />
                 </button>
-              )}
-            </div>
-            
-            {/* Right Side - Visitor Info & Status */}
-            <div className="flex-1 space-y-3">
-              <div>
-                <h3 className="text-xl font-semibold">{visitorName}</h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">{getFieldValue(appointment, 'visitorEmail')}</span>
-                </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">{getFieldValue(appointment, 'visitorPhone')}</span>
-                </div>
-              </div>
-              <div>
-                <Badge variant={statusVariants[status] || 'secondary'} className="text-sm">
-                  {status}
-                </Badge>
-              </div>
-            </div>
-          </div>
+            );
+        }
 
-          {/* Appointment Details - Bottom Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {fieldConfig.map(({ key, label, format, optional, showOnlyForCompleted }) => {
-              if (key === 'visitorName' || key === 'visitorEmail' || key === 'visitorPhone' || key === 'status') return null
-              if (showOnlyForCompleted && appointment.status !== 'completed') return null
-              
-              const value = getFieldValue(appointment, key)
-              
-              if (optional && !value && key !== 'checkInTime' && key !== 'checkOutTime') return null
-              
-              let icon = null
-              if (key === '_id') icon = <FileText className="h-4 w-4" />
-              else if (key === 'employeeName') icon = <Briefcase className="h-4 w-4" />
-              else if (key === 'purpose') icon = <FileText className="h-4 w-4" />
-              else if (key === 'appointmentDate') icon = <Calendar className="h-4 w-4" />
-              else if (key === 'appointmentTime') icon = <Clock className="h-4 w-4" />
-              else if (key === 'checkInTime') icon = <CheckCircle className="h-4 w-4" />
-              else if (key === 'checkOutTime') icon = <XCircle className="h-4 w-4" />
-              else if (key === 'vehicleNumber') icon = <Car className="h-4 w-4" />
-              else if (key === 'notes') icon = <FileText className="h-4 w-4" />
-              else if (key === 'createdAt') icon = <Calendar className="h-4 w-4" />
-              
-              return (
-                <div key={key} className="space-y-1">
-                  <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    {icon}
-                    {label}
-                  </div>
-                  <div className="text-sm font-semibold text-foreground">
-                    {renderFieldValue(key, value, format)}
-                  </div>
+        if (formatFn && value) {
+            return formatFn(value as string);
+        }
+
+        return value || "N/A";
+    };
+
+    const visitorPhoto = getFieldValue(appointment, "visitorPhoto");
+    const visitorName = formatName(getFieldValue(appointment, "visitorName"));
+    const status = appointment.status;
+
+    const isAppointmentDatePast = () => {
+        if (!appointment) return false;
+        const scheduledDateTime = getAppointmentDateTime(appointment);
+        if (!scheduledDateTime) return false;
+        const now = new Date();
+        return scheduledDateTime < now;
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={(isOpen) => !isOpen && on_close()}>
+            <DialogContent className="max-w-4xl bg-white dark:bg-gray-900">
+                <DialogHeader>
+                    <DialogTitle>Appointment Details</DialogTitle>
+                </DialogHeader>
+
+                <div className="space-y-6 max-h-[80vh] overflow-y-auto px-1">
+                    {/* Profile Header - LinkedIn/Facebook Style */}
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 border-b pb-6">
+                        {/* Left Side - Visitor Photo */}
+                        <div className="group relative shrink-0">
+                            <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
+                                <AvatarImage src={visitorPhoto} alt={visitorName} />
+                                <AvatarFallback className="text-xl sm:text-2xl flex items-center justify-center leading-none">
+                                    {getInitials(visitorName, 2)}
+                                </AvatarFallback>
+                            </Avatar>
+                            {visitorPhoto && (
+                                <button
+                                    onClick={() => window.open(visitorPhoto, "_blank")}
+                                    className="absolute right-0 bottom-0 rounded-full bg-[#3882a5] p-1.5 text-white opacity-0 shadow-lg transition-colors group-hover:opacity-100 hover:bg-[#2d6a87]"
+                                    title="View full image"
+                                >
+                                    <Maximize2 className="h-3.5 w-3.5" />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Right Side - Visitor Info & Status */}
+                        <div className="flex-1 space-y-3 text-center sm:text-left w-full">
+                            <div>
+                                <h3 className="text-lg sm:text-xl font-semibold">{visitorName}</h3>
+                                <div className="mt-2 flex flex-col sm:flex-row flex-wrap items-center sm:items-start gap-1 sm:gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <Mail className="text-muted-foreground h-3.5 w-3.5" />
+                                        <span className="text-muted-foreground text-xs sm:text-sm break-all">
+                                            {getFieldValue(appointment, "visitorEmail")}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Phone className="text-muted-foreground h-3.5 w-3.5" />
+                                        <span className="text-muted-foreground text-xs sm:text-sm break-all">
+                                            {getFieldValue(appointment, "visitorPhone")}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex justify-center sm:justify-start">
+                                <StatusBadge status={status} className="text-[10px] sm:text-xs" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Appointment Details - Bottom Section */}
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        {fieldConfig.map(({ key, label, format, optional, showOnlyForCompleted }) => {
+                            if (
+                                key === "visitorName" ||
+                                key === "visitorEmail" ||
+                                key === "visitorPhone" ||
+                                key === "status"
+                            )
+                                return null;
+                            if (showOnlyForCompleted && appointment.status !== "completed") return null;
+
+                            const value = getFieldValue(appointment, key);
+
+                            if (optional && !value && key !== "checkInTime" && key !== "checkOutTime") return null;
+
+                            let icon = null;
+                            if (key === "_id") icon = <FileText className="h-4 w-4" />;
+                            else if (key === "employeeName") icon = <Briefcase className="h-4 w-4" />;
+                            else if (key === "purpose") icon = <FileText className="h-4 w-4" />;
+                            else if (key === "appointmentDate") icon = <Calendar className="h-4 w-4" />;
+                            else if (key === "appointmentTime") icon = <Clock className="h-4 w-4" />;
+                            else if (key === "checkInTime") icon = <CheckCircle className="h-4 w-4" />;
+                            else if (key === "checkOutTime") icon = <XCircle className="h-4 w-4" />;
+                            else if (key === "vehicleNumber") icon = <Car className="h-4 w-4" />;
+                            else if (key === "notes") icon = <FileText className="h-4 w-4" />;
+                            else if (key === "createdAt") icon = <Calendar className="h-4 w-4" />;
+
+                            return (
+                                <div key={key} className="space-y-1">
+                                    <div className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
+                                        {icon}
+                                        {label}
+                                    </div>
+                                    <div className="text-foreground text-sm font-semibold">
+                                        {key === "employeeName" ? (
+                                            <div className="flex items-center gap-2">
+                                                <Avatar className="h-6 w-6">
+                                                    <AvatarImage
+                                                        src={(appointment as any).employeeId?.photo || appointment.employee?.photo || (appointment as any).employeeId?.profilePicture || (appointment.employee as any)?.profilePicture || ""}
+                                                        alt={value}
+                                                    />
+                                                    <AvatarFallback className="text-[10px] flex items-center justify-center leading-none">
+                                                        {getInitials(value, 2)}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <span>{formatName(renderFieldValue(key, value, format)) || "N/A"}</span>
+                                            </div>
+                                        ) : (
+                                            key === "purpose" ? formatName(renderFieldValue(key, value, format)) : renderFieldValue(key, value, format)
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="flex justify-end gap-2 border-t pt-4">
+                        {onCheckOut && appointment.status === "approved" && isAppointmentDatePast() && (
+                            <Button
+                                type="button"
+                                onClick={onCheckOut}
+                                variant="destructive"
+                                className="bg-red-50 text-red-600 hover:bg-red-100 border-red-200 border"
+                            >
+                                <LogOut className="mr-2 h-4 w-4" />
+                                Check Out
+                            </Button>
+                        )}
+                        <Button type="button" onClick={on_close} variant="outline">
+                            Close
+                        </Button>
+                    </div>
                 </div>
-              )
-            })}
-          </div>
-          
-          <div className="flex justify-end pt-4 border-t">
-            <Button 
-              type="button" 
-              onClick={on_close}
-              variant="outline"
-            >
-              Close
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
+            </DialogContent>
+        </Dialog>
+    );
 }

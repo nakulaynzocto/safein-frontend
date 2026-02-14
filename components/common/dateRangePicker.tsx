@@ -1,19 +1,29 @@
-"use client"
+"use client";
 
 import { useRef, useState, useEffect, useMemo } from "react";
 import { Calendar as CalendarIcon, X as XIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const PREDEFINED_RANGES = [
-    'Today', 'Yesterday', 'Last 7 Days', 'Last 30 Days',
-    'This Month', 'Last Month', 'Last 1 Year', 'All'
+    "Today",
+    "Yesterday",
+    "Last 7 Days",
+    "Last 30 Days",
+    "This Month",
+    "Last Month",
+    "Last 1 Year",
+    "All",
 ];
 
-interface DateRange { startDate: Date | null; endDate: Date | null }
-interface DateRangePickerProps { 
-  onDateRangeChange?: (v: { startDate: string | null; endDate: string | null }) => void
-  initialValue?: { startDate: string | null; endDate: string | null }
-  className?: string
+interface DateRange {
+    startDate: Date | null;
+    endDate: Date | null;
+}
+interface DateRangePickerProps {
+    onDateRangeChange?: (v: { startDate: string | null; endDate: string | null }) => void;
+    initialValue?: { startDate: string | null; endDate: string | null };
+    className?: string;
 }
 
 const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRangePickerProps) => {
@@ -25,24 +35,24 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
 
     const today = new Date();
     const formatLocalDate = (d: Date) => {
-        const y = d.getFullYear()
-        const m = String(d.getMonth() + 1).padStart(2, '0')
-        const day = String(d.getDate()).padStart(2, '0')
-        return `${y}-${m}-${day}`
-    }
-    
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+    };
+
     const [currentView, setCurrentView] = useState({
         month: today.getMonth(),
-        year: today.getFullYear()
+        year: today.getFullYear(),
     });
     const [nextView, setNextView] = useState({
         month: today.getMonth() === 11 ? 0 : today.getMonth() + 1,
-        year: today.getMonth() === 11 ? today.getFullYear() + 1 : today.getFullYear()
+        year: today.getMonth() === 11 ? today.getFullYear() + 1 : today.getFullYear(),
     });
 
     const displayRange = useMemo(() => {
         const { startDate, endDate } = range;
-        return startDate && endDate ? `${formatLocalDate(startDate)} - ${formatLocalDate(endDate)}` : '';
+        return startDate && endDate ? `${formatLocalDate(startDate)} - ${formatLocalDate(endDate)}` : "";
     }, [range]);
 
     const generateCalendarDays = (year: number, month: number) => {
@@ -63,16 +73,16 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
     const currentMonthDays = useMemo(() => generateCalendarDays(currentView.year, currentView.month), [currentView]);
     const nextMonthDays = useMemo(() => generateCalendarDays(nextView.year, nextView.month), [nextView]);
 
-    const updateCalendarViews = (direction: 'prev' | 'next') => {
+    const updateCalendarViews = (direction: "prev" | "next") => {
         const adjust = (view: { month: number; year: number }, diff: number) => {
             const newMonth = view.month + diff;
             return {
                 month: (newMonth + 12) % 12,
-                year: view.year + Math.floor((newMonth + 12) / 12) - 1
+                year: view.year + Math.floor((newMonth + 12) / 12) - 1,
             };
         };
 
-        const delta = direction === 'prev' ? -1 : 1;
+        const delta = direction === "prev" ? -1 : 1;
         setCurrentView((prev) => adjust(prev, delta));
         setNextView((prev) => adjust(prev, delta));
     };
@@ -82,12 +92,10 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
 
         setRangeDates(tempRange);
 
-        localStorage.setItem('dateRange', JSON.stringify({
-          startDate: formatLocalDate(tempRange.startDate),
-          endDate: formatLocalDate(tempRange.endDate),
-        }))
-
-        onDateRangeChange?.({ startDate: formatLocalDate(tempRange.startDate), endDate: formatLocalDate(tempRange.endDate) });
+        onDateRangeChange?.({
+            startDate: formatLocalDate(tempRange.startDate),
+            endDate: formatLocalDate(tempRange.endDate),
+        });
         setIsOpen(false);
     };
 
@@ -105,7 +113,7 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
     const handleDateClick = (date: Date) => {
         const normalizedDate = normalizeDate(date);
         const { startDate, endDate } = tempRange;
-        
+
         if (!startDate || (startDate && endDate)) {
             setTempRange({ startDate: normalizedDate, endDate: null });
             setHoverDate(null);
@@ -125,8 +133,8 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
         const normalizedDate = normalizeDate(date);
         const normalizedStart = normalizeDate(startDate);
         const normalizedEnd = normalizeDate(endDate);
-        const inRange = normalizedDate.getTime() > normalizedStart.getTime() && 
-                        normalizedDate.getTime() < normalizedEnd.getTime();
+        const inRange =
+            normalizedDate.getTime() > normalizedStart.getTime() && normalizedDate.getTime() < normalizedEnd.getTime();
         return inRange;
     };
 
@@ -155,51 +163,50 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
     const handleRangeSelect = (rangeName: string) => {
         let start: Date | null, end: Date | null;
         const normalizedToday = normalizeDate(today);
-        
+
         switch (rangeName) {
-            case 'Today': 
+            case "Today":
                 start = end = new Date(normalizedToday);
                 break;
-            case 'Yesterday': 
+            case "Yesterday":
                 start = new Date(normalizedToday);
                 start.setDate(start.getDate() - 1);
                 end = new Date(start);
                 break;
-            case 'Last 7 Days': 
+            case "Last 7 Days":
                 start = new Date(normalizedToday);
                 start.setDate(start.getDate() - 6);
                 end = new Date(normalizedToday);
                 break;
-            case 'Last 30 Days': 
+            case "Last 30 Days":
                 start = new Date(normalizedToday);
                 start.setDate(start.getDate() - 29);
                 end = new Date(normalizedToday);
                 break;
-            case 'This Month': 
+            case "This Month":
                 start = new Date(today.getFullYear(), today.getMonth(), 1);
                 end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
                 normalizeDate(start);
                 normalizeDate(end);
                 break;
-            case 'Last Month': 
+            case "Last Month":
                 start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
                 end = new Date(today.getFullYear(), today.getMonth(), 0);
                 normalizeDate(start);
                 normalizeDate(end);
                 break;
-            case 'Last 1 Year': 
+            case "Last 1 Year":
                 start = new Date(normalizedToday);
                 start.setFullYear(start.getFullYear() - 1);
                 end = new Date(normalizedToday);
                 break;
-            case 'All': 
-                setRangeDates({ startDate: null, endDate: null }); 
-                setTempRange({ startDate: null, endDate: null }); 
-                setIsOpen(false); 
-                localStorage.setItem('dateRange', JSON.stringify({ startDate: null, endDate: null }));
-                onDateRangeChange?.({ startDate: null, endDate: null }); 
+            case "All":
+                setRangeDates({ startDate: null, endDate: null });
+                setTempRange({ startDate: null, endDate: null });
+                setIsOpen(false);
+                onDateRangeChange?.({ startDate: null, endDate: null });
                 return;
-            default: 
+            default:
                 start = end = new Date(normalizedToday);
         }
 
@@ -209,105 +216,93 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
             setRangeDates({ startDate: start, endDate: end });
             setTempRange({ startDate: start, endDate: end });
             setIsOpen(false);
-            
-            localStorage.setItem('dateRange', JSON.stringify({ startDate: formatLocalDate(start!), endDate: formatLocalDate(end!) }))
+
             onDateRangeChange?.({ startDate: formatLocalDate(start!), endDate: formatLocalDate(end!) });
         }
     };
 
     useEffect(() => {
-        // Priority: 1. initialValue prop, 2. localStorage 'dateRange', 3. null (no filter)
-        let initialStart: Date | null = null;
-        let initialEnd: Date | null = null;
-        
-        // First check if parent provided initialValue
+        // Sync with initialValue prop
         if (initialValue?.startDate && initialValue?.endDate) {
-            initialStart = normalizeDate(new Date(initialValue.startDate));
-            initialEnd = normalizeDate(new Date(initialValue.endDate));
+            const initialStart = normalizeDate(new Date(initialValue.startDate));
+            const initialEnd = normalizeDate(new Date(initialValue.endDate));
+
+            if (initialStart && initialEnd) {
+                setRangeDates({ startDate: initialStart, endDate: initialEnd });
+                setTempRange({ startDate: initialStart, endDate: initialEnd });
+            }
         } else {
-            // Otherwise check localStorage
-            const raw = localStorage.getItem('dateRange');
-            const saved = raw ? JSON.parse(raw) : null;
-            if (saved?.startDate && saved?.endDate) {
-                initialStart = normalizeDate(new Date(saved.startDate));
-                initialEnd = normalizeDate(new Date(saved.endDate));
-            }
+            // If initialValue is cleared, reset internal state
+            setRangeDates({ startDate: null, endDate: null });
+            setTempRange({ startDate: null, endDate: null });
         }
-        
-        // Only set if we have valid dates
-        if (initialStart && initialEnd) {
-            setRangeDates({ startDate: initialStart, endDate: initialEnd });
-            setTempRange({ startDate: initialStart, endDate: initialEnd });
-            
-            // Call onDateRangeChange to sync with parent (only if not from initialValue to avoid double call)
-            if (onDateRangeChange && !initialValue) {
-                const startDateStr = formatLocalDate(initialStart);
-                const endDateStr = formatLocalDate(initialEnd);
-                setTimeout(() => {
-                    onDateRangeChange({ startDate: startDateStr, endDate: endDateStr });
-                }, 0);
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [initialValue]);
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(e.target as Node)) setIsOpen(false);
         };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     const renderCalendar = (days: (Date | null)[], month: number) => (
         <div className="date-range-calendar" style={{ width: 220, minWidth: 220 }}>
-            <div className="date-range-calendar-weekdays" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center' }}>
+            <div
+                className="date-range-calendar-weekdays"
+                style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", textAlign: "center" }}
+            >
                 {WEEKDAYS.map((day) => (
-                    <div key={day} className="date-range-calendar-weekday">{day}</div>
+                    <div key={day} className="date-range-calendar-weekday">
+                        {day}
+                    </div>
                 ))}
             </div>
-            <div className="date-range-calendar-days" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+            <div
+                className="date-range-calendar-days"
+                style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}
+            >
                 {days.map((date: Date | null, i: number) => {
                     if (!date) {
                         return <div key={i} className="date-range-calendar-day" style={{ height: 30 }}></div>;
                     }
-                    
+
                     const isOtherMonth = date.getMonth() !== month;
                     const isInRangeCheck = isInRange(date);
                     const isStartOrEndCheck = isStartOrEnd(date);
                     const isInHoverRangeCheck = isInHoverRange(date);
-                    
-                    let className = 'date-range-calendar-day';
-                    let inlineStyles: React.CSSProperties = { 
-                        height: 30, 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        cursor: 'pointer'
+
+                    let className = "date-range-calendar-day";
+                    let inlineStyles: React.CSSProperties = {
+                        height: 30,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
                     };
-                    
+
                     if (isOtherMonth) {
-                        className += ' other-month';
-                        inlineStyles.color = '#d1d5db';
+                        className += " other-month";
+                        inlineStyles.color = "#d1d5db";
                     }
-                    
+
                     if (isStartOrEndCheck) {
-                        className += ' start-end';
-                        inlineStyles.backgroundColor = '#2563eb';
-                        inlineStyles.color = 'white';
-                        inlineStyles.border = '2px solid #2563eb';
-                        inlineStyles.borderRadius = '50%';
-                        inlineStyles.fontWeight = '600';
+                        className += " start-end";
+                        inlineStyles.backgroundColor = "#2563eb";
+                        inlineStyles.color = "white";
+                        inlineStyles.border = "2px solid #2563eb";
+                        inlineStyles.borderRadius = "50%";
+                        inlineStyles.fontWeight = "600";
                     } else if (isInRangeCheck) {
-                        className += ' in-range';
-                        inlineStyles.backgroundColor = 'rgba(37, 99, 235, 0.15)';
-                        inlineStyles.color = '#1f2937';
+                        className += " in-range";
+                        inlineStyles.backgroundColor = "rgba(37, 99, 235, 0.15)";
+                        inlineStyles.color = "#1f2937";
                     } else if (isInHoverRangeCheck) {
-                        className += ' hover-range';
-                        inlineStyles.backgroundColor = 'rgba(37, 99, 235, 0.2)';
-                        inlineStyles.color = '#111827';
+                        className += " hover-range";
+                        inlineStyles.backgroundColor = "rgba(37, 99, 235, 0.2)";
+                        inlineStyles.color = "#111827";
                     }
-                    
+
                     return (
                         <div
                             key={i}
@@ -326,41 +321,55 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
         </div>
     );
 
+    const hasRange = range.startDate && range.endDate;
+
     return (
-        <div className={`date-range-picker-container ${className || ''}`} ref={containerRef}>
-            <div
-                className="date-range-picker-trigger flex items-center gap-1 whitespace-nowrap border border-dashed border-gray-300 rounded-full px-2 py-1 bg-white"
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                {range.startDate && range.endDate ? (
-                    <span
-                        className="text-gray-500 hover:text-red-600 cursor-pointer text-lg font-bold"
+        <div className={`date-range-picker-container relative ${className || ""}`} ref={containerRef}>
+            {hasRange ? (
+                <Button
+                    variant="outline"
+                    className="flex h-12 w-auto items-center justify-between gap-2 rounded-xl border-border bg-background px-3 font-medium text-foreground hover:bg-accent hover:text-accent-foreground sm:w-auto"
+                    onClick={() => setIsOpen(!isOpen)}
+                >
+                    <div className="flex items-center gap-2">
+                        <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <span className="truncate text-sm hidden sm:inline">{displayRange}</span>
+                    </div>
+                    <div
+                        role="button"
+                        tabIndex={0}
+                        className="ml-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
                         onClick={(e) => {
                             e.stopPropagation();
                             setRangeDates({ startDate: null, endDate: null });
                             setTempRange({ startDate: null, endDate: null });
-                            localStorage.setItem('dateRange', JSON.stringify({ startDate: null, endDate: null }));
                             onDateRangeChange?.({ startDate: null, endDate: null });
                         }}
                     >
-                        <XIcon className="h-4 w-4" />
-                    </span>
-                ) : <CalendarIcon className="h-4 w-4" />}
-                <span className="text-default">
-                    {displayRange || 'Select date range'}
-                </span>
-            </div>
+                        <XIcon className="h-3 w-3" />
+                    </div>
+                </Button>
+            ) : (
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-12 w-12 rounded-xl border-border bg-muted/30 hover:bg-background hover:ring-1 hover:ring-ring"
+                    onClick={() => setIsOpen(!isOpen)}
+                    title="Select Date Range"
+                >
+                    <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+                </Button>
+            )}
 
             {isOpen && (
                 <div
-                    className="date-range-picker-dropdown absolute z-50 mt-2 flex bg-white border border-gray-300 rounded-md shadow-lg"
-                    style={{ right: 0, left: 'auto' }}
+                    className="date-range-picker-dropdown absolute z-50 mt-2 flex flex-col lg:flex-row rounded-xl border border-border bg-popover shadow-lg animate-in fade-in-0 zoom-in-95 overflow-hidden w-auto left-1/2 -translate-x-1/2"
                 >
-                    <div className="date-range-presets w-36 py-4 border-r border-gray-300 bg-white">
-                        {PREDEFINED_RANGES.map(range => (
+                    <div className="date-range-presets flex flex-row overflow-x-auto border-b border-border bg-muted/10 p-2 lg:w-36 lg:flex-col lg:border-b-0 lg:border-r lg:py-2">
+                        {PREDEFINED_RANGES.map((range) => (
                             <div
                                 key={range}
-                                className="date-range-preset-item px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                                className="date-range-preset-item cursor-pointer whitespace-nowrap rounded-md px-3 py-1.5 text-xs transition-colors hover:bg-accent hover:text-accent-foreground lg:px-4 lg:py-2 lg:text-sm"
                                 onClick={() => handleRangeSelect(range)}
                             >
                                 {range}
@@ -368,34 +377,66 @@ const DateRangePicker = ({ onDateRangeChange, initialValue, className }: DateRan
                         ))}
                     </div>
 
-                    <div className="date-range-calendar-container p-4 flex flex-col">
-                        <div className="date-range-calendar-header flex items-center justify-between mb-2 px-2">
-                            <button className="date-range-calendar-nav-btn" onClick={() => updateCalendarViews('prev')}>&lt;</button>
-                            <div className="date-range-calendar-month-title font-semibold text-sm text-gray-700">
-                                {new Date(currentView.year, currentView.month).toLocaleString('default', { month: 'long', year: 'numeric' })}
+                    <div className="date-range-calendar-container flex flex-col p-2">
+                        <div className="date-range-calendar-header mb-4 flex items-center justify-between px-2">
+                            <button
+                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                                onClick={() => updateCalendarViews("prev")}
+                            >
+                                &lt;
+                            </button>
+                            <div className="flex text-sm font-semibold">
+                                <span className="w-32 text-center">
+                                    {new Date(currentView.year, currentView.month).toLocaleString("default", {
+                                        month: "long",
+                                        year: "numeric",
+                                    })}
+                                </span>
+                                <span className="hidden w-32 text-center lg:block">
+                                    {new Date(nextView.year, nextView.month).toLocaleString("default", {
+                                        month: "long",
+                                        year: "numeric",
+                                    })}
+                                </span>
                             </div>
-                            <div className="date-range-calendar-month-title font-semibold text-sm text-gray-700">
-                                {new Date(nextView.year, nextView.month).toLocaleString('default', { month: 'long', year: 'numeric' })}
-                            </div>
-                            <button className="date-range-calendar-nav-btn" onClick={() => updateCalendarViews('next')}>&gt;</button>
+                            <button
+                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                                onClick={() => updateCalendarViews("next")}
+                            >
+                                &gt;
+                            </button>
                         </div>
 
-                        <div className="date-range-calendars flex gap-5 sm:flex-row flex-col">
+                        <div className="date-range-calendars flex flex-col gap-4 lg:flex-row">
                             {renderCalendar(currentMonthDays, currentView.month)}
-                            {renderCalendar(nextMonthDays, nextView.month)}
+                            <div className="hidden lg:block">
+                                {renderCalendar(nextMonthDays, nextView.month)}
+                            </div>
                         </div>
 
-                        <div className="date-range-footer flex items-center justify-between mt-4 pt-4 border-t border-gray-300">
-                            <div className="date-range-selected-text text-sm text-gray-500">
-                                {tempRange.startDate && tempRange.endDate && `${formatLocalDate(tempRange.startDate)} - ${formatLocalDate(tempRange.endDate)}`}
+                        <div className="date-range-footer mt-4 flex items-center justify-between border-t border-border pt-4">
+                            <div className="date-range-selected-text text-xs text-muted-foreground mr-2">
+                                {tempRange.startDate && tempRange.endDate
+                                    ? `${formatLocalDate(tempRange.startDate)} - ${formatLocalDate(tempRange.endDate)}`
+                                    : "Select a range"}
                             </div>
                             <div className="date-range-footer-buttons flex gap-2">
-                                <button className="date-range-btn date-range-btn-cancel px-3 py-1 text-sm border border-gray-300 rounded" onClick={cancelSelection}>Cancel</button>
-                                <button
-                                    className="date-range-btn date-range-btn-apply px-3 py-1 text-sm border rounded bg-blue-600 text-white disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={cancelSelection}
+                                    className="h-8 rounded-lg px-3 text-xs"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    size="sm"
                                     onClick={applySelection}
                                     disabled={!tempRange.startDate || !tempRange.endDate}
-                                >Apply</button>
+                                    className="h-8 rounded-lg px-3 text-xs"
+                                >
+                                    Apply
+                                </Button>
                             </div>
                         </div>
                     </div>

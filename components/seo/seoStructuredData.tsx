@@ -1,43 +1,13 @@
-"use client"
+"use client";
 
-import { generateStructuredData } from "@/lib/seoHelpers"
+import { generateStructuredData } from "@/lib/seoHelpers";
 
 interface SEOStructuredDataProps {
-  pageKey: 'home' | 'dashboard' | 'login' | 'register' | 'contact' | 'pricing' | 'features' | 'help'
+    pageKey: "home" | "dashboard" | "login" | "register" | "contact" | "pricing" | "features" | "help";
 }
 
 export function SEOStructuredData({ pageKey }: SEOStructuredDataProps) {
-  const structuredData = generateStructuredData(pageKey)
-  
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-    />
-  )
+    const structuredData = generateStructuredData(pageKey);
+
+    return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

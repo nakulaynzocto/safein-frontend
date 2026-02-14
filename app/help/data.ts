@@ -1,28 +1,27 @@
-
-import { Calendar, Users, Shield, Book, Video, Phone } from "lucide-react"
+import { Calendar, Users, Shield, Book, Video, Phone } from "lucide-react";
 
 export interface HelpArticle {
-  id: string
-  title: string
-  slug: string
-  category: "Getting Started" | "User Management" | "Security & Privacy" | "Troubleshooting" | "Reporting"
-  description: string
-  content: string
-  lastUpdated: string
-  readTime: string
+    id: string;
+    title: string;
+    slug: string;
+    category: "Getting Started" | "User Management" | "Security & Privacy" | "Troubleshooting" | "Reporting";
+    description: string;
+    content: string;
+    lastUpdated: string;
+    readTime: string;
 }
 
 export const helpArticles: HelpArticle[] = [
-  // Getting Started
-  {
-    id: "1",
-    title: "How to create your first appointment",
-    slug: "how-to-create-your-first-appointment",
-    category: "Getting Started",
-    description: "A comprehensive guide to scheduling and managing visitor appointments in SafeIn.",
-    readTime: "5 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    // Getting Started
+    {
+        id: "1",
+        title: "How to create your first appointment",
+        slug: "how-to-create-your-first-appointment",
+        category: "Getting Started",
+        description: "A comprehensive guide to scheduling and managing visitor appointments in SafeIn.",
+        readTime: "5 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>Introduction</h2>
       <p>Scheduling appointments effectively is the cornerstone of a secure and efficient front-desk operation. In <strong>SafeIn</strong>, creating an appointment not only reserves a time slot but also initiates a sequence of automated workflows, including visitor notifications, calendar invites, and security pre-checks.</p>
       
@@ -78,17 +77,17 @@ export const helpArticles: HelpArticle[] = [
 
       <h2>Troubleshooting</h2>
       <p>If the visitor does not receive the email, please check the spelling of the email address or ask them to check their Spam/Junk folder. You can always <strong>Resend Invite</strong> from the Appointment Details page.</p>
-    `
-  },
-  {
-    id: "2",
-    title: "Setting up visitor registration",
-    slug: "setting-up-visitor-registration",
-    category: "Getting Started",
-    description: "Configure the check-in process, custom fields, and legal documents for your visitors.",
-    readTime: "6 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    `,
+    },
+    {
+        id: "2",
+        title: "Setting up visitor registration",
+        slug: "setting-up-visitor-registration",
+        category: "Getting Started",
+        description: "Configure the check-in process, custom fields, and legal documents for your visitors.",
+        readTime: "6 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>Overview</h2>
       <p>The visitor registration flow is the first touchpoint for your guests. A well-configured flow balances security requirements with a welcoming user experience. SafeIn allows you to customize every step of this process.</p>
 
@@ -131,17 +130,17 @@ export const helpArticles: HelpArticle[] = [
 
       <h2>Kiosk Mode</h2>
       <p>Once configured, open the SafeIn Kiosk App on your tablet. Go to <strong>Settings</strong> in the app and select <strong>"Lock to Kiosk Mode"</strong>. This hinders visitors from closing the app or accessing other tablet functions.</p>
-    `
-  },
-  {
-    id: "3",
-    title: "Configuring email notifications",
-    slug: "configuring-email-notifications",
-    category: "Getting Started",
-    description: "Master the communication flow with automated email templates and triggers.",
-    readTime: "4 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    `,
+    },
+    {
+        id: "3",
+        title: "Configuring email notifications",
+        slug: "configuring-email-notifications",
+        category: "Getting Started",
+        description: "Master the communication flow with automated email templates and triggers.",
+        readTime: "4 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>The Importance of Communication</h2>
       <p>Automated status updates ensure that your reception team, hosts, and security staff are always in sync. SafeIn's notification engine handles these communications instantly.</p>
 
@@ -171,17 +170,17 @@ export const helpArticles: HelpArticle[] = [
           <li><code>{{location_name}}</code></li>
       </ul>
       <p>Supports basic HTML for branding (adding logos, colors, and footer links).</p>
-    `
-  },
-  {
-    id: "4",
-    title: "Basic dashboard overview",
-    slug: "basic-dashboard-overview",
-    category: "Getting Started",
-    description: "Unlocking the power of real-time analytics and operational data on your dashboard.",
-    readTime: "5 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    `,
+    },
+    {
+        id: "4",
+        title: "Basic dashboard overview",
+        slug: "basic-dashboard-overview",
+        category: "Getting Started",
+        description: "Unlocking the power of real-time analytics and operational data on your dashboard.",
+        readTime: "5 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>Your Command Center</h2>
       <p>The SafeIn Dashboard provides a high-level view of your facility's activity. It is designed to give Receptionists and Admins "at-a-glance" situational awareness.</p>
 
@@ -215,19 +214,19 @@ export const helpArticles: HelpArticle[] = [
 
       <h2>Real-Time Activity Feed</h2>
       <p>The sidebar or bottom feed shows a live log of actions: <em>"John Doe checked in"</em>, <em>"Meeting with Sarah Smith ended"</em>. This provides a granular audit trail of the day's events.</p>
-    `
-  },
+    `,
+    },
 
-  // User Management
-  {
-    id: "5",
-    title: "Adding and managing employees",
-    slug: "adding-and-managing-employees",
-    category: "User Management",
-    description: "A complete guide to directory management, role assignment, and access control for your staff.",
-    readTime: "4 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    // User Management
+    {
+        id: "5",
+        title: "Adding and managing employees",
+        slug: "adding-and-managing-employees",
+        category: "User Management",
+        description: "A complete guide to directory management, role assignment, and access control for your staff.",
+        readTime: "4 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>Employee Directory Management</h2>
       <p>For the system to function effectively, your employee database must be up to date. Employees need accounts to invite visitors and receive arrival notifications.</p>
 
@@ -251,17 +250,17 @@ export const helpArticles: HelpArticle[] = [
           <li><strong>Do NOT Delete:</strong> Deleting a user removes their historical appointment data, breaking your audit trails.</li>
           <li><strong>Deactivate Instead:</strong> Toggle the "Active" status to "Inactive". This prevents login but preserves all history.</p>
       </ul>
-    `
-  },
-  {
-    id: "6",
-    title: "Visitor registration process",
-    slug: "visitor-registration-process",
-    category: "User Management",
-    description: "Understanding the end-to-end lifecycle of a visit from the guest's perspective.",
-    readTime: "5 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    `,
+    },
+    {
+        id: "6",
+        title: "Visitor registration process",
+        slug: "visitor-registration-process",
+        category: "User Management",
+        description: "Understanding the end-to-end lifecycle of a visit from the guest's perspective.",
+        readTime: "5 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>The Visitor Journey</h2>
       <p>A smooth registration process reflects positively on your company brand. Here is the standard workflow:</p>
 
@@ -280,17 +279,17 @@ export const helpArticles: HelpArticle[] = [
 
       <h3>Phase 4: Check-Out</h3>
       <p>On their way out, the visitor scans their badge at the kiosk or simply taps "Check Out" and types their name. This timestamps their departure and updates the Fire List.</p>
-    `
-  },
-  {
-    id: "7",
-    title: "User roles and permissions",
-    slug: "user-roles-and-permissions",
-    category: "User Management",
-    description: "Detailed breakdown of access levels: Global Admin, Location Admin, Receptionist, and Employee.",
-    readTime: "3 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    `,
+    },
+    {
+        id: "7",
+        title: "User roles and permissions",
+        slug: "user-roles-and-permissions",
+        category: "User Management",
+        description: "Detailed breakdown of access levels: Global Admin, Location Admin, Receptionist, and Employee.",
+        readTime: "3 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>RBAC (Role-Based Access Control)</h2>
       <p>SafeIn adheres to the principle of least privilege. Assign roles based on job function.</p>
 
@@ -309,17 +308,17 @@ export const helpArticles: HelpArticle[] = [
       <h3>4. Employee (Host)</h3>
       <p><strong>Access:</strong> Self-Service Only.</p>
       <p><strong>Capabilities:</strong> Can only see and manage <em>their own</em> appointments and history. Cannot see visitors invited by colleagues.</p>
-    `
-  },
-  {
-    id: "8",
-    title: "Bulk user import",
-    slug: "bulk-user-import",
-    category: "User Management",
-    description: "How to rapidly onboard hundreds of employees using CSV tools.",
-    readTime: "2 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    `,
+    },
+    {
+        id: "8",
+        title: "Bulk user import",
+        slug: "bulk-user-import",
+        category: "User Management",
+        description: "How to rapidly onboard hundreds of employees using CSV tools.",
+        readTime: "2 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>Mass Onboarding</h2>
       <p>Setting up a new office? You don't need to add users one by one.</p>
 
@@ -339,19 +338,19 @@ export const helpArticles: HelpArticle[] = [
 
       <h3>Step 4: Commit</h3>
       <p>Click <strong>"Import Users"</strong>. The system will create the accounts in the background and optionally send Welcome Emails to all new users with a link to set their passwords.</p>
-    `
-  },
+    `,
+    },
 
-  // Security & Privacy
-  {
-    id: "9",
-    title: "Data encryption and security",
-    slug: "data-encryption-and-security",
-    category: "Security & Privacy",
-    description: "Technical overview of SafeIn's data protection architecture and standards.",
-    readTime: "3 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    // Security & Privacy
+    {
+        id: "9",
+        title: "Data encryption and security",
+        slug: "data-encryption-and-security",
+        category: "Security & Privacy",
+        description: "Technical overview of SafeIn's data protection architecture and standards.",
+        readTime: "3 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>Data Protection Architecture</h2>
       <p>SafeIn is built with a "Security-First" approach, trusting that visitor data is often sensitive corporate intelligence.</p>
 
@@ -366,17 +365,17 @@ export const helpArticles: HelpArticle[] = [
 
       <h3>Penetration Testing</h3>
       <p>We conduct annual third-party penetration tests to identify and patch vulnerabilities. Summary reports are available to Enterprise customers upon request.</p>
-    `
-  },
-  {
-    id: "10",
-    title: "Privacy policy compliance",
-    slug: "privacy-policy-compliance",
-    category: "Security & Privacy",
-    description: "Tools to ensure compliance with GDPR, CCPA, and other data privacy regulations.",
-    readTime: "4 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    `,
+    },
+    {
+        id: "10",
+        title: "Privacy policy compliance",
+        slug: "privacy-policy-compliance",
+        category: "Security & Privacy",
+        description: "Tools to ensure compliance with GDPR, CCPA, and other data privacy regulations.",
+        readTime: "4 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>Regulatory Compliance</h2>
       <p>Modern privacy laws (GDPR in Europe, CCPA in California) give individuals rights over their data. SafeIn provides the tools you need to remain compliant.</p>
 
@@ -392,17 +391,17 @@ export const helpArticles: HelpArticle[] = [
 
       <h3>Explicit Consent</h3>
       <p>During check-in, you can force a "Terms of Service" or "Privacy Notice" screen that the visitor must accept before providing their data.</p>
-    `
-  },
-  {
-    id: "11",
-    title: "Access control settings",
-    slug: "access-control-settings",
-    category: "Security & Privacy",
-    description: "Advanced security settings including IP whitelisting and 2FA.",
-    readTime: "3 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    `,
+    },
+    {
+        id: "11",
+        title: "Access control settings",
+        slug: "access-control-settings",
+        category: "Security & Privacy",
+        description: "Advanced security settings including IP whitelisting and 2FA.",
+        readTime: "3 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>Securing the Dashboard</h2>
       <p>Protecting the admin panel is as important as protecting the physical door.</p>
 
@@ -414,17 +413,17 @@ export const helpArticles: HelpArticle[] = [
 
       <h3>Session Policies</h3>
       <p>Configure automatic logout timers. For example, <em>"Log out inactive receptionists after 15 minutes"</em>. This prevents a security breach if a front-desk iPad is left unattended.</p>
-    `
-  },
-  {
-    id: "12",
-    title: "Audit trail features",
-    slug: "audit-trail-features",
-    category: "Security & Privacy",
-    description: "Complete visibility into every system modification for compliance audits.",
-    readTime: "2 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    `,
+    },
+    {
+        id: "12",
+        title: "Audit trail features",
+        slug: "audit-trail-features",
+        category: "Security & Privacy",
+        description: "Complete visibility into every system modification for compliance audits.",
+        readTime: "2 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>System Transparency</h2>
       <p>The Audit Log is an immutable record of "Who did What, and When". It is essential for forensic investigations and compliance audits.</p>
 
@@ -454,19 +453,19 @@ export const helpArticles: HelpArticle[] = [
 
       <h3>Exporting Logs</h3>
       <p>Logs can be exported to JSON or CSV format for ingestion into your SIEM tools (like Splunk or Datadog) for centralized monitoring.</p>
-    `
-  },
+    `,
+    },
 
-  // Troubleshooting
-  {
-    id: "13",
-    title: "Troubleshooting common login issues",
-    slug: "troubleshooting-common-login-issues",
-    category: "Troubleshooting",
-    description: "Diagnose and resolve access issues for your team.",
-    readTime: "2 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    // Troubleshooting
+    {
+        id: "13",
+        title: "Troubleshooting common login issues",
+        slug: "troubleshooting-common-login-issues",
+        category: "Troubleshooting",
+        description: "Diagnose and resolve access issues for your team.",
+        readTime: "2 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>Cannot Access Account</h2>
       <p>If you or your team members are stuck at the login screen, follow this checklist.</p>
 
@@ -489,19 +488,19 @@ export const helpArticles: HelpArticle[] = [
 
       <h3>4. SSO Issues</h3>
       <p>If logging in with Google/Microsoft, ensure your browser allows pop-ups and third-party cookies for the authentication token to pass through.</p>
-    `
-  },
+    `,
+    },
 
-  // Reporting (Corrected category from Popular to Reporting where appropriate)
-  {
-    id: "14",
-    title: "Exporting visitor reports and analytics",
-    slug: "exporting-visitor-reports-and-analytics",
-    category: "Reporting",
-    description: "Generating compliance reports and data dumps for offline analysis.",
-    readTime: "6 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    // Reporting (Corrected category from Popular to Reporting where appropriate)
+    {
+        id: "14",
+        title: "Exporting visitor reports and analytics",
+        slug: "exporting-visitor-reports-and-analytics",
+        category: "Reporting",
+        description: "Generating compliance reports and data dumps for offline analysis.",
+        readTime: "6 min read",
+        lastUpdated: "Dec 2025",
+        content: `
       <h2>The Power of Data</h2>
       <p>SafeIn keeps a historical record of every single footfall in your facility.</p>
 
@@ -526,17 +525,17 @@ export const helpArticles: HelpArticle[] = [
           <li><em>"Send me a PDF summary of all visitors every Friday at 5:00 PM."</em></li>
           <li><em>"Send the Fire Marshal a list of active visitors every day at 8:00 AM."</em></li>
       </ul>
-    `
-  },
-  {
-    id: "15",
-    title: "Managing visitor check-in and check-out",
-    slug: "managing-visitor-check-in-and-check-out",
-    category: "User Management",
-    description: "Operational guide for front-desk staff handling guests manually.",
-    readTime: "4 min read",
-    lastUpdated: "Dec 2025",
-    content: `
+    `,
+    },
+    {
+        id: "15",
+        title: "Managing visitor check-in and check-out",
+        slug: "managing-visitor-check-in-and-check-out",
+        category: "User Management",
+        description: "Operational guide for front-desk staff handling guests manually.",
+        readTime: "4 min read",
+        lastUpdated: "Dec 2025",
+        content: `
         <h2>Manual Operations for Receptionists</h2>
         <p>While Kiosks handle self-service, the Receptionist Dashboard is designed for power users who need to manage exceptions.</p>
 
@@ -556,43 +555,43 @@ export const helpArticles: HelpArticle[] = [
             <li><strong>Individual:</strong> Search the name in the "Active" list and click "Check Out".</li>
             <li><strong>Bulk Action:</strong> Verify that the lobby is empty at the end of the day. Select "Select All Active" and click "Force Check Out". *Use a note like "End of Day Auto-Checkout" for the audit trail.*</li>
         </ul>
-      `
-  }
-]
+      `,
+    },
+];
 
 export const helpCategories = [
-  {
-    icon: Calendar,
-    title: "Getting Started",
-    description: "Learn the basics of setting up your SafeIn management system",
-    articles: [
-      "how-to-create-your-first-appointment",
-      "setting-up-visitor-registration",
-      "configuring-email-notifications",
-      "basic-dashboard-overview"
-    ]
-  },
-  {
-    icon: Users,
-    title: "User Management",
-    description: "Manage employees, visitors, and user permissions",
-    articles: [
-      "adding-and-managing-employees",
-      "visitor-registration-process",
-      "user-roles-and-permissions",
-      "bulk-user-import",
-      "managing-visitor-check-in-and-check-out"
-    ]
-  },
-  {
-    icon: Shield,
-    title: "Security & Privacy",
-    description: "Learn about security features and data protection",
-    articles: [
-      "data-encryption-and-security",
-      "privacy-policy-compliance",
-      "access-control-settings",
-      "audit-trail-features"
-    ]
-  }
-]
+    {
+        icon: Calendar,
+        title: "Getting Started",
+        description: "Learn the basics of setting up your SafeIn management system",
+        articles: [
+            "how-to-create-your-first-appointment",
+            "setting-up-visitor-registration",
+            "configuring-email-notifications",
+            "basic-dashboard-overview",
+        ],
+    },
+    {
+        icon: Users,
+        title: "User Management",
+        description: "Manage employees, visitors, and user permissions",
+        articles: [
+            "adding-and-managing-employees",
+            "visitor-registration-process",
+            "user-roles-and-permissions",
+            "bulk-user-import",
+            "managing-visitor-check-in-and-check-out",
+        ],
+    },
+    {
+        icon: Shield,
+        title: "Security & Privacy",
+        description: "Learn about security features and data protection",
+        articles: [
+            "data-encryption-and-security",
+            "privacy-policy-compliance",
+            "access-control-settings",
+            "audit-trail-features",
+        ],
+    },
+];

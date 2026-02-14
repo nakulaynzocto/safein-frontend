@@ -1,39 +1,46 @@
+"use client";
 
-
-import { helpArticles, helpCategories } from "../data"
-import { notFound } from "next/navigation"
-import { PublicLayout } from "@/components/layout/publicLayout"
-import { PageSEOHead } from "@/components/seo/pageSEOHead"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft, Calendar, Clock, Tag } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-
+import { helpArticles, helpCategories } from "../data";
+import { notFound, useRouter } from "next/navigation";
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
+import { PageSEOHead } from "@/components/seo/pageSEOHead";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Calendar, Clock, Tag } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 
 interface PageProps {
     params: Promise<{
-        slug: string
-    }>
+        slug: string;
+    }>;
 }
 
-export async function generateStaticParams() {
-    return helpArticles.map((article) => ({
-        slug: article.slug,
-    }))
-}
+export default function HelpArticlePage({ params }: PageProps) {
+    const [slug, setSlug] = useState<string>("");
+    const [article, setArticle] = useState<any>(null);
+    const [categoryData, setCategoryData] = useState<any>(null);
 
-
-export default async function HelpArticlePage({ params }: PageProps) {
-    const { slug } = await params
-    const article = helpArticles.find((a) => a.slug === slug)
+    useEffect(() => {
+        params.then((resolvedParams) => {
+            const foundArticle = helpArticles.find((a) => a.slug === resolvedParams.slug);
+            if (!foundArticle) {
+                notFound();
+            }
+            setSlug(resolvedParams.slug);
+            setArticle(foundArticle);
+            const foundCategory = helpCategories.find((c) => c.title === foundArticle.category);
+            setCategoryData(foundCategory);
+        });
+    }, [params]);
 
     if (!article) {
-        notFound()
+        return null; // or a loading spinner
     }
 
-    const categoryData = helpCategories.find(c => c.title === article.category)
-    const CategoryIcon = categoryData ? categoryData.icon : Tag
+    const CategoryIcon = categoryData ? categoryData.icon : Tag;
 
     return (
         <>
@@ -43,77 +50,95 @@ export default async function HelpArticlePage({ params }: PageProps) {
                 keywords={[article.category, "help", "guide", "tutorial", "SafeIn"]}
                 url={`https://safein.aynzo.com/help/${article.slug}`}
             />
-            <PublicLayout>
-                <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 py-8 sm:py-12">
-                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                        {/* Back Navigation */}
-                        <div className="mb-6">
-                            <Button variant="ghost" className="pl-0 hover:pl-2 text-gray-500 hover:text-[#3882a5] transition-all" asChild>
-                                <Link href="/help">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back to Help Center
-                                </Link>
-                            </Button>
-                        </div>
-
-                        {/* Updated Header Style (Matches Privacy Policy) */}
-                        <div className="mb-8">
-                            <div className="flex items-start sm:items-center gap-3 mb-4">
-                                <div className="p-2 bg-blue-50 rounded-lg shrink-0">
-                                    <CategoryIcon className="h-6 w-6 sm:h-8 sm:w-8 text-[#3882a5]" />
-                                </div>
-                                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
-                                    {article.title}
-                                </h1>
+            <div className="flex min-h-screen flex-col" style={{ backgroundColor: "var(--background)" }}>
+                <Navbar forcePublic showUpgradeButton={false} />
+                <main className="flex-1">
+                    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 py-8 sm:py-12">
+                        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                            {/* Back Navigation */}
+                            <div className="mb-6">
+                                <Button
+                                    variant="ghost"
+                                    className="pl-0 text-gray-500 transition-all hover:pl-2 hover:text-[#3882a5]"
+                                    asChild
+                                >
+                                    <Link href="/help">
+                                        <ArrowLeft className="mr-2 h-4 w-4" />
+                                        Back to Help Center
+                                    </Link>
+                                </Button>
                             </div>
 
-                            {/* Metadata */}
-                            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 ml-1 sm:ml-14">
-                                <span className="flex items-center">
-                                    <Clock className="w-4 h-4 mr-1.5" />
-                                    {article.readTime}
-                                </span>
-                                <span className="hidden sm:inline text-gray-300">|</span>
-                                <span className="flex items-center">
-                                    <Calendar className="w-4 h-4 mr-1.5" />
-                                    Last updated: {article.lastUpdated}
-                                </span>
-                                <span className="hidden sm:inline text-gray-300">|</span>
-                                <Badge variant="secondary" className="bg-blue-50 text-[#3882a5] hover:bg-blue-100 border-0">
-                                    {article.category}
-                                </Badge>
-                            </div>
-                        </div>
-
-                        {/* Content Card */}
-                        <Card className="mb-8 overflow-hidden border-slate-200 shadow-sm">
-                            <CardContent className="p-6 sm:p-10">
-                                <article className="prose prose-slate max-w-none prose-headings:text-[#074463] prose-headings:font-bold prose-a:text-[#3882a5] prose-img:rounded-xl">
-                                    <div dangerouslySetInnerHTML={{ __html: article.content }} />
-                                </article>
-                            </CardContent>
-                        </Card>
-
-                        {/* Footer / CTA Card */}
-                        <Card className="bg-slate-50 border-dashed border-slate-300">
-                            <CardContent className="p-8 text-center">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Still have questions?</h3>
-                                <p className="text-gray-500 mb-6 max-w-lg mx-auto">
-                                    Can't find what you're looking for? Our support team is here to help you get back on track.
-                                </p>
-                                <div className="flex justify-center gap-4">
-                                    <Button asChild className="bg-[#3882a5] hover:bg-[#2c6b8a] text-white">
-                                        <Link href="/contact">Contact Support</Link>
-                                    </Button>
-                                    <Button asChild variant="outline" className="border-slate-300 hover:bg-white text-gray-700">
-                                        <Link href="/help">Browse More Articles</Link>
-                                    </Button>
+                            {/* Updated Header Style (Matches Privacy Policy) */}
+                            <div className="mb-8">
+                                <div className="mb-4 flex items-start gap-3 sm:items-center">
+                                    <div className="shrink-0 rounded-lg bg-blue-50 p-2">
+                                        <CategoryIcon className="h-6 w-6 text-[#3882a5] sm:h-8 sm:w-8" />
+                                    </div>
+                                    <h1 className="text-2xl leading-tight font-bold text-gray-900 sm:text-3xl md:text-4xl">
+                                        {article.title}
+                                    </h1>
                                 </div>
-                            </CardContent>
-                        </Card>
+
+                                {/* Metadata */}
+                                <div className="ml-1 flex flex-wrap items-center gap-4 text-sm text-gray-500 sm:ml-14">
+                                    <span className="flex items-center">
+                                        <Clock className="mr-1.5 h-4 w-4" />
+                                        {article.readTime}
+                                    </span>
+                                    <span className="hidden text-gray-300 sm:inline">|</span>
+                                    <span className="flex items-center">
+                                        <Calendar className="mr-1.5 h-4 w-4" />
+                                        Last updated: {article.lastUpdated}
+                                    </span>
+                                    <span className="hidden text-gray-300 sm:inline">|</span>
+                                    <Badge
+                                        variant="secondary"
+                                        className="border-0 bg-blue-50 text-[#3882a5] hover:bg-blue-100"
+                                    >
+                                        {article.category}
+                                    </Badge>
+                                </div>
+                            </div>
+
+                            {/* Content Card */}
+                            <Card className="mb-8 overflow-hidden border-slate-200 shadow-sm">
+                                <CardContent className="p-6 sm:p-10">
+                                    <article className="prose prose-slate prose-headings:text-[#074463] prose-headings:font-bold prose-a:text-[#3882a5] prose-img:rounded-xl max-w-none">
+                                        <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                                    </article>
+                                </CardContent>
+                            </Card>
+
+                            {/* Footer / CTA Card */}
+                            <Card className="border-dashed border-slate-300 bg-slate-50">
+                                <CardContent className="p-8 text-center">
+                                    <h3 className="mb-2 text-lg font-semibold text-gray-900">
+                                        Still have questions?
+                                    </h3>
+                                    <p className="mx-auto mb-6 max-w-lg text-gray-500">
+                                        Can't find what you're looking for? Our support team is here to help you get
+                                        back on track.
+                                    </p>
+                                    <div className="flex justify-center gap-4">
+                                        <Button asChild className="bg-[#3882a5] text-white hover:bg-[#2c6b8a]">
+                                            <Link href="/contact">Contact Support</Link>
+                                        </Button>
+                                        <Button
+                                            asChild
+                                            variant="outline"
+                                            className="border-slate-300 text-gray-700 hover:bg-white"
+                                        >
+                                            <Link href="/help">Browse More Articles</Link>
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
-                </div>
-            </PublicLayout>
+                </main>
+                <Footer />
+            </div>
         </>
-    )
+    );
 }

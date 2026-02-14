@@ -1,18 +1,22 @@
-"use client"
+"use client";
 
-import { memo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { LucideIcon } from "lucide-react"
+import { memo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LucideIcon } from "lucide-react";
 
 interface StatCardProps {
-  title: string
-  value: number
-  icon: LucideIcon
-  description?: string
-  trend?: {
-    value: number
-    isPositive: boolean
-  }
+    title: string;
+    value: number;
+    icon: LucideIcon;
+    description?: string;
+    colorClassName?: string;
+    bgClassName?: string;
+    trend?: {
+        value: number;
+        isPositive: boolean;
+    };
+    onClick?: () => void;
+    isActive?: boolean;
 }
 
 /**
@@ -20,31 +24,29 @@ interface StatCardProps {
  * Optimized with React.memo to prevent unnecessary re-renders
  * Mobile-responsive: compact layout on small screens
  */
-export const StatCard = memo(function StatCard({ title, value, icon: Icon, description, trend }: StatCardProps) {
-  return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 sm:pb-2">
-        <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-      </CardHeader>
-      <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
-        <div className="text-xl sm:text-2xl font-bold">{value}</div>
-        {description && (
-          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 line-clamp-1">{description}</p>
-        )}
-        {trend && (
-          <div className="flex items-center mt-2 flex-wrap">
-            <span
-              className={`text-[10px] sm:text-xs font-medium ${
-                trend.isPositive ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              {trend.isPositive ? "+" : ""}{trend.value}%
-            </span>
-            <span className="text-[10px] sm:text-xs text-muted-foreground ml-1">from last month</span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  )
-})
+export const StatCard = memo(function StatCard({ title, value, icon: Icon, description, trend, colorClassName, bgClassName, onClick, isActive }: StatCardProps) {
+    return (
+        <Card
+            onClick={onClick}
+            className={`
+                border shadow-sm transition-all duration-200 
+                ${bgClassName || "bg-card"} 
+                ${onClick ? "cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98]" : ""}
+            `}
+        >
+            <CardContent className="flex flex-col items-center justify-center p-2 sm:p-3">
+                <div className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-center mb-1 ${colorClassName || "text-muted-foreground"}`}>
+                    {title}
+                </div>
+                <div className={`text-base sm:text-lg md:text-xl font-bold tracking-tight leading-none ${colorClassName || ""}`}>
+                    {value}
+                </div>
+                {description && (
+                    <div className="text-[9px] sm:text-[10px] text-muted-foreground text-center mt-0.5 hidden sm:block">
+                        {description}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
+});
