@@ -99,6 +99,13 @@ export default function ContactPage() {
             details: "Monday - Friday: 9:00 AM - 6:00 PM EST\nSaturday: 10:00 AM - 4:00 PM EST",
             action: null,
         },
+        {
+            icon: MapPin,
+            title: "Office Address",
+            description: "Visit our office",
+            details: "Zirakpur, Mohali\nPunjab - 140603\nIndia",
+            action: null,
+        },
     ];
 
     const departments = [
@@ -151,8 +158,9 @@ export default function ContactPage() {
                                 Get in Touch
                             </h1>
                             <p className="mx-auto mb-6 max-w-3xl px-2 text-base leading-relaxed text-gray-300 sm:mb-8 sm:px-0 sm:text-lg md:text-xl">
-                                Have questions about our visitor management system? We're here to help. Reach out to our
-                                team and we'll get back to you as soon as possible.
+                                Have questions about our comprehensive visitor management system, real-time chat,
+                                spot pass, or any features? We're here to help with 24/7 support. Reach out and we'll
+                                get back to you promptly.
                             </p>
                         </div>
                     </section>
@@ -167,7 +175,7 @@ export default function ContactPage() {
                                 <p className="text-accent text-lg">Multiple ways to reach our team</p>
                             </div>
 
-                            <div className="mb-16 grid gap-6 md:grid-cols-3">
+                            <div className="mb-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                                 {contactInfo.map((info, index) => (
                                     <Card
                                         key={index}
@@ -340,7 +348,7 @@ export default function ContactPage() {
                     </section>
 
                     {/* CTA Section */}
-                    <section className="bg-hero-gradient px-4 py-20">
+                    <section className="bg-[#074463] px-4 pt-20 pb-8">
                         <div className="container mx-auto text-center">
                             <h2 className="mb-6 text-3xl font-bold text-white md:text-4xl">Ready to Get Started?</h2>
                             <p className="mx-auto mb-8 max-w-2xl text-xl text-gray-300">

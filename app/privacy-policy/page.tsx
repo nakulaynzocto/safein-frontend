@@ -337,7 +337,7 @@ export default function PrivacyPolicyPage() {
                                     <strong>Email:</strong> grievance@aynzo.com
                                 </p>
                                 <p>
-                                    <strong>Address:</strong> Aynzo Technologies, Bangalore, Karnataka, India
+                                    <strong>Address:</strong> Aynzo Technologies, Zirakpur, Mohali, Punjab - 140603, India
                                 </p>
                             </div>
                         </CardContent>
@@ -445,8 +445,8 @@ export default function PrivacyPolicyPage() {
                                     <div>
                                         <p className="font-semibold">Registered Office:</p>
                                         <p>Aynzo Technologies Pvt Ltd</p>
-                                        <p>123, Tech Park, Indiranagar</p>
-                                        <p>Bangalore, Karnataka, 560038, India</p>
+                                        <p>Zirakpur, Mohali</p>
+                                        <p>Punjab - 140603, India</p>
                                     </div>
                                 </div>
                             </div>

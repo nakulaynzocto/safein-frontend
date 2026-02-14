@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { routes } from "@/utils/routes";
-import { Search, Book, Video, Phone, ArrowRight, Tag, Clock } from "lucide-react";
+import { Search, Book, MessageCircle, Phone, ArrowRight, Tag, Clock } from "lucide-react";
 import Link from "next/link";
 import { PublicLayout } from "@/components/layout/publicLayout";
 import { PageSEOHead } from "@/components/seo/pageSEOHead";
@@ -21,23 +21,23 @@ export default function HelpPage() {
 
     const supportOptions = [
         {
-            icon: Book,
-            title: "Knowledge Base",
-            description: "Browse our comprehensive documentation and guides",
-            action: "Browse Articles",
+            icon: MessageCircle,
+            title: "24/7 Live Chat",
+            description: "Get instant help with our real-time chat support system",
+            action: "Start Chat",
             color: "#3882a5",
         },
         {
-            icon: Video,
-            title: "Video Tutorials",
-            description: "Watch step-by-step video guides and tutorials",
-            action: "Watch Videos",
+            icon: Book,
+            title: "Knowledge Base",
+            description: "Browse our comprehensive documentation and step-by-step guides",
+            action: "Browse Articles",
             color: "#3882a5",
         },
         {
             icon: Phone,
             title: "Phone Support",
-            description: "Call us for immediate assistance",
+            description: "Call us during business hours for immediate assistance",
             action: "Call Now",
             color: "#3882a5",
         },
@@ -46,8 +46,8 @@ export default function HelpPage() {
     return (
         <>
             <PageSEOHead
-                title="Help & Support"
-                description="Get help with SafeIn visitor management system. Find guides, tutorials, and support resources."
+                title="Help & Support - Complete Guide to SafeIn Features"
+                description="Get help with SafeIn's complete feature set: appointments, real-time chat, spot pass, notifications, bulk import, and analytics. Find guides, tutorials, and 24/7 support."
                 keywords={[
                     "help",
                     "support",
@@ -56,6 +56,9 @@ export default function HelpPage() {
                     "guides",
                     "visitor management help",
                     "SafeIn support",
+                    "real-time chat help",
+                    "spot pass guide",
+                    "appointment links",
                 ]}
                 url="https://safein.aynzo.com/help"
             />
@@ -68,8 +71,10 @@ export default function HelpPage() {
                                 How can we help you?
                             </h1>
                             <p className="mx-auto mb-6 max-w-3xl px-2 text-base leading-relaxed text-gray-300 sm:mb-8 sm:px-0 sm:text-lg md:text-xl">
-                                Find answers to your questions, learn new features, and get the most out of your SafeIn
-                                management system with our comprehensive help resources.
+                                Find answers to your questions about appointments, real-time chat, spot pass, bulk
+                                operations, smart notifications, and more. Learn new features and get the most out of
+                                your SafeIn management system with our comprehensive help resources and 24/7 support
+                                chat.
                             </p>
 
                             {/* Search Bar */}
@@ -230,7 +235,7 @@ export default function HelpPage() {
                     </section>
 
                     {/* CTA Section */}
-                    <section className="bg-hero-gradient px-4 py-12 sm:px-6 sm:py-16 md:py-20">
+                    <section className="bg-[#074463] px-4 pt-12 pb-8 sm:px-6 sm:pt-16 md:pt-20">
                         <div className="container mx-auto text-center">
                             <h2 className="mb-4 px-2 text-2xl leading-tight font-bold text-white sm:mb-6 sm:px-0 sm:text-3xl md:text-4xl">
                                 Ready to Get Started?

@@ -76,8 +76,8 @@ export default function PricingPage() {
     return (
         <>
             <PageSEOHead
-                title="Pricing Plans"
-                description="Choose the perfect SafeIn plan for your business. Flexible pricing options for visitor management and appointment scheduling."
+                title="Pricing Plans - Complete Visitor Management Solution"
+                description="Flexible pricing for complete visitor management. Includes real-time chat, spot pass, appointment links, smart notifications, bulk import & analytics. Start free 3-day trial!"
                 keywords={[
                     "pricing",
                     "plans",
@@ -86,6 +86,7 @@ export default function PricingPage() {
                     "appointment system cost",
                     "SafeIn pricing",
                     "business plans",
+                    "free trial",
                 ]}
                 url="https://safein.aynzo.com/pricing"
                 structuredData={pricingStructuredData}
@@ -99,8 +100,9 @@ export default function PricingPage() {
                                 Simple, Transparent Pricing
                             </h1>
                             <p className="mx-auto mb-6 max-w-3xl px-2 text-base leading-relaxed text-gray-300 sm:mb-8 sm:px-0 sm:text-lg md:text-xl">
-                                Choose the perfect plan for your business. All plans include our core SafeIn management
-                                features with a 3-day free trial and no setup fees.
+                                Choose the perfect plan for your business. All plans include real-time chat, spot
+                                pass, appointment links, smart notifications, bulk import, and advanced analytics with
+                                a 3-day free trial.
                             </p>
                             <div className="mb-4 flex flex-wrap items-center justify-center gap-1.5 px-2 text-yellow-400 sm:gap-2 sm:px-0">
                                 <Star className="h-4 w-4 fill-current sm:h-5 sm:w-5" />
@@ -343,7 +345,7 @@ export default function PricingPage() {
                     </section>
 
                     {/* CTA Section */}
-                    <section className="bg-hero-gradient px-4 py-20">
+                    <section className="bg-[#074463] px-4 pt-20 pb-8">
                         <div className="container mx-auto text-center">
                             <h2 className="mb-6 text-3xl font-bold text-white md:text-4xl">Ready to Get Started?</h2>
                             <p className="mx-auto mb-8 max-w-2xl text-xl text-gray-300">

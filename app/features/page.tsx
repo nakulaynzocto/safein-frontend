@@ -15,6 +15,12 @@ import {
     ArrowRight,
     Zap,
     Lock,
+    MessageCircle,
+    Link2,
+    Upload,
+    UserCheck,
+    Volume2,
+    FileSpreadsheet,
 } from "lucide-react";
 import { routes } from "@/utils/routes";
 import { PublicLayout } from "@/components/layout/publicLayout";
@@ -25,52 +31,147 @@ export default function FeaturesPage() {
     const features = [
         {
             icon: Calendar,
-            title: "Appointment Management",
+            title: "Smart Appointment Management",
             description:
-                "Schedule, manage, and track visitor appointments with ease. Automated email notifications keep everyone informed.",
+                "Schedule, manage, and track visitor appointments with ease. Create shareable booking links and automated email notifications.",
             benefits: [
                 "Online booking system",
-                "Appointment scheduling",
+                "Shareable appointment links",
                 "Automated email reminders",
                 "Appointment history tracking",
             ],
         },
         {
-            icon: Users,
-            title: "Visitor Registration",
+            icon: UserCheck,
+            title: "Spot Pass - Walk-in Management",
             description:
-                "Streamline visitor check-in process with digital registration forms and instant email notifications to hosts.",
+                "Handle unexpected visitors seamlessly with our Spot Pass system. Quick registration for walk-in visitors without prior appointments.",
             benefits: [
-                "Digital visitor registration",
-                "Visitor information management",
-                "Host notifications",
-                "Visitor tracking",
+                "Instant visitor registration",
+                "Quick check-in process",
+                "Real-time host notifications",
+                "Walk-in visitor tracking",
+            ],
+        },
+        {
+            icon: MessageCircle,
+            title: "Real-time Chat System",
+            description:
+                "Connect instantly with team members and get 24/7 support. Internal messaging for employees and dedicated support chat for assistance.",
+            benefits: [
+                "Employee-to-employee chat",
+                "24/7 support chat",
+                "Real-time messaging",
+                "File sharing support",
+            ],
+        },
+        {
+            icon: Link2,
+            title: "Appointment Links",
+            description:
+                "Create and share personalized booking links. Let visitors schedule appointments directly without needing system access.",
+            benefits: [
+                "Generate shareable links",
+                "Custom link URLs",
+                "Track link performance",
+                "Quick visitor bookings",
+            ],
+        },
+        {
+            icon: Upload,
+            title: "Bulk Import & Export",
+            description:
+                "Save time with CSV bulk operations for employee onboarding and comprehensive data export capabilities for reporting.",
+            benefits: [
+                "CSV import for employees",
+                "Data export for reports",
+                "Visitor data export",
+                "Template downloads",
+            ],
+        },
+        {
+            icon: Volume2,
+            title: "Smart Notifications",
+            description:
+                "Never miss important updates with our multi-channel notification system. Visual toasts, voice alerts, and email notifications.",
+            benefits: [
+                "Voice alerts for critical events",
+                "Toast notifications",
+                "Email notifications",
+                "Real-time updates",
+            ],
+        },
+        {
+            icon: Users,
+            title: "Advanced Employee Management",
+            description:
+                "Comprehensive team management with role-based permissions, bulk operations, and detailed employee profiles.",
+            benefits: [
+                "Role-based access control",
+                "Bulk employee import",
+                "Employee directory",
+                "Access permissions",
             ],
         },
         {
             icon: Shield,
             title: "Security & Access Control",
-            description: "Enhanced security with visitor tracking, access logs, and comprehensive visitor management.",
-            benefits: ["Visitor access logs", "Security monitoring", "Visitor history", "Role-based access control"],
-        },
-        {
-            icon: Users,
-            title: "Employee Management",
-            description: "Manage your team with comprehensive employee directory and role-based permissions.",
-            benefits: ["Employee directory", "Role management", "Team organization", "Access permissions"],
+            description:
+                "Enterprise-grade security with visitor tracking, access logs, and comprehensive visitor management.",
+            benefits: [
+                "Visitor access logs",
+                "Security monitoring",
+                "Visitor history",
+                "Spot pass verification",
+            ],
         },
         {
             icon: BarChart3,
-            title: "Dashboard & Analytics",
-            description: "Comprehensive dashboard with insights into visitor patterns and appointment statistics.",
-            benefits: ["Real-time dashboard", "Visitor analytics", "Appointment tracking", "Activity monitoring"],
+            title: "Advanced Analytics Dashboard",
+            description:
+                "Comprehensive dashboard with real-time insights, visitor patterns, appointment statistics, and detailed reports.",
+            benefits: [
+                "Real-time dashboard",
+                "Visitor pattern analysis",
+                "Appointment statistics",
+                "Custom reports",
+            ],
+        },
+        {
+            icon: Bell,
+            title: "Multi-Channel Notifications",
+            description:
+                "Stay informed with email, in-app, and voice notifications for appointments, visitor arrivals, and system updates.",
+            benefits: [
+                "Email notifications",
+                "In-app alerts",
+                "Voice announcements",
+                "Custom notification rules",
+            ],
+        },
+        {
+            icon: FileSpreadsheet,
+            title: "Reports & Export",
+            description:
+                "Generate detailed reports and export data in multiple formats. Track visitor trends and appointment analytics.",
+            benefits: [
+                "Attendance reports",
+                "Visitor analytics",
+                "CSV/Excel export",
+                "Custom date ranges",
+            ],
         },
         {
             icon: Smartphone,
             title: "Mobile Responsive",
             description:
-                "Access your visitor management system from any device with our fully responsive web application.",
-            benefits: ["Mobile optimized", "Tablet friendly", "Cross-platform access", "Responsive design"],
+                "Access your visitor management system from any device with our fully responsive design optimized for mobile.",
+            benefits: [
+                "Mobile optimized",
+                "Tablet friendly",
+                "Cross-platform access",
+                "Responsive design",
+            ],
         },
     ];
 
@@ -79,12 +180,13 @@ export default function FeaturesPage() {
             icon: Clock,
             title: "Real-time Updates",
             description:
-                "Get instant updates on visitor status, appointment changes, and system notifications via email.",
+                "Get instant updates on visitor status, appointment changes, and system notifications via multiple channels.",
         },
         {
             icon: CheckCircle,
             title: "Easy to Use",
-            description: "Intuitive interface designed for ease of use with minimal training required.",
+            description:
+                "Intuitive interface designed for ease of use with minimal training required. Built for efficiency.",
         },
         {
             icon: Zap,
@@ -95,27 +197,39 @@ export default function FeaturesPage() {
         {
             icon: Lock,
             title: "Secure Data Storage",
-            description: "Your data is protected with secure storage and authentication mechanisms.",
+            description:
+                "Your data is protected with enterprise-grade security, encrypted storage, and secure authentication.",
         },
         {
-            icon: Bell,
-            title: "Email Notifications",
-            description: "Automated email notifications for appointments, visitor arrivals, and system updates.",
+            icon: Users,
+            title: "Team Collaboration",
+            description:
+                "Built-in chat system enables seamless communication between team members for better coordination.",
+        },
+        {
+            icon: BarChart3,
+            title: "Powerful Analytics",
+            description:
+                "Track visitor patterns, appointment trends, and generate insights to improve your operations.",
         },
     ];
 
     return (
         <>
             <PageSEOHead
-                title="Features"
-                description="Discover SafeIn's powerful features for visitor management, appointment scheduling, and security analytics."
+                title="Features - Smart Visitor Management System"
+                description="Discover SafeIn's powerful features: Real-time Chat, Spot Pass, Appointment Links, Smart Notifications, Bulk Import, and Advanced Analytics for complete visitor management."
                 keywords={[
-                    "features",
-                    "capabilities",
                     "visitor management features",
                     "appointment system features",
+                    "real-time chat",
+                    "spot pass",
+                    "appointment links",
+                    "bulk import",
+                    "visitor analytics",
                     "SafeIn features",
                     "security features",
+                    "smart notifications",
                 ]}
                 url="https://safein.aynzo.com/features"
             />
@@ -124,12 +238,16 @@ export default function FeaturesPage() {
                     {/* Hero Section */}
                     <section className="bg-hero-gradient px-4 py-12 sm:px-6 sm:py-16 md:py-20">
                         <div className="container mx-auto text-center">
+                            <Badge className="mb-4 bg-yellow-400 text-gray-900">
+                                6+ New Features Added
+                            </Badge>
                             <h1 className="mb-4 px-2 text-2xl leading-tight font-bold text-white sm:mb-6 sm:px-0 sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
-                                Powerful Features for Modern SafeIn Management
+                                Powerful Features for Modern Visitor Management
                             </h1>
                             <p className="mx-auto mb-6 max-w-3xl px-2 text-base leading-relaxed text-gray-300 sm:mb-8 sm:px-0 sm:text-lg md:text-xl">
-                                Discover how our comprehensive SafeIn management system can transform your business
-                                operations with cutting-edge features designed for efficiency and security.
+                                Transform your business operations with our comprehensive visitor management system.
+                                Real-time chat, smart notifications, bulk operations, and advanced analytics - all in
+                                one platform.
                             </p>
                             <div className="flex flex-col justify-center gap-3 px-4 sm:flex-row sm:gap-4 sm:px-0">
                                 <Button
@@ -155,7 +273,9 @@ export default function FeaturesPage() {
                     <section className="px-4 py-20">
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
-                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">Core Features</h2>
+                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">
+                                    Complete Feature Set
+                                </h2>
                                 <p className="text-accent text-lg">
                                     Everything you need to manage visitors professionally and efficiently
                                 </p>
@@ -163,7 +283,10 @@ export default function FeaturesPage() {
 
                             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                                 {features.map((feature, index) => (
-                                    <Card key={index} className="transition-shadow duration-300 hover:shadow-lg">
+                                    <Card
+                                        key={index}
+                                        className="relative transition-shadow duration-300 hover:shadow-lg"
+                                    >
                                         <CardHeader>
                                             <div className="bg-brand-tint mb-4 flex h-12 w-12 items-center justify-center rounded-lg">
                                                 <feature.icon className="text-brand-strong h-6 w-6" />
@@ -193,14 +316,14 @@ export default function FeaturesPage() {
                     </section>
 
                     {/* Additional Features */}
-                    <section className="bg-white px-4 py-20">
+                    <section className="bg-gray-50 px-4 py-20">
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
                                 <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">
                                     Additional Benefits
                                 </h2>
                                 <p className="text-accent text-lg">
-                                    Extra features that make your SafeIn management even better
+                                    Extra features that make your visitor management even better
                                 </p>
                             </div>
 
@@ -208,7 +331,7 @@ export default function FeaturesPage() {
                                 {additionalFeatures.map((feature, index) => (
                                     <div
                                         key={index}
-                                        className="flex items-start space-x-4 rounded-lg bg-white p-6 shadow-sm"
+                                        className="flex items-start space-x-4 rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
                                     >
                                         <div className="bg-brand-tint flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                                             <feature.icon className="text-brand-strong h-5 w-5" />
@@ -223,14 +346,122 @@ export default function FeaturesPage() {
                         </div>
                     </section>
 
+                    {/* Feature Highlights */}
+                    <section className="px-4 py-20">
+                        <div className="container mx-auto">
+                            <div className="mb-16 text-center">
+                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">
+                                    What Makes Us Different
+                                </h2>
+                            </div>
+
+                            <div className="grid gap-12 lg:grid-cols-2">
+                                <div className="space-y-6">
+                                    <div className="flex items-start gap-4">
+                                        <div className="bg-brand flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-white font-semibold">
+                                            1
+                                        </div>
+                                        <div>
+                                            <h3 className="text-brand mb-2 text-xl font-semibold">
+                                                Real-time Communication
+                                            </h3>
+                                            <p className="text-accent">
+                                                Built-in chat system for instant team collaboration and 24/7 support
+                                                access. Stay connected with your team and get help when you need it.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-4">
+                                        <div className="bg-brand flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-white font-semibold">
+                                            2
+                                        </div>
+                                        <div>
+                                            <h3 className="text-brand mb-2 text-xl font-semibold">
+                                                Flexible Visitor Management
+                                            </h3>
+                                            <p className="text-accent">
+                                                Handle both pre-scheduled appointments and unexpected walk-ins with Spot
+                                                Pass. Share booking links for hassle-free scheduling.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-4">
+                                        <div className="bg-brand flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-white font-semibold">
+                                            3
+                                        </div>
+                                        <div>
+                                            <h3 className="text-brand mb-2 text-xl font-semibold">
+                                                Smart Automation
+                                            </h3>
+                                            <p className="text-accent">
+                                                Bulk import employees and visitors, automated email notifications, voice
+                                                alerts for critical events, and intelligent scheduling.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div className="flex items-start gap-4">
+                                        <div className="bg-brand flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-white font-semibold">
+                                            4
+                                        </div>
+                                        <div>
+                                            <h3 className="text-brand mb-2 text-xl font-semibold">
+                                                Advanced Analytics
+                                            </h3>
+                                            <p className="text-accent">
+                                                Comprehensive dashboards with visitor patterns, appointment trends, and
+                                                detailed reports to optimize your operations.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-4">
+                                        <div className="bg-brand flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-white font-semibold">
+                                            5
+                                        </div>
+                                        <div>
+                                            <h3 className="text-brand mb-2 text-xl font-semibold">
+                                                Multi-Level Notifications
+                                            </h3>
+                                            <p className="text-accent">
+                                                Never miss important updates with email, toast notifications, and voice
+                                                alerts. Customizable notification preferences for each user.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-4">
+                                        <div className="bg-brand flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-white font-semibold">
+                                            6
+                                        </div>
+                                        <div>
+                                            <h3 className="text-brand mb-2 text-xl font-semibold">
+                                                Enterprise Security
+                                            </h3>
+                                            <p className="text-accent">
+                                                Role-based access control, encrypted data storage, comprehensive audit
+                                                logs, and secure authentication mechanisms.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
                     {/* CTA Section */}
-                    <section className="bg-hero-gradient px-4 py-20">
+                    <section className="bg-[#074463] px-4 pt-20 pb-8">
                         <div className="container mx-auto text-center">
                             <h2 className="mb-6 text-3xl font-bold text-white md:text-4xl">
-                                Ready to Transform Your SafeIn Management?
+                                Ready to Transform Your Visitor Management?
                             </h2>
                             <p className="mx-auto mb-8 max-w-2xl text-xl text-gray-300">
-                                Join thousands of businesses that trust our platform for their SafeIn management needs.
+                                Join thousands of businesses that trust our platform for their visitor management
+                                needs. Start your 3-day free trial today!
                             </p>
                             <div className="flex flex-col justify-center gap-4 sm:flex-row">
                                 <Button size="lg" className="bg-brand text-white" asChild>

@@ -321,18 +321,18 @@ export default function SupportWidget() {
                                     <div className="absolute bottom-10 right-10 w-24 h-24 bg-primary-light/10 rounded-full blur-2xl"></div>
                                 </div>
 
-                                <div className="relative">
-                                    <div className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-2xl shadow-primary/30 animate-in zoom-in duration-500" style={{ background: GRADIENT_PRIMARY }}>
-                                        <MessageSquare className="w-10 h-10 text-white" />
-                                    </div>
-
-                                </div>
 
                                 <div className="space-y-3 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-150">
                                     <h4 className="font-bold text-gray-900 dark:text-white text-xl">Welcome! 👋</h4>
                                     <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed">
-                                        Get instant support from our team. Sign in with Google to start chatting.
+                                        This authorization is for security purposes. Sign in with Google to start chatting with our support team.
                                     </p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed pt-2">
+                                        You can also contact our support team by phone:
+                                    </p>
+                                    <a href="tel:+918699966076" className="text-sm font-semibold text-primary hover:text-accent transition-colors">
+                                        +91 86999 66076
+                                    </a>
                                 </div>
 
                                 <Button

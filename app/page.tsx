@@ -30,6 +30,7 @@ import {
     Play,
     ChevronRight,
     BarChart3,
+    Bell,
 } from "lucide-react";
 import Link from "next/link";
 import { PageSEOHead } from "@/components/seo/pageSEOHead";
@@ -63,21 +64,22 @@ export default function HomePage() {
     return (
         <>
             <PageSEOHead
-                title="SafeIn - Professional Visitor Management & Appointment System"
-                description="Transform your visitor management with SafeIn's comprehensive appointment scheduling system. Streamline check-ins, manage visitors, and enhance security with our professional platform. Start your free 3-day trial today!"
+                title="SafeIn - Complete Visitor Management with Chat, Spot Pass & Smart Notifications"
+                description="Transform visitor management with SafeIn's comprehensive platform. Features: Real-time chat, Spot Pass for walk-ins, smart appointment links, bulk import, voice notifications & advanced analytics. Start your free 3-day trial!"
                 keywords={[
                     "visitor management system",
                     "appointment scheduling software",
+                    "real-time chat",
+                    "spot pass system",
                     "visitor check-in system",
-                    "security management platform",
-                    "visitor registration",
-                    "appointment booking",
-                    "visitor tracking",
-                    "business security",
+                    "appointment links",
+                    "bulk import employees",
+                    "smart notifications",
+                    "voice alerts",
                     "visitor analytics",
+                    "security management platform",
                     "SafeIn management",
                     "Aynzo",
-                    "digital solutions",
                 ]}
                 url="https://safein.aynzo.com"
                 structuredData={homeStructuredData}
@@ -101,9 +103,9 @@ export default function HomePage() {
                                     Transform Your Visitor Management with SafeIn
                                 </h1>
                                 <p className="mb-6 px-2 text-base leading-relaxed text-gray-300 sm:mb-8 sm:px-0 sm:text-lg md:text-xl">
-                                    Get your SafeIn management system set up online with our expert assistance. Start
-                                    with our free 3-day trial and experience the power of our comprehensive visitor
-                                    appointment platform.
+                                    Transform your visitor management with smart appointments, real-time chat, spot
+                                    pass for walk-ins, and intelligent notifications. Get your complete visitor
+                                    management system with our free 3-day trial.
                                 </p>
 
                                 {/* 3 Day Trial Badge */}
@@ -173,20 +175,59 @@ export default function HomePage() {
                     </div>
                 </section>
 
+
                 {/* Service Highlights */}
                 <section className="bg-white py-16">
                     <div className="container mx-auto px-4">
-                        <div className="grid gap-8 md:grid-cols-3">
+                        <div className="mb-12 text-center">
+                            <h2 className="text-brand mb-4 text-3xl font-bold md:text-4xl">
+                                Comprehensive Feature Set
+                            </h2>
+                            <p className="text-accent mx-auto max-w-2xl text-lg">
+                                Everything you need for professional visitor management in one powerful platform
+                            </p>
+                        </div>
+                        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                             <Card className="text-center transition-shadow hover:shadow-lg">
                                 <CardHeader>
                                     <div className="bg-brand-tint mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
                                         <Calendar className="text-brand-strong h-8 w-8" />
                                     </div>
-                                    <CardTitle className="text-xl">SafeIn Appointment Booking</CardTitle>
+                                    <CardTitle className="text-xl">Smart Appointment Booking</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <CardDescription className="text-gray-600">
-                                        Streamline visitor appointments with our advanced booking system
+                                        Schedule appointments, create shareable booking links, and manage visitors with
+                                        automated notifications
+                                    </CardDescription>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="text-center transition-shadow hover:shadow-lg">
+                                <CardHeader>
+                                    <div className="bg-brand-tint mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+                                        <UserCheck className="text-brand-strong h-8 w-8" />
+                                    </div>
+                                    <CardTitle className="text-xl">Spot Pass System</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <CardDescription className="text-gray-600">
+                                        Handle walk-in visitors seamlessly with instant registration and quick check-in
+                                        process
+                                    </CardDescription>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="text-center transition-shadow hover:shadow-lg">
+                                <CardHeader>
+                                    <div className="bg-brand-tint mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+                                        <MessageCircle className="text-brand-strong h-8 w-8" />
+                                    </div>
+                                    <CardTitle className="text-xl">Real-time Chat</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <CardDescription className="text-gray-600">
+                                        Instant team communication and 24/7 support chat for seamless collaboration
                                     </CardDescription>
                                 </CardContent>
                             </Card>
@@ -200,7 +241,8 @@ export default function HomePage() {
                                 </CardHeader>
                                 <CardContent>
                                     <CardDescription className="text-gray-600">
-                                        Comprehensive staff directory with role-based access control
+                                        Comprehensive staff directory with bulk import, role-based access, and team
+                                        management
                                     </CardDescription>
                                 </CardContent>
                             </Card>
@@ -210,11 +252,25 @@ export default function HomePage() {
                                     <div className="bg-brand-tint mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
                                         <Shield className="text-brand-strong h-8 w-8" />
                                     </div>
-                                    <CardTitle className="text-xl">Security Analytics</CardTitle>
+                                    <CardTitle className="text-xl">Security & Analytics</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <CardDescription className="text-gray-600">
-                                        Advanced security monitoring and visitor pattern analysis
+                                        Advanced security monitoring, visitor pattern analysis, and comprehensive reports
+                                    </CardDescription>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="text-center transition-shadow hover:shadow-lg">
+                                <CardHeader>
+                                    <div className="bg-brand-tint mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+                                        <Bell className="text-brand-strong h-8 w-8" />
+                                    </div>
+                                    <CardTitle className="text-xl">Smart Notifications</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <CardDescription className="text-gray-600">
+                                        Multi-channel alerts with email, toast notifications, and voice announcements
                                     </CardDescription>
                                 </CardContent>
                             </Card>
@@ -563,7 +619,7 @@ export default function HomePage() {
                 </section>
 
                 {/* Contact Section */}
-                <section className="bg-hero-gradient py-20">
+                <section className="bg-[#074463] pt-20 pb-8">
                     <div className="container mx-auto px-4">
                         <div className="mb-16 text-center">
                             <h2 className="mb-6 text-4xl font-bold text-white md:text-5xl">Get in Touch with Us</h2>
