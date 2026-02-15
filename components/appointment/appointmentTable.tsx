@@ -216,6 +216,13 @@ export function AppointmentTable({
     };
 
     const handleView = (appointment: Appointment) => {
+        // Close all other modals first
+        setShowCheckOutDialog(false);
+        setShowApproveDialog(false);
+        setShowRejectDialog(false);
+        setShowDeleteDialog(false);
+
+        // Then set the appointment and open view dialog
         setSelectedAppointment(appointment);
         setShowViewDialog(true);
     };
@@ -457,6 +464,12 @@ export function AppointmentTable({
                                         {onApprove && (
                                             <DropdownMenuItem
                                                 onClick={() => {
+                                                    // Close all other modals first
+                                                    setShowViewDialog(false);
+                                                    setShowCheckOutDialog(false);
+                                                    setShowRejectDialog(false);
+                                                    setShowDeleteDialog(false);
+
                                                     setSelectedAppointment(appointment);
                                                     setShowApproveDialog(true);
                                                 }}
@@ -468,6 +481,12 @@ export function AppointmentTable({
                                         )}
                                         <DropdownMenuItem
                                             onClick={() => {
+                                                // Close all other modals first
+                                                setShowViewDialog(false);
+                                                setShowCheckOutDialog(false);
+                                                setShowApproveDialog(false);
+                                                setShowDeleteDialog(false);
+
                                                 setSelectedAppointment(appointment);
                                                 setShowRejectDialog(true);
                                             }}
@@ -500,6 +519,12 @@ export function AppointmentTable({
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem
                                             onClick={() => {
+                                                // Close all other modals first
+                                                setShowViewDialog(false);
+                                                setShowApproveDialog(false);
+                                                setShowRejectDialog(false);
+                                                setShowDeleteDialog(false);
+
                                                 setSelectedAppointment(appointment);
                                                 setShowCheckOutDialog(true);
                                             }}
