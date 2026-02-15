@@ -343,6 +343,7 @@ export default function AppointmentLinksPage() {
                 key: "actions",
                 header: "Actions",
                 className: "text-right",
+                sticky: 'right' as const,
                 render: (item: any) => {
                     const isCreator = user?._id && (
                         item.createdBy === user._id ||
@@ -356,6 +357,10 @@ export default function AppointmentLinksPage() {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => {
+                                        // Close other modals
+                                        setDeleteLinkId(null);
+                                        setShowOtpModal(false);
+
                                         setSelectedBookingId(item._id);
                                         setNoteValue(item.notes || "");
                                         setShowEditNoteModal(true);
@@ -371,6 +376,10 @@ export default function AppointmentLinksPage() {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => {
+                                        // Close other modals
+                                        setDeleteLinkId(null);
+                                        setShowEditNoteModal(false);
+
                                         setSelectedBookingId(item._id);
                                         setShowOtpModal(true);
                                     }}
@@ -407,7 +416,13 @@ export default function AppointmentLinksPage() {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setDeleteLinkId(item._id)}
+                                onClick={() => {
+                                    // Close other modals
+                                    setShowOtpModal(false);
+                                    setShowEditNoteModal(false);
+
+                                    setDeleteLinkId(item._id);
+                                }}
                                 className="text-red-600 hover:bg-red-50 hover:text-red-700"
                                 title="Delete"
                             >
@@ -684,25 +699,83 @@ export default function AppointmentLinksPage() {
                             </DialogDescription>
                         </DialogHeader>
                         <div className="py-6">
-                            <InputField
-                                label="OTP Code"
-                                placeholder="0000"
-                                maxLength={4}
-                                value={otpValue}
-                                onChange={(e) => setOtpValue(e.target.value.replace(/\D/g, ''))}
-                                className="text-center text-3xl tracking-[1rem] font-bold h-16 border-2 focus:border-[#3882a5]"
-                                autoFocus
-                            />
+                            <label className="block text-sm font-medium text-gray-700 mb-3">OTP Code</label>
+                            <div className="flex justify-center gap-3">
+                                {[0, 1, 2, 3].map((index) => (
+                                    <input
+                                        key={index}
+                                        id={`otp-${index}`}
+                                        type="text"
+                                        inputMode="numeric"
+                                        maxLength={1}
+                                        value={otpValue[index] || ''}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, '');
+                                            if (value) {
+                                                const newOtp = otpValue.split('');
+                                                newOtp[index] = value;
+                                                const newOtpValue = newOtp.join('');
+                                                setOtpValue(newOtpValue);
+
+                                                // Auto-focus next input
+                                                if (index < 3) {
+                                                    document.getElementById(`otp-${index + 1}`)?.focus();
+                                                }
+
+                                                // Auto-submit when all 4 digits are entered
+                                                if (index === 3 && newOtpValue.length === 4) {
+                                                    handleVerifyOtp();
+                                                }
+                                            }
+                                        }}
+                                        onKeyDown={(e) => {
+                                            // Handle backspace
+                                            if (e.key === 'Backspace' && !otpValue[index] && index > 0) {
+                                                const newOtp = otpValue.split('');
+                                                newOtp[index - 1] = '';
+                                                setOtpValue(newOtp.join(''));
+                                                document.getElementById(`otp-${index - 1}`)?.focus();
+                                            } else if (e.key === 'Backspace' && otpValue[index]) {
+                                                const newOtp = otpValue.split('');
+                                                newOtp[index] = '';
+                                                setOtpValue(newOtp.join(''));
+                                            }
+                                            // Handle arrow keys
+                                            else if (e.key === 'ArrowLeft' && index > 0) {
+                                                document.getElementById(`otp-${index - 1}`)?.focus();
+                                            } else if (e.key === 'ArrowRight' && index < 3) {
+                                                document.getElementById(`otp-${index + 1}`)?.focus();
+                                            }
+                                        }}
+                                        onPaste={(e) => {
+                                            e.preventDefault();
+                                            const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
+                                            setOtpValue(pastedData);
+
+                                            // Focus the last filled box or the first empty one
+                                            const nextIndex = Math.min(pastedData.length, 3);
+                                            document.getElementById(`otp-${nextIndex}`)?.focus();
+
+                                            // Auto-submit if 4 digits pasted
+                                            if (pastedData.length === 4) {
+                                                setTimeout(() => handleVerifyOtp(), 100);
+                                            }
+                                        }}
+                                        className="w-14 h-16 sm:w-16 sm:h-18 text-center text-2xl sm:text-3xl font-bold border-2 rounded-lg focus:border-[#3882a5] focus:ring-2 focus:ring-[#3882a5]/20 outline-none transition-all"
+                                        autoFocus={index === 0}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                        <DialogFooter className="gap-2 sm:gap-0">
-                            <Button variant="outline" onClick={() => setShowOtpModal(false)} className="flex-1">
+                        <DialogFooter className="flex flex-col sm:flex-row gap-3">
+                            <Button variant="outline" onClick={() => setShowOtpModal(false)} className="w-full sm:flex-1">
                                 Cancel
                             </Button>
                             <Button
                                 onClick={handleVerifyOtp}
                                 disabled={otpValue.length !== 4 || isVerifying}
                                 variant="primary"
-                                className="flex-1"
+                                className="w-full sm:flex-1"
                             >
                                 {isVerifying ? <LoadingSpinner size="sm" className="mr-2" /> : "Verify & Schedule"}
                             </Button>
@@ -750,15 +823,15 @@ export default function AppointmentLinksPage() {
                                 className="min-h-[150px] resize-none border-2 focus:border-[#3882a5]"
                             />
                         </div>
-                        <DialogFooter className="gap-2 sm:gap-0">
-                            <Button variant="outline" onClick={() => setShowEditNoteModal(false)} className="flex-1">
+                        <DialogFooter className="flex flex-col sm:flex-row gap-3">
+                            <Button variant="outline" onClick={() => setShowEditNoteModal(false)} className="w-full sm:flex-1">
                                 Cancel
                             </Button>
                             <Button
                                 onClick={handleUpdateNote}
                                 disabled={isUpdatingNote}
                                 variant="primary"
-                                className="flex-1"
+                                className="w-full sm:flex-1"
                             >
                                 {isUpdatingNote ? <LoadingSpinner size="sm" className="mr-2" /> : "Save Note"}
                             </Button>

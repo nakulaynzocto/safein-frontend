@@ -14,6 +14,7 @@ interface Column<T> {
     render?: (item: T) => ReactNode;
     className?: string;
     sortable?: boolean;
+    sticky?: 'left' | 'right';
 }
 
 interface EmptyData {
@@ -176,6 +177,8 @@ export function DataTable<T extends Record<string, any>>({
                                     enableSorting &&
                                     column.sortable &&
                                     "hover:bg-muted/70 cursor-pointer transition-colors",
+                                    column.sticky === 'right' && "md:sticky md:right-0 md:z-10 md:!bg-muted/80 md:shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.1)]",
+                                    column.sticky === 'left' && "md:sticky md:left-0 md:z-10 md:!bg-muted/80 md:shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]",
                                     column.className,
                                 )}
                                 onClick={() => enableSorting && column.sortable && handleSort(column.key as string)}
@@ -190,12 +193,14 @@ export function DataTable<T extends Record<string, any>>({
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                     {sortedData.map((item, rowIndex) => (
-                        <tr key={rowIndex} className="border-border hover:bg-muted/30 border-b transition-colors">
+                        <tr key={rowIndex} className="border-border hover:bg-muted/30 border-b transition-colors group">
                             {columns.map((column, colIndex) => (
                                 <td
                                     key={colIndex}
                                     className={cn(
                                         "text-foreground px-2 py-2 text-xs sm:px-4 sm:py-3 sm:text-sm",
+                                        column.sticky === 'right' && "md:sticky md:right-0 md:z-10 !bg-white md:group-hover:!bg-muted/30 dark:!bg-gray-950 md:shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.1)]",
+                                        column.sticky === 'left' && "md:sticky md:left-0 md:z-10 !bg-white md:group-hover:!bg-muted/30 dark:!bg-gray-950 md:shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]",
                                         column.className,
                                     )}
                                 >

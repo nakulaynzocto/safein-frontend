@@ -223,6 +223,9 @@ export function VisitorList() {
     }, [appointmentCheck]);
 
     const handleDeleteClick = (visitor: Visitor) => {
+        // Close other modals
+        setShowViewDialog(false);
+
         setSelectedVisitor(visitor);
         setShowDeleteDialog(true);
     };
@@ -251,6 +254,9 @@ export function VisitorList() {
     };
 
     const handleViewVisitor = (visitor: Visitor) => {
+        // Close other modals
+        setShowDeleteDialog(false);
+
         setSelectedVisitor(visitor);
         setShowViewDialog(true);
     };

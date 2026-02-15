@@ -103,11 +103,19 @@ export function EmployeeTable({
     };
 
     const handleView = (employee: Employee) => {
+        // Close other modals
+        setShowDeleteDialog(false);
+        setShowVerifyDialog(false);
+
         setSelectedEmployee(employee);
         setShowViewDialog(true);
     };
 
     const handleVerify = (employee: Employee) => {
+        // Close other modals
+        setShowDeleteDialog(false);
+        setShowViewDialog(false);
+
         setSelectedEmployee(employee);
         setShowVerifyDialog(true);
     };
@@ -235,6 +243,10 @@ export function EmployeeTable({
                                     <DropdownMenuItem
                                         onClick={() => {
                                             if ((employee as any).canDelete !== false) {
+                                                // Close other modals
+                                                setShowViewDialog(false);
+                                                setShowVerifyDialog(false);
+
                                                 setSelectedEmployee(employee);
                                                 setShowDeleteDialog(true);
                                             }
