@@ -2,10 +2,9 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { routes } from "@/utils/routes";
-import { Search, Book, MessageCircle, Phone, ArrowRight, Tag, Clock } from "lucide-react";
+import { Book, MessageCircle, Phone, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
 import { PublicLayout } from "@/components/layout/publicLayout";
 import { PageSEOHead } from "@/components/seo/pageSEOHead";
@@ -77,16 +76,7 @@ export default function HelpPage() {
                                 chat.
                             </p>
 
-                            {/* Search Bar */}
-                            <div className="mx-auto max-w-2xl px-4 sm:px-0">
-                                <div className="relative">
-                                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400 sm:left-4 sm:h-5 sm:w-5" />
-                                    <Input
-                                        placeholder="Search for help articles..."
-                                        className="border-white/20 bg-white/10 py-2.5 pr-4 pl-10 text-sm text-white placeholder:text-gray-300 sm:py-3 sm:pl-12 sm:text-base md:text-lg"
-                                    />
-                                </div>
-                            </div>
+                            {/* Search Bar Removed */}
                         </div>
                     </section>
 
@@ -217,9 +207,9 @@ export default function HelpPage() {
                                                 </h3>
                                             </Link>
                                             <Button
-                                                variant="ghost"
+                                                variant="link"
                                                 size="sm"
-                                                className="text-brand-strong hover:text-brand mt-auto h-auto justify-start p-0 font-medium hover:bg-transparent"
+                                                className="text-brand-strong hover:text-[#074463] hover:no-underline mt-auto h-auto justify-start p-0 font-medium hover:bg-transparent"
                                                 asChild
                                             >
                                                 <Link href={`/help/${article.slug}`}>

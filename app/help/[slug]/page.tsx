@@ -7,7 +7,7 @@ import { Footer } from "@/components/layout/footer";
 import { PageSEOHead } from "@/components/seo/pageSEOHead";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Clock, Tag } from "lucide-react";
+import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
@@ -40,7 +40,7 @@ export default function HelpArticlePage({ params }: PageProps) {
         return null; // or a loading spinner
     }
 
-    const CategoryIcon = categoryData ? categoryData.icon : Tag;
+    // const CategoryIcon = categoryData ? categoryData.icon : Tag; // Unused
 
     return (
         <>
@@ -54,7 +54,7 @@ export default function HelpArticlePage({ params }: PageProps) {
                 <Navbar forcePublic showUpgradeButton={false} />
                 <main className="flex-1">
                     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 py-8 sm:py-12">
-                        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                        <div className="mx-auto container px-4 sm:px-6 lg:px-8">
                             {/* Back Navigation */}
                             <div className="mb-6">
                                 <Button
@@ -71,17 +71,14 @@ export default function HelpArticlePage({ params }: PageProps) {
 
                             {/* Updated Header Style (Matches Privacy Policy) */}
                             <div className="mb-8">
-                                <div className="mb-4 flex items-start gap-3 sm:items-center">
-                                    <div className="shrink-0 rounded-lg bg-blue-50 p-2">
-                                        <CategoryIcon className="h-6 w-6 text-[#3882a5] sm:h-8 sm:w-8" />
-                                    </div>
-                                    <h1 className="text-2xl leading-tight font-bold text-gray-900 sm:text-3xl md:text-4xl">
+                                <div className="mb-4">
+                                    <h1 className="text-3xl leading-tight font-bold text-gray-900 sm:text-4xl md:text-5xl">
                                         {article.title}
                                     </h1>
                                 </div>
 
                                 {/* Metadata */}
-                                <div className="ml-1 flex flex-wrap items-center gap-4 text-sm text-gray-500 sm:ml-14">
+                                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                                     <span className="flex items-center">
                                         <Clock className="mr-1.5 h-4 w-4" />
                                         {article.readTime}
