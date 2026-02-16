@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { initializeAuth, logout } from "@/store/slices/authSlice";
-import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionApi";
+import { useGetUserActiveSubscriptionQuery, useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi";
 import { routes, isPrivateRoute, isPublicRoute, isGuestOnlyRoute, isPublicActionRoute } from "@/utils/routes";
 
 export function useAuthSubscription() {
@@ -180,6 +180,13 @@ export function useAuthSubscription() {
 
     // Note: Free trial is auto-assigned during registration, so all new users will have a subscription
 
+    // Fetch trial limits (permissions & modules)
+    const { data: trialLimitsData } = useGetTrialLimitsStatusQuery(undefined, {
+        skip: !isAuthenticated || !user?.id,
+    });
+
+    const subscriptionLimits = useMemo(() => trialLimitsData?.data, [trialLimitsData]);
+
     return {
         // Auth state
         isAuthenticated,
@@ -196,6 +203,7 @@ export function useAuthSubscription() {
         activeSubscriptionData: subscription,
         isTrialingSubscription,
         expiryWarning,
+        subscriptionLimits, // Export limits and modules
 
         // Route state
         pathname,

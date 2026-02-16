@@ -6,6 +6,8 @@ import { ChatWindow } from "@/components/chat/chatWindow";
 import { GroupSettingsModal } from "@/components/chat/groupSettingsModal";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { useChat } from "@/hooks/useChat";
+import { MessageSquare, ShieldAlert } from "lucide-react";
+import { ModuleAccessDenied } from "@/components/common/moduleAccessDenied";
 import { cn } from "@/lib/utils";
 import {
     getCurrentUserId,
@@ -19,12 +21,19 @@ import {
 } from "@/lib/chat-utils";
 
 export default function MessagesPage() {
-    const { user } = useAuthSubscription();
+    const { user, subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
+
+    // Check module access
+    // If limits are loaded, check boolean. If loading, wait.
+    const canAccessMessages = subscriptionLimits?.modules?.message;
+
     // Broad Admin Check
     const isAdmin =
         user?.role === "admin" ||
         user?.role === "super_admin" ||
         (Array.isArray(user?.roles) && (user?.roles.includes("admin") || user?.roles.includes("super_admin")));
+
+
 
     const {
         chats,
@@ -256,6 +265,24 @@ export default function MessagesPage() {
             };
         }
     }, []);
+
+    if (isAuthLoading) {
+        return (
+            <div className="h-full w-full flex items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+        );
+    }
+
+    if (canAccessMessages === false) {
+        return (
+            <ModuleAccessDenied
+                title="Messaging Not Available"
+                description="Your current subscription plan does not include the Messaging module. Please upgrade your plan to access this feature."
+                containerHeight="h-[60vh]"
+            />
+        );
+    }
 
     return (
         <div className="h-[calc(100vh-180px)] md:h-[calc(100vh-230px)] w-full relative flex flex-col">

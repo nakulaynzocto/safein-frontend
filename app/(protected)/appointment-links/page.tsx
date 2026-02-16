@@ -20,23 +20,53 @@ import { useGetAllAppointmentLinksQuery, useDeleteAppointmentLinkMutation, useRe
 import { useGetAllSpecialBookingsQuery, useVerifySpecialBookingOtpMutation, useUpdateSpecialBookingNoteMutation, useResendOtpMutation } from "@/store/api/specialBookingApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { formatDate, formatDateTime, isEmployee as checkIsEmployee } from "@/utils/helpers";
-import { Link2, RefreshCw, User, Trash2, CheckCircle, XCircle, Copy, Mail, Phone, Calendar, Maximize2, Plus, MessageSquare, Key, Send } from "lucide-react";
+import {
+    Plus,
+    LayoutGrid,
+    List,
+    Trash2,
+    Search,
+    Filter,
+    RefreshCw,
+    MoreVertical,
+    Copy,
+    QrCode,
+    Mail,
+    Link as LinkIcon,
+    Download,
+    Check,
+    AlertCircle,
+    ShieldAlert,
+    Link2,
+    User,
+    CheckCircle,
+    XCircle,
+    Phone,
+    Calendar,
+    Maximize2,
+    MessageSquare,
+    Key,
+    Send
+} from "lucide-react";
 import { AppointmentLink } from "@/store/api/appointmentLinkApi";
 import { getInitials, formatName } from "@/utils/helpers";
 import { AppointmentLinkSelectionModal } from "@/components/appointment/AppointmentLinkSelectionModal";
 import { useCooldown } from "@/hooks/useCooldown";
 import { CreateAppointmentLinkModal } from "@/components/appointment/CreateAppointmentLinkModal";
 import { QuickAppointmentModal } from "@/components/appointment/QuickAppointmentModal";
+import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { StatusBadge } from "@/components/common/statusBadge";
 import { ActionButton } from "@/components/common/actionButton";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { ModuleAccessDenied } from "@/components/common/moduleAccessDenied";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 
 export default function AppointmentLinksPage() {
     // ALL HOOKS MUST BE CALLED AT TOP LEVEL - BEFORE ANY CONDITIONAL RETURNS
     const router = useRouter();
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+    const { user: authUser, isAuthenticated, subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
+    const user = authUser; // Maintain compatibility with existing code
     const [isChecking, setIsChecking] = useState(true);
     const isEmployee = checkIsEmployee(user);
 
@@ -464,8 +494,19 @@ export default function AppointmentLinksPage() {
         );
     }
 
-    if (isLoading) {
+    if (isLoading || isAuthLoading) {
         return <PageSkeleton />;
+    }
+
+    const canAccessAppointmentLinks = subscriptionLimits?.modules?.visitorInvite;
+
+    if (canAccessAppointmentLinks === false) {
+        return (
+            <ModuleAccessDenied
+                title="Visitor Invites Not Available"
+                description="Your current subscription plan does not include the Visitor Invite module. Please upgrade your plan to access this feature."
+            />
+        );
     }
 
     return (

@@ -7,14 +7,15 @@ import { PendingApprovals } from "@/components/employee-dashboard/PendingApprova
 import { useGetAppointmentsQuery } from "@/store/api/appointmentApi";
 import { routes } from "@/utils/routes";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
-import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { Card, CardContent } from "@/components/ui/card";
+import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/common/pageHeader";
+import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 
 export default function AppointmentRequestsPage() {
     const router = useRouter();
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+    const { user, isAuthenticated, subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
     const [isChecking, setIsChecking] = useState(true);
 
     // Check if user is employee
@@ -45,7 +46,7 @@ export default function AppointmentRequestsPage() {
         }
     }, [user, isAuthenticated, router, isEmployee]);
 
-    if (!isAuthenticated || isChecking || !user) {
+    if (!isAuthenticated || isChecking || !user || isAuthLoading) {
         return (
             <div className="flex min-h-[60vh] items-center justify-center">
                 <LoadingSpinner />

@@ -33,6 +33,11 @@ export interface TrialLimitsStatus {
         employees: { limit: number; current: number; reached: boolean; canCreate: boolean };
         visitors: { limit: number; current: number; reached: boolean; canCreate: boolean };
         appointments: { limit: number; current: number; reached: boolean; canCreate: boolean };
+        spotPasses: { limit: number; current: number; reached: boolean; canCreate: boolean };
+    };
+    modules: {
+        visitorInvite: boolean;
+        message: boolean;
     };
 }
 

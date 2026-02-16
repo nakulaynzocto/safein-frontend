@@ -3,34 +3,32 @@
 import { useEffect } from "react";
 import { NewAppointmentModal } from "@/components/appointment/AppointmentForm";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/store/hooks";
+import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { routes } from "@/utils/routes";
-import { LoadingSpinner } from "@/components/common/loadingSpinner";
+import { ArrowLeft } from "lucide-react";
 
 // Page: appoitment create (non-modal page version)
 export default function AppoitmentCreate() {
     const router = useRouter();
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+    const { user, isAuthenticated, subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
     const isEmployee = checkIsEmployee(user);
 
+    // Initial Auth Check
     useEffect(() => {
-        if (!isAuthenticated) {
+        if (!isAuthLoading && !isAuthenticated) {
             router.replace(routes.publicroute.LOGIN);
-            return;
         }
+    }, [isAuthLoading, isAuthenticated, router]);
 
-        if (isEmployee) {
-            router.replace(routes.privateroute.DASHBOARD);
-            return;
-        }
-    }, [isEmployee, isAuthenticated, router]);
+    // Check module access
+    // Remove if not needed here anymore based on latest instructions
 
-    if (!isAuthenticated || isEmployee) {
+    if (isAuthLoading || !isAuthenticated) {
         return (
-            <div className="flex min-h-[60vh] items-center justify-center">
+            <div className="flex h-screen w-full items-center justify-center">
                 <LoadingSpinner />
             </div>
         );

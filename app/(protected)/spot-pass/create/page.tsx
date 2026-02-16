@@ -4,11 +4,23 @@ import { Suspense } from "react";
 import { SpotPassCreateForm } from "@/components/spot-pass/SpotPassCreateForm";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 
 export default function CreateSpotPassPage() {
     const router = useRouter();
+    const { subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
+
+    // Limit check removed as per request
+
+    if (isAuthLoading) {
+        return (
+            <div className="container mx-auto max-w-full py-3 sm:py-4">
+                <PageSkeleton />
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto max-w-full py-3 sm:py-4">
