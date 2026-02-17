@@ -30,7 +30,10 @@ import { Calendar, Car, Info } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { FormContainer } from "@/components/common/formContainer";
 import { ApprovalLinkModal } from "./ApprovalLinkModal";
-import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
+
+
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useDebounce } from "@/hooks/useDebounce";
 import { appointmentSchema, type AppointmentFormData } from "./helpers/appointmentValidation";
@@ -64,12 +67,21 @@ export function NewAppointmentModal({
 }: NewAppointmentModalProps) {
     const router = useRouter();
 
+    const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal,
+        showAddonModal,
+        openAddonModal,
+        closeAddonModal
+    } = useSubscriptionActions();
     const [internalOpen, setInternalOpen] = useState(false);
     const isPage = layout === "page";
     const [generalError, setGeneralError] = useState<string | null>(null);
     const [approvalLink, setApprovalLink] = useState<string | null>(null);
     const [showApprovalLinkModal, setShowApprovalLinkModal] = useState(false);
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
     const [employeeSearchInput, setEmployeeSearchInput] = useState("");
     const [visitorSearchInput, setVisitorSearchInput] = useState("");
     const [showVehicleFields, setShowVehicleFields] = useState<boolean>(false);
@@ -84,7 +96,7 @@ export function NewAppointmentModal({
 
     const [createAppointment, { isLoading: isCreating }] = useCreateAppointmentMutation();
     const [updateAppointment, { isLoading: isUpdating }] = useUpdateAppointmentMutation();
-    const { hasReachedAppointmentLimit } = useSubscriptionStatus();
+
     const isLoading = isCreating || isUpdating;
     const {
         data: employeesData,
@@ -217,10 +229,7 @@ export function NewAppointmentModal({
     const onSubmit = async (data: AppointmentFormData) => {
         if (isLoading) return;
 
-        if (!isEditMode && hasReachedAppointmentLimit) {
-            setShowUpgradeModal(true);
-            return;
-        }
+
 
         setGeneralError(null);
 
@@ -523,27 +532,44 @@ export function NewAppointmentModal({
                 >
                     Cancel
                 </ActionButton>
-                <ActionButton
-                    type="submit"
-                    variant="outline-primary"
-                    disabled={isLoading || isFileUploading}
-                    size="xl"
-                    className="w-full min-w-[180px] px-6 sm:w-auto"
+                <SubscriptionActionButtons
+                    isExpired={isExpired}
+                    hasReachedLimit={hasReachedAppointmentLimit && !isEditMode}
+                    limitType="appointment"
+                    showUpgradeModal={showUpgradeModal}
+                    openUpgradeModal={openUpgradeModal}
+                    closeUpgradeModal={closeUpgradeModal}
+                    showAddonModal={showAddonModal}
+                    openAddonModal={openAddonModal}
+                    closeAddonModal={closeAddonModal}
+                    upgradeLabel="Upgrade Plan"
+                    buyExtraLabel="Buy Extra Appointments"
+                    className="w-full min-w-[180px] px-6 sm:w-auto text-white"
                 >
-                    {isLoading ? (
-                        <>
-                            <LoadingSpinner size="sm" className="mr-2" />
-                            <span>{isEditMode ? "Updating..." : "Scheduling..."}</span>
-                        </>
-                    ) : (
-                        <>
-                            <Calendar className="mr-2 h-4 w-4" />
-                            <span>{isEditMode ? "Update" : "Schedule"} Appointment</span>
-                        </>
-                    )}
-                </ActionButton>
+                    <ActionButton
+                        type="submit"
+                        variant="outline-primary"
+                        disabled={isLoading || isFileUploading}
+                        size="xl"
+                        className="w-full min-w-[180px] px-6 sm:w-auto"
+                    >
+                        {isLoading ? (
+                            <>
+                                <LoadingSpinner size="sm" className="mr-2" />
+                                <span>{isEditMode ? "Updating..." : "Scheduling..."}</span>
+                            </>
+                        ) : (
+                            <>
+                                <Calendar className="mr-2 h-4 w-4" />
+                                <span>{isEditMode ? "Update" : "Schedule"} Appointment</span>
+                            </>
+                        )}
+                    </ActionButton>
+                </SubscriptionActionButtons>
             </div>
-        </form>
+
+
+        </form >
     );
 
     const renderedForm = isPage ? (
@@ -592,7 +618,7 @@ export function NewAppointmentModal({
                 />
             )}
 
-            <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+
         </>
     );
 }

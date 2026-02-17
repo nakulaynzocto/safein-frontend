@@ -59,7 +59,7 @@ export const appointmentLinkApi = baseApi.injectEndpoints({
                 method: "POST",
                 body: data,
             }),
-            invalidatesTags: [{ type: "AppointmentLink", id: "LIST" }],
+            invalidatesTags: [{ type: "AppointmentLink", id: "LIST" }, { type: "Subscription" }],
         }),
 
         getAllAppointmentLinks: builder.query<
@@ -107,7 +107,7 @@ export const appointmentLinkApi = baseApi.injectEndpoints({
                 url: `/appointment-links/${id}`,
                 method: "DELETE",
             }),
-            invalidatesTags: [{ type: "AppointmentLink", id: "LIST" }],
+            invalidatesTags: [{ type: "AppointmentLink", id: "LIST" }, { type: "Subscription" }],
         }),
         resendAppointmentLink: builder.mutation<any, string>({
             query: (id) => ({

@@ -26,7 +26,10 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { isValidEmail, isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { Link2, Mail, User } from "lucide-react";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { UpgradePlanModal } from "../common/upgradePlanModal";
+import { AddonPurchaseModal } from "../common/AddonPurchaseModal";
 import { ActionButton } from "@/components/common/actionButton";
 import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
 
@@ -100,10 +103,17 @@ export function CreateAppointmentLinkModal({
     const [internalOpen, setInternalOpen] = useState(false);
     const [generalError, setGeneralError] = useState<string | null>(null);
     const [visitorExists, setVisitorExists] = useState<boolean | null>(null);
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal,
+        showAddonModal,
+        openAddonModal,
+        closeAddonModal
+    } = useSubscriptionActions();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const { hasReachedAppointmentLimit } = useSubscriptionStatus();
+    const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
     const { user } = useAppSelector((state) => state.auth);
 
     const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -200,8 +210,12 @@ export function CreateAppointmentLinkModal({
                 return;
             }
 
-            if (hasReachedAppointmentLimit) {
-                setShowUpgradeModal(true);
+            if (hasReachedAppointmentLimit || isExpired) {
+                if (isExpired) {
+                    openUpgradeModal();
+                } else {
+                    openAddonModal();
+                }
                 return;
             }
 
@@ -521,32 +535,61 @@ export function CreateAppointmentLinkModal({
                         >
                             Cancel
                         </ActionButton>
-                        <ActionButton
-                            type="submit"
-                            variant="primary"
-                            disabled={isSubmitting || isCreating || !!(isEmployee && !currentEmployeeId)}
-                            size="xl"
-                            className="px-6"
+
+                        <SubscriptionActionButtons
+                            isExpired={isExpired}
+                            hasReachedLimit={hasReachedAppointmentLimit}
+                            limitType="appointment"
+                            showUpgradeModal={showUpgradeModal}
+                            openUpgradeModal={openUpgradeModal}
+                            closeUpgradeModal={closeUpgradeModal}
+                            showAddonModal={showAddonModal}
+                            openAddonModal={openAddonModal}
+                            closeAddonModal={closeAddonModal}
+                            upgradeLabel="Upgrade Plan"
+                            buyExtraLabel="Buy Extra Invites"
+                            className="px-6 text-white min-w-[180px]"
                         >
-                            {isSubmitting || isCreating ? (
-                                <>
-                                    <LoadingSpinner size="sm" className="mr-2" />
-                                    Creating...
-                                </>
-                            ) : isEmployee && !currentEmployeeId ? (
-                                <>
-                                    <LoadingSpinner size="sm" className="mr-2" />
-                                    Loading...
-                                </>
-                            ) : (
-                                "Create Link"
-                            )}
-                        </ActionButton>
+                            <ActionButton
+                                type="submit"
+                                variant="primary"
+                                disabled={isSubmitting || isCreating || !!(isEmployee && !currentEmployeeId)}
+                                size="xl"
+                                className="px-6 min-w-[180px]"
+                            >
+                                {isSubmitting || isCreating ? (
+                                    <>
+                                        <LoadingSpinner size="sm" className="mr-2" />
+                                        Creating...
+                                    </>
+                                ) : isEmployee && !currentEmployeeId ? (
+                                    <>
+                                        <LoadingSpinner size="sm" className="mr-2" />
+                                        Loading...
+                                    </>
+                                ) : (
+                                    "Create Link"
+                                )}
+                            </ActionButton>
+                        </SubscriptionActionButtons>
                     </DialogFooter>
                 </form>
-            </DialogContent>
 
-            <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+                {/* Modals for when they are NOT rendered by SubscriptionActionButtons (i.e. limit not reached, but programmatic open needed) */}
+                {!(hasReachedAppointmentLimit || isExpired) && (
+                    <>
+                        <UpgradePlanModal
+                            isOpen={showUpgradeModal}
+                            onClose={closeUpgradeModal}
+                        />
+                        <AddonPurchaseModal
+                            isOpen={showAddonModal}
+                            onClose={closeAddonModal}
+                            type="appointment"
+                        />
+                    </>
+                )}
+            </DialogContent>
         </Dialog>
     );
 }

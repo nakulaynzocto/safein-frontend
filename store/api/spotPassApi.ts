@@ -68,7 +68,7 @@ export const spotPassApi = baseApi.injectEndpoints({
                 }
                 return response;
             },
-            invalidatesTags: [{ type: "SpotPass" as const, id: "LIST" }],
+            invalidatesTags: [{ type: "SpotPass" as const, id: "LIST" }, { type: "Subscription" }],
         }),
 
         getSpotPasses: builder.query<SpotPassListResponse, GetSpotPassesQuery | void>({
@@ -116,6 +116,7 @@ export const spotPassApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, id) => [
                 { type: "SpotPass" as const, id },
                 { type: "SpotPass" as const, id: "LIST" },
+                { type: "Subscription" },
             ],
         }),
     }),

@@ -14,6 +14,7 @@ import { DashboardCharts } from "./dashboardCharts";
 import { calculateAppointmentStats } from "./dashboardUtils";
 import { DashboardSkeleton } from "@/components/common/tableSkeleton";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { AddonPurchaseModal } from "@/components/common/AddonPurchaseModal";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { routes } from "@/utils/routes";
 import { getChartDateRange, getTimezoneOffset } from "@/utils/dateUtils";
@@ -25,6 +26,7 @@ import { getErrorMessage } from "@/utils/errorUtils";
 export function UnifiedDashboard() {
     const router = useRouter();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [showAddonModal, setShowAddonModal] = useState(false);
     const [retryCount, setRetryCount] = useState(0);
     const [loadingTimeout, setLoadingTimeout] = useState(false);
 
@@ -85,7 +87,7 @@ export function UnifiedDashboard() {
         refetchOnFocus: false,
     });
 
-    const { hasReachedAppointmentLimit, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
+    const { hasReachedAppointmentLimit, isExpired, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
     const { user } = useAppSelector((state) => state.auth);
 
     const isLoading = appointmentsLoading || employeesLoading || visitorsLoading || statsLoading;
@@ -138,14 +140,14 @@ export function UnifiedDashboard() {
     const handleScheduleAppointment = useCallback(() => {
         if (isEmployee) {
             router.push(routes.privateroute.APPOINTMENT_LINKS);
+        } else if (isExpired) {
+            setShowUpgradeModal(true);
+        } else if (hasReachedAppointmentLimit) {
+            setShowAddonModal(true);
         } else {
-            if (hasReachedAppointmentLimit) {
-                setShowUpgradeModal(true);
-            } else {
-                router.push(routes.privateroute.APPOINTMENTCREATE);
-            }
+            router.push(routes.privateroute.APPOINTMENTCREATE);
         }
-    }, [isEmployee, hasReachedAppointmentLimit, router]);
+    }, [isEmployee, isExpired, hasReachedAppointmentLimit, router]);
 
     const hasError = useMemo(
         () => appointmentsError || employeesError || visitorsError,
@@ -211,7 +213,7 @@ export function UnifiedDashboard() {
                     description: "No recent appointment activities found.",
                     primaryActionLabel: isEmployee
                         ? "Visitor Invites"
-                        : (hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment"),
+                        : (isExpired ? "Upgrade Plan" : (hasReachedAppointmentLimit ? "Buy Extra Invites" : "Schedule Appointment")),
                 }}
                 onPrimaryAction={handleScheduleAppointment}
             />
@@ -219,6 +221,11 @@ export function UnifiedDashboard() {
             <QuickActions />
 
             <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+            <AddonPurchaseModal
+                isOpen={showAddonModal}
+                onClose={() => setShowAddonModal(false)}
+                type="appointment"
+            />
         </div>
     );
 }

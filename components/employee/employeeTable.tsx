@@ -23,9 +23,12 @@ import {
 } from "@/components/ui/dropdownMenu";
 import { routes } from "@/utils/routes";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { AddonPurchaseModal } from "@/components/common/AddonPurchaseModal";
 import { formatName, getInitials } from "@/utils/helpers";
 import { EmployeeVerificationModal } from "./EmployeeVerificationModal";
 import { ShieldCheck } from "lucide-react";
+import { useAppSelector } from "@/store/hooks";
+import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 
 import { useUpdateEmployeeMutation } from "@/store/api/employeeApi";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
@@ -54,6 +57,7 @@ export interface EmployeeTableProps {
     title?: string;
     description?: string;
     hasReachedLimit?: boolean;
+    isExpired?: boolean;
     headerActions?: React.ReactNode;
 }
 
@@ -74,6 +78,7 @@ export function EmployeeTable({
     showHeader = true,
     title,
     hasReachedLimit = false,
+    isExpired = false,
     headerActions,
 }: EmployeeTableProps) {
     const router = useRouter();
@@ -83,6 +88,11 @@ export function EmployeeTable({
     const [showVerifyDialog, setShowVerifyDialog] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [showAddonModal, setShowAddonModal] = useState(false);
+    const [limitErrorMessage, setLimitErrorMessage] = useState("");
+
+    const { user } = useAppSelector((state) => state.auth);
+    const isEmployee = checkIsEmployee(user);
 
     const [updateEmployee] = useUpdateEmployeeMutation();
 
@@ -90,8 +100,18 @@ export function EmployeeTable({
         try {
             await updateEmployee({ id: employee._id, status: newStatus as any }).unwrap();
             showSuccessToast(`Employee status updated to ${newStatus}`);
-        } catch (err: any) {
-            showErrorToast(err?.data?.message || "Failed to update status");
+        } catch (error: any) {
+            console.error("Failed to update status:", error);
+            if (error?.status === 403 && error?.data?.message?.includes('limit')) {
+                setLimitErrorMessage(error?.data?.message || "Limit reached. Please upgrade your plan.");
+                if (isExpired) {
+                    setShowUpgradeModal(true);
+                } else {
+                    setShowAddonModal(true);
+                }
+            } else {
+                showErrorToast(error?.data?.message || "Failed to update status");
+            }
         }
     };
 
@@ -306,12 +326,17 @@ export function EmployeeTable({
                         emptyData={{
                             title: "No employees yet",
                             description: "Add your first employee to get started.",
-                            primaryActionLabel: hasReachedLimit ? "Upgrade Plan" : "Add Employee",
+                            primaryActionLabel: isEmployee
+                                ? undefined
+                                : (isExpired ? "Upgrade Plan" : (hasReachedLimit ? "Buy Extra Slots" : "Add Employee")),
                             icon: User
                         }}
                         onPrimaryAction={() => {
-                            if (hasReachedLimit) {
+                            if (isEmployee) return;
+                            if (isExpired) {
                                 setShowUpgradeModal(true);
+                            } else if (hasReachedLimit) {
+                                setShowAddonModal(true);
                             } else {
                                 router.push(routes.privateroute.EMPLOYEECREATE);
                             }
@@ -319,6 +344,17 @@ export function EmployeeTable({
                     />
                 </div>
             </div>
+
+            <UpgradePlanModal
+                isOpen={showUpgradeModal}
+                onClose={() => setShowUpgradeModal(false)}
+            />
+            <AddonPurchaseModal
+                isOpen={showAddonModal}
+                onClose={() => { setShowAddonModal(false); setLimitErrorMessage(""); }}
+                addonType="employee"
+                message={limitErrorMessage}
+            />
 
             {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (

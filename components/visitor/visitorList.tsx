@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { routes } from "@/utils/routes";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/common/searchInput";
 import { DataTable } from "@/components/common/dataTable";
@@ -20,7 +20,6 @@ import {
     Mail,
     MapPin,
     Calendar,
-    User,
     MoreVertical,
     RefreshCw,
     Maximize2,
@@ -41,10 +40,13 @@ import {
 } from "@/components/ui/dropdownMenu";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useRouter } from "next/navigation";
-import { NewVisitorModal } from "./VisitorForm";
+
 import { formatDate, formatName, getInitials } from "@/utils/helpers";
-import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useAppSelector } from "@/store/hooks";
+import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { VisitorDetailsDialog } from "./visitorDetailsDialog";
 
 // Helper function to truncate text
@@ -191,8 +193,18 @@ export function VisitorList() {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showViewDialog, setShowViewDialog] = useState(false);
     const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null);
-    const { hasReachedVisitorLimit, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const { hasReachedVisitorLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal,
+        showAddonModal,
+        openAddonModal,
+        closeAddonModal
+    } = useSubscriptionActions();
+
+    const { user } = useAppSelector((state) => state.auth);
+    const isEmployee = checkIsEmployee(user);
 
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
@@ -239,7 +251,6 @@ export function VisitorList() {
             setShowDeleteDialog(false);
             setSelectedVisitor(null);
             refetch();
-            refetchSubscriptionStatus();
         } catch (error: any) {
             showErrorToast(error?.data?.message || "Failed to delete visitor");
         }
@@ -264,10 +275,15 @@ export function VisitorList() {
     const visitors = visitorsData?.visitors || [];
     const pagination = visitorsData?.pagination;
     const columns = createColumns(handleDeleteClick, handleEditVisitor, handleViewVisitor);
-    const emptyPrimaryLabel = hasReachedVisitorLimit ? "Upgrade Plan" : "Register Visitor";
+    const emptyPrimaryLabel = isEmployee
+        ? "Register Visitor"
+        : (isExpired ? "Upgrade Plan" : (hasReachedVisitorLimit ? "Buy Extra Invites" : "Register Visitor"));
+
     const handlePrimaryAction = () => {
-        if (hasReachedVisitorLimit) {
-            setShowUpgradeModal(true);
+        if (!isEmployee && isExpired) {
+            openUpgradeModal();
+        } else if (!isEmployee && hasReachedVisitorLimit) {
+            openAddonModal();
         } else {
             router.push(routes.privateroute.VISITORREGISTRATION);
         }
@@ -309,22 +325,22 @@ export function VisitorList() {
                         className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none"
                     />
                     <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
-                        {hasReachedVisitorLimit ? (
-                            <>
-                                <Button
-                                    variant="outline-primary"
-                                    className="flex h-12 shrink-0 items-center gap-1 rounded-xl px-4 text-[10px] bg-muted/30 whitespace-nowrap sm:gap-2 sm:text-sm"
-                                    onClick={() => setShowUpgradeModal(true)}
-                                >
-                                    <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                    <span className="hidden sm:inline">Upgrade to Add More</span>
-                                </Button>
-                                <UpgradePlanModal
-                                    isOpen={showUpgradeModal}
-                                    onClose={() => setShowUpgradeModal(false)}
-                                />
-                            </>
-                        ) : (
+                        <SubscriptionActionButtons
+                            isExpired={isExpired}
+                            hasReachedLimit={hasReachedVisitorLimit}
+                            limitType="appointment"
+                            showUpgradeModal={showUpgradeModal}
+                            openUpgradeModal={openUpgradeModal}
+                            closeUpgradeModal={closeUpgradeModal}
+                            showAddonModal={showAddonModal}
+                            openAddonModal={openAddonModal}
+                            closeAddonModal={closeAddonModal}
+                            upgradeLabel="Upgrade Plan"
+                            buyExtraLabel="Buy Extra Invites"
+                            icon={Plus}
+                            isEmployee={isEmployee}
+                            className="rounded-xl px-6 min-w-[150px] text-[10px] sm:text-sm h-12"
+                        >
                             <Button
                                 variant="outline-primary"
                                 className="flex h-12 shrink-0 items-center gap-1 rounded-xl px-4 text-[10px] bg-muted/30 whitespace-nowrap sm:gap-2 sm:text-sm"
@@ -333,7 +349,7 @@ export function VisitorList() {
                                 <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
                                 <span className="hidden sm:inline">Add Visitor</span>
                             </Button>
-                        )}
+                        </SubscriptionActionButtons>
                     </div>
                 </div>
                 <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">

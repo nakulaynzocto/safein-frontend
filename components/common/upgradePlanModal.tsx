@@ -10,6 +10,7 @@ import { useCreateCheckoutSessionMutation, useVerifyRazorpayPaymentMutation } fr
 import { toast } from "sonner";
 import { formatCurrency, isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { useAppSelector } from "@/store/hooks";
+import { ShieldAlert } from "lucide-react";
 
 declare global {
     interface Window {
@@ -153,68 +154,81 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
                 </DialogHeader>
 
                 <div className="mt-4 space-y-4">
-                    {!isLoading && startingPriceText && (
-                        <div className="rounded-md border border-[#3882a5]/20 bg-[#3882a5]/5 px-4 py-3 text-sm text-[#074463]">
-                            Paid plans start from <span className="font-semibold">{startingPriceText}</span>.
-                        </div>
-                    )}
-
-                    {!isLoading && paidPlans.length > 0 && (
-                        <div className="max-h-56 space-y-2 overflow-y-auto rounded-md border bg-slate-50 px-3 py-2">
-                            {paidPlans.map((plan) => {
-                                const isSelected = selectedPlanId === plan._id;
-                                return (
-                                    <button
-                                        key={plan._id}
-                                        type="button"
-                                        onClick={() => setSelectedPlanId(plan._id)}
-                                        className={`flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-xs transition sm:text-sm ${isSelected
-                                            ? "bg-[#3882a5]/10 border-[#3882a5] border text-slate-900"
-                                            : "border border-transparent text-slate-800 hover:bg-slate-100"
-                                            }`}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <div
-                                                className={`h-3 w-3 rounded-full border ${isSelected ? "border-[#3882a5] bg-[#3882a5]" : "border-slate-400 bg-white"
-                                                    }`}
-                                            />
-                                            <div className="font-medium">
-                                                {plan.name}
-                                                {plan.isPopular && (
-                                                    <span className="bg-[#3882a5]/10 text-[#3882a5] ml-2 rounded-full px-2 py-0.5 text-[10px] tracking-wide uppercase">
-                                                        Popular
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="text-slate-700">
-                                            {formatCurrency(plan.amount, plan.currency)}{" "}
-                                            <span className="text-[11px] text-slate-500">
-                                                / {plan.planType.replace("ly", "")}
-                                            </span>
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    )}
-
-                    {isLoading && <div className="text-muted-foreground text-xs">Loading plans...</div>}
-
-                    <div className="flex justify-end space-x-2 pt-2">
-                        <Button variant="outline" onClick={onClose} disabled={isCreating} className="h-12 rounded-xl px-6">
-                            Cancel
-                        </Button>
-                        {!isEmployee ? (
-                            <Button onClick={handleUpgradeClick} variant="primary" disabled={isCreating || !selectedPlanId} className="h-12 rounded-xl px-8">
-                                {isCreating ? "Processing..." : "Upgrade Now"}
-                            </Button>
-                        ) : (
-                            <div className="px-4 py-3 text-sm text-muted-foreground bg-muted rounded-xl">
-                                Subscription managed by administrator
+                    {isEmployee ? (
+                        <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
+                            <div className="h-16 w-16 flex items-center justify-center rounded-full bg-orange-50 text-orange-600">
+                                <ShieldAlert className="h-8 w-8" />
                             </div>
-                        )}
-                    </div>
+                            <div className="space-y-2">
+                                <p className="font-semibold text-gray-900 text-lg">Admin Access Required</p>
+                                <p className="text-sm text-gray-500 max-w-[300px]">
+                                    Only administrators can purchase subscriptions or upgrade plans. Please contact your manager.
+                                </p>
+                            </div>
+                            <Button variant="outline" onClick={onClose} className="mt-4 h-11 px-8 rounded-xl">
+                                Close
+                            </Button>
+                        </div>
+                    ) : (
+                        <>
+                            {!isLoading && startingPriceText && (
+                                <div className="rounded-md border border-[#3882a5]/20 bg-[#3882a5]/5 px-4 py-3 text-sm text-[#074463]">
+                                    Paid plans start from <span className="font-semibold">{startingPriceText}</span>.
+                                </div>
+                            )}
+
+                            {!isLoading && paidPlans.length > 0 && (
+                                <div className="max-h-56 space-y-2 overflow-y-auto rounded-md border bg-slate-50 px-3 py-2">
+                                    {paidPlans.map((plan) => {
+                                        const isSelected = selectedPlanId === plan._id;
+                                        return (
+                                            <button
+                                                key={plan._id}
+                                                type="button"
+                                                onClick={() => setSelectedPlanId(plan._id)}
+                                                className={`flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-xs transition sm:text-sm ${isSelected
+                                                    ? "bg-[#3882a5]/10 border-[#3882a5] border text-slate-900"
+                                                    : "border border-transparent text-slate-800 hover:bg-slate-100"
+                                                    }`}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <div
+                                                        className={`h-3 w-3 rounded-full border ${isSelected ? "border-[#3882a5] bg-[#3882a5]" : "border-slate-400 bg-white"
+                                                            }`}
+                                                    />
+                                                    <div className="font-medium">
+                                                        {plan.name}
+                                                        {plan.isPopular && (
+                                                            <span className="bg-[#3882a5]/10 text-[#3882a5] ml-2 rounded-full px-2 py-0.5 text-[10px] tracking-wide uppercase">
+                                                                Popular
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="text-slate-700">
+                                                    {formatCurrency(plan.amount, plan.currency)}{" "}
+                                                    <span className="text-[11px] text-slate-500">
+                                                        / {plan.planType.replace("ly", "")}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {isLoading && <div className="text-muted-foreground text-xs">Loading plans...</div>}
+
+                            <div className="flex justify-end space-x-2 pt-2">
+                                <Button variant="outline" onClick={onClose} disabled={isCreating} className="h-12 rounded-xl px-6">
+                                    Cancel
+                                </Button>
+                                <Button onClick={handleUpgradeClick} variant="primary" disabled={isCreating || !selectedPlanId} className="h-12 rounded-xl px-8">
+                                    {isCreating ? "Processing..." : "Upgrade Now"}
+                                </Button>
+                            </div>
+                        </>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>

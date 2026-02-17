@@ -20,6 +20,9 @@ import { FormContainer } from "@/components/common/formContainer";
 import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQuery } from "@/store/api";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { AddonPurchaseModal } from "@/components/common/AddonPurchaseModal";
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 
 const employeeSchema = yup.object({
     name: yup
@@ -87,6 +90,10 @@ export function NewEmployeeModal({
     const [createEmployee, { isLoading: isCreating }] = useCreateEmployeeMutation();
     const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
+
+    const { hasReachedEmployeeLimit, isExpired } = useSubscriptionStatus();
+    const [showAddonModal, setShowAddonModal] = useState(false);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     const isEditMode = !!employeeId;
     const isLoading = isCreating || isUpdating;
@@ -406,17 +413,50 @@ export function NewEmployeeModal({
                 >
                     Cancel
                 </ActionButton>
-                <ActionButton
-                    type="submit"
-                    variant="outline-primary"
-                    disabled={isLoading || isLoadingEmployee}
-                    size="xl"
-                    className="w-full min-w-[160px] px-6 sm:w-auto"
-                >
-                    {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-                    {isEditMode ? "Update Employee" : "Create Employee"}
-                </ActionButton>
+                {isExpired ? (
+                    <ActionButton
+                        type="button"
+                        variant="destructive"
+                        onClick={() => setShowUpgradeModal(true)}
+                        size="xl"
+                        className="w-full min-w-[160px] px-6 sm:w-auto"
+                    >
+                        Upgrade Plan
+                    </ActionButton>
+                ) : hasReachedEmployeeLimit && !isEditMode ? (
+                    <ActionButton
+                        type="button"
+                        variant="primary"
+                        onClick={() => setShowAddonModal(true)}
+                        size="xl"
+                        className="w-full min-w-[160px] px-6 sm:w-auto text-white"
+                    >
+                        Buy Extra Slots
+                    </ActionButton>
+                ) : (
+                    <ActionButton
+                        type="submit"
+                        variant="outline-primary"
+                        disabled={isLoading || isLoadingEmployee}
+                        size="xl"
+                        className="w-full min-w-[160px] px-6 sm:w-auto"
+                    >
+                        {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+                        {isEditMode ? "Update Employee" : "Create Employee"}
+                    </ActionButton>
+                )}
             </div>
+
+            <AddonPurchaseModal
+                isOpen={showAddonModal}
+                onClose={() => setShowAddonModal(false)}
+                type="employee"
+            />
+
+            <UpgradePlanModal
+                isOpen={showUpgradeModal}
+                onClose={() => setShowUpgradeModal(false)}
+            />
         </form>
     );
 

@@ -37,6 +37,9 @@ import {
     DropdownMenuSeparator,
 } from "@/components/ui/dropdownMenu";
 import { SpotPassDetailsDialog } from "./SpotPassDetailsDialog";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 
 export function SpotPassList() {
     const router = useRouter();
@@ -44,6 +47,16 @@ export function SpotPassList() {
     const [page, setPage] = useState(1);
     const [selectedPass, setSelectedPass] = useState<SpotPass | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+    const { hasReachedSpotPassLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal,
+        showAddonModal,
+        openAddonModal,
+        closeAddonModal
+    } = useSubscriptionActions();
 
     // Queries & Mutations
     const { data, isLoading, refetch } = useGetSpotPassesQuery({
@@ -268,15 +281,29 @@ export function SpotPassList() {
                         onChange={(val: string) => setSearchQuery(val)}
                         className="flex-1 min-w-[120px] sm:w-[300px] sm:flex-none"
                     />
-                    <Button
-                        variant="outline"
-                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white shadow-sm transition-all active:scale-95"
-                        onClick={() => router.push(routes.privateroute.SPOT_PASS_CREATE)}
+                    <SubscriptionActionButtons
+                        isExpired={isExpired}
+                        hasReachedLimit={hasReachedSpotPassLimit}
+                        limitType="spotPass"
+                        showUpgradeModal={showUpgradeModal}
+                        openUpgradeModal={openUpgradeModal}
+                        closeUpgradeModal={closeUpgradeModal}
+                        showAddonModal={showAddonModal}
+                        openAddonModal={openAddonModal}
+                        closeAddonModal={closeAddonModal}
+                        upgradeLabel="Upgrade Plan"
+                        buyExtraLabel="Buy Extra Passes"
                     >
-                        <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                        <span className="hidden sm:inline">New Spot Pass</span>
-                        <span className="sm:hidden text-[10px]">New Pass</span>
-                    </Button>
+                        <Button
+                            variant="outline"
+                            className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white shadow-sm transition-all active:scale-95"
+                            onClick={() => router.push(routes.privateroute.SPOT_PASS_CREATE)}
+                        >
+                            <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                            <span className="hidden sm:inline">New Spot Pass</span>
+                            <span className="sm:hidden text-[10px]">New Pass</span>
+                        </Button>
+                    </SubscriptionActionButtons>
                 </div>
 
                 <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">

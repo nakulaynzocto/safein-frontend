@@ -194,7 +194,7 @@ export const appointmentApi = baseApi.injectEndpoints({
                 }
                 return response;
             },
-            invalidatesTags: [{ type: "Appointment", id: "LIST" }],
+            invalidatesTags: [{ type: "Appointment", id: "LIST" }, { type: "Subscription" }],
         }),
 
         getAppointments: builder.query<AppointmentListResponse, GetAppointmentsQuery | void>({
@@ -284,6 +284,7 @@ export const appointmentApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, id) => [
                 { type: "Appointment", id },
                 { type: "Appointment", id: "LIST" },
+                { type: "Subscription" },
             ],
         }),
 
@@ -342,6 +343,7 @@ export const appointmentApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, id) => [
                 { type: "Appointment", id },
                 { type: "Appointment", id: "LIST" },
+                { type: "Subscription" },
             ],
         }),
 
@@ -359,6 +361,7 @@ export const appointmentApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, id) => [
                 { type: "Appointment", id },
                 { type: "Appointment", id: "LIST" },
+                { type: "Subscription" },
             ],
         }),
 
@@ -376,6 +379,7 @@ export const appointmentApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, id) => [
                 { type: "Appointment", id },
                 { type: "Appointment", id: "LIST" },
+                { type: "Subscription" },
             ],
         }),
 

@@ -166,7 +166,7 @@ export const visitorApi = baseApi.injectEndpoints({
                 }
                 return response;
             },
-            invalidatesTags: [{ type: "Visitor" as const, id: "LIST" }],
+            invalidatesTags: [{ type: "Visitor" as const, id: "LIST" }, { type: "Subscription" }],
         }),
 
         getVisitors: builder.query<VisitorListResponse, GetVisitorsQuery | void>({
@@ -252,6 +252,7 @@ export const visitorApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, id) => [
                 { type: "Visitor" as const, id },
                 { type: "Visitor" as const, id: "LIST" },
+                { type: "Subscription" },
             ],
         }),
     }),

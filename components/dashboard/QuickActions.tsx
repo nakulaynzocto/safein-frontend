@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Calendar, CalendarPlus, UserPlus, Users, Send, ClipboardList } from "lucide-react";
 import { routes } from "@/utils/routes";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { AddonPurchaseModal } from "@/components/common/AddonPurchaseModal";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
@@ -47,8 +48,10 @@ const employeeQuickActions: QuickAction[] = [
 export function QuickActions() {
     const router = useRouter();
     const { user } = useAppSelector((state) => state.auth);
-    const { hasReachedEmployeeLimit, hasReachedAppointmentLimit } = useSubscriptionStatus();
+    const { hasReachedEmployeeLimit, hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [showAppointmentAddon, setShowAppointmentAddon] = useState(false);
+    const [showEmployeeAddon, setShowEmployeeAddon] = useState(false);
 
     // Check if user is employee
     const isEmployee = checkIsEmployee(user);
@@ -62,15 +65,23 @@ export function QuickActions() {
             </CardHeader>
             <CardContent className="p-3 pt-0 sm:p-4 md:p-6">
                 <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 lg:grid-cols-4">
-                    {hasReachedAppointmentLimit ? (
+                    {hasReachedAppointmentLimit || isExpired ? (
                         <>
                             <Button
                                 className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm"
                                 variant="outline"
-                                onClick={() => setShowUpgradeModal(true)}
+                                onClick={() => {
+                                    if (isExpired) {
+                                        setShowUpgradeModal(true);
+                                    } else {
+                                        setShowAppointmentAddon(true);
+                                    }
+                                }}
                             >
                                 <CalendarPlus className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                <span className="line-clamp-2 text-center">Upgrade to Create More</span>
+                                <span className="line-clamp-2 text-center">
+                                    {isExpired ? "Upgrade to Create More" : "Buy Extra Invites"}
+                                </span>
                             </Button>
                         </>
                     ) : (
@@ -112,15 +123,23 @@ export function QuickActions() {
                     ))}
 
                     {!isEmployee && (
-                        hasReachedEmployeeLimit ? (
+                        hasReachedEmployeeLimit || isExpired ? (
                             <>
                                 <Button
                                     className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm"
                                     variant="outline"
-                                    onClick={() => setShowUpgradeModal(true)}
+                                    onClick={() => {
+                                        if (isExpired) {
+                                            setShowUpgradeModal(true);
+                                        } else {
+                                            setShowEmployeeAddon(true);
+                                        }
+                                    }}
                                 >
                                     <UserPlus className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                    <span className="line-clamp-2 text-center">Upgrade to Add More</span>
+                                    <span className="line-clamp-2 text-center">
+                                        {isExpired ? "Upgrade to Add More" : "Buy Extra Slots"}
+                                    </span>
                                 </Button>
                             </>
                         ) : (
@@ -138,6 +157,16 @@ export function QuickActions() {
                     )}
 
                     <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+                    <AddonPurchaseModal
+                        isOpen={showAppointmentAddon}
+                        onClose={() => setShowAppointmentAddon(false)}
+                        type="appointment"
+                    />
+                    <AddonPurchaseModal
+                        isOpen={showEmployeeAddon}
+                        onClose={() => setShowEmployeeAddon(false)}
+                        type="employee"
+                    />
                 </div>
             </CardContent>
         </Card>

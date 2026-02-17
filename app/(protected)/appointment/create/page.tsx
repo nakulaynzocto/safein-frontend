@@ -1,38 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
 import { NewAppointmentModal } from "@/components/appointment/AppointmentForm";
 import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { useRouter } from "next/navigation";
-import { useAuthSubscription } from "@/hooks/useAuthSubscription";
-import { isEmployee as checkIsEmployee } from "@/utils/helpers";
-import { routes } from "@/utils/routes";
 import { ArrowLeft } from "lucide-react";
 
 // Page: appoitment create (non-modal page version)
 export default function AppoitmentCreate() {
     const router = useRouter();
-    const { user, isAuthenticated, subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
-    const isEmployee = checkIsEmployee(user);
-
-    // Initial Auth Check
-    useEffect(() => {
-        if (!isAuthLoading && !isAuthenticated) {
-            router.replace(routes.publicroute.LOGIN);
-        }
-    }, [isAuthLoading, isAuthenticated, router]);
-
-    // Check module access
-    // Remove if not needed here anymore based on latest instructions
-
-    if (isAuthLoading || !isAuthenticated) {
-        return (
-            <div className="flex h-screen w-full items-center justify-center">
-                <LoadingSpinner />
-            </div>
-        );
-    }
 
     return (
         <div className="container mx-auto max-w-full py-3 sm:py-4">

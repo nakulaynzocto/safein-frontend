@@ -30,10 +30,10 @@ export interface TrialLimitsStatus {
     isExpired: boolean;
     isEmployeeContext?: boolean;
     limits: {
-        employees: { limit: number; current: number; reached: boolean; canCreate: boolean };
-        visitors: { limit: number; current: number; reached: boolean; canCreate: boolean };
-        appointments: { limit: number; current: number; reached: boolean; canCreate: boolean };
-        spotPasses: { limit: number; current: number; reached: boolean; canCreate: boolean };
+        employees: { limit: number; extra: number; total: number; current: number; reached: boolean; canCreate: boolean };
+        visitors: { limit: number; extra: number; total: number; current: number; reached: boolean; canCreate: boolean };
+        appointments: { limit: number; extra: number; total: number; current: number; reached: boolean; canCreate: boolean };
+        spotPasses: { limit: number; extra: number; total: number; current: number; reached: boolean; canCreate: boolean };
     };
     modules: {
         visitorInvite: boolean;
@@ -43,6 +43,21 @@ export interface TrialLimitsStatus {
 
 interface GetTrialLimitsStatusResponse {
     data: TrialLimitsStatus;
+}
+
+export interface ISubscriptionAddon {
+    _id: string;
+    name: string;
+    description: string;
+    type: 'employee' | 'appointment' | 'spotPass';
+    unitQuantity: number;
+    amount: number;
+    currency: string;
+    isActive: boolean;
+}
+
+interface GetAvailableAddonsResponse {
+    data: ISubscriptionAddon[];
 }
 
 export interface ISubscriptionHistory {
@@ -107,6 +122,7 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
                             employees: { limit: -1, current: 0, reached: false },
                             visitors: { limit: -1, current: 0, reached: false },
                             appointments: { limit: -1, current: 0, reached: false },
+                            spotPasses: { limit: -1, current: 0, reached: false },
                         },
                     },
                 };
@@ -131,8 +147,54 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
             },
             providesTags: ["User", "Subscription"],
         }),
+
+        /**
+         * Get available subscription addons
+         */
+        getAvailableAddons: builder.query<GetAvailableAddonsResponse, void>({
+            query: () => ({
+                url: "/user-subscriptions/addons/available",
+                method: "GET",
+            }),
+            transformResponse: (response: any) => {
+                return { data: response?.data || [] };
+            },
+            providesTags: ["Subscription"],
+        }),
+
+        /**
+         * Create Razorpay order for addon
+         */
+        createAddonRazorpayCheckout: builder.mutation<any, { addonId: string }>({
+            query: (data) => ({
+                url: "/user-subscriptions/addons/razorpay/checkout",
+                method: "POST",
+                body: data,
+            }),
+        }),
+
+        /**
+         * Verify addon payment
+         */
+        verifyAddonPayment: builder.mutation<
+            any,
+            { orderId: string; paymentId: string; signature: string; addonId: string }
+        >({
+            query: (data) => ({
+                url: "/user-subscriptions/addons/razorpay/verify",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: ["User", "Subscription"],
+        }),
     }),
 });
 
-export const { useGetUserActiveSubscriptionQuery, useGetTrialLimitsStatusQuery, useGetSubscriptionHistoryQuery } =
-    userSubscriptionApi;
+export const {
+    useGetUserActiveSubscriptionQuery,
+    useGetTrialLimitsStatusQuery,
+    useGetSubscriptionHistoryQuery,
+    useGetAvailableAddonsQuery,
+    useCreateAddonRazorpayCheckoutMutation,
+    useVerifyAddonPaymentMutation,
+} = userSubscriptionApi;

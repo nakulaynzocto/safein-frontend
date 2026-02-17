@@ -35,7 +35,7 @@ import {
     Link as LinkIcon,
     Download,
     Check,
-    AlertCircle,
+
     ShieldAlert,
     Link2,
     User,
@@ -60,7 +60,8 @@ import { StatusBadge } from "@/components/common/statusBadge";
 import { ActionButton } from "@/components/common/actionButton";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { ModuleAccessDenied } from "@/components/common/moduleAccessDenied";
-import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 
 export default function AppointmentLinksPage() {
     // ALL HOOKS MUST BE CALLED AT TOP LEVEL - BEFORE ANY CONDITIONAL RETURNS
@@ -78,8 +79,15 @@ export default function AppointmentLinksPage() {
     const [deleteLinkId, setDeleteLinkId] = useState<string | null>(null);
     const [showLinkModal, setShowLinkModal] = useState(false);
     const [showVipModal, setShowVipModal] = useState(false);
-    const { hasReachedAppointmentLimit } = useSubscriptionStatus();
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal,
+        showAddonModal,
+        openAddonModal,
+        closeAddonModal
+    } = useSubscriptionActions();
 
     // OTP Modal states
     const [showOtpModal, setShowOtpModal] = useState(false);
@@ -505,9 +513,12 @@ export default function AppointmentLinksPage() {
             <ModuleAccessDenied
                 title="Visitor Invites Not Available"
                 description="Your current subscription plan does not include the Visitor Invite module. Please upgrade your plan to access this feature."
+                isExpired={isExpired}
             />
         );
     }
+
+
 
     return (
         <div className="space-y-4 sm:space-y-6">
@@ -611,67 +622,59 @@ export default function AppointmentLinksPage() {
                             <RefreshCw className={`h-4 w-4 text-gray-500 ${isLoading ? 'animate-spin' : ''}`} />
                         </Button>
                         <div className="shrink-0">
-                            {hasReachedAppointmentLimit ? (
-                                <>
-                                    <ActionButton
-                                        variant="primary"
-                                        size="xl"
-                                        className="flex items-center justify-center gap-2 text-xs whitespace-nowrap sm:text-sm"
-                                        onClick={() => setShowUpgradeModal(true)}
-                                    >
-                                        <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                        <span className="sm:hidden">UPGRADE</span>
-                                        <span className="hidden sm:inline">UPGRADE TO SCHEDULE MORE</span>
-                                    </ActionButton>
-                                    <UpgradePlanModal
-                                        isOpen={showUpgradeModal}
-                                        onClose={() => setShowUpgradeModal(false)}
-                                    />
-                                </>
-                            ) : (
-                                <>
-                                    <>
-                                        <CreateAppointmentLinkModal
-                                            open={showLinkModal}
-                                            onOpenChange={setShowLinkModal}
-                                            onSuccess={() => {
-                                                refetchAll();
-                                            }}
-                                        />
-                                        <QuickAppointmentModal
-                                            open={showVipModal}
-                                            onOpenChange={setShowVipModal}
-                                            onSuccess={() => {
-                                                refetchAll();
-                                            }}
-                                        />
-                                        <ActionButton
-                                            variant="outline-primary"
-                                            size="xl"
-                                            className="flex items-center justify-center sm:gap-2 text-xs whitespace-nowrap sm:text-sm"
-                                            onClick={() => {
-                                                if (filterType === "special") {
-                                                    setShowVipModal(true);
-                                                } else {
-                                                    setShowLinkModal(true);
-                                                }
-                                            }}
-                                        >
-                                            {filterType === "special" ? (
-                                                <>
-                                                    <User className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                                    <span className="hidden sm:inline">Book VIP</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                                    <span className="hidden sm:inline">Create Link</span>
-                                                </>
-                                            )}
-                                        </ActionButton>
-                                    </>
-                                </>
-                            )}
+                            <SubscriptionActionButtons
+                                isExpired={isExpired}
+                                hasReachedLimit={hasReachedAppointmentLimit}
+                                limitType="appointment"
+                                showUpgradeModal={showUpgradeModal}
+                                openUpgradeModal={openUpgradeModal}
+                                closeUpgradeModal={closeUpgradeModal}
+                                showAddonModal={showAddonModal}
+                                openAddonModal={openAddonModal}
+                                closeAddonModal={closeAddonModal}
+                                upgradeLabel="Upgrade Plan"
+                                buyExtraLabel="Buy Extra Invites"
+                                className="flex items-center justify-center gap-2 text-xs whitespace-nowrap sm:text-sm text-white px-6 min-w-[150px]"
+                            >
+                                <CreateAppointmentLinkModal
+                                    open={showLinkModal}
+                                    onOpenChange={setShowLinkModal}
+                                    onSuccess={() => {
+                                        refetchAll();
+                                    }}
+                                />
+                                <QuickAppointmentModal
+                                    open={showVipModal}
+                                    onOpenChange={setShowVipModal}
+                                    onSuccess={() => {
+                                        refetchAll();
+                                    }}
+                                />
+                                <ActionButton
+                                    variant="outline-primary"
+                                    size="xl"
+                                    className="flex items-center justify-center sm:gap-2 text-xs whitespace-nowrap sm:text-sm"
+                                    onClick={() => {
+                                        if (filterType === "special") {
+                                            setShowVipModal(true);
+                                        } else {
+                                            setShowLinkModal(true);
+                                        }
+                                    }}
+                                >
+                                    {filterType === "special" ? (
+                                        <>
+                                            <User className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                            <span className="hidden sm:inline">Book VIP</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                            <span className="hidden sm:inline">Create Link</span>
+                                        </>
+                                    )}
+                                </ActionButton>
+                            </SubscriptionActionButtons>
                         </div>
                     </div>
                 </div>
@@ -684,13 +687,17 @@ export default function AppointmentLinksPage() {
                         emptyData={{
                             title: "No appointment links found",
                             description: "Create your first appointment link to get started.",
-                            primaryActionLabel: hasReachedAppointmentLimit
+                            primaryActionLabel: isExpired
                                 ? "Upgrade Plan"
-                                : (filterType === "special" ? "Book VIP" : "Create Link"),
+                                : hasReachedAppointmentLimit
+                                    ? "Buy Extra Invites"
+                                    : (filterType === "special" ? "Book VIP" : "Create Link"),
                         }}
                         onPrimaryAction={() => {
-                            if (hasReachedAppointmentLimit) {
-                                setShowUpgradeModal(true);
+                            if (isExpired) {
+                                openUpgradeModal();
+                            } else if (hasReachedAppointmentLimit) {
+                                openAddonModal();
                             } else {
                                 if (filterType === "special") {
                                     setShowVipModal(true);

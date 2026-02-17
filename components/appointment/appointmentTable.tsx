@@ -21,9 +21,7 @@ import {
     isAppointmentTimedOut,
 } from "@/utils/helpers";
 import {
-    Trash2,
     Eye,
-    Clock,
     LogOut,
     Calendar,
     MoreVertical,
@@ -51,7 +49,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu";
 import { routes } from "@/utils/routes";
-import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { useCooldown } from "@/hooks/useCooldown";
@@ -126,8 +125,15 @@ export function AppointmentTable({
     onDateToChange,
 }: AppointmentTableProps) {
     const router = useRouter();
-    const { hasReachedAppointmentLimit, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal,
+        showAddonModal,
+        openAddonModal,
+        closeAddonModal
+    } = useSubscriptionActions();
 
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showViewDialog, setShowViewDialog] = useState(false);
@@ -591,41 +597,33 @@ export function AppointmentTable({
                             />
                         </div>
                         <div className="flex w-full items-center gap-2 sm:w-auto">
-                            {hasReachedAppointmentLimit ? (
-                                <>
+                            <SubscriptionActionButtons
+                                isExpired={isExpired}
+                                hasReachedLimit={hasReachedAppointmentLimit}
+                                limitType="appointment"
+                                showUpgradeModal={showUpgradeModal}
+                                openUpgradeModal={openUpgradeModal}
+                                closeUpgradeModal={closeUpgradeModal}
+                                showAddonModal={showAddonModal}
+                                openAddonModal={openAddonModal}
+                                closeAddonModal={closeAddonModal}
+                                upgradeLabel="Upgrade Plan"
+                                buyExtraLabel="Buy Extra Invites"
+                                icon={Plus}
+                                isEmployee={isEmployee}
+                                className="rounded-xl px-6 min-w-[150px] text-xs sm:text-sm h-12"
+                            >
+                                {!isEmployee && (
                                     <Button
-                                        variant="default"
-                                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm bg-[#3882a5] hover:bg-[#2d6a87] text-white shadow-md hover:shadow-lg transition-all"
-                                        onClick={() => setShowUpgradeModal(true)}
+                                        variant="outline"
+                                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-6 min-w-[150px] text-xs whitespace-nowrap sm:gap-2 sm:text-sm border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white"
+                                        onClick={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
                                     >
                                         <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                        <span className="hidden sm:inline">Upgrade to Schedule More</span>
+                                        <span className="hidden sm:inline">Schedule Appointment</span>
                                     </Button>
-                                    <UpgradePlanModal
-                                        isOpen={showUpgradeModal}
-                                        onClose={() => setShowUpgradeModal(false)}
-                                    />
-                                </>
-                            ) : (
-                                <>
-                                    {!isEmployee && (
-                                        <Button
-                                            variant="outline"
-                                            className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white"
-                                            onClick={() => {
-                                                if (hasReachedAppointmentLimit) {
-                                                    setShowUpgradeModal(true);
-                                                } else {
-                                                    router.push(routes.privateroute.APPOINTMENTCREATE);
-                                                }
-                                            }}
-                                        >
-                                            <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                            <span className="hidden sm:inline">Schedule Appointment</span>
-                                        </Button>
-                                    )}
-                                </>
-                            )}
+                                )}
+                            </SubscriptionActionButtons>
                         </div>
                     </div>
                 </div>
@@ -642,8 +640,10 @@ export function AppointmentTable({
                         onPrimaryAction={() => {
                             if (isEmployee) {
                                 router.push(routes.privateroute.APPOINTMENT_LINKS);
+                            } else if (isExpired) {
+                                openUpgradeModal();
                             } else if (hasReachedAppointmentLimit) {
-                                setShowUpgradeModal(true);
+                                openAddonModal();
                             } else {
                                 router.push(routes.privateroute.APPOINTMENTCREATE);
                             }

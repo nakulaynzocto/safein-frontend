@@ -16,6 +16,9 @@ import { CheckCircle, X } from "lucide-react";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useCreateSpotPassMutation } from "@/store/api/spotPassApi";
 import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 
 // Form Schema
 const spotPassSchema = yup.object({
@@ -37,9 +40,9 @@ const spotPassSchema = yup.object({
         .trim()
         .min(5, "Address must be at least 5 characters")
         .max(500, "Address cannot exceed 500 characters"),
-    notes: yup.string().default("").trim(),
+    notes: yup.string().optional(),
     employeeId: yup.string().optional(),
-    photo: yup.string().default(""),
+    photo: yup.string().optional(),
 });
 
 type SpotPassFormData = {
@@ -56,6 +59,16 @@ export function SpotPassCreateForm() {
     const router = useRouter();
     const [createSpotPass, { isLoading }] = useCreateSpotPassMutation();
     const { loadEmployeeOptions } = useEmployeeSearch();
+
+    const { hasReachedSpotPassLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal,
+        showAddonModal,
+        openAddonModal,
+        closeAddonModal
+    } = useSubscriptionActions();
 
     const {
         register,
@@ -196,22 +209,45 @@ export function SpotPassCreateForm() {
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => router.push(routes.privateroute.SPOT_PASS)}
-                            className="h-12 rounded-xl px-8 font-semibold text-gray-600 sm:w-auto"
+                            onClick={() => router.back()}
+                            className="mr-3 h-12 rounded-xl border-2 px-8 font-semibold hover:bg-muted sm:w-auto"
                         >
-                            <X className="mr-2 h-4 w-4" />
                             Cancel
                         </Button>
-                        <Button
-                            type="submit"
-                            disabled={isLoading}
-                            className="h-12 rounded-xl bg-[#3882a5] px-8 font-semibold text-white hover:bg-[#3882a5]/90 sm:w-auto"
+                        <SubscriptionActionButtons
+                            isExpired={isExpired}
+                            hasReachedLimit={hasReachedSpotPassLimit}
+                            limitType="spotPass"
+                            showUpgradeModal={showUpgradeModal}
+                            openUpgradeModal={openUpgradeModal}
+                            closeUpgradeModal={closeUpgradeModal}
+                            showAddonModal={showAddonModal}
+                            openAddonModal={openAddonModal}
+                            closeAddonModal={closeAddonModal}
+                            upgradeLabel="Upgrade Plan"
+                            buyExtraLabel="Buy Extra Passes"
+                            className="w-full sm:w-auto min-w-[180px]"
                         >
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Generate Pass
-                        </Button>
+                            <Button
+                                type="submit"
+                                variant="default"
+                                disabled={isLoading}
+                                size="lg"
+                                className="w-full min-w-[180px] px-6 sm:w-auto"
+                            >
+                                {isLoading ? (
+                                    <>Generating...</>
+                                ) : (
+                                    <>
+                                        <CheckCircle className="mr-2 h-4 w-4" />
+                                        Generate Spot Pass
+                                    </>
+                                )}
+                            </Button>
+                        </SubscriptionActionButtons>
                     </div>
                 </form>
+
             </FormContainer>
         </div>
     );

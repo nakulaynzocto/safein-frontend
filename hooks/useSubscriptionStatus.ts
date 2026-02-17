@@ -1,7 +1,7 @@
 import { useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi";
 import { useMemo, useCallback } from "react";
 
-export type ResourceType = "employees" | "visitors" | "appointments";
+export type ResourceType = "employees" | "visitors" | "appointments" | "spotPasses";
 
 export function useSubscriptionStatus() {
     const { data: trialStatus, isLoading, error, refetch } = useGetTrialLimitsStatusQuery();
@@ -19,6 +19,8 @@ export function useSubscriptionStatus() {
                 canCreate: limitInfo?.canCreate || false,
                 current: limitInfo?.current || 0,
                 limit: limitInfo?.limit || -1,
+                extra: limitInfo?.extra || 0,
+                total: limitInfo?.total || (limitInfo?.limit === -1 ? -1 : (limitInfo?.limit || 0) + (limitInfo?.extra || 0)),
             };
         },
         [trialStatus],
@@ -29,6 +31,7 @@ export function useSubscriptionStatus() {
             appointments: checkLimit("appointments"),
             employees: checkLimit("employees"),
             visitors: checkLimit("visitors"),
+            spotPasses: checkLimit("spotPasses"),
         }),
         [checkLimit],
     );
@@ -45,6 +48,7 @@ export function useSubscriptionStatus() {
         hasReachedAppointmentLimit: limits.appointments.reached,
         hasReachedEmployeeLimit: limits.employees.reached,
         hasReachedVisitorLimit: limits.visitors.reached,
+        hasReachedSpotPassLimit: limits.spotPasses.reached,
         limits,
     };
 }

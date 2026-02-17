@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { ActionButton } from "@/components/common/actionButton";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+
+
 import { EmployeeTable } from "./employeeTable";
-import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useGetEmployeesQuery, useDeleteEmployeeMutation } from "@/store/api/employeeApi";
 import { useLazyGetAppointmentsQuery } from "@/store/api/appointmentApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
-import { UserPlus, FileSpreadsheet, User } from "lucide-react";
+import { UserPlus, FileSpreadsheet } from "lucide-react";
 import { BulkImportModal } from "./BulkImportModal";
 import { routes } from "@/utils/routes";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -21,8 +23,15 @@ export function EmployeeList() {
     const [search, setSearch] = useState("");
 
     const debouncedSearch = useDebounce(search, 500);
-    const { hasReachedEmployeeLimit, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const { hasReachedEmployeeLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal,
+        showAddonModal,
+        openAddonModal,
+        closeAddonModal
+    } = useSubscriptionActions();
     const [showBulkImportModal, setShowBulkImportModal] = useState(false);
 
     const {
@@ -77,7 +86,6 @@ export function EmployeeList() {
             await deleteEmployee(employeeId).unwrap();
             showSuccessToast("Employee deleted successfully");
             refetch();
-            refetchSubscriptionStatus();
         } catch (error: any) {
             if (error?.name === "ConditionError") return; // Handled above
             const errorMessage = error?.data?.message || error?.error || "Failed to delete employee";
@@ -95,7 +103,7 @@ export function EmployeeList() {
 
     const handleEmployeeCreated = () => {
         refetch();
-        refetchSubscriptionStatus();
+
     };
 
     return (
@@ -120,29 +128,27 @@ export function EmployeeList() {
                 onPageChange={setCurrentPage}
                 onPageSizeChange={setPageSize}
                 hasReachedLimit={hasReachedEmployeeLimit}
+                isExpired={isExpired}
                 onDelete={handleDelete}
                 onView={(employee) => { }}
                 isDeleting={isDeleting}
                 showHeader={false}
                 headerActions={
-                    hasReachedEmployeeLimit ? (
-                        <>
-                            <ActionButton
-                                onClick={() => setShowUpgradeModal(true)}
-                                variant="outline-primary"
-                                size="xl"
-                                className="flex shrink-0 items-center gap-1 rounded-xl px-4 text-[10px] whitespace-nowrap sm:gap-2 sm:text-sm"
-                            >
-                                <UserPlus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                <span className="hidden sm:inline">Upgrade to Add More</span>
-                            </ActionButton>
-                            <UpgradePlanModal
-                                isOpen={showUpgradeModal}
-                                onClose={() => setShowUpgradeModal(false)}
-                            />
-                        </>
-                    ) : (
-                        <>
+                    <SubscriptionActionButtons
+                        isExpired={isExpired}
+                        hasReachedLimit={hasReachedEmployeeLimit}
+                        limitType="employee"
+                        showUpgradeModal={showUpgradeModal}
+                        openUpgradeModal={openUpgradeModal}
+                        closeUpgradeModal={closeUpgradeModal}
+                        showAddonModal={showAddonModal}
+                        openAddonModal={openAddonModal}
+                        closeAddonModal={closeAddonModal}
+                        upgradeLabel="Upgrade Plan"
+                        buyExtraLabel="Buy Extra Slots"
+                        icon={UserPlus}
+                    >
+                        <div className="flex gap-2">
                             <ActionButton
                                 asChild
                                 variant="outline-primary"
@@ -163,8 +169,8 @@ export function EmployeeList() {
                                 <FileSpreadsheet className="h-5 w-5 shrink-0" />
                                 <span className="hidden sm:inline">Bulk Import</span>
                             </ActionButton>
-                        </>
-                    )
+                        </div>
+                    </SubscriptionActionButtons>
                 }
             />
         </div>
