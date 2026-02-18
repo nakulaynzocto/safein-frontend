@@ -58,13 +58,13 @@ export function ModuleAccessDenied({
                 {/* Decorative top accent */}
                 <div className={cn(
                     "absolute top-0 left-0 right-0 h-1.5 w-full",
-                    isError ? "bg-red-500" : "bg-orange-500"
+                    isError ? "bg-primary" : "bg-accent"
                 )} />
 
                 <CardHeader className="text-center pb-2 px-6 pt-10 sm:pt-12">
                     <div className={cn(
                         "mx-auto mb-6 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full shadow-sm ring-4 ring-white transition-transform hover:scale-105 duration-300",
-                        isError ? "bg-red-50 text-red-600" : "bg-orange-50 text-orange-600"
+                        isError ? "bg-primary/10 text-primary" : "bg-accent/10 text-accent"
                     )}>
                         <Icon className="h-8 w-8 sm:h-10 sm:w-10" />
                     </div>
@@ -89,7 +89,7 @@ export function ModuleAccessDenied({
                             {showAddonAction ? (
                                 <>
                                     <Button
-                                        variant="default"
+                                        variant="primary"
                                         size="lg"
                                         className="w-full sm:w-auto min-w-[160px] shadow-md hover:shadow-lg transition-all h-11 sm:h-12 text-base"
                                         onClick={() => setShowAddonModal(true)}
@@ -107,11 +107,10 @@ export function ModuleAccessDenied({
                                 </>
                             ) : (
                                 <Button
-                                    variant="default"
+                                    variant="primary"
                                     size="lg"
                                     className={cn(
-                                        "w-full sm:w-auto min-w-[200px] shadow-md hover:shadow-lg transition-all h-11 sm:h-12 text-base font-medium",
-                                        isError ? "bg-red-600 hover:bg-red-700" : ""
+                                        "w-full sm:w-auto min-w-[200px] shadow-md hover:shadow-lg transition-all h-11 sm:h-12 text-base font-medium"
                                     )}
                                     onClick={() => setShowUpgradeModal(true)}
                                 >

@@ -156,7 +156,7 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
                 <div className="mt-4 space-y-4">
                     {isEmployee ? (
                         <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
-                            <div className="h-16 w-16 flex items-center justify-center rounded-full bg-orange-50 text-orange-600">
+                            <div className="h-16 w-16 flex items-center justify-center rounded-full bg-primary/10 text-primary">
                                 <ShieldAlert className="h-8 w-8" />
                             </div>
                             <div className="space-y-2">

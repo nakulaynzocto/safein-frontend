@@ -131,7 +131,7 @@ export function AddonPurchaseModal({ isOpen, onClose, type, addonType, message }
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold">Purchase Extra Limits</DialogTitle>
                     {message && (
-                        <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm mt-2 border border-red-100 flex items-start gap-2">
+                        <div className="bg-primary/10 text-primary p-3 rounded-md text-sm mt-2 border border-primary/20 flex items-start gap-2">
                             <ShieldAlert className="h-5 w-5 shrink-0" />
                             <span>{message}</span>
                         </div>
@@ -144,7 +144,7 @@ export function AddonPurchaseModal({ isOpen, onClose, type, addonType, message }
                 <div className="py-4 space-y-4">
                     {isEmployee ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center space-y-4">
-                            <div className="h-16 w-16 flex items-center justify-center rounded-full bg-orange-50 text-orange-600">
+                            <div className="h-16 w-16 flex items-center justify-center rounded-full bg-primary/10 text-primary">
                                 <ShieldAlert className="h-8 w-8" />
                             </div>
                             <div className="space-y-2">
