@@ -89,6 +89,8 @@ export function EmployeeTable({
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [showAddonModal, setShowAddonModal] = useState(false);
+    const [showStatusDialog, setShowStatusDialog] = useState(false);
+    const [pendingStatus, setPendingStatus] = useState<string>("");
     const [limitErrorMessage, setLimitErrorMessage] = useState("");
 
     const { user } = useAppSelector((state) => state.auth);
@@ -96,10 +98,20 @@ export function EmployeeTable({
 
     const [updateEmployee] = useUpdateEmployeeMutation();
 
-    const handleStatusUpdate = async (employee: Employee, newStatus: string) => {
+    const handleStatusUpdate = (employee: Employee, newStatus: string) => {
+        setSelectedEmployee(employee);
+        setPendingStatus(newStatus);
+        setShowStatusDialog(true);
+    };
+
+    const confirmStatusUpdate = async () => {
+        if (!selectedEmployee || !pendingStatus) return;
+
         try {
-            await updateEmployee({ id: employee._id, status: newStatus as any }).unwrap();
+            const newStatus = pendingStatus;
+            await updateEmployee({ id: selectedEmployee._id, status: newStatus as any }).unwrap();
             showSuccessToast(`Employee status updated to ${newStatus}`);
+            setShowStatusDialog(false);
         } catch (error: any) {
             console.error("Failed to update status:", error);
             if (error?.status === 403 && error?.data?.message?.includes('limit')) {
@@ -112,6 +124,7 @@ export function EmployeeTable({
             } else {
                 showErrorToast(error?.data?.message || "Failed to update status");
             }
+            setShowStatusDialog(false);
         }
     };
 
@@ -385,6 +398,16 @@ export function EmployeeTable({
                     variant="destructive"
                 />
             )}
+
+            <ConfirmationDialog
+                open={showStatusDialog}
+                onOpenChange={setShowStatusDialog}
+                title={`Change Status to ${pendingStatus}`}
+                description={`Are you sure you want to change the status of ${selectedEmployee?.name} to ${pendingStatus}?`}
+                onConfirm={confirmStatusUpdate}
+                confirmText="Update Status"
+                variant={pendingStatus === "Inactive" ? "destructive" : "default"}
+            />
 
             {/* View Details Dialog */}
             <EmployeeDetailsDialog
