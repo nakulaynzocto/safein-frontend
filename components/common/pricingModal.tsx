@@ -12,6 +12,8 @@ import {
     useCreateCheckoutSessionMutation,
     useVerifyRazorpayPaymentMutation,
 } from "@/store/api/subscriptionApi";
+import { useGetSafeinProfileQuery } from "@/store/api/safeinProfileApi";
+import { getTaxSplit } from "@/utils/invoiceHelpers";
 import { useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -47,10 +49,13 @@ interface PricingModalProps {
 
 export function PricingModal({ open, onOpenChange, isRegistrationFlow = false }: PricingModalProps) {
     const { data: fetchedSubscriptionPlans, isLoading } = useGetAllSubscriptionPlansQuery({ isActive: true });
+    const { data: safeinProfile } = useGetSafeinProfileQuery();
     const [createCheckoutSession, { isLoading: isCreatingSession }] = useCreateCheckoutSessionMutation();
     const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation();
     const { user, isAuthenticated } = useAppSelector((state) => state.auth);
     const router = useRouter();
+
+    const companyDetails = safeinProfile?.data?.companyDetails;
 
     // Check if user is an employee - employees cannot purchase subscriptions
     const isEmployee = checkIsEmployee(user);
@@ -206,16 +211,41 @@ export function PricingModal({ open, onOpenChange, isRegistrationFlow = false }:
                                             </div>
                                         ) : null}
                                         <span className="text-brand-strong text-4xl font-bold">
-                                            {formatCurrency(plan.amount, plan.currency)}
+                                            {formatCurrency(plan.totalAmount || plan.amount, plan.currency)}
                                         </span>
-                                        <div className="mt-2">
-                                            <span className="text-gray-500">per {plan.planType.replace("ly", "")}</span>
+                                        <div className="mt-2 flex flex-col items-center">
+                                            <span className="text-gray-500 text-sm italic font-medium">per {plan.planType.replace("ly", "")}</span>
+                                            {(plan.totalAmount || 0) > plan.amount && (() => {
+                                                const gstAmount = (plan.totalAmount || 0) - plan.amount;
+                                                const taxSplit = getTaxSplit(
+                                                    gstAmount,
+                                                    plan.taxPercentage || 0,
+                                                    user?.address,
+                                                    companyDetails?.state,
+                                                    companyDetails?.country
+                                                );
+
+                                                return (
+                                                    <div className="mt-1 flex flex-col items-center text-[10px] text-gray-400 font-medium">
+                                                        <div className="flex justify-between w-32 border-b border-gray-100 pb-0.5">
+                                                            <span>Base:</span>
+                                                            <span>{formatCurrency(plan.amount, plan.currency)}</span>
+                                                        </div>
+                                                        {taxSplit.components.map((comp, idx) => (
+                                                            <div key={idx} className="flex justify-between w-32 pt-0.5">
+                                                                <span>{comp.label} ({comp.rate}%):</span>
+                                                                <span>{formatCurrency(comp.amount, plan.currency)}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
                                         {plan.monthlyEquivalent && (
                                             <div className="mt-2 text-sm text-gray-600">
                                                 <span className="text-gray-400">Effective: </span>
                                                 <span className="text-brand-strong font-semibold">
-                                                    {formatCurrency(plan.monthlyEquivalent, plan.currency)}/month
+                                                    {formatCurrency(plan.totalAmount ? Math.round(plan.totalAmount / (plan.planType === 'yearly' ? 12 : plan.planType === 'quarterly' ? 3 : 1)) : (plan.monthlyEquivalent || 0), plan.currency)}/month
                                                 </span>
                                             </div>
                                         )}

@@ -5,12 +5,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { routes } from "@/utils/routes";
-import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan } from "@/store/api/subscriptionApi";
-import { useCreateCheckoutSessionMutation, useVerifyRazorpayPaymentMutation } from "@/store/api/subscriptionApi";
+import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan, useCreateCheckoutSessionMutation, useVerifyRazorpayPaymentMutation } from "@/store/api/subscriptionApi";
+import { useGetSafeinProfileQuery } from "@/store/api/safeinProfileApi";
 import { toast } from "sonner";
 import { formatCurrency, isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { useAppSelector } from "@/store/hooks";
 import { ShieldAlert } from "lucide-react";
+import { getTaxSplit } from "@/utils/invoiceHelpers";
 
 declare global {
     interface Window {
@@ -45,8 +46,11 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
     // Check if user is an employee - employees cannot purchase subscriptions
     const isEmployee = checkIsEmployee(user);
     const { data, isLoading } = useGetAllSubscriptionPlansQuery({ isActive: true });
+    const { data: safeinProfile } = useGetSafeinProfileQuery();
     const [createCheckoutSession, { isLoading: isCreating }] = useCreateCheckoutSessionMutation();
     const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation();
+
+    const companyDetails = safeinProfile?.data?.companyDetails;
 
     const plans: ISubscriptionPlan[] = data?.data?.plans || [];
     const paidPlans = plans.filter((plan) => plan.planType !== "free");
@@ -63,7 +67,7 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
 
     const startingPriceText =
         paidPlans.length > 0
-            ? formatCurrency(Math.min(...paidPlans.map((p) => p.amount)), paidPlans[0].currency || "INR")
+            ? formatCurrency(Math.min(...paidPlans.map((p) => p.totalAmount || p.amount)), paidPlans[0].currency || "INR")
             : null;
 
     const handleUpgradeClick = async () => {
@@ -178,42 +182,80 @@ export function UpgradePlanModal({ isOpen, onClose }: UpgradePlanModalProps) {
                             )}
 
                             {!isLoading && paidPlans.length > 0 && (
-                                <div className="max-h-56 space-y-2 overflow-y-auto rounded-md border bg-slate-50 px-3 py-2">
-                                    {paidPlans.map((plan) => {
-                                        const isSelected = selectedPlanId === plan._id;
-                                        return (
-                                            <button
-                                                key={plan._id}
-                                                type="button"
-                                                onClick={() => setSelectedPlanId(plan._id)}
-                                                className={`flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-xs transition sm:text-sm ${isSelected
-                                                    ? "bg-[#3882a5]/10 border-[#3882a5] border text-slate-900"
-                                                    : "border border-transparent text-slate-800 hover:bg-slate-100"
-                                                    }`}
-                                            >
-                                                <div className="flex items-center gap-2">
-                                                    <div
-                                                        className={`h-3 w-3 rounded-full border ${isSelected ? "border-[#3882a5] bg-[#3882a5]" : "border-slate-400 bg-white"
-                                                            }`}
-                                                    />
-                                                    <div className="font-medium">
-                                                        {plan.name}
-                                                        {plan.isPopular && (
-                                                            <span className="bg-[#3882a5]/10 text-[#3882a5] ml-2 rounded-full px-2 py-0.5 text-[10px] tracking-wide uppercase">
-                                                                Popular
-                                                            </span>
-                                                        )}
+                                <div className="space-y-4">
+                                    <div className="max-h-56 space-y-2 overflow-y-auto rounded-md border bg-slate-50 px-3 py-2">
+                                        {paidPlans.map((plan) => {
+                                            const isSelected = selectedPlanId === plan._id;
+                                            return (
+                                                <button
+                                                    key={plan._id}
+                                                    type="button"
+                                                    onClick={() => setSelectedPlanId(plan._id)}
+                                                    className={`flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-xs transition sm:text-sm ${isSelected
+                                                        ? "bg-[#3882a5]/10 border-[#3882a5] border text-slate-900"
+                                                        : "border border-transparent text-slate-800 hover:bg-slate-100"
+                                                        }`}
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <div
+                                                            className={`h-3 w-3 rounded-full border ${isSelected ? "border-[#3882a5] bg-[#3882a5]" : "border-slate-400 bg-white"
+                                                                }`}
+                                                        />
+                                                        <div className="font-medium">
+                                                            {plan.name}
+                                                            {plan.isPopular && (
+                                                                <span className="bg-[#3882a5]/10 text-[#3882a5] ml-2 rounded-full px-2 py-0.5 text-[10px] tracking-wide uppercase">
+                                                                    Popular
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="text-slate-700">
-                                                    {formatCurrency(plan.amount, plan.currency)}{" "}
-                                                    <span className="text-[11px] text-slate-500">
-                                                        / {plan.planType.replace("ly", "")}
-                                                    </span>
-                                                </div>
-                                            </button>
+                                                    <div className="text-slate-700">
+                                                        {formatCurrency(plan.totalAmount || plan.amount, plan.currency)}{" "}
+                                                        <span className="text-[11px] text-slate-500">
+                                                            / {plan.planType.replace("ly", "")}
+                                                        </span>
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* GST Breakdown for selected plan */}
+                                    {selectedPlanId && (() => {
+                                        const selectedPlan = paidPlans.find(p => p._id === selectedPlanId);
+                                        if (!selectedPlan) return null;
+
+                                        const baseAmount = selectedPlan.amount;
+                                        const totalAmount = selectedPlan.totalAmount || selectedPlan.amount;
+                                        const gstAmount = totalAmount - baseAmount;
+                                        const taxSplit = getTaxSplit(
+                                            gstAmount,
+                                            selectedPlan.taxPercentage || 0,
+                                            user?.address,
+                                            companyDetails?.state,
+                                            companyDetails?.country
                                         );
-                                    })}
+
+                                        return (
+                                            <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-3 space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                <div className="flex justify-between text-[11px] text-slate-600">
+                                                    <span>Base Price:</span>
+                                                    <span>{formatCurrency(baseAmount, selectedPlan.currency)}</span>
+                                                </div>
+                                                {taxSplit.components.map((comp, idx) => (
+                                                    <div key={idx} className="flex justify-between text-[11px] text-slate-600">
+                                                        <span>{comp.label} ({comp.rate}%):</span>
+                                                        <span>+ {formatCurrency(comp.amount, selectedPlan.currency)}</span>
+                                                    </div>
+                                                ))}
+                                                <div className="flex justify-between border-t border-slate-200 pt-1.5 mt-1 font-bold text-slate-900 text-xs uppercase tracking-tight">
+                                                    <span>Total Payable:</span>
+                                                    <span>{formatCurrency(totalAmount, selectedPlan.currency)}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             )}
 

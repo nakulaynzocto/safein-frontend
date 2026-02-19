@@ -135,20 +135,20 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         () => ({
             control: (base, state) => ({
                 ...base,
-                backgroundColor: "#f3f4f64d", // bg-muted/30 approx
-                minHeight: 48, // h-12
+                backgroundColor: state.isFocused ? "var(--background)" : "var(--muted)", // Match typical input behavior
+                minHeight: 48,
                 height: 48,
-                borderRadius: 12, // rounded-xl
-                borderColor: error ? "#ef4444" : state.isFocused ? "#3882a5" : "#e5e7eb",
+                borderRadius: 12,
+                borderColor: error ? "var(--destructive)" : state.isFocused ? "var(--primary)" : "var(--border)",
                 boxShadow: state.isFocused
                     ? error
-                        ? "0 0 0 2px rgba(239, 68, 68, 0.2)"
-                        : "0 0 0 2px rgba(56, 130, 165, 0.2)"
+                        ? "0 0 0 2px var(--destructive-ring)"
+                        : "0 0 0 2px var(--primary-ring)"
                     : "none",
                 cursor: isFieldDisabled ? "not-allowed" : "pointer",
                 opacity: isFieldDisabled ? 0.6 : 1,
                 "&:hover": {
-                    borderColor: state.isFocused ? (error ? "#ef4444" : "#3882a5") : "#d1d5db",
+                    borderColor: state.isFocused ? (error ? "var(--destructive)" : "var(--primary)") : "var(--border-hover, var(--border))",
                 },
             }),
             valueContainer: (base) => ({
@@ -157,17 +157,17 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
             }),
             placeholder: (base) => ({
                 ...base,
-                color: "#6b7280",
+                color: "var(--muted-foreground)",
                 fontSize: 14,
             }),
             singleValue: (base) => ({
                 ...base,
-                color: "#161718",
+                color: "var(--foreground)",
                 fontSize: 14,
             }),
             input: (base) => ({
                 ...base,
-                color: "#161718",
+                color: "var(--foreground)",
                 fontSize: 14,
                 margin: 0,
                 padding: 0,
@@ -175,26 +175,26 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
             indicatorSeparator: () => ({ display: "none" }),
             dropdownIndicator: (base, state) => ({
                 ...base,
-                color: "#6b7280",
+                color: "var(--muted-foreground)",
                 padding: "0 8px",
                 transition: "transform 0.2s",
                 transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : undefined,
                 "&:hover": {
-                    color: "#161718",
+                    color: "var(--foreground)",
                 },
             }),
             clearIndicator: (base) => ({
                 ...base,
-                color: "#6b7280",
+                color: "var(--muted-foreground)",
                 padding: "0 4px",
                 "&:hover": {
-                    color: "#ef4444",
+                    color: "var(--destructive)",
                 },
             }),
             menu: (base) => ({
                 ...base,
-                backgroundColor: "#ffffff",
-                border: "1px solid #e5e7eb",
+                backgroundColor: "var(--popover)",
+                border: "1px solid var(--border)",
                 borderRadius: 8,
                 boxShadow: "0 10px 40px rgba(0, 0, 0, 0.2)",
                 marginTop: 4,
@@ -212,26 +212,36 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
             }),
             option: (base, { isDisabled: optDisabled, isFocused, isSelected }) => ({
                 ...base,
-                backgroundColor: optDisabled ? "#f9fafb" : isSelected ? "#3882a5" : isFocused ? "#e9eff6" : "#ffffff",
-                color: optDisabled ? "#9ca3af" : isSelected ? "#ffffff" : "#161718",
+                backgroundColor: optDisabled
+                    ? "transparent"
+                    : isSelected
+                        ? "var(--primary)"
+                        : isFocused
+                            ? "var(--accent)"
+                            : "transparent",
+                color: optDisabled
+                    ? "var(--muted-foreground)"
+                    : isSelected
+                        ? "var(--primary-foreground)"
+                        : "var(--foreground)",
                 cursor: optDisabled ? "not-allowed" : "pointer",
                 padding: "10px 12px",
                 borderRadius: 4,
                 fontSize: 14,
                 fontWeight: isSelected ? 500 : 400,
                 "&:active": {
-                    backgroundColor: isSelected ? "#2c6b8a" : "#d1e7f2",
+                    backgroundColor: isSelected ? "var(--primary)" : "var(--accent)",
                 },
             }),
             noOptionsMessage: (base) => ({
                 ...base,
-                color: "#6b7280",
+                color: "var(--muted-foreground)",
                 fontSize: 14,
                 padding: "12px",
             }),
             loadingMessage: (base) => ({
                 ...base,
-                color: "#6b7280",
+                color: "var(--muted-foreground)",
                 fontSize: 14,
             }),
         }),

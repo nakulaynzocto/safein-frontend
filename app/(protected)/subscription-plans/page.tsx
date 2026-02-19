@@ -4,12 +4,19 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan } from "@/store/api/subscriptionApi";
+import { useGetSafeinProfileQuery } from "@/store/api/safeinProfileApi";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getTaxSplit } from "@/utils/invoiceHelpers";
+import { useAppSelector } from "@/store/hooks";
+import { formatCurrency } from "@/utils/helpers";
 
 export default function SubscriptionPlansPage() {
     const { data, isLoading, error } = useGetAllSubscriptionPlansQuery({ isActive: true });
+    const { data: safeinProfile } = useGetSafeinProfileQuery();
+    const { user } = useAppSelector((state) => state.auth);
 
     const plans: ISubscriptionPlan[] = data?.data?.plans || [];
+    const companyDetails = safeinProfile?.data?.companyDetails;
 
     return (
         <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
@@ -70,7 +77,35 @@ export default function SubscriptionPlansPage() {
                                     </CardHeader>
                                     <CardContent className="space-y-3 pt-0">
                                         <div className="space-y-0.5 text-center">
-                                            <div className="text-2xl font-bold">₹{Math.round(plan.amount)}</div>
+                                            <div className="text-2xl font-bold">₹{Math.round(plan.totalAmount || plan.amount)}</div>
+                                            {(plan.totalAmount || 0) > plan.amount && (() => {
+                                                const gstAmount = (plan.totalAmount || 0) - plan.amount;
+                                                const taxSplit = getTaxSplit(
+                                                    gstAmount,
+                                                    plan.taxPercentage || 0,
+                                                    user?.address,
+                                                    companyDetails?.state,
+                                                    companyDetails?.country
+                                                );
+
+                                                return (
+                                                    <div className="flex flex-col items-center">
+                                                        <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">(Incl. GST)</div>
+                                                        <div className="flex flex-col items-center text-[9px] text-gray-400 border-t border-gray-100 pt-1 w-24">
+                                                            <div className="flex justify-between w-full">
+                                                                <span>Base:</span>
+                                                                <span>{formatCurrency(plan.amount, plan.currency)}</span>
+                                                            </div>
+                                                            {taxSplit.components.map((comp, idx) => (
+                                                                <div key={idx} className="flex justify-between w-full">
+                                                                    <span>{comp.label}:</span>
+                                                                    <span>{formatCurrency(comp.amount, plan.currency)}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
                                             <div className="text-muted-foreground text-[10px]">
                                                 {plan.planType === "free"
                                                     ? "Card verification - 3 Days Trial"

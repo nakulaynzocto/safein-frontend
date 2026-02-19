@@ -55,6 +55,7 @@ interface SubscriptionHistoryTableProps {
     // Assuming we can get total pages from API or parent logic, default to 1 if not
     totalPages?: number;
     user?: any;
+    businessProfile?: any;
 }
 
 export const SubscriptionHistoryTable = ({
@@ -64,6 +65,7 @@ export const SubscriptionHistoryTable = ({
     onPageChange,
     totalPages = 1,
     user,
+    businessProfile,
 }: SubscriptionHistoryTableProps) => {
     const [selectedInvoice, setSelectedInvoice] = useState<SubscriptionItem | null>(null);
     const [isViewOpen, setIsViewOpen] = useState(false);
@@ -352,6 +354,7 @@ export const SubscriptionHistoryTable = ({
                                 ref={invoiceRef}
                                 subscription={selectedInvoice}
                                 user={user}
+                                businessProfile={businessProfile}
                             />
                         </div>
                     </div>

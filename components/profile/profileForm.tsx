@@ -19,6 +19,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { CountryStateCitySelect } from "@/components/common/countryStateCity";
 import { Textarea } from "@/components/ui/textarea"; // Using Textarea component
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useUploadFileMutation } from "@/store/api";
@@ -29,7 +30,7 @@ import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 // Expanded Schema to match Super Admin
 // Note: Schema validation will be conditional based on user role
 const createProfileSchema = (isEmployee: boolean) => z.object({
-    companyName: isEmployee 
+    companyName: isEmployee
         ? z.string().optional() // Optional for employees (will be ignored)
         : z.string()
             .min(2, "Company name must be at least 2 characters")
@@ -84,7 +85,7 @@ interface ProfileFormProps {
 export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     const { user: currentUser } = useAppSelector((state) => state.auth);
     const isEmployee = checkIsEmployee(currentUser);
-    
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [profileImage, setProfileImage] = useState<string | null>(profile?.profilePicture || null);
     const [isUploading, setIsUploading] = useState(false);
@@ -102,7 +103,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
             street: profile?.address?.street || "",
             city: profile?.address?.city || "",
             state: profile?.address?.state || "",
-            country: profile?.address?.country || "India",
+            country: profile?.address?.country || "IN",
             pincode: profile?.address?.pincode || "",
         },
         socialLinks: {
@@ -114,7 +115,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     };
     // Create schema based on employee status
     const profileSchema = z.object({
-        companyName: isEmployee 
+        companyName: isEmployee
             ? z.string().optional() // Optional for employees (will be ignored)
             : z.string()
                 .min(2, "Company name must be at least 2 characters")
@@ -137,7 +138,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
         }),
         isActive: z.boolean().optional(),
     });
-    
+
     const {
         register,
         handleSubmit,
@@ -163,7 +164,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                     street: profile.address?.street || "",
                     city: profile.address?.city || "",
                     state: profile.address?.state || "",
-                    country: profile.address?.country || "India",
+                    country: profile.address?.country || "IN",
                     pincode: profile.address?.pincode || "",
                 },
                 socialLinks: {
@@ -445,57 +446,26 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             <p className="text-xs text-destructive mt-1">{errors.address.street.message}</p>
                                         )}
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label
-                                                htmlFor="city"
-                                                className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
-                                            >
-                                                City
-                                            </Label>
-                                            <Input
-                                                id="city"
-                                                {...register("address.city")}
-                                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.city ? "border-destructive" : ""}`}
-                                            />
-                                            {errors.address?.city && (
-                                                <p className="text-xs text-destructive mt-1">{errors.address.city.message}</p>
-                                            )}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label
-                                                htmlFor="state"
-                                                className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
-                                            >
-                                                State
-                                            </Label>
-                                            <Input
-                                                id="state"
-                                                {...register("address.state")}
-                                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.state ? "border-destructive" : ""}`}
-                                            />
-                                            {errors.address?.state && (
-                                                <p className="text-xs text-destructive mt-1">{errors.address.state.message}</p>
-                                            )}
-                                        </div>
+                                    <div className="pt-2">
+                                        <CountryStateCitySelect
+                                            value={{
+                                                country: watch("address.country") || "IN",
+                                                state: watch("address.state") || "",
+                                                city: watch("address.city") || "",
+                                            }}
+                                            onChange={(v: any) => {
+                                                setValue("address.country", v.country, { shouldDirty: true });
+                                                setValue("address.state", v.state, { shouldDirty: true });
+                                                setValue("address.city", v.city, { shouldDirty: true });
+                                            }}
+                                            errors={{
+                                                country: errors.address?.country?.message,
+                                                state: errors.address?.state?.message,
+                                                city: errors.address?.city?.message,
+                                            }}
+                                        />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label
-                                                htmlFor="country"
-                                                className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
-                                            >
-                                                Country
-                                            </Label>
-                                            <Input
-                                                id="country"
-                                                {...register("address.country")}
-                                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.country ? "border-destructive" : ""}`}
-                                            />
-                                            {errors.address?.country && (
-                                                <p className="text-xs text-destructive mt-1">{errors.address.country.message}</p>
-                                            )}
-                                        </div>
+                                    <div className="grid grid-cols-1 gap-4">
                                         <div className="space-y-2">
                                             <Label
                                                 htmlFor="pincode"
