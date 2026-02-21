@@ -26,7 +26,7 @@ const companySchema = yup.object({
         .string()
         .required("Mobile number is required")
         .matches(/^[0-9]{10,12}$/, "Invalid mobile number. Must be 10-12 digits."),
-    street: yup.string().required("Street address is required"),
+    street: yup.string().required("Company address is required"),
     city: yup.string().required("City is required"),
     state: yup.string().required("State is required"),
     pincode: yup
@@ -94,9 +94,6 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                 showCloseButton={false}
             >
                 <DialogHeader>
-                    <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-2">
-                        <Building2 className="w-6 h-6 text-primary" />
-                    </div>
                     <DialogTitle className="text-2xl text-center">Complete Company Profile</DialogTitle>
                     <DialogDescription className="text-center">
                         Please provide your company's contact and address details to continue to the dashboard.
@@ -105,7 +102,7 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="col-span-1 md:col-span-2">
+                        <div className="col-span-1">
                             <InputField
                                 label="Company Name"
                                 placeholder="Enter your company name"
@@ -115,24 +112,13 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                                 required
                             />
                         </div>
-                        <div className="col-span-1 md:col-span-2">
+                        <div className="col-span-1">
                             <InputField
                                 label="Mobile Number"
                                 placeholder="e.g. 9876543210"
                                 icon={<Phone className="w-4 h-4" />}
                                 error={errors.mobileNumber?.message}
                                 {...register("mobileNumber")}
-                                required
-                            />
-                        </div>
-
-                        <div className="col-span-1 md:col-span-2">
-                            <InputField
-                                label="Street Address"
-                                placeholder="Building No, Street Name"
-                                icon={<MapPin className="w-4 h-4" />}
-                                error={errors.street?.message}
-                                {...register("street")}
                                 required
                             />
                         </div>
@@ -157,6 +143,17 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                                     city: errors.city?.message,
                                     postalCode: errors.pincode?.message,
                                 }}
+                                required
+                            />
+                        </div>
+
+                        <div className="col-span-1 md:col-span-2">
+                            <InputField
+                                label="Company Address"
+                                placeholder="Building No"
+                                icon={<MapPin className="w-4 h-4" />}
+                                error={errors.street?.message}
+                                {...register("street")}
                                 required
                             />
                         </div>
