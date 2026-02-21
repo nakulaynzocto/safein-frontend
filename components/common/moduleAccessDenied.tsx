@@ -54,29 +54,29 @@ export function ModuleAccessDenied({
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl opacity-50" />
             </div>
 
-            <Card className="w-full max-w-lg overflow-hidden border-border/50 shadow-xl backdrop-blur-sm bg-background/95 relative">
+            <Card className="w-full max-w-2xl overflow-hidden border-border/50 shadow-xl backdrop-blur-sm bg-background/95 relative">
                 {/* Decorative top accent */}
                 <div className={cn(
                     "absolute top-0 left-0 right-0 h-1.5 w-full",
                     isError ? "bg-primary" : "bg-accent"
                 )} />
 
-                <CardHeader className="text-center pb-2 px-6 pt-10 sm:pt-12">
+                <CardHeader className="text-center pb-2 px-6 pt-6 sm:pt-8">
                     <div className={cn(
-                        "mx-auto mb-6 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full shadow-sm ring-4 ring-white transition-transform hover:scale-105 duration-300",
+                        "mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full shadow-sm ring-4 ring-white transition-transform hover:scale-105 duration-300",
                         isError ? "bg-primary/10 text-primary" : "bg-accent/10 text-accent"
                     )}>
-                        <Icon className="h-8 w-8 sm:h-10 sm:w-10" />
+                        <Icon className="h-7 w-7 sm:h-8 sm:w-8" />
                     </div>
                     <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
                         {title}
                     </CardTitle>
-                    <CardDescription className="text-base sm:text-lg text-gray-500 mt-3 leading-relaxed max-w-sm mx-auto">
+                    <CardDescription className="text-base sm:text-lg text-gray-500 mt-2 leading-relaxed max-w-xl mx-auto">
                         {description}
                     </CardDescription>
                 </CardHeader>
 
-                <CardFooter className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4 pb-8 sm:pb-10 px-6 sm:px-10">
+                <CardFooter className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-2 pb-6 sm:pb-8 px-6 sm:px-10">
                     {isEmployee ? (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 w-full">
                             <p className="text-sm text-gray-600 italic text-center flex items-center justify-center gap-2">

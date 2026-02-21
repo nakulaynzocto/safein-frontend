@@ -298,14 +298,14 @@ export function RegisterForm() {
                             ? "Registration Complete!"
                             : currentStep === "otp"
                                 ? "Verify Your Email"
-                                : "Create Account"}
+                                : ""}
                     </h1>
                     <p className="text-muted-foreground text-lg">
                         {currentStep === "success"
                             ? "Your account has been successfully created"
                             : currentStep === "otp"
                                 ? "Enter the OTP sent to your email"
-                                : "Join thousands of users today"}
+                                : ""}
                     </p>
                 </div>
             </div>

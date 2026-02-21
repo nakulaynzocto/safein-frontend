@@ -140,10 +140,6 @@ export function LoginForm() {
                     </Button>
                 </div>
 
-                <div className="space-y-2">
-                    <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">Welcome Back</h1>
-                    <p className="text-muted-foreground text-lg">Sign in to manage your visitors</p>
-                </div>
             </div>
 
             <div className="space-y-6">
@@ -222,7 +218,6 @@ export function LoginForm() {
                         </Button>
                     </div>
                 </form>
-
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t border-gray-100" />
