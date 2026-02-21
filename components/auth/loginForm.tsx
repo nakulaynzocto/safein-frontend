@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -124,105 +126,116 @@ export function LoginForm() {
     });
 
     return (
-        <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-                <div className="mb-4 flex items-center justify-between">
+        <div className="w-full">
+            <div className="mb-10">
+                <div className="mb-6 flex items-center">
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => router.push(routes.publicroute.HOME)}
-                        className="text-muted-foreground hover:bg-[#3882a5] hover:text-white"
+                        className="text-muted-foreground hover:bg-[#3882a5] hover:text-white rounded-lg px-3"
                     >
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back
+                        Back to Home
                     </Button>
-                    <div className="flex flex-1 justify-center">
-                        <img src="/aynzo-logo.svg" alt="Aynzo Logo" className="h-10 w-auto" />
-                    </div>
-                    <div className="w-20"></div>
                 </div>
-                <CardTitle className="text-brand text-2xl">Welcome Back</CardTitle>
-                <CardDescription>Sign in to your account</CardDescription>
-            </CardHeader>
-            <CardContent>
+
+                <div className="space-y-2">
+                    <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">Welcome Back</h1>
+                    <p className="text-muted-foreground text-lg">Sign in to manage your visitors</p>
+                </div>
+            </div>
+
+            <div className="space-y-6">
                 {errorMessage && (
-                    <Alert variant="destructive" className="mb-4">
+                    <Alert variant="destructive" className="border-red-100 bg-red-50 text-red-900 rounded-xl">
                         <AlertDescription>{errorMessage}</AlertDescription>
                     </Alert>
                 )}
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    <InputField
-                        label="Email"
-                        type="email"
-                        placeholder="Enter your email"
-                        error={errors.email?.message}
-                        required
-                        {...register("email")}
-                    />
 
-                    <InputField
-                        label="Password"
-                        type="password"
-                        placeholder="Enter your password"
-                        error={errors.password?.message}
-                        required
-                        {...register("password")}
-                    />
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="space-y-4">
+                        <InputField
+                            label="Email"
+                            type="email"
+                            placeholder="Enter your email"
+                            error={errors.email?.message}
+                            required
+                            {...register("email")}
+                            className="h-12 rounded-xl border-gray-200 focus:border-[#3882a5]"
+                        />
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                            Security Check: {captcha.num1} + {captcha.num2} = ?
-                        </label>
-                        <div className="flex gap-2">
-                            <InputField
-                                placeholder="Answer"
-                                type="number"
-                                value={captchaInput}
-                                onChange={(e) => setCaptchaInput(e.target.value)}
-                                error={captchaError || undefined}
-                                className="flex-1"
-                                required
-                            />
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={generateCaptcha}
-                                className="h-12 w-12 rounded-xl"
-                                title="Refresh Captcha"
-                            >
-                                🔄
-                            </Button>
-                        </div>
+                        <InputField
+                            label="Password"
+                            type="password"
+                            placeholder="Enter your password"
+                            error={errors.password?.message}
+                            required
+                            {...register("password")}
+                            className="h-12 rounded-xl border-gray-200 focus:border-[#3882a5]"
+                        />
                     </div>
 
                     <div className="flex items-center justify-end">
                         <Link
                             href={routes.publicroute.FORGOT_PASSWORD}
-                            className="text-primary text-sm hover:underline"
+                            className="text-[#3882a5] text-sm font-semibold hover:underline"
                         >
                             Forgot password?
                         </Link>
                     </div>
 
-                    <Button type="submit" className="w-full h-12 rounded-xl font-bold" disabled={isLoading || isGoogleLoading}>
-                        {isLoading ? "Signing in..." : "Sign In"}
-                    </Button>
+                    <div className="space-y-4">
+                        <div className="space-y-3">
+                            <label className="text-sm font-semibold text-gray-700">
+                                Security Check: {captcha.num1} + {captcha.num2} = ?
+                            </label>
+                            <div className="flex gap-2">
+                                <InputField
+                                    placeholder="Answer"
+                                    type="number"
+                                    value={captchaInput}
+                                    onChange={(e) => setCaptchaInput(e.target.value)}
+                                    error={captchaError || undefined}
+                                    className="flex-1 h-12 rounded-xl border-gray-200"
+                                    required
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={generateCaptcha}
+                                    className="h-12 w-12 rounded-xl border-gray-200 hover:bg-gray-50 bg-white"
+                                    title="Refresh Captcha"
+                                >
+                                    🔄
+                                </Button>
+                            </div>
+                        </div>
+
+                        <Button
+                            type="submit"
+                            className="w-full h-12 rounded-xl font-bold bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98]"
+                            disabled={isLoading || isGoogleLoading}
+                        >
+                            {isLoading ? "Signing in..." : "Sign In"}
+                        </Button>
+                    </div>
                 </form>
 
-                <div className="relative my-6">
+                <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-gray-200" />
+                        <span className="w-full border-t border-gray-100" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
+                        <span className="bg-white px-4 text-muted-foreground font-medium">Or continue with</span>
                     </div>
                 </div>
 
                 <Button
                     type="button"
                     variant="outline"
-                    className="w-full h-12 rounded-xl border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3"
+                    className="w-full h-12 rounded-xl border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3 font-semibold transition-colors"
                     onClick={() => handleGoogleLogin()}
                     disabled={isLoading || isGoogleLoading}
                 >
@@ -230,19 +243,19 @@ export function LoginForm() {
                     {isGoogleLoading ? "Connecting..." : "Continue with Google"}
                 </Button>
 
-                <div className="mt-6 text-center">
-                    <p className="text-muted-foreground text-sm">
+                <div className="text-center pt-2">
+                    <p className="text-gray-600 text-sm">
                         Don't have an account?{" "}
                         <Link
                             href={routes.publicroute.REGISTER}
-                            className="text-primary hover:underline"
+                            className="text-[#3882a5] font-bold hover:underline"
                             prefetch={true}
                         >
-                            Sign up
+                            Create an account
                         </Link>
                     </p>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }

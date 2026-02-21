@@ -238,9 +238,6 @@ export default function FeaturesPage() {
                     {/* Hero Section */}
                     <section className="bg-hero-gradient px-4 py-12 sm:px-6 sm:py-16 md:py-20">
                         <div className="container mx-auto text-center">
-                            <Badge className="mb-4 bg-yellow-400 text-gray-900">
-                                6+ New Features Added
-                            </Badge>
                             <h1 className="mb-4 px-2 text-2xl leading-tight font-bold text-white sm:mb-6 sm:px-0 sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
                                 Powerful Features for Modern Visitor Management
                             </h1>

@@ -88,115 +88,136 @@ export function ResetPasswordForm() {
 
     if (isSuccess) {
         return (
-            <Card className="w-full max-w-md">
-                <CardHeader className="text-center">
-                    <div className="mb-4 flex justify-center">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                            <CheckCircle className="h-8 w-8 text-green-600" />
+            <div className="w-full">
+                <div className="mb-10 text-center">
+                    <div className="mb-6 flex justify-center">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100 shadow-lg shadow-green-100/50">
+                            <CheckCircle className="h-10 w-10 text-green-600" />
                         </div>
                     </div>
-                    <CardTitle className="text-brand text-2xl">Password Reset Successful</CardTitle>
-                    <CardDescription>Your password has been successfully reset</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <Alert>
-                        <CheckCircle className="h-4 w-4" />
-                        <AlertDescription>
+                    <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-2">Reset Successful</h1>
+                    <p className="text-muted-foreground text-lg">Your password has been updated</p>
+                </div>
+
+                <div className="space-y-6">
+                    <Alert className="border-green-100 bg-green-50 rounded-xl">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <AlertDescription className="text-green-900 font-medium">
                             You can now sign in with your new password. Redirecting to login page...
                         </AlertDescription>
                     </Alert>
 
-                    <Button className="w-full" onClick={() => router.push(routes.publicroute.LOGIN)}>
+                    <Button
+                        className="w-full h-12 rounded-xl font-bold bg-[#3882a5] hover:bg-[#2c6a88]"
+                        onClick={() => router.push(routes.publicroute.LOGIN)}
+                    >
                         Go to Sign In
                     </Button>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         );
     }
 
     if (!token) {
         return (
-            <Card className="w-full max-w-md">
-                <CardHeader className="text-center">
-                    <CardTitle className="text-brand text-2xl">Invalid Reset Link</CardTitle>
-                    <CardDescription>The password reset link is invalid or has expired</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <Alert variant="destructive">
+            <div className="w-full">
+                <div className="mb-10 text-center lg:text-left">
+                    <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-2">Invalid Reset Link</h1>
+                    <p className="text-muted-foreground text-lg">The password reset link is invalid or has expired</p>
+                </div>
+
+                <div className="space-y-6">
+                    <Alert variant="destructive" className="border-red-100 bg-red-50 text-red-900 rounded-xl">
                         <AlertDescription>
                             {submitError || "Please request a new password reset link."}
                         </AlertDescription>
                     </Alert>
 
-                    <div className="space-y-2">
-                        <Button className="w-full" onClick={() => router.push(routes.publicroute.FORGOT_PASSWORD)}>
+                    <div className="space-y-4">
+                        <Button
+                            className="w-full h-12 rounded-xl font-bold bg-[#3882a5] hover:bg-[#2c6a88]"
+                            onClick={() => router.push(routes.publicroute.FORGOT_PASSWORD)}
+                        >
                             Request New Reset Link
                         </Button>
-                        <Link
-                            href={routes.publicroute.LOGIN}
-                            className="text-muted-foreground hover:text-primary flex items-center justify-center gap-2 text-sm transition-colors"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            Back to Sign In
-                        </Link>
+                        <div className="text-center pt-2">
+                            <Link
+                                href={routes.publicroute.LOGIN}
+                                className="text-[#3882a5] font-bold hover:underline flex items-center justify-center gap-2"
+                            >
+                                <ArrowLeft className="h-4 w-4" />
+                                Back to Sign In
+                            </Link>
+                        </div>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         );
     }
 
     return (
-        <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-                <div className="mb-4 flex justify-center">
-                    <div className="bg-brand/10 flex h-12 w-12 items-center justify-center rounded-full">
-                        <Lock className="text-brand h-6 w-6" />
+        <div className="w-full">
+            <div className="mb-10">
+                <div className="mb-6 flex justify-center">
+                    <div className="bg-[#3882a5]/10 flex h-16 w-16 items-center justify-center rounded-2xl shadow-inner">
+                        <Lock className="text-[#3882a5] h-8 w-8" />
                     </div>
                 </div>
-                <CardTitle className="text-brand text-2xl">Reset Your Password</CardTitle>
-                <CardDescription>Enter your new password below</CardDescription>
-            </CardHeader>
-            <CardContent>
+                <div className="space-y-2 text-center lg:text-left">
+                    <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">Secure Your Account</h1>
+                    <p className="text-muted-foreground text-lg">Enter your new strong password below</p>
+                </div>
+            </div>
+
+            <div className="space-y-6">
                 {submitError && (
-                    <Alert variant="destructive" className="mb-4">
+                    <Alert variant="destructive" className="border-red-100 bg-red-50 text-red-900 rounded-xl">
                         <AlertDescription>{submitError}</AlertDescription>
                     </Alert>
                 )}
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    <InputField
-                        label="New Password"
-                        type="password"
-                        placeholder="Enter your new password"
-                        error={errors.newPassword?.message}
-                        required
-                        {...register("newPassword")}
-                    />
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="space-y-4">
+                        <InputField
+                            label="New Password"
+                            type="password"
+                            placeholder="Min. 8 characters with numbers"
+                            error={errors.newPassword?.message}
+                            required
+                            {...register("newPassword")}
+                            className="h-12 rounded-xl border-gray-200 focus:border-[#3882a5]"
+                        />
 
-                    <InputField
-                        label="Confirm Password"
-                        type="password"
-                        placeholder="Confirm your new password"
-                        error={errors.confirmPassword?.message}
-                        required
-                        {...register("confirmPassword")}
-                    />
+                        <InputField
+                            label="Confirm Password"
+                            type="password"
+                            placeholder="Must match new password"
+                            error={errors.confirmPassword?.message}
+                            required
+                            {...register("confirmPassword")}
+                            className="h-12 rounded-xl border-gray-200 focus:border-[#3882a5]"
+                        />
+                    </div>
 
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading ? "Resetting..." : "Reset Password"}
+                    <Button
+                        type="submit"
+                        className="w-full h-12 rounded-xl font-bold bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-lg shadow-blue-500/20"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? "Resetting..." : "Update Password"}
                     </Button>
                 </form>
 
-                <div className="mt-6 text-center">
+                <div className="text-center pt-2">
                     <Link
                         href={routes.publicroute.LOGIN}
-                        className="text-muted-foreground hover:text-primary flex items-center justify-center gap-2 text-sm transition-colors"
+                        className="text-[#3882a5] font-bold hover:underline flex items-center justify-center gap-2"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Back to Sign In
                     </Link>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }

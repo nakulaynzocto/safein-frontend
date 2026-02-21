@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -276,68 +278,68 @@ export function RegisterForm() {
     };
 
     return (
-        <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-                <div className="mb-4 flex items-center justify-between">
+        <div className="w-full">
+            <div className="mb-10">
+                <div className="mb-6 flex items-center">
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => router.push(routes.publicroute.HOME)}
-                        className="text-muted-foreground hover:bg-[#3882a5] hover:text-white"
+                        className="text-muted-foreground hover:bg-[#3882a5] hover:text-white rounded-lg px-3"
                     >
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back
+                        Back to Home
                     </Button>
-                    <div className="flex flex-1 justify-center">
-                        <img src="/aynzo-logo.svg" alt="Aynzo Logo" className="h-10 w-auto" />
-                    </div>
-                    <div className="w-20"></div>
                 </div>
-                <CardTitle className="text-brand text-2xl">
-                    {currentStep === "success"
-                        ? "Registration Complete!"
-                        : currentStep === "otp"
-                            ? "Verify Your Email"
-                            : "Sign Up"}
-                </CardTitle>
-                <CardDescription>
-                    {currentStep === "success"
-                        ? "Your account has been successfully created"
-                        : currentStep === "otp"
-                            ? "Enter the OTP sent to your email"
-                            : "Sign up for your account"}
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
+
+                <div className="space-y-2">
+                    <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
+                        {currentStep === "success"
+                            ? "Registration Complete!"
+                            : currentStep === "otp"
+                                ? "Verify Your Email"
+                                : "Create Account"}
+                    </h1>
+                    <p className="text-muted-foreground text-lg">
+                        {currentStep === "success"
+                            ? "Your account has been successfully created"
+                            : currentStep === "otp"
+                                ? "Enter the OTP sent to your email"
+                                : "Join thousands of users today"}
+                    </p>
+                </div>
+            </div>
+
+            <div className="space-y-6">
                 {/* Error Messages */}
                 {submitError && (
-                    <Alert variant="destructive" className="mb-4">
+                    <Alert variant="destructive" className="border-red-100 bg-red-50 text-red-900 rounded-xl">
                         <AlertDescription>{submitError}</AlertDescription>
                     </Alert>
                 )}
 
                 {otpError && (
-                    <Alert variant="destructive" className="mb-4">
+                    <Alert variant="destructive" className="border-red-100 bg-red-50 text-red-900 rounded-xl">
                         <AlertDescription>{otpError}</AlertDescription>
                     </Alert>
                 )}
 
                 {/* Success Message */}
                 {currentStep === "success" && (
-                    <Alert className="mb-4 border-green-200 bg-green-50">
+                    <Alert className="mb-4 border-green-200 bg-green-50 rounded-xl">
                         <CheckCircle className="h-4 w-4 text-green-600" />
-                        <AlertDescription className="text-green-800">
-                            OTP verified — your account has been created.
+                        <AlertDescription className="text-green-800 font-medium">
+                            OTP verified — your account is ready!
                         </AlertDescription>
                     </Alert>
                 )}
 
                 {/* OTP Sent Message */}
                 {currentStep === "otp" && (
-                    <Alert className="mb-4 border-[#3882a5]/20 bg-[#3882a5]/5">
+                    <Alert className="mb-4 border-[#3882a5]/20 bg-[#3882a5]/5 rounded-xl">
                         <Mail className="h-4 w-4 text-[#3882a5]" />
-                        <AlertDescription className="text-[#074463]">
-                            OTP sent to {userEmail}. Please enter it below to complete registration.
+                        <AlertDescription className="text-[#074463] font-medium">
+                            OTP sent to <span className="font-bold">{userEmail}</span>.
                         </AlertDescription>
                     </Alert>
                 )}
@@ -354,19 +356,21 @@ export function RegisterForm() {
                                     error={errors.email?.message}
                                     {...registerField("email")}
                                     required
+                                    className="h-12 rounded-xl border-gray-200 focus:border-[#3882a5]"
                                 />
 
                                 <InputField
                                     label="Password"
                                     type="password"
-                                    placeholder="Create a password"
+                                    placeholder="Create a strong password"
                                     error={errors.password?.message}
                                     {...registerField("password")}
                                     required
+                                    className="h-12 rounded-xl border-gray-200 focus:border-[#3882a5]"
                                 />
 
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                <div className="space-y-3">
+                                    <label className="text-sm font-semibold text-gray-700">
                                         Security Check: {captcha.num1} + {captcha.num2} = ?
                                     </label>
                                     <div className="flex gap-2">
@@ -376,14 +380,14 @@ export function RegisterForm() {
                                             value={captchaInput}
                                             onChange={(e) => setCaptchaInput(e.target.value)}
                                             error={captchaError || undefined}
-                                            className="flex-1 h-12 rounded-xl"
+                                            className="flex-1 h-12 rounded-xl border-gray-200"
                                             required
                                         />
                                         <Button
                                             type="button"
                                             variant="outline"
                                             onClick={generateCaptcha}
-                                            className="h-12 w-12 rounded-xl"
+                                            className="h-12 w-12 rounded-xl border-gray-200 hover:bg-gray-50 bg-white"
                                             title="Refresh Captcha"
                                         >
                                             🔄
@@ -392,24 +396,28 @@ export function RegisterForm() {
                                 </div>
                             </div>
 
-                            <Button type="submit" variant="primary" className="w-full h-12 rounded-xl font-bold" disabled={isLoading || isGoogleLoading}>
-                                {isLoading ? "Registering..." : "Register"}
+                            <Button
+                                type="submit"
+                                className="w-full h-12 rounded-xl font-bold bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98]"
+                                disabled={isLoading || isGoogleLoading}
+                            >
+                                {isLoading ? "Creating account..." : "Register Now"}
                             </Button>
                         </form>
 
-                        <div className="relative my-6">
+                        <div className="relative">
                             <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t border-gray-200" />
+                                <span className="w-full border-t border-gray-100" />
                             </div>
                             <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
+                                <span className="bg-white px-4 text-muted-foreground font-medium">Or continue with</span>
                             </div>
                         </div>
 
                         <Button
                             type="button"
                             variant="outline"
-                            className="w-full h-12 rounded-xl border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3"
+                            className="w-full h-12 rounded-xl border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3 font-semibold transition-colors"
                             onClick={() => handleGoogleLogin()}
                             disabled={isLoading || isGoogleLoading}
                         >
@@ -422,15 +430,19 @@ export function RegisterForm() {
                 {/* OTP Verification Form */}
                 {currentStep === "otp" && (
                     <div className="space-y-6">
-                        <Button variant="ghost" onClick={handleBackToForm} className="mb-4">
+                        <Button
+                            variant="ghost"
+                            onClick={handleBackToForm}
+                            className="text-[#3882a5] hover:bg-[#3882a5]/10 font-semibold"
+                        >
                             <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Registration
+                            Back to registration
                         </Button>
 
                         <form onSubmit={handleOtpSubmit(onOtpSubmit)} className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    Enter Verification Code
+                            <div className="space-y-4">
+                                <label className="text-sm font-semibold text-gray-700 block text-center">
+                                    Enter 6-digit code
                                 </label>
                                 <div className="flex justify-center">
                                     <InputOTP
@@ -440,43 +452,24 @@ export function RegisterForm() {
                                         containerClassName="gap-2 md:gap-3"
                                     >
                                         <InputOTPGroup className="gap-2 md:gap-3">
-                                            <InputOTPSlot
-                                                index={0}
-                                                className="focus-within:border-primary focus-within:ring-primary/20 h-12 w-12 rounded-lg border-2 text-lg font-semibold transition-all focus-within:ring-2 md:h-14 md:w-14 md:text-xl"
-                                            />
-                                            <InputOTPSlot
-                                                index={1}
-                                                className="focus-within:border-primary focus-within:ring-primary/20 h-12 w-12 rounded-lg border-2 text-lg font-semibold transition-all focus-within:ring-2 md:h-14 md:w-14 md:text-xl"
-                                            />
-                                            <InputOTPSlot
-                                                index={2}
-                                                className="focus-within:border-primary focus-within:ring-primary/20 h-12 w-12 rounded-lg border-2 text-lg font-semibold transition-all focus-within:ring-2 md:h-14 md:w-14 md:text-xl"
-                                            />
-                                            <InputOTPSlot
-                                                index={3}
-                                                className="focus-within:border-primary focus-within:ring-primary/20 h-12 w-12 rounded-lg border-2 text-lg font-semibold transition-all focus-within:ring-2 md:h-14 md:w-14 md:text-xl"
-                                            />
-                                            <InputOTPSlot
-                                                index={4}
-                                                className="focus-within:border-primary focus-within:ring-primary/20 h-12 w-12 rounded-lg border-2 text-lg font-semibold transition-all focus-within:ring-2 md:h-14 md:w-14 md:text-xl"
-                                            />
-                                            <InputOTPSlot
-                                                index={5}
-                                                className="focus-within:border-primary focus-within:ring-primary/20 h-12 w-12 rounded-lg border-2 text-lg font-semibold transition-all focus-within:ring-2 md:h-14 md:w-14 md:text-xl"
-                                            />
+                                            {[0, 1, 2, 3, 4, 5].map((index) => (
+                                                <InputOTPSlot
+                                                    key={index}
+                                                    index={index}
+                                                    className="focus-within:border-[#3882a5] focus-within:ring-[#3882a5]/20 h-12 w-12 rounded-xl border-2 text-lg font-bold transition-all focus-within:ring-4 md:h-14 md:w-14"
+                                                />
+                                            ))}
                                         </InputOTPGroup>
                                     </InputOTP>
                                 </div>
-                                {otpErrors.otp?.message && (
-                                    <p className="text-destructive mt-1 text-sm">{otpErrors.otp.message}</p>
-                                )}
-                                {otpError && <p className="text-destructive mt-1 text-sm">{otpError}</p>}
-                                <p className="text-muted-foreground mt-2 text-center text-xs">
-                                    Enter the 6-digit code sent to your email
-                                </p>
+                                {otpError && <p className="text-destructive mt-1 text-sm text-center font-medium">{otpError}</p>}
                             </div>
 
-                            <Button type="submit" variant="primary" className="w-full" disabled={isVerifyingOtp || otpValue.length !== 6}>
+                            <Button
+                                type="submit"
+                                className="w-full h-12 rounded-xl font-bold bg-[#3882a5] hover:bg-[#2c6a88]"
+                                disabled={isVerifyingOtp || otpValue.length !== 6}
+                            >
                                 {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
                             </Button>
                         </form>
@@ -485,10 +478,10 @@ export function RegisterForm() {
                             <Button
                                 variant="link"
                                 onClick={handleResendOtp}
-                                className="text-sm"
+                                className="text-[#3882a5] font-semibold"
                                 disabled={isResendingOtp}
                             >
-                                {isResendingOtp ? "Resending..." : "Didn't receive OTP? Resend"}
+                                {isResendingOtp ? "Resending..." : "Didn't receive code? Resend"}
                             </Button>
                         </div>
                     </div>
@@ -498,17 +491,23 @@ export function RegisterForm() {
                 {currentStep === "success" && (
                     <div className="space-y-6">
                         <div className="text-center">
-                            <p className="mb-4 text-sm text-gray-600">
-                                Your account has been created successfully! You can now access your dashboard or login
-                                later.
+                            <p className="text-gray-600 text-lg">
+                                Welcome aboard! Your account has been created successfully.
                             </p>
                         </div>
 
-                        <div className="flex flex-col gap-3 sm:flex-row">
-                            <Button onClick={handleGoToDashboard} variant="primary" className="flex-1">
+                        <div className="flex flex-col gap-3">
+                            <Button
+                                onClick={handleGoToDashboard}
+                                className="w-full h-12 rounded-xl font-bold bg-[#3882a5] hover:bg-[#2c6a88]"
+                            >
                                 Go to Dashboard
                             </Button>
-                            <Button variant="outline" onClick={handleGoToLogin} className="flex-1">
+                            <Button
+                                variant="outline"
+                                onClick={handleGoToLogin}
+                                className="w-full h-12 rounded-xl border-gray-200"
+                            >
                                 Login Later
                             </Button>
                         </div>
@@ -517,20 +516,20 @@ export function RegisterForm() {
 
                 {/* Login Link */}
                 {currentStep === "form" && (
-                    <div className="mt-6 text-center">
-                        <p className="text-muted-foreground text-sm">
+                    <div className="text-center pt-2">
+                        <p className="text-gray-600 text-sm">
                             Already have an account?{" "}
                             <Link
                                 href={routes.publicroute.LOGIN}
-                                className="text-primary hover:underline"
+                                className="text-[#3882a5] font-bold hover:underline"
                                 prefetch={true}
                             >
-                                Sign in
+                                Sign in here
                             </Link>
                         </p>
                     </div>
                 )}
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }

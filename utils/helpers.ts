@@ -564,6 +564,8 @@ export function clearAuthData(): void {
     // Clear Storage
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("safein_support_g_token");
+    localStorage.removeItem("safein_support_ticket_id");
     sessionStorage.clear();
 
     // Clear authentication cookies

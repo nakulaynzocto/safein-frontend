@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, MessageSquareText, X } from 'lucide-react';
+import { MessageSquare, MessageSquareText, X, Loader2 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { toast } from 'sonner';
 import { ChatHeader } from './ChatHeader';
@@ -51,6 +51,7 @@ export default function SupportWidget() {
     const [mounted, setMounted] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [isAuthenticating, setIsAuthenticating] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const { user, token, isAuthenticated, isCurrentRoutePrivate } = useAuthSubscription(); // Get employee session if logged in
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -98,9 +99,18 @@ export default function SupportWidget() {
             socket = supportSocketService.connect(undefined, savedGoogleToken);
             socketRef.current = socket;
         } else {
-            if (savedGoogleToken) localStorage.removeItem("safein_support_g_token");
-            setUserMode("none");
-            return;
+            // Handle Logout or No Session
+            // We use a small timeout to prevent flicker during fast auth transitions (like Google -> Main App)
+            const timeout = setTimeout(() => {
+                if (!isAuthenticating && !googleToken && !token) {
+                    if (savedGoogleToken) localStorage.removeItem("safein_support_g_token");
+                    setUserMode("none");
+                    setMessages([]);
+                    setTicketId(null);
+                    localStorage.removeItem("safein_support_ticket_id");
+                }
+            }, 500);
+            return () => clearTimeout(timeout);
         }
 
         if (!socket) return;
@@ -220,12 +230,15 @@ export default function SupportWidget() {
 
             // ALSO log them into the main app so they are "really" logged in
             try {
+                setIsAuthenticating(true);
                 const result = await googleLogin({ token: gToken }).unwrap();
                 if (result.token && result.user) {
                     dispatch(setCredentials(result));
                 }
             } catch (err) {
                 console.error("Failed to sync main app auth with support google login:", err);
+            } finally {
+                setIsAuthenticating(false);
             }
         },
         onError: () => {
@@ -358,34 +371,48 @@ export default function SupportWidget() {
                                     <div className="absolute bottom-10 right-10 w-24 h-24 bg-primary-light/10 rounded-full blur-2xl"></div>
                                 </div>
 
+                                {isLoading || isAuthenticating ? (
+                                    <div className="flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-500">
+                                        <div className="relative">
+                                            <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
+                                            <Loader2 className="w-12 h-12 animate-spin text-primary relative z-10" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="font-bold text-gray-900 dark:text-white">Authenticating...</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">Please wait while we secure your connection</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-150">
+                                            <h4 className="font-bold text-gray-900 dark:text-white text-xl">Welcome! 👋</h4>
+                                            <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed">
+                                                This authorization is for security purposes. Sign in with Google to start chatting with our support team.
+                                            </p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed pt-2">
+                                                You can also contact our support team by phone:
+                                            </p>
+                                            <a href="tel:+918699966076" className="text-sm font-semibold text-primary hover:text-accent transition-colors">
+                                                +91 86999 66076
+                                            </a>
+                                        </div>
 
-                                <div className="space-y-3 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-150">
-                                    <h4 className="font-bold text-gray-900 dark:text-white text-xl">Welcome! 👋</h4>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed">
-                                        This authorization is for security purposes. Sign in with Google to start chatting with our support team.
-                                    </p>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed pt-2">
-                                        You can also contact our support team by phone:
-                                    </p>
-                                    <a href="tel:+918699966076" className="text-sm font-semibold text-primary hover:text-accent transition-colors">
-                                        +91 86999 66076
-                                    </a>
-                                </div>
+                                        <Button
+                                            onClick={() => loginWithGoogle()}
+                                            className="w-full bg-white dark:bg-slate-800 text-gray-800 dark:text-white border-2 border-gray-200 dark:border-slate-700 hover:border-accent dark:hover:border-accent hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 shadow-lg flex items-center justify-center gap-3 h-12 rounded-xl font-semibold group animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300"
+                                        >
+                                            <img src="https://www.google.com/favicon.ico" alt="G" className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                            Continue with Google
+                                        </Button>
 
-                                <Button
-                                    onClick={() => loginWithGoogle()}
-                                    className="w-full bg-white dark:bg-slate-800 text-gray-800 dark:text-white border-2 border-gray-200 dark:border-slate-700 hover:border-accent dark:hover:border-accent hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 shadow-lg flex items-center justify-center gap-3 h-12 rounded-xl font-semibold group animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300"
-                                >
-                                    <img src="https://www.google.com/favicon.ico" alt="G" className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    Continue with Google
-                                </Button>
-
-                                <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1.5 animate-in fade-in duration-700 delay-500">
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                                    </svg>
-                                    Secure & encrypted • We'll notify you via email
-                                </p>
+                                        <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1.5 animate-in fade-in duration-700 delay-500">
+                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                            </svg>
+                                            Secure & encrypted • We'll notify you via email
+                                        </p>
+                                    </>
+                                )}
                             </div>
                         )}
 
