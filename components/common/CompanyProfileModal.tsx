@@ -1,0 +1,179 @@
+"use client";
+
+import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { InputField } from "@/components/common/inputField";
+import { CountryStateCitySelect } from "@/components/common/countryStateCity";
+import { useUpdateProfileMutation } from "@/store/api/authApi";
+import { useAppDispatch } from "@/store/hooks";
+import { setUser } from "@/store/slices/authSlice";
+import { showSuccessToast, showErrorToast } from "@/utils/toast";
+import { Building2, MapPin, Phone, Loader2 } from "lucide-react";
+
+const companySchema = yup.object({
+    companyName: yup.string().required("Company name is required"),
+    mobileNumber: yup
+        .string()
+        .required("Mobile number is required")
+        .matches(/^[0-9]{10,12}$/, "Invalid mobile number. Must be 10-12 digits."),
+    street: yup.string().required("Street address is required"),
+    city: yup.string().required("City is required"),
+    state: yup.string().required("State is required"),
+    pincode: yup
+        .string()
+        .required("Pincode is required")
+        .matches(/^[0-9]{6}$/, "Pincode must be 6 digits"),
+    country: yup.string().required("Country is required"),
+});
+
+type CompanyFormData = yup.InferType<typeof companySchema>;
+
+interface CompanyProfileModalProps {
+    isOpen: boolean;
+}
+
+export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
+    const [updateProfile, { isLoading }] = useUpdateProfileMutation();
+
+    const {
+        register,
+        handleSubmit,
+        control,
+        watch,
+        setValue,
+        formState: { errors },
+    } = useForm<CompanyFormData>({
+        resolver: yupResolver(companySchema),
+        defaultValues: {
+            country: "IN",
+            state: "",
+            city: "",
+        },
+    });
+
+    const dispatch = useAppDispatch();
+    const onSubmit = async (data: CompanyFormData) => {
+        try {
+            const updatedUser = await updateProfile({
+                companyName: data.companyName,
+                mobileNumber: data.mobileNumber,
+                address: {
+                    street: data.street,
+                    city: data.city,
+                    state: data.state,
+                    pincode: data.pincode,
+                    country: data.country,
+                },
+            }).unwrap();
+
+            // Update auth state so the dashboard re-renders and closes the modal
+            dispatch(setUser(updatedUser));
+
+            showSuccessToast("Company profile updated successfully!");
+        } catch (error: any) {
+            showErrorToast(error?.data?.message || "Failed to update company profile");
+        }
+    };
+
+    return (
+        <Dialog open={isOpen}>
+            <DialogContent
+                className="sm:max-w-[700px] overflow-y-auto max-h-[90vh]"
+                onPointerDownOutside={(e) => e.preventDefault()}
+                onEscapeKeyDown={(e) => e.preventDefault()}
+                showCloseButton={false}
+            >
+                <DialogHeader>
+                    <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-2">
+                        <Building2 className="w-6 h-6 text-primary" />
+                    </div>
+                    <DialogTitle className="text-2xl text-center">Complete Company Profile</DialogTitle>
+                    <DialogDescription className="text-center">
+                        Please provide your company's contact and address details to continue to the dashboard.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="col-span-1 md:col-span-2">
+                            <InputField
+                                label="Company Name"
+                                placeholder="Enter your company name"
+                                icon={<Building2 className="w-4 h-4" />}
+                                error={errors.companyName?.message}
+                                {...register("companyName")}
+                                required
+                            />
+                        </div>
+                        <div className="col-span-1 md:col-span-2">
+                            <InputField
+                                label="Mobile Number"
+                                placeholder="e.g. 9876543210"
+                                icon={<Phone className="w-4 h-4" />}
+                                error={errors.mobileNumber?.message}
+                                {...register("mobileNumber")}
+                                required
+                            />
+                        </div>
+
+                        <div className="col-span-1 md:col-span-2">
+                            <InputField
+                                label="Street Address"
+                                placeholder="Building No, Street Name"
+                                icon={<MapPin className="w-4 h-4" />}
+                                error={errors.street?.message}
+                                {...register("street")}
+                                required
+                            />
+                        </div>
+
+                        <div className="col-span-1 md:col-span-2">
+                            <CountryStateCitySelect
+                                value={{
+                                    country: watch("country") || "",
+                                    state: watch("state") || "",
+                                    city: watch("city") || "",
+                                    postalCode: watch("pincode") || "",
+                                }}
+                                onChange={(val) => {
+                                    setValue("country", val.country, { shouldValidate: true });
+                                    setValue("state", val.state, { shouldValidate: true });
+                                    setValue("city", val.city, { shouldValidate: true });
+                                    setValue("pincode", val.postalCode || "", { shouldValidate: true });
+                                }}
+                                errors={{
+                                    country: errors.country?.message,
+                                    state: errors.state?.message,
+                                    city: errors.city?.message,
+                                    postalCode: errors.pincode?.message,
+                                }}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <Button type="submit" className="w-full h-12 text-lg font-semibold" disabled={isLoading}>
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                Saving Details...
+                            </>
+                        ) : (
+                            "Complete Setup"
+                        )}
+                    </Button>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}

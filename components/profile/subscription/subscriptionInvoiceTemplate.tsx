@@ -134,13 +134,13 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                             </div>
                         </div>
 
-                        {/* Billed From */}
+                        {/* Invoice From */}
                         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
                             <div
                                 style={{ backgroundColor: primaryColor }}
                                 className="px-3 py-1.5 text-white font-bold text-[10px] uppercase tracking-wide"
                             >
-                                BILLED FROM:
+                                INVOICE FROM:
                             </div>
                             <div className="p-3 text-slate-700 text-xs space-y-0.5">
                                 <p className="font-bold text-sm text-slate-900">

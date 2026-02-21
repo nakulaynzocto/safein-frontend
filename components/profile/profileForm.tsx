@@ -36,16 +36,16 @@ const createProfileSchema = (isEmployee: boolean) => z.object({
             .min(2, "Company name must be at least 2 characters")
             .max(100, "Company name cannot exceed 100 characters"),
     email: z.string().email("Invalid email format").min(1, "Email is required"),
-    mobileNumber: z.string().max(20, "Mobile number too long").optional(),
+    mobileNumber: z.string().min(1, "Mobile number is required").max(20, "Mobile number too long"),
     bio: z.string().max(500, "Biography must be less than 500 characters").optional(),
     profilePicture: z.string().optional(),
     address: z.object({
-        street: z.string().max(200, "Address too long").optional(),
-        city: z.string().max(100, "City too long").optional(),
-        state: z.string().max(100, "State too long").optional(),
-        country: z.string().max(100, "Country too long").optional(),
-        pincode: z.string().max(20, "Pincode too long").optional(),
-    }).optional(),
+        street: z.string().min(1, "Street address is required").max(200, "Address too long"),
+        city: z.string().min(1, "City is required").max(100, "City too long"),
+        state: z.string().min(1, "State is required").max(100, "State too long"),
+        country: z.string().min(1, "Country is required").max(100, "Country too long"),
+        pincode: z.string().min(1, "Pincode is required").max(20, "Pincode too long"),
+    }),
     socialLinks: z.object({
         linkedin: z.string().url("Invalid LinkedIn URL").optional().or(z.literal("")),
         twitter: z.string().url("Invalid Twitter URL").optional().or(z.literal("")),
@@ -125,11 +125,11 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
         bio: z.string().max(500, "Biography must be less than 500 characters").optional(),
         profilePicture: z.string().optional(),
         address: z.object({
-            street: z.string().max(200, "Address too long").optional(),
-            city: z.string().max(100, "City too long").optional(),
-            state: z.string().max(100, "State too long").optional(),
-            country: z.string().max(100, "Country too long").optional(),
-            pincode: z.string().max(20, "Pincode too long").optional(),
+            street: z.string().min(1, "Street address is required").max(200, "Address too long"),
+            city: z.string().min(1, "City is required").max(100, "City too long"),
+            state: z.string().min(1, "State is required").max(100, "State too long"),
+            country: z.string().min(1, "Country is required").max(100, "Country too long"),
+            pincode: z.string().min(1, "Pincode is required").max(20, "Pincode too long"),
         }),
         socialLinks: z.object({
             linkedin: z.string().url("Invalid LinkedIn URL").optional().or(z.literal("")),
@@ -382,7 +382,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                     htmlFor="mobileNumber"
                                     className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
                                 >
-                                    Contact Number
+                                    Contact Number <span className="text-destructive font-bold">*</span>
                                 </Label>
                                 <div className="relative group">
                                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
@@ -435,7 +435,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             htmlFor="street"
                                             className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
                                         >
-                                            Street / Locality
+                                            Street / Locality <span className="text-destructive font-bold">*</span>
                                         </Label>
                                         <Input
                                             id="street"
@@ -452,36 +452,22 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                                 country: watch("address.country") || "IN",
                                                 state: watch("address.state") || "",
                                                 city: watch("address.city") || "",
+                                                postalCode: watch("address.pincode") || "",
                                             }}
                                             onChange={(v: any) => {
                                                 setValue("address.country", v.country, { shouldDirty: true });
                                                 setValue("address.state", v.state, { shouldDirty: true });
                                                 setValue("address.city", v.city, { shouldDirty: true });
+                                                setValue("address.pincode", v.postalCode, { shouldDirty: true });
                                             }}
                                             errors={{
                                                 country: errors.address?.country?.message,
                                                 state: errors.address?.state?.message,
                                                 city: errors.address?.city?.message,
+                                                postalCode: errors.address?.pincode?.message,
                                             }}
+                                            required={true}
                                         />
-                                    </div>
-                                    <div className="grid grid-cols-1 gap-4">
-                                        <div className="space-y-2">
-                                            <Label
-                                                htmlFor="pincode"
-                                                className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
-                                            >
-                                                Pincode
-                                            </Label>
-                                            <Input
-                                                id="pincode"
-                                                {...register("address.pincode")}
-                                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.pincode ? "border-destructive" : ""}`}
-                                            />
-                                            {errors.address?.pincode && (
-                                                <p className="text-xs text-destructive mt-1">{errors.address.pincode.message}</p>
-                                            )}
-                                        </div>
                                     </div>
                                 </div>
                             </div>

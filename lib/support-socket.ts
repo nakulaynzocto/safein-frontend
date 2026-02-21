@@ -7,9 +7,11 @@ const BASE_SUPER_ADMIN_URL = process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL
 const SUPPORT_URL = `${BASE_SUPER_ADMIN_URL}/support`;
 
 export class SupportSocketService {
+    private static instance: SupportSocketService;
     private socket: Socket | null = null;
     private isConnecting: boolean = false;
-    private static instance: SupportSocketService;
+    private lastToken: string | undefined;
+    private lastGoogleToken: string | undefined;
 
     // Singleton Pattern
     public static getInstance(): SupportSocketService {
@@ -20,11 +22,19 @@ export class SupportSocketService {
     }
 
     public connect(token?: string, googleToken?: string): Socket {
+        // If we already have a socket and tokens haven't changed, return existing
         if (this.socket && (this.socket.connected || this.isConnecting)) {
-            return this.socket;
+            if (this.lastToken === token && this.lastGoogleToken === googleToken) {
+                return this.socket;
+            }
+            // Tokens changed, disconnect existing socket
+            this.socket.disconnect();
         }
 
+        this.lastToken = token;
+        this.lastGoogleToken = googleToken;
         this.isConnecting = true;
+
         this.socket = io(SUPPORT_URL, {
             auth: {
                 token,       // For Employees

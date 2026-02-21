@@ -10,15 +10,15 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InputField } from "@/components/common/inputField";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/inputOtp";
 import { useAppDispatch } from "@/store/hooks";
-import { useRegisterMutation, useVerifyOtpMutation, useResendOtpMutation } from "@/store/api/authApi";
+import { useRegisterMutation, useVerifyOtpMutation, useResendOtpMutation, useGoogleLoginMutation } from "@/store/api/authApi";
 import { setCredentials } from "@/store/slices/authSlice";
 import { routes } from "@/utils/routes";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { CheckCircle, Mail, ArrowLeft } from "lucide-react";
+import { useGoogleLogin } from "@react-oauth/google";
 import { encryptData } from "@/utils/crypto";
 
 const registerSchema = yup.object({
-    companyName: yup.string().required("Company name is required"),
     email: yup.string().email("Invalid email address").required("Email is required"),
     password: yup
         .string()
@@ -46,6 +46,7 @@ export function RegisterForm() {
     const [register, { isLoading }] = useRegisterMutation();
     const [verifyOtp, { isLoading: isVerifyingOtp }] = useVerifyOtpMutation();
     const [resendOtp, { isLoading: isResendingOtp }] = useResendOtpMutation();
+    const [googleLogin, { isLoading: isGoogleLoading }] = useGoogleLoginMutation();
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [currentStep, setCurrentStep] = useState<RegistrationStep>("form");
     const [userEmail, setUserEmail] = useState<string>("");
@@ -102,11 +103,10 @@ export function RegisterForm() {
             setSubmitError(null);
             const encryptedEmail = encryptData(data.email);
             const encryptedPassword = encryptData(data.password);
-            const enctyptedCompanyNmae = encryptData(data.companyName);
             const result = await register({
                 email: encryptedEmail,
                 password: encryptedPassword,
-                companyName: enctyptedCompanyNmae
+                companyName: "SafeIn User"
             }).unwrap();
 
             setUserEmail(data.email);
@@ -241,6 +241,29 @@ export function RegisterForm() {
         }
     };
 
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                setSubmitError(null);
+                const result = await googleLogin({
+                    token: tokenResponse.access_token,
+                }).unwrap();
+
+                if (result.token && result.user) {
+                    dispatch(setCredentials(result));
+                    showSuccessToast("Registration successful with Google!");
+
+                    const next = searchParams.get("next");
+                    const target = next || routes.privateroute.DASHBOARD;
+                    window.location.replace(target);
+                }
+            } catch (error: any) {
+                setSubmitError(error?.data?.message || "Google registration failed");
+            }
+        },
+        onError: () => setSubmitError("Google registration failed"),
+    });
+
     const handleGoToLogin = () => {
         router.push(`${routes.publicroute.LOGIN}?message=Registration successful. Please login to continue.`);
     };
@@ -321,65 +344,79 @@ export function RegisterForm() {
 
                 {/* Registration Form */}
                 {currentStep === "form" && (
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                        <div className="space-y-4">
-                            <InputField
-                                label="Company Name"
-                                placeholder="Enter your company name"
-                                error={errors.companyName?.message}
-                                {...registerField("companyName")}
-                                required
-                            />
+                    <>
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                            <div className="space-y-4">
+                                <InputField
+                                    label="Email"
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    error={errors.email?.message}
+                                    {...registerField("email")}
+                                    required
+                                />
 
-                            <InputField
-                                label="Email"
-                                type="email"
-                                placeholder="Enter your email"
-                                error={errors.email?.message}
-                                {...registerField("email")}
-                                required
-                            />
+                                <InputField
+                                    label="Password"
+                                    type="password"
+                                    placeholder="Create a password"
+                                    error={errors.password?.message}
+                                    {...registerField("password")}
+                                    required
+                                />
 
-                            <InputField
-                                label="Password"
-                                type="password"
-                                placeholder="Create a password"
-                                error={errors.password?.message}
-                                {...registerField("password")}
-                                required
-                            />
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    Security Check: {captcha.num1} + {captcha.num2} = ?
-                                </label>
-                                <div className="flex gap-2">
-                                    <InputField
-                                        placeholder="Answer"
-                                        type="number"
-                                        value={captchaInput}
-                                        onChange={(e) => setCaptchaInput(e.target.value)}
-                                        error={captchaError || undefined}
-                                        className="flex-1 h-12 rounded-xl"
-                                        required
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={generateCaptcha}
-                                        className="h-12 w-12 rounded-xl"
-                                        title="Refresh Captcha"
-                                    >
-                                        🔄
-                                    </Button>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Security Check: {captcha.num1} + {captcha.num2} = ?
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <InputField
+                                            placeholder="Answer"
+                                            type="number"
+                                            value={captchaInput}
+                                            onChange={(e) => setCaptchaInput(e.target.value)}
+                                            error={captchaError || undefined}
+                                            className="flex-1 h-12 rounded-xl"
+                                            required
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={generateCaptcha}
+                                            className="h-12 w-12 rounded-xl"
+                                            title="Refresh Captcha"
+                                        >
+                                            🔄
+                                        </Button>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <Button type="submit" variant="primary" className="w-full h-12 rounded-xl font-bold" disabled={isLoading || isGoogleLoading}>
+                                {isLoading ? "Registering..." : "Register"}
+                            </Button>
+                        </form>
+
+                        <div className="relative my-6">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-gray-200" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
                             </div>
                         </div>
 
-                        <Button type="submit" variant="primary" className="w-full h-12 rounded-xl font-bold" disabled={isLoading}>
-                            {isLoading ? "Registering..." : "Register"}
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full h-12 rounded-xl border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3"
+                            onClick={() => handleGoogleLogin()}
+                            disabled={isLoading || isGoogleLoading}
+                        >
+                            <img src="https://www.google.com/favicon.ico" alt="G" className="w-5 h-5" />
+                            {isGoogleLoading ? "Connecting..." : "Continue with Google"}
                         </Button>
-                    </form>
+                    </>
                 )}
 
                 {/* OTP Verification Form */}

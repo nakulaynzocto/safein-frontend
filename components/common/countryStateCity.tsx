@@ -1,52 +1,64 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { Country, State, City } from "country-state-city";
 import { SelectField } from "@/components/common/selectField";
+import { InputField } from "@/components/common/inputField";
 
 export interface CountryStateCityValue {
     country: string;
     state: string;
     city: string;
+    postalCode?: string;
 }
 
 interface Props {
     value: CountryStateCityValue;
     onChange: (v: CountryStateCityValue) => void;
     errors?: Partial<Record<keyof CountryStateCityValue, string>>;
+    required?: boolean;
 }
 
-export function CountryStateCitySelect({ value, onChange, errors }: Props) {
-    const countries = Country.getAllCountries().map((c) => ({
-        label: c.name,
-        value: c.isoCode,
-        searchKeywords: `${c.name} ${c.isoCode} ${c.phonecode ?? ""}`.trim(),
-    }));
-    const states = value.country
-        ? State.getStatesOfCountry(value.country).map((s) => ({
-              label: s.name,
-              value: s.isoCode,
-              searchKeywords: `${s.name} ${s.isoCode}`.trim(),
-          }))
-        : [];
-    const cities =
+export function CountryStateCitySelect({ value, onChange, errors, required = false }: Props) {
+    const countries = useMemo(() =>
+        Country.getAllCountries().map((c) => ({
+            label: c.name,
+            value: c.isoCode,
+            searchKeywords: `${c.name} ${c.isoCode} ${c.phonecode ?? ""}`.trim(),
+        })), []
+    );
+
+    const states = useMemo(() =>
+        value.country
+            ? State.getStatesOfCountry(value.country).map((s) => ({
+                label: s.name,
+                value: s.isoCode,
+                searchKeywords: `${s.name} ${s.isoCode}`.trim(),
+            }))
+            : [],
+        [value.country]
+    );
+
+    const cities = useMemo(() =>
         value.country && value.state
             ? City.getCitiesOfState(value.country, value.state).map((ct) => ({
-                  label: ct.name,
-                  value: ct.name,
-              }))
-            : [];
+                label: ct.name,
+                value: ct.name,
+            }))
+            : [],
+        [value.country, value.state]
+    );
 
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SelectField
                 label="Country"
                 placeholder="Select country"
                 options={countries}
                 value={value.country}
-                onChange={(country) => onChange({ country, state: "", city: "" })}
+                onChange={(country) => onChange({ ...value, country, state: "", city: "" })}
                 error={errors?.country}
-                required
+                required={required}
             />
             <SelectField
                 label="State"
@@ -56,7 +68,7 @@ export function CountryStateCitySelect({ value, onChange, errors }: Props) {
                 onChange={(state) => onChange({ ...value, state, city: "" })}
                 isDisabled={!value.country}
                 error={errors?.state}
-                required
+                required={required}
             />
             <SelectField
                 label="City"
@@ -66,7 +78,15 @@ export function CountryStateCitySelect({ value, onChange, errors }: Props) {
                 onChange={(city) => onChange({ ...value, city })}
                 isDisabled={!value.country || !value.state}
                 error={errors?.city}
-                required
+                required={required}
+            />
+            <InputField
+                label="Pincode"
+                placeholder="e.g. 123456"
+                value={value.postalCode || ""}
+                onChange={(e) => onChange({ ...value, postalCode: e.target.value })}
+                error={errors?.postalCode}
+                required={required}
             />
         </div>
     );

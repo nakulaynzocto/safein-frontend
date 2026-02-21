@@ -136,6 +136,27 @@ export const authApi = baseApi.injectEndpoints({
             invalidatesTags: ["User"],
         }),
 
+        googleLogin: builder.mutation<AuthResponse, { token: string }>({
+            query: (data) => ({
+                url: "/users/google-login",
+                method: "POST",
+                body: data,
+            }),
+            transformResponse: (response: any) => {
+                let data = response;
+                if (response.success && response.data) {
+                    data = response.data;
+                }
+
+                if (data && data.user) {
+                    data.user = normalizeUser(data.user);
+                }
+
+                return data;
+            },
+            invalidatesTags: ["User"],
+        }),
+
         register: builder.mutation<RegisterResponse, RegisterRequest>({
             query: (userData) => ({
                 url: "/users/register",
@@ -360,6 +381,7 @@ export const authApi = baseApi.injectEndpoints({
 
 export const {
     useLoginMutation,
+    useGoogleLoginMutation,
     useRegisterMutation,
     useVerifyOtpMutation,
     useResendOtpMutation,

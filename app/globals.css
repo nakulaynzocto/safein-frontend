@@ -591,9 +591,9 @@
 
 [class*="__menu"],
 .rs__menu {
-    z-index: 999999 !important;
-    background-color: hsl(var(--background)) !important;
-    border: 1px solid hsl(var(--border)) !important;
+    z-index: 9999 !important;
+    background-color: var(--popover, #ffffff) !important;
+    border: 1px solid var(--border, #e5e7eb) !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
 }
 

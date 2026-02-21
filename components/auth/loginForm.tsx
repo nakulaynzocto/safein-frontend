@@ -8,13 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InputField } from "@/components/common/inputField";
 import { useAppDispatch } from "@/store/hooks";
-import { useLoginMutation } from "@/store/api/authApi";
+import { useLoginMutation, useGoogleLoginMutation } from "@/store/api/authApi";
 import { setCredentials } from "@/store/slices/authSlice";
 import { routes } from "@/utils/routes";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { useGoogleLogin } from "@react-oauth/google";
 import { encryptData } from "@/utils/crypto";
 const loginSchema = yup.object({
     email: yup.string().email("Invalid email address").required("Email is required"),
@@ -28,6 +29,7 @@ export function LoginForm() {
     const dispatch = useAppDispatch();
     const searchParams = useSearchParams();
     const [login, { isLoading }] = useLoginMutation();
+    const [googleLogin, { isLoading: isGoogleLoading }] = useGoogleLoginMutation();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, result: 0 });
     const [captchaInput, setCaptchaInput] = useState("");
@@ -98,6 +100,28 @@ export function LoginForm() {
             generateCaptcha();
         }
     };
+
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                const result = await googleLogin({
+                    token: tokenResponse.access_token,
+                }).unwrap();
+
+                if (result.token && result.user) {
+                    dispatch(setCredentials(result));
+                    showSuccessToast("Login successful with Google!");
+
+                    const next = searchParams.get("next");
+                    const target = next || routes.privateroute.DASHBOARD;
+                    window.location.replace(target);
+                }
+            } catch (error: any) {
+                setErrorMessage(error?.data?.message || "Google login failed");
+            }
+        },
+        onError: () => setErrorMessage("Google login failed"),
+    });
 
     return (
         <Card className="w-full max-w-md">
@@ -181,10 +205,30 @@ export function LoginForm() {
                         </Link>
                     </div>
 
-                    <Button type="submit" className="w-full h-12 rounded-xl font-bold" disabled={isLoading}>
+                    <Button type="submit" className="w-full h-12 rounded-xl font-bold" disabled={isLoading || isGoogleLoading}>
                         {isLoading ? "Signing in..." : "Sign In"}
                     </Button>
                 </form>
+
+                <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-gray-200" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
+                    </div>
+                </div>
+
+                <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-12 rounded-xl border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3"
+                    onClick={() => handleGoogleLogin()}
+                    disabled={isLoading || isGoogleLoading}
+                >
+                    <img src="https://www.google.com/favicon.ico" alt="G" className="w-5 h-5" />
+                    {isGoogleLoading ? "Connecting..." : "Continue with Google"}
+                </Button>
 
                 <div className="mt-6 text-center">
                     <p className="text-muted-foreground text-sm">

@@ -14,6 +14,8 @@ import { supportSocketService } from "@/lib/support-socket";
 import { useLazyGetTicketHistoryQuery, useCreateTicketMutation, useSendMessageMutation } from "@/store/api/supportApi";
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setAssistantOpen } from '@/store/slices/uiSlice';
+import { useGoogleLoginMutation } from '@/store/api/authApi';
+import { setCredentials } from '@/store/slices/authSlice';
 
 // Project color scheme - matching your existing brand
 const GRADIENT_PRIMARY = "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)";
@@ -21,11 +23,21 @@ const GRADIENT_ACCENT = "linear-gradient(135deg, var(--accent) 0%, var(--primary
 const COLOR_PRIMARY = "var(--primary)";
 const COLOR_ACCENT = "var(--accent)";
 
+// Types
+interface Message {
+    _id?: string;
+    sender: "user" | "agent";
+    senderId?: string;
+    content: string;
+    createdAt: Date;
+    type?: string;
+}
+
 export default function SupportWidget() {
     const dispatch = useAppDispatch();
     const { isAssistantOpen: isOpen } = useAppSelector((state) => state.ui);
     const setIsOpen = (val: boolean) => dispatch(setAssistantOpen(val));
-    const [messages, setMessages] = useState<any[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isConnected, setIsConnected] = useState(false);
 
@@ -49,6 +61,7 @@ export default function SupportWidget() {
     const [fetchHistory] = useLazyGetTicketHistoryQuery();
     const [restCreateTicket] = useCreateTicketMutation();
     const [restSendMessage] = useSendMessageMutation();
+    const [googleLogin] = useGoogleLoginMutation();
 
     // --- Effects ---
 
@@ -70,8 +83,15 @@ export default function SupportWidget() {
         let socket: any = null;
 
         const savedGoogleToken = localStorage.getItem("safein_support_g_token");
-        // Hard check to ensure it's not a string "undefined" or empty
-        if (savedGoogleToken && savedGoogleToken !== "undefined" && savedGoogleToken !== "null") {
+
+        // Priority 1: Main App Session (Employee/Admin)
+        if (token && isAuthenticated) {
+            setUserMode("public_verified");
+            socket = supportSocketService.connect(token, undefined);
+            socketRef.current = socket;
+        }
+        // Priority 2: Saved Google Session (Public User / Guest)
+        else if (savedGoogleToken && savedGoogleToken !== "undefined" && savedGoogleToken !== "null") {
             setGoogleToken(savedGoogleToken);
             setUserMode("public_verified");
             socket = supportSocketService.connect(undefined, savedGoogleToken);
@@ -106,11 +126,10 @@ export default function SupportWidget() {
             setIsLoading(false);
             // Handle both "Authentication error" and "Authentication failed" messages
             if (err.message && (err.message.includes("Authentication error") || err.message.includes("Authentication failed"))) {
-                console.warn("[Support Chat] Auth failed, reverting to guest mode...");
+                // Silently fallback to guest mode if auth fails (e.g. expired token)
                 localStorage.removeItem("safein_support_g_token");
                 setGoogleToken(null);
                 setUserMode("none");
-                // Stop the socket from constantly retrying with a bad token
                 if (socket) socket.disconnect();
             } else {
                 console.error("[Support Chat] Connection error:", err.message);
@@ -136,7 +155,7 @@ export default function SupportWidget() {
             socket.off("connect_error", onConnectError);
             socket.off("disconnect", onDisconnect);
         };
-    }, [mounted, googleToken]);
+    }, [mounted, googleToken, token, isAuthenticated]);
 
     // 2. Auto-scroll to bottom of chat
     useEffect(() => {
@@ -190,6 +209,16 @@ export default function SupportWidget() {
             localStorage.setItem("safein_support_g_token", gToken);
             setGoogleToken(gToken);
             setUserMode("public_verified");
+
+            // ALSO log them into the main app so they are "really" logged in
+            try {
+                const result = await googleLogin({ token: gToken }).unwrap();
+                if (result.token && result.user) {
+                    dispatch(setCredentials(result));
+                }
+            } catch (err) {
+                console.error("Failed to sync main app auth with support google login:", err);
+            }
         },
         onError: () => {
             toast.error("Google Login Failed");

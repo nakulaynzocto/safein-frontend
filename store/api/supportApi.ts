@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type { RootState } from '../store';
 
 const SUPPORT_API_BASE_URL = process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL
     ? `${process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL}/support`
@@ -9,15 +10,19 @@ export const supportApi = createApi({
     reducerPath: 'supportApi',
     baseQuery: fetchBaseQuery({
         baseUrl: SUPPORT_API_BASE_URL,
-        prepareHeaders: (headers) => {
-            // Support chat might need special headers or local tokens
+        prepareHeaders: (headers, { getState }) => {
+            const state = getState() as RootState;
+            const token = state.auth.token;
+
+            if (token) {
+                headers.set("Authorization", `Bearer ${token}`);
+            }
+
             const gToken = typeof window !== 'undefined' ? localStorage.getItem('safein_support_g_token') : null;
             if (gToken) {
                 headers.set('x-google-token', gToken);
             }
 
-            // If it's an employee, we might want their main auth token too
-            // However, super-admin-backend might have different validation logic
             return headers;
         },
     }),

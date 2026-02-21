@@ -38,7 +38,7 @@ export interface SelectFieldProps {
     className?: string;
 }
 
-const MENU_PORTAL_Z_INDEX = 2147483647; // Maximum z-index value
+const MENU_PORTAL_Z_INDEX = 9999;
 
 const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     {
@@ -60,6 +60,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         isRtl,
         isDisabled,
         disabled,
+        menuZIndex,
     },
     ref,
 ) {
@@ -193,13 +194,13 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
             }),
             menu: (base) => ({
                 ...base,
-                backgroundColor: "var(--popover)",
-                border: "1px solid var(--border)",
+                backgroundColor: "var(--popover, #ffffff)",
+                border: "1px solid var(--border, #e5e7eb)",
                 borderRadius: 8,
                 boxShadow: "0 10px 40px rgba(0, 0, 0, 0.2)",
                 marginTop: 4,
                 overflow: "hidden",
-                zIndex: MENU_PORTAL_Z_INDEX,
+                zIndex: 9999,
             }),
             menuList: (base) => ({
                 ...base,
@@ -208,7 +209,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
             }),
             menuPortal: (base) => ({
                 ...base,
-                zIndex: MENU_PORTAL_Z_INDEX,
+                zIndex: menuZIndex ?? MENU_PORTAL_Z_INDEX,
             }),
             option: (base, { isDisabled: optDisabled, isFocused, isSelected }) => ({
                 ...base,
@@ -249,11 +250,11 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     );
 
     return (
-        <div className={cn("space-y-1.5", className)}>
+        <div className={cn("space-y-1.5 relative", error ? "z-20" : "z-10", className)}>
             {label && (
                 <label htmlFor={controlId} className="text-foreground text-sm font-medium">
                     {label}
-                    {required && <span className="ml-1 text-red-500">*</span>}
+                    {required && <span className="ml-1 text-destructive font-bold">*</span>}
                 </label>
             )}
 
