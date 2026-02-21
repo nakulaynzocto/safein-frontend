@@ -87,7 +87,8 @@ export default function SupportWidget() {
         // Priority 1: Main App Session (Employee/Admin)
         if (token && isAuthenticated) {
             setUserMode("public_verified");
-            socket = supportSocketService.connect(token, undefined);
+            // Pass both tokens if available, backend will prioritize appropriately
+            socket = supportSocketService.connect(token, savedGoogleToken || undefined);
             socketRef.current = socket;
         }
         // Priority 2: Saved Google Session (Public User / Guest)
@@ -126,10 +127,17 @@ export default function SupportWidget() {
             setIsLoading(false);
             // Handle both "Authentication error" and "Authentication failed" messages
             if (err.message && (err.message.includes("Authentication error") || err.message.includes("Authentication failed"))) {
-                // Silently fallback to guest mode if auth fails (e.g. expired token)
-                localStorage.removeItem("safein_support_g_token");
-                setGoogleToken(null);
-                setUserMode("none");
+                // If we are logged in via main app, don't revert to "none" mode immediately
+                // Only revert if we were explicitly using Priority 2 (googleToken only)
+                if (!token || !isAuthenticated) {
+                    localStorage.removeItem("safein_support_g_token");
+                    setGoogleToken(null);
+                    setUserMode("none");
+                } else {
+                    console.warn("[Support Chat] Support socket auth failed for main app session.");
+                    // Keep userMode as "public_verified" so they see the chat window loading or error state
+                    // rather than being kicked back to login button
+                }
                 if (socket) socket.disconnect();
             } else {
                 console.error("[Support Chat] Connection error:", err.message);
