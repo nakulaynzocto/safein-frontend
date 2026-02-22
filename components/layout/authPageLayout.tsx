@@ -18,7 +18,27 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
 
     return (
         <div className="flex min-h-screen bg-white overflow-hidden">
-            {/* Left Side: Image & Branding (Desktop Only) */}
+            {/* Left Side: Form */}
+            <div className="flex w-full flex-col lg:w-1/2 relative justify-center px-6 py-12 lg:px-12 xl:px-24">
+                {/* Back to Home Button - consistently at top left */}
+                <div className="absolute top-8 left-8 lg:left-12">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => router.push(routes.publicroute.HOME)}
+                        className="text-muted-foreground hover:bg-[#3882a5] hover:text-white rounded-lg px-3 flex items-center gap-2"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        <span className="font-medium">Back to Home</span>
+                    </Button>
+                </div>
+
+                <div className="mx-auto w-full max-w-md">
+                    {children}
+                </div>
+            </div>
+
+            {/* Right Side: Image & Branding (Desktop Only) */}
             <div className="hidden lg:flex lg:w-1/2 relative bg-[#3882a5] flex-col items-center justify-center p-12 overflow-hidden">
                 {/* Background decorative elements */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full -mr-48 -mt-48 transition-all" />
@@ -53,13 +73,6 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
                 {/* Footer Link (Optional) */}
                 <div className="absolute bottom-12 left-0 right-0 text-center text-white/40 text-sm">
                     &copy; {new Date().getFullYear()} Aynzo Global Private Limited. All rights reserved.
-                </div>
-            </div>
-
-            {/* Right Side: Form */}
-            <div className="flex w-full flex-col lg:w-1/2 justify-center px-6 py-12 lg:px-12 xl:px-24">
-                <div className="mx-auto w-full max-w-md">
-                    {children}
                 </div>
             </div>
         </div>

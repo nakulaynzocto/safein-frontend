@@ -138,17 +138,6 @@ export function LoginForm() {
     return (
         <div className="w-full">
             <div className="mb-10">
-                <div className="mb-6 flex items-center">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push(routes.publicroute.HOME)}
-                        className="text-muted-foreground hover:bg-[#3882a5] hover:text-white rounded-lg px-3"
-                    >
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Home
-                    </Button>
-                </div>
 
             </div>
 
@@ -158,6 +147,26 @@ export function LoginForm() {
                         <AlertDescription>{errorMessage}</AlertDescription>
                     </Alert>
                 )}
+
+                <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-12 rounded-xl border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3 font-semibold transition-colors"
+                    onClick={() => handleGoogleLogin()}
+                    disabled={isLoading || isGoogleLoading}
+                >
+                    <img src="https://www.google.com/favicon.ico" alt="G" className="w-5 h-5" />
+                    {isGoogleLoading ? "Connecting..." : "Continue with Google"}
+                </Button>
+
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-gray-100" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-white px-4 text-muted-foreground font-medium">Or continue with</span>
+                    </div>
+                </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div className="space-y-4">
@@ -228,25 +237,6 @@ export function LoginForm() {
                         </Button>
                     </div>
                 </form>
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-gray-100" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-4 text-muted-foreground font-medium">Or continue with</span>
-                    </div>
-                </div>
-
-                <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full h-12 rounded-xl border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3 font-semibold transition-colors"
-                    onClick={() => handleGoogleLogin()}
-                    disabled={isLoading || isGoogleLoading}
-                >
-                    <img src="https://www.google.com/favicon.ico" alt="G" className="w-5 h-5" />
-                    {isGoogleLoading ? "Connecting..." : "Continue with Google"}
-                </Button>
 
                 <div className="text-center pt-2">
                     <p className="text-gray-600 text-sm">
