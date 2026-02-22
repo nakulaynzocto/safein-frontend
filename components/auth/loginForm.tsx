@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InputField } from "@/components/common/inputField";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useLoginMutation, useGoogleLoginMutation } from "@/store/api/authApi";
 import { setCredentials } from "@/store/slices/authSlice";
 import { routes } from "@/utils/routes";
@@ -29,6 +29,7 @@ type LoginFormData = yup.InferType<typeof loginSchema>;
 export function LoginForm() {
     const router = useRouter();
     const dispatch = useAppDispatch();
+    const { isAuthenticated, token } = useAppSelector((state) => state.auth);
     const searchParams = useSearchParams();
     const [login, { isLoading }] = useLoginMutation();
     const [googleLogin, { isLoading: isGoogleLoading }] = useGoogleLoginMutation();
@@ -44,6 +45,15 @@ export function LoginForm() {
     } = useForm<LoginFormData>({
         resolver: yupResolver(loginSchema),
     });
+
+    // Handle redirection if already authenticated
+    useEffect(() => {
+        if (isAuthenticated && token) {
+            const next = searchParams.get("next");
+            const target = next || routes.privateroute.DASHBOARD;
+            router.replace(target);
+        }
+    }, [isAuthenticated, token, router, searchParams]);
 
     const generateCaptcha = () => {
         const n1 = Math.floor(Math.random() * 10) + 1;

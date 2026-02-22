@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InputField } from "@/components/common/inputField";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/inputOtp";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useRegisterMutation, useVerifyOtpMutation, useResendOtpMutation, useGoogleLoginMutation } from "@/store/api/authApi";
 import { setCredentials } from "@/store/slices/authSlice";
 import { routes } from "@/utils/routes";
@@ -45,6 +45,8 @@ export function RegisterForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const dispatch = useAppDispatch();
+    const { isAuthenticated, token } = useAppSelector((state) => state.auth);
+
     const [register, { isLoading }] = useRegisterMutation();
     const [verifyOtp, { isLoading: isVerifyingOtp }] = useVerifyOtpMutation();
     const [resendOtp, { isLoading: isResendingOtp }] = useResendOtpMutation();
@@ -53,12 +55,21 @@ export function RegisterForm() {
     const [currentStep, setCurrentStep] = useState<RegistrationStep>("form");
     const [userEmail, setUserEmail] = useState<string>("");
     const [otpError, setOtpError] = useState<string | null>(null);
-    const [user, setUser] = useState<any>(null);
-    const [token, setToken] = useState<string | null>(null);
+    const [regUser, setRegUser] = useState<any>(null);
+    const [regToken, setRegToken] = useState<string | null>(null);
 
     const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, result: 0 });
     const [captchaInput, setCaptchaInput] = useState("");
     const [captchaError, setCaptchaError] = useState<string | null>(null);
+
+    // Handle redirection if already authenticated
+    useEffect(() => {
+        if (isAuthenticated && token && currentStep !== "success") {
+            const next = searchParams.get("next");
+            const target = next || routes.privateroute.DASHBOARD;
+            router.replace(target);
+        }
+    }, [isAuthenticated, token, router, searchParams, currentStep]);
 
     const generateCaptcha = () => {
         const n1 = Math.floor(Math.random() * 10) + 1;
@@ -143,8 +154,8 @@ export function RegisterForm() {
                 otp: otpToVerify,
             }).unwrap();
 
-            setUser(result.user);
-            setToken(result.token);
+            setRegUser(result.user);
+            setRegToken(result.token);
             dispatch(setCredentials({ user: result.user, token: result.token }));
 
             setCurrentStep("success");
@@ -214,8 +225,8 @@ export function RegisterForm() {
                     otp: value,
                 }).unwrap();
 
-                setUser(result.user);
-                setToken(result.token);
+                setRegUser(result.user);
+                setRegToken(result.token);
                 dispatch(setCredentials({ user: result.user, token: result.token }));
 
                 setCurrentStep("success");
