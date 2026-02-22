@@ -217,19 +217,16 @@ export default function FeaturesPage() {
     return (
         <>
             <PageSEOHead
-                title="Features - Smart Visitor Management System"
-                description="Discover SafeIn's powerful features: Real-time Chat, Spot Pass, Appointment Links, Smart Notifications, Bulk Import, and Advanced Analytics for complete visitor management."
+                title="SafeIn Features - Smart Visitor Management & Security India"
+                description="Explore powerful features of SafeIn for Indian businesses: Real-time chat, Spot Pass for societies, Smart Notifications, and Advanced Analytics. The best visitor management system features in India."
                 keywords={[
-                    "visitor management features",
-                    "appointment system features",
-                    "real-time chat",
-                    "spot pass",
-                    "appointment links",
-                    "bulk import",
-                    "visitor analytics",
-                    "SafeIn features",
-                    "security features",
-                    "smart notifications",
+                    "safein features india",
+                    "visitor management capabilities",
+                    "spot pass system india",
+                    "gatekeeper app features",
+                    "visitor analytics india",
+                    "smart security notifications",
+                    "bulk import employees india",
                 ]}
                 url="https://safein.aynzo.com/features"
             />

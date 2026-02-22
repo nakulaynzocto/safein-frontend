@@ -36,7 +36,7 @@ export function generatePageMetadata(pageKey: PageKey): Metadata {
         },
         openGraph: {
             type: "website",
-            locale: "en_US",
+            locale: "en_IN",
             url: fullUrl,
             title: pageConfig.title,
             description: pageConfig.description,
@@ -57,15 +57,22 @@ export function generatePageMetadata(pageKey: PageKey): Metadata {
             images: [safeInSEOConfig.logoUrl],
             creator: safeInSEOConfig.twitterHandle,
         },
-        robots: pageConfig.noindex
+        robots: (pageConfig as any).noindex
             ? {
-                  index: false,
-                  follow: false,
-              }
+                index: false,
+                follow: false,
+            }
             : {
-                  index: true,
-                  follow: true,
-              },
+                index: true,
+                follow: true,
+                googleBot: {
+                    index: true,
+                    follow: true,
+                    'max-video-preview': -1,
+                    'max-image-preview': 'large',
+                    'max-snippet': -1,
+                },
+            },
     };
 }
 
@@ -83,105 +90,158 @@ export function generateStructuredData(pageKey: PageKey) {
         name: org.name,
         url: org.url,
         logo: org.logo,
+        address: (org as any).address,
         contactPoint: {
             "@type": "ContactPoint",
             telephone: org.contactPoint.telephone,
             contactType: org.contactPoint.contactType,
             email: org.contactPoint.email,
+            areaServed: (org.contactPoint as any).areaServed,
+            availableLanguage: (org.contactPoint as any).availableLanguage
         },
         sameAs: org.sameAs,
+    };
+
+    const softwareApplicationData = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        ...(safeInSEOConfig as any).softwareApplication
+    };
+
+    const localBusinessData = {
+        "@context": "https://schema.org",
+        ...(safeInSEOConfig as any).localBusiness
+    };
+
+    const breadcrumbData = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": safeInSEOConfig.siteUrl
+            },
+            ...(pageKey !== "home" ? [{
+                "@type": "ListItem",
+                "position": 2,
+                "name": pageConfig.title,
+                "item": `${safeInSEOConfig.siteUrl}${pageConfig.path}`
+            }] : [])
+        ]
     };
 
     // Page-specific structured data
     switch (pageKey) {
         case "home":
-            return {
-                "@context": "https://schema.org",
-                "@type": "WebSite",
-                name: safeInSEOConfig.siteName,
-                url: safeInSEOConfig.siteUrl,
-                publisher: {
-                    "@type": "Organization",
-                    name: org.name,
-                    logo: {
-                        "@type": "ImageObject",
-                        url: org.logo,
-                        width: 1200,
-                        height: 630,
+            return [
+                {
+                    "@context": "https://schema.org",
+                    "@type": "WebSite",
+                    name: safeInSEOConfig.siteName,
+                    url: safeInSEOConfig.siteUrl,
+                    publisher: organizationData,
+                    potentialAction: {
+                        "@type": "SearchAction",
+                        target: `${safeInSEOConfig.siteUrl}/search?q={search_term_string}`,
+                        "query-input": "required name=search_term_string",
                     },
                 },
-                potentialAction: {
-                    "@type": "SearchAction",
-                    target: `${safeInSEOConfig.siteUrl}/search?q={search_term_string}`,
-                    "query-input": "required name=search_term_string",
-                },
-            };
+                organizationData,
+                softwareApplicationData,
+                localBusinessData,
+                breadcrumbData,
+                {
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    "mainEntity": [
+                        {
+                            "@type": "Question",
+                            "name": "Which is the best visitor management system in India?",
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "SafeIn by Aynzo is widely considered one of the best visitor management systems in India, offering real-time chat, spot passes for walk-ins, and smart security notifications."
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": "Does SafeIn offer a free trial in India?",
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "Yes, SafeIn offers a comprehensive 3-day free trial for all businesses and housing societies in India to experience full features of the visitor management platform."
+                            }
+                        },
+                        {
+                            "@type": "Question",
+                            "name": "Is SafeIn suitable for housing societies in India?",
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": "Absolutely. SafeIn is specifically designed to handle and streamline visitor entries for both modern businesses and large housing societies across major Indian cities."
+                            }
+                        }
+                    ]
+                }
+            ];
 
         case "contact":
-            return {
-                "@context": "https://schema.org",
-                "@type": "ContactPage",
-                name: pageConfig.title,
-                description: pageConfig.description,
-                url: `${safeInSEOConfig.siteUrl}${pageConfig.path}`,
-                mainEntity: {
-                    "@type": "Organization",
-                    name: org.name,
-                    logo: {
-                        "@type": "ImageObject",
-                        url: org.logo,
-                        width: 1200,
-                        height: 630,
-                    },
-                    contactPoint: {
-                        "@type": "ContactPoint",
-                        telephone: org.contactPoint.telephone,
-                        contactType: org.contactPoint.contactType,
-                        email: org.contactPoint.email,
-                    },
+            return [
+                {
+                    "@context": "https://schema.org",
+                    "@type": "ContactPage",
+                    name: pageConfig.title,
+                    description: pageConfig.description,
+                    url: `${safeInSEOConfig.siteUrl}${pageConfig.path}`,
+                    mainEntity: organizationData,
                 },
-            };
+                breadcrumbData,
+                organizationData,
+            ];
 
         case "pricing":
-            return {
-                "@context": "https://schema.org",
-                "@type": "Product",
-                name: "SafeIn Visitor Management System",
-                description: "Professional visitor management and appointment scheduling system",
-                brand: {
-                    "@type": "Organization",
-                    name: org.name,
-                    logo: org.logo,
+            return [
+                {
+                    "@context": "https://schema.org",
+                    "@type": "Product",
+                    name: "SafeIn Visitor Management System India",
+                    description: "Best visitor management and appointment scheduling system in India.",
+                    brand: organizationData,
+                    offers: [
+                        {
+                            "@type": "Offer",
+                            name: "Standard Plan",
+                            price: "499",
+                            priceCurrency: "INR",
+                            description: "Professional visitor management for Indian small businesses.",
+                            availability: "https://schema.org/InStock",
+                        },
+                        {
+                            "@type": "Offer",
+                            name: "3 Day Trial",
+                            price: "0",
+                            priceCurrency: "INR",
+                            description: "Free 3-day trial for new Indian users.",
+                            availability: "https://schema.org/InStock",
+                        },
+                    ],
                 },
-                offers: [
-                    {
-                        "@type": "Offer",
-                        name: "3 Day Trial",
-                        price: "50",
-                        priceCurrency: "INR",
-                        description: "Free 3-day trial with card verification",
-                    },
-                ],
-            };
+                breadcrumbData,
+                organizationData,
+            ];
 
         default:
-            return {
-                "@context": "https://schema.org",
-                "@type": "WebPage",
-                name: pageConfig.title,
-                description: pageConfig.description,
-                url: `${safeInSEOConfig.siteUrl}${pageConfig.path}`,
-                publisher: {
-                    "@type": "Organization",
-                    name: org.name,
-                    logo: {
-                        "@type": "ImageObject",
-                        url: org.logo,
-                        width: 1200,
-                        height: 630,
-                    },
+            return [
+                {
+                    "@context": "https://schema.org",
+                    "@type": "WebPage",
+                    name: pageConfig.title,
+                    description: pageConfig.description,
+                    url: `${safeInSEOConfig.siteUrl}${pageConfig.path}`,
+                    publisher: organizationData,
                 },
-            };
+                breadcrumbData,
+                organizationData,
+            ];
     }
 }
 

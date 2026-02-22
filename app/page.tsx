@@ -64,21 +64,16 @@ export default function HomePage() {
     return (
         <>
             <PageSEOHead
-                title="SafeIn - Complete Visitor Management with Chat, Spot Pass & Smart Notifications"
-                description="Transform visitor management with SafeIn's comprehensive platform. Features: Real-time chat, Spot Pass for walk-ins, smart appointment links, bulk import, voice notifications & advanced analytics. Start your free 3-day trial!"
+                title="Best Visitor Management System in India | SafeIn by Aynzo"
+                description="SafeIn is India's leading visitor management system. Features: Real-time chat, Spot Pass for walk-ins, Smart Appointment Links, Bulk Import for India & advanced security analytics. Start your free trial today!"
                 keywords={[
-                    "visitor management system",
-                    "appointment scheduling software",
-                    "real-time chat",
-                    "spot pass system",
-                    "visitor check-in system",
-                    "appointment links",
-                    "bulk import employees",
-                    "smart notifications",
-                    "voice alerts",
-                    "visitor analytics",
-                    "security management platform",
-                    "SafeIn management",
+                    "best visitor management system in india",
+                    "gatekeeper app india",
+                    "society visitor management software india",
+                    "smart appointment system india",
+                    "visitor check-in system india",
+                    "digital visitor register india",
+                    "SafeIn India",
                     "Aynzo",
                 ]}
                 url="https://safein.aynzo.com"
@@ -533,85 +528,168 @@ export default function HomePage() {
                     </div>
                 </section>
 
+                {/* Industries Section */}
+                <section className="bg-gray-50 py-20">
+                    <div className="container mx-auto px-4">
+                        <div className="mb-16 text-center">
+                            <h2 className="text-brand mb-6 text-3xl font-bold md:text-4xl">
+                                Industries Trusting SafeIn in India
+                            </h2>
+                            <p className="text-accent mx-auto max-w-2xl text-lg">
+                                From IT Parks in Bangalore to Housing Societies in Mumbai, we secure every sector with the best visitor management system.
+                            </p>
+                        </div>
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                            {[
+                                { title: "IT Parks & Offices", desc: "Manage corporate visitors and employee attendance in Delhi, Noida & Gurgaon IT hubs." },
+                                { title: "Housing Societies", desc: "The perfect gatekeeper app for residential complexes in Mumbai, Pune & Bangalore." },
+                                { title: "Educational Institutes", desc: "Secure school and college campuses with smart student and visitor tracking." },
+                                { title: "Hospitals & Healthcare", desc: "Efficiently manage patient attendants and visitor flow in busy medical centers." }
+                            ].map((industry, i) => (
+                                <Card key={i} className="hover:border-primary transition-colors bg-white">
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-lg font-bold">{industry.title}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-gray-600 text-sm">{industry.desc}</p>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
                 {/* Testimonials Section */}
                 <section className="bg-white py-20">
                     <div className="container mx-auto px-4">
                         <div className="mb-16 text-center">
-                            <h2 className="heading-main mb-6 text-4xl font-bold md:text-5xl">
-                                Testimonials That Speak for Us
+                            <h2 className="text-brand mb-6 text-3xl font-bold md:text-4xl text-center">
+                                What Our Clients in India Say
                             </h2>
-                            <p className="text-accent text-xl">
-                                See what our clients have to say about their experience with our platform
+                            <p className="text-accent text-xl text-center">
+                                Join 1000+ businesses across top Indian cities securing their premises.
                             </p>
                         </div>
 
                         <div className="grid gap-8 md:grid-cols-3">
-                            <Card className="bg-white">
+                            <Card className="bg-white border-2 hover:border-brand transition-all shadow-sm">
                                 <CardContent className="p-6">
                                     <div className="mb-4 flex items-center gap-1">
                                         {[...Array(5)].map((_, i) => (
                                             <Star key={i} className="h-5 w-5 fill-current text-yellow-400" />
                                         ))}
                                     </div>
-                                    <p className="mb-4 text-gray-700">
-                                        "The SafeIn management system has transformed our security operations. Setup was
+                                    <p className="mb-4 text-gray-700 italic">
+                                        "The SafeIn management system has transformed our security operations in our Delhi office. Setup was
                                         incredibly easy and the support team is outstanding."
                                     </p>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 border-t pt-4">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 font-semibold text-white">
                                             AK
                                         </div>
                                         <div>
                                             <p className="font-semibold text-gray-900">Amit Kumar</p>
-                                            <p className="text-sm text-gray-600">Security Manager</p>
+                                            <p className="text-xs text-gray-500">Security Manager, IT Park</p>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-white">
+                            <Card className="bg-white border-2 hover:border-brand transition-all shadow-sm">
                                 <CardContent className="p-6">
                                     <div className="mb-4 flex items-center gap-1">
                                         {[...Array(5)].map((_, i) => (
                                             <Star key={i} className="h-5 w-5 fill-current text-yellow-400" />
                                         ))}
                                     </div>
-                                    <p className="mb-4 text-gray-700">
-                                        "Excellent platform with great features. The analytics help us understand
-                                        visitor patterns and improve our security measures significantly."
+                                    <p className="mb-4 text-gray-700 italic">
+                                        "Excellent platform for housing societies. The analytics help us understand
+                                        visitor patterns and improve our security measures significantly in Mumbai."
                                     </p>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 border-t pt-4">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 font-semibold text-white">
                                             PS
                                         </div>
                                         <div>
                                             <p className="font-semibold text-gray-900">Priya Sharma</p>
-                                            <p className="text-sm text-gray-600">Facilities Director</p>
+                                            <p className="text-xs text-gray-500">Secretary, Green Valley Society</p>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-white">
+                            <Card className="bg-white border-2 hover:border-brand transition-all shadow-sm">
                                 <CardContent className="p-6">
                                     <div className="mb-4 flex items-center gap-1">
                                         {[...Array(5)].map((_, i) => (
                                             <Star key={i} className="h-5 w-5 fill-current text-yellow-400" />
                                         ))}
                                     </div>
-                                    <p className="mb-4 text-gray-700">
-                                        "Professional service and reliable platform. Our visitors love the streamlined
-                                        check-in process and our team appreciates the efficiency."
+                                    <p className="mb-4 text-gray-700 italic">
+                                        "Professional service and reliable platform. Our visitors in Bangalore love the streamlined
+                                        check-in process and our team appreciates the high efficiency."
                                     </p>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 border-t pt-4">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500 font-semibold text-white">
                                             RM
                                         </div>
                                         <div>
                                             <p className="font-semibold text-gray-900">Rahul Mehta</p>
-                                            <p className="text-sm text-gray-600">Office Manager</p>
+                                            <p className="text-xs text-gray-500">Operations Head, Tech Hub</p>
                                         </div>
                                     </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+                </section>
+
+                {/* FAQ Section */}
+                <section className="bg-gray-50 py-20">
+                    <div className="container mx-auto px-4">
+                        <div className="mb-12 text-center">
+                            <h2 className="text-brand mb-4 text-3xl font-bold md:text-4xl">
+                                Frequently Asked Questions
+                            </h2>
+                            <p className="text-accent mx-auto max-w-2xl text-lg">
+                                Got questions about India's best visitor management system? We've got answers.
+                            </p>
+                        </div>
+                        <div className="mx-auto max-w-3xl space-y-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">Which is the best visitor management system in India?</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-gray-600">
+                                        SafeIn by Aynzo is considered one of the best visitor management systems in India due to its
+                                        comprehensive feature set including real-time chat, smart notifications, and spot passes, all
+                                        designed specifically for the Indian market.
+                                    </p>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">How does the Spot Pass system work for Indian walk-ins?</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-gray-600">
+                                        Our Spot Pass system allows walk-in visitors in India to quickly register at the gate.
+                                        Security guards can generate a pass instantly, ensuring high security and zero delays
+                                        at your premises.
+                                    </p>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">Is SafeIn suitable for housing societies in India?</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-gray-600">
+                                        Yes, SafeIn is an ideal gatekeeper app for housing societies in India. It manages
+                                        visitor entries, staff check-ins, and provides real-time alerts to residents,
+                                        making it the perfect digital visitor book.
+                                    </p>
                                 </CardContent>
                             </Card>
                         </div>

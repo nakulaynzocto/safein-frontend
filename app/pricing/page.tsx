@@ -76,17 +76,16 @@ export default function PricingPage() {
     return (
         <>
             <PageSEOHead
-                title="Pricing Plans - Complete Visitor Management Solution"
-                description="Flexible pricing for complete visitor management. Includes real-time chat, spot pass, appointment links, smart notifications, bulk import & analytics. Start free 3-day trial!"
+                title="SafeIn Pricing - Best Visitor Management System Costs India"
+                description="Affordable pricing for the best visitor management system in India. Choose the right plan for your office or housing society. Start your free 3-day trial and experience professional gatekeeping today!"
                 keywords={[
-                    "pricing",
-                    "plans",
-                    "subscription",
-                    "visitor management pricing",
-                    "appointment system cost",
-                    "SafeIn pricing",
-                    "business plans",
-                    "free trial",
+                    "visitor management pricing india",
+                    "gatekeeper app cost india",
+                    "society security management cost",
+                    "safein plan prices",
+                    "affordable visitor system india",
+                    "subscription plans india",
+                    "free trial visitor management",
                 ]}
                 url="https://safein.aynzo.com/pricing"
                 structuredData={pricingStructuredData}

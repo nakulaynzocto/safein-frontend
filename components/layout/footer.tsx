@@ -120,6 +120,13 @@ export function Footer() {
                     </Link>
                 </div>
                 <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+                    <div>
+                        <h3 className="mb-4 text-lg font-semibold text-white">SafeIn India</h3>
+                        <p className="text-sm text-gray-300 leading-relaxed">
+                            India's best visitor management system for offices, IT parks, and housing societies.
+                            Providing smart gatekeeper solutions in Mohali, Chandigarh, Delhi, Mumbai, and Bangalore.
+                        </p>
+                    </div>
                     {/* Footer Sections */}
                     {footerSections.map((section) => (
                         <div key={section.title}>

@@ -66,7 +66,7 @@ export function PageSEOHead({
         updateMetaTag("og:image:width", "1200", true);
         updateMetaTag("og:image:height", "630", true);
         updateMetaTag("og:image:alt", `${title} - SafeIn by Aynzo`, true);
-        updateMetaTag("og:locale", "en_US", true);
+        updateMetaTag("og:locale", "en_IN", true);
 
         // Twitter Card tags
         updateMetaTag("twitter:card", "summary_large_image");
@@ -108,12 +108,15 @@ export function PageSEOHead({
                 name: safeInSEOConfig.organization.name,
                 url: safeInSEOConfig.organization.url,
                 logo: safeInSEOConfig.organization.logo,
+                address: (safeInSEOConfig.organization as any).address,
                 sameAs: safeInSEOConfig.organization.sameAs,
                 contactPoint: {
                     "@type": "ContactPoint",
                     telephone: safeInSEOConfig.organization.contactPoint.telephone,
                     contactType: safeInSEOConfig.organization.contactPoint.contactType,
                     email: safeInSEOConfig.organization.contactPoint.email,
+                    areaServed: (safeInSEOConfig.organization.contactPoint as any).areaServed,
+                    availableLanguage: (safeInSEOConfig.organization.contactPoint as any).availableLanguage
                 },
             },
             "organization-structured-data",

@@ -8,24 +8,28 @@ import { ErrorBoundary } from "@/components/common/errorBoundary";
 import { NavigationProgress } from "@/components/common/navigationProgress";
 import { NavigationProgressProvider } from "@/components/common/navigationProgressProvider";
 import { RouteOptimizer } from "@/components/common/routeOptimizer";
+import type { Viewport } from "next";
+
+export const viewport: Viewport = {
+    themeColor: "#3882a5",
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+};
 
 export const metadata: Metadata = {
-    title: "SafeIn - Professional Visitor Management & Appointment System | Aynzo",
+    title: "Best Visitor Management System in India | SafeIn",
     description:
-        "Transform your visitor management with SafeIn's comprehensive appointment scheduling system. Streamline check-ins, manage visitors, and enhance security with our professional platform. Start your free 3-day trial today!",
+        "Transform your visitor management with SafeIn's comprehensive platform in India. Streamline check-ins, manage society visitors, and enhance security with our professional system. Start your free 3-day trial today!",
     keywords: [
-        "visitor management system",
-        "appointment scheduling software",
-        "visitor check-in system",
-        "security management platform",
-        "visitor registration",
-        "appointment booking",
-        "visitor tracking",
-        "business security",
-        "visitor analytics",
-        "SafeIn management",
+        "best visitor management system in india",
+        "visitor management software india",
+        "gatekeeper app india",
+        "society visitor management india",
+        "appointment scheduling software india",
+        "digital visitor register india",
+        "SafeIn India",
         "Aynzo",
-        "digital solutions",
     ],
     authors: [{ name: "Aynzo" }],
     creator: "Aynzo",
@@ -33,6 +37,13 @@ export const metadata: Metadata = {
     robots: {
         index: true,
         follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+        },
     },
     generator: "Next.js",
     icons: {
@@ -46,31 +57,44 @@ export const metadata: Metadata = {
     },
     openGraph: {
         type: "website",
-        locale: "en_US",
+        locale: "en_IN",
         url: "https://safein.aynzo.com",
         siteName: "SafeIn by Aynzo",
-        title: "SafeIn - Professional Visitor Management & Appointment System",
+        title: "SafeIn - #1 Visitor Management System in India",
         description:
-            "Transform your visitor management with SafeIn's comprehensive appointment scheduling system. Streamline check-ins, manage visitors, and enhance security with our professional platform.",
+            "India's leading visitor management system. Features: Smart appointments, spot pass, real-time chat, and advanced security analytics. Perfect for offices & housing societies.",
         images: [
             {
                 url: "https://safein.aynzo.com/aynzo-logo.png",
                 width: 1200,
                 height: 630,
-                alt: "Aynzo Logo - SafeIn Visitor Management System",
+                alt: "Aynzo Logo - SafeIn Visitor Management System India",
             },
         ],
     },
     twitter: {
         card: "summary_large_image",
-        title: "SafeIn - Professional Visitor Management & Appointment System",
-        description: "Transform your visitor management with SafeIn's comprehensive appointment scheduling system.",
+        title: "SafeIn - Professional Visitor Management System India",
+        description: "India's smartest visitor management and appointment scheduling platform.",
         images: ["https://safein.aynzo.com/aynzo-logo.png"],
         creator: "@aynzo",
     },
     metadataBase: new URL("https://safein.aynzo.com"),
     alternates: {
         canonical: "https://safein.aynzo.com",
+        languages: {
+            "en-IN": "https://safein.aynzo.com",
+        },
+    },
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "default",
+        title: "SafeIn",
+    },
+    formatDetection: {
+        telephone: true,
+        address: true,
+        email: true,
     },
 };
 
@@ -80,7 +104,7 @@ export default function RootLayout({
     children: ReactNode;
 }>) {
     return (
-        <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+        <html lang="en-IN" className="scroll-smooth" suppressHydrationWarning>
             <head>
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -91,6 +115,10 @@ export default function RootLayout({
                 <link rel="icon" href="/aynzo-logo.png" type="image/png" />
                 <link rel="apple-touch-icon" href="/aynzo-logo.png" />
                 <link rel="shortcut icon" href="/aynzo-logo.png" type="image/png" />
+                <meta name="geo.region" content="IN-PB" />
+                <meta name="geo.placename" content="Mohali" />
+                <meta name="geo.position" content="30.7046;76.7179" />
+                <meta name="ICBM" content="30.7046, 76.7179" />
                 {/* Structured Data for Organization Logo (Google Search) */}
                 <script
                     type="application/ld+json"
@@ -110,8 +138,10 @@ export default function RootLayout({
                             ],
                             contactPoint: {
                                 "@type": "ContactPoint",
-                                telephone: "+91-86999-66076",
+                                telephone: "+91 86999 66076",
                                 contactType: "customer service",
+                                areaServed: "IN",
+                                availableLanguage: "en",
                                 email: "support@aynzo.com",
                             },
                         }),
