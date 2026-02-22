@@ -279,7 +279,7 @@ export function NewEmployeeModal({
                                 {...register("name")}
                                 placeholder="Enter employee's full name"
                                 aria-required="true"
-                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.name ? "border-destructive" : ""}`}
+                                className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.name ? "border-destructive" : ""}`}
                             />
                             {errors.name && <span className="text-destructive text-xs">{errors.name.message}</span>}
                         </div>
@@ -294,7 +294,7 @@ export function NewEmployeeModal({
                                 {...register("email", { onChange: clearGeneralError })}
                                 placeholder="Enter email address"
                                 aria-required="true"
-                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.email ? "border-destructive" : ""}`}
+                                className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.email ? "border-destructive" : ""}`}
                             />
                             {errors.email && <span className="text-destructive text-xs">{errors.email.message}</span>}
                         </div>
@@ -317,7 +317,7 @@ export function NewEmployeeModal({
                                     required
                                     placeholder="Enter phone number"
                                     defaultCountry="in"
-                                    className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                    className="pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                 />
                             )}
                         />
@@ -337,7 +337,7 @@ export function NewEmployeeModal({
                                         value={field.value || ""}
                                         onChange={(e) => field.onChange(e.target.value)}
                                         aria-required="true"
-                                        className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.department ? "border-destructive" : ""}`}
+                                        className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.department ? "border-destructive" : ""}`}
                                     />
                                     {errors.department && (
                                         <span className="text-destructive text-xs">{errors.department.message}</span>
@@ -369,7 +369,7 @@ export function NewEmployeeModal({
                                         value={field.value || ""}
                                         onChange={(e) => field.onChange(e.target.value)}
                                         aria-required="true"
-                                        className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.designation ? "border-destructive" : ""}`}
+                                        className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.designation ? "border-destructive" : ""}`}
                                     />
                                     {errors.designation && (
                                         <span className="text-destructive text-xs">{errors.designation.message}</span>
@@ -392,7 +392,7 @@ export function NewEmployeeModal({
                                             onChange={(val) => field.onChange(val)}
                                             error={errors.status?.message}
                                             isClearable={false}
-                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                            className="pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                         />
                                     </div>
                                 )}

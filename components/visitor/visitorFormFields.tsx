@@ -59,7 +59,7 @@ export function VisitorFormFields({
                             id="name"
                             {...register("name")}
                             placeholder="Enter full name"
-                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.name ? "border-destructive" : ""}`}
+                            className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.name ? "border-destructive" : ""}`}
                         />
                         {errors.name && <span className="text-destructive text-xs">{errors.name.message}</span>}
                     </div>
@@ -73,7 +73,7 @@ export function VisitorFormFields({
                             type="email"
                             {...register("email")}
                             placeholder="Enter email address"
-                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.email ? "border-destructive" : ""}`}
+                            className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.email ? "border-destructive" : ""}`}
                         />
                         {errors.email && <span className="text-destructive text-xs">{errors.email.message}</span>}
                     </div>
@@ -145,14 +145,14 @@ export function VisitorFormFields({
                     placeholder="Enter company address"
                     {...register("address.street")}
                     error={errors.address?.street?.message}
-                    className="bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                    className="bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                     rows={3}
                 />
             </div>
 
             {/* ID Verification & Photos Toggle */}
             <div className="border-t pt-4">
-                <div className="bg-muted/30 flex items-center justify-between rounded-lg border p-4">
+                <div className="bg-background flex items-center justify-between rounded-lg border p-4">
                     <div className="flex items-center gap-3">
                         <Info className="text-muted-foreground h-5 w-5" />
                         <div>
@@ -272,7 +272,7 @@ export function VisitorFormFields({
 
             {/* Security & Emergency Toggle */}
             <div className="border-t pt-4">
-                <div className="bg-muted/30 flex items-center justify-between rounded-lg border p-4">
+                <div className="bg-background flex items-center justify-between rounded-lg border p-4">
                     <div className="flex items-center gap-3">
                         <CreditCard className="text-muted-foreground h-5 w-5" />
                         <div>
@@ -304,14 +304,14 @@ export function VisitorFormFields({
                             <InputField
                                 label="Emergency Contact Name"
                                 placeholder="Enter contact name"
-                                {...register("emergencyContact.name")}
-                                error={errors.emergencyContact?.name?.message}
+                                {...register("emergencyContacts.0.name" as any)}
+                                error={(errors.emergencyContacts as any)?.[0]?.name?.message}
                             />
                             <InputField
                                 label="Emergency Contact Phone"
                                 placeholder="Enter contact phone"
-                                {...register("emergencyContact.phone")}
-                                error={errors.emergencyContact?.phone?.message}
+                                {...register("emergencyContacts.0.phone" as any)}
+                                error={(errors.emergencyContacts as any)?.[0]?.phone?.message}
                             />
                         </div>
                     </div>

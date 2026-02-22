@@ -346,7 +346,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                     {...register("companyName")}
                                     disabled={isEmployee}
                                     readOnly={isEmployee}
-                                    className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${isEmployee ? "opacity-60 cursor-not-allowed bg-gray-100" : ""} ${errors.companyName ? "border-destructive" : ""}`}
+                                    className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${isEmployee ? "opacity-60 cursor-not-allowed bg-gray-100" : ""} ${errors.companyName ? "border-destructive" : ""}`}
                                     style={isEmployee ? { pointerEvents: 'none', backgroundColor: '#f3f4f6' } : {}}
                                 />
                                 {errors.companyName && (
@@ -369,7 +369,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                         id="email"
                                         {...register("email")}
                                         disabled // Usually email is immutable or requires specific flow
-                                        className={`pl-10 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground ${errors.email ? "border-destructive" : ""}`}
+                                        className={`pl-10 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground ${errors.email ? "border-destructive" : ""}`}
                                     />
                                 </div>
                                 {errors.email && (
@@ -391,7 +391,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                     <Input
                                         id="mobileNumber"
                                         {...register("mobileNumber")}
-                                        className={`pl-10 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground ${errors.mobileNumber ? "border-destructive" : ""}`}
+                                        className={`pl-10 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground ${errors.mobileNumber ? "border-destructive" : ""}`}
                                         placeholder="10-digit mobile number"
                                     />
                                 </div>
@@ -411,7 +411,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                     id="bio"
                                     {...register("bio")}
                                     rows={3}
-                                    className={`w-full rounded-xl border border-border bg-muted/30 px-3 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus:bg-background transition-all disabled:cursor-not-allowed disabled:opacity-50 font-medium resize-none ${errors.bio ? "border-destructive" : ""}`}
+                                    className={`w-full rounded-xl border border-border bg-background px-3 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus:bg-background transition-all disabled:cursor-not-allowed disabled:opacity-50 font-medium resize-none ${errors.bio ? "border-destructive" : ""}`}
                                     placeholder="Write a short bio about yourself..."
                                 />
                                 {errors.bio && (
@@ -440,7 +440,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                         <Input
                                             id="street"
                                             {...register("address.street")}
-                                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.street ? "border-destructive" : ""}`}
+                                            className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.street ? "border-destructive" : ""}`}
                                         />
                                         {errors.address?.street && (
                                             <p className="text-xs text-destructive mt-1">{errors.address.street.message}</p>
@@ -490,7 +490,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             id="linkedin"
                                             {...register("socialLinks.linkedin")}
                                             placeholder="https://linkedin.com/in/..."
-                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                            className="pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -504,7 +504,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             id="twitter"
                                             {...register("socialLinks.twitter")}
                                             placeholder="https://twitter.com/..."
-                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                            className="pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -518,7 +518,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             id="website"
                                             {...register("socialLinks.website")}
                                             placeholder="https://..."
-                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                            className="pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                         />
                                     </div>
                                 </div>

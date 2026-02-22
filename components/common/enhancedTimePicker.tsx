@@ -141,7 +141,7 @@ export function EnhancedTimePicker({
                     <Button
                         variant="outline"
                         className={cn(
-                            "group h-12 w-full justify-start text-left font-medium rounded-xl bg-muted/30 pl-4 border-border", // Updated styles
+                            "group h-12 w-full justify-start text-left font-medium rounded-xl bg-background pl-4 border-border", // Updated styles
                             !value && "text-muted-foreground hover:bg-[#3882a5] hover:text-white",
                             error && "border-destructive focus:ring-destructive",
                         )}

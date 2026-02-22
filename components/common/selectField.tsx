@@ -136,7 +136,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         () => ({
             control: (base, state) => ({
                 ...base,
-                backgroundColor: state.isFocused ? "var(--background)" : "var(--muted)", // Match typical input behavior
+                backgroundColor: "var(--background)", // Match typical input behavior
                 minHeight: 48,
                 height: 48,
                 borderRadius: 12,
@@ -219,7 +219,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                         ? "var(--primary)"
                         : isFocused
                             ? "var(--accent)"
-                            : "transparent",
+                            : "var(--background)", // Changed from transparent to var(--background)
                 color: optDisabled
                     ? "var(--muted-foreground)"
                     : isSelected

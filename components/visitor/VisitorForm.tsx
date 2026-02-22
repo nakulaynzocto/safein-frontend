@@ -313,7 +313,7 @@ export function NewVisitorModal({
                             id="name"
                             {...register("name")}
                             placeholder="Enter full name"
-                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.name ? "border-destructive" : ""}`}
+                            className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.name ? "border-destructive" : ""}`}
                         />
                         {errors.name && <span className="text-destructive text-xs">{errors.name.message}</span>}
                     </div>
@@ -327,7 +327,7 @@ export function NewVisitorModal({
                             type="email"
                             {...register("email", { onChange: clearGeneralError })}
                             placeholder="Enter email address"
-                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.email ? "border-destructive" : ""}`}
+                            className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.email ? "border-destructive" : ""}`}
                         />
                         {errors.email && <span className="text-destructive text-xs">{errors.email.message}</span>}
                     </div>
@@ -402,14 +402,14 @@ export function NewVisitorModal({
                     placeholder="Enter company address"
                     {...register("address.street")}
                     error={errors.address?.street?.message}
-                    className="bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                    className="bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                     rows={3}
                 />
             </div>
 
             {/* ID Verification & Photos Toggle */}
             <div className="border-t pt-4">
-                <div className="bg-muted/30 flex items-center justify-between rounded-lg border p-4">
+                <div className="bg-background flex items-center justify-between rounded-lg border p-4">
                     <div className="flex items-center gap-3">
                         <Info className="text-muted-foreground h-5 w-5" />
                         <div>
@@ -529,7 +529,7 @@ export function NewVisitorModal({
 
             {/* Security & Emergency Toggle */}
             <div className="border-t pt-4">
-                <div className="bg-muted/30 flex items-center justify-between rounded-lg border p-4">
+                <div className="bg-background flex items-center justify-between rounded-lg border p-4">
                     <div className="flex items-center gap-3">
                         <CreditCard className="text-muted-foreground h-5 w-5" />
                         <div>

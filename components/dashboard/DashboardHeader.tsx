@@ -44,7 +44,7 @@ export function DashboardHeader({ companyName }: DashboardHeaderProps) {
                                         }
                                     }}
                                     variant="outline-primary"
-                                    className="flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-muted/30 text-xs whitespace-nowrap sm:w-auto sm:text-sm"
+                                    className="flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-background text-xs whitespace-nowrap sm:w-auto sm:text-sm"
                                 >
                                     <CalendarPlus className="mr-1 h-5 w-5 shrink-0 sm:mr-2" />
                                     <span className="hidden sm:inline">

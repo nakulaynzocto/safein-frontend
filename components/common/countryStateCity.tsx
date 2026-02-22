@@ -83,6 +83,7 @@ export function CountryStateCitySelect({ value, onChange, errors, required = fal
             <InputField
                 label="Pincode"
                 placeholder="e.g. 123456"
+                className="bg-background"
                 value={value.postalCode || ""}
                 onChange={(e) => onChange({ ...value, postalCode: e.target.value })}
                 error={errors?.postalCode}

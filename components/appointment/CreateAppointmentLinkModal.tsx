@@ -423,7 +423,7 @@ export function CreateAppointmentLinkModal({
                                         id="visitorEmail"
                                         type="email"
                                         placeholder="visitor@example.com"
-                                        className={`h-12 rounded-xl bg-muted/30 font-medium ${errors.visitorEmail ? "border-red-500" : ""}`}
+                                        className={`h-12 rounded-xl bg-background font-medium ${errors.visitorEmail ? "border-red-500" : ""}`}
                                     />
                                     {errors.visitorEmail && (
                                         <p className="text-sm text-red-500">{errors.visitorEmail.message}</p>

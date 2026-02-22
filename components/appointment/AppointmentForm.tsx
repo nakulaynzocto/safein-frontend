@@ -346,7 +346,7 @@ export function NewAppointmentModal({
                             step={1}
                             placeholder="Number of people (e.g., 0, 1, 2)"
                             {...register("accompanyingCount")}
-                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.accompanyingCount ? "border-destructive" : ""}`}
+                            className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.accompanyingCount ? "border-destructive" : ""}`}
                         />
                         {errors.accompanyingCount && (
                             <span className="text-destructive text-xs">{errors.accompanyingCount.message}</span>
@@ -439,7 +439,7 @@ export function NewAppointmentModal({
                         id="notes"
                         {...register("notes")}
                         placeholder="Any additional information or special requirements"
-                        className={`bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.notes ? "border-destructive" : ""}`}
+                        className={`bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.notes ? "border-destructive" : ""}`}
                         rows={4}
                     />
                     {errors.notes && <span className="text-destructive text-xs">{errors.notes.message}</span>}
@@ -448,7 +448,7 @@ export function NewAppointmentModal({
 
             {/* Vehicle Fields Toggle */}
             <div className="border-t pt-4">
-                <div className="bg-muted/30 flex items-center justify-between rounded-lg border p-4">
+                <div className="bg-background flex items-center justify-between rounded-lg border p-4">
                     <div className="flex items-center gap-3">
                         <Car className="text-muted-foreground h-5 w-5" />
                         <div>
@@ -511,7 +511,7 @@ export function NewAppointmentModal({
                                 id="vehicleNumber"
                                 {...register("vehicleNumber")}
                                 placeholder="e.g., DL01AB1234"
-                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.vehicleNumber ? "border-destructive" : ""}`}
+                                className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.vehicleNumber ? "border-destructive" : ""}`}
                             />
                             {errors.vehicleNumber && (
                                 <p className="text-xs text-red-500 mt-1">{errors.vehicleNumber.message}</p>

@@ -50,8 +50,8 @@ export function PhoneInputField({
                         "aria-label": label,
                     }}
                     containerClass="phone-input-container"
-                    inputClass={`phone-input-field pl-4 h-12 !bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium w-full ${className || ""}`}
-                    buttonClass="phone-input-button !bg-muted/30 !rounded-l-xl !border-border hover:!bg-muted/30"
+                    inputClass={`phone-input-field pl-4 h-12 !bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium w-full ${className || ""}`}
+                    buttonClass="phone-input-button !bg-background !rounded-l-xl !border-border hover:!bg-background"
                     dropdownClass="phone-input-dropdown"
                     searchClass="phone-input-search"
                     containerStyle={{

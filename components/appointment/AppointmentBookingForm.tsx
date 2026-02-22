@@ -216,7 +216,7 @@ export function AppointmentBookingForm({
                             step={1}
                             placeholder="Number of people (e.g., 0, 1, 2)"
                             {...register("accompanyingCount")}
-                            className={`h-12 rounded-xl bg-muted/30 font-medium ${errors.accompanyingCount ? "border-destructive" : ""}`}
+                            className={`h-12 rounded-xl bg-background font-medium ${errors.accompanyingCount ? "border-destructive" : ""}`}
                         />
                         {errors.accompanyingCount && (
                             <span className="text-destructive text-xs">{errors.accompanyingCount.message}</span>
@@ -301,7 +301,7 @@ export function AppointmentBookingForm({
                                     id="vehicleNumber"
                                     {...register("vehicleNumber")}
                                     placeholder="e.g., DL01AB1234"
-                                    className={`h-12 rounded-xl bg-muted/30 font-medium ${errors.vehicleNumber ? "border-destructive" : ""}`}
+                                    className={`h-12 rounded-xl bg-background font-medium ${errors.vehicleNumber ? "border-destructive" : ""}`}
                                 />
                                 {errors.vehicleNumber && (
                                     <p className="text-xs text-red-500 mt-1">{errors.vehicleNumber.message}</p>

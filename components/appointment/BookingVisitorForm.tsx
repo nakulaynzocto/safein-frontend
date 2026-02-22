@@ -191,7 +191,7 @@ export function BookingVisitorForm({
                         id="name"
                         {...register("name")}
                         placeholder="Enter full name"
-                        className={`h-12 w-full rounded-xl border ${errors.name ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-muted/30 text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium`}
+                        className={`h-12 w-full rounded-xl border ${errors.name ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-background text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium`}
                     />
                     {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
                 </div>
@@ -231,7 +231,7 @@ export function BookingVisitorForm({
                                 type="email"
                                 {...register("email")}
                                 placeholder="Enter email address"
-                                className={`h-12 w-full rounded-xl border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-muted/30 text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium`}
+                                className={`h-12 w-full rounded-xl border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-background text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium`}
                             />
                             {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
                         </>
@@ -293,7 +293,7 @@ export function BookingVisitorForm({
                                 id="address.street"
                                 placeholder="Enter company address"
                                 rows={3}
-                                className={`w-full rounded-xl border ${errors.address?.street ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-muted/30 text-foreground placeholder:text-muted-foreground resize-none px-4 py-3 text-sm focus:outline-none font-medium`}
+                                className={`w-full rounded-xl border ${errors.address?.street ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-background text-foreground placeholder:text-muted-foreground resize-none px-4 py-3 text-sm focus:outline-none font-medium`}
                             />
                             {errors.address?.street && (
                                 <p className="text-xs text-red-500">{errors.address.street.message}</p>
@@ -390,7 +390,7 @@ export function BookingVisitorForm({
                             id="idProofNumber"
                             {...register("idProof.number")}
                             placeholder="Enter Number"
-                            className={`h-12 w-full rounded-xl border ${errors.idProof?.number ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-muted/30 text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium`}
+                            className={`h-12 w-full rounded-xl border ${errors.idProof?.number ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-background text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium`}
                         />
                         {errors.idProof?.number && (
                             <p className="text-xs text-red-500 mt-1">{errors.idProof.number.message}</p>
