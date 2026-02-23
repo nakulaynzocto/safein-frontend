@@ -18,7 +18,6 @@ import {
     getInitials,
     getAppointmentStatus,
     getAppointmentDateTime,
-    isAppointmentTimedOut,
 } from "@/utils/helpers";
 import {
     Eye,
@@ -435,7 +434,7 @@ export function AppointmentTable({
             header: "Actions",
             render: (appointment: Appointment) => {
                 const status = typeof appointment.status === "string" ? appointment.status : "pending";
-                const isTimedOut = isAppointmentTimedOut(appointment);
+                const isTimedOut = !!appointment.isTimedOut;
                 const isPending = status === "pending" && !isTimedOut;
                 const isApproved = status === "approved";
                 const isRejected = status === "rejected";

@@ -423,84 +423,24 @@ export function getAppointmentDateTime(appointment: AppointmentForStatus): Date 
 }
 
 /**
- * Check if appointment is timed out (scheduled DATE has passed)
- * Date-based timeout: Appointments are valid for the entire scheduled day
- * and timeout at midnight (00:00) of the NEXT day
- * Example: Appointment on 1/2/2026 at 2:00 AM will timeout on 2/2/2026 at 00:00
- * @param appointment - Appointment object with appointmentDetails
- * @returns True if scheduled date has passed (next day or later)
+ * Check if appointment is timed out.
+ * Uses the `isTimedOut` field computed by the backend.
+ * (pending/approved appointments whose scheduledDate is before today)
  */
 export function isAppointmentTimedOut(appointment: AppointmentForStatus): boolean {
-    const scheduledDateTime = getAppointmentDateTime(appointment);
-    if (!scheduledDateTime) return false;
-
-    const now = new Date();
-
-    // Get date only (without time) for comparison
-    // This ensures appointments are valid for the entire scheduled day
-    const scheduledDateOnly = new Date(
-        scheduledDateTime.getFullYear(),
-        scheduledDateTime.getMonth(),
-        scheduledDateTime.getDate(),
-        0, 0, 0, 0  // Set to 00:00:00 (midnight)
-    );
-    const currentDateOnly = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        0, 0, 0, 0  // Set to 00:00:00 (midnight)
-    );
-
-
-    // Check if current date is after scheduled date (next day or later)
-    // Example: If appointment is for 1/2/2026, it will timeout on 2/2/2026 at 00:00
-    return currentDateOnly.getTime() > scheduledDateOnly.getTime();
+    return !!(appointment as any).isTimedOut;
 }
 
 /**
- * Get the effective status for an appointment (handles timeout logic)
- * @param appointment - Appointment object with status and appointmentDetails
- * @returns Effective status string
+ * Get the effective status for an appointment.
+ * Uses `isTimedOut` from the backend response — no client-side date calculation.
+ * Returns 'time_out' if backend marked it as timed out, otherwise the real status.
  */
 export function getAppointmentStatus(appointment: AppointmentForStatus): string {
-    const status = appointment.status || "pending";
-
-    // Only show 'time_out' if:
-    // 1. Status is 'pending' (not approved/rejected/completed)
-    // 2. Both scheduledDate and scheduledTime are available
-    // 3. Current date is after scheduled date (next day or later)
-    // Example: If appointment is for 1/1/2026, it will timeout on 2/1/2026
-    if (status === "pending") {
-        // Check if both date and time are available
-        if (!appointment.appointmentDetails?.scheduledDate || !appointment.appointmentDetails?.scheduledTime) {
-            return status;
-        }
-
-        const scheduledDateTime = getAppointmentDateTime(appointment);
-        if (scheduledDateTime) {
-            const now = new Date();
-
-            // Get date only (without time) for comparison
-            const scheduledDateOnly = new Date(
-                scheduledDateTime.getFullYear(),
-                scheduledDateTime.getMonth(),
-                scheduledDateTime.getDate()
-            );
-            const currentDateOnly = new Date(
-                now.getFullYear(),
-                now.getMonth(),
-                now.getDate()
-            );
-
-            // Check if current date is after scheduled date (next day or later)
-            // If appointment is for 1/1/2026, it will timeout on 2/1/2026
-            if (currentDateOnly.getTime() > scheduledDateOnly.getTime()) {
-                return "time_out";
-            }
-        }
+    if ((appointment as any).isTimedOut) {
+        return "time_out";
     }
-
-    return status;
+    return appointment.status || "pending";
 }
 
 export function getAppointmentStatsKey(

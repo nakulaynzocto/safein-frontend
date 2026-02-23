@@ -132,7 +132,7 @@ export function UnifiedDashboard() {
             approvedAppointments: appointmentStatsData.approved || 0,
             rejectedAppointments: appointmentStatsData.rejected || 0,
             completedAppointments: appointmentStatsData.completed || 0,
-            timeOutAppointments: appointmentStatsData.cancelled || 0,
+            timeOutAppointments: appointmentStatsData.time_out || 0,
         };
     }, [appointmentStatsData]);
 
