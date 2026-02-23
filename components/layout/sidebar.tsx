@@ -33,6 +33,7 @@ import {
     ClipboardList,
     Link as LinkIcon,
     MessageSquare,
+    Mail,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -104,6 +105,18 @@ const baseSettingsSubmenu = [
         icon: UserCircle,
         roles: ["admin"], // Only admin can access profile
     },
+    {
+        name: "WhatsApp Config",
+        href: routes.privateroute.SETTINGS_WHATSAPP,
+        icon: MessageSquare,
+        roles: ["admin"],
+    },
+    {
+        name: "SMTP Config",
+        href: routes.privateroute.SETTINGS_SMTP,
+        icon: Mail,
+        roles: ["admin"],
+    },
 ];
 
 export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () => void; isMobile?: boolean }) => {
@@ -153,7 +166,6 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
     const isSettingsActive =
         pathname === routes.privateroute.SETTINGS ||
         pathname === routes.privateroute.PROFILE ||
-        pathname === routes.privateroute.SETTINGS_STATUS ||
         pathname?.startsWith("/settings/");
     const [settingsOpen, setSettingsOpen] = useState(isSettingsActive);
     const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation();

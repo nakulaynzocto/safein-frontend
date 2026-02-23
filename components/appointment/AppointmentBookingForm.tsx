@@ -86,8 +86,6 @@ export function AppointmentBookingForm({
                 purpose: data.purpose,
                 scheduledDate: data.appointmentDate,
                 scheduledTime: data.appointmentTime,
-                duration: 60,
-                meetingRoom: "Main Conference Room",
                 notes: data.notes || "",
                 vehicleNumber: data.vehicleNumber || "",
                 vehiclePhoto: data.vehiclePhoto || "",
@@ -99,7 +97,6 @@ export function AppointmentBookingForm({
                 securityNotes: "",
             },
             notifications: {
-                smsSent: false,
                 emailSent: false,
                 whatsappSent: false,
                 reminderSent: false,

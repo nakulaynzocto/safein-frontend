@@ -9,7 +9,6 @@ export interface CountryStateCityValue {
     country: string;
     state: string;
     city: string;
-    postalCode?: string;
 }
 
 interface Props {
@@ -50,7 +49,7 @@ export function CountryStateCitySelect({ value, onChange, errors, required = fal
     );
 
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <SelectField
                 label="Country"
                 placeholder="Select country"
@@ -78,15 +77,6 @@ export function CountryStateCitySelect({ value, onChange, errors, required = fal
                 onChange={(city) => onChange({ ...value, city })}
                 isDisabled={!value.country || !value.state}
                 error={errors?.city}
-                required={required}
-            />
-            <InputField
-                label="Pincode"
-                placeholder="e.g. 123456"
-                className="bg-background"
-                value={value.postalCode || ""}
-                onChange={(e) => onChange({ ...value, postalCode: e.target.value })}
-                error={errors?.postalCode}
                 required={required}
             />
         </div>

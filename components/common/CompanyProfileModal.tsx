@@ -11,6 +11,8 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import { ActionButton } from "@/components/common/actionButton";
+import { PhoneInputField } from "@/components/common/phoneInputField";
 import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/common/inputField";
 import { CountryStateCitySelect } from "@/components/common/countryStateCity";
@@ -25,7 +27,7 @@ const companySchema = yup.object({
     mobileNumber: yup
         .string()
         .required("Mobile number is required")
-        .matches(/^[0-9]{10,12}$/, "Invalid mobile number. Must be 10-12 digits."),
+        .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
     street: yup.string().required("Company address is required"),
     city: yup.string().required("City is required"),
     state: yup.string().required("State is required"),
@@ -113,13 +115,21 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                             />
                         </div>
                         <div className="col-span-1">
-                            <InputField
-                                label="Mobile Number"
-                                placeholder="e.g. 9876543210"
-                                icon={<Phone className="w-4 h-4" />}
-                                error={errors.mobileNumber?.message}
-                                {...register("mobileNumber")}
-                                required
+                            <Controller
+                                name="mobileNumber"
+                                control={control}
+                                render={({ field }) => (
+                                    <PhoneInputField
+                                        id="mobileNumber"
+                                        label="Mobile Number"
+                                        value={field.value || ""}
+                                        onChange={(val) => field.onChange(val)}
+                                        placeholder="Enter mobile number"
+                                        error={errors.mobileNumber?.message}
+                                        required
+                                        defaultCountry="in"
+                                    />
+                                )}
                             />
                         </div>
 
@@ -129,28 +139,35 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                                     country: watch("country") || "",
                                     state: watch("state") || "",
                                     city: watch("city") || "",
-                                    postalCode: watch("pincode") || "",
                                 }}
                                 onChange={(val) => {
                                     setValue("country", val.country, { shouldValidate: true });
                                     setValue("state", val.state, { shouldValidate: true });
                                     setValue("city", val.city, { shouldValidate: true });
-                                    setValue("pincode", val.postalCode || "", { shouldValidate: true });
                                 }}
                                 errors={{
                                     country: errors.country?.message,
                                     state: errors.state?.message,
                                     city: errors.city?.message,
-                                    postalCode: errors.pincode?.message,
                                 }}
                                 required
                             />
                         </div>
 
-                        <div className="col-span-1 md:col-span-2">
+                        <div className="col-span-1">
+                            <InputField
+                                label="Pincode"
+                                placeholder="e.g. 123456"
+                                error={errors.pincode?.message}
+                                {...register("pincode")}
+                                required
+                            />
+                        </div>
+
+                        <div className="col-span-1">
                             <InputField
                                 label="Company Address"
-                                placeholder="Building No"
+                                placeholder="Building No, Street..."
                                 icon={<MapPin className="w-4 h-4" />}
                                 error={errors.street?.message}
                                 {...register("street")}

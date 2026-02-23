@@ -307,11 +307,20 @@ export function VisitorFormFields({
                                 {...register("emergencyContacts.0.name" as any)}
                                 error={(errors.emergencyContacts as any)?.[0]?.name?.message}
                             />
-                            <InputField
-                                label="Emergency Contact Phone"
-                                placeholder="Enter contact phone"
-                                {...register("emergencyContacts.0.phone" as any)}
-                                error={(errors.emergencyContacts as any)?.[0]?.phone?.message}
+                            <Controller
+                                name="emergencyContacts.0.phone"
+                                control={control}
+                                render={({ field }) => (
+                                    <PhoneInputField
+                                        id="emergency-phone"
+                                        label="Emergency Contact Phone"
+                                        value={field.value || ""}
+                                        onChange={(val) => field.onChange(val)}
+                                        placeholder="Enter contact phone"
+                                        error={(errors.emergencyContacts as any)?.[0]?.phone?.message}
+                                        defaultCountry="in"
+                                    />
+                                )}
                             />
                         </div>
                     </div>

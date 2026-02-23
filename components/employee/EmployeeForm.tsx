@@ -34,7 +34,7 @@ const employeeSchema = yup.object({
     phone: yup
         .string()
         .required("Phone number is required")
-        .matches(/^[\+]?[0-9]{10,15}$/, "Please enter a valid phone number"),
+        .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
     department: yup
         .string()
         .required("Department is required")
@@ -317,7 +317,6 @@ export function NewEmployeeModal({
                                     required
                                     placeholder="Enter phone number"
                                     defaultCountry="in"
-                                    className="pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                 />
                             )}
                         />

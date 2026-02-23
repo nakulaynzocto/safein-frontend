@@ -10,12 +10,13 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { UserX } from "lucide-react";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
+import { APIErrorState } from "@/components/common/APIErrorState";
 
 export function ProfilePageContent() {
     const dispatch = useAppDispatch();
     const { user: currentUser } = useAppSelector((state) => state.auth);
     const isEmployee = checkIsEmployee(currentUser);
-    
+
     const {
         data: profile,
         isLoading,
@@ -32,13 +33,13 @@ export function ProfilePageContent() {
             try {
                 // For employees, exclude company-related fields from update
                 const cleanPayload: UpdateProfileRequest = {};
-                
+
                 // Employees cannot update company fields
                 if (!isEmployee) {
                     if (data?.companyName && typeof data.companyName === "string") {
                         cleanPayload.companyName = data.companyName.trim();
                     }
-                    
+
                     if (
                         data?.profilePicture &&
                         typeof data.profilePicture === "string" &&
@@ -47,7 +48,7 @@ export function ProfilePageContent() {
                         cleanPayload.profilePicture = data.profilePicture.trim();
                     }
                 }
-                
+
                 // All users can update these fields
                 if (data.mobileNumber !== undefined) {
                     cleanPayload.mobileNumber = data.mobileNumber;
@@ -115,17 +116,22 @@ export function ProfilePageContent() {
         return <PageSkeleton />;
     }
 
-    if (error || !profile) {
+    if (error) {
         return (
-            <div className="container mx-auto px-4 py-8">
+            <APIErrorState
+                title="Failed to load profile"
+                error={error}
+                onRetry={() => refetch()}
+            />
+        );
+    }
 
+    if (!profile) {
+        return (
+            <div className="container mx-auto px-4 py-8 text-center">
                 <EmptyState
-                    title={error ? "Failed to load profile" : "No profile found"}
-                    description={
-                        error
-                            ? "There was an error loading your profile information. Please try again."
-                            : "Your profile information could not be found."
-                    }
+                    title="No profile found"
+                    description="Your profile information could not be found."
                     icon={UserX}
                 />
             </div>
@@ -143,11 +149,6 @@ export function ProfilePageContent() {
                             {activeTab === "profile" && (
                                 <ProfileForm profile={profile} onSubmit={handleProfileUpdate} onCancel={handleCancelEdit} />
                             )}
-                            {activeTab === "notification" && (
-                                <div className="space-y-4">
-                                    <SettingsPageContent />
-                                </div>
-                            )}
                             {activeTab === "subscription" && (
                                 <ProfileSubscription />
                             )}
@@ -160,7 +161,6 @@ export function ProfilePageContent() {
 }
 
 // Wrapper to handle dynamic import or just standard import
-import { SettingsPageContent } from "@/components/settings/SettingsPageContent";
 import { ProfileLayout } from "./profileLayout";
 import { ProfileSubscription } from "./profileSubscription";
 

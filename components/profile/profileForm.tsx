@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, type ChangeEvent } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -20,6 +20,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { CountryStateCitySelect } from "@/components/common/countryStateCity";
+import { PhoneInputField } from "@/components/common/phoneInputField";
 import { Textarea } from "@/components/ui/textarea"; // Using Textarea component
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useUploadFileMutation } from "@/store/api";
@@ -36,7 +37,9 @@ const createProfileSchema = (isEmployee: boolean) => z.object({
             .min(2, "Company name must be at least 2 characters")
             .max(100, "Company name cannot exceed 100 characters"),
     email: z.string().email("Invalid email format").min(1, "Email is required"),
-    mobileNumber: z.string().min(1, "Mobile number is required").max(20, "Mobile number too long"),
+    mobileNumber: z.string()
+        .min(1, "Mobile number is required")
+        .regex(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
     bio: z.string().max(500, "Biography must be less than 500 characters").optional(),
     profilePicture: z.string().optional(),
     address: z.object({
@@ -121,7 +124,10 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                 .min(2, "Company name must be at least 2 characters")
                 .max(100, "Company name cannot exceed 100 characters"),
         email: z.string().email("Invalid email format").min(1, "Email is required"),
-        mobileNumber: z.string().max(20, "Mobile number too long").optional(),
+        mobileNumber: z.string()
+            .regex(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits")
+            .optional()
+            .or(z.literal("")),
         bio: z.string().max(500, "Biography must be less than 500 characters").optional(),
         profilePicture: z.string().optional(),
         address: z.object({
@@ -142,6 +148,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     const {
         register,
         handleSubmit,
+        control,
         formState: { errors },
         setValue,
         reset,
@@ -378,26 +385,22 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label
-                                    htmlFor="mobileNumber"
-                                    className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
-                                >
-                                    Contact Number <span className="text-destructive font-bold">*</span>
-                                </Label>
-                                <div className="relative group">
-                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
-                                        <Phone size={16} />
-                                    </div>
-                                    <Input
-                                        id="mobileNumber"
-                                        {...register("mobileNumber")}
-                                        className={`pl-10 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground ${errors.mobileNumber ? "border-destructive" : ""}`}
-                                        placeholder="10-digit mobile number"
-                                    />
-                                </div>
-                                {errors.mobileNumber && (
-                                    <p className="text-xs text-destructive mt-1">{errors.mobileNumber.message}</p>
-                                )}
+                                <Controller
+                                    name="mobileNumber"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <PhoneInputField
+                                            id="mobileNumber"
+                                            label="Contact Number"
+                                            value={field.value || ""}
+                                            onChange={(val) => field.onChange(val)}
+                                            placeholder="Enter contact number"
+                                            error={errors.mobileNumber?.message}
+                                            required
+                                            defaultCountry="in"
+                                        />
+                                    )}
+                                />
                             </div>
 
                             <div className="space-y-2">
@@ -452,22 +455,36 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                                 country: watch("address.country") || "IN",
                                                 state: watch("address.state") || "",
                                                 city: watch("address.city") || "",
-                                                postalCode: watch("address.pincode") || "",
                                             }}
                                             onChange={(v: any) => {
                                                 setValue("address.country", v.country, { shouldDirty: true });
                                                 setValue("address.state", v.state, { shouldDirty: true });
                                                 setValue("address.city", v.city, { shouldDirty: true });
-                                                setValue("address.pincode", v.postalCode, { shouldDirty: true });
                                             }}
                                             errors={{
                                                 country: errors.address?.country?.message,
                                                 state: errors.address?.state?.message,
                                                 city: errors.address?.city?.message,
-                                                postalCode: errors.address?.pincode?.message,
                                             }}
                                             required={true}
                                         />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="pincode"
+                                            className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                        >
+                                            Pincode <span className="text-destructive font-bold">*</span>
+                                        </Label>
+                                        <Input
+                                            id="pincode"
+                                            {...register("address.pincode")}
+                                            className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.pincode ? "border-destructive" : ""}`}
+                                            placeholder="e.g. 123456"
+                                        />
+                                        {errors.address?.pincode && (
+                                            <p className="text-xs text-destructive mt-1">{errors.address.pincode.message}</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>

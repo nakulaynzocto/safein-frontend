@@ -59,8 +59,6 @@ export interface AppointmentDetails {
     purpose: string;
     scheduledDate: string;
     scheduledTime: string;
-    duration: number;
-    meetingRoom: string;
     notes: string;
     vehicleNumber?: string; // Optional vehicle number
     vehiclePhoto?: string; // Optional vehicle photo URL

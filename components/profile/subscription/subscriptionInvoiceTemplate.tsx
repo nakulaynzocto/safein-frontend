@@ -179,9 +179,8 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                                     style={{ borderColor: primaryColor }}
                                 >
                                     <th className="py-2 font-bold text-slate-700 w-[5%] text-left">#</th>
-                                    <th className="py-2 font-bold text-slate-700 w-[45%]">ITEM DESCRIPTION</th>
+                                    <th className="py-2 font-bold text-slate-700 w-[55%]">ITEM DESCRIPTION</th>
                                     <th className="py-2 font-bold text-slate-700 text-center w-[20%]">SAC CODE</th>
-                                    <th className="py-2 font-bold text-slate-700 text-center w-[10%]">QTY</th>
                                     <th className="py-2 font-bold text-slate-700 text-right w-[20%]">AMOUNT</th>
                                 </tr>
                             </thead>
@@ -197,7 +196,6 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                                         </p>
                                     </td>
                                     <td className="py-3 text-center text-slate-600 font-medium italic">998311</td>
-                                    <td className="py-3 text-center text-slate-600">1</td>
                                     <td className="py-3 text-right font-bold text-slate-800">
                                         {formatCurrency(amount)}
                                     </td>

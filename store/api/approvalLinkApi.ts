@@ -62,8 +62,6 @@ export interface VerifyTokenResponse {
                 purpose: string;
                 scheduledDate: string;
                 scheduledTime: string;
-                duration: number;
-                meetingRoom?: string;
                 notes?: string;
             };
             createdAt: string;

@@ -48,6 +48,7 @@ import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { VisitorDetailsDialog } from "./visitorDetailsDialog";
+import { APIErrorState } from "@/components/common/APIErrorState";
 
 // Helper function to truncate text
 const truncateText = (text: string, maxLength: number) => {
@@ -290,23 +291,12 @@ export function VisitorList() {
     };
 
     if (error) {
-        const errorMessage = (error as any)?.data?.message || (error as any)?.error || "Failed to load visitors";
-
         return (
-            <div className="space-y-6">
-                <Card className="card-hostinger p-4">
-                    <CardContent className="flex items-center justify-center py-8">
-                        <div className="text-center">
-                            <p className="mb-2 text-red-500">Failed to load visitors</p>
-                            <p className="mb-4 text-sm text-gray-500">{errorMessage}</p>
-                            <Button onClick={handleRefresh} variant="outline">
-                                <RefreshCw className="mr-2 h-4 w-4" />
-                                Retry
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+            <APIErrorState
+                title="Failed to load visitors"
+                error={error}
+                onRetry={handleRefresh}
+            />
         );
     }
 

@@ -14,7 +14,14 @@ export interface Option {
     image?: string;
 }
 
-type RSOption = { value: string; label: string; color?: string; searchKeywords?: string; image?: string };
+type RSOption = {
+    value: string;
+    label: string;
+    color?: string;
+    searchKeywords?: string;
+    image?: string;
+    data: Option;
+};
 
 export interface SelectFieldProps {
     label?: string;
@@ -36,6 +43,8 @@ export interface SelectFieldProps {
     disabled?: boolean;
     menuZIndex?: number;
     className?: string;
+    formatOptionLabel?: (option: Option) => React.ReactNode;
+    showDropdownIndicator?: boolean;
 }
 
 const MENU_PORTAL_Z_INDEX = 9999;
@@ -61,6 +70,8 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         isDisabled,
         disabled,
         menuZIndex,
+        formatOptionLabel,
+        showDropdownIndicator = true,
     },
     ref,
 ) {
@@ -78,20 +89,15 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
 
     // Convert options to react-select format
     const rsOptions: RSOption[] = useMemo(() => {
-        const converted: RSOption[] = options.map((o) => ({
+        return options.map((o) => ({
             value: String(o.value),
             label: o.label,
             color: o.color,
             searchKeywords: o.searchKeywords,
             image: o.image,
+            data: o,
         }));
-
-        // If there's a selected value that's not in the options, we should NOT add a placeholder
-        // Instead, we'll let the parent component handle fetching the actual data
-        // This prevents showing IDs as labels
-
-        return converted;
-    }, [options, value]);
+    }, [options]);
 
     // Find selected option - convert value to string for comparison
     const selectedOption: RSOption | null = useMemo(() => {
@@ -111,16 +117,9 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     );
 
     // Custom filter function for searching
-    // When onInputChange is provided, we're doing server-side search, so show all options
-    // Otherwise, do client-side filtering
     const customFilter = useCallback(
         (option: { label: string; value: string; data: RSOption }, inputValue: string) => {
-            // If onInputChange is provided, we're doing server-side search, so show all options
-            // The API will handle the filtering
-            if (onInputChange) {
-                return true;
-            }
-            // Otherwise, do client-side filtering
+            if (onInputChange) return true;
             if (!inputValue) return true;
             const searchText = inputValue.toLowerCase();
             const label = option.label.toLowerCase();
@@ -136,20 +135,20 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         () => ({
             control: (base, state) => ({
                 ...base,
-                backgroundColor: "var(--background)", // Match typical input behavior
+                backgroundColor: "var(--background)",
                 minHeight: 48,
                 height: 48,
                 borderRadius: 12,
-                borderColor: error ? "var(--destructive)" : state.isFocused ? "var(--primary)" : "var(--border)",
+                borderColor: error ? "var(--destructive)" : state.isFocused ? "var(--accent)" : "var(--border)",
                 boxShadow: state.isFocused
                     ? error
                         ? "0 0 0 2px var(--destructive-ring)"
-                        : "0 0 0 2px var(--primary-ring)"
+                        : "0 0 0 2px var(--ring)"
                     : "none",
                 cursor: isFieldDisabled ? "not-allowed" : "pointer",
                 opacity: isFieldDisabled ? 0.6 : 1,
                 "&:hover": {
-                    borderColor: state.isFocused ? (error ? "var(--destructive)" : "var(--primary)") : "var(--border-hover, var(--border))",
+                    borderColor: state.isFocused ? (error ? "var(--destructive)" : "var(--accent)") : "var(--border)",
                 },
             }),
             valueContainer: (base) => ({
@@ -176,6 +175,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
             indicatorSeparator: () => ({ display: "none" }),
             dropdownIndicator: (base, state) => ({
                 ...base,
+                display: showDropdownIndicator ? "flex" : "none",
                 color: "var(--muted-foreground)",
                 padding: "0 8px",
                 transition: "transform 0.2s",
@@ -219,7 +219,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                         ? "var(--primary)"
                         : isFocused
                             ? "var(--accent)"
-                            : "var(--background)", // Changed from transparent to var(--background)
+                            : "var(--background)",
                 color: optDisabled
                     ? "var(--muted-foreground)"
                     : isSelected
@@ -246,7 +246,19 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 fontSize: 14,
             }),
         }),
-        [error, isFieldDisabled],
+        [error, isFieldDisabled, showDropdownIndicator, menuZIndex],
+    );
+
+    const defaultFormatOptionLabel = (option: RSOption) => (
+        <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8 border border-border">
+                <AvatarImage src={option.image} alt={option.label} className="object-cover" />
+                <AvatarFallback className="text-xs font-medium leading-none bg-secondary text-secondary-foreground flex items-center justify-center">
+                    {getInitials(option.label)}
+                </AvatarFallback>
+            </Avatar>
+            <span className="truncate">{option.label}</span>
+        </div>
     );
 
     return (
@@ -288,17 +300,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 escapeClearsValue={false}
                 backspaceRemovesValue={true}
                 menuShouldScrollIntoView={false}
-                formatOptionLabel={(option) => (
-                    <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8 border border-border">
-                            <AvatarImage src={option.image} alt={option.label} className="object-cover" />
-                            <AvatarFallback className="text-xs font-medium leading-none bg-secondary text-secondary-foreground flex items-center justify-center">
-                                {getInitials(option.label)}
-                            </AvatarFallback>
-                        </Avatar>
-                        <span className="truncate">{option.label}</span>
-                    </div>
-                )}
+                formatOptionLabel={formatOptionLabel ? (opt) => formatOptionLabel(opt.data) : defaultFormatOptionLabel}
             />
 
             {error && (

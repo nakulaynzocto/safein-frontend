@@ -9,17 +9,7 @@ import {
     CheckCircle2,
     XCircle,
     Loader2,
-    Calendar,
-    Clock,
-    User,
-    Building2,
-    FileText,
-    Mail,
-    Phone,
-    MapPin,
-    CreditCard,
     ExternalLink,
-    Maximize2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -44,7 +34,7 @@ export function VerifyAppointment() {
     if (!token) {
         return (
             <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-                <Card className="w-full max-w-md">
+                <Card className="w-full max-w-md shadow-none">
                     <CardHeader className="text-center">
                         <div className="bg-destructive/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
                             <XCircle className="text-destructive h-6 w-6" />
@@ -89,7 +79,7 @@ export function VerifyAppointment() {
     if (isLoading) {
         return (
             <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-                <Card className="w-full max-w-md">
+                <Card className="w-full max-w-md shadow-none">
                     <CardContent className="flex flex-col items-center justify-center py-12">
                         <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
                         <p className="text-muted-foreground">Verifying link...</p>
@@ -106,7 +96,7 @@ export function VerifyAppointment() {
 
         return (
             <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-                <Card className="w-full max-w-md">
+                <Card className="w-full max-w-md shadow-none">
                     <CardHeader className="text-center">
                         <div className="bg-destructive/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
                             <XCircle className="text-destructive h-6 w-6" />
@@ -126,7 +116,7 @@ export function VerifyAppointment() {
     if (!appointment) {
         return (
             <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-                <Card className="w-full max-w-md">
+                <Card className="w-full max-w-md shadow-none">
                     <CardContent className="flex flex-col items-center justify-center py-12">
                         <XCircle className="text-destructive mb-4 h-8 w-8" />
                         <p className="text-muted-foreground">Appointment not found</p>
@@ -153,7 +143,7 @@ export function VerifyAppointment() {
         const displayStatus = currentStatus === "approved" ? "approved" : "rejected";
         return (
             <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-                <Card className="w-full max-w-md">
+                <Card className="w-full max-w-md shadow-none">
                     <CardHeader className="text-center">
                         <div
                             className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${displayStatus === "approved"
@@ -184,7 +174,7 @@ export function VerifyAppointment() {
 
     return (
         <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-2 py-4 sm:px-4 sm:py-12">
-            <Card className="w-full max-w-4xl">
+            <Card className="w-full max-w-4xl shadow-none">
                 <CardHeader className="px-4 pt-4 sm:px-6 sm:pt-6">
                     <CardTitle className="text-xl sm:text-2xl">Appointment Approval</CardTitle>
                     <CardDescription className="text-sm sm:text-base">
@@ -194,8 +184,7 @@ export function VerifyAppointment() {
                 <CardContent className="space-y-4 px-4 pb-4 sm:space-y-6 sm:px-6 sm:pb-6">
                     {/* Visitor Details Section */}
                     <div className="bg-muted/50 space-y-3 rounded-lg border p-3 sm:space-y-4 sm:p-6">
-                        <h3 className="flex items-center gap-2 text-base font-semibold sm:text-lg">
-                            <User className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <h3 className="text-base font-semibold sm:text-lg text-gray-700 dark:text-gray-300">
                             Visitor Information
                         </h3>
 
@@ -212,15 +201,6 @@ export function VerifyAppointment() {
                                             .toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
-                                {appointment.visitor.photo && (
-                                    <button
-                                        onClick={() => window.open(appointment.visitor.photo, "_blank")}
-                                        className="absolute right-0 bottom-0 rounded-full bg-[#3882a5] p-1.5 text-white opacity-0 shadow-lg transition-colors group-hover:opacity-100 hover:bg-[#2d6a87]"
-                                        title="View full image"
-                                    >
-                                        <Maximize2 className="h-3.5 w-3.5" />
-                                    </button>
-                                )}
                             </div>
                             <div className="min-w-0 flex-1">
                                 <h4 className="truncate text-base font-semibold sm:text-xl">
@@ -247,7 +227,6 @@ export function VerifyAppointment() {
                         {/* Visitor Contact Details */}
                         <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
                             <div className="flex items-start gap-2 sm:gap-3">
-                                <Mail className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
                                 <div className="min-w-0 flex-1">
                                     <p className="text-xs font-medium sm:text-sm">Email</p>
                                     <p className="text-muted-foreground text-xs break-all sm:text-sm">
@@ -257,7 +236,6 @@ export function VerifyAppointment() {
                             </div>
 
                             <div className="flex items-start gap-2 sm:gap-3">
-                                <Phone className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
                                 <div className="min-w-0 flex-1">
                                     <p className="text-xs font-medium sm:text-sm">Phone</p>
                                     <p className="text-muted-foreground text-xs break-all sm:text-sm">
@@ -269,7 +247,6 @@ export function VerifyAppointment() {
                             {/* Address */}
                             {appointment.visitor.address && (
                                 <div className="flex items-start gap-2 sm:gap-3 md:col-span-2">
-                                    <MapPin className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
                                     <div className="min-w-0 flex-1">
                                         <p className="text-xs font-medium sm:text-sm">Address</p>
                                         <p className="text-muted-foreground text-xs break-words sm:text-sm">
@@ -290,7 +267,6 @@ export function VerifyAppointment() {
                             {appointment.visitor.idProof && (
                                 <>
                                     <div className="flex items-start gap-2 sm:gap-3">
-                                        <CreditCard className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
                                         <div className="min-w-0 flex-1">
                                             <p className="text-xs font-medium sm:text-sm">ID Proof Type</p>
                                             <Badge variant="outline" className="mt-1 text-xs">
@@ -302,7 +278,6 @@ export function VerifyAppointment() {
                                     </div>
 
                                     <div className="flex items-start gap-2 sm:gap-3">
-                                        <CreditCard className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
                                         <div className="min-w-0 flex-1">
                                             <p className="text-xs font-medium sm:text-sm">ID Proof Number</p>
                                             {appointment.visitor.idProof.image ? (
@@ -345,130 +320,53 @@ export function VerifyAppointment() {
                     </div>
 
                     {/* Appointment Details Section */}
-                    <div className="bg-gradient-to-br from-[#3882a5]/5 to-[#3882a5]/10 dark:from-[#3882a5]/10 dark:to-[#3882a5]/5 space-y-3 rounded-xl border border-[#3882a5]/20 dark:border-[#3882a5]/10 p-4 shadow-sm sm:space-y-4 sm:p-6">
-                        <h3 className="flex items-center gap-2 text-base font-semibold text-[#074463] dark:text-[#3882a5] sm:text-lg">
-                            <div className="rounded-lg bg-[#3882a5]/10 p-2">
-                                <Calendar className="h-4 w-4 text-[#3882a5] dark:text-[#3882a5] sm:h-5 sm:w-5" />
+                    <div className="bg-white dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-none">
+                        <div className="bg-[#3882a5]/5 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                            <h3 className="text-sm font-semibold text-[#074463] dark:text-[#3882a5] uppercase tracking-wider">
+                                Appointment Details
+                            </h3>
+                        </div>
+                        <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                            {/* Date & Time */}
+                            <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Date & Time</dt>
+                                <dd className="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100 sm:col-span-2 sm:mt-0">
+                                    {formattedDate} at {appointment.appointmentDetails.scheduledTime}
+                                </dd>
                             </div>
-                            Appointment Details
-                        </h3>
-                        <div className="grid grid-cols-1 gap-4 sm:gap-5">
-                            {/* Date & Time Combined */}
-                            <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
-                                        <Calendar className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">DATE & TIME</p>
-                                        <p className="text-base font-semibold text-gray-900 dark:text-gray-100 sm:text-lg mt-0.5">
-                                            {formattedDate} at {appointment.appointmentDetails.scheduledTime}
-                                        </p>
-                                    </div>
-                                </div>
+                            {/* Visitor */}
+                            <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Visitor</dt>
+                                <dd className="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100 sm:col-span-2 sm:mt-0">
+                                    {appointment.visitor.name}
+                                </dd>
                             </div>
-
-                            {/* Visitor Name */}
-                            <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
-                                        <User className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">VISITOR</p>
-                                        <p className="text-base font-semibold text-gray-900 dark:text-gray-100 sm:text-lg mt-0.5 truncate">
-                                            {appointment.visitor.name}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Purpose */}
-                            {appointment.appointmentDetails.purpose && (
-                                <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                    <div className="flex items-start gap-3">
-                                        <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5 mt-0.5">
-                                            <FileText className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">PURPOSE</p>
-                                            <p className="text-sm text-gray-700 dark:text-gray-300 mt-1.5 leading-relaxed break-words">
-                                                {appointment.appointmentDetails.purpose}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Employee Info */}
-                            <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
-                                        <Building2 className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">MEETING WITH</p>
-                                        <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mt-0.5 truncate">
-                                            {appointment.employee.name}
-                                        </p>
+                            {/* Meeting With */}
+                            <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Meeting With</dt>
+                                <dd className="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100 sm:col-span-2 sm:mt-0">
+                                    <div className="flex flex-col">
+                                        <span>{appointment.employee.name}</span>
                                         {appointment.employee.department && (
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                                                {appointment.employee.department}
-                                            </p>
+                                            <span className="text-xs font-normal text-gray-500 mt-0.5">{appointment.employee.department}</span>
                                         )}
                                     </div>
-                                </div>
+                                </dd>
                             </div>
-
-                            {/* Meeting Room & Duration */}
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                {appointment.appointmentDetails.duration && (
-                                    <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
-                                                <Clock className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">DURATION</p>
-                                                <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mt-0.5">
-                                                    {appointment.appointmentDetails.duration} min
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {appointment.appointmentDetails.meetingRoom && (
-                                    <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
-                                                <Building2 className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">ROOM</p>
-                                                <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mt-0.5 truncate">
-                                                    {appointment.appointmentDetails.meetingRoom}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                            {/* Purpose */}
+                            <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Purpose</dt>
+                                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:col-span-2 sm:mt-0 leading-relaxed font-medium">
+                                    {appointment.appointmentDetails.purpose}
+                                </dd>
                             </div>
-
                             {/* Notes */}
                             {appointment.appointmentDetails.notes && (
-                                <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                    <div className="flex items-start gap-3">
-                                        <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5 mt-0.5">
-                                            <FileText className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">ADDITIONAL NOTES</p>
-                                            <p className="text-sm text-gray-700 dark:text-gray-300 mt-1.5 leading-relaxed break-words">
-                                                {appointment.appointmentDetails.notes}
-                                            </p>
-                                        </div>
-                                    </div>
+                                <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Additional Notes</dt>
+                                    <dd className="mt-1 text-sm text-gray-600 dark:text-gray-400 sm:col-span-2 sm:mt-0 leading-relaxed">
+                                        {appointment.appointmentDetails.notes}
+                                    </dd>
                                 </div>
                             )}
                         </div>

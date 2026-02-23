@@ -54,6 +54,7 @@ import { SubscriptionActionButtons } from "@/components/common/SubscriptionActio
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { useCooldown } from "@/hooks/useCooldown";
+import { APIErrorState } from "@/components/common/APIErrorState";
 
 export interface AppointmentTableProps {
     appointments: Appointment[];
@@ -385,12 +386,6 @@ export function AppointmentTable({
                             >
                                 {formatName(appointment.appointmentDetails?.purpose) || "N/A"}
                             </div>
-                            {appointment.appointmentDetails?.meetingRoom && (
-                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                    <Building className="h-3 w-3" />
-                                    {appointment.appointmentDetails.meetingRoom}
-                                </div>
-                            )}
                         </div>
                     );
                 },
@@ -555,19 +550,10 @@ export function AppointmentTable({
 
     if (error) {
         return (
-            <div className="space-y-6">
-                <Card className="card-hostinger p-4">
-                    <CardContent className="flex items-center justify-center py-8">
-                        <div className="text-center">
-                            <p className="mb-4 text-red-500">Failed to load appointments</p>
-                            <Button onClick={() => window.location.reload()} variant="outline">
-                                <RefreshCw className="mr-2 h-4 w-4" />
-                                Retry
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+            <APIErrorState
+                title="Failed to load appointments"
+                error={error}
+            />
         );
     }
 

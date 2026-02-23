@@ -347,6 +347,12 @@ export function RegisterForm() {
                 {/* Registration Form */}
                 {currentStep === "form" && (
                     <>
+                        <div className="mb-10 text-center sm:text-left">
+                            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Register</h1>
+                            <p className="text-muted-foreground mt-2 font-medium text-sm sm:text-base">
+                                Start your journey with us today!
+                            </p>
+                        </div>
                         <Button
                             type="button"
                             variant="outline"
@@ -380,7 +386,7 @@ export function RegisterForm() {
                                 />
 
                                 <InputField
-                                    label="Password"
+                                    label="Create Password"
                                     type="password"
                                     placeholder="Create a strong password"
                                     error={errors.password?.message}

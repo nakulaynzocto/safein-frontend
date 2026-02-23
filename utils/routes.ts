@@ -53,7 +53,8 @@ export const routes = {
         // Settings Routes
         SETTINGS: "/settings",
         PROFILE: "/settings/profile",
-        SETTINGS_STATUS: "/settings/status",
+        SETTINGS_WHATSAPP: "/settings/whatsapp",
+        SETTINGS_SMTP: "/settings/smtp",
         SPOT_PASS: "/spot-pass",
         SPOT_PASS_CREATE: "/spot-pass/create",
         MESSAGES: "/messages",

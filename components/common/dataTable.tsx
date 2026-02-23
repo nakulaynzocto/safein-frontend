@@ -57,7 +57,8 @@ export function DataTable<T extends Record<string, any>>({
     skeletonRows = 5,
     skeletonColumns,
     enableSorting = false,
-}: DataTableProps<T>) {
+    minHeight = "400px",
+}: DataTableProps<T> & { minHeight?: string }) {
     const [sortConfig, setSortConfig] = useState<{
         key: string | null;
         direction: "asc" | "desc";
@@ -158,7 +159,8 @@ export function DataTable<T extends Record<string, any>>({
                 scrollBehavior: "smooth",
                 // Remove all touch-action restrictions - let browser decide naturally
                 userSelect: "none",
-                WebkitUserSelect: "none"
+                WebkitUserSelect: "none",
+                minHeight: minHeight
             }}
         >
             <table

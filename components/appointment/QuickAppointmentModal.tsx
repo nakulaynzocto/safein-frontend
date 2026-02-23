@@ -23,8 +23,9 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
-import { User, Mail, Phone, FileText, Info, Briefcase, Calendar, Clock } from "lucide-react";
+import { User, Mail, FileText, Info, Briefcase, Calendar, Clock } from "lucide-react";
 import { ActionButton } from "@/components/common/actionButton";
+import { PhoneInputField } from "@/components/common/phoneInputField";
 import { EnhancedDatePicker } from "@/components/common/enhancedDatePicker";
 import { EnhancedTimePicker } from "@/components/common/enhancedTimePicker";
 import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
@@ -32,7 +33,10 @@ import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
 const quickAppointmentSchema = (isEmployee: boolean) => yup.object().shape({
     name: yup.string().required("Name is required"),
     email: yup.string().email("Invalid email").required("Email is required"),
-    phone: yup.string().required("Mobile number is required"),
+    phone: yup
+        .string()
+        .required("Mobile number is required")
+        .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
     purpose: yup.string().required("Purpose of visit is required"),
     employeeId: isEmployee
         ? yup.string().optional().nullable()
@@ -204,14 +208,21 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                                 error={errors.email?.message}
                                 required
                             />
-                            <InputField
-                                label="Mobile Number"
-                                placeholder="Enter mobile number"
-                                icon={<Phone className="h-4 w-4" />}
-                                {...register("phone")}
-                                error={errors.phone?.message}
-                                required
-                                maxLength={15}
+                            <Controller
+                                name="phone"
+                                control={control}
+                                render={({ field }) => (
+                                    <PhoneInputField
+                                        id="phone"
+                                        label="Mobile Number"
+                                        value={field.value || ""}
+                                        onChange={(val) => field.onChange(val)}
+                                        placeholder="Enter mobile number"
+                                        error={errors.phone?.message}
+                                        required
+                                        defaultCountry="in"
+                                    />
+                                )}
                             />
 
                             {!isEmployee && (

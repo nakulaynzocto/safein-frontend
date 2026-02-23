@@ -17,18 +17,11 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
     const isEmployee = checkIsEmployee(user);
     const [activeTab, setActiveTab] = useState<TabType>("profile");
 
-    // Base tabs - all users see profile
     const baseTabs = [
         {
             id: "profile" as const,
             label: "Profile Details",
             icon: User,
-            roles: ["admin", "employee"],
-        },
-        {
-            id: "notification" as const,
-            label: "Notification",
-            icon: Calendar,
             roles: ["admin", "employee"],
         },
         {
@@ -38,7 +31,6 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
             roles: ["admin"], // Only admin can see subscription
         },
     ];
-    
     // Filter tabs based on user role
     const tabs = baseTabs.filter(tab => tab.roles.includes(user?.role || 'admin'));
 

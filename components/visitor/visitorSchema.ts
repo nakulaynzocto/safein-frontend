@@ -3,7 +3,10 @@ import * as yup from "yup";
 export const visitorSchema = yup.object({
     name: yup.string().required("Name is required").min(2, "Name must be at least 2 characters"),
     email: yup.string().email("Invalid email address").required("Email is required"),
-    phone: yup.string().required("Phone number is required"),
+    phone: yup
+        .string()
+        .required("Phone number is required")
+        .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
     gender: yup.string().oneOf(["male", "female", "other"], "Please select gender").optional(),
     address: yup.object({
         street: yup.string().optional(),
@@ -28,28 +31,10 @@ export const visitorSchema = yup.object({
                     .string()
                     .required("Contact name is required")
                     .min(2, "Name must be at least 2 characters"),
-                countryCode: yup
-                    .string()
-                    .required("Country code is required")
-                    .matches(/^\+\d{1,4}$/, "Country code must start with + and contain 1-4 digits (e.g., +91)"),
                 phone: yup
                     .string()
                     .required("Phone number is required")
-                    .matches(/^\d+$/, "Phone number must contain only digits")
-                    .test(
-                        "total-length",
-                        "Total phone number (country code + phone) must be exactly 15 digits",
-                        function (value) {
-                            const { countryCode } = this.parent;
-                            if (!countryCode || !value) return false;
-
-                            // Remove + from country code and count digits
-                            const countryCodeDigits = countryCode.replace(/^\+/, "");
-                            const totalDigits = countryCodeDigits.length + value.length;
-
-                            return totalDigits === 15;
-                        }
-                    ),
+                    .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
             })
         )
         .optional()

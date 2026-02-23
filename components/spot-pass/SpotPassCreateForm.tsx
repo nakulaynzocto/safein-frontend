@@ -9,6 +9,7 @@ import { FormContainer } from "@/components/common/formContainer";
 import { InputField } from "@/components/common/inputField";
 import { SelectField } from "@/components/common/selectField";
 import { ImageUploadField } from "@/components/common/imageUploadField";
+import { PhoneInputField } from "@/components/common/phoneInputField";
 import { TextareaField } from "@/components/common/textareaField";
 import { AsyncSelectField } from "@/components/common/asyncSelectField";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ const spotPassSchema = yup.object({
         .string()
         .required("Phone number is required")
         .trim()
-        .matches(/^[\+]?[0-9]{10,15}$/, "Phone number must be valid (10-15 digits)"),
+        .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
     gender: yup.string().required("Gender is required"),
     address: yup
         .string()
@@ -139,13 +140,21 @@ export function SpotPassCreateForm() {
                                     error={errors.name?.message}
                                     required
                                 />
-                                <InputField
-                                    label="Phone Number"
-                                    placeholder="Enter mobile number"
-                                    {...register("phone")}
-                                    error={errors.phone?.message}
-                                    required
-                                    maxLength={15}
+                                <Controller
+                                    name="phone"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <PhoneInputField
+                                            id="phone"
+                                            label="Phone Number"
+                                            value={field.value}
+                                            onChange={(value) => field.onChange(value)}
+                                            error={errors.phone?.message}
+                                            required
+                                            placeholder="Enter phone number"
+                                            defaultCountry="in"
+                                        />
+                                    )}
                                 />
                                 <SelectField
                                     label="Gender"

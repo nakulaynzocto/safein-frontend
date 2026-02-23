@@ -22,6 +22,7 @@ import { ErrorDisplay } from "@/components/common/ErrorDisplay";
 import { LoadingTimeoutDisplay } from "@/components/common/LoadingTimeoutDisplay";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { getErrorMessage } from "@/utils/errorUtils";
+import { APIErrorState } from "@/components/common/APIErrorState";
 
 export function UnifiedDashboard() {
     const router = useRouter();
@@ -184,10 +185,11 @@ export function UnifiedDashboard() {
 
         return (
             <div className="space-y-6">
-                <ErrorDisplay
+                <APIErrorState
                     title="Failed to load dashboard data"
-                    message={errorMessages || "Failed to load dashboard data"}
+                    description={errorMessages}
                     onRetry={handleRetry}
+                    error={appointmentsError || employeesError || visitorsError}
                 />
             </div>
         );

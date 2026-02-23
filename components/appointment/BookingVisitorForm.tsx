@@ -17,7 +17,10 @@ import { FileText, Camera } from "lucide-react";
 const bookingVisitorSchema = yup.object({
     name: yup.string().required("Name is required").min(2, "Name must be at least 2 characters"),
     email: yup.string().email("Invalid email address").required("Email is required"),
-    phone: yup.string().required("Phone number is required"),
+    phone: yup
+        .string()
+        .required("Phone number is required")
+        .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
     address: yup.object({
         street: yup
             .string()

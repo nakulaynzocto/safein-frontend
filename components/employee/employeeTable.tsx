@@ -28,6 +28,7 @@ import { formatName, getInitials } from "@/utils/helpers";
 import { EmployeeVerificationModal } from "./EmployeeVerificationModal";
 import { ShieldCheck } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
+import { APIErrorState } from "@/components/common/APIErrorState";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 
 import { useUpdateEmployeeMutation } from "@/store/api/employeeApi";
@@ -303,11 +304,10 @@ export function EmployeeTable({
 
     if (error) {
         return (
-            <Card>
-                <CardContent className="pt-6">
-                    <div className="text-center text-red-500">Failed to load employees. Please try again.</div>
-                </CardContent>
-            </Card>
+            <APIErrorState
+                title="Failed to load employees"
+                error={error}
+            />
         );
     }
 
