@@ -199,17 +199,19 @@ export function PhoneInputField({
     );
 
     return (
-        <div className={cn("space-y-1.5", className)}>
-            <Label htmlFor={id} className="text-sm font-medium">
-                {label}
-                {required && <span className="ml-1 text-red-500 font-bold">*</span>}
-            </Label>
+        <div className={cn("space-y-1.5 w-full", className)}>
+            {label && (
+                <label htmlFor={id} className="text-foreground text-sm font-medium block">
+                    {label}
+                    {required && <span className="ml-1 text-red-500 font-bold">*</span>}
+                </label>
+            )}
 
             {/* Unified Container */}
             <div
                 className={cn(
                     "phone-unified-input-field flex flex-row items-center overflow-hidden rounded-xl border transition-all duration-200 bg-background",
-                    "h-12",
+                    "h-12 w-full",
                     isFocused ? "border-accent ring-2 ring-[var(--ring)]" : "border-border hover:border-border",
                     error ? "border-destructive ring-destructive/20 focus-within:ring-destructive/20" : "",
                     disabled ? "opacity-50 cursor-not-allowed" : ""
@@ -218,7 +220,7 @@ export function PhoneInputField({
                 onBlur={() => setIsFocused(false)}
             >
                 {/* Country Selector */}
-                <div className="w-[95px] shrink-0 h-full flex items-center">
+                <div className="w-[85px] sm:w-[95px] shrink-0 h-full flex items-center">
                     <Select<CountryOption>
                         value={selectedOption}
                         onChange={handleCountryChange}

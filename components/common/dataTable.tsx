@@ -57,7 +57,7 @@ export function DataTable<T extends Record<string, any>>({
     skeletonRows = 5,
     skeletonColumns,
     enableSorting = false,
-    minHeight = "400px",
+    minHeight = "350px",
 }: DataTableProps<T> & { minHeight?: string }) {
     const [sortConfig, setSortConfig] = useState<{
         key: string | null;
