@@ -51,31 +51,27 @@ export function VisitorFormFields({
             {/* Personal Information Section */}
             <div className="space-y-4">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="flex flex-col gap-1.5 md:col-span-2 lg:col-span-1">
-                        <Label htmlFor="name" className="text-sm font-medium">
-                            Full Name <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
+                    <div className="md:col-span-2 lg:col-span-1">
+                        <InputField
                             id="name"
+                            label="Full Name"
                             {...register("name")}
                             placeholder="Enter full name"
-                            className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.name ? "border-destructive" : ""}`}
+                            error={errors.name?.message}
+                            required
                         />
-                        {errors.name && <span className="text-destructive text-xs">{errors.name.message}</span>}
                     </div>
 
-                    <div className="flex flex-col gap-1.5 md:col-span-2 lg:col-span-1">
-                        <Label htmlFor="email" className="text-sm font-medium">
-                            Email Address <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
+                    <div className="md:col-span-2 lg:col-span-1">
+                        <InputField
                             id="email"
+                            label="Email Address"
                             type="email"
                             {...register("email")}
                             placeholder="Enter email address"
-                            className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.email ? "border-destructive" : ""}`}
+                            error={errors.email?.message}
+                            required
                         />
-                        {errors.email && <span className="text-destructive text-xs">{errors.email.message}</span>}
                     </div>
 
                     <Controller
@@ -110,6 +106,7 @@ export function VisitorFormFields({
                                 value={field.value || ""}
                                 onChange={(val) => field.onChange(val)}
                                 error={errors.gender?.message}
+                                required
                             />
                         )}
                     />
@@ -134,6 +131,7 @@ export function VisitorFormFields({
                         state: errors.address?.state?.message as string,
                         city: errors.address?.city?.message as string,
                     }}
+                    required
                 />
             </div>
 

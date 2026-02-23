@@ -19,7 +19,7 @@ const TextareaField = forwardRef<HTMLTextAreaElement, TextareaFieldProps>(
                 {label && (
                     <label className="text-foreground text-sm font-medium">
                         {label}
-                        {required && <span className="ml-1 text-red-500">*</span>}
+                        {required && <span className="ml-1 text-red-500 font-bold">*</span>}
                     </label>
                 )}
                 <Textarea

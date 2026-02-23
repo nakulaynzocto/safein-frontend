@@ -328,20 +328,11 @@ export function WhatsAppSettings() {
         <div className="container mx-auto max-w-full py-3 sm:py-4">
 
             {/* ── Page Header ── */}
-            <div className="mb-6 flex items-center gap-4">
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-10 w-10 shrink-0 rounded-xl bg-background hover:bg-accent/50"
-                    onClick={() => router.back()}
-                >
-                    <ArrowLeft className="h-5 w-5 text-muted-foreground" />
-                </Button>
+            <div className="mb-6">
 
                 <div>
                     <div className="flex items-center gap-3">
-                        <h1 className="text-foreground text-xl font-bold tracking-tight flex items-center gap-2">
-                            <MessageSquare className="h-6 w-6 text-green-600" />
+                        <h1 className="text-foreground text-xl font-bold tracking-tight">
                             WhatsApp Configuration
                         </h1>
 
@@ -355,7 +346,6 @@ export function WhatsAppSettings() {
                                 variant="outline"
                                 className="text-muted-foreground border-dashed border-muted-foreground/30 flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-bold"
                             >
-                                <MessageSquare className="h-3.5 w-3.5" />
                                 Not Verified
                             </Badge>
                         )}
@@ -381,9 +371,9 @@ export function WhatsAppSettings() {
                     <div className="flex items-center gap-3">
                         <div className={cn(
                             "p-2 rounded-lg transition-colors",
-                            whatsappEnabled ? "bg-green-50" : "bg-gray-100 dark:bg-gray-800"
+                            whatsappEnabled ? "bg-[#3882a5]/10" : "bg-gray-100 dark:bg-gray-800"
                         )}>
-                            <MessageSquare className={cn("h-5 w-5", whatsappEnabled ? "text-green-600" : "text-gray-400")} />
+                            <MessageSquare className={cn("h-5 w-5", whatsappEnabled ? "text-[#3882a5]" : "text-gray-400")} />
                         </div>
                         <div>
                             <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">WhatsApp Notifications</h3>
@@ -395,7 +385,7 @@ export function WhatsAppSettings() {
                         className={cn(
                             "relative h-6 w-11 rounded-full p-1 transition-all duration-300",
                             whatsappEnabled
-                                ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]"
+                                ? "bg-[#3882a5] shadow-[0_0_8px_rgba(56,130,165,0.4)]"
                                 : "bg-gray-200 dark:bg-gray-700",
                         )}
                     >
@@ -505,6 +495,7 @@ export function WhatsAppSettings() {
                                     placeholder="e.g. 10472938439201"
                                     {...register("meta.phoneNumberId")}
                                     error={errors.meta?.phoneNumberId?.message}
+                                    required
                                     className="h-12 bg-background border-border rounded-xl font-medium"
                                 />
                                 <InputField
@@ -513,6 +504,7 @@ export function WhatsAppSettings() {
                                     placeholder="EAAG...."
                                     {...register("meta.accessToken")}
                                     error={errors.meta?.accessToken?.message}
+                                    required
                                     className="h-12 bg-background border-border rounded-xl font-medium"
                                 />
                             </div>
@@ -529,6 +521,7 @@ export function WhatsAppSettings() {
                                     placeholder="https://api.provider.com/v1/send"
                                     {...register("custom.apiUrl")}
                                     error={errors.custom?.apiUrl?.message}
+                                    required
                                     className="h-12 bg-background border-border rounded-xl font-medium"
                                 />
                                 <InputField
@@ -537,6 +530,7 @@ export function WhatsAppSettings() {
                                     placeholder="Enter your API Key"
                                     {...register("custom.apiKey")}
                                     error={errors.custom?.apiKey?.message}
+                                    required
                                     className="h-12 bg-background border-border rounded-xl font-medium"
                                 />
                             </div>

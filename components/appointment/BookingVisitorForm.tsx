@@ -6,6 +6,8 @@ import * as yup from "yup";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { InputField } from "@/components/common/inputField";
+import { TextareaField } from "@/components/common/textareaField";
 import { SelectField } from "@/components/common/selectField";
 import { CountryStateCitySelect } from "@/components/common/countryStateCity";
 import { PhoneInputField } from "@/components/common/phoneInputField";
@@ -186,58 +188,43 @@ export function BookingVisitorForm({
         >
             {/* Personal Information Section */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="space-y-1.5">
-                    <Label htmlFor="name" className="text-foreground text-sm font-medium">
-                        Full Name <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                        id="name"
-                        {...register("name")}
-                        placeholder="Enter full name"
-                        className={`h-12 w-full rounded-xl border ${errors.name ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-background text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium`}
-                    />
-                    {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
-                </div>
+                <InputField
+                    id="name"
+                    label="Full Name"
+                    {...register("name")}
+                    placeholder="Enter full name"
+                    error={errors.name?.message}
+                    required
+                />
 
                 <div className="space-y-1.5">
-                    <Label htmlFor="email" className="text-foreground text-sm font-medium">
-                        Email Address <span className="text-red-500">*</span>
-                    </Label>
                     {initialEmail ? (
-                        <Controller
-                            name="email"
-                            control={control}
-                            defaultValue={initialEmail}
-                            render={({ field }) => (
-                                <div className="space-y-1">
-                                    <Input
-                                        {...field}
-                                        id="email"
-                                        type="email"
-                                        placeholder="Enter email address"
-                                        value={initialEmail}
-                                        className={`h-12 w-full rounded-xl border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} text-foreground placeholder:text-muted-foreground bg-gray-50 px-4 py-2 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 font-medium`}
-                                        disabled={true}
-                                        readOnly={true}
-                                    />
-                                    <p className="text-muted-foreground text-xs">
-                                        This email was used to send you the appointment link
-                                    </p>
-                                    {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
-                                </div>
-                            )}
-                        />
-                    ) : (
-                        <>
+                        <div className="space-y-1.5">
+                            <Label htmlFor="email" className="text-foreground text-sm font-medium">
+                                Email Address <span className="text-red-500 font-bold">*</span>
+                            </Label>
                             <Input
                                 id="email"
                                 type="email"
-                                {...register("email")}
-                                placeholder="Enter email address"
-                                className={`h-12 w-full rounded-xl border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-background text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium`}
+                                value={initialEmail}
+                                className={`h-12 w-full rounded-xl border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} text-foreground placeholder:text-muted-foreground bg-gray-50 px-4 py-2 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 font-medium`}
+                                disabled={true}
+                                readOnly={true}
                             />
-                            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
-                        </>
+                            <p className="text-muted-foreground text-xs">
+                                This email was used to send you the appointment link
+                            </p>
+                        </div>
+                    ) : (
+                        <InputField
+                            id="email"
+                            label="Email Address"
+                            type="email"
+                            {...register("email")}
+                            placeholder="Enter email address"
+                            error={errors.email?.message}
+                            required
+                        />
                     )}
                 </div>
 
@@ -246,7 +233,6 @@ export function BookingVisitorForm({
                     control={control}
                     render={({ field }) => (
                         <PhoneInputField
-                            {...(field as any)}
                             id="phone"
                             label="Phone Number"
                             value={field.value}
@@ -278,33 +264,20 @@ export function BookingVisitorForm({
                         state: errors.address?.state?.message as string,
                         city: errors.address?.city?.message as string,
                     }}
+                    required
                 />
             </div>
 
             {/* Company Address Section */}
-            <div className="space-y-1.5">
-                <Label htmlFor="address.street" className="text-foreground text-sm font-medium">
-                    Company Address <span className="text-red-500">*</span>
-                </Label>
-                <Controller
-                    name="address.street"
-                    control={control}
-                    render={({ field }) => (
-                        <div className="space-y-1">
-                            <textarea
-                                {...field}
-                                id="address.street"
-                                placeholder="Enter company address"
-                                rows={3}
-                                className={`w-full rounded-xl border ${errors.address?.street ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} bg-background text-foreground placeholder:text-muted-foreground resize-none px-4 py-3 text-sm focus:outline-none font-medium`}
-                            />
-                            {errors.address?.street && (
-                                <p className="text-xs text-red-500">{errors.address.street.message}</p>
-                            )}
-                        </div>
-                    )}
-                />
-            </div>
+            <TextareaField
+                id="address.street"
+                label="Company Address"
+                placeholder="Enter company address"
+                rows={3}
+                {...register("address.street")}
+                error={errors.address?.street?.message}
+                required
+            />
 
             {/* ID Verification & Photos */}
             <div className="space-y-4">

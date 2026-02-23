@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SelectField } from "@/components/common/selectField";
 import { InputField } from "@/components/common/inputField";
+import { TextareaField } from "@/components/common/textareaField";
 import { EnhancedDatePicker } from "@/components/common/enhancedDatePicker";
 import { EnhancedTimePicker } from "@/components/common/enhancedTimePicker";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
@@ -335,22 +336,18 @@ export function NewAppointmentModal({
                         )}
                     />
 
-                    <div className="space-y-1.5">
-                        <Label className="text-sm font-medium">
-                            Accompanying People <span className="text-muted-foreground font-normal">(optional)</span>
-                        </Label>
-                        <Input
+                    <div className="md:col-span-1">
+                        <InputField
                             type="number"
+                            id="accompanyingCount"
+                            label="Accompanying People (optional)"
                             min={0}
                             max={20}
                             step={1}
-                            placeholder="Number of people (e.g., 0, 1, 2)"
+                            placeholder="e.g., 0, 1, 2"
                             {...register("accompanyingCount")}
-                            className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.accompanyingCount ? "border-destructive" : ""}`}
+                            error={errors.accompanyingCount?.message}
                         />
-                        {errors.accompanyingCount && (
-                            <span className="text-destructive text-xs">{errors.accompanyingCount.message}</span>
-                        )}
                     </div>
                 </div>
             </div>
@@ -431,19 +428,14 @@ export function NewAppointmentModal({
 
             {/* Visit Information Section */}
             <div className="space-y-4 pt-4">
-                <div className="space-y-1.5">
-                    <Label htmlFor="notes" className="text-sm font-medium">
-                        Notes <span className="text-muted-foreground font-normal">(optional)</span>
-                    </Label>
-                    <Textarea
-                        id="notes"
-                        {...register("notes")}
-                        placeholder="Any additional information or special requirements"
-                        className={`bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.notes ? "border-destructive" : ""}`}
-                        rows={4}
-                    />
-                    {errors.notes && <span className="text-destructive text-xs">{errors.notes.message}</span>}
-                </div>
+                <TextareaField
+                    id="notes"
+                    label="Notes (optional)"
+                    placeholder="Any additional information or special requirements"
+                    {...register("notes")}
+                    error={errors.notes?.message}
+                    rows={4}
+                />
             </div>
 
             {/* Vehicle Fields Toggle */}

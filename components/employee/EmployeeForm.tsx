@@ -23,6 +23,7 @@ import { routes } from "@/utils/routes";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { AddonPurchaseModal } from "@/components/common/AddonPurchaseModal";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { InputField } from "../common/inputField";
 
 const employeeSchema = yup.object({
     name: yup
@@ -270,34 +271,24 @@ export function NewEmployeeModal({
                     </h3>
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor="name" className="text-sm font-medium">
-                                Full Name <span className="text-destructive">*</span>
-                            </Label>
-                            <Input
-                                id="name"
-                                {...register("name")}
-                                placeholder="Enter employee's full name"
-                                aria-required="true"
-                                className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.name ? "border-destructive" : ""}`}
-                            />
-                            {errors.name && <span className="text-destructive text-xs">{errors.name.message}</span>}
-                        </div>
+                        <InputField
+                            id="name"
+                            label="Full Name"
+                            {...register("name")}
+                            placeholder="Enter employee's full name"
+                            error={errors.name?.message}
+                            required
+                        />
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor="email" className="text-sm font-medium">
-                                Email Address <span className="text-destructive">*</span>
-                            </Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                {...register("email", { onChange: clearGeneralError })}
-                                placeholder="Enter email address"
-                                aria-required="true"
-                                className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.email ? "border-destructive" : ""}`}
-                            />
-                            {errors.email && <span className="text-destructive text-xs">{errors.email.message}</span>}
-                        </div>
+                        <InputField
+                            id="email"
+                            label="Email Address"
+                            type="email"
+                            {...register("email", { onChange: clearGeneralError })}
+                            placeholder="Enter email address"
+                            error={errors.email?.message}
+                            required
+                        />
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 pt-2">
@@ -321,29 +312,16 @@ export function NewEmployeeModal({
                             )}
                         />
 
-                        <Controller
-                            name="department"
-                            control={control}
-                            rules={{ required: "Department is required" }}
-                            render={({ field }) => (
-                                <div className="flex flex-col gap-1.5">
-                                    <Label className="text-sm font-medium">
-                                        Department <span className="text-destructive">*</span>
-                                    </Label>
-                                    <Input
-                                        id="department"
-                                        placeholder="Enter department"
-                                        value={field.value || ""}
-                                        onChange={(e) => field.onChange(e.target.value)}
-                                        aria-required="true"
-                                        className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.department ? "border-destructive" : ""}`}
-                                    />
-                                    {errors.department && (
-                                        <span className="text-destructive text-xs">{errors.department.message}</span>
-                                    )}
-                                </div>
-                            )}
-                        />
+                        <div className="flex flex-col gap-1.5">
+                            <InputField
+                                id="department"
+                                label="Department"
+                                placeholder="Enter department"
+                                {...register("department")}
+                                error={errors.department?.message}
+                                required
+                            />
+                        </div>
                     </div>
 
                     <h3 className="text-sm font-bold uppercase tracking-widest text-[#3882a5] mt-6 mb-2">
@@ -351,30 +329,13 @@ export function NewEmployeeModal({
                     </h3>
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-
-
-                        <Controller
-                            name="designation"
-                            control={control}
-                            rules={{ required: "Position is required" }}
-                            render={({ field }) => (
-                                <div className="flex flex-col gap-1.5">
-                                    <Label className="text-sm font-medium">
-                                        Position <span className="text-destructive">*</span>
-                                    </Label>
-                                    <Input
-                                        id="designation"
-                                        placeholder="e.g., CEO, VP, HR, Manager"
-                                        value={field.value || ""}
-                                        onChange={(e) => field.onChange(e.target.value)}
-                                        aria-required="true"
-                                        className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.designation ? "border-destructive" : ""}`}
-                                    />
-                                    {errors.designation && (
-                                        <span className="text-destructive text-xs">{errors.designation.message}</span>
-                                    )}
-                                </div>
-                            )}
+                        <InputField
+                            id="designation"
+                            label="Position"
+                            placeholder="e.g., CEO, VP, HR, Manager"
+                            {...register("designation")}
+                            error={errors.designation?.message}
+                            required
                         />
 
                         {(isEditMode && employeeData?.isVerified) && (

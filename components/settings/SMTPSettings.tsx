@@ -231,20 +231,11 @@ export function SMTPSettings() {
         <div className="container mx-auto max-w-full py-3 sm:py-4">
 
             {/* ── Page Header ── */}
-            <div className="mb-6 flex items-center gap-4">
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-10 w-10 shrink-0 rounded-xl bg-background hover:bg-accent/50"
-                    onClick={() => router.back()}
-                >
-                    <ArrowLeft className="h-5 w-5 text-muted-foreground" />
-                </Button>
+            <div className="mb-6">
 
                 <div>
                     <div className="flex items-center gap-3 flex-wrap">
-                        <h1 className="text-foreground text-xl font-bold tracking-tight flex items-center gap-2">
-                            <Mail className="h-6 w-6 text-primary" />
+                        <h1 className="text-foreground text-xl font-bold tracking-tight">
                             SMTP Email Configuration
                         </h1>
 
@@ -258,7 +249,6 @@ export function SMTPSettings() {
                                 variant="outline"
                                 className="text-muted-foreground border-dashed border-muted-foreground/30 flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-bold"
                             >
-                                <Mail className="h-3.5 w-3.5" />
                                 Not Configured
                             </Badge>
                         )}
