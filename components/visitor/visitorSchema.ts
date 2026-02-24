@@ -29,12 +29,19 @@ export const visitorSchema = yup.object({
             yup.object({
                 name: yup
                     .string()
-                    .required("Contact name is required")
+                    .notRequired()
+                    .nullable()
+                    .transform((value) => (value === "" ? null : value))
                     .min(2, "Name must be at least 2 characters"),
                 phone: yup
                     .string()
-                    .required("Phone number is required")
-                    .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
+                    .notRequired()
+                    .nullable()
+                    .transform((value) => (value === "" ? null : value))
+                    .matches(/^\d{10,15}$/, {
+                        message: "Phone number must be between 10 and 15 digits",
+                        excludeEmptyString: true,
+                    }),
             })
         )
         .optional()

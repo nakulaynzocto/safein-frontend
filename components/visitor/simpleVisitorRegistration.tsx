@@ -4,22 +4,20 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { VisitorDetailsStep } from "./visitorRegister";
-import { VisitorDetails } from "@/store/api/appointmentApi";
+import { VisitorRegister } from "./visitorRegister";
+import { CreateVisitorRequest } from "@/store/api/visitorApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
-import { User, ArrowLeft } from "lucide-react";
+import { User } from "lucide-react";
 
 export function SimpleVisitorRegistration() {
     const router = useRouter();
-    const [visitorDetails, setVisitorDetails] = useState<VisitorDetails | null>(null);
+    const [visitorDetails, setVisitorDetails] = useState<CreateVisitorRequest | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleVisitorComplete = async (data: VisitorDetails, accompaniedBy?: any) => {
+    const handleVisitorComplete = async (data: CreateVisitorRequest) => {
         try {
             setIsSubmitting(true);
-
-            await new Promise((resolve) => setTimeout(resolve, 1000));
 
             setVisitorDetails(data);
             showSuccessToast("Visitor registered successfully!");
@@ -34,8 +32,6 @@ export function SimpleVisitorRegistration() {
 
     return (
         <div className="space-y-6">
-
-
             {/* Visitor Details Form */}
             <Card>
                 <CardHeader>
@@ -46,7 +42,7 @@ export function SimpleVisitorRegistration() {
                     </p>
                 </CardHeader>
                 <CardContent>
-                    <VisitorDetailsStep onComplete={handleVisitorComplete} initialData={visitorDetails} />
+                    <VisitorRegister onComplete={handleVisitorComplete} initialData={visitorDetails} />
                 </CardContent>
             </Card>
 

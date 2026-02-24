@@ -41,8 +41,12 @@ export default function VisitorRegisterPage() {
         );
     }
 
-    const handleVisitorComplete = (visitorData: CreateVisitorRequest) => {
-        router.push(routes.privateroute.VISITORLIST);
+    const handleVisitorComplete = (visitorData: CreateVisitorRequest, visitorId?: string) => {
+        if (visitorId) {
+            router.push(`${routes.privateroute.APPOINTMENTCREATE}?visitorId=${visitorId}`);
+        } else {
+            router.push(routes.privateroute.VISITORLIST);
+        }
     };
 
     return (

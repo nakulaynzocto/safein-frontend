@@ -2,12 +2,14 @@
 
 import { NewAppointmentModal } from "@/components/appointment/AppointmentForm";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 // Page: appoitment create (non-modal page version)
 export default function AppoitmentCreate() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const visitorId = searchParams.get("visitorId") || undefined;
 
     return (
         <div className="container mx-auto max-w-full py-3 sm:py-4">
@@ -28,7 +30,7 @@ export default function AppoitmentCreate() {
                 </div>
             </div>
             <div className="w-full">
-                <NewAppointmentModal layout="page" />
+                <NewAppointmentModal layout="page" initialVisitorId={visitorId} />
             </div>
         </div>
     );

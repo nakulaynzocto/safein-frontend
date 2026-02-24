@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -12,13 +12,13 @@ import {
     DialogDescription,
     DialogFooter,
 } from "@/components/ui/dialog";
+import { useVisitorExistenceCheck } from "@/hooks/useVisitorExistenceCheck";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { InputField } from "@/components/common/inputField";
 import { AsyncSelectField } from "@/components/common/asyncSelectField";
 import { appointmentLinkApi } from "@/store/api/appointmentLinkApi";
 import { useCreateSpecialBookingMutation } from "@/store/api/specialBookingApi";
-import { useLazyGetVisitorsQuery } from "@/store/api/visitorApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
@@ -67,7 +67,6 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [createSpecialBooking] = useCreateSpecialBookingMutation();
-    const [triggerSearch, { isFetching: isSearchingVisitor }] = useLazyGetVisitorsQuery();
 
     // Use common employee search hook
     const { loadEmployeeOptions } = useEmployeeSearch();
@@ -92,35 +91,27 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
     });
 
     const watchedEmail = watch("email");
+    const watchedPhone = watch("phone");
 
-    // Auto-fill visitor details
+    // Use common hook for existence check and auto-fill data
+    const { emailExists, phoneExists, foundVisitor } = useVisitorExistenceCheck(watchedEmail, watchedPhone);
+
+    // Auto-fill logic when a visitor is found
     useEffect(() => {
-        const timeoutId = setTimeout(async () => {
-            if (watchedEmail && watchedEmail.includes("@") && watchedEmail.length > 5) {
-                try {
-                    const result = await triggerSearch({ search: watchedEmail }).unwrap();
-                    if (result.visitors && result.visitors.length > 0) {
-                        const visitor = result.visitors.find((v: any) => v.email.toLowerCase() === watchedEmail.toLowerCase());
-
-                        if (visitor) {
-                            // Valid match found, auto-fill
-                            // For now, just update and show toast
-                            reset({
-                                ...getValues(), // Need getValues from useForm
-                                name: visitor.name,
-                                phone: visitor.phone,
-                            });
-                            showSuccessToast("Visitor details found and auto-filled!");
-                        }
-                    }
-                } catch (error) {
-                    // Ignore search errors
-                }
+        if (foundVisitor) {
+            const currentValues = getValues();
+            // Valid match found, auto-fill if name or other fields are empty
+            if (!currentValues.name || !currentValues.phone || !currentValues.email) {
+                reset({
+                    ...currentValues,
+                    name: currentValues.name || foundVisitor.name,
+                    phone: currentValues.phone || foundVisitor.phone,
+                    email: currentValues.email || foundVisitor.email,
+                });
+                showSuccessToast("Visitor details found and auto-filled!");
             }
-        }, 800); // 800ms debounce
-
-        return () => clearTimeout(timeoutId);
-    }, [watchedEmail, triggerSearch, reset]);
+        }
+    }, [foundVisitor, reset, getValues]);
 
     // Reset form when modal opens and set employeeId for employees
     useEffect(() => {
@@ -199,31 +190,46 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                                 error={errors.name?.message}
                                 required
                             />
-                            <InputField
-                                label="Email Address"
-                                type="email"
-                                placeholder="visitor@example.com"
-                                icon={<Mail className="h-4 w-4" />}
-                                {...register("email")}
-                                error={errors.email?.message}
-                                required
-                            />
-                            <Controller
-                                name="phone"
-                                control={control}
-                                render={({ field }) => (
-                                    <PhoneInputField
-                                        id="phone"
-                                        label="Mobile Number"
-                                        value={field.value || ""}
-                                        onChange={(val) => field.onChange(val)}
-                                        placeholder="Enter mobile number"
-                                        error={errors.phone?.message}
-                                        required
-                                        defaultCountry="in"
-                                    />
+                            <div className="space-y-1">
+                                <Controller
+                                    name="phone"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <PhoneInputField
+                                            id="phone"
+                                            label="Mobile Number"
+                                            value={field.value || ""}
+                                            onChange={(val) => field.onChange(val)}
+                                            placeholder="Enter mobile number"
+                                            error={errors.phone?.message}
+                                            required
+                                            defaultCountry="in"
+                                        />
+                                    )}
+                                />
+                                {phoneExists && (
+                                    <p className="text-[10px] font-medium text-amber-600 animate-in fade-in slide-in-from-top-1 -mt-1">
+                                        Visitor with this phone already exists
+                                    </p>
                                 )}
-                            />
+                            </div>
+
+                            <div className="space-y-1">
+                                <InputField
+                                    label="Email Address"
+                                    type="email"
+                                    placeholder="visitor@example.com"
+                                    icon={<Mail className="h-4 w-4" />}
+                                    {...register("email")}
+                                    error={errors.email?.message}
+                                    required
+                                />
+                                {emailExists && (
+                                    <p className="text-[10px] font-medium text-amber-600 animate-in fade-in slide-in-from-top-1 -mt-2">
+                                        Visitor with this email already exists
+                                    </p>
+                                )}
+                            </div>
 
                             {!isEmployee && (
                                 <div className="space-y-2">

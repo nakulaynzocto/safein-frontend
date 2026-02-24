@@ -197,6 +197,23 @@ export function BookingVisitorForm({
                     required
                 />
 
+                <Controller
+                    name="phone"
+                    control={control}
+                    render={({ field }) => (
+                        <PhoneInputField
+                            id="phone"
+                            label="Phone Number"
+                            value={field.value}
+                            onChange={(value) => field.onChange(value)}
+                            error={errors.phone?.message}
+                            required
+                            placeholder="Enter phone number"
+                            defaultCountry="in"
+                        />
+                    )}
+                />
+
                 <div className="space-y-1.5">
                     {initialEmail ? (
                         <div className="space-y-1.5">
@@ -227,23 +244,6 @@ export function BookingVisitorForm({
                         />
                     )}
                 </div>
-
-                <Controller
-                    name="phone"
-                    control={control}
-                    render={({ field }) => (
-                        <PhoneInputField
-                            id="phone"
-                            label="Phone Number"
-                            value={field.value}
-                            onChange={(value) => field.onChange(value)}
-                            error={errors.phone?.message}
-                            required
-                            placeholder="Enter phone number"
-                            defaultCountry="in"
-                        />
-                    )}
-                />
             </div>
 
             {/* Address Information */}

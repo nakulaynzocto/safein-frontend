@@ -51,6 +51,7 @@ import { getDefaultFormValues, appointmentToFormValues } from "./helpers/formRes
 
 interface NewAppointmentModalProps {
     appointmentId?: string;
+    initialVisitorId?: string;
     triggerButton?: ReactNode;
     onSuccess?: () => void;
     open?: boolean;
@@ -60,6 +61,7 @@ interface NewAppointmentModalProps {
 
 export function NewAppointmentModal({
     appointmentId,
+    initialVisitorId,
     triggerButton,
     onSuccess,
     open: controlledOpen,
@@ -205,8 +207,10 @@ export function NewAppointmentModal({
             clearErrors();
             setEmployeeSearchInput("");
             setVisitorSearchInput("");
+        } else if (initialVisitorId && !isEditMode) {
+            setValue("visitorId", initialVisitorId);
         }
-    }, [open, reset, clearErrors]);
+    }, [open, reset, clearErrors, initialVisitorId, isEditMode, setValue]);
 
     useEffect(() => {
         if (isEditMode && existingAppointment && open) {

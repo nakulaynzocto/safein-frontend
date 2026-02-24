@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Info, CreditCard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { VisitorFormData, idProofTypes } from "./visitorSchema";
+import { useVisitorExistenceCheck } from "@/hooks/useVisitorExistenceCheck";
+import { EmergencyContactsField } from "./EmergencyContactsField";
 
 interface VisitorFormFieldsProps {
     register: UseFormRegister<VisitorFormData>;
@@ -19,8 +21,6 @@ interface VisitorFormFieldsProps {
     errors: FieldErrors<VisitorFormData>;
     watch: UseFormWatch<VisitorFormData>;
     setValue: UseFormSetValue<VisitorFormData>;
-    showOptionalFields: boolean;
-    onToggleOptionalFields: (checked: boolean) => void;
     showIdVerificationFields: boolean;
     onToggleIdVerificationFields: (checked: boolean) => void;
     showSecurityFields: boolean;
@@ -36,8 +36,6 @@ export function VisitorFormFields({
     errors,
     watch,
     setValue,
-    showOptionalFields,
-    onToggleOptionalFields,
     showIdVerificationFields,
     onToggleIdVerificationFields,
     showSecurityFields,
@@ -46,6 +44,11 @@ export function VisitorFormFields({
     visitorId,
     initialData,
 }: VisitorFormFieldsProps) {
+    const watchedEmail = watch("email");
+    const watchedPhone = watch("phone");
+
+    const { emailExists, phoneExists } = useVisitorExistenceCheck(watchedEmail, watchedPhone, visitorId);
+
     return (
         <div className="space-y-6">
             {/* Personal Information Section */}
@@ -63,33 +66,35 @@ export function VisitorFormFields({
                     </div>
 
                     <div className="md:col-span-2 lg:col-span-1">
+                        <Controller
+                            name="phone"
+                            control={control}
+                            render={({ field }) => (
+                                <PhoneInputField
+                                    id="phone"
+                                    label="Phone Number"
+                                    value={field.value}
+                                    onChange={(value) => field.onChange(value)}
+                                    error={errors.phone?.message || (phoneExists ? "This phone number is already registered" : undefined)}
+                                    required
+                                    placeholder="Enter phone number"
+                                    defaultCountry="in"
+                                />
+                            )}
+                        />
+                    </div>
+
+                    <div className="md:col-span-2 lg:col-span-1">
                         <InputField
                             id="email"
                             label="Email Address"
                             type="email"
                             {...register("email")}
                             placeholder="Enter email address"
-                            error={errors.email?.message}
+                            error={errors.email?.message || (emailExists ? "This email is already registered" : undefined)}
                             required
                         />
                     </div>
-
-                    <Controller
-                        name="phone"
-                        control={control}
-                        render={({ field }) => (
-                            <PhoneInputField
-                                id="phone"
-                                label="Phone Number"
-                                value={field.value}
-                                onChange={(value) => field.onChange(value)}
-                                error={errors.phone?.message}
-                                required
-                                placeholder="Enter phone number"
-                                defaultCountry="in"
-                            />
-                        )}
-                    />
 
                     <Controller
                         name="gender"
@@ -295,32 +300,11 @@ export function VisitorFormFields({
             {showSecurityFields && (
                 <div className="animate-in fade-in slide-in-from-top-2 space-y-4 pt-4 duration-200">
                     <div className="space-y-4 border-t pt-4">
-                        <h4 className="text-muted-foreground flex items-center gap-2 text-sm font-bold tracking-wider uppercase">
-                            <CreditCard className="h-4 w-4" /> Security & Emergency
-                        </h4>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <InputField
-                                label="Emergency Contact Name"
-                                placeholder="Enter contact name"
-                                {...register("emergencyContacts.0.name" as any)}
-                                error={(errors.emergencyContacts as any)?.[0]?.name?.message}
-                            />
-                            <Controller
-                                name="emergencyContacts.0.phone"
-                                control={control}
-                                render={({ field }) => (
-                                    <PhoneInputField
-                                        id="emergency-phone"
-                                        label="Emergency Contact Phone"
-                                        value={field.value || ""}
-                                        onChange={(val) => field.onChange(val)}
-                                        placeholder="Enter contact phone"
-                                        error={(errors.emergencyContacts as any)?.[0]?.phone?.message}
-                                        defaultCountry="in"
-                                    />
-                                )}
-                            />
-                        </div>
+                        <EmergencyContactsField
+                            control={control}
+                            register={register}
+                            errors={errors}
+                        />
                     </div>
 
                     <div className="space-y-4 border-t pt-4">

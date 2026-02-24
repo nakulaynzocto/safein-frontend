@@ -36,11 +36,11 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
             initialData.photo);
     const hasSecurityData =
         initialData &&
-        ((initialData as any).emergencyContact?.name ||
-            (initialData as any).emergencyContact?.phone ||
+        ((initialData as any).emergencyContacts?.[0]?.name ||
+            (initialData as any).emergencyContacts?.[0]?.phone ||
             (initialData as any).blacklisted ||
             (initialData as any).tags);
-    
+
     const [showIdVerificationFields, setShowIdVerificationFields] = useState<boolean>(!!hasIdVerificationData);
     const [showSecurityFields, setShowSecurityFields] = useState<boolean>(!!hasSecurityData);
 
@@ -74,10 +74,9 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
             blacklisted: (initialData as any)?.blacklisted || false,
             blacklistReason: (initialData as any)?.blacklistReason || "",
             tags: (initialData as any)?.tags?.join(", ") || "",
-            emergencyContact: {
-                name: (initialData as any)?.emergencyContact?.name || "",
-                phone: (initialData as any)?.emergencyContact?.phone || "",
-            },
+            emergencyContacts: (initialData as any)?.emergencyContacts?.length > 0
+                ? (initialData as any).emergencyContacts
+                : [],
         },
     });
 
@@ -105,8 +104,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
             setValue("blacklisted", false);
             setValue("blacklistReason", "");
             setValue("tags", "");
-            setValue("emergencyContact.name", "");
-            setValue("emergencyContact.phone", "");
+            setValue("emergencyContacts", []);
         }
     };
 
@@ -137,13 +135,9 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                 blacklisted: data.blacklisted,
                 blacklistReason: data.blacklistReason || undefined,
                 tags: data.tags ? data.tags.split(",").map((t) => t.trim()) : undefined,
-                emergencyContact:
-                    data.emergencyContact?.name || data.emergencyContact?.phone
-                        ? {
-                            name: data.emergencyContact.name || "",
-                            phone: data.emergencyContact.phone || "",
-                        }
-                        : undefined,
+                emergencyContacts: data.emergencyContacts && data.emergencyContacts.length > 0
+                    ? (data.emergencyContacts as any)
+                    : undefined,
             };
 
             const result = await createVisitor(visitorPayload).unwrap();
@@ -154,7 +148,14 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
             }
 
             if (onComplete) {
-                onComplete(visitorPayload, result._id);
+                // Robustly extract ID from various possible response structures
+                const visitorId = (result as any)?._id ||
+                    (result as any)?.id ||
+                    (result as any)?.data?._id ||
+                    (result as any)?.data?.id ||
+                    (result as any)?.visitor?._id ||
+                    (result as any)?.visitor?.id;
+                onComplete(visitorPayload, visitorId);
             }
         } catch (error: any) {
             let errorMessage = error?.data?.message || error?.message || "Failed to register visitor";
@@ -200,7 +201,11 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
     }
 
     const formContent = (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-2" onChange={clearGeneralError}>
+        <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6 pt-2"
+            onChange={clearGeneralError}
+        >
             {generalError && (
                 <Alert variant="destructive" className="mb-4">
                     <AlertDescription>{generalError}</AlertDescription>
@@ -214,8 +219,6 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                 errors={errors}
                 watch={watch}
                 setValue={setValue}
-                showOptionalFields={false}
-                onToggleOptionalFields={() => {}}
                 showIdVerificationFields={showIdVerificationFields}
                 onToggleIdVerificationFields={handleToggleIdVerification}
                 showSecurityFields={showSecurityFields}
