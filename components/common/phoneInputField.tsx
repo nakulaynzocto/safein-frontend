@@ -87,10 +87,15 @@ export function PhoneInputField({
     }, [phoneNumber, onChange]);
 
     const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const digits = e.target.value.replace(/\D/g, "");
-        setPhoneNumber(digits);
+        const inputDigits = e.target.value.replace(/\D/g, "");
         const option = countryOptions.find((o) => o.value === selectedIso);
         const code = option?.phoneCode || "";
+
+        // Limit total length (code + digits) to 15
+        const maxDigitsAllowed = 15 - code.length;
+        const digits = inputDigits.substring(0, maxDigitsAllowed);
+
+        setPhoneNumber(digits);
         onChange(`${code}${digits}`);
     }, [countryOptions, selectedIso, onChange]);
 
@@ -100,11 +105,11 @@ export function PhoneInputField({
     );
 
     const formatOptionLabel = useCallback((option: CountryOption) => (
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <img
                 src={option.image}
                 alt=""
-                style={{ width: 20, height: 14, objectFit: "cover", borderRadius: 2, border: "1px solid rgba(0,0,0,0.1)", flexShrink: 0 }}
+                style={{ width: 18, height: 12, objectFit: "cover", borderRadius: 2, border: "1px solid rgba(0,0,0,0.1)", flexShrink: 0 }}
             />
             <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>{option.label}</span>
         </div>
@@ -126,10 +131,10 @@ export function PhoneInputField({
         }),
         valueContainer: (base) => ({
             ...base,
-            padding: "0 8px",
+            padding: "0 2px 0 8px",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "flex-start",
             height: "100%",
             flexWrap: "nowrap" as const,
         }),
@@ -139,7 +144,7 @@ export function PhoneInputField({
             padding: 0,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "flex-start",
             color: "var(--foreground)",
         }),
         indicatorSeparator: () => ({ display: "none" }),
@@ -220,7 +225,7 @@ export function PhoneInputField({
                 onBlur={() => setIsFocused(false)}
             >
                 {/* Country Selector */}
-                <div className="w-[85px] sm:w-[95px] shrink-0 h-full flex items-center">
+                <div className="w-auto min-w-[70px] shrink-0 h-full flex items-center">
                     <Select<CountryOption>
                         value={selectedOption}
                         onChange={handleCountryChange}
@@ -250,7 +255,7 @@ export function PhoneInputField({
                     placeholder={placeholder}
                     disabled={disabled}
                     autoComplete="tel"
-                    className="flex-1 min-w-0 h-full bg-transparent border-none px-3 text-sm font-medium focus:outline-none placeholder:text-muted-foreground"
+                    className="flex-1 min-w-0 h-full bg-transparent border-none pl-1.5 pr-3 text-sm font-medium focus:outline-none placeholder:text-muted-foreground"
                 />
             </div>
 

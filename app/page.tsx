@@ -644,57 +644,6 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* FAQ Section */}
-                <section className="bg-gray-50 py-20">
-                    <div className="container mx-auto px-4">
-                        <div className="mb-12 text-center">
-                            <h2 className="text-brand mb-4 text-3xl font-bold md:text-4xl">
-                                Frequently Asked Questions
-                            </h2>
-                            <p className="text-accent mx-auto max-w-2xl text-lg">
-                                Got questions about India's best visitor management system? We've got answers.
-                            </p>
-                        </div>
-                        <div className="mx-auto max-w-3xl space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-lg">Which is the best visitor management system in India?</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-gray-600">
-                                        SafeIn by Aynzo is considered one of the best visitor management systems in India due to its
-                                        comprehensive feature set including real-time chat, smart notifications, and spot passes, all
-                                        designed specifically for the Indian market.
-                                    </p>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-lg">How does the Spot Pass system work for Indian walk-ins?</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-gray-600">
-                                        Our Spot Pass system allows walk-in visitors in India to quickly register at the gate.
-                                        Security guards can generate a pass instantly, ensuring high security and zero delays
-                                        at your premises.
-                                    </p>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-lg">Is SafeIn suitable for housing societies in India?</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-gray-600">
-                                        Yes, SafeIn is an ideal gatekeeper app for housing societies in India. It manages
-                                        visitor entries, staff check-ins, and provides real-time alerts to residents,
-                                        making it the perfect digital visitor book.
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
-                </section>
 
                 {/* Contact Section */}
                 <section className="bg-[#074463] pt-20 pb-8">
