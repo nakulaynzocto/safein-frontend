@@ -23,16 +23,13 @@ export interface Settings {
     };
     smtp?: SmtpConfig;
     whatsapp: {
-        activeProvider: "meta" | "custom";
+        activeProvider: "meta";
         senderNumber: string;
         testNumber?: string;
-        apiUrl?: string;
-        apiKey?: string;
         phoneNumberId?: string;
         accessToken?: string;
         verified: boolean;
         metaVerified: boolean;
-        customVerified: boolean;
         verifiedAt?: string;
     };
     createdAt: string;
@@ -45,11 +42,9 @@ export interface UpdateSettingsRequest {
         whatsappEnabled?: boolean;
     };
     whatsapp?: {
-        activeProvider?: "meta" | "custom";
+        activeProvider?: "meta";
         senderNumber?: string;
         testNumber?: string;
-        apiUrl?: string;
-        apiKey?: string;
         phoneNumberId?: string;
         accessToken?: string;
     };

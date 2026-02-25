@@ -29,10 +29,13 @@ import { PhoneInputField } from "@/components/common/phoneInputField";
 import { EnhancedDatePicker } from "@/components/common/enhancedDatePicker";
 import { EnhancedTimePicker } from "@/components/common/enhancedTimePicker";
 import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
+import { FormProvider } from "react-hook-form";
+import { EmployeeSelectionField } from "@/components/common/EmployeeSelectionField";
+import { useVisitorAutoFill } from "@/hooks/useVisitorAutoFill";
 
 const quickAppointmentSchema = (isEmployee: boolean) => yup.object().shape({
     name: yup.string().required("Name is required"),
-    email: yup.string().email("Invalid email").required("Email is required"),
+    email: yup.string().email("Invalid email").optional(),
     phone: yup
         .string()
         .required("Mobile number is required")
@@ -47,7 +50,7 @@ const quickAppointmentSchema = (isEmployee: boolean) => yup.object().shape({
 
 type QuickAppointmentFormData = {
     name: string;
-    email: string;
+    email?: string;
     phone: string;
     purpose: string;
     employeeId?: string | null;
@@ -69,7 +72,16 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
     const [createSpecialBooking] = useCreateSpecialBookingMutation();
 
     // Use common employee search hook
-    const { loadEmployeeOptions } = useEmployeeSearch();
+    const { } = useEmployeeSearch();
+
+    const methods = useForm<QuickAppointmentFormData>({
+        resolver: yupResolver(quickAppointmentSchema(isEmployee)) as any,
+        defaultValues: {
+            purpose: "Official VIP Meeting",
+            employeeId: "",
+            accompanyingCount: 0,
+        }
+    });
 
     const {
         register,
@@ -81,39 +93,18 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
         trigger,
         clearErrors,
         getValues,
-    } = useForm<QuickAppointmentFormData>({
-        resolver: yupResolver(quickAppointmentSchema(isEmployee)) as any,
-        defaultValues: {
-            purpose: "Official VIP Meeting",
-            employeeId: "",
-            accompanyingCount: 0,
-        }
-    });
+    } = methods;
 
-    const watchedEmail = watch("email");
-    const watchedPhone = watch("phone");
 
     // Use common hook for existence check and auto-fill data
-    const { emailExists, phoneExists, foundVisitor } = useVisitorExistenceCheck(watchedEmail, watchedPhone);
+    const { emailExists, phoneExists } = useVisitorAutoFill({
+        nameFieldName: "name",
+        phoneFieldName: "phone",
+        emailFieldName: "email",
+        methods
+    });
 
-    // Auto-fill logic when a visitor is found
-    useEffect(() => {
-        if (foundVisitor) {
-            const currentValues = getValues();
-            // Valid match found, auto-fill if name or other fields are empty
-            if (!currentValues.name || !currentValues.phone || !currentValues.email) {
-                reset({
-                    ...currentValues,
-                    name: currentValues.name || foundVisitor.name,
-                    phone: currentValues.phone || foundVisitor.phone,
-                    email: currentValues.email || foundVisitor.email,
-                });
-                showSuccessToast("Visitor details found and auto-filled!");
-            }
-        }
-    }, [foundVisitor, reset, getValues]);
-
-    // Reset form when modal opens and set employeeId for employees
+    // Reset form when modal opens
     useEffect(() => {
         if (open) {
             reset({
@@ -127,6 +118,7 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
             });
         }
     }, [open, reset, isEmployee, user]);
+
 
     const onSubmit = async (data: QuickAppointmentFormData) => {
         setIsSubmitting(true);
@@ -179,137 +171,115 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
-                    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 touch-pan-y pointer-events-auto">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <InputField
-                                label="Visitor Name"
-                                placeholder="Enter visitor name"
-                                icon={<User className="h-4 w-4" />}
-                                {...register("name")}
-                                error={errors.name?.message}
-                                required
-                            />
-                            <div className="space-y-1">
-                                <Controller
-                                    name="phone"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <PhoneInputField
-                                            id="phone"
-                                            label="Mobile Number"
-                                            value={field.value || ""}
-                                            onChange={(val) => field.onChange(val)}
-                                            placeholder="Enter mobile number"
-                                            error={errors.phone?.message}
-                                            required
-                                            defaultCountry="in"
-                                        />
-                                    )}
-                                />
-                                {phoneExists && (
-                                    <p className="text-[10px] font-medium text-amber-600 animate-in fade-in slide-in-from-top-1 -mt-1">
-                                        Visitor with this phone already exists
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="space-y-1">
+                <FormProvider {...methods}>
+                    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
+                        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 touch-pan-y pointer-events-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <InputField
-                                    label="Email Address"
-                                    type="email"
-                                    placeholder="visitor@example.com"
-                                    icon={<Mail className="h-4 w-4" />}
-                                    {...register("email")}
-                                    error={errors.email?.message}
+                                    label="Visitor Name"
+                                    placeholder="Enter visitor name"
+                                    icon={<User className="h-4 w-4" />}
+                                    {...register("name")}
+                                    error={errors.name?.message}
                                     required
                                 />
-                                {emailExists && (
-                                    <p className="text-[10px] font-medium text-amber-600 animate-in fade-in slide-in-from-top-1 -mt-2">
-                                        Visitor with this email already exists
-                                    </p>
-                                )}
-                            </div>
-
-                            {!isEmployee && (
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium leading-none flex items-center gap-2">
-                                        <Briefcase className="h-4 w-4" />
-                                        Employee to Meet <span className="text-red-500">*</span>
-                                    </label>
+                                <div className="space-y-1">
                                     <Controller
-                                        name="employeeId"
+                                        name="phone"
                                         control={control}
                                         render={({ field }) => (
-                                            <AsyncSelectField
+                                            <PhoneInputField
+                                                id="phone"
+                                                label="Mobile Number"
                                                 value={field.value || ""}
-                                                onChange={field.onChange}
-                                                loadOptions={loadEmployeeOptions}
-                                                placeholder="Search employees..."
-                                                isClearable={false}
-                                                error={errors.employeeId?.message}
-                                                cacheOptions={true}
-                                                defaultOptions={true}
+                                                onChange={(val) => field.onChange(val)}
+                                                placeholder="Enter mobile number"
+                                                error={errors.phone?.message}
+                                                required
+                                                defaultCountry="in"
                                             />
                                         )}
                                     />
+                                    {phoneExists && (
+                                        <p className="text-[10px] font-medium text-amber-600 animate-in fade-in slide-in-from-top-1 -mt-1">
+                                            Visitor with this phone already exists
+                                        </p>
+                                    )}
                                 </div>
-                            )}
 
-                            <InputField
-                                label="Purpose of Visit"
-                                placeholder="e.g., Official VIP Visit"
-                                icon={<Info className="h-4 w-4" />}
-                                {...register("purpose")}
-                                error={errors.purpose?.message}
-                                required
-                            />
+                                <div className="space-y-1">
+                                    <InputField
+                                        label="Email Address"
+                                        type="email"
+                                        placeholder="visitor@example.com"
+                                        icon={<Mail className="h-4 w-4" />}
+                                        {...register("email")}
+                                        error={errors.email?.message}
+                                    />
+                                    {emailExists && (
+                                        <p className="text-[10px] font-medium text-amber-600 animate-in fade-in slide-in-from-top-1 -mt-2">
+                                            Visitor with this email already exists
+                                        </p>
+                                    )}
+                                </div>
 
-                            <InputField
-                                label="Accompanying People"
-                                type="number"
-                                placeholder="Number of people"
-                                icon={<User className="h-4 w-4" />}
-                                {...register("accompanyingCount")}
-                                error={errors.accompanyingCount?.message}
-                            />
+                                <EmployeeSelectionField />
 
-                            <div className="md:col-span-2 space-y-2">
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    Notes
-                                </label>
-                                <Textarea
-                                    placeholder="Add any notes here..."
-                                    {...register("notes")}
-                                    className={errors.notes ? "border-red-500" : ""}
-                                    rows={3}
+                                <InputField
+                                    label="Purpose of Visit"
+                                    placeholder="e.g., Official VIP Visit"
+                                    icon={<Info className="h-4 w-4" />}
+                                    {...register("purpose")}
+                                    error={errors.purpose?.message}
+                                    required
                                 />
-                                {errors.notes && <p className="text-xs text-red-500">{errors.notes.message}</p>}
+
+                                <InputField
+                                    label="Accompanying People"
+                                    type="number"
+                                    placeholder="Number of people"
+                                    icon={<User className="h-4 w-4" />}
+                                    {...register("accompanyingCount")}
+                                    error={errors.accompanyingCount?.message}
+                                />
+
+                                <div className="md:col-span-2 space-y-2">
+                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Notes
+                                    </label>
+                                    <Textarea
+                                        placeholder="Add any notes here..."
+                                        {...register("notes")}
+                                        className={errors.notes ? "border-red-500" : ""}
+                                        rows={3}
+                                    />
+                                    {errors.notes && <p className="text-xs text-red-500">{errors.notes.message}</p>}
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <DialogFooter className="p-6 pt-4 border-t bg-gray-50/50">
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="px-6">
-                            Cancel
-                        </Button>
-                        <ActionButton
-                            type="submit"
-                            variant="primary"
-                            disabled={isSubmitting}
-                            className="px-8"
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <LoadingSpinner size="sm" className="mr-2" />
-                                    Booking...
-                                </>
-                            ) : (
-                                "Book Appointment"
-                            )}
-                        </ActionButton>
-                    </DialogFooter>
-                </form>
+                        <DialogFooter className="p-6 pt-4 border-t bg-gray-50/50">
+                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="px-6">
+                                Cancel
+                            </Button>
+                            <ActionButton
+                                type="submit"
+                                variant="primary"
+                                disabled={isSubmitting}
+                                className="px-8"
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <LoadingSpinner size="sm" className="mr-2" />
+                                        Booking...
+                                    </>
+                                ) : (
+                                    "Book Appointment"
+                                )}
+                            </ActionButton>
+                        </DialogFooter>
+                    </form>
+                </FormProvider>
             </DialogContent>
         </Dialog>
     );

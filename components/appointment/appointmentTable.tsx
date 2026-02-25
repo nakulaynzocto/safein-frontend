@@ -561,55 +561,52 @@ export function AppointmentTable({
 
 
             <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
+                <div className="flex w-full items-center justify-between gap-1.5 sm:gap-4">
                     <SearchInput
-                        placeholder="Search appointments..."
+                        placeholder="Search..."
                         value={searchTerm}
                         onChange={onSearchChange}
                         debounceDelay={500}
-                        className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none"
+                        className="flex-1 min-w-0 sm:min-w-[200px] sm:max-w-[300px]"
                     />
-                    <div className="flex shrink-0 items-center gap-2">
-                        <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
-                            <DateRangePicker
-                                onDateRangeChange={(r) => {
-                                    onDateFromChange?.(r.startDate || "");
-                                    onDateToChange?.(r.endDate || "");
-                                    onPageChange?.(1);
-                                }}
-                                initialValue={dateFrom && dateTo ? { startDate: dateFrom, endDate: dateTo } : undefined}
-                                className="w-full sm:w-auto"
-                            />
-                        </div>
-                        <div className="flex w-full items-center gap-2 sm:w-auto">
-                            <SubscriptionActionButtons
-                                isExpired={isExpired}
-                                hasReachedLimit={hasReachedAppointmentLimit}
-                                limitType="appointment"
-                                showUpgradeModal={showUpgradeModal}
-                                openUpgradeModal={openUpgradeModal}
-                                closeUpgradeModal={closeUpgradeModal}
-                                showAddonModal={showAddonModal}
-                                openAddonModal={openAddonModal}
-                                closeAddonModal={closeAddonModal}
-                                upgradeLabel="Upgrade Plan"
-                                buyExtraLabel="Buy Extra Invites"
-                                icon={Plus}
-                                isEmployee={isEmployee}
-                                className="rounded-xl px-6 min-w-[150px] text-xs sm:text-sm h-12"
-                            >
-                                {!isEmployee && (
-                                    <Button
-                                        variant="outline"
-                                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-6 min-w-[150px] text-xs whitespace-nowrap sm:gap-2 sm:text-sm border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white"
-                                        onClick={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
-                                    >
-                                        <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                        <span className="hidden sm:inline">Schedule Appointment</span>
-                                    </Button>
-                                )}
-                            </SubscriptionActionButtons>
-                        </div>
+                    <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+                        <DateRangePicker
+                            onDateRangeChange={(r) => {
+                                onDateFromChange?.(r.startDate || "");
+                                onDateToChange?.(r.endDate || "");
+                                onPageChange?.(1);
+                            }}
+                            initialValue={dateFrom && dateTo ? { startDate: dateFrom, endDate: dateTo } : undefined}
+                            className="w-auto"
+                        />
+                        
+                        <SubscriptionActionButtons
+                            isExpired={isExpired}
+                            hasReachedLimit={hasReachedAppointmentLimit}
+                            limitType="appointment"
+                            showUpgradeModal={showUpgradeModal}
+                            openUpgradeModal={openUpgradeModal}
+                            closeUpgradeModal={closeUpgradeModal}
+                            showAddonModal={showAddonModal}
+                            openAddonModal={openAddonModal}
+                            closeAddonModal={closeAddonModal}
+                            upgradeLabel="Upgrade"
+                            buyExtraLabel="Buy Extra"
+                            icon={Plus}
+                            isEmployee={isEmployee}
+                            className="h-12 w-12 sm:w-auto sm:px-6 rounded-xl"
+                        >
+                            {!isEmployee && (
+                                <Button
+                                    variant="outline"
+                                    className="flex h-12 w-12 sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white sm:px-6 sm:min-w-[160px] transition-all"
+                                    onClick={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
+                                >
+                                    <Plus className="h-5 w-5 shrink-0" />
+                                    <span className="hidden sm:inline font-medium">Schedule Appointment</span>
+                                </Button>
+                            )}
+                        </SubscriptionActionButtons>
                     </div>
                 </div>
                 <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">

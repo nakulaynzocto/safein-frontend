@@ -2,7 +2,7 @@ import * as yup from "yup";
 
 export const visitorSchema = yup.object({
     name: yup.string().required("Name is required").min(2, "Name must be at least 2 characters"),
-    email: yup.string().email("Invalid email address").required("Email is required"),
+    email: yup.string().email("Invalid email address").optional(),
     phone: yup
         .string()
         .required("Phone number is required")

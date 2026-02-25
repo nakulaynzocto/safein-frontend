@@ -4,7 +4,7 @@ import { createUrlParams } from "@/utils/helpers";
 export interface SpecialBooking {
     _id: string;
     visitorName: string;
-    visitorEmail: string;
+    visitorEmail?: string;
     visitorPhone: string;
     employeeId: {
         _id: string;

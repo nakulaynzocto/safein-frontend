@@ -4,7 +4,7 @@ import { createUrlParams } from "@/utils/helpers";
 export interface Visitor {
     _id: string;
     name: string;
-    email: string;
+    email?: string;
     phone: string;
     address: {
         street: string;
@@ -48,7 +48,7 @@ export interface VisitorSearchResponse {
 
 export interface CreateVisitorRequest {
     name: string;
-    email: string;
+    email?: string;
     phone: string;
     address: {
         street?: string;

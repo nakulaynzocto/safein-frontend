@@ -242,15 +242,22 @@ export default function BookAppointmentPage() {
                             </CardTitle>
 
                             {/* Employee Info */}
-                            {appointmentLinkData?.employee && (
-                                <div className="mt-1 text-center sm:mt-2">
-                                    <p className="text-xs text-gray-700 sm:text-sm">
-                                        Meeting with:{" "}
-                                        <strong className="text-[#3882a5]">{appointmentLinkData.employee.name}</strong>
-                                    </p>
-                                    <p className="mt-1 text-xs text-gray-600">{appointmentLinkData.employee.email}</p>
-                                </div>
-                            )}
+                            {(() => {
+                                const displayEmployee = appointmentLinkData?.employee || 
+                                    (typeof appointmentLinkData?.employeeId === 'object' ? appointmentLinkData.employeeId : null);
+                                
+                                if (!displayEmployee?.name) return null;
+
+                                return (
+                                    <div className="mt-1 text-center sm:mt-2">
+                                        <p className="text-xs text-gray-700 sm:text-sm">
+                                            Meeting with:{" "}
+                                            <strong className="text-[#3882a5]">{displayEmployee.name}</strong>
+                                        </p>
+                                        <p className="mt-1 text-xs text-gray-600">{displayEmployee.email}</p>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     </CardHeader>
 
@@ -310,7 +317,7 @@ export default function BookAppointmentPage() {
                             <AppointmentBookingForm
                                 visitorId={visitorId}
                                 employeeId={extractIdString(appointmentLinkData.employeeId)}
-                                employeeName={appointmentLinkData.employee?.name || ""}
+                                employeeName={appointmentLinkData.employee?.name || appointmentLinkData.employeeId?.name || ""}
                                 visitorEmail={appointmentLinkData.visitorEmail}
                                 visitorName={visitorData?.name || appointmentLinkData.visitor?.name || ""}
                                 onSubmit={handleAppointmentSubmit}

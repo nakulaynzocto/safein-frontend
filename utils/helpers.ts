@@ -56,18 +56,10 @@ export function isValidPhone(phone: string): boolean {
 }
 
 export const createUrlParams = (urlData: Record<string, any>): string => {
-    let datasize = Object.keys(urlData)?.length;
-    const keys = Object.keys(urlData);
-    let search = "";
-    if (datasize) {
-        keys.forEach((key) => {
-            if (urlData[key] !== null && urlData[key] !== "" && urlData[key] !== undefined) {
-                search += `${key}=${urlData[key]}&`;
-            }
-        });
-        return search?.substring(0, search.length - 1);
-    }
-    return "";
+    return Object.entries(urlData)
+        .filter(([_, value]) => value !== null && value !== "" && value !== undefined)
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        .join("&");
 };
 
 /**
@@ -148,26 +140,16 @@ export function truncateText(text: string, maxLength: number, suffix: string = "
 export function getInitials(name: string, maxInitials: number = 2): string {
     if (!name) return "U";
 
-    // Clean the name: replace common delimiters/punctuation with spaces
-    // This handles "Name-Surname", "Name (Dept)", "Name_Last"
     const cleanName = name
         .replace(/[(){}[\].,\-_"']/g, " ")
-        .replace(/\s+/g, " ")
         .trim();
 
     if (!cleanName) return name.charAt(0).toUpperCase() || "U";
 
-    const words = cleanName.split(" ");
+    const words = cleanName.split(/\s+/).filter(Boolean);
 
-    // If only one word, return first letter (or first 2 letters if preferred?)
-    // Standard practice is often first letter only for single names.
-    // However, to ensure visibility and consistency, let's stick to initials from words.
-    // If user specifically wants 2 letters for single words (e.g. "Google" -> "Go"), we can change.
-    // But usually "G" is fine.
-
-    if (words.length === 1) {
-        return words[0].charAt(0).toUpperCase();
-    }
+    if (words.length === 0) return "U";
+    if (words.length === 1) return words[0].charAt(0).toUpperCase();
 
     return words
         .slice(0, maxInitials)

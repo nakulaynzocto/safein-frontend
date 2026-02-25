@@ -149,12 +149,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
 
             if (onComplete) {
                 // Robustly extract ID from various possible response structures
-                const visitorId = (result as any)?._id ||
-                    (result as any)?.id ||
-                    (result as any)?.data?._id ||
-                    (result as any)?.data?.id ||
-                    (result as any)?.visitor?._id ||
-                    (result as any)?.visitor?.id;
+                const visitorId = (result as any)?.data?._id || (result as any)?.data?.id || (result as any)?._id || (result as any)?.id;
                 onComplete(visitorPayload, visitorId);
             }
         } catch (error: any) {

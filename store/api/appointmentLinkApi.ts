@@ -6,7 +6,8 @@ export interface AppointmentLink {
     _id: string;
     visitorId?: string;
     visitor?: Partial<Visitor> & { _id?: string };
-    visitorEmail: string;
+    visitorEmail?: string;
+    visitorPhone: string;
     employeeId: string;
     employee?: {
         _id: string;
@@ -27,7 +28,8 @@ export interface AppointmentLink {
 }
 
 export interface CreateAppointmentLinkRequest {
-    visitorEmail: string;
+    visitorEmail?: string;
+    visitorPhone: string;
     employeeId: string;
     expiresInDays?: number;
 }
@@ -90,10 +92,12 @@ export const appointmentLinkApi = baseApi.injectEndpoints({
             keepUnusedDataFor: 0,
         }),
 
-        checkVisitorExists: builder.query<CheckVisitorResponse, string>({
-            query: (email) => {
-                const normalizedEmail = email.trim().toLowerCase();
-                const queryParams = createUrlParams({ email: normalizedEmail });
+        checkVisitorExists: builder.query<CheckVisitorResponse, { email?: string; phone?: string }>({
+            query: ({ email, phone }) => {
+                const params: any = {};
+                if (email) params.email = email.trim().toLowerCase();
+                if (phone) params.phone = phone.trim();
+                const queryParams = createUrlParams(params);
                 return `/appointment-links/check-visitor${queryParams ? `?${queryParams}` : ""}`;
             },
             transformResponse: (response: any) => {

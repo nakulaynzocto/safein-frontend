@@ -28,7 +28,7 @@ const isPhoneMatch = (v: Visitor, phoneDigits: string) => {
  * HOOK: useVisitorExistenceCheck
  * Efficiently checks if a visitor exists by email or phone.
  */
-export function useVisitorExistenceCheck(watchedEmail: string, watchedPhone: string, visitorId?: string) {
+export function useVisitorExistenceCheck(watchedEmail: string | undefined, watchedPhone: string | undefined, visitorId?: string) {
     const [emailExists, setEmailExists] = useState(false);
     const [phoneExists, setPhoneExists] = useState(false);
     const [foundVisitor, setFoundVisitor] = useState<Visitor | null>(null);
@@ -57,7 +57,7 @@ export function useVisitorExistenceCheck(watchedEmail: string, watchedPhone: str
                 setEmailExists(!!match);
                 if (match) setFoundVisitor(match);
             } catch (err) {
-                console.error("Email check error:", err);
+                // Silent failure for background check
             }
         }, 400);
 
@@ -66,7 +66,7 @@ export function useVisitorExistenceCheck(watchedEmail: string, watchedPhone: str
 
     // PHONE CHECK EFFECT
     useEffect(() => {
-        const digits = cleanDigits(watchedPhone);
+        const digits = cleanDigits(watchedPhone || "");
 
         // Only search if we have at least 10 digits (Standard mobile length)
         if (digits.length < 10) {
@@ -93,7 +93,7 @@ export function useVisitorExistenceCheck(watchedEmail: string, watchedPhone: str
                 setPhoneExists(!!match);
                 if (match) setFoundVisitor(match);
             } catch (err) {
-                console.error("Phone check error:", err);
+                // Silent failure for background check
             }
         }, 500);
 
@@ -102,8 +102,8 @@ export function useVisitorExistenceCheck(watchedEmail: string, watchedPhone: str
 
     // CLEANUP EFFECT
     useEffect(() => {
-        const hasEmail = watchedEmail?.length >= 5;
-        const hasPhone = cleanDigits(watchedPhone).length >= 10;
+        const hasEmail = (watchedEmail?.length || 0) >= 5;
+        const hasPhone = cleanDigits(watchedPhone || "").length >= 10;
 
         if (!hasEmail && !hasPhone) {
             setFoundVisitor(null);

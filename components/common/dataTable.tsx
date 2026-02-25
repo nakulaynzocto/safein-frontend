@@ -148,16 +148,14 @@ export function DataTable<T extends Record<string, any>>({
         );
     }
 
-    const TableContent = () => (
+    const tableContent = (
         <div
             className={cn("-mx-1 sm:mx-0", className)}
             style={{
-                // Manual overflow control
                 overflowX: "auto",
                 overflowY: "visible",
                 WebkitOverflowScrolling: "touch",
                 scrollBehavior: "smooth",
-                // Remove all touch-action restrictions - let browser decide naturally
                 userSelect: "none",
                 WebkitUserSelect: "none",
                 minHeight: minHeight
@@ -173,7 +171,7 @@ export function DataTable<T extends Record<string, any>>({
                     <tr>
                         {columns.map((column, index) => (
                             <th
-                                key={index}
+                                key={column.key as string || index}
                                 className={cn(
                                     "px-6 py-4 font-bold",
                                     enableSorting &&
@@ -194,52 +192,55 @@ export function DataTable<T extends Record<string, any>>({
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {sortedData.map((item, rowIndex) => (
-                        <tr key={rowIndex} className="border-border hover:bg-muted/30 border-b transition-colors group">
-                            {columns.map((column, colIndex) => (
-                                <td
-                                    key={colIndex}
-                                    className={cn(
-                                        "text-foreground px-2 py-2 text-xs sm:px-4 sm:py-3 sm:text-sm",
-                                        column.sticky === 'right' && "md:sticky md:right-0 md:z-10 !bg-white md:group-hover:!bg-muted/30 dark:!bg-gray-950 md:shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.1)]",
-                                        column.sticky === 'left' && "md:sticky md:left-0 md:z-10 !bg-white md:group-hover:!bg-muted/30 dark:!bg-gray-950 md:shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]",
-                                        column.className,
-                                    )}
-                                >
-                                    {(() => {
-                                        const renderSafeValue = (value: any): ReactNode => {
-                                            if (value === null || value === undefined) return "";
-                                            if (isValidElement(value)) return value;
-                                            if (typeof value === "object") {
-                                                if (Array.isArray(value)) {
-                                                    return value.join(", ");
+                    {sortedData.map((item, rowIndex) => {
+                        const rowKey = item._id || item.id || rowIndex;
+                        return (
+                            <tr key={rowKey} className="border-border hover:bg-muted/30 border-b transition-colors group">
+                                {columns.map((column, colIndex) => (
+                                    <td
+                                        key={column.key as string || colIndex}
+                                        className={cn(
+                                            "text-foreground px-2 py-2 text-xs sm:px-4 sm:py-3 sm:text-sm",
+                                            column.sticky === 'right' && "md:sticky md:right-0 md:z-10 !bg-white md:group-hover:!bg-muted/30 dark:!bg-gray-950 md:shadow-[-4px_0_8px_-2px_rgba(0,0,0,0.1)]",
+                                            column.sticky === 'left' && "md:sticky md:left-0 md:z-10 !bg-white md:group-hover:!bg-muted/30 dark:!bg-gray-950 md:shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)]",
+                                            column.className,
+                                        )}
+                                    >
+                                        {(() => {
+                                            const renderSafeValue = (value: any): ReactNode => {
+                                                if (value === null || value === undefined) return "";
+                                                if (isValidElement(value)) return value;
+                                                if (typeof value === "object") {
+                                                    if (Array.isArray(value)) {
+                                                        return value.join(", ");
+                                                    }
+                                                    if (value.name) return String(value.name);
+                                                    if (value.title) return String(value.title);
+                                                    if (value.label) return String(value.label);
+                                                    if (value.id) return String(value.id);
+                                                    if (value._id) return String(value._id);
+                                                    return "[Object]";
                                                 }
-                                                if (value.name) return String(value.name);
-                                                if (value.title) return String(value.title);
-                                                if (value.label) return String(value.label);
-                                                if (value.id) return String(value.id);
-                                                if (value._id) return String(value._id);
-                                                return "[Object]";
-                                            }
-                                            return String(value);
-                                        };
+                                                return String(value);
+                                            };
 
-                                        try {
-                                            if (column.render) {
-                                                const result = column.render(item);
-                                                return renderSafeValue(result);
-                                            } else {
-                                                const value = item[column.key as keyof T];
-                                                return renderSafeValue(value);
+                                            try {
+                                                if (column.render) {
+                                                    const result = column.render(item);
+                                                    return renderSafeValue(result);
+                                                } else {
+                                                    const value = item[column.key as keyof T];
+                                                    return renderSafeValue(value);
+                                                }
+                                            } catch (error) {
+                                                return "Error";
                                             }
-                                        } catch (error) {
-                                            return "Error";
-                                        }
-                                    })()}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
+                                        })()}
+                                    </td>
+                                ))}
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>
@@ -249,7 +250,7 @@ export function DataTable<T extends Record<string, any>>({
         return (
             <div className="bg-card border-border overflow-hidden rounded-2xl border shadow-sm">
                 <CardContent className="p-0">
-                    <TableContent />
+                    {tableContent}
                 </CardContent>
             </div>
         );
@@ -257,7 +258,7 @@ export function DataTable<T extends Record<string, any>>({
 
     return (
         <div className="bg-card border-border overflow-hidden rounded-2xl border shadow-sm">
-            <TableContent />
+            {tableContent}
         </div>
     );
 }

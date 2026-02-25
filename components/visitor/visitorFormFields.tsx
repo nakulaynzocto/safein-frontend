@@ -92,7 +92,6 @@ export function VisitorFormFields({
                             {...register("email")}
                             placeholder="Enter email address"
                             error={errors.email?.message || (emailExists ? "This email is already registered" : undefined)}
-                            required
                         />
                     </div>
 

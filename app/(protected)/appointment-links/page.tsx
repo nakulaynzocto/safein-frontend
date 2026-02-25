@@ -29,13 +29,13 @@ import {
     Filter,
     RefreshCw,
     MoreVertical,
+    MoreHorizontal,
     Copy,
     QrCode,
     Mail,
     Link as LinkIcon,
     Download,
     Check,
-
     ShieldAlert,
     Link2,
     User,
@@ -46,11 +46,17 @@ import {
     Maximize2,
     MessageSquare,
     Key,
-    Send
+    Send,
 } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+    DropdownMenuSeparator,
+} from "@/components/ui/dropdownMenu";
 import { AppointmentLink } from "@/store/api/appointmentLinkApi";
 import { getInitials, formatName } from "@/utils/helpers";
-import { AppointmentLinkSelectionModal } from "@/components/appointment/AppointmentLinkSelectionModal";
 import { useCooldown } from "@/hooks/useCooldown";
 import { CreateAppointmentLinkModal } from "@/components/appointment/CreateAppointmentLinkModal";
 import { QuickAppointmentModal } from "@/components/appointment/QuickAppointmentModal";
@@ -62,6 +68,139 @@ import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { ModuleAccessDenied } from "@/components/common/moduleAccessDenied";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
+import { Input } from "@/components/ui/input";
+
+interface AppointmentActionCellProps {
+    item: any;
+    user: any;
+    handleCopyLink: (link: any) => void;
+    handleResend: (item: any) => void;
+    cooldowns: Record<string, number>;
+    setDeleteLinkId: (id: string) => void;
+    setSelectedBookingId: (id: string) => void;
+    setNoteValue: (value: string) => void;
+    setShowEditNoteModal: (show: boolean) => void;
+    handleInlineVerifyOtp: (bookingId: string, otp: string) => Promise<void>;
+    isVerifyingInline: string | null;
+}
+
+const AppointmentActionCell = ({
+    item,
+    user,
+    handleCopyLink,
+    handleResend,
+    cooldowns,
+    setDeleteLinkId,
+    setSelectedBookingId,
+    setNoteValue,
+    setShowEditNoteModal,
+    handleInlineVerifyOtp,
+    isVerifyingInline
+}: AppointmentActionCellProps) => {
+    const [otpValue, setOtpValue] = useState("");
+    const isCreator = user?._id && (
+        item.createdBy === user._id ||
+        (typeof item.createdBy === 'object' && item.createdBy?._id === user._id)
+    );
+    const isSpecial = item.entryType === 'special';
+    const isBooked = item.isBooked;
+
+    return (
+        <div className="flex items-center justify-end gap-2">
+            {/* Inline OTP Field for Special Bookings */}
+            {isSpecial && !isBooked && (
+                <div className="flex items-center gap-1.5 p-1 px-1.5 bg-[#3882a5]/5 border border-[#3882a5]/10 rounded-xl transition-all hover:border-[#3882a5]/20">
+                    <Input
+                        className="h-8 w-18 text-xs px-2 bg-white border-[#3882a5]/20 focus-visible:ring-[#3882a5] rounded-lg tabular-nums"
+                        placeholder="OTP"
+                        maxLength={6}
+                        value={otpValue}
+                        onChange={(e) => setOtpValue(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleInlineVerifyOtp(item._id, otpValue);
+                        }}
+                    />
+                    <Button
+                        variant="default"
+                        size="icon"
+                        onClick={() => handleInlineVerifyOtp(item._id, otpValue)}
+                        disabled={isVerifyingInline === item._id || !otpValue}
+                        className="h-7 w-7 bg-[#3882a5] hover:bg-[#2d6a87] text-white rounded-lg shadow-sm"
+                        title="Verify"
+                    >
+                        {isVerifyingInline === item._id ? (
+                            <LoadingSpinner size="sm" className="h-4 w-4 border-white" />
+                        ) : (
+                            <Check className="h-4 w-4" />
+                        )}
+                    </Button>
+                </div>
+            )}
+
+            {/* Action Three-Dots Menu */}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-xl hover:bg-gray-100 text-gray-500"
+                    >
+                        <MoreHorizontal className="h-5 w-5" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-xl border-gray-100">
+                    {isSpecial && isCreator && (
+                        <DropdownMenuItem
+                            onClick={() => {
+                                setSelectedBookingId(item._id);
+                                setNoteValue(item.notes || "");
+                                setShowEditNoteModal(true);
+                            }}
+                            className="rounded-xl flex items-center gap-2 text-[#3882a5] focus:text-[#3882a5] focus:bg-[#3882a5]/5 cursor-pointer p-2.5"
+                        >
+                            <MessageSquare className="h-4 w-4" />
+                            <span>{item.notes ? "Edit Note" : "Add Note"}</span>
+                        </DropdownMenuItem>
+                    )}
+
+                    {item.entryType === 'link' && !isBooked && (
+                        <DropdownMenuItem
+                            onClick={() => handleCopyLink(item)}
+                            className="rounded-xl flex items-center gap-2 text-[#3882a5] focus:text-[#3882a5] focus:bg-[#3882a5]/5 cursor-pointer p-2.5"
+                        >
+                            <Copy className="h-4 w-4" />
+                            <span>Copy Link</span>
+                        </DropdownMenuItem>
+                    )}
+
+                    {!isBooked && (
+                        <DropdownMenuItem
+                            onClick={() => handleResend(item)}
+                            disabled={!!cooldowns[item._id]}
+                            className={`rounded-xl flex items-center gap-2 p-2.5 cursor-pointer ${cooldowns[item._id] ? 'text-gray-400 opacity-50' : 'text-[#3882a5] focus:text-[#3882a5] focus:bg-[#3882a5]/5'
+                                }`}
+                        >
+                            <Send className="h-4 w-4" />
+                            <span>
+                                {cooldowns[item._id] ? `Retry in ${cooldowns[item._id]}s` : "Resend Notification"}
+                            </span>
+                        </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenuSeparator className="my-1 bg-gray-50" />
+
+                    <DropdownMenuItem
+                        onClick={() => setDeleteLinkId(item._id)}
+                        className="rounded-xl flex items-center gap-2 text-red-600 focus:text-red-700 focus:bg-red-50 cursor-pointer p-2.5"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                        <span>Delete</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
+    );
+};
 
 export default function AppointmentLinksPage() {
     // ALL HOOKS MUST BE CALLED AT TOP LEVEL - BEFORE ANY CONDITIONAL RETURNS
@@ -93,6 +232,7 @@ export default function AppointmentLinksPage() {
     const [showOtpModal, setShowOtpModal] = useState(false);
     const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
     const [otpValue, setOtpValue] = useState("");
+    const [isVerifyingInline, setIsVerifyingInline] = useState<string | null>(null);
 
     // Note Modal states
     const [showNoteModal, setShowNoteModal] = useState(false);
@@ -214,6 +354,24 @@ export default function AppointmentLinksPage() {
             showErrorToast(error.data?.message || "Invalid OTP");
         }
     };
+
+    const handleInlineVerifyOtp = useCallback(async (bookingId: string, otp: string) => {
+        if (!otp || otp.length < 4) {
+            showErrorToast("Please enter a valid OTP");
+            return;
+        }
+
+        try {
+            setIsVerifyingInline(bookingId);
+            await verifyOtp({ bookingId, otp }).unwrap();
+            showSuccessToast("OTP verified successfully!");
+            refetchAll();
+        } catch (error: any) {
+            showErrorToast(error.data?.message || "Invalid OTP");
+        } finally {
+            setIsVerifyingInline(null);
+        }
+    }, [verifyOtp, refetchAll]);
 
     const handleCopyLink = useCallback((link: AppointmentLink) => {
         // Generate booking URL if not provided by backend
@@ -382,98 +540,26 @@ export default function AppointmentLinksPage() {
                 header: "Actions",
                 className: "text-right",
                 sticky: 'right' as const,
-                render: (item: any) => {
-                    const isCreator = user?._id && (
-                        item.createdBy === user._id ||
-                        (typeof item.createdBy === 'object' && item.createdBy?._id === user._id)
-                    );
-
-                    return (
-                        <div className="flex justify-end gap-1">
-                            {item.entryType === 'special' && isCreator && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                        // Close other modals
-                                        setDeleteLinkId(null);
-                                        setShowOtpModal(false);
-
-                                        setSelectedBookingId(item._id);
-                                        setNoteValue(item.notes || "");
-                                        setShowEditNoteModal(true);
-                                    }}
-                                    className="text-blue-600 hover:bg-blue-50"
-                                    title="Add/Edit Note"
-                                >
-                                    <MessageSquare className="h-4 w-4" />
-                                </Button>
-                            )}
-                            {item.entryType === 'special' && !item.isBooked && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                        // Close other modals
-                                        setDeleteLinkId(null);
-                                        setShowEditNoteModal(false);
-
-                                        setSelectedBookingId(item._id);
-                                        setShowOtpModal(true);
-                                    }}
-                                    className="text-orange-600 hover:bg-orange-50 hover:text-orange-700"
-                                    title="Fill OTP"
-                                >
-                                    <Key className="h-4 w-4" />
-                                </Button>
-                            )}
-                            {item.entryType === 'link' && !item.isBooked && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleCopyLink(item)}
-                                    className="text-[#3882a5] hover:bg-[#3882a5]/10 hover:text-[#3882a5]"
-                                    title="Copy Link"
-                                >
-                                    <Copy className="h-4 w-4" />
-                                </Button>
-                            )}
-                            {!item.isBooked && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleResend(item)}
-                                    disabled={!!cooldowns[item._id]}
-                                    className={`${cooldowns[item._id] ? 'text-gray-400' : 'text-blue-600 hover:bg-blue-50'}`}
-                                    title={cooldowns[item._id] ? `Wait ${cooldowns[item._id]}s` : "Resend"}
-                                >
-                                    <Send className="h-4 w-4" />
-                                    {cooldowns[item._id] && <span className="ml-1 text-[10px] tabular-nums">{cooldowns[item._id]}s</span>}
-                                </Button>
-                            )}
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                    // Close other modals
-                                    setShowOtpModal(false);
-                                    setShowEditNoteModal(false);
-
-                                    setDeleteLinkId(item._id);
-                                }}
-                                className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                                title="Delete"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    );
-                },
+                render: (item: any) => (
+                    <AppointmentActionCell
+                        item={item}
+                        user={user}
+                        handleCopyLink={handleCopyLink}
+                        handleResend={handleResend}
+                        cooldowns={cooldowns}
+                        setDeleteLinkId={setDeleteLinkId}
+                        setSelectedBookingId={setSelectedBookingId}
+                        setNoteValue={setNoteValue}
+                        setShowEditNoteModal={setShowEditNoteModal}
+                        handleInlineVerifyOtp={handleInlineVerifyOtp}
+                        isVerifyingInline={isVerifyingInline}
+                    />
+                ),
             },
         ],
         // Don't include cooldowns in dependencies to prevent re-render on every tick
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [handleCopyLink, handleResend, filterType, user],
+        [handleCopyLink, handleResend, filterType, user, isVerifyingInline, handleInlineVerifyOtp, cooldowns],
     );
 
 

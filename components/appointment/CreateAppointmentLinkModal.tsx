@@ -24,14 +24,18 @@ import { useCreateAppointmentLinkMutation, useCheckVisitorExistsQuery } from "@/
 import { useAppSelector } from "@/store/hooks";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { isValidEmail, isEmployee as checkIsEmployee } from "@/utils/helpers";
-import { Link2, Mail, User } from "lucide-react";
+import { Link2, Mail, User, Phone } from "lucide-react";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { UpgradePlanModal } from "../common/upgradePlanModal";
 import { AddonPurchaseModal } from "../common/AddonPurchaseModal";
 import { ActionButton } from "@/components/common/actionButton";
-import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
+import { PhoneInputField } from "@/components/common/phoneInputField";
+import { FormProvider } from "react-hook-form";
+import { EmployeeSelectionField } from "@/components/common/EmployeeSelectionField";
+import { VisitorExistenceStatus } from "@/components/visitor/VisitorExistenceStatus";
+import { useVisitorExistenceCheck } from "@/hooks/useVisitorExistenceCheck";
 
 const EXPIRATION_CONFIG = {
     "30m": { days: 0.0208, label: "30 minutes" },
@@ -69,10 +73,14 @@ const convertToDays = (value: string): number => {
 
 // Create schema dynamically based on whether user is employee
 const createLinkSchema = (isEmployee: boolean) => yup.object().shape({
-    visitorEmail: yup.string().required("Visitor email is required").email("Please enter a valid email address"),
+    visitorEmail: yup.string().email("Please enter a valid email address").optional(),
+    visitorPhone: yup
+        .string()
+        .required("Visitor phone number is required")
+        .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
     employeeId: isEmployee
-        ? yup.string().optional().nullable() // For employees, employeeId is optional (auto-filled)
-        : yup.string().required("Employee is required"), // For admins, employeeId is required
+        ? yup.string().optional().nullable()
+        : yup.string().required("Employee is required"),
     expiresInDays: yup
         .number()
         .min(0.0208, "Expiry must be at least 30 minutes")
@@ -82,7 +90,8 @@ const createLinkSchema = (isEmployee: boolean) => yup.object().shape({
 });
 
 interface CreateAppointmentLinkFormData {
-    visitorEmail: string;
+    visitorEmail?: string;
+    visitorPhone: string;
     employeeId: string | null | undefined;
     expiresInDays: number;
 }
@@ -127,81 +136,43 @@ export function CreateAppointmentLinkModal({
     // Get employeeId from user object
     const currentEmployeeId = user?.employeeId || null;
 
-    // Use common employee search hook
-    const { loadEmployeeOptions } = useEmployeeSearch();
-
-    const {
-        control,
-        handleSubmit,
-        formState: { errors, isValid },
-        watch,
-        reset,
-        setValue,
-        trigger,
-    } = useForm<CreateAppointmentLinkFormData>({
+    const methods = useForm<CreateAppointmentLinkFormData>({
         resolver: yupResolver(createLinkSchema(isEmployee)) as any,
         defaultValues: {
             visitorEmail: "",
-            employeeId: "",
+            visitorPhone: "",
+            employeeId: isEmployee ? (currentEmployeeId || "") : "",
             expiresInDays: 1,
         },
         mode: "onChange",
     });
 
-    // Reset form when modal opens for employees to ensure employeeId is set
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+        watch,
+        reset,
+        setValue,
+        getValues,
+    } = methods;
+
+    // Reset form when modal opens
     useEffect(() => {
-        if (isEmployee && currentEmployeeId && open) {
+        if (open) {
             reset({
                 visitorEmail: "",
-                employeeId: currentEmployeeId,
-                expiresInDays: 1,
-            }, { keepDefaultValues: false });
-            // Also set value explicitly to ensure it's registered (without validation for employees)
-            setValue("employeeId", currentEmployeeId, { shouldValidate: false, shouldDirty: true });
-        } else if (!isEmployee && open) {
-            reset({
-                visitorEmail: "",
-                employeeId: "",
+                visitorPhone: "",
+                employeeId: isEmployee ? (currentEmployeeId || "") : "",
                 expiresInDays: 1,
             });
         }
-    }, [isEmployee, currentEmployeeId, open, reset, setValue]);
-
-    // Ensure employeeId is always set for employees when currentEmployeeId changes
-    useEffect(() => {
-        if (isEmployee && currentEmployeeId && open) {
-            setValue("employeeId", currentEmployeeId, { shouldValidate: false, shouldDirty: true });
-        }
-    }, [isEmployee, currentEmployeeId, open, setValue]);
+    }, [open, reset, isEmployee, currentEmployeeId]);
 
     const visitorEmail = watch("visitorEmail");
-    const expiresInDaysValue = watch("expiresInDays");
-    const [debouncedEmail, setDebouncedEmail] = useState("");
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (visitorEmail && isValidEmail(visitorEmail)) {
-                setDebouncedEmail(visitorEmail.trim().toLowerCase());
-            } else {
-                setDebouncedEmail("");
-                setVisitorExists(null);
-            }
-        }, 500);
-
-        return () => clearTimeout(timer);
-    }, [visitorEmail]);
-
-    const { data: visitorCheckData, isLoading: isCheckingVisitor } = useCheckVisitorExistsQuery(debouncedEmail, {
-        skip: !debouncedEmail || !isValidEmail(debouncedEmail),
-    });
-
-    useEffect(() => {
-        if (debouncedEmail && visitorCheckData !== undefined) {
-            setVisitorExists(visitorCheckData.exists);
-        } else if (!debouncedEmail) {
-            setVisitorExists(null);
-        }
-    }, [debouncedEmail, visitorCheckData]);
+    const visitorPhone = watch("visitorPhone");
+    // Use common visitor check hook
+    const { emailExists, phoneExists, foundVisitor } = useVisitorExistenceCheck(visitorEmail, visitorPhone);
 
     const onSubmit = useCallback(
         async (data: CreateAppointmentLinkFormData) => {
@@ -222,41 +193,34 @@ export function CreateAppointmentLinkModal({
             // Set submitting state to prevent duplicate submissions
             setIsSubmitting(true);
 
-            // Ensure employeeId is set for employees - use currentEmployeeId from component state
-            let submitEmployeeId = data.employeeId;
-            if (isEmployee) {
-                submitEmployeeId = currentEmployeeId || currentEmployeeId || data.employeeId;
+            // Resolve employeeId based on user role
+            const submitEmployeeId = isEmployee ? (currentEmployeeId || data.employeeId) : data.employeeId;
 
-                // For employees, if still no employeeId, show error
-                if (!submitEmployeeId) {
-                    setGeneralError("Unable to find employee information. Please refresh and try again.");
-                    showErrorToast("Unable to find employee information. Please refresh and try again.");
-                    setIsSubmitting(false);
-                    return;
-                }
-            } else {
-                // For admins, employeeId is required
-                if (!submitEmployeeId) {
-                    setGeneralError("Employee ID is required. Please try again.");
-                    showErrorToast("Employee ID is required. Please try again.");
-                    setIsSubmitting(false);
-                    return;
-                }
+            if (!submitEmployeeId) {
+                const error = isEmployee
+                    ? "Unable to find employee information. Please refresh and try again."
+                    : "Employee ID is required. Please try again.";
+                setGeneralError(error);
+                showErrorToast(error);
+                setIsSubmitting(false);
+                return;
             }
 
             try {
                 setGeneralError(null);
                 const result = await createAppointmentLink({
-                    visitorEmail: data.visitorEmail.trim().toLowerCase(),
+                    visitorEmail: data.visitorEmail?.trim().toLowerCase(),
+                    visitorPhone: data.visitorPhone.trim(),
                     employeeId: submitEmployeeId,
                     expiresInDays: data.expiresInDays || 1,
                 }).unwrap();
 
-                showSuccessToast("Appointment link created and email sent successfully!");
+                showSuccessToast("Appointment link created and sent successfully!");
                 // Reset form - for employees, keep employeeId; for admins, clear it
                 if (isEmployee && currentEmployeeId) {
                     reset({
                         visitorEmail: "",
+                        visitorPhone: "",
                         employeeId: currentEmployeeId,
                         expiresInDays: 1,
                     });
@@ -274,7 +238,7 @@ export function CreateAppointmentLinkModal({
                 setIsSubmitting(false);
             }
         },
-        [createAppointmentLink, reset, setOpen, onSuccess, isEmployee, currentEmployeeId, currentEmployeeId, hasReachedAppointmentLimit, isSubmitting, isCreating],
+        [createAppointmentLink, reset, setOpen, onSuccess, isEmployee, currentEmployeeId, hasReachedAppointmentLimit, isSubmitting, isCreating],
     );
 
     const handleOpenChange = useCallback(
@@ -289,6 +253,7 @@ export function CreateAppointmentLinkModal({
                 if (isEmployee && currentEmployeeId) {
                     reset({
                         visitorEmail: "",
+                        visitorPhone: "",
                         employeeId: currentEmployeeId,
                         expiresInDays: 1,
                     });
@@ -313,6 +278,7 @@ export function CreateAppointmentLinkModal({
         if (isEmployee && currentEmployeeId) {
             reset({
                 visitorEmail: "",
+                visitorPhone: "",
                 employeeId: currentEmployeeId,
                 expiresInDays: 1,
             });
@@ -335,247 +301,199 @@ export function CreateAppointmentLinkModal({
                     </DialogTitle>
                     <DialogDescription>
                         Generate a secure booking link that visitors can use to schedule appointments. The link will be
-                        sent via email and expires based on your selected duration.
+                        sent via phone (SMS/WhatsApp) and email, and expires based on your selected duration.
                     </DialogDescription>
                 </DialogHeader>
 
-                <form
-                    onSubmit={async (e) => {
-                        e.preventDefault();
+                <FormProvider {...methods}>
+                    <form
+                        onSubmit={async (e) => {
+                            e.preventDefault();
 
-                        // Prevent multiple submissions
-                        if (isSubmitting || isCreating) {
-                            return;
-                        }
-
-                        // For employees, bypass validation completely and call onSubmit directly
-                        if (isEmployee) {
-                            // Wait for employee data to load if still loading
-                            if (!currentEmployeeId) {
-                                setGeneralError("Loading employee information. Please wait...");
-                                showErrorToast("Loading employee information. Please wait...");
+                            // Prevent multiple submissions
+                            if (isSubmitting || isCreating) {
                                 return;
                             }
 
-                            // Get employeeId from currentEmployeeId
-                            let submitEmployeeId = currentEmployeeId;
-
-                            // If still no employeeId, show error
-                            if (!submitEmployeeId) {
-
-                                // If we still don't have employeeId, check if employees list has loaded
-                                if (false) {
+                            // For employees, bypass validation completely and call onSubmit directly
+                            if (isEmployee) {
+                                // Wait for employee data to load if still loading
+                                if (!currentEmployeeId) {
                                     setGeneralError("Loading employee information. Please wait...");
                                     showErrorToast("Loading employee information. Please wait...");
                                     return;
                                 }
 
-                                // If employees list has loaded but we still can't find the employee
-                                if (false) {
-                                    setGeneralError("Failed to load employee information. Please try again.");
-                                    showErrorToast("Failed to load employee information. Please try again.");
+                                // Get employeeId from currentEmployeeId
+                                let submitEmployeeId = currentEmployeeId;
+
+                                // If still no employeeId, show error
+                                if (!submitEmployeeId) {
+                                    setGeneralError("Unable to find employee information. Please ensure you are properly registered as an employee.");
+                                    showErrorToast("Unable to find employee information.");
                                     return;
                                 }
 
-                                setGeneralError("Unable to find employee information. Please ensure you are properly registered as an employee and your email matches your employee record.");
-                                showErrorToast("Unable to find employee information. Please ensure you are properly registered as an employee and your email matches your employee record.");
-                                return;
+                                // Validate visitor phone manually
+                                const currentValues = getValues();
+                                if (!currentValues.visitorPhone || currentValues.visitorPhone.length < 10) {
+                                    setGeneralError("Please enter a valid visitor phone number.");
+                                    showErrorToast("Please enter a valid visitor phone number.");
+                                    return;
+                                }
+
+                                // Call onSubmit directly with the data
+                                await onSubmit({
+                                    visitorEmail: currentValues.visitorEmail?.trim().toLowerCase(),
+                                    visitorPhone: currentValues.visitorPhone.trim(),
+                                    employeeId: submitEmployeeId,
+                                    expiresInDays: currentValues.expiresInDays || 1,
+                                });
+                            } else {
+                                // For admins, use normal validation
+                                await handleSubmit(onSubmit)(e);
                             }
+                        }}
+                        className="space-y-4"
+                    >
+                        {generalError && (
+                            <Alert variant="destructive">
+                                <AlertDescription>{generalError}</AlertDescription>
+                            </Alert>
+                        )}
 
-                            // Validate visitor email manually
-                            if (!visitorEmail || !isValidEmail(visitorEmail)) {
-                                setGeneralError("Please enter a valid visitor email address.");
-                                showErrorToast("Please enter a valid visitor email address.");
-                                return;
-                            }
-
-                            // Call onSubmit directly with the data
-                            await onSubmit({
-                                visitorEmail: visitorEmail.trim().toLowerCase(),
-                                employeeId: submitEmployeeId,
-                                expiresInDays: expiresInDaysValue || 1,
-                            });
-                        } else {
-                            // For admins, use normal validation
-                            await handleSubmit(onSubmit)(e);
-                        }
-                    }}
-                    className="space-y-4"
-                >
-                    {generalError && (
-                        <Alert variant="destructive">
-                            <AlertDescription>{generalError}</AlertDescription>
-                        </Alert>
-                    )}
-
-                    <div className="space-y-2">
-                        <Label htmlFor="visitorEmail" className="flex items-center gap-2">
-                            <Mail className="h-4 w-4" />
-                            Visitor Email <span className="text-red-500">*</span>
-                        </Label>
-                        <Controller
-                            name="visitorEmail"
-                            control={control}
-                            render={({ field }) => (
-                                <div className="space-y-1">
-                                    <Input
-                                        {...field}
-                                        id="visitorEmail"
-                                        type="email"
-                                        placeholder="visitor@example.com"
-                                        className={`h-12 rounded-xl bg-background font-medium ${errors.visitorEmail ? "border-red-500" : ""}`}
-                                    />
-                                    {errors.visitorEmail && (
-                                        <p className="text-sm text-red-500">{errors.visitorEmail.message}</p>
-                                    )}
-                                    {isCheckingVisitor && <p className="text-sm text-gray-500">Checking visitor...</p>}
-                                    {visitorExists !== null && !isCheckingVisitor && (
-                                        <div className="flex items-center gap-2 text-sm">
-                                            {visitorExists ? (
-                                                <span className="flex items-center gap-1 text-green-600">
-                                                    <User className="h-4 w-4" />
-                                                    This visitor is already registered
-                                                </span>
-                                            ) : (
-                                                <span className="flex items-center gap-1 text-[#3882a5]">
-                                                    <User className="h-4 w-4" />
-                                                    New visitor - will be registered during booking
-                                                </span>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        />
-                    </div>
-
-                    {/* Employee field - only show for admins, hide completely for employees */}
-                    {!isEmployee && (
                         <div className="space-y-2">
-                            <Label htmlFor="employeeId">
-                                Employee <span className="text-red-500">*</span>
+                            <Label htmlFor="visitorPhone" className="flex items-center gap-2">
+                                <Phone className="h-4 w-4" />
+                                Visitor Phone <span className="text-red-500">*</span>
                             </Label>
                             <Controller
-                                name="employeeId"
+                                name="visitorPhone"
                                 control={control}
                                 render={({ field }) => (
                                     <div className="space-y-1">
-                                        <AsyncSelectField
+                                        <PhoneInputField
                                             value={field.value || ""}
                                             onChange={field.onChange}
-                                            loadOptions={loadEmployeeOptions}
-                                            placeholder="Search employees..."
-                                            isClearable={false}
-                                            error={errors.employeeId?.message}
-                                            cacheOptions={true}
-                                            defaultOptions={true}
+                                            id="visitorPhone"
+                                            placeholder="Enter phone number"
+                                            error={errors.visitorPhone?.message}
+                                            defaultCountry="in"
+                                            required
                                         />
                                     </div>
                                 )}
                             />
                         </div>
-                    )}
 
-                    {/* Hidden field for employees - employeeId is auto-set */}
-                    {isEmployee && (
-                        <Controller
-                            name="employeeId"
-                            control={control}
-                            render={({ field }) => {
-                                // Always use currentEmployeeId if available, sync immediately
-                                const value = currentEmployeeId || field.value || "";
-                                if (value && value !== field.value) {
-                                    field.onChange(value);
-                                }
-                                return (
-                                    <input
-                                        type="hidden"
-                                        {...field}
-                                        value={value}
-                                    />
-                                );
-                            }}
-                        />
-                    )}
+                        <div className="space-y-2">
+                            <Label htmlFor="visitorEmail" className="flex items-center gap-2 text-muted-foreground">
+                                <Mail className="h-4 w-4" />
+                                Visitor Email (Optional)
+                            </Label>
+                            <Controller
+                                name="visitorEmail"
+                                control={control}
+                                render={({ field }) => (
+                                    <div className="space-y-1">
+                                        <Input
+                                            {...field}
+                                            id="visitorEmail"
+                                            type="email"
+                                            placeholder="visitor@example.com"
+                                            className={`h-12 rounded-xl bg-background font-medium ${errors.visitorEmail ? "border-red-500" : ""}`}
+                                        />
+                                        {errors.visitorEmail && (
+                                            <p className="text-sm text-red-500">{errors.visitorEmail.message}</p>
+                                        )}
+                                        <VisitorExistenceStatus
+                                            isLoading={false}
+                                            exists={emailExists || phoneExists}
+                                            foundVisitor={foundVisitor}
+                                        />
+                                    </div>
+                                )}
+                            />
+                        </div>
 
-                    {/* Don't show validation errors for employeeId for employees - it's auto-filled */}
+                        <EmployeeSelectionField />
 
-                    <div className="space-y-2">
-                        <Label htmlFor="expiresInDays">Link Expires In</Label>
-                        <Controller
-                            name="expiresInDays"
-                            control={control}
-                            render={({ field }) => (
-                                <div className="space-y-1">
-                                    <SelectField
-                                        value={getDisplayValue(field.value || 1)}
-                                        onChange={(value) => field.onChange(convertToDays(value))}
-                                        options={EXPIRATION_OPTIONS}
-                                        placeholder="Select expiration time"
-                                        isClearable={false}
-                                        className={errors.expiresInDays ? "border-red-500" : ""}
-                                    />
-                                    {errors.expiresInDays && (
-                                        <p className="text-sm text-red-500">{errors.expiresInDays.message}</p>
-                                    )}
-                                    <p className="text-xs text-gray-500">Default: 1 day</p>
-                                </div>
-                            )}
-                        />
-                    </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="expiresInDays">Link Expires In</Label>
+                            <Controller
+                                name="expiresInDays"
+                                control={control}
+                                render={({ field }) => (
+                                    <div className="space-y-1">
+                                        <SelectField
+                                            value={getDisplayValue(field.value || 1)}
+                                            onChange={(value) => field.onChange(convertToDays(value))}
+                                            options={EXPIRATION_OPTIONS}
+                                            placeholder="Select expiration time"
+                                            isClearable={false}
+                                            className={errors.expiresInDays ? "border-red-500" : ""}
+                                        />
+                                        {errors.expiresInDays && (
+                                            <p className="text-sm text-red-500">{errors.expiresInDays.message}</p>
+                                        )}
+                                        <p className="text-xs text-gray-500">Default: 1 day</p>
+                                    </div>
+                                )}
+                            />
+                        </div>
 
-                    <DialogFooter>
-                        <ActionButton
-                            type="button"
-                            variant="outline"
-                            onClick={handleClose}
-                            disabled={isSubmitting || isCreating || !!(isEmployee && !currentEmployeeId)}
-                            size="xl"
-                            className="px-6"
-                        >
-                            Cancel
-                        </ActionButton>
-
-                        <SubscriptionActionButtons
-                            isExpired={isExpired}
-                            hasReachedLimit={hasReachedAppointmentLimit}
-                            limitType="appointment"
-                            showUpgradeModal={showUpgradeModal}
-                            openUpgradeModal={openUpgradeModal}
-                            closeUpgradeModal={closeUpgradeModal}
-                            showAddonModal={showAddonModal}
-                            openAddonModal={openAddonModal}
-                            closeAddonModal={closeAddonModal}
-                            upgradeLabel="Upgrade Plan"
-                            buyExtraLabel="Buy Extra Invites"
-                            className="px-6 text-white min-w-[180px]"
-                        >
+                        <DialogFooter className="gap-2 sm:gap-0">
                             <ActionButton
-                                type="submit"
-                                variant="primary"
+                                type="button"
+                                variant="outline"
+                                onClick={handleClose}
                                 disabled={isSubmitting || isCreating || !!(isEmployee && !currentEmployeeId)}
                                 size="xl"
-                                className="px-6 min-w-[180px]"
+                                className="px-6"
                             >
-                                {isSubmitting || isCreating ? (
-                                    <>
-                                        <LoadingSpinner size="sm" className="mr-2" />
-                                        Creating...
-                                    </>
-                                ) : isEmployee && !currentEmployeeId ? (
-                                    <>
-                                        <LoadingSpinner size="sm" className="mr-2" />
-                                        Loading...
-                                    </>
-                                ) : (
-                                    "Create Link"
-                                )}
+                                Cancel
                             </ActionButton>
-                        </SubscriptionActionButtons>
-                    </DialogFooter>
-                </form>
 
-                {/* Modals for when they are NOT rendered by SubscriptionActionButtons (i.e. limit not reached, but programmatic open needed) */}
+                            <SubscriptionActionButtons
+                                isExpired={isExpired}
+                                hasReachedLimit={hasReachedAppointmentLimit}
+                                limitType="appointment"
+                                showUpgradeModal={showUpgradeModal}
+                                openUpgradeModal={openUpgradeModal}
+                                closeUpgradeModal={closeUpgradeModal}
+                                showAddonModal={showAddonModal}
+                                openAddonModal={openAddonModal}
+                                closeAddonModal={closeAddonModal}
+                                upgradeLabel="Upgrade Plan"
+                                buyExtraLabel="Buy Extra Invites"
+                                className="px-6 text-white min-w-[180px]"
+                            >
+                                <ActionButton
+                                    type="submit"
+                                    variant="primary"
+                                    disabled={isSubmitting || isCreating || !!(isEmployee && !currentEmployeeId)}
+                                    size="xl"
+                                    className="px-6 min-w-[180px]"
+                                >
+                                    {isSubmitting || isCreating ? (
+                                        <>
+                                            <LoadingSpinner size="sm" className="mr-2" />
+                                            Creating...
+                                        </>
+                                    ) : isEmployee && !currentEmployeeId ? (
+                                        <>
+                                            <LoadingSpinner size="sm" className="mr-2" />
+                                            Loading...
+                                        </>
+                                    ) : (
+                                        "Create Link"
+                                    )}
+                                </ActionButton>
+                            </SubscriptionActionButtons>
+                        </DialogFooter>
+                    </form>
+                </FormProvider>
+
                 {!(hasReachedAppointmentLimit || isExpired) && (
                     <>
                         <UpgradePlanModal
