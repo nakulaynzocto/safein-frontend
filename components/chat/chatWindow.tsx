@@ -78,6 +78,21 @@ export function ChatWindow({
         isInitialLoad.current = true;
     }, [activeUser?.id]);
 
+    // Visual Viewport logic for mobile keyboard
+    useEffect(() => {
+        if (!window.visualViewport) return;
+
+        const handleResize = () => {
+            if (scrollRef.current) {
+                // When keyboard appears, scroll to bottom
+                scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            }
+        };
+
+        window.visualViewport.addEventListener('resize', handleResize);
+        return () => window.visualViewport?.removeEventListener('resize', handleResize);
+    }, []);
+
     if (!activeUser) {
         return (
             <div className={cn("flex flex-col items-center justify-center h-full bg-gray-50/50", className)}>
@@ -96,7 +111,6 @@ export function ChatWindow({
             </div>
         );
     }
-
     // Helper to format time
     const formatTime = (date: Date) => {
         return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -113,9 +127,12 @@ export function ChatWindow({
     };
 
     return (
-        <div className={cn("flex flex-col h-full bg-[#f8fafc] relative", className)}>
+        <div className={cn("flex flex-col h-full bg-[#e5ddd5] dark:bg-gray-950 relative overflow-hidden", className)}>
+            {/* Background Pattern Overlay (WhatsApp Style) */}
+            <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-white border-b shadow-sm z-20 shrink-0">
+            <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-white border-b shadow-sm z-30 shrink-0">
                 <div className="flex items-center gap-2 sm:gap-3">
                     <Button
                         variant="ghost"
@@ -162,15 +179,13 @@ export function ChatWindow({
             <div
                 ref={scrollRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto px-3 py-4 sm:px-4 sm:py-6 space-y-1 scroll-smooth scrollbar-none overscroll-contain"
+                className="flex-1 overflow-y-auto px-3 py-4 sm:px-4 sm:py-6 space-y-1 z-10 scrollbar-none overscroll-contain"
             >
                 {/* Loader for older messages */}
                 {isFetching && (
                     <div className="flex justify-center py-4">
-                        <div className="flex gap-1.5 items-center">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.3s]"></span>
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.15s]"></span>
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce"></span>
+                        <div className="flex gap-1.5 items-center bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full shadow-sm text-[10px] font-medium text-gray-500">
+                             Loading older messages...
                         </div>
                     </div>
                 )}
@@ -186,79 +201,78 @@ export function ChatWindow({
                         </div>
                     </div>
                 ) : (
-                    messages.map((msg, index) => {
-                        const isOwn = msg.senderId === currentUser.id;
-                        const prevMsg = messages[index - 1];
-                        const nextMsg = messages[index + 1];
-                        const isFirstInSequence = prevMsg?.senderId !== msg.senderId;
-                        const isLastInSequence = nextMsg?.senderId !== msg.senderId;
+                    <div className="flex flex-col gap-1">
+                        {messages.map((msg, index) => {
+                            const isOwn = msg.senderId === currentUser.id;
+                            const prevMsg = messages[index - 1];
+                            const nextMsg = messages[index + 1];
+                            const isFirstInSequence = prevMsg?.senderId !== msg.senderId;
+                            const isLastInSequence = nextMsg?.senderId !== msg.senderId;
 
-                        return (
-                            <div key={msg.id} className={cn(
-                                "flex w-full gap-2 items-end",
-                                isOwn ? "flex-row-reverse" : "flex-row",
-                                isFirstInSequence ? "mt-4" : "mt-0.5"
-                            )}>
-                                {/* Avatar - Only show for received messages, last in sequence */}
-                                <div className="w-8 shrink-0 flex items-end">
-                                    {!isOwn && isLastInSequence ? (
-                                        <div className="pb-1">
-                                            <Avatar className="h-7 w-7 border border-white shadow-sm">
-                                                <AvatarImage src={msg.senderAvatar} />
-                                                <AvatarFallback className="bg-gray-100 text-[#074463] text-[10px] font-bold flex items-center justify-center leading-none">
-                                                    {getInitials(msg.senderName || "U")}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                        </div>
-                                    ) : (
-                                        <div className="w-8" />
-                                    )}
-                                </div>
-
-                                <div className={cn(
-                                    "flex flex-col",
-                                    isOwn ? "items-end max-w-[85%] sm:max-w-[75%]" : "items-start max-w-[85%] sm:max-w-[75%]"
+                            return (
+                                <div key={msg.id} className={cn(
+                                    "flex w-full gap-2 items-end mb-0.5",
+                                    isOwn ? "justify-end" : "justify-start",
+                                    isFirstInSequence ? "mt-4" : "mt-0"
                                 )}>
-                                    <div className={cn(
-                                        "px-3.5 py-2 shadow-sm text-sm sm:text-[15px] break-words whitespace-pre-wrap relative transition-all duration-200",
-                                        isOwn
-                                            ? "bg-[#074463] text-white rounded-[18px] bg-gradient-to-br from-[#074463] to-[#0a5a82]"
-                                            : "bg-white text-gray-800 border border-gray-100 rounded-[18px]",
-                                        isOwn
-                                            ? (isLastInSequence ? "rounded-br-sm" : "")
-                                            : (isLastInSequence ? "rounded-bl-sm" : "")
-                                    )}>
-                                        {!isOwn && (activeUser?.role === 'group' || (activeUser as any)?.isGroup) && isFirstInSequence && (
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <span className="text-[12px] font-bold text-[#128c7e] tracking-tight">
-                                                     {formatName(msg.senderName || "Unknown")}
-                                                </span>
-                                            </div>
-                                        )}
-                                        {msg.text}
+                                    {/* Avatar - Only show for received messages, last in sequence */}
+                                    {!isOwn && (
+                                        <div className="w-8 shrink-0">
+                                            {isLastInSequence ? (
+                                                <Avatar className="h-8 w-8 border border-white shadow-sm ring-1 ring-gray-100">
+                                                    <AvatarImage src={msg.senderAvatar} />
+                                                    <AvatarFallback className="bg-gray-200 text-[#074463] text-[10px] font-bold">
+                                                        {getInitials(msg.senderName || "U")}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                            ) : <div className="w-8" />}
+                                        </div>
+                                    )}
 
+                                    <div className={cn(
+                                        "flex flex-col max-w-[85%] sm:max-w-[70%]",
+                                        isOwn ? "items-end" : "items-start"
+                                    )}>
                                         <div className={cn(
-                                            "text-[10px] mt-1 flex items-center justify-end gap-1 select-none opacity-70",
-                                            isOwn ? "text-blue-100/90" : "text-gray-400"
+                                            "px-3 py-1.5 shadow-sm text-sm sm:text-[15px] break-words whitespace-pre-wrap relative",
+                                            isOwn
+                                                ? "bg-[#dcf8c6] text-gray-800 rounded-lg rounded-tr-none"
+                                                : "bg-white text-gray-800 rounded-lg rounded-tl-none border border-gray-100",
+                                            !isLastInSequence && isOwn && "rounded-tr-lg",
+                                            !isLastInSequence && !isOwn && "rounded-tl-lg",
+                                            "hover:shadow-md transition-shadow duration-200"
                                         )}>
-                                            <span>{formatTime(msg.createdAt)}</span>
-                                            {isOwn && (
-                                                msg.read
-                                                    ? <CheckCheck className="h-3 w-3 text-blue-400" strokeWidth={3} />
-                                                    : <Check className="h-3 w-3" strokeWidth={3} />
+                                            {!isOwn && (activeUser?.role === 'group' || (activeUser as any)?.isGroup) && isFirstInSequence && (
+                                                <div className="text-[12px] font-bold text-[#128c7e] mb-0.5">
+                                                     {formatName(msg.senderName || "Unknown")}
+                                                </div>
                                             )}
+                                            {msg.text}
+
+                                            <div className={cn(
+                                                "text-[9px] mt-1 flex items-center justify-end gap-1 select-none opacity-60 leading-none",
+                                                isOwn ? "text-gray-600" : "text-gray-400"
+                                            )}>
+                                                <span>{formatTime(msg.createdAt)}</span>
+                                                {isOwn && (
+                                                    msg.read
+                                                        ? <CheckCheck className="h-3 w-3 text-blue-500" strokeWidth={3} />
+                                                        : <Check className="h-3 w-3" strokeWidth={3} />
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        );
-                    })
+                            );
+                        })}
+                    </div>
                 )}
-                <div className="h-2" /> {/* Spacer */}
+                <div className="h-4" /> {/* Spacer */}
             </div>
 
-            {/* Input Area */}
-            <ChatInput onSendMessage={onSendMessage} isAdmin={currentUser.id === "admin"} />
+            <div className="z-30 shrink-0">
+                <ChatInput onSendMessage={onSendMessage} isAdmin={currentUser.id === "admin"} />
+            </div>
         </div>
     );
 }

@@ -25,7 +25,7 @@ export function ChatInput({ onSendMessage, isLoading, isAdmin }: ChatInputProps)
         // Scroll input into view on mobile when keyboard appears
         if (textareaRef.current && window.innerWidth < 768) {
             setTimeout(() => {
-                textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }, 300); // Delay for keyboard animation
         }
     };
@@ -34,7 +34,11 @@ export function ChatInput({ onSendMessage, isLoading, isAdmin }: ChatInputProps)
         if (!message.trim()) return;
         onSendMessage(message);
         setMessage("");
-        if (textareaRef.current) textareaRef.current.style.height = "auto";
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+            // Crucial: keep focus after sending to prevent keyboard from closing
+            textareaRef.current.focus();
+        }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -45,7 +49,7 @@ export function ChatInput({ onSendMessage, isLoading, isAdmin }: ChatInputProps)
     };
 
     return (
-        <div className="sticky bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-100 p-2 sm:p-4 flex flex-col gap-2 z-30 pb-safe">
+        <div className="relative bg-[#f0f2f5] dark:bg-gray-900 px-2 py-3 sm:px-4 sm:py-3 flex items-center gap-2 z-30">
             <div className="flex items-center gap-2 max-w-5xl mx-auto w-full">
                 <div className="relative flex-1">
                     <Textarea
