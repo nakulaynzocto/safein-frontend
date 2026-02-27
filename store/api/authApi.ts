@@ -378,6 +378,13 @@ export const authApi = baseApi.injectEndpoints({
             },
             invalidatesTags: ["User"],
         }),
+        updateFCMToken: builder.mutation<void, { fcmToken: string }>({
+            query: (data) => ({
+                url: "/users/fcm-token",
+                method: "POST",
+                body: data,
+            }),
+        }),
     }),
 });
 
@@ -395,4 +402,5 @@ export const {
     useResetPasswordMutation,
     useSetupEmployeePasswordMutation,
     useExchangeImpersonationTokenMutation,
+    useUpdateFCMTokenMutation,
 } = authApi;

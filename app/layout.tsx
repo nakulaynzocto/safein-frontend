@@ -10,6 +10,7 @@ import { NavigationProgressProvider } from "@/components/common/navigationProgre
 import { RouteOptimizer } from "@/components/common/routeOptimizer";
 import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
 import { InstallPromptBanner } from "@/components/pwa/InstallPromptBanner";
+import { NotificationHandler } from "@/components/notifications/NotificationHandler";
 import type { Viewport } from "next";
 
 export const viewport: Viewport = {
@@ -221,12 +222,13 @@ export default function RootLayout({
                             >
                                 {children}
                             </Suspense>
+                            {/* PWA & Notifications */}
+                            <ServiceWorkerRegistrar />
+                            <InstallPromptBanner />
+                            <NotificationHandler />
                         </Providers>
                     </NavigationProgressProvider>
                 </ErrorBoundary>
-                {/* PWA: Service Worker + Install Banner */}
-                <ServiceWorkerRegistrar />
-                <InstallPromptBanner />
                 {process.env.NODE_ENV === "production" && <Analytics />}
             </body>
         </html>
