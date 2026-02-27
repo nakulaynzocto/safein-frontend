@@ -179,6 +179,7 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                             enableSorting={false}
                             emptyData={emptyData}
                             onPrimaryAction={onPrimaryAction}
+                            minHeight="auto"
                         />
                     </div>
                 </div>
