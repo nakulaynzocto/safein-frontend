@@ -205,7 +205,8 @@ export function AppointmentBookingForm({
 
                         <div className="space-y-1.5">
                             <Label className="text-sm font-medium">
-                                Accompanying People <span className="text-muted-foreground font-normal">(optional)</span>
+                                Accompanying People
+                                <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
                             </Label>
                             <Input
                                 type="number"
@@ -227,7 +228,8 @@ export function AppointmentBookingForm({
                 <div className="space-y-4 pt-4">
                     <div className="space-y-1.5">
                         <Label htmlFor="notes" className="text-sm font-medium">
-                            Notes <span className="text-muted-foreground font-normal">(optional)</span>
+                            Notes
+                            <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
                         </Label>
                         <Textarea
                             id="notes"

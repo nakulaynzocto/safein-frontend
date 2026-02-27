@@ -150,7 +150,7 @@ export default function SupportWidget() {
                 }
                 if (socket) socket.disconnect();
             } else {
-                console.error("[Support Chat] Connection error:", err.message);
+                console.warn("[Support Chat] Real-time server unreachable. Falling back to REST API.", err.message);
             }
         };
 

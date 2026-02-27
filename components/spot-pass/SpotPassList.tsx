@@ -272,47 +272,51 @@ export function SpotPassList() {
     ];
 
     return (
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-4">
             <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="flex w-full items-center justify-between gap-2 sm:gap-4 px-1">
+                <div className="flex w-full items-center justify-between gap-1.5 sm:gap-4">
                     <SearchInput
                         placeholder="Search by name or phone..."
                         value={searchQuery}
                         onChange={(val: string) => setSearchQuery(val)}
-                        className="flex-1 min-w-[120px] sm:w-[300px] sm:flex-none"
+                        debounceDelay={500}
+                        className="flex-1 min-w-0 sm:min-w-[200px] sm:max-w-[300px]"
                     />
-                    <SubscriptionActionButtons
-                        isExpired={isExpired}
-                        hasReachedLimit={hasReachedSpotPassLimit}
-                        limitType="spotPass"
-                        showUpgradeModal={showUpgradeModal}
-                        openUpgradeModal={openUpgradeModal}
-                        closeUpgradeModal={closeUpgradeModal}
-                        showAddonModal={showAddonModal}
-                        openAddonModal={openAddonModal}
-                        closeAddonModal={closeAddonModal}
-                        upgradeLabel="Upgrade Plan"
-                        buyExtraLabel="Buy Extra Passes"
-                    >
-                        <Button
-                            variant="outline"
-                            className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white shadow-sm transition-all active:scale-95"
-                            onClick={() => router.push(routes.privateroute.SPOT_PASS_CREATE)}
+                    <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+                        <SubscriptionActionButtons
+                            isExpired={isExpired}
+                            hasReachedLimit={hasReachedSpotPassLimit}
+                            limitType="spotPass"
+                            showUpgradeModal={showUpgradeModal}
+                            openUpgradeModal={openUpgradeModal}
+                            closeUpgradeModal={closeUpgradeModal}
+                            showAddonModal={showAddonModal}
+                            openAddonModal={openAddonModal}
+                            closeAddonModal={closeAddonModal}
+                            upgradeLabel="Upgrade"
+                            buyExtraLabel="Buy Extra"
+                            icon={Plus}
+                            className="h-12 w-12 sm:w-auto sm:px-6 rounded-xl"
                         >
-                            <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                            <span className="hidden sm:inline">New Spot Pass</span>
-                            <span className="sm:hidden text-[10px]">New Pass</span>
-                        </Button>
-                    </SubscriptionActionButtons>
+                            <Button
+                                variant="outline"
+                                className="flex h-12 w-12 sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white sm:px-6 sm:min-w-[160px] transition-all"
+                                onClick={() => router.push(routes.privateroute.SPOT_PASS_CREATE)}
+                            >
+                                <Plus className="h-5 w-5 shrink-0" />
+                                <span className="hidden sm:inline font-medium">New Spot Pass</span>
+                            </Button>
+                        </SubscriptionActionButtons>
+                    </div>
                 </div>
 
-                <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+                <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
                     <DataTable
                         columns={columns}
                         data={data?.spotPasses || []}
                         isLoading={isLoading}
                         showCard={false}
-                        emptyMessage="No spot passes found. Try adjusting your search criteria."
+                        emptyMessage="No spot passes found."
                         emptyData={{
                             title: searchQuery ? "No results found" : "No spot passes yet",
                             description: searchQuery
@@ -321,12 +325,13 @@ export function SpotPassList() {
                             primaryActionLabel: "New Spot Pass",
                         }}
                         onPrimaryAction={() => router.push(routes.privateroute.SPOT_PASS_CREATE)}
+                        minWidth="1000px"
                     />
                 </div>
             </div>
 
             {data?.pagination && data.pagination.totalPages > 1 && (
-                <div className="flex justify-center pt-4">
+                <div className="pt-4">
                     <Pagination
                         currentPage={data.pagination.currentPage}
                         totalPages={data.pagination.totalPages}

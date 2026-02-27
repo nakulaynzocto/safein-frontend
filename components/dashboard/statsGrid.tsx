@@ -65,7 +65,7 @@ export const StatsGrid = memo(function StatsGrid({ stats, onStatusClick, current
     );
 
     return (
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-3 md:gap-4">
             {statCards.map((card) => (
                 <StatCard
                     key={card.title}

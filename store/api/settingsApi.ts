@@ -14,12 +14,20 @@ export interface SmtpConfig {
     verifiedAt?: string;
 }
 
+export interface INotificationType {
+    email: boolean;
+    whatsapp: boolean;
+}
+
 export interface Settings {
     _id: string;
     userId: string;
     notifications: {
         emailEnabled: boolean;
         whatsappEnabled: boolean;
+        visitor: INotificationType;
+        employee: INotificationType;
+        appointment: INotificationType;
     };
     smtp?: SmtpConfig;
     whatsapp: {
@@ -40,6 +48,9 @@ export interface UpdateSettingsRequest {
     notifications?: {
         emailEnabled?: boolean;
         whatsappEnabled?: boolean;
+        visitor?: Partial<INotificationType>;
+        employee?: Partial<INotificationType>;
+        appointment?: Partial<INotificationType>;
     };
     whatsapp?: {
         activeProvider?: "meta";

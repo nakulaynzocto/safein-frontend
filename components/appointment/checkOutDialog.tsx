@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Appointment } from "@/store/api/appointmentApi";
 import { LogOut, User, Calendar, Clock } from "lucide-react";
-import { formatDate, formatDateTime } from "@/utils/helpers";
+import { formatDate, formatDateTime, formatTime } from "@/utils/helpers";
 
 const checkOutSchema = yup.object({
     notes: yup.string().optional().max(500, "Notes cannot exceed 500 characters"),
@@ -100,7 +100,7 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
                                 <span className="font-medium">Scheduled:</span>
                                 <span>
                                     {formatDate(appointment.appointmentDetails.scheduledDate)} at{" "}
-                                    {appointment.appointmentDetails.scheduledTime}
+                                    {appointment.appointmentDetails.scheduledTime ? formatTime(appointment.appointmentDetails.scheduledTime) : "N/A"}
                                 </span>
                             </div>
                         )}

@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { StatusBadge } from "@/components/common/statusBadge";
 import { formatDateWithPattern } from "@/utils/dateUtils";
-import { getAppointmentDateTime, getInitials, formatName } from "@/utils/helpers";
+import { getAppointmentDateTime, getInitials, formatName, formatTime } from "@/utils/helpers";
 
 interface AppointmentDetailsDialogProps {
     appointment: Appointment | null;
@@ -43,7 +43,7 @@ const getFieldValue = (appointment: Appointment, key: string): any => {
         employeeName: (appt) => (appt as any).employeeId?.name || appt.employee?.name || "N/A",
         purpose: (appt) => appt.appointmentDetails?.purpose || "N/A",
         appointmentDate: (appt) => appt.appointmentDetails?.scheduledDate || "N/A",
-        appointmentTime: (appt) => appt.appointmentDetails?.scheduledTime || "N/A",
+        appointmentTime: (appt) => (appt.appointmentDetails?.scheduledTime ? formatTime(appt.appointmentDetails.scheduledTime) : "N/A"),
         notes: (appt) => appt.appointmentDetails?.notes || "N/A",
         vehicleNumber: (appt) => appt.appointmentDetails?.vehicleNumber || "",
         vehiclePhoto: (appt) => appt.appointmentDetails?.vehiclePhoto || "",
@@ -82,18 +82,18 @@ const fieldConfig = [
     {
         key: "checkInTime",
         label: "Check In Time",
-        format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm", "Not checked in"),
+        format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' hh:mm a", "Not checked in"),
     },
     {
         key: "checkOutTime",
         label: "Check Out Time",
         showOnlyForCompleted: true,
-        format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm", "Not checked out"),
+        format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' hh:mm a", "Not checked out"),
     },
     {
         key: "createdAt",
         label: "Created At",
-        format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm"),
+        format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' hh:mm a"),
     },
 ];
 

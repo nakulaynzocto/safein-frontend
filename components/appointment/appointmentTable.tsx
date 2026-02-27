@@ -632,12 +632,13 @@ export function AppointmentTable({
                         }}
                         showCard={false}
                         isLoading={isLoading}
+                        minWidth="1000px"
                     />
                 </div>
             </div >
 
             {pagination && pagination.totalPages > 1 && (
-                <div className="flex justify-center">
+                <div className="pt-4">
                     <Pagination
                         currentPage={pagination.currentPage}
                         totalPages={pagination.totalPages}

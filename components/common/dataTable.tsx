@@ -54,11 +54,12 @@ export function DataTable<T extends Record<string, any>>({
     onPrimaryAction,
     onSecondaryAction,
     showCard = true,
-    skeletonRows = 5,
+    skeletonRows = 10,
     skeletonColumns,
     enableSorting = false,
-    minHeight = "350px",
-}: DataTableProps<T> & { minHeight?: string }) {
+    minHeight = "650px",
+    minWidth = "100%",
+}: DataTableProps<T> & { minHeight?: string; minWidth?: string }) {
     const [sortConfig, setSortConfig] = useState<{
         key: string | null;
         direction: "asc" | "desc";
@@ -164,7 +165,8 @@ export function DataTable<T extends Record<string, any>>({
             <table
                 className="w-full text-left text-sm"
                 style={{
-                    userSelect: "none"
+                    userSelect: "none",
+                    minWidth: minWidth
                 }}
             >
                 <thead className="bg-muted/80 border-border text-muted-foreground border-b text-[10px] font-bold tracking-wider uppercase">

@@ -23,7 +23,7 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
-import { User, Mail, FileText, Info, Briefcase, Calendar, Clock } from "lucide-react";
+import { User, Mail, FileText, Info, Briefcase, Building, Calendar, Clock } from "lucide-react";
 import { ActionButton } from "@/components/common/actionButton";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { EnhancedDatePicker } from "@/components/common/enhancedDatePicker";
@@ -46,6 +46,7 @@ const quickAppointmentSchema = (isEmployee: boolean) => yup.object().shape({
         : yup.string().required("Please select an employee"),
     accompanyingCount: yup.number().min(0).max(20).default(0),
     notes: yup.string().optional(),
+    address: yup.string().optional(),
 });
 
 type QuickAppointmentFormData = {
@@ -56,6 +57,7 @@ type QuickAppointmentFormData = {
     employeeId?: string | null;
     accompanyingCount: number;
     notes?: string;
+    address?: string;
 };
 
 interface QuickAppointmentModalProps {
@@ -96,12 +98,12 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
     } = methods;
 
 
-    // Use common hook for existence check and auto-fill data
     const { emailExists, phoneExists } = useVisitorAutoFill({
         nameFieldName: "name",
         phoneFieldName: "phone",
         emailFieldName: "email",
-        methods
+        methods,
+        silent: true
     });
 
     // Reset form when modal opens
@@ -115,6 +117,7 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                 employeeId: isEmployee ? (user?.employeeId || "") : "",
                 accompanyingCount: 0,
                 notes: "",
+                address: "",
             });
         }
     }, [open, reset, isEmployee, user]);
@@ -145,6 +148,7 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                 purpose: data.purpose,
                 accompanyingCount: data.accompanyingCount || 0,
                 notes: data.notes || "",
+                address: data.address || "",
             }).unwrap();
 
             showSuccessToast("Special visitor booking created. OTP has been sent to the visitor.");
@@ -200,11 +204,6 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                                             />
                                         )}
                                     />
-                                    {phoneExists && (
-                                        <p className="text-[10px] font-medium text-amber-600 animate-in fade-in slide-in-from-top-1 -mt-1">
-                                            Visitor with this phone already exists
-                                        </p>
-                                    )}
                                 </div>
 
                                 <div className="space-y-1">
@@ -216,11 +215,6 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                                         {...register("email")}
                                         error={errors.email?.message}
                                     />
-                                    {emailExists && (
-                                        <p className="text-[10px] font-medium text-amber-600 animate-in fade-in slide-in-from-top-1 -mt-2">
-                                            Visitor with this email already exists
-                                        </p>
-                                    )}
                                 </div>
 
                                 <EmployeeSelectionField />
@@ -244,8 +238,24 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                                 />
 
                                 <div className="md:col-span-2 space-y-2">
+                                    <label className="text-sm font-medium leading-none flex items-center gap-2">
+                                        <Building className="h-4 w-4" />
+                                        Address
+                                        <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                                    </label>
+                                    <Textarea
+                                        placeholder="Enter visitor address"
+                                        {...register("address")}
+                                        className={errors.address ? "border-red-500" : ""}
+                                        rows={2}
+                                    />
+                                    {errors.address && <p className="text-xs text-red-500">{errors.address.message}</p>}
+                                </div>
+
+                                <div className="md:col-span-2 space-y-2">
                                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                                         Notes
+                                        <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
                                     </label>
                                     <Textarea
                                         placeholder="Add any notes here..."

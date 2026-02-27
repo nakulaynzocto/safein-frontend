@@ -5,6 +5,7 @@ import { type ReactNode } from "react";
 import Link from "next/link";
 import { Navbar } from "./navbar";
 import { Sidebar } from "./sidebar";
+import { MobileBottomNav } from "./mobileBottomNav";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { useAppointmentSocket } from "@/hooks/useSocket";
 import { routes } from "@/utils/routes";
@@ -94,7 +95,8 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                         overscrollBehaviorY: "contain"
                     }}
                 >
-                    <div className="flex-1 container mx-auto max-w-full px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 lg:px-6 lg:py-6 pb-6 sm:pb-8">
+                    {/* Extra bottom padding on mobile so content isn't hidden behind the bottom nav */}
+                    <div className="flex-1 container mx-auto max-w-full px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 lg:px-6 lg:py-6 pb-20 md:pb-6 lg:pb-8">
                         {isLoading ? (
                             <PageSkeleton />
                         ) : shouldShowContent ? (
@@ -118,8 +120,8 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                             </div>
                         )}
                     </div>
-                    {/* Footer matching sidebar style - always at bottom */}
-                    <footer className="border-t bg-gray-50/50 flex-shrink-0" style={{ height: '64px' }}>
+                    {/* Footer - only on desktop */}
+                    <footer className="hidden md:flex border-t bg-gray-50/50 flex-shrink-0" style={{ height: '64px' }}>
                         <div className="container mx-auto max-w-full h-full flex items-center justify-center">
                             <div className="text-xs text-gray-500 font-medium">
                                 © 2026 Visitor Management System
@@ -128,6 +130,8 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                     </footer>
                 </main>
             </div>
+            {/* Mobile bottom navigation — Instagram/LinkedIn style */}
+            {isClient && !isLoading && shouldShowSidebar && <MobileBottomNav />}
         </div>
     );
 }

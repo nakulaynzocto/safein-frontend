@@ -4,7 +4,7 @@ import { memo, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/common/dataTable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatDateTime, formatName } from "@/utils/helpers";
+import { formatDateTime, formatName, formatTime } from "@/utils/helpers";
 import { Calendar, Phone, Mail, Building, Maximize2 } from "lucide-react";
 
 interface AppointmentsTableProps {
@@ -150,7 +150,7 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                         header: "Time",
                         sortable: false,
                         render: (appointment: any) => (
-                            <div className="text-xs sm:text-sm">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
+                            <div className="text-xs sm:text-sm">{appointment.appointmentDetails?.scheduledTime ? formatTime(appointment.appointmentDetails.scheduledTime) : "N/A"}</div>
                         ),
                     },
                 ]),

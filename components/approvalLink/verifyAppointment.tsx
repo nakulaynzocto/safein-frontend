@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { formatTime } from "@/utils/helpers";
 
 export function VerifyAppointment() {
     const params = useParams();
@@ -331,7 +332,7 @@ export function VerifyAppointment() {
                             <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                                 <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Date & Time</dt>
                                 <dd className="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100 sm:col-span-2 sm:mt-0">
-                                    {formattedDate} at {appointment.appointmentDetails.scheduledTime}
+                                    {formattedDate} at {formatTime(appointment.appointmentDetails.scheduledTime)}
                                 </dd>
                             </div>
                             {/* Visitor */}

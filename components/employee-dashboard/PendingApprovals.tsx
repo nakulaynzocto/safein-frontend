@@ -12,6 +12,7 @@ import { CheckCircle, XCircle, Clock, User, Building2, Calendar, Send } from "lu
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { filterActivePendingAppointments } from "@/utils/appointmentUtils";
 import { useCooldown } from "@/hooks/useCooldown";
+import { formatTime } from "@/utils/helpers";
 
 interface PendingApprovalsProps {
     appointments: Appointment[];
@@ -106,79 +107,78 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
                     return (
                         <div
                             key={appointment._id}
-                            className="rounded-lg border border-[#3882a5]/20 bg-[#3882a5]/5 p-4 transition-all hover:shadow-md"
+                            className="flex flex-col gap-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:shadow-md sm:p-5"
                         >
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                <div className="flex-1 space-y-2">
-                                    <div className="flex items-start gap-3">
-                                        <div className="rounded-full bg-[#3882a5]/10 p-2">
-                                            <User className="h-4 w-4 text-[#3882a5]" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <h4 className="font-semibold text-gray-900">
-                                                    {(appointment.visitorId as any)?.name || appointment.visitor?.name || "Visitor"}
-                                                </h4>
-                                                <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
-                                                    Pending
-                                                </Badge>
-                                            </div>
-                                            {((appointment.visitorId as any)?.company || appointment.visitor?.company) && (
-                                                <p className="mt-1 flex items-center gap-1 text-sm text-gray-600">
-                                                    <Building2 className="h-3 w-3" />
-                                                    {(appointment.visitorId as any)?.company || appointment.visitor?.company}
-                                                </p>
-                                            )}
-                                        </div>
+                            {/* Header: Avatar, Info, Badge */}
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="flex gap-3 min-w-0">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#3882a5]/10 text-[#3882a5]">
+                                        <User className="h-5 w-5" />
                                     </div>
-
-                                    <div className="ml-11 space-y-1 text-sm">
-                                        <div className="flex items-center gap-2 text-gray-700">
-                                            <Calendar className="h-4 w-4 text-gray-400" />
-                                            <span>
-                                                {format(scheduledDate, "MMM dd, yyyy")} at{" "}
-                                                {appointment.appointmentDetails.scheduledTime}
-                                            </span>
-                                        </div>
-                                        <p className="text-gray-600">
-                                            <span className="font-medium">Purpose:</span>{" "}
-                                            {appointment.appointmentDetails.purpose}
-                                        </p>
+                                    <div className="min-w-0">
+                                        <h4 className="truncate font-bold text-gray-900">
+                                            {(appointment.visitorId as any)?.name || appointment.visitor?.name || "Visitor"}
+                                        </h4>
+                                        {((appointment.visitorId as any)?.company || appointment.visitor?.company) && (
+                                            <p className="truncate text-xs text-gray-500">
+                                                {(appointment.visitorId as any)?.company || appointment.visitor?.company}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
+                                <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-none px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shrink-0">
+                                    Pending
+                                </Badge>
+                            </div>
 
-                                <div className="flex flex-wrap gap-2 sm:ml-4">
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => handleResend(appointment._id)}
-                                        disabled={!!cooldowns[appointment._id]}
-                                        className={`${cooldowns[appointment._id] ? 'text-gray-400' : 'text-blue-600 hover:bg-blue-50'}`}
-                                        title={cooldowns[appointment._id] ? `Wait ${cooldowns[appointment._id]}s` : "Resend"}
-                                    >
-                                        <Send className="mr-1 h-4 w-4" />
-                                        {cooldowns[appointment._id] && <span className="ml-1 text-[10px] tabular-nums">{cooldowns[appointment._id]}s</span>}
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="primary"
-                                        onClick={() => handleApprove(appointment._id)}
-                                        disabled={isProcessing}
-                                    >
-                                        <CheckCircle className="mr-2 h-4 w-4" />
-                                        {isProcessing && isApproving ? "Approving..." : "Approve"}
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handleReject(appointment._id)}
-                                        disabled={isProcessing}
-                                        className="border-red-600 text-red-600 hover:bg-red-50 dark:border-red-500 dark:text-red-400 dark:hover:bg-red-950/30"
-                                    >
-                                        <XCircle className="mr-2 h-4 w-4" />
-                                        {isProcessing && isRejecting ? "Rejecting..." : "Reject"}
-                                    </Button>
+                            {/* Body: Date and Purpose */}
+                            <div className="grid grid-cols-2 gap-4 border-y border-gray-50 py-3 text-sm">
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-semibold uppercase tracking-tight text-gray-400">Scheduled For</p>
+                                    <div className="flex items-center gap-1.5 font-medium text-gray-700">
+                                        <Calendar className="h-3.5 w-3.5 text-[#3882a5]" />
+                                        <span>{format(scheduledDate, "MMM dd, yyyy")}</span>
+                                    </div>
+                                    <p className="ml-5 text-[11px] text-gray-500">{formatTime(appointment.appointmentDetails.scheduledTime)}</p>
                                 </div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-semibold uppercase tracking-tight text-gray-400">Purpose</p>
+                                    <p className="line-clamp-2 font-medium text-gray-700 leading-snug">
+                                        {appointment.appointmentDetails.purpose}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Footer: Actions */}
+                            <div className="flex items-center gap-2 pt-1">
+                                <Button
+                                    variant="primary"
+                                    size="sm"
+                                    className="h-10 flex-1 rounded-lg bg-[#3882a5] font-bold text-white hover:bg-[#2d6a87]"
+                                    onClick={() => handleApprove(appointment._id)}
+                                    disabled={isProcessing}
+                                >
+                                    {isProcessing && isApproving ? "..." : (
+                                        <span className="flex items-center gap-1.5">
+                                            <CheckCircle className="h-4 w-4" />
+                                            Approve
+                                        </span>
+                                    )}
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-10 flex-1 rounded-lg border-red-200 font-bold text-red-500 hover:bg-red-50 hover:text-red-600"
+                                    onClick={() => handleReject(appointment._id)}
+                                    disabled={isProcessing}
+                                >
+                                    {isProcessing && isRejecting ? "..." : (
+                                        <span className="flex items-center gap-1.5">
+                                            <XCircle className="h-4 w-4" />
+                                            Reject
+                                        </span>
+                                    )}
+                                </Button>
                             </div>
                         </div>
                     );

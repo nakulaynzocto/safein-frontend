@@ -17,6 +17,7 @@ export interface SpecialBooking {
     scheduledTime: string;
     accompanyingCount: number;
     notes?: string;
+    address?: string;
     status: 'pending' | 'verified' | 'cancelled';
     createdBy: string;
     visitorId?: string;

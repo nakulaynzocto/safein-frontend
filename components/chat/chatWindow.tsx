@@ -99,7 +99,7 @@ export function ChatWindow({
 
     // Helper to format time
     const formatTime = (date: Date) => {
-        return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     };
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {

@@ -78,8 +78,8 @@ export function NewVisitorModal({
         setValue,
         clearErrors,
         watch,
-    } = useForm({
-        resolver: yupResolver(visitorSchema),
+    } = useForm<VisitorFormData>({
+        resolver: yupResolver(visitorSchema) as any,
         mode: "onSubmit",
         reValidateMode: "onChange",
         defaultValues: {

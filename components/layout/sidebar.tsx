@@ -7,27 +7,20 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { routes } from "@/utils/routes";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { logout } from "@/store/slices/authSlice";
-import { useLogoutMutation } from "@/store/api/authApi";
+import { useAppSelector } from "@/store/hooks";
 // Import Chat Query
 import { useGetChatsQuery } from "@/store/api/chatApi";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     LayoutDashboard,
     Users,
     Calendar,
     UserPlus,
-    Settings,
     UserCircle,
     CheckCircle,
     Bell,
-    LogOut,
-    ChevronDown,
-    ChevronRight,
     Package,
     Menu,
     ClipboardList,
@@ -89,50 +82,14 @@ const baseNavigation: Array<{
             icon: ClipboardList,
             roles: ["admin"], // Only admin
         },
-        {
-            name: "Messages",
-            href: routes.privateroute.MESSAGES,
-            icon: MessageSquare,
-            roles: ["admin", "employee"], // Both admin and employee
-        },
     ];
 
-// Base settings submenu items
-const baseSettingsSubmenu = [
-    {
-        name: "Profile",
-        href: routes.privateroute.PROFILE,
-        icon: UserCircle,
-        roles: ["admin"], // Only admin can access profile
-    },
-    {
-        name: "WhatsApp Config",
-        href: routes.privateroute.SETTINGS_WHATSAPP,
-        icon: MessageSquare,
-        roles: ["admin"],
-    },
-    {
-        name: "SMTP Config",
-        href: routes.privateroute.SETTINGS_SMTP,
-        icon: Mail,
-        roles: ["admin"],
-    },
-];
+
+
 
 export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () => void; isMobile?: boolean }) => {
     const pathname = usePathname();
-    const router = useRouter();
-    const dispatch = useAppDispatch();
     const { user } = useAppSelector((state) => state.auth);
-
-    // Fetch Chats for Badge Count
-    const { data: chats } = useGetChatsQuery(undefined, { skip: !user });
-
-    // Calculate total unread messages
-    const unreadMessagesCount = (chats || []).reduce((acc, chat) => {
-        const userId = user?.id || (user as any)?._id;
-        return acc + (chat.unreadCounts?.[userId] || 0);
-    }, 0);
 
     // Check if user is employee
     const isEmployee = checkIsEmployee(user);
@@ -158,17 +115,6 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
             href: typeof item.href === 'function' ? item.href(userRole) : item.href
         }));
 
-    // Filter settings submenu based on role - only show if user is loaded and is admin
-    const settingsSubmenu = baseSettingsSubmenu.filter(item =>
-        userRole && item.roles.includes(userRole as any)
-    );
-
-    const isSettingsActive =
-        pathname === routes.privateroute.SETTINGS ||
-        pathname === routes.privateroute.PROFILE ||
-        pathname?.startsWith("/settings/");
-    const [settingsOpen, setSettingsOpen] = useState(isSettingsActive);
-    const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation();
     const prevPathnameRef = useRef(pathname);
 
     const isActive = (href: string) => {
@@ -219,46 +165,10 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
     };
 
     useEffect(() => {
-        // Only update when pathname actually changes (not on every render or state change)
-        if (prevPathnameRef.current !== pathname) {
-            // Auto-open settings menu if navigating TO a settings page
-            if (isSettingsActive) {
-                setSettingsOpen(true);
-            } else {
-                // Auto-close settings menu when navigating AWAY from settings pages to a different route
-                setSettingsOpen(false);
-            }
-            prevPathnameRef.current = pathname;
-        }
-    }, [pathname, isSettingsActive]);
+        prevPathnameRef.current = pathname;
+    }, [pathname]);
 
-    const handleLogout = async () => {
-        try {
-            dispatch(logout());
-            logoutMutation()
-                .unwrap()
-                .catch(() => { });
-            if (typeof window !== "undefined") {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-                sessionStorage.clear();
-            }
-            onLinkClick?.();
-            setTimeout(() => {
-                router.replace(routes.publicroute.LOGIN);
-            }, 300);
-        } catch (error) {
-            dispatch(logout());
-            if (typeof window !== "undefined") {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-            }
-            onLinkClick?.();
-            setTimeout(() => {
-                router.replace(routes.publicroute.LOGIN);
-            }, 300);
-        }
-    };
+
 
     if (isMobile) {
         return (
@@ -289,96 +199,11 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
                             >
                                 <item.icon className="h-5 w-5 shrink-0" />
                                 <span className="truncate">{item.name}</span>
-                                {isMessages && unreadMessagesCount > 0 && (
-                                    <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full shadow-sm">
-                                        {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
-                                    </span>
-                                )}
                             </Link>
                         );
                     })}
 
-                    {/* Settings menu - only show if there are submenu items */}
-                    {settingsSubmenu.length > 0 && (
-                        <div className="mt-2 space-y-1">
-                            <button
-                                onClick={() => setSettingsOpen(!settingsOpen)}
-                                className={cn(
-                                    "flex w-full items-center justify-between rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200",
-                                    isSettingsActive
-                                        ? "bg-primary/10 text-primary shadow-sm"
-                                        : "text-gray-700 hover:bg-gray-100 active:bg-gray-200",
-                                )}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <Settings className="h-5 w-5 shrink-0" />
-                                    <span className="truncate">Settings</span>
-                                </div>
-                                {settingsOpen ? (
-                                    <ChevronDown className="h-4 w-4 shrink-0" />
-                                ) : (
-                                    <ChevronRight className="h-4 w-4 shrink-0" />
-                                )}
-                            </button>
-
-                            {settingsOpen && (
-                                <div className="ml-6 space-y-1 border-l-2 border-gray-200 pl-2">
-                                    {settingsSubmenu.map((item) => {
-                                        if (!item.href) return null;
-                                        return (
-                                            <Link
-                                                key={item.name}
-                                                href={item.href}
-                                                prefetch={true}
-                                                className={cn(
-                                                    "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200",
-                                                    isActive(item.href)
-                                                        ? "bg-primary/10 text-primary shadow-sm"
-                                                        : "text-gray-700 hover:bg-gray-100 active:bg-gray-200",
-                                                )}
-                                                onClick={onLinkClick}
-                                            >
-                                                <item.icon className="h-4 w-4 shrink-0" />
-                                                <span className="truncate">{item.name}</span>
-                                            </Link>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-                    )}
                 </nav>
-
-                <div className="border-t bg-gray-50/50 p-3">
-                    <div className="flex items-center justify-between gap-3">
-                        {user && (
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                                <Avatar className="h-8 w-8 shrink-0 border border-primary/10">
-                                    <AvatarImage src={user.profilePicture} alt={user.name} />
-                                    <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
-                                        {(isEmployee ? (user.name || "E") : (user.companyName || user.name || "A")).charAt(0).toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div className="flex flex-col min-w-0">
-                                    <p className="text-xs font-bold text-gray-900 truncate leading-tight">
-                                        {isEmployee ? (user?.name || "Employee") : (user?.companyName || user?.name || "Admin")}
-                                    </p>
-                                    <p className="text-[10px] text-gray-500 truncate mt-0.5 leading-none">
-                                        {user.email}
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-                        <button
-                            onClick={handleLogout}
-                            disabled={isLoggingOut}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50 shrink-0"
-                            title="Logout"
-                        >
-                            <LogOut className="h-4 w-4" />
-                        </button>
-                    </div>
-                </div>
             </div>
         );
 
@@ -404,71 +229,11 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
                                 <item.icon className="sidebar-item-icon" />
                                 <span className="sidebar-item-text font-medium tracking-wide">{item.name}</span>
                             </div>
-                            {isMessages && unreadMessagesCount > 0 && (
-                                <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full shadow-sm animate-in fade-in zoom-in duration-300">
-                                    {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
-                                </span>
-                            )}
                         </Link>
                     );
                 })}
 
-                {/* Settings menu - only show if there are submenu items */}
-                {settingsSubmenu.length > 0 && (
-                    <div className="space-y-1">
-                        <button
-                            onClick={() => setSettingsOpen(!settingsOpen)}
-                            className={cn(
-                                "sidebar-item flex w-full items-center justify-between rounded-lg border-0 text-base",
-                                isSettingsActive && "active bg-primary/10 text-primary",
-                            )}
-                        >
-                            <div className="flex items-center">
-                                <Settings className="sidebar-item-icon" />
-                                <span className="sidebar-item-text font-medium tracking-wide">Settings</span>
-                            </div>
-                            {settingsOpen ? (
-                                <ChevronDown className="sidebar-item-text h-4 w-4" />
-                            ) : (
-                                <ChevronRight className="sidebar-item-text h-4 w-4" />
-                            )}
-                        </button>
-
-                        {settingsOpen && (
-                            <div className="ml-6 space-y-1 border-l-2 border-gray-200 pl-2">
-                                {settingsSubmenu.map((item) => {
-                                    if (!item.href) return null;
-                                    return (
-                                        <Link
-                                            key={item.name}
-                                            href={item.href}
-                                            prefetch={true}
-                                            className={cn(
-                                                "sidebar-item flex items-center gap-2 rounded-md border-0 px-3 py-2 text-sm",
-                                                isActive(item.href) && "active bg-primary/10 text-primary",
-                                            )}
-                                        >
-                                            <item.icon className="h-4 w-4" />
-                                            <span className="sidebar-item-text font-medium">{item.name}</span>
-                                        </Link>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-                )}
             </nav>
-
-            <div className="p-2 border-t border-gray-100">
-                <button
-                    onClick={handleLogout}
-                    disabled={isLoggingOut}
-                    className="sidebar-item flex w-full items-center gap-2 rounded-lg border-0 text-base text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
-                >
-                    <LogOut className="sidebar-item-icon" />
-                    <span className="sidebar-item-text font-medium tracking-wide">{isLoggingOut ? "Logging out..." : "Logout"}</span>
-                </button>
-            </div>
         </>
     );
 };

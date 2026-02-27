@@ -8,6 +8,7 @@ export interface User {
     roles?: string[]; // Backend returns roles array
     companyName: string;
     profilePicture?: string;
+    photo?: string; // Personal photo for employees
     department?: string;
     designation?: string;
     employeeId?: string;
@@ -105,6 +106,7 @@ const normalizeUser = (userData: any) => {
         ...userData,
         id: userData.id || userData._id || userData.id,
         profilePicture: userData.profilePicture || "",
+        photo: userData.photo || "",
         role: userData.role || roles[0] || 'admin',
         roles: roles,
         // Ensure employeeId is set if user is an employee

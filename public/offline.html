@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>You're Offline – SafeIn</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family:
+                    "DM Sans",
+                    system-ui,
+                    -apple-system,
+                    sans-serif;
+                background: #f0f4fb;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                padding: 1rem;
+            }
+            .card {
+                background: #fff;
+                border: 1px solid #e5e7eb;
+                border-radius: 20px;
+                padding: 3rem 2.5rem;
+                max-width: 420px;
+                width: 100%;
+                text-align: center;
+                box-shadow: 0 8px 30px rgba(56, 130, 165, 0.12);
+            }
+            .logo {
+                width: 64px;
+                height: 64px;
+                object-fit: contain;
+                margin-bottom: 1.25rem;
+            }
+            .icon-wrap {
+                width: 72px;
+                height: 72px;
+                border-radius: 50%;
+                background: #e0f0f9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 1.5rem;
+            }
+            svg {
+                color: #3882a5;
+            }
+            h1 {
+                font-size: 1.4rem;
+                font-weight: 700;
+                color: #074463;
+                margin-bottom: 0.5rem;
+            }
+            p {
+                font-size: 0.95rem;
+                color: #6b7280;
+                margin-bottom: 2rem;
+                line-height: 1.6;
+            }
+            button {
+                background: #3882a5;
+                color: #fff;
+                border: none;
+                border-radius: 12px;
+                padding: 0.75rem 2.5rem;
+                font-size: 0.95rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            button:hover {
+                background: #2d6a87;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <img src="/aynzo-logo.png" class="logo" alt="SafeIn Logo" />
+            <div class="icon-wrap">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="36"
+                    height="36"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <line x1="2" y1="2" x2="22" y2="22" />
+                    <path d="M8.5 16.5a5 5 0 0 1 7-7" />
+                    <path d="M10.9 4.5A9.77 9.77 0 0 1 12 4.5a9.5 9.5 0 0 1 9.5 9.5 9.77 9.77 0 0 1-.5 3" />
+                    <path d="M16.5 16.5A9.5 9.5 0 0 1 2.5 14" />
+                    <path d="M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+                </svg>
+            </div>
+            <h1>You're Offline</h1>
+            <p>It looks like you've lost your internet connection. Check your network and try again.</p>
+            <button onclick="location.reload()">Try Again</button>
+        </div>
+    </body>
+</html>

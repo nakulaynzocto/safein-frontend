@@ -23,7 +23,7 @@ import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { useCreateAppointmentLinkMutation, useCheckVisitorExistsQuery } from "@/store/api/appointmentLinkApi";
 import { useAppSelector } from "@/store/hooks";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
-import { isValidEmail, isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { isValidEmail, isValidPhone, isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { Link2, Mail, User, Phone } from "lucide-react";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
@@ -73,11 +73,13 @@ const convertToDays = (value: string): number => {
 
 // Create schema dynamically based on whether user is employee
 const createLinkSchema = (isEmployee: boolean) => yup.object().shape({
-    visitorEmail: yup.string().email("Please enter a valid email address").optional(),
-    visitorPhone: yup
+    visitorContact: yup
         .string()
-        .required("Visitor phone number is required")
-        .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
+        .required("Visitor email or phone number is required")
+        .test("is-valid-contact", "Please enter a valid email or 10-15 digit phone number", (value) => {
+            if (!value) return false;
+            return isValidEmail(value) || isValidPhone(value);
+        }),
     employeeId: isEmployee
         ? yup.string().optional().nullable()
         : yup.string().required("Employee is required"),
@@ -90,8 +92,7 @@ const createLinkSchema = (isEmployee: boolean) => yup.object().shape({
 });
 
 interface CreateAppointmentLinkFormData {
-    visitorEmail?: string;
-    visitorPhone: string;
+    visitorContact: string;
     employeeId: string | null | undefined;
     expiresInDays: number;
 }
@@ -139,8 +140,7 @@ export function CreateAppointmentLinkModal({
     const methods = useForm<CreateAppointmentLinkFormData>({
         resolver: yupResolver(createLinkSchema(isEmployee)) as any,
         defaultValues: {
-            visitorEmail: "",
-            visitorPhone: "",
+            visitorContact: "",
             employeeId: isEmployee ? (currentEmployeeId || "") : "",
             expiresInDays: 1,
         },
@@ -161,16 +161,20 @@ export function CreateAppointmentLinkModal({
     useEffect(() => {
         if (open) {
             reset({
-                visitorEmail: "",
-                visitorPhone: "",
+                visitorContact: "",
                 employeeId: isEmployee ? (currentEmployeeId || "") : "",
                 expiresInDays: 1,
             });
         }
     }, [open, reset, isEmployee, currentEmployeeId]);
 
-    const visitorEmail = watch("visitorEmail");
-    const visitorPhone = watch("visitorPhone");
+    const visitorContact = watch("visitorContact");
+
+    // Derived values for existence check
+    const contact = visitorContact?.trim() || "";
+    const visitorEmail = isValidEmail(contact) ? contact.toLowerCase() : "";
+    const visitorPhone = isValidPhone(contact) && !isValidEmail(contact) ? contact : "";
+
     // Use common visitor check hook
     const { emailExists, phoneExists, foundVisitor } = useVisitorExistenceCheck(visitorEmail, visitorPhone);
 
@@ -178,6 +182,17 @@ export function CreateAppointmentLinkModal({
         async (data: CreateAppointmentLinkFormData) => {
             // Prevent multiple submissions
             if (isSubmitting || isCreating) {
+                return;
+            }
+
+            const contactValue = data.visitorContact.trim();
+            const email = isValidEmail(contactValue) ? contactValue.toLowerCase() : undefined;
+            const phone = isValidPhone(contactValue) && !isValidEmail(contactValue) ? contactValue : undefined;
+
+            if (!email && !phone) {
+                const error = "Please enter a valid email or phone number.";
+                setGeneralError(error);
+                showErrorToast(error);
                 return;
             }
 
@@ -209,8 +224,8 @@ export function CreateAppointmentLinkModal({
             try {
                 setGeneralError(null);
                 const result = await createAppointmentLink({
-                    visitorEmail: data.visitorEmail?.trim().toLowerCase(),
-                    visitorPhone: data.visitorPhone.trim(),
+                    visitorEmail: email,
+                    visitorPhone: phone || "", // Backend might expect phone, if not present we send empty or previous logic had it required
                     employeeId: submitEmployeeId,
                     expiresInDays: data.expiresInDays || 1,
                 }).unwrap();
@@ -219,8 +234,7 @@ export function CreateAppointmentLinkModal({
                 // Reset form - for employees, keep employeeId; for admins, clear it
                 if (isEmployee && currentEmployeeId) {
                     reset({
-                        visitorEmail: "",
-                        visitorPhone: "",
+                        visitorContact: "",
                         employeeId: currentEmployeeId,
                         expiresInDays: 1,
                     });
@@ -238,7 +252,7 @@ export function CreateAppointmentLinkModal({
                 setIsSubmitting(false);
             }
         },
-        [createAppointmentLink, reset, setOpen, onSuccess, isEmployee, currentEmployeeId, hasReachedAppointmentLimit, isSubmitting, isCreating],
+        [createAppointmentLink, reset, setOpen, onSuccess, isEmployee, currentEmployeeId, hasReachedAppointmentLimit, isSubmitting, isCreating, isExpired, openUpgradeModal, openAddonModal],
     );
 
     const handleOpenChange = useCallback(
@@ -252,8 +266,7 @@ export function CreateAppointmentLinkModal({
                 // Reset form - for employees, keep employeeId; for admins, clear it
                 if (isEmployee && currentEmployeeId) {
                     reset({
-                        visitorEmail: "",
-                        visitorPhone: "",
+                        visitorContact: "",
                         employeeId: currentEmployeeId,
                         expiresInDays: 1,
                     });
@@ -277,8 +290,7 @@ export function CreateAppointmentLinkModal({
         // Reset form - for employees, keep employeeId; for admins, clear it
         if (isEmployee && currentEmployeeId) {
             reset({
-                visitorEmail: "",
-                visitorPhone: "",
+                visitorContact: "",
                 employeeId: currentEmployeeId,
                 expiresInDays: 1,
             });
@@ -334,18 +346,17 @@ export function CreateAppointmentLinkModal({
                                     return;
                                 }
 
-                                // Validate visitor phone manually
+                                // Validate visitor contact manually
                                 const currentValues = getValues();
-                                if (!currentValues.visitorPhone || currentValues.visitorPhone.length < 10) {
-                                    setGeneralError("Please enter a valid visitor phone number.");
-                                    showErrorToast("Please enter a valid visitor phone number.");
+                                if (!currentValues.visitorContact || currentValues.visitorContact.trim().length < 5) {
+                                    setGeneralError("Please enter a valid visitor email or phone number.");
+                                    showErrorToast("Please enter a valid visitor email or phone number.");
                                     return;
                                 }
 
                                 // Call onSubmit directly with the data
                                 await onSubmit({
-                                    visitorEmail: currentValues.visitorEmail?.trim().toLowerCase(),
-                                    visitorPhone: currentValues.visitorPhone.trim(),
+                                    visitorContact: currentValues.visitorContact.trim(),
                                     employeeId: submitEmployeeId,
                                     expiresInDays: currentValues.expiresInDays || 1,
                                 });
@@ -362,49 +373,33 @@ export function CreateAppointmentLinkModal({
                             </Alert>
                         )}
 
-                        <div className="space-y-2">
-                            <Label htmlFor="visitorPhone" className="flex items-center gap-2">
-                                <Phone className="h-4 w-4" />
-                                Visitor Phone <span className="text-red-500">*</span>
+                        <div className="space-y-1.5">
+                            <Label htmlFor="visitorContact" className="flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                Visitor Contact (Email or Phone) <span className="text-red-500">*</span>
                             </Label>
                             <Controller
-                                name="visitorPhone"
+                                name="visitorContact"
                                 control={control}
                                 render={({ field }) => (
                                     <div className="space-y-1">
-                                        <PhoneInputField
-                                            value={field.value || ""}
-                                            onChange={field.onChange}
-                                            id="visitorPhone"
-                                            placeholder="Enter phone number"
-                                            error={errors.visitorPhone?.message}
-                                            defaultCountry="in"
-                                            required
-                                        />
-                                    </div>
-                                )}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="visitorEmail" className="flex items-center gap-2 text-muted-foreground">
-                                <Mail className="h-4 w-4" />
-                                Visitor Email (Optional)
-                            </Label>
-                            <Controller
-                                name="visitorEmail"
-                                control={control}
-                                render={({ field }) => (
-                                    <div className="space-y-1">
-                                        <Input
-                                            {...field}
-                                            id="visitorEmail"
-                                            type="email"
-                                            placeholder="visitor@example.com"
-                                            className={`h-12 rounded-xl bg-background font-medium ${errors.visitorEmail ? "border-red-500" : ""}`}
-                                        />
-                                        {errors.visitorEmail && (
-                                            <p className="text-sm text-red-500">{errors.visitorEmail.message}</p>
+                                        <div className="relative">
+                                            <Input
+                                                {...field}
+                                                id="visitorContact"
+                                                placeholder="Enter email or 10-digit phone number"
+                                                className={`h-12 rounded-xl bg-background font-medium pl-10 ${errors.visitorContact ? "border-red-500" : ""}`}
+                                            />
+                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                                {isValidEmail(field.value?.trim() || "") ? (
+                                                    <Mail className="h-4 w-4" />
+                                                ) : (
+                                                    <Phone className="h-4 w-4" />
+                                                )}
+                                            </div>
+                                        </div>
+                                        {errors.visitorContact && (
+                                            <p className="text-sm text-red-500">{errors.visitorContact.message}</p>
                                         )}
                                         <VisitorExistenceStatus
                                             isLoading={false}

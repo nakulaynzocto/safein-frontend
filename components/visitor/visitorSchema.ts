@@ -48,7 +48,31 @@ export const visitorSchema = yup.object({
         .default([]),
 });
 
-export type VisitorFormData = yup.InferType<typeof visitorSchema>;
+export interface VisitorFormData {
+    name: string;
+    email?: string;
+    phone: string;
+    gender?: "male" | "female" | "other" | "";
+    address: {
+        street?: string;
+        city: string;
+        state: string;
+        country: string;
+    };
+    idProof: {
+        type?: string;
+        number?: string;
+        image?: string;
+    };
+    photo?: string;
+    blacklisted: boolean;
+    blacklistReason?: string;
+    tags?: string;
+    emergencyContacts?: {
+        name?: string | null;
+        phone?: string | null;
+    }[];
+}
 
 export const idProofTypes = [
     { value: "aadhaar", label: "Aadhaar Card" },

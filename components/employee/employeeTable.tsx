@@ -354,6 +354,7 @@ export function EmployeeTable({
                                 router.push(routes.privateroute.EMPLOYEECREATE);
                             }
                         }}
+                        minWidth="800px"
                     />
                 </div>
             </div>
@@ -371,7 +372,7 @@ export function EmployeeTable({
 
             {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (
-                <div className="flex justify-center">
+                <div className="pt-4">
                     <Pagination
                         currentPage={pagination.currentPage}
                         totalPages={pagination.totalPages}

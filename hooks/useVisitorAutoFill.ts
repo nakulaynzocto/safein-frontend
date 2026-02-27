@@ -10,6 +10,7 @@ interface UseVisitorAutoFillOptions {
     phoneFieldName?: string;
     nameFieldName?: string;
     methods?: any;
+    silent?: boolean;
 }
 
 /**
@@ -19,7 +20,8 @@ export function useVisitorAutoFill({
     emailFieldName = "email",
     phoneFieldName = "phone",
     nameFieldName = "name",
-    methods: providedMethods
+    methods: providedMethods,
+    silent = false
 }: UseVisitorAutoFillOptions = {}) {
     const contextMethods = useFormContext();
     const methods = providedMethods || contextMethods;
@@ -53,10 +55,12 @@ export function useVisitorAutoFill({
                     [phoneFieldName]: currentPhone || foundVisitor.phone,
                     [emailFieldName]: currentEmail || foundVisitor.email,
                 });
-                showSuccessToast("Visitor details found and auto-filled!");
+                if (!silent) {
+                    showSuccessToast("Visitor details found and auto-filled!");
+                }
             }
         }
-    }, [foundVisitor, reset, getValues, emailFieldName, phoneFieldName, nameFieldName]);
+    }, [foundVisitor, reset, getValues, emailFieldName, phoneFieldName, nameFieldName, silent]);
 
     return { emailExists, phoneExists, foundVisitor };
 }

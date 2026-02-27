@@ -8,6 +8,8 @@ import { ErrorBoundary } from "@/components/common/errorBoundary";
 import { NavigationProgress } from "@/components/common/navigationProgress";
 import { NavigationProgressProvider } from "@/components/common/navigationProgressProvider";
 import { RouteOptimizer } from "@/components/common/routeOptimizer";
+import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
+import { InstallPromptBanner } from "@/components/pwa/InstallPromptBanner";
 import type { Viewport } from "next";
 
 export const viewport: Viewport = {
@@ -18,7 +20,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-    title: "Best Visitor Management System in India | SafeIn",
+    title: "SafeIn",
     description:
         "Transform your visitor management with SafeIn's comprehensive platform in India. Streamline check-ins, manage society visitors, and enhance security with our professional system. Start your free 3-day trial today!",
     keywords: [
@@ -60,7 +62,7 @@ export const metadata: Metadata = {
         locale: "en_IN",
         url: "https://safein.aynzo.com",
         siteName: "SafeIn by Aynzo",
-        title: "SafeIn - #1 Visitor Management System in India",
+        title: "SafeIn",
         description:
             "India's leading visitor management system. Features: Smart appointments, spot pass, real-time chat, and advanced security analytics. Perfect for offices & housing societies.",
         images: [
@@ -74,7 +76,7 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        title: "SafeIn - Professional Visitor Management System India",
+        title: "SafeIn",
         description: "India's smartest visitor management and appointment scheduling platform.",
         images: ["https://safein.aynzo.com/aynzo-logo.png"],
         creator: "@aynzo",
@@ -115,6 +117,11 @@ export default function RootLayout({
                 <link rel="icon" href="/aynzo-logo.png" type="image/png" />
                 <link rel="apple-touch-icon" href="/aynzo-logo.png" />
                 <link rel="shortcut icon" href="/aynzo-logo.png" type="image/png" />
+                <link rel="manifest" href="/manifest.webmanifest" />
+                <meta name="mobile-web-app-capable" content="yes" />
+                <meta name="apple-mobile-web-app-capable" content="yes" />
+                <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+                <meta name="apple-mobile-web-app-title" content="SafeIn" />
                 <meta name="geo.region" content="IN-PB" />
                 <meta name="geo.placename" content="Mohali" />
                 <meta name="geo.position" content="30.7046;76.7179" />
@@ -217,6 +224,9 @@ export default function RootLayout({
                         </Providers>
                     </NavigationProgressProvider>
                 </ErrorBoundary>
+                {/* PWA: Service Worker + Install Banner */}
+                <ServiceWorkerRegistrar />
+                <InstallPromptBanner />
                 {process.env.NODE_ENV === "production" && <Analytics />}
             </body>
         </html>

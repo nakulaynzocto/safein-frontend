@@ -19,17 +19,17 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
     return (
         <div className="flex min-h-screen bg-white overflow-hidden">
             {/* Left Side: Form */}
-            <div className="flex w-full flex-col lg:w-1/2 relative justify-center px-6 py-12 lg:px-12 xl:px-24">
-                {/* Back to Home Button - consistently at top left */}
-                <div className="absolute top-8 left-8 lg:left-12">
+            <div className="flex w-full flex-col lg:w-1/2 px-4 py-6 sm:px-8 sm:py-8 lg:px-12 xl:px-24">
+                {/* Back to Home — in normal flow, never overlaps form */}
+                <div className="mb-6 sm:mb-8">
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => router.push(routes.publicroute.HOME)}
-                        className="text-muted-foreground hover:bg-[#3882a5] hover:text-white rounded-lg px-3 flex items-center gap-2"
+                        className="text-muted-foreground hover:bg-[#3882a5] hover:text-white rounded-lg px-3 flex items-center gap-2 -ml-2"
                     >
                         <ArrowLeft className="h-4 w-4" />
-                        <span className="font-medium">Back to Home</span>
+                        <span className="font-medium text-sm">Back to Home</span>
                     </Button>
                 </div>
 

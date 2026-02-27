@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, CalendarPlus, UserPlus, Users, Send, ClipboardList } from "lucide-react";
+import { Calendar, CalendarPlus, UserPlus, Users, Send, ClipboardList, IdCard, Contact } from "lucide-react";
 import { routes } from "@/utils/routes";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { AddonPurchaseModal } from "@/components/common/AddonPurchaseModal";
@@ -30,6 +30,16 @@ const adminQuickActions: QuickAction[] = [
         icon: Users,
         label: "Manage Employees",
     },
+    {
+        href: routes.privateroute.VISITORLIST,
+        icon: Contact,
+        label: "Manage Visitors",
+    },
+    {
+        href: routes.privateroute.SPOT_PASS,
+        icon: IdCard,
+        label: "Spot Pass",
+    },
 ];
 
 const employeeQuickActions: QuickAction[] = [
@@ -42,6 +52,11 @@ const employeeQuickActions: QuickAction[] = [
         href: routes.privateroute.APPOINTMENT_REQUESTS,
         icon: ClipboardList,
         label: "Visit Approvals",
+    },
+    {
+        href: routes.privateroute.SPOT_PASS,
+        icon: IdCard,
+        label: "Spot Pass",
     },
 ];
 

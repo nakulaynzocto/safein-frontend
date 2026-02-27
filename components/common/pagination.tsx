@@ -103,7 +103,7 @@ export function Pagination({
     }
 
     return (
-        <div className={cn("flex flex-col items-center justify-between gap-4 sm:flex-row", className)}>
+        <div className={cn("flex w-full flex-row items-center justify-between gap-2", className)}>
             {/* Items info */}
             <div className="text-sm text-gray-600 dark:text-gray-400">
                 Showing <span className="font-medium">{startItem || 0}</span> to{" "}
@@ -162,7 +162,7 @@ export function CompactPagination({
     }
 
     return (
-        <div className={cn("flex flex-col items-center justify-between gap-4 sm:flex-row", className)}>
+        <div className={cn("flex w-full flex-row items-center justify-between gap-2", className)}>
             <div className="text-sm text-gray-600 dark:text-gray-400">
                 <span className="font-medium">{startItem || 0}</span>-
                 <span className="font-medium">{endItem || 0}</span> of{" "}

@@ -133,7 +133,11 @@ export function EnhancedTimePicker({
             {label && (
                 <label className="text-foreground text-sm font-medium">
                     {label}
-                    {required && <span className="ml-1 text-red-500">*</span>}
+                    {required ? (
+                        <span className="ml-1 text-red-500 font-bold">*</span>
+                    ) : (
+                        <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                    )}
                 </label>
             )}
             <Popover open={open} onOpenChange={setOpen} modal={true}>

@@ -79,7 +79,7 @@ export function SpotPassCreateForm() {
         control,
         formState: { errors },
     } = useForm<SpotPassFormData>({
-        resolver: yupResolver(spotPassSchema),
+        resolver: yupResolver(spotPassSchema) as any,
         defaultValues: {
             name: "",
             phone: "",
@@ -119,7 +119,7 @@ export function SpotPassCreateForm() {
                                     name="photo"
                                     register={register}
                                     setValue={setValue}
-                                    errors={errors.photo}
+                                    errors={errors.photo as any}
                                     initialUrl={watch("photo")}
                                     enableImageCapture={true}
                                     variant="avatar"
@@ -137,7 +137,7 @@ export function SpotPassCreateForm() {
                                     label="Full Name"
                                     placeholder="Enter visitor's full name"
                                     {...register("name")}
-                                    error={errors.name?.message}
+                                    error={errors.name?.message as string}
                                     required
                                 />
                                 <Controller
@@ -147,9 +147,9 @@ export function SpotPassCreateForm() {
                                         <PhoneInputField
                                             id="phone"
                                             label="Phone Number"
-                                            value={field.value}
+                                            value={field.value || ""}
                                             onChange={(value) => field.onChange(value)}
-                                            error={errors.phone?.message}
+                                            error={errors.phone?.message as string}
                                             required
                                             placeholder="Enter phone number"
                                             defaultCountry="in"
@@ -165,7 +165,7 @@ export function SpotPassCreateForm() {
                                     ]}
                                     value={watch("gender")}
                                     onChange={(val) => setValue("gender", val)}
-                                    error={errors.gender?.message}
+                                    error={errors.gender?.message as string}
                                     required
                                 />
 
@@ -183,7 +183,7 @@ export function SpotPassCreateForm() {
                                                 loadOptions={loadEmployeeOptions}
                                                 placeholder="Search employees..."
                                                 isClearable={true}
-                                                error={errors.employeeId?.message}
+                                                error={errors.employeeId?.message as string}
                                                 cacheOptions={true}
                                                 defaultOptions={true}
                                             />
@@ -197,7 +197,7 @@ export function SpotPassCreateForm() {
                                     label="Address"
                                     placeholder="Enter current address"
                                     {...register("address")}
-                                    error={errors.address?.message}
+                                    error={errors.address?.message as string}
                                     required
                                     rows={2}
                                 />
@@ -206,7 +206,7 @@ export function SpotPassCreateForm() {
                                     label="Notes (Optional)"
                                     placeholder="Any additional information or special requirements"
                                     {...register("notes")}
-                                    error={errors.notes?.message}
+                                    error={errors.notes?.message as string}
                                     rows={2}
                                 />
                             </div>

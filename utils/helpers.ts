@@ -17,7 +17,7 @@ export function formatTime(time: string): string {
     const ampm = hour >= 12 ? "PM" : "AM";
     const displayHour = hour % 12 || 12; // Convert 0 to 12, 13-23 to 1-11
     const displayMinutes = min.toString().padStart(2, "0");
-    return `${displayHour}:${displayMinutes}${ampm}`;
+    return `${displayHour}:${displayMinutes} ${ampm}`;
 }
 
 export function formatDateTime(date: string | Date, time?: string): string {

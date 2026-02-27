@@ -16,6 +16,7 @@ import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { logout, setUser } from "@/store/slices/authSlice";
 import { toggleAssistant } from "@/store/slices/uiSlice";
 import { useLogoutMutation, useGetProfileQuery } from "@/store/api/authApi";
+import { useGetChatsQuery } from "@/store/api/chatApi";
 import { useGetEmployeeQuery, useGetEmployeesQuery } from "@/store/api/employeeApi";
 import { routes } from "@/utils/routes";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
@@ -25,6 +26,7 @@ import { useNavbarScrollStyle } from "@/hooks/useScrollStyle";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { SidebarContent } from "@/components/layout/sidebar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
     User,
     LogOut,
@@ -42,6 +44,8 @@ import {
     Bell,
     CreditCard,
     Sparkles,
+    MessageSquare,
+    Settings,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { usePathname } from "next/navigation";
@@ -118,6 +122,15 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
     const employeeName = isEmployee
         ? formatName(employeeData?.name || employeeFromList?.name || user?.name || "") || user?.email || "Employee"
         : null;
+
+    // Fetch Chats for Badge Count
+    const { data: chats } = useGetChatsQuery(undefined, { skip: !user });
+
+    // Calculate total unread messages
+    const unreadMessagesCount = (chats || []).reduce((acc: number, chat: any) => {
+        const userId = user?.id || (user as any)?._id;
+        return acc + (chat.unreadCounts?.[userId] || 0);
+    }, 0);
 
     useEffect(() => {
         setIsMounted(true);
@@ -451,53 +464,168 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                     </div>
                                 )}
 
-                                {/* ✨ Ask Assistant Button */}
-                                <button
-                                    onClick={() => dispatch(toggleAssistant())}
+
+                                 {/* Messages Icon */}
+                                <Link
+                                    href={routes.privateroute.MESSAGES}
                                     className={cn(
-                                        "flex items-center gap-1.5 sm:gap-2 group px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border-2 transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer",
-                                        shouldShowWhiteNavbar
-                                            ? "border-primary/20 hover:border-primary/40 bg-white"
-                                            : "border-white/20 hover:border-white/40 bg-white/10 backdrop-blur-sm"
+                                        "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors",
+                                        shouldShowWhiteNavbar ? "text-gray-700 hover:bg-gray-100/80" : "text-white hover:bg-white/10"
                                     )}
+                                    title="Messages"
                                 >
-                                    <div className="relative">
-                                        <Sparkles className={cn(
-                                            "w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform",
-                                            shouldShowWhiteNavbar ? "text-primary" : "text-white"
-                                        )} />
-                                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full border border-white dark:border-slate-800 animate-pulse"></div>
-                                    </div>
-                                    <span className={cn(
-                                        "hidden xs:inline-block text-[12px] sm:text-[13px] font-bold transition-opacity group-hover:opacity-80",
-                                        shouldShowWhiteNavbar
-                                            ? "bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
-                                            : "text-white"
-                                    )}>
-                                        Ask SafeIn
-                                    </span>
-                                </button>
+                                    <MessageSquare className="h-5 w-5" />
+                                    {unreadMessagesCount > 0 && (
+                                        <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white shadow-sm">
+                                            {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                                        </span>
+                                    )}
+                                </Link>
 
                                 {/* Notification Bell */}
                                 <NotificationBell
                                     className={shouldShowWhiteNavbar ? "hover:bg-gray-100/80" : "hover:bg-white/10"}
                                     iconClassName={shouldShowWhiteNavbar ? "text-gray-700" : "text-white"}
                                 />
-                                {/* Sidebar Toggle Button - Mobile Only */}
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setIsMobileSidebarOpen(true)}
-                                    className={cn(
-                                        "size-9 md:hidden",
-                                        shouldShowWhiteNavbar
-                                            ? "text-gray-700 hover:bg-gray-100/80"
-                                            : "text-white hover:bg-white/10",
-                                    )}
-                                >
-                                    <Menu className="h-6 w-6" />
-                                    <span className="sr-only">Toggle menu</span>
-                                </Button>
+
+                                {/* Settings Dropdown */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className={cn(
+                                                "size-9 rounded-full transition-colors",
+                                                shouldShowWhiteNavbar
+                                                    ? "text-gray-700 hover:bg-gray-100/80"
+                                                    : "text-white hover:bg-white/10"
+                                            )}
+                                            title="Settings"
+                                        >
+                                            <Settings className="h-5 w-5" />
+                                            <span className="sr-only">Settings</span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                        align="end"
+                                        sideOffset={8}
+                                        className="w-72 p-0 overflow-hidden rounded-xl border border-border shadow-xl bg-white"
+                                    >
+                                        {/* Header: LinkedIn Style */}
+                                        {user && (
+                                            <div className="p-4 border-b border-border bg-white">
+                                                <div className="flex items-start gap-3">
+                                                    <Avatar className="h-14 w-14 ring-1 ring-border shadow-sm">
+                                                        <AvatarImage src={user.photo || user.profilePicture} alt={user.name} />
+                                                        <AvatarFallback className="text-xl font-bold rounded-full"
+                                                            style={{ background: "#e9eff6", color: "#074463" }}>
+                                                            {(isEmployee
+                                                                ? (employeeName || "E")
+                                                                : (user.companyName || user.name || "A")
+                                                            ).charAt(0).toUpperCase()}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex flex-col min-w-0 pt-1">
+                                                        <p className="text-base font-bold text-[#161718] truncate leading-tight">
+                                                            {isEmployee
+                                                                ? (employeeName || "Employee")
+                                                                : (user.companyName || user.name || "Admin")}
+                                                        </p>
+                                                        <p className="text-xs text-[#6b7280] truncate mt-1">
+                                                            {isEmployee ? "Employee Account" : "Platform Administrator"}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Action Buttons */}
+                                                <div className="flex gap-2 mt-4">
+                                                    <Button 
+                                                        variant="outline" 
+                                                        size="sm" 
+                                                        className="flex-1 rounded-full h-8 text-[13px] font-semibold border-[#074463] text-[#074463] hover:bg-[#e9eff6] hover:text-[#074463]"
+                                                        onClick={() => router.push(routes.privateroute.PROFILE)}
+                                                    >
+                                                        View Profile
+                                                    </Button>
+                                                    {!isEmployee && (
+                                                        <Button 
+                                                            size="sm" 
+                                                            className="flex-1 rounded-full h-8 text-[13px] font-semibold bg-[#074463] text-white hover:bg-[#05334a]"
+                                                            onClick={handleOpenUpgradeModal}
+                                                        >
+                                                            Upgrade
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Account Section */}
+                                        <div className="py-2">
+                                            <div className="px-4 py-1.5">
+                                                <p className="text-[15px] font-bold text-[#161718]">Account</p>
+                                                {!isEmployee && (isTrialingSubscription || !hasActiveSubscription) && (
+                                                    <div className="flex items-center gap-1.5 mt-1.5 group cursor-pointer" onClick={handleOpenUpgradeModal}>
+                                                        <div className="h-3 w-3 bg-[#e68a00] rounded-[2px]" />
+                                                        <p className="text-[13px] font-semibold text-[#666666] group-hover:underline group-hover:text-[#0a66c2]">
+                                                            Try Premium for ₹0
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                             {!isEmployee && (
+                                                 <DropdownMenuItem asChild className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors">
+                                                    <Link href={routes.privateroute.PROFILE} className="text-[14px] font-semibold text-[#666666] group-hover:underline">
+                                                        Settings & Privacy
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                             )}
+                                            {/* WhatsApp and Email Server links removed */}
+                                            <DropdownMenuItem asChild className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors">
+                                                <Link href={routes.publicroute.HELP} className="text-[14px] font-semibold text-[#666666] group-hover:underline">
+                                                    Help
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        </div>
+
+                                        {/* Manage Section */}
+                                        <div className="py-2 border-t border-border">
+                                            <p className="px-4 py-1.5 text-[15px] font-bold text-[#161718]">Manage</p>
+                                            <DropdownMenuItem 
+                                                onClick={() => dispatch(toggleAssistant())}
+                                                className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors"
+                                            >
+                                                <span className="text-[14px] font-semibold text-[#666666] group-hover:underline flex items-center gap-2">
+                                                    Ask SafeIn
+                                                    <Sparkles className="h-3.5 w-3.5 text-emerald-500" />
+                                                </span>
+                                            </DropdownMenuItem>
+                                            {!isEmployee && (
+                                                <DropdownMenuItem asChild className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors">
+                                                    <Link href={routes.privateroute.SPOT_PASS} className="text-[14px] font-semibold text-[#666666] group-hover:underline">
+                                                        Spot Pass
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            )}
+                                        </div>
+
+                                        {/* Logout Section */}
+                                        <div className="py-2 border-t border-border">
+                                            <DropdownMenuItem
+                                                onClick={handleLogout}
+                                                disabled={isLoggingOut}
+                                                className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors"
+                                            >
+                                                <span className="text-[14px] font-semibold text-[#666666] group-hover:underline">
+                                                    {isLoggingOut ? "Signing out..." : "Sign Out"}
+                                                </span>
+                                            </DropdownMenuItem>
+                                        </div>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+
+
+
                             </div>
                         )}
 
@@ -672,14 +800,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                 )}
             </div>
 
-            {/* Mobile Sidebar Sheet */}
-            {shouldShowPrivateNavbar && (
-                <Sheet open={isMobileSidebarOpen} onOpenChange={setIsMobileSidebarOpen}>
-                    <SheetContent side="left" className="flex w-72 flex-col p-0">
-                        <SidebarContent isMobile onLinkClick={() => setIsMobileSidebarOpen(false)} />
-                    </SheetContent>
-                </Sheet>
-            )}
+
         </nav>
     );
 }

@@ -12,6 +12,7 @@ interface PhoneInputFieldProps {
     value: string;
     onChange: (value: string) => void;
     error?: string;
+    helperText?: string;
     required?: boolean;
     disabled?: boolean;
     placeholder?: string;
@@ -33,6 +34,7 @@ export function PhoneInputField({
     value = "",
     onChange,
     error,
+    helperText,
     required = false,
     disabled = false,
     placeholder = "Enter phone number",
@@ -208,7 +210,11 @@ export function PhoneInputField({
             {label && (
                 <label htmlFor={id} className="text-foreground text-sm font-medium">
                     {label}
-                    {required && <span className="ml-1 text-red-500 font-bold">*</span>}
+                    {required ? (
+                        <span className="ml-1 text-red-500 font-bold">*</span>
+                    ) : (
+                        <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                    )}
                 </label>
             )}
             <div
@@ -261,6 +267,7 @@ export function PhoneInputField({
             </div>
 
             {error && <p className="text-destructive text-xs">{error}</p>}
+            {helperText && !error && <p className="text-muted-foreground text-xs">{helperText}</p>}
 
             <style jsx global>{`
                 /* Prevent browser autofill from changing background color */

@@ -67,7 +67,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                                     "text-[9px] mt-1.5 flex justify-end items-center gap-1.5 font-medium",
                                     isMe ? "text-blue-100/80" : "text-gray-400"
                                 )}>
-                                    {format(new Date(msg.createdAt), "HH:mm")}
+                                    {format(new Date(msg.createdAt), "hh:mm a")}
                                     {isMe && <CheckCheck className="w-3 h-3 text-emerald-300" />}
                                 </div>
                             </div>

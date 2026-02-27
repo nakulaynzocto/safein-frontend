@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, Clock, User, Calendar, Clock as ClockIcon } from "lucide-react";
 import { Appointment } from "@/store/api/appointmentApi";
 import { formatDateLong } from "@/utils/dateUtils";
+import { formatTime } from "@/utils/helpers";
 
 interface NotificationCardProps {
     appointment: Appointment;
@@ -123,7 +124,7 @@ export const NotificationCard = memo(function NotificationCard({
                         <ClockIcon className="text-muted-foreground mt-1 h-4 w-4 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
                             <p className="text-sm font-medium text-gray-900">Time</p>
-                            <p className="text-sm text-gray-600">{appointment.appointmentDetails.scheduledTime}</p>
+                            <p className="text-sm text-gray-600">{formatTime(appointment.appointmentDetails.scheduledTime)}</p>
                         </div>
                     </div>
 

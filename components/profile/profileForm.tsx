@@ -546,7 +546,9 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                             <Button
                                 type="submit"
                                 disabled={isSubmitting || isUploading || !canSave}
-                                className="min-w-[120px]"
+                                variant="primary"
+                                size="xl"
+                                className="min-w-[200px] shadow-lg shadow-[#3882a5]/20 transition-all active:scale-[0.98]"
                             >
                                 {isSubmitting ? (
                                     <>
