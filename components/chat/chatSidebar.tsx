@@ -60,33 +60,29 @@ export function ChatSidebar({
     return (
         <div className={cn("flex flex-col h-full bg-white border-r w-full md:w-80 lg:w-96", className)}>
             {/* Header */}
-            <div className="p-4 border-b space-y-4 sticky top-0 bg-white z-10">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-bold text-gray-900">
-                        {isAdmin ? "Messages" : "Support Chat"}
-                    </h1>
-                    <div className="flex gap-2">
+            <div className="p-4 border-b sticky top-0 bg-white z-10 transition-all duration-300">
+                {!isAdmin ? (
+                    <h1 className="text-xl font-bold text-gray-900 mb-0">Support Chat</h1>
+                ) : (
+                    <div className="flex items-center gap-2">
                         {isAdmin && (
                             <button
                                 onClick={() => setIsGroupModalOpen(true)}
-                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded-xl transition-all duration-300 shrink-0 border border-gray-100 shadow-sm group"
+                                title="Create Group"
                             >
-                                <Users className="h-5 w-5 text-gray-600" />
+                                <Users className="h-5 w-5 text-gray-600 group-hover:text-[#3882a5] transition-colors" />
                             </button>
                         )}
-                    </div>
-                </div>
-
-                {/* Search Bar (Only for Admin) */}
-                {isAdmin && (
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <Input
-                            placeholder="Search employees..."
-                            className="pl-9 h-10 bg-gray-50 border-gray-200 focus-visible:ring-[#3882a5] rounded-xl"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+                        <div className="relative flex-1 group">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-[#3882a5] transition-colors" />
+                            <Input
+                                placeholder="Search employees..."
+                                className="pl-9 h-10 bg-gray-50 border-gray-200 focus-visible:ring-[#3882a5] focus:bg-white rounded-xl transition-all duration-300"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
                     </div>
                 )}
             </div>

@@ -115,32 +115,32 @@ export function ChatWindow({
     return (
         <div className={cn("flex flex-col h-full bg-[#f8fafc] relative", className)}>
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-white border-b shadow-sm z-20 shrink-0">
-                <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-white border-b shadow-sm z-20 shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3">
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="md:hidden -ml-2 hover:bg-gray-100 rounded-full"
+                        className="md:hidden -ml-1 h-8 w-8 hover:bg-gray-100 rounded-full"
                         onClick={onBack}
                     >
                         <ArrowLeft className="h-5 w-5 text-gray-600" />
                     </Button>
                     <div className="relative">
-                        <Avatar className="h-10 w-10 border-2 border-white shadow-sm ring-1 ring-gray-100">
+                        <Avatar className="h-9 w-9 sm:h-10 sm:w-10 border-2 border-white shadow-sm ring-1 ring-gray-100">
                             <AvatarImage src={activeUser.avatar} />
-                            <AvatarFallback className="bg-gradient-to-br from-[#074463] to-[#0a5a82] text-white font-bold flex items-center justify-center leading-none">
+                            <AvatarFallback className="bg-gradient-to-br from-[#074463] to-[#0a5a82] text-white text-xs sm:text-sm font-bold flex items-center justify-center leading-none">
                                 {getInitials(activeUser.name)}
                             </AvatarFallback>
                         </Avatar>
                         {activeUser.isOnline && (
-                            <span className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"></span>
+                            <span className="absolute bottom-0 right-0 h-2.5 w-2.5 sm:h-3 sm:w-3 bg-green-500 border-2 border-white rounded-full"></span>
                         )}
                     </div>
                     <div className="flex flex-col">
-                        <h2 className="text-[15px] font-bold text-gray-900 leading-tight">
+                        <h2 className="text-sm sm:text-[15px] font-bold text-gray-900 leading-tight truncate max-w-[150px] sm:max-w-none">
                             {formatName(activeUser.name)}
                         </h2>
-                        <span className="text-[11px] text-gray-500 font-medium">
+                        <span className="text-[10px] sm:text-[11px] text-gray-500 font-medium">
                             {activeUser.role === 'group' || (activeUser as any).isGroup
                                 ? activeUser.email // Shows participant count
                                 : activeUser.isOnline ? "Online" : "Offline"
@@ -149,9 +149,9 @@ export function ChatWindow({
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
                     {(activeUser?.role === 'group' || (activeUser as any)?.isGroup) && (
-                        <Button onClick={onSettings} variant="ghost" size="icon" className="h-9 w-9 text-gray-500 hover:text-[#074463] hover:bg-blue-50/50 rounded-full transition-all">
+                        <Button onClick={onSettings} variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-[#074463] hover:bg-blue-50/50 rounded-full">
                             <Info className="h-4 w-4" />
                         </Button>
                     )}
@@ -162,7 +162,7 @@ export function ChatWindow({
             <div
                 ref={scrollRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto px-4 py-6 space-y-2 scroll-smooth scrollbar-thin scrollbar-thumb-gray-200 overscroll-contain"
+                className="flex-1 overflow-y-auto px-3 py-4 sm:px-4 sm:py-6 space-y-1 scroll-smooth scrollbar-none overscroll-contain"
             >
                 {/* Loader for older messages */}
                 {isFetching && (
@@ -195,15 +195,15 @@ export function ChatWindow({
 
                         return (
                             <div key={msg.id} className={cn(
-                                "flex w-full gap-2 items-start",
+                                "flex w-full gap-2 items-end",
                                 isOwn ? "flex-row-reverse" : "flex-row",
-                                isFirstInSequence ? "mt-4" : "mt-1"
+                                isFirstInSequence ? "mt-4" : "mt-0.5"
                             )}>
-                                {/* Avatar */}
-                                <div className="w-8 shrink-0 flex items-start">
-                                    {!isOwn && isFirstInSequence ? (
-                                        <div className="pt-1">
-                                            <Avatar className="h-8 w-8 border border-white shadow-sm">
+                                {/* Avatar - Only show for received messages, last in sequence */}
+                                <div className="w-8 shrink-0 flex items-end">
+                                    {!isOwn && isLastInSequence ? (
+                                        <div className="pb-1">
+                                            <Avatar className="h-7 w-7 border border-white shadow-sm">
                                                 <AvatarImage src={msg.senderAvatar} />
                                                 <AvatarFallback className="bg-gray-100 text-[#074463] text-[10px] font-bold flex items-center justify-center leading-none">
                                                     {getInitials(msg.senderName || "U")}
@@ -216,33 +216,36 @@ export function ChatWindow({
                                 </div>
 
                                 <div className={cn(
-                                    "flex flex-col max-w-[85%] sm:max-w-[70%]",
-                                    isOwn ? "items-end text-right" : "items-start text-left"
+                                    "flex flex-col",
+                                    isOwn ? "items-end max-w-[85%] sm:max-w-[75%]" : "items-start max-w-[85%] sm:max-w-[75%]"
                                 )}>
                                     <div className={cn(
-                                        "px-4 py-2.5 shadow-sm text-[14px] break-words whitespace-pre-wrap relative transition-all duration-200",
+                                        "px-3.5 py-2 shadow-sm text-sm sm:text-[15px] break-words whitespace-pre-wrap relative transition-all duration-200",
                                         isOwn
-                                            ? "bg-[#074463] text-white rounded-2xl rounded-tr-sm bg-gradient-to-br from-[#074463] to-[#0a5a82]"
-                                            : "bg-white text-gray-800 border border-gray-100/50 rounded-2xl rounded-tl-sm hover:shadow-md"
+                                            ? "bg-[#074463] text-white rounded-[18px] bg-gradient-to-br from-[#074463] to-[#0a5a82]"
+                                            : "bg-white text-gray-800 border border-gray-100 rounded-[18px]",
+                                        isOwn
+                                            ? (isLastInSequence ? "rounded-br-sm" : "")
+                                            : (isLastInSequence ? "rounded-bl-sm" : "")
                                     )}>
                                         {!isOwn && (activeUser?.role === 'group' || (activeUser as any)?.isGroup) && isFirstInSequence && (
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="text-[12px] font-bold text-[#128c7e] tracking-tight">
-                                                    ~ {formatName(msg.senderName || "Unknown")}
+                                                     {formatName(msg.senderName || "Unknown")}
                                                 </span>
                                             </div>
                                         )}
                                         {msg.text}
 
                                         <div className={cn(
-                                            "text-[10px] mt-1 flex items-center justify-end gap-1 select-none opacity-80",
-                                            isOwn ? "text-blue-100" : "text-gray-400"
+                                            "text-[10px] mt-1 flex items-center justify-end gap-1 select-none opacity-70",
+                                            isOwn ? "text-blue-100/90" : "text-gray-400"
                                         )}>
                                             <span>{formatTime(msg.createdAt)}</span>
                                             {isOwn && (
                                                 msg.read
-                                                    ? <CheckCheck className="h-3 w-3 text-blue-500" strokeWidth={2.5} />
-                                                    : <Check className="h-3 w-3" strokeWidth={2.5} />
+                                                    ? <CheckCheck className="h-3 w-3 text-blue-400" strokeWidth={3} />
+                                                    : <Check className="h-3 w-3" strokeWidth={3} />
                                             )}
                                         </div>
                                     </div>
