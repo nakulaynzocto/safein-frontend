@@ -255,16 +255,21 @@ export default function MessagesPage() {
 
 
     useEffect(() => {
-        // Prevent layout-level scrolling for the messages page to achieve an app-like feel
-        const mainContent = document.querySelector('main');
-        if (mainContent) {
-            const originalStyle = mainContent.style.overflowY;
-            mainContent.style.overflowY = 'hidden';
+        // Find the scrollable container in ProtectedLayout
+        const scrollableContainer = document.querySelector('.overflow-y-auto');
+        if (scrollableContainer instanceof HTMLElement) {
+            const originalOverflow = scrollableContainer.style.overflowY;
+            const originalHeight = scrollableContainer.style.height;
+            
+            scrollableContainer.style.overflowY = 'hidden';
+            scrollableContainer.style.height = '100%'; 
+            
             return () => {
-                mainContent.style.overflowY = originalStyle;
+                scrollableContainer.style.overflowY = originalOverflow;
+                scrollableContainer.style.height = originalHeight;
             };
         }
-    }, []);
+    }, [activeChat]); // Re-run when chat changes to ensure state
 
     if (isAuthLoading) {
         return (
@@ -285,7 +290,7 @@ export default function MessagesPage() {
     }
 
     return (
-        <div className="flex-1 min-h-0 h-[calc(100dvh-160px)] sm:h-[calc(100dvh-180px)] md:h-[calc(100dvh-200px)] w-full relative flex flex-col overflow-hidden">
+        <div className="flex-1 h-full max-h-full w-full relative flex flex-col overflow-hidden">
             <div className="flex-1 bg-white md:rounded-3xl shadow-xl md:shadow-lg border-x md:border border-gray-100 overflow-hidden flex relative">
                 {/* Sidebar */}
                 <div

@@ -51,7 +51,14 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     }
 
     return (
-        <div className="flex h-[100dvh] flex-col overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
+        <div
+            className="fixed inset-0 flex flex-col overflow-hidden bg-background"
+            style={{
+                backgroundColor: "var(--background)",
+                height: "100dvh",
+                width: "100vw"
+            }}
+        >
             {shouldShowNavbar && <Navbar variant="dashboard" />}
             {/* Expiry warning banner - Only show on private pages (not subscription page) */}
             <Banner
@@ -87,7 +94,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                 {/* Only show sidebar if user has active subscription AND token */}
                 {isClient && !isLoading && shouldShowSidebar && <Sidebar />}
                 <main
-                    className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto transition-opacity duration-200"
+                    className="flex-1 flex flex-col overflow-x-hidden transition-opacity duration-200" // Removed overflow-y-auto from main
                     style={{
                         backgroundColor: "var(--background)",
                         WebkitOverflowScrolling: "touch",
@@ -96,7 +103,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                     }}
                 >
                     {/* Extra bottom padding on mobile so content isn't hidden behind the bottom nav */}
-                    <div className="flex-1 container mx-auto max-w-full px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 lg:px-6 lg:py-6 pb-20 md:pb-6 lg:pb-8">
+                    <div className="flex-1 container mx-auto max-w-full px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 lg:px-6 lg:py-6 pb-20 md:pb-6 lg:pb-8 overflow-y-auto"> {/* Added overflow-y-auto here */}
                         {isLoading ? (
                             <PageSkeleton />
                         ) : shouldShowContent ? (
