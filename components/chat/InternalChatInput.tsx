@@ -22,8 +22,12 @@ export function ChatInput({ onSendMessage, isLoading, isAdmin }: ChatInputProps)
     }, [message]);
 
     const handleFocus = () => {
-        // Dynamic viewport logic in ProtectedLayout handles this more reliably
-        // without pushing the navbar off-screen.
+        // Scroll input into view on mobile when keyboard appears
+        if (textareaRef.current && window.innerWidth < 768) {
+            setTimeout(() => {
+                textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 300); // Delay for keyboard animation
+        }
     };
 
     const handleSend = () => {
