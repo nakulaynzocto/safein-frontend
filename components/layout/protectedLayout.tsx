@@ -1,7 +1,7 @@
 "use client";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 
-import { type ReactNode } from "react";
+import { type ReactNode, useState, useEffect } from "react";
 import Link from "next/link";
 import { Navbar } from "./navbar";
 import { Sidebar } from "./sidebar";
@@ -44,6 +44,31 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     // 🔔 Listen for Chat Notifications globally
     useChatNotifications();
 
+    // State for visual viewport height (to handle mobile keyboard)
+    const [viewportHeight, setViewportHeight] = useState<string>("100dvh");
+
+    useEffect(() => {
+        if (!window.visualViewport) return;
+
+        const handleResize = () => {
+            // Use visualViewport height to precisely fit the screen when keyboard is open
+            if (window.visualViewport) {
+                setViewportHeight(`${window.visualViewport.height}px`);
+            }
+        };
+
+        window.visualViewport.addEventListener('resize', handleResize);
+        window.visualViewport.addEventListener('scroll', handleResize);
+        
+        // Initial set
+        handleResize();
+
+        return () => {
+            window.visualViewport?.removeEventListener('resize', handleResize);
+            window.visualViewport?.removeEventListener('scroll', handleResize);
+        };
+    }, []);
+
     // Immediate hard redirect for unauthenticated users in ProtectedLayout
     // This is a fail-safe for the global useAuthSubscription redirect
     if (typeof window !== "undefined" && isInitialized && !isLoading && !isAuthenticated && !token) {
@@ -55,7 +80,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
             className="fixed inset-0 flex flex-col overflow-hidden bg-background"
             style={{
                 backgroundColor: "var(--background)",
-                height: "100dvh",
+                height: viewportHeight,
                 width: "100vw"
             }}
         >
