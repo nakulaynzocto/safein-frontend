@@ -285,7 +285,7 @@ export default function MessagesPage() {
     }
 
     return (
-        <div className="flex-1 min-h-0 h-[calc(100dvh-160px)] sm:h-[calc(100dvh-180px)] md:h-[calc(100dvh-200px)] w-full relative flex flex-col overflow-hidden">
+        <div className="flex-1 min-h-0 h-[calc(100dvh-180px)] sm:h-[calc(100dvh-204px)] md:h-[calc(100dvh-230px)] w-full relative flex flex-col overflow-hidden">
             <div className="flex-1 bg-white md:rounded-3xl shadow-xl md:shadow-lg border-x md:border border-gray-100 overflow-hidden flex relative">
                 {/* Sidebar */}
                 <div
