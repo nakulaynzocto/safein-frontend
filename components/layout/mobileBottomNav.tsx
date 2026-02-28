@@ -67,6 +67,15 @@ export function MobileBottomNav() {
 
     if (!userRole || navItems.length === 0) return null;
 
+    // Hide bottom nav on specific pages for premium app-like feel
+    // Specifically hide when in a chat on mobile
+    if (pathname === routes.privateroute.MESSAGES) {
+        // We could check if a chat is active via redux, but for now let's keep it simple
+        // If we want to show it on the sidebar but hide it in a chat, we'd need more state.
+        // For a "premium" feel, usually the chat takes the whole bottom area.
+        return null;
+    }
+
     return (
         <nav
             className={cn(

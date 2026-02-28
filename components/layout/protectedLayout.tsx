@@ -12,6 +12,7 @@ import { routes } from "@/utils/routes";
 import { clearAuthData } from "@/utils/helpers";
 import { Banner } from "@/components/common/banner";
 import { useChatNotifications } from "@/hooks/useChatNotifications";
+import { cn } from "@/lib/utils";
 
 interface ProtectedLayoutProps {
     children: ReactNode;
@@ -32,6 +33,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
         hasActiveSubscription,
         shouldShowPrivateNavbar,
         expiryWarning,
+        pathname,
     } = useAuthSubscription();
 
     // Show navbar for all authenticated users
@@ -87,21 +89,25 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                 {/* Only show sidebar if user has active subscription AND token */}
                 {isClient && !isLoading && shouldShowSidebar && <Sidebar />}
                 <main
-                    className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto transition-opacity duration-200"
+                    className={cn(
+                        "flex-1 flex flex-col transition-opacity duration-200",
+                        pathname === routes.privateroute.MESSAGES ? "overflow-hidden" : "overflow-x-hidden overflow-y-auto"
+                    )}
                     style={{
                         backgroundColor: "var(--background)",
                         WebkitOverflowScrolling: "touch",
-                        scrollBehavior: "smooth",
-                        overscrollBehaviorY: "contain"
                     }}
                 >
                     {/* Extra bottom padding on mobile so content isn't hidden behind the bottom nav */}
-                    <div className="flex-1 container mx-auto max-w-full px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 lg:px-6 lg:py-6 pb-20 md:pb-6 lg:pb-8">
+                    <div className={cn(
+                        "flex-1 container mx-auto max-w-full",
+                        pathname === routes.privateroute.MESSAGES ? "p-0 h-full overflow-hidden" : "px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 lg:px-6 lg:py-6 pb-20 md:pb-6 lg:pb-8"
+                    )}>
                         {isLoading ? (
                             <PageSkeleton />
                         ) : shouldShowContent ? (
                             // Show content if conditions are met
-                            <div className="animate-fade-in" style={{ backgroundColor: "var(--background)" }}>
+                            <div className={cn("animate-fade-in", pathname === routes.privateroute.MESSAGES ? "h-full" : "")} style={{ backgroundColor: "var(--background)" }}>
                                 {children}
                             </div>
                         ) : (
