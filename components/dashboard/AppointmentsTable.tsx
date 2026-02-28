@@ -6,6 +6,7 @@ import { DataTable } from "@/components/common/dataTable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDateTime, formatName, formatTime } from "@/utils/helpers";
 import { Calendar, Phone, Mail, Building, Maximize2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AppointmentsTableProps {
     title: string;
@@ -168,8 +169,11 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                 <p className="text-muted-foreground text-xs sm:text-sm">{description}</p>
             </div>
             <div className="overflow-hidden rounded-lg border border-border bg-background shadow-xs sm:rounded-xl">
-                <div className="overflow-x-auto -mx-1 sm:mx-0">
-                    <div className="min-w-[600px] sm:min-w-0">
+                <div className="overflow-x-auto sm:mx-0">
+                    <div className={cn(
+                        "sm:min-w-0 w-full",
+                        data && data.length > 0 ? "min-w-[600px]" : "min-w-0"
+                    )}>
                         <DataTable
                             data={data}
                             columns={columns}

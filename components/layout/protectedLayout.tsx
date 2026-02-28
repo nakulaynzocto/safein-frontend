@@ -110,8 +110,8 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                 {isClient && !isLoading && shouldShowSidebar && <Sidebar />}
                 <main
                     className={cn(
-                        "flex-1 flex flex-col transition-opacity duration-200 min-h-0",
-                        pathname === routes.privateroute.MESSAGES ? "overflow-hidden max-md:fixed max-md:inset-x-0 max-md:bottom-0 md:relative" : "overflow-x-hidden overflow-y-auto"
+                        "flex-1 flex flex-col transition-opacity duration-200 min-h-0 relative",
+                        pathname === routes.privateroute.MESSAGES ? "overflow-hidden" : "overflow-x-hidden overflow-y-auto"
                     )}
                     style={{
                         backgroundColor: "var(--background)",
@@ -119,7 +119,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                     }}
                 >
                     <div className={cn(
-                        "flex-1 w-full max-w-full",
+                        "flex-1 w-full max-w-full min-h-0",
                         pathname === routes.privateroute.MESSAGES ? "p-0 md:p-4 h-full overflow-hidden flex flex-col" : "container mx-auto px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 lg:px-6 lg:py-6 pb-20 md:pb-6 lg:pb-8"
                     )}>
                         {isLoading ? (

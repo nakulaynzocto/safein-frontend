@@ -196,7 +196,7 @@ export function UnifiedDashboard() {
     }
 
     return (
-        <div className={`space-y-4 sm:space-y-6 ${isEmployee ? 'px-1 sm:px-0' : ''}`}>
+        <div className="space-y-4 sm:space-y-6">
             <DashboardCharts
                 appointmentsData={appointments}
                 employeesData={[]} // Charts use appointments data mainly, employee/visitor lists not needed
