@@ -65,12 +65,6 @@ const baseNavigation: Array<{
             roles: ["admin", "employee"], // Both admin and employee can see
         },
         {
-            name: "Visit Approvals",
-            href: routes.privateroute.APPOINTMENT_REQUESTS,
-            icon: ClipboardList,
-            roles: ["employee"], // Only employee
-        },
-        {
             name: "Visitor Invites",
             href: routes.privateroute.APPOINTMENT_LINKS,
             icon: LinkIcon,
@@ -81,6 +75,12 @@ const baseNavigation: Array<{
             href: routes.privateroute.SPOT_PASS,
             icon: ClipboardList,
             roles: ["admin"], // Only admin
+        },
+        {
+            name: "Visit Approvals",
+            href: routes.privateroute.APPOINTMENT_REQUESTS,
+            icon: ClipboardList,
+            roles: ["employee"], // Only employee
         },
     ];
 
