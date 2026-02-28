@@ -152,8 +152,8 @@ export default function ContactPage() {
             <PublicLayout>
                 <div className="min-h-screen bg-white">
                     {/* Hero Section */}
-                    <section className="bg-hero-gradient px-4 py-12 sm:px-6 sm:py-16 md:py-20">
-                        <div className="container mx-auto text-center">
+                    <section className="bg-hero-gradient relative pt-20 pb-8 sm:px-6 sm:pt-24 sm:pb-10 md:pt-32 md:pb-12">
+                        <div className="container mx-auto px-4 sm:px-6 text-center">
                             <h1 className="mb-4 px-2 text-3xl leading-tight font-bold text-white sm:mb-6 sm:px-0 sm:text-4xl md:text-5xl lg:text-6xl">
                                 Get in Touch
                             </h1>
@@ -169,7 +169,7 @@ export default function ContactPage() {
                     <section className="px-4 py-20">
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
-                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">
+                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">
                                     Contact Information
                                 </h2>
                                 <p className="text-accent text-lg">Multiple ways to reach our team</p>
@@ -179,26 +179,23 @@ export default function ContactPage() {
                                 {contactInfo.map((info, index) => (
                                     <Card
                                         key={index}
-                                        className="text-center transition-shadow duration-300 hover:shadow-lg"
+                                        className="text-center transition-all duration-300 hover:shadow-lg border-gray-100 p-4"
                                     >
                                         <CardHeader>
-                                            <div className="bg-brand-tint mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg">
-                                                <info.icon className="text-brand-strong h-6 w-6" />
-                                            </div>
-                                            <CardTitle className="text-brand text-lg">{info.title}</CardTitle>
-                                            <CardDescription className="text-accent">
+                                            <CardTitle className="text-brand text-xl mb-1">{info.title}</CardTitle>
+                                            <CardDescription className="text-accent text-base">
                                                 {info.description}
                                             </CardDescription>
                                         </CardHeader>
                                         <CardContent>
-                                            <p className="text-accent mb-4 text-sm whitespace-pre-line">
+                                            <p className="text-brand-strong mb-6 text-sm font-semibold whitespace-pre-line">
                                                 {info.details}
                                             </p>
                                             {info.action && (
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    className="border-brand text-brand-strong hover:!text-white"
+                                                    className="border-brand text-brand-strong hover:!text-white rounded-full px-6"
                                                     asChild
                                                 >
                                                     <Link href={info.action}>Contact Us</Link>
@@ -212,11 +209,11 @@ export default function ContactPage() {
                     </section>
 
                     {/* Contact Form */}
-                    <section className="bg-white px-4 py-20">
+                    <section className="bg-slate-50/30 px-4 py-20">
                         <div className="container mx-auto">
                             <div className="mx-auto max-w-2xl">
                                 <div className="mb-12 text-center">
-                                    <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">
+                                    <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">
                                         Send us a Message
                                     </h2>
                                     <p className="text-accent text-lg">
@@ -224,8 +221,8 @@ export default function ContactPage() {
                                     </p>
                                 </div>
 
-                                <Card className="shadow-lg">
-                                    <CardContent className="p-8">
+                                <Card className="shadow-xl border-none rounded-3xl overflow-hidden">
+                                    <CardContent className="p-8 sm:p-12">
                                         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                                             {/* Name */}
                                             <InputField
@@ -268,23 +265,22 @@ export default function ContactPage() {
                                                     id="message"
                                                     placeholder="Tell us more about your inquiry..."
                                                     className={cn(
-                                                        "focus:ring-brand mt-2 min-h-[120px]",
+                                                        "focus:ring-brand mt-2 min-h-[150px] rounded-xl border-gray-200",
                                                         errors.message && "border-destructive focus:ring-destructive",
                                                     )}
                                                     {...register("message")}
                                                 />
                                                 {errors.message?.message && (
-                                                    <p className="text-destructive text-xs">{errors.message.message}</p>
+                                                    <p className="text-destructive text-xs mt-1">{errors.message.message}</p>
                                                 )}
                                             </div>
 
                                             <Button
                                                 type="submit"
-                                                className="bg-brand w-full text-white"
+                                                className="bg-brand w-full text-white h-12 rounded-xl text-lg font-semibold transition-all hover:scale-[1.02]"
                                                 disabled={isSubmitting}
                                             >
                                                 {isSubmitting ? "Sending..." : "Send Message"}
-                                                <Send className="ml-2 h-4 w-4" />
                                             </Button>
                                         </form>
                                     </CardContent>
@@ -297,7 +293,7 @@ export default function ContactPage() {
                     <section className="px-4 py-20">
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
-                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">
+                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">
                                     Contact by Department
                                 </h2>
                                 <p className="text-accent text-lg">Reach out to the right team for faster assistance</p>
@@ -307,35 +303,31 @@ export default function ContactPage() {
                                 {departments.map((dept, index) => (
                                     <Card
                                         key={index}
-                                        className="text-center transition-shadow duration-300 hover:shadow-lg"
+                                        className="text-center transition-all duration-300 hover:shadow-lg border-gray-100 overflow-hidden rounded-2xl"
                                     >
-                                        <CardHeader>
-                                            <div className="bg-brand-tint mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg">
-                                                <dept.icon className="text-brand-strong h-6 w-6" />
-                                            </div>
-                                            <CardTitle className="text-brand text-xl">{dept.title}</CardTitle>
+                                        <CardHeader className="bg-slate-50/50 pb-8">
+                                            <CardTitle className="text-brand text-xl mb-1">{dept.title}</CardTitle>
                                             <CardDescription className="text-accent text-base">
                                                 {dept.description}
                                             </CardDescription>
                                         </CardHeader>
-                                        <CardContent>
-                                            <div className="space-y-4">
-                                                <div>
-                                                    <p className="text-brand text-sm font-medium">Email:</p>
-                                                    <p className="text-brand-strong text-sm">{dept.email}</p>
+                                        <CardContent className="pt-8">
+                                            <div className="space-y-6">
+                                                <div className="bg-brand-tint/30 py-4 rounded-xl">
+                                                    <p className="text-brand text-xs font-bold uppercase tracking-wider mb-1">Email</p>
+                                                    <p className="text-brand-strong text-lg font-semibold">{dept.email}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-brand text-sm font-medium">Response Time:</p>
+                                                    <p className="text-brand text-xs font-bold uppercase tracking-wider mb-1">Response Time</p>
                                                     <p className="text-accent text-sm">{dept.response}</p>
                                                 </div>
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    className="border-brand text-brand-strong hover:!text-white"
+                                                    className="border-brand text-brand-strong hover:!text-white rounded-full w-full h-10"
                                                     asChild
                                                 >
                                                     <Link href={`mailto:${dept.email}`}>
-                                                        <MessageSquare className="mr-2 h-4 w-4" />
                                                         Send Email
                                                     </Link>
                                                 </Button>

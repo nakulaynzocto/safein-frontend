@@ -64,8 +64,8 @@ export default function HelpPage() {
             <PublicLayout>
                 <div className="min-h-screen bg-white">
                     {/* Hero Section */}
-                    <section className="bg-hero-gradient px-4 py-12 sm:px-6 sm:py-16 md:py-20">
-                        <div className="container mx-auto text-center">
+                    <section className="bg-hero-gradient relative pt-20 pb-8 sm:px-6 sm:pt-24 sm:pb-10 md:pt-32 md:pb-12">
+                        <div className="container mx-auto px-4 sm:px-6 text-center">
                             <h1 className="mb-4 px-2 text-3xl leading-tight font-bold text-white sm:mb-6 sm:px-0 sm:text-4xl md:text-5xl lg:text-6xl">
                                 How can we help you?
                             </h1>
@@ -84,7 +84,7 @@ export default function HelpPage() {
                     <section className="px-4 py-20">
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
-                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">Get Support</h2>
+                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">Get Support</h2>
                                 <p className="text-accent text-lg">Choose the support option that works best for you</p>
                             </div>
 
@@ -92,14 +92,11 @@ export default function HelpPage() {
                                 {supportOptions.map((option, index) => (
                                     <Card
                                         key={index}
-                                        className="text-center transition-shadow duration-300 hover:shadow-lg"
+                                        className="text-center transition-all duration-300 hover:shadow-lg border-gray-100 p-6"
                                     >
                                         <CardHeader>
-                                            <div className="bg-brand-tint mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg">
-                                                <option.icon className="text-brand-strong h-6 w-6" />
-                                            </div>
-                                            <CardTitle className="text-brand text-lg">{option.title}</CardTitle>
-                                            <CardDescription className="text-accent">
+                                            <CardTitle className="text-brand text-xl mb-2">{option.title}</CardTitle>
+                                            <CardDescription className="text-accent text-base leading-relaxed">
                                                 {option.description}
                                             </CardDescription>
                                         </CardHeader>
@@ -107,7 +104,7 @@ export default function HelpPage() {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="border-brand text-brand-strong hover:!text-white"
+                                                className="border-brand text-brand-strong hover:!text-white rounded-full px-8"
                                             >
                                                 {option.action}
                                             </Button>
@@ -119,10 +116,10 @@ export default function HelpPage() {
                     </section>
 
                     {/* Help Categories */}
-                    <section className="bg-white px-4 py-20">
+                    <section className="bg-slate-50/50 px-4 py-20">
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
-                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">Browse by Category</h2>
+                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">Browse by Category</h2>
                                 <p className="text-accent text-lg">Find help organized by topic</p>
                             </div>
 
@@ -130,19 +127,16 @@ export default function HelpPage() {
                                 {helpCategories.map((category, index) => (
                                     <Card
                                         key={index}
-                                        className="flex h-full flex-col transition-shadow duration-300 hover:shadow-lg"
+                                        className="flex h-full flex-col transition-all duration-300 hover:shadow-lg border-gray-100 overflow-hidden"
                                     >
-                                        <CardHeader>
-                                            <div className="bg-brand-tint mb-4 flex h-12 w-12 items-center justify-center rounded-lg">
-                                                <category.icon className="text-brand-strong h-6 w-6" />
-                                            </div>
-                                            <CardTitle className="text-brand text-lg">{category.title}</CardTitle>
-                                            <CardDescription className="text-accent">
+                                        <CardHeader className="bg-white pb-6">
+                                            <CardTitle className="text-brand text-xl">{category.title}</CardTitle>
+                                            <CardDescription className="text-accent text-base">
                                                 {category.description}
                                             </CardDescription>
                                         </CardHeader>
-                                        <CardContent className="flex flex-1 flex-col">
-                                            <ul className="mb-6 flex-1 space-y-3">
+                                        <CardContent className="flex flex-1 flex-col pt-6 bg-white">
+                                            <ul className="mb-8 flex-1 space-y-4">
                                                 {category.articles.map((slug, articleIndex) => {
                                                     const article = getArticleBySlug(slug);
                                                     if (!article) return null;
@@ -150,9 +144,9 @@ export default function HelpPage() {
                                                         <li key={articleIndex}>
                                                             <Link
                                                                 href={`/help/${slug}`}
-                                                                className="text-accent hover:text-brand-strong flex items-start gap-2 text-sm hover:underline"
+                                                                className="text-accent hover:text-brand-strong flex items-start gap-3 text-sm hover:underline group"
                                                             >
-                                                                <span className="bg-brand-light mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full" />
+                                                                <span className="bg-brand mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full transition-transform group-hover:scale-150" />
                                                                 <span>{article.title}</span>
                                                             </Link>
                                                         </li>
@@ -162,7 +156,7 @@ export default function HelpPage() {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="border-brand text-brand-strong mt-auto w-full hover:!text-white"
+                                                className="border-brand text-brand-strong mt-auto w-full rounded-xl hover:!text-white h-11"
                                                 asChild
                                             >
                                                 <Link href={`/help/${category.articles[0]}`}>View All Articles</Link>
@@ -178,7 +172,7 @@ export default function HelpPage() {
                     <section className="px-4 py-20">
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
-                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">Popular Articles</h2>
+                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">Popular Articles</h2>
                                 <p className="text-accent text-lg">Most frequently viewed help articles</p>
                             </div>
 
@@ -186,35 +180,33 @@ export default function HelpPage() {
                                 {popularArticles.map((article, index) => (
                                     <Card
                                         key={index}
-                                        className="group flex h-full cursor-pointer flex-col transition-all duration-300 hover:shadow-lg"
+                                        className="group flex h-full cursor-pointer flex-col transition-all duration-300 hover:shadow-xl border-gray-100"
                                     >
-                                        <CardContent className="flex flex-1 flex-col p-6">
-                                            <div className="mb-3 flex items-start justify-between">
+                                        <CardContent className="flex flex-1 flex-col p-8">
+                                            <div className="mb-4 flex items-start justify-between">
                                                 <Badge
                                                     variant="secondary"
-                                                    className="bg-brand-tint text-brand-strong hover:bg-brand-light/20 text-xs"
+                                                    className="bg-brand-tint/50 text-brand-strong border-none text-[10px] uppercase tracking-wider font-bold"
                                                 >
                                                     {article.category}
                                                 </Badge>
-                                                <span className="flex items-center text-xs text-gray-500">
-                                                    <Clock className="mr-1 h-3 w-3" />
+                                                <span className="flex items-center text-xs text-slate-400 font-medium">
                                                     {article.readTime}
                                                 </span>
                                             </div>
                                             <Link href={`/help/${article.slug}`} className="block flex-1">
-                                                <h3 className="text-brand group-hover:text-brand-strong mb-4 text-lg font-semibold transition-colors">
+                                                <h3 className="text-brand group-hover:text-brand-strong mb-6 text-lg font-bold transition-colors leading-snug">
                                                     {article.title}
                                                 </h3>
                                             </Link>
                                             <Button
                                                 variant="link"
                                                 size="sm"
-                                                className="text-brand-strong hover:text-[#074463] hover:no-underline mt-auto h-auto justify-start p-0 font-medium hover:bg-transparent"
+                                                className="text-brand-strong hover:text-brand-strong/80 hover:no-underline mt-auto h-auto justify-start p-0 font-bold text-sm tracking-tight"
                                                 asChild
                                             >
                                                 <Link href={`/help/${article.slug}`}>
-                                                    Read Article
-                                                    <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                                                    Read Full Article
                                                 </Link>
                                             </Button>
                                         </CardContent>
@@ -225,29 +217,28 @@ export default function HelpPage() {
                     </section>
 
                     {/* CTA Section */}
-                    <section className="bg-[#074463] px-4 pt-12 pb-8 sm:px-6 sm:pt-16 md:pt-20">
+                    <section className="bg-[#074463] px-4 pt-16 pb-12 sm:px-6 sm:pt-20 md:pt-24 md:pb-16">
                         <div className="container mx-auto text-center">
-                            <h2 className="mb-4 px-2 text-2xl leading-tight font-bold text-white sm:mb-6 sm:px-0 sm:text-3xl md:text-4xl">
+                            <h2 className="mb-4 px-2 text-3xl leading-tight font-bold text-white sm:mb-6 sm:px-0 sm:text-4xl">
                                 Ready to Get Started?
                             </h2>
-                            <p className="mx-auto mb-6 max-w-2xl px-2 text-base leading-relaxed text-gray-300 sm:mb-8 sm:px-0 sm:text-lg md:text-xl">
+                            <p className="mx-auto mb-8 max-w-2xl px-2 text-lg leading-relaxed text-slate-300">
                                 Start your free trial today and see how easy SafeIn management can be.
                             </p>
-                            <div className="flex flex-col justify-center gap-3 px-4 sm:flex-row sm:gap-4 sm:px-0">
+                            <div className="flex flex-col justify-center gap-4 px-4 sm:flex-row sm:px-0">
                                 <Button
                                     size="lg"
-                                    className="bg-brand w-full px-6 py-2.5 text-sm text-white sm:w-auto sm:px-8 sm:py-3 sm:text-base"
+                                    className="bg-brand w-full px-8 py-4 text-base font-bold text-white sm:w-auto h-14 rounded-2xl shadow-lg transition-transform hover:scale-105"
                                     asChild
                                 >
                                     <Link href={routes.publicroute.REGISTER}>
                                         Start 3 Day Trial
-                                        <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                                     </Link>
                                 </Button>
                                 <Button
                                     size="lg"
                                     variant="outline"
-                                    className="w-full border-white px-6 py-2.5 text-sm hover:bg-white hover:text-gray-900 sm:w-auto sm:px-8 sm:py-3 sm:text-base"
+                                    className="w-full border-white/20 bg-white/5 text-white hover:bg-white hover:text-slate-900 sm:w-auto h-14 rounded-2xl backdrop-blur-sm"
                                     asChild
                                 >
                                     <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>

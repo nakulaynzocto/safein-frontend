@@ -236,9 +236,9 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
     return (
         <nav
             className={`${shouldShowWhiteNavbar
-                ? "border-b border-gray-200/30 bg-white/90 shadow-lg backdrop-blur-md"
-                : "bg-hero-gradient backdrop-blur-0 border-transparent shadow-none"
-                } sticky top-0 z-50 transition-all duration-300`}
+                ? "border-b border-gray-200/30 bg-white/90 shadow-lg backdrop-blur-md sticky"
+                : "bg-transparent border-transparent shadow-none absolute"
+                } top-0 left-0 right-0 z-50 transition-all duration-300`}
         >
             <div className="w-full px-4 sm:px-6 lg:px-8">
                 <div className="flex h-20 items-center justify-between">

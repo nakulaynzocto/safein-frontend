@@ -527,7 +527,10 @@
 
 /* Brand utilities */
 .bg-hero-gradient {
-    background: linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95));
+    background: linear-gradient(to right, rgba(7, 68, 99, 0.75), rgba(56, 130, 165, 0.75)), url('/home/hero-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .text-brand {

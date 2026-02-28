@@ -93,8 +93,8 @@ export default function PricingPage() {
             <PublicLayout>
                 <div className="min-h-screen bg-white">
                     {/* Hero Section */}
-                    <section className="bg-hero-gradient px-4 py-12 sm:px-6 sm:py-16 md:py-20">
-                        <div className="container mx-auto text-center">
+                    <section className="bg-hero-gradient relative pt-20 pb-8 sm:px-6 sm:pt-24 sm:pb-10 md:pt-32 md:pb-12">
+                        <div className="container mx-auto px-4 sm:px-6 text-center">
                             <h1 className="mb-4 px-2 text-3xl leading-tight font-bold text-white sm:mb-6 sm:px-0 sm:text-4xl md:text-5xl lg:text-6xl">
                                 Simple, Transparent Pricing
                             </h1>

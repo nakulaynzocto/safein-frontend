@@ -233,9 +233,9 @@ export default function FeaturesPage() {
             <PublicLayout>
                 <div className="min-h-screen bg-white">
                     {/* Hero Section */}
-                    <section className="bg-hero-gradient px-4 py-12 sm:px-6 sm:py-16 md:py-20">
-                        <div className="container mx-auto text-center">
-                            <h1 className="mb-4 px-2 text-2xl leading-tight font-bold text-white sm:mb-6 sm:px-0 sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
+                    <section className="bg-hero-gradient relative pt-20 pb-8 sm:pt-24 sm:pb-10 md:pt-32 md:pb-12">
+                        <div className="container mx-auto px-4 sm:px-6 text-center">
+                            <h1 className="mb-4 px-2 text-3xl leading-tight font-bold text-white sm:mb-6 sm:px-0 sm:text-4xl md:text-5xl lg:text-6xl">
                                 Powerful Features for Modern Visitor Management
                             </h1>
                             <p className="mx-auto mb-6 max-w-3xl px-2 text-base leading-relaxed text-gray-300 sm:mb-8 sm:px-0 sm:text-lg md:text-xl">
@@ -267,7 +267,7 @@ export default function FeaturesPage() {
                     <section className="px-4 py-20">
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
-                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">
+                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">
                                     Complete Feature Set
                                 </h2>
                                 <p className="text-accent text-lg">
@@ -279,25 +279,22 @@ export default function FeaturesPage() {
                                 {features.map((feature, index) => (
                                     <Card
                                         key={index}
-                                        className="relative transition-shadow duration-300 hover:shadow-lg"
+                                        className="relative transition-shadow duration-300 hover:shadow-lg border-gray-100"
                                     >
                                         <CardHeader>
-                                            <div className="bg-brand-tint mb-4 flex h-12 w-12 items-center justify-center rounded-lg">
-                                                <feature.icon className="text-brand-strong h-6 w-6" />
-                                            </div>
-                                            <CardTitle className="text-brand text-xl">{feature.title}</CardTitle>
-                                            <CardDescription className="text-accent text-base">
+                                            <CardTitle className="text-brand text-2xl mb-2">{feature.title}</CardTitle>
+                                            <CardDescription className="text-accent text-base leading-relaxed">
                                                 {feature.description}
                                             </CardDescription>
                                         </CardHeader>
                                         <CardContent>
-                                            <ul className="space-y-2">
+                                            <ul className="space-y-3">
                                                 {feature.benefits.map((benefit, benefitIndex) => (
                                                     <li
                                                         key={benefitIndex}
-                                                        className="text-accent flex items-center text-sm"
+                                                        className="text-accent flex items-start text-sm"
                                                     >
-                                                        <CheckCircle className="text-brand-strong mr-2 h-4 w-4" />
+                                                        <span className="bg-brand-strong mt-1.5 mr-3 h-1.5 w-1.5 flex-shrink-0 rounded-full" />
                                                         {benefit}
                                                     </li>
                                                 ))}
@@ -310,10 +307,10 @@ export default function FeaturesPage() {
                     </section>
 
                     {/* Additional Features */}
-                    <section className="bg-gray-50 px-4 py-20">
+                    <section className="bg-slate-50/50 px-4 py-20 font-sans">
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
-                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">
+                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">
                                     Additional Benefits
                                 </h2>
                                 <p className="text-accent text-lg">
@@ -325,14 +322,11 @@ export default function FeaturesPage() {
                                 {additionalFeatures.map((feature, index) => (
                                     <div
                                         key={index}
-                                        className="flex items-start space-x-4 rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+                                        className="flex items-start rounded-2xl bg-white p-8 shadow-sm transition-all hover:shadow-md border border-gray-100"
                                     >
-                                        <div className="bg-brand-tint flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
-                                            <feature.icon className="text-brand-strong h-5 w-5" />
-                                        </div>
                                         <div>
-                                            <h3 className="text-brand mb-2 font-semibold">{feature.title}</h3>
-                                            <p className="text-accent text-sm">{feature.description}</p>
+                                            <h3 className="text-brand mb-3 text-lg font-bold">{feature.title}</h3>
+                                            <p className="text-accent text-sm leading-relaxed">{feature.description}</p>
                                         </div>
                                     </div>
                                 ))}
