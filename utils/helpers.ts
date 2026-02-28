@@ -422,7 +422,9 @@ export function getAppointmentStatus(appointment: AppointmentForStatus): string 
     if ((appointment as any).isTimedOut) {
         return "time_out";
     }
-    return appointment.status || "pending";
+    const status = appointment.status || "pending";
+    if (status === "scheduled") return "approved";
+    return status;
 }
 
 export function getAppointmentStatsKey(

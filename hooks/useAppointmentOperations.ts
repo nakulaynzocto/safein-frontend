@@ -5,7 +5,7 @@ import {
     useDeleteAppointmentMutation,
     useCheckInAppointmentMutation,
     useCheckOutAppointmentMutation,
-    useUpdateAppointmentMutation,
+    useApproveAppointmentMutation,
     useCancelAppointmentMutation,
     useRejectAppointmentMutation,
     Appointment,
@@ -36,6 +36,7 @@ export interface UseAppointmentOperationsReturn {
     } | null;
     isLoading: boolean;
     isDeleting: boolean;
+    isCheckingIn: boolean;
     isCheckingOut: boolean;
     isApproving: boolean;
     isRejecting: boolean;
@@ -60,6 +61,7 @@ export interface UseAppointmentOperationsReturn {
     setSortBy: (field: string) => void;
     setSortOrder: (order: "asc" | "desc") => void;
     deleteAppointment: (appointmentId: string) => Promise<void>;
+    checkInAppointment: (appointmentId: string, notes?: string) => Promise<void>;
     checkOutAppointment: (appointmentId: string, notes?: string) => Promise<void>;
     approveAppointment: (appointmentId: string) => Promise<void>;
     rejectAppointment: (appointmentId: string) => Promise<void>;
@@ -127,8 +129,9 @@ export function useAppointmentOperations(
     const { data: appointmentData, isLoading, error, refetch } = useGetAppointmentsQuery(queryParams);
 
     const [deleteAppointmentMutation, { isLoading: isDeleting }] = useDeleteAppointmentMutation();
+    const [checkInAppointmentMutation, { isLoading: isCheckingIn }] = useCheckInAppointmentMutation();
     const [checkOutAppointmentMutation, { isLoading: isCheckingOut }] = useCheckOutAppointmentMutation();
-    const [updateAppointmentMutation, { isLoading: isApproving }] = useUpdateAppointmentMutation();
+    const [approveAppointmentMutation, { isLoading: isApproving }] = useApproveAppointmentMutation();
     const [rejectAppointmentMutation, { isLoading: isRejecting }] = useRejectAppointmentMutation();
     const [cancelAppointmentMutation, { isLoading: isCancelling }] = useCancelAppointmentMutation();
 
@@ -149,21 +152,32 @@ export function useAppointmentOperations(
             toast.success("Visitor checked out successfully");
             refetch();
         } catch (error) {
-            toast.error("Failed to check out visitor");
+            const errorMsg = (error as any)?.data?.message || "Failed to check out visitor";
+            toast.error(errorMsg);
             throw error;
         }
     };
 
     const approveAppointment = async (appointmentId: string): Promise<void> => {
         try {
-            await updateAppointmentMutation({
-                id: appointmentId,
-                status: "approved",
-            }).unwrap();
+            await approveAppointmentMutation(appointmentId).unwrap();
             toast.success("Appointment approved successfully");
             refetch();
         } catch (error) {
-            toast.error("Failed to approve appointment");
+            const errorMsg = (error as any)?.data?.message || "Failed to approve appointment";
+            toast.error(errorMsg);
+            throw error;
+        }
+    };
+
+    const checkInAppointment = async (appointmentId: string, notes?: string): Promise<void> => {
+        try {
+            await checkInAppointmentMutation({ appointmentId, notes }).unwrap();
+            toast.success("Visitor checked in successfully");
+            refetch();
+        } catch (error) {
+            const errorMsg = (error as any)?.data?.message || "Failed to check in visitor";
+            toast.error(errorMsg);
             throw error;
         }
     };
@@ -247,6 +261,7 @@ export function useAppointmentOperations(
         pagination: appointmentData?.pagination || null,
         isLoading,
         isDeleting,
+        isCheckingIn,
         isCheckingOut,
         isApproving,
         isRejecting,
@@ -271,6 +286,7 @@ export function useAppointmentOperations(
         setSortBy: handleSortBy,
         setSortOrder: handleSortOrder,
         deleteAppointment,
+        checkInAppointment,
         checkOutAppointment,
         approveAppointment,
         rejectAppointment,

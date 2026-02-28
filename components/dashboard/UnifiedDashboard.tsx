@@ -122,6 +122,7 @@ export function UnifiedDashboard() {
                 approvedAppointments: 0,
                 rejectedAppointments: 0,
                 completedAppointments: 0,
+                checkedInAppointments: 0,
                 timeOutAppointments: 0,
             };
         }
@@ -132,6 +133,7 @@ export function UnifiedDashboard() {
             approvedAppointments: appointmentStatsData.approved || 0,
             rejectedAppointments: appointmentStatsData.rejected || 0,
             completedAppointments: appointmentStatsData.completed || 0,
+            checkedInAppointments: appointmentStatsData.checked_in || 0,
             timeOutAppointments: appointmentStatsData.time_out || 0,
         };
     }, [appointmentStatsData]);

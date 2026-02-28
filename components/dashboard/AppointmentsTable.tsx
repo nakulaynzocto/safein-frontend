@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDateTime, formatName, formatTime } from "@/utils/helpers";
 import { Calendar, Phone, Mail, Building, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StatusBadge } from "@/components/common/statusBadge";
 
 interface AppointmentsTableProps {
     title: string;
@@ -155,6 +156,15 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                         ),
                     },
                 ]),
+            {
+                key: "status",
+                header: "Status",
+                sortable: false,
+                render: (appointment: any) => {
+                    const status = appointment.status || "pending";
+                    return <StatusBadge status={status} />;
+                },
+            },
         ],
         [showDateTime],
     );

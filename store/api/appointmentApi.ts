@@ -10,9 +10,11 @@ export interface Appointment {
     accompaniedBy?: AccompaniedBy;
     accompanyingCount?: number;
     appointmentDetails: AppointmentDetails;
-    status: "pending" | "approved" | "rejected" | "completed" | "time_out";
+    status: "pending" | "approved" | "rejected" | "completed" | "time_out" | "checked_in";
     checkInTime?: string;
     checkOutTime?: string;
+    checkInNotes?: string;
+    checkOutNotes?: string;
     actualDuration?: number;
     securityDetails: SecurityDetails;
     notifications: NotificationPreferences;
@@ -162,6 +164,7 @@ export interface AppointmentStats {
     approvedAppointments: number;
     rejectedAppointments: number;
     completedAppointments: number;
+    checkedInAppointments: number;
     checkedOutAppointments: number;
     appointmentsByStatus: Array<{ status: string; count: number }>;
     appointmentsByEmployee: Array<{ employeeId: string; employeeName: string; count: number }>;
@@ -174,6 +177,7 @@ export interface DashboardStats {
     approvedAppointments: number;
     rejectedAppointments: number;
     completedAppointments: number;
+    checkedInAppointments: number;
     upcomingAppointments: number;
     todayAppointments: number;
 }
@@ -233,6 +237,7 @@ export const appointmentApi = baseApi.injectEndpoints({
             approved: number;
             rejected: number;
             completed: number;
+            checked_in: number;
             cancelled: number;
             time_out: number;
         }, { dateFrom?: string; dateTo?: string; search?: string; employeeId?: string } | void>({

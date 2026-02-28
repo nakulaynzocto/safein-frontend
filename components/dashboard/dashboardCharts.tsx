@@ -15,7 +15,7 @@ import {
     Cell,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Users, Clock, TrendingUp, Activity, TimerOff, CalendarX } from "lucide-react";
+import { Calendar, Users, Clock, TrendingUp, Activity, TimerOff, CalendarX, LogIn } from "lucide-react";
 import { getAppointmentStatus } from "@/utils/helpers";
 
 interface DashboardChartsProps {
@@ -39,6 +39,7 @@ export const DashboardCharts = memo(function DashboardCharts({
         let pending = 0,
             approved = 0,
             completed = 0,
+            checked_in = 0,
             rejected = 0,
             time_out = 0;
         let active = 0;
@@ -52,6 +53,7 @@ export const DashboardCharts = memo(function DashboardCharts({
                     | "pending"
                     | "approved"
                     | "completed"
+                    | "checked_in"
                     | "rejected"
                     | "time_out";
 
@@ -59,6 +61,9 @@ export const DashboardCharts = memo(function DashboardCharts({
                 else if (effectiveStatus === "approved") {
                     approved++;
                     if (apt.checkInTime && !apt.checkOutTime) active++;
+                } else if (effectiveStatus === "checked_in") {
+                    checked_in++;
+                    active++;
                 } else if (effectiveStatus === "completed") completed++;
                 else if (effectiveStatus === "rejected") rejected++;
                 else if (effectiveStatus === "time_out") time_out++;
@@ -69,6 +74,7 @@ export const DashboardCharts = memo(function DashboardCharts({
             statusData: [
                 { value: pending, label: "Pending", color: "#F59E0B", icon: Clock },
                 { value: approved, label: "Approved", color: "#10B981", icon: Calendar },
+                { value: checked_in, label: "Checked In", color: "#6366F1", icon: LogIn },
                 { value: completed, label: "Completed", color: "#3B82F6", icon: Activity },
                 { value: rejected, label: "Rejected", color: "#EF4444", icon: CalendarX },
                 { value: time_out, label: "Time Out", color: "#F97316", icon: TimerOff },

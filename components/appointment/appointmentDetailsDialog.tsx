@@ -47,8 +47,9 @@ const getFieldValue = (appointment: Appointment, key: string): any => {
         notes: (appt) => appt.appointmentDetails?.notes || "N/A",
         vehicleNumber: (appt) => appt.appointmentDetails?.vehicleNumber || "",
         vehiclePhoto: (appt) => appt.appointmentDetails?.vehiclePhoto || "",
-        checkInTime: (appt) => appt.checkInTime || null,
         checkOutTime: (appt) => appt.checkOutTime || null,
+        checkInNotes: (appt) => appt.checkInNotes || (appt.securityDetails?.securityNotes) || "",
+        checkOutNotes: (appt) => appt.checkOutNotes || "",
     };
 
     const handler = fieldMap[key];
@@ -64,7 +65,6 @@ const statusVariants: Record<string, "secondary" | "default" | "destructive" | "
 };
 
 const fieldConfig = [
-    { key: "_id", label: "Appointment ID" },
     { key: "visitorName", label: "Visitor Name" },
     { key: "visitorEmail", label: "Visitor Email" },
     { key: "visitorPhone", label: "Visitor Phone" },
@@ -90,6 +90,8 @@ const fieldConfig = [
         showOnlyForCompleted: true,
         format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' hh:mm a", "Not checked out"),
     },
+    { key: "checkInNotes", label: "Check In Notes", optional: true },
+    { key: "checkOutNotes", label: "Check Out Notes", optional: true, showOnlyForCompleted: true },
     {
         key: "createdAt",
         label: "Created At",
@@ -248,17 +250,6 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close, on
                     </div>
 
                     <div className="flex justify-end gap-2 border-t pt-4">
-                        {onCheckOut && appointment.status === "approved" && isAppointmentDatePast() && (
-                            <Button
-                                type="button"
-                                onClick={onCheckOut}
-                                variant="destructive"
-                                className="bg-red-50 text-red-600 hover:bg-red-100 border-red-200 border"
-                            >
-                                <LogOut className="mr-2 h-4 w-4" />
-                                Check Out
-                            </Button>
-                        )}
                         <Button type="button" onClick={on_close} variant="outline">
                             Close
                         </Button>

@@ -7,6 +7,7 @@ export interface AppointmentStats {
     approvedAppointments: number;
     rejectedAppointments: number;
     completedAppointments: number;
+    checkedInAppointments: number;
     todaysAppointments: number;
     timeOutAppointments: number;
 }
@@ -19,6 +20,7 @@ export function calculateAppointmentStats(appointments: Appointment[]): Appointm
             approvedAppointments: 0,
             rejectedAppointments: 0,
             completedAppointments: 0,
+            checkedInAppointments: 0,
             todaysAppointments: 0,
             timeOutAppointments: 0,
         };
@@ -60,20 +62,22 @@ export function calculateAppointmentStats(appointments: Appointment[]): Appointm
             approvedAppointments: 0,
             rejectedAppointments: 0,
             completedAppointments: 0,
+            checkedInAppointments: 0,
             todaysAppointments: 0,
             timeOutAppointments: 0,
         },
-    );
+);
 
     const {
         pendingAppointments,
         approvedAppointments,
         rejectedAppointments,
         completedAppointments,
+        checkedInAppointments,
         timeOutAppointments,
     } = stats;
     const calculatedTotal =
-        pendingAppointments + approvedAppointments + rejectedAppointments + completedAppointments + timeOutAppointments;
+        pendingAppointments + approvedAppointments + rejectedAppointments + completedAppointments + checkedInAppointments + timeOutAppointments;
 
     return calculatedTotal !== stats.totalAppointments ? { ...stats, totalAppointments: calculatedTotal } : stats;
 }

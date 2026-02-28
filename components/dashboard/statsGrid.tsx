@@ -38,6 +38,15 @@ export const StatsGrid = memo(function StatsGrid({ stats, onStatusClick, current
                 bgClassName: "bg-muted/80 border-gray-200 shadow-sm hover:shadow-md hover:border-[#3882a5] transition-all",
             },
             {
+                title: "Check In",
+                statusKey: "checked_in",
+                value: stats.checkedInAppointments,
+                icon: Calendar,
+                description: "Visitors on-site",
+                colorClassName: "text-indigo-600",
+                bgClassName: "bg-muted/80 border-gray-200 shadow-sm hover:shadow-md hover:border-[#3882a5] transition-all",
+            },
+            {
                 title: "Completed",
                 statusKey: "completed",
                 value: stats.completedAppointments,
@@ -46,26 +55,17 @@ export const StatsGrid = memo(function StatsGrid({ stats, onStatusClick, current
                 colorClassName: "text-[#3882a5]",
                 bgClassName: "bg-muted/80 border-gray-200 shadow-sm hover:shadow-md hover:border-[#3882a5] transition-all",
             },
-            {
-                title: "Rejected",
-                statusKey: "rejected",
-                value: stats.rejectedAppointments,
-                icon: CalendarX,
-                description: "Rejected appointments",
-                colorClassName: "text-red-600",
-                bgClassName: "bg-muted/80 border-gray-200 shadow-sm hover:shadow-md hover:border-[#3882a5] transition-all",
-            },
         ],
         [
             stats.pendingAppointments,
             stats.approvedAppointments,
+            stats.checkedInAppointments,
             stats.completedAppointments,
-            stats.rejectedAppointments,
         ],
     );
 
     return (
-        <div className="grid grid-cols-4 gap-1.5 sm:gap-3 md:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {statCards.map((card) => (
                 <StatCard
                     key={card.title}

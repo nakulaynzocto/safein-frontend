@@ -16,10 +16,12 @@ export function AppointmentList() {
         isLoading,
         error,
         isDeleting,
+        isCheckingIn,
         isCheckingOut,
         isApproving,
         isRejecting,
         deleteAppointment,
+        checkInAppointment,
         checkOutAppointment,
         approveAppointment,
         rejectAppointment,
@@ -64,8 +66,9 @@ export function AppointmentList() {
                 approvedAppointments: 0,
                 rejectedAppointments: 0,
                 completedAppointments: 0,
+                checkedInAppointments: 0,
                 timeOutAppointments: 0,
-                todaysAppointments: 0, // Not available from stats API, could be added if needed
+                todaysAppointments: 0,
             };
         }
 
@@ -75,6 +78,7 @@ export function AppointmentList() {
             approvedAppointments: appointmentStatsData.approved || 0,
             rejectedAppointments: appointmentStatsData.rejected || 0,
             completedAppointments: appointmentStatsData.completed || 0,
+            checkedInAppointments: appointmentStatsData.checked_in || 0,
             timeOutAppointments: appointmentStatsData.time_out || 0,
             todaysAppointments: 0,
         };
@@ -150,11 +154,13 @@ export function AppointmentList() {
                 onPageSizeChange={setPageSize}
                 onSortChange={handleSortChange}
                 onDelete={deleteAppointment}
+                onCheckIn={checkInAppointment}
                 onCheckOut={checkOutAppointment}
                 onApprove={approveAppointment}
                 onReject={rejectAppointment}
                 onView={handleView}
                 isDeleting={isDeleting}
+                isCheckingIn={isCheckingIn}
                 isCheckingOut={isCheckingOut}
                 isApproving={isApproving}
                 isRejecting={isRejecting}

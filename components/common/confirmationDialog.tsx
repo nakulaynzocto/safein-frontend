@@ -18,7 +18,7 @@ interface ConfirmationDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     title: string;
-    description: string;
+    description: string | ReactNode;
     confirmText?: string;
     cancelText?: string;
     onConfirm: () => void;
@@ -103,9 +103,9 @@ export function ConfirmationDialog({
                 </div>
                 <DialogFooter className="flex flex-col sm:flex-row gap-2 p-6 bg-gray-50/50 border-t border-gray-100">
                     <Button 
-                        variant="ghost" 
+                        variant="outline" 
                         onClick={handleCancel} 
-                        className="w-full sm:flex-1 h-12 rounded-xl text-gray-500 hover:bg-gray-100 font-semibold"
+                        className="w-full sm:flex-1 h-11 rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-semibold transition-colors"
                     >
                         {cancelText}
                     </Button>
