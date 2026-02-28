@@ -77,7 +77,6 @@ export const DashboardCharts = memo(function DashboardCharts({
                 { value: checked_in, label: "Checked In", color: "#6366F1", icon: LogIn },
                 { value: completed, label: "Completed", color: "#3B82F6", icon: Activity },
                 { value: rejected, label: "Rejected", color: "#EF4444", icon: CalendarX },
-                { value: time_out, label: "Time Out", color: "#F97316", icon: TimerOff },
             ],
             activeVisitors: active,
             todaysAppointmentsCount: count,
