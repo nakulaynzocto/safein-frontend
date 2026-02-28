@@ -1,7 +1,7 @@
 "use client";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import Link from "next/link";
 import { Navbar } from "./navbar";
 import { Sidebar } from "./sidebar";
@@ -45,6 +45,26 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
     // 🔔 Listen for Chat Notifications globally
     useChatNotifications();
+
+    // Prevent global page scroll for messages page
+    useEffect(() => {
+        if (typeof window !== 'undefined' && pathname === routes.privateroute.MESSAGES) {
+            const originalHtmlOverflow = document.documentElement.style.overflow;
+            const originalBodyOverflow = document.body.style.overflow;
+            
+            // On mobile, we need to hide overflow to stop the "bounce" and outer scroll
+            // On desktop, the container itself manages overflow
+            if (window.innerWidth < 768) {
+                document.documentElement.style.overflow = 'hidden';
+                document.body.style.overflow = 'hidden';
+            }
+            
+            return () => {
+                document.documentElement.style.overflow = originalHtmlOverflow;
+                document.body.style.overflow = originalBodyOverflow;
+            };
+        }
+    }, [pathname]);
 
     // Immediate hard redirect for unauthenticated users in ProtectedLayout
     // This is a fail-safe for the global useAuthSubscription redirect
@@ -90,24 +110,23 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                 {isClient && !isLoading && shouldShowSidebar && <Sidebar />}
                 <main
                     className={cn(
-                        "flex-1 flex flex-col transition-opacity duration-200",
-                        pathname === routes.privateroute.MESSAGES ? "overflow-hidden" : "overflow-x-hidden overflow-y-auto"
+                        "flex-1 flex flex-col transition-opacity duration-200 min-h-0",
+                        pathname === routes.privateroute.MESSAGES ? "overflow-hidden max-md:fixed max-md:inset-x-0 max-md:bottom-0 md:relative" : "overflow-x-hidden overflow-y-auto"
                     )}
                     style={{
                         backgroundColor: "var(--background)",
                         WebkitOverflowScrolling: "touch",
                     }}
                 >
-                    {/* Extra bottom padding on mobile so content isn't hidden behind the bottom nav */}
                     <div className={cn(
-                        "flex-1 container mx-auto max-w-full",
-                        pathname === routes.privateroute.MESSAGES ? "p-0 h-full overflow-hidden" : "px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 lg:px-6 lg:py-6 pb-20 md:pb-6 lg:pb-8"
+                        "flex-1 w-full max-w-full",
+                        pathname === routes.privateroute.MESSAGES ? "p-0 md:p-4 h-full overflow-hidden flex flex-col" : "container mx-auto px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 lg:px-6 lg:py-6 pb-20 md:pb-6 lg:pb-8"
                     )}>
                         {isLoading ? (
                             <PageSkeleton />
                         ) : shouldShowContent ? (
                             // Show content if conditions are met
-                            <div className={cn("animate-fade-in", pathname === routes.privateroute.MESSAGES ? "h-full" : "")} style={{ backgroundColor: "var(--background)" }}>
+                            <div className={cn("animate-fade-in flex-1 flex flex-col min-h-0", pathname === routes.privateroute.MESSAGES ? "h-full" : "")} style={{ backgroundColor: "var(--background)" }}>
                                 {children}
                             </div>
                         ) : (
@@ -126,14 +145,16 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                             </div>
                         )}
                     </div>
-                    {/* Footer - only on desktop */}
-                    <footer className="hidden md:flex border-t bg-gray-50/50 flex-shrink-0" style={{ height: '64px' }}>
-                        <div className="container mx-auto max-w-full h-full flex items-center justify-center">
-                            <div className="text-xs text-gray-500 font-medium">
-                                © 2026 Visitor Management System
+                    {/* Footer - only on desktop and not on messages page */}
+                    {pathname !== routes.privateroute.MESSAGES && (
+                        <footer className="hidden md:flex border-t bg-gray-50/50 flex-shrink-0" style={{ height: '64px' }}>
+                            <div className="container mx-auto max-w-full h-full flex items-center justify-center">
+                                <div className="text-xs text-gray-500 font-medium">
+                                    © 2026 Visitor Management System
+                                </div>
                             </div>
-                        </div>
-                    </footer>
+                        </footer>
+                    )}
                 </main>
             </div>
             {/* Mobile bottom navigation — Instagram/LinkedIn style */}
