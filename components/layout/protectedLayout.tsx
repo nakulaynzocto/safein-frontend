@@ -110,8 +110,8 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                 {isClient && !isLoading && shouldShowSidebar && <Sidebar />}
                 <main
                     className={cn(
-                        "flex-1 flex flex-col transition-opacity duration-200 min-h-0 relative",
-                        pathname === routes.privateroute.MESSAGES ? "overflow-hidden" : "overflow-x-hidden overflow-y-auto"
+                        "flex-1 flex flex-col transition-opacity duration-200 relative",
+                        pathname === routes.privateroute.MESSAGES ? "overflow-hidden" : "overflow-y-auto"
                     )}
                     style={{
                         backgroundColor: "var(--background)",
@@ -119,14 +119,14 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                     }}
                 >
                     <div className={cn(
-                        "flex-1 w-full max-w-full min-h-0",
-                        pathname === routes.privateroute.MESSAGES ? "p-0 md:p-4 h-full overflow-hidden flex flex-col" : "container mx-auto px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 lg:px-6 lg:py-6 pb-20 md:pb-6 lg:pb-8"
+                        "w-full max-w-full",
+                        pathname === routes.privateroute.MESSAGES ? "flex-1 min-h-0 p-0 md:p-4 h-full overflow-hidden flex flex-col" : "container mx-auto px-2 py-4 sm:px-3 sm:py-4 md:px-4 md:py-6 lg:px-6 lg:py-8 pb-32 md:pb-24"
                     )}>
                         {isLoading ? (
                             <PageSkeleton />
                         ) : shouldShowContent ? (
                             // Show content if conditions are met
-                            <div className={cn("animate-fade-in flex-1 flex flex-col min-h-0", pathname === routes.privateroute.MESSAGES ? "h-full" : "")} style={{ backgroundColor: "var(--background)" }}>
+                            <div className={cn("animate-fade-in flex flex-col", pathname === routes.privateroute.MESSAGES ? "flex-1 min-h-0 h-full" : "min-h-[calc(100vh-200px)]")} style={{ backgroundColor: "var(--background)" }}>
                                 {children}
                             </div>
                         ) : (
@@ -147,10 +147,13 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                     </div>
                     {/* Footer - only on desktop and not on messages page */}
                     {pathname !== routes.privateroute.MESSAGES && (
-                        <footer className="hidden md:flex border-t bg-gray-50/50 flex-shrink-0" style={{ height: '64px' }}>
-                            <div className="container mx-auto max-w-full h-full flex items-center justify-center">
+                        <footer className="hidden md:flex border-t bg-gray-50/50 flex-shrink-0 mt-auto" style={{ height: '64px' }}>
+                            <div className="container mx-auto max-w-full h-full flex items-center justify-between px-8">
                                 <div className="text-xs text-gray-500 font-medium">
                                     © 2026 Visitor Management System
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                    Secure & Trusted Platform
                                 </div>
                             </div>
                         </footer>

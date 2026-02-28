@@ -66,6 +66,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
     const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const lastProfileUserRef = useRef<string | null>(null);
@@ -224,6 +225,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
     }, [logoutMutation, dispatch]);
 
     const handleOpenUpgradeModal = useCallback(() => {
+        setIsSettingsOpen(false);
         setIsUpgradeModalOpen(true);
     }, []);
 
@@ -488,8 +490,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                     iconClassName={shouldShowWhiteNavbar ? "text-gray-700" : "text-white"}
                                 />
 
-                                {/* Settings Dropdown */}
-                                <DropdownMenu>
+                                 {/* Settings Dropdown */}
+                                 <DropdownMenu open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                                     <DropdownMenuTrigger asChild>
                                         <Button
                                             variant="ghost"
@@ -538,25 +540,28 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                                 </div>
                                                 
                                                 {/* Action Buttons */}
-                                                <div className="flex gap-2 mt-4">
-                                                    <Button 
-                                                        variant="outline" 
-                                                        size="sm" 
-                                                        className="flex-1 rounded-full h-8 text-[13px] font-semibold border-[#074463] text-[#074463] hover:bg-[#e9eff6] hover:text-[#074463]"
-                                                        onClick={() => router.push(routes.privateroute.PROFILE)}
-                                                    >
-                                                        View Profile
-                                                    </Button>
-                                                    {!isEmployee && (
-                                                        <Button 
-                                                            size="sm" 
-                                                            className="flex-1 rounded-full h-8 text-[13px] font-semibold bg-[#074463] text-white hover:bg-[#05334a]"
-                                                            onClick={handleOpenUpgradeModal}
-                                                        >
-                                                            Upgrade
-                                                        </Button>
-                                                    )}
-                                                </div>
+                                                 <div className="flex gap-2 mt-4">
+                                                     <Button 
+                                                         variant="outline" 
+                                                         size="sm" 
+                                                         className="flex-1 rounded-full h-8 text-[13px] font-semibold border-[#074463] text-[#074463] hover:bg-[#e9eff6] hover:text-[#074463]"
+                                                         onClick={() => {
+                                                             setIsSettingsOpen(false);
+                                                             router.push(routes.privateroute.PROFILE);
+                                                         }}
+                                                     >
+                                                         View Profile
+                                                     </Button>
+                                                     {!isEmployee && (
+                                                         <Button 
+                                                             size="sm" 
+                                                             className="flex-1 rounded-full h-8 text-[13px] font-semibold bg-[#074463] text-white hover:bg-[#05334a]"
+                                                             onClick={handleOpenUpgradeModal}
+                                                         >
+                                                             Upgrade
+                                                         </Button>
+                                                     )}
+                                                 </div>
                                             </div>
                                         )}
 
