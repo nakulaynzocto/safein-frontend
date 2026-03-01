@@ -126,7 +126,7 @@ export function AppointmentBookingForm({
                     </div>
                 </div>
 
-                {/* First Row: Appointment Date and Appointment Time */}
+                {/* First Row:  Appointment Date and Appointment Time */}
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <Controller

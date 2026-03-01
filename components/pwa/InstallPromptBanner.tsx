@@ -29,7 +29,7 @@ export function InstallPromptBanner() {
     const isAllowedPage = pathname ? allowedPublicPages.includes(pathname) : false;
     const isProtectedPage = !isAllowedPage || isPrivateRoute(pathname ?? "");
 
-    // ✅ All hooks MUST be called before any early return (Rules of Hooks)
+    // ✅ All hooks  MUST be called before any early return (Rules of Hooks)
     useEffect(() => {
         // Don't attach listener on protected/private pages
         if (isProtectedPage) return;
