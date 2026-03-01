@@ -147,7 +147,7 @@ export function EmployeeVerificationModal({
                             Cancel
                         </Button>
                         {otpSent && (
-                            <Button onClick={handleVerify} disabled={!otp || isVerifying || otp.length < 6}>
+                            <Button onClick={() => handleVerify()} disabled={!otp || isVerifying || otp.length < 6}>
                                 {isVerifying ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

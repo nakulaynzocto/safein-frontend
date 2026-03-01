@@ -24,7 +24,10 @@ export function InstallPromptBanner() {
     const [show, setShow] = useState(false);
     const [installing, setInstalling] = useState(false);
 
-    const isProtectedPage = isPrivateRoute(pathname ?? "");
+    // Restrict visibility to only Home, Features, Pricing, Contact, and Help pages
+    const allowedPublicPages = ["/", "/features", "/pricing", "/contact", "/help"];
+    const isAllowedPage = pathname ? allowedPublicPages.includes(pathname) : false;
+    const isProtectedPage = !isAllowedPage || isPrivateRoute(pathname ?? "");
 
     // ✅ All hooks MUST be called before any early return (Rules of Hooks)
     useEffect(() => {
