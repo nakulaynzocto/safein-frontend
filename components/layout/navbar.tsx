@@ -368,7 +368,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                                 "relative px-5 py-2.5 text-sm font-semibold transition-all duration-300 rounded-xl",
                                                 isActive 
                                                     ? shouldShowWhiteNavbar 
-                                                        ? "text-brand-strong bg-brand/5" 
+                                                        ? "text-accent bg-accent/10" 
                                                         : "text-white bg-white/10"
                                                     : linkText,
                                                 "hover:scale-105 active:scale-95"
@@ -678,12 +678,13 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                         {isMounted && (!isAuthenticated || !token) && variant !== "dashboard" && (
                             <>
                                 <Button
-                                    variant="ghost"
+                                    variant="outline"
                                     asChild
                                     className={cn(
-                                        "rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 text-[12px] sm:text-sm font-medium transition-all duration-200 flex items-center justify-center",
-                                        linkHoverBgClass,
-                                        linkText
+                                        "rounded-xl px-4 h-10 min-w-[100px] text-[13px] font-bold transition-all duration-300 flex items-center justify-center border-2",
+                                        shouldShowWhiteNavbar 
+                                            ? "border-brand/20 text-brand hover:bg-brand/5 hover:border-brand/40" 
+                                            : "border-brand-strong/20 text-brand-strong hover:bg-white/10 hover:border-brand-strong/40"
                                     )}
                                 >
                                     <Link href={routes.publicroute.LOGIN} prefetch={true}>
@@ -693,7 +694,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 <Link
                                     href={routes.publicroute.REGISTER}
                                     className={cn(
-                                        "hidden rounded-xl px-7 py-3 text-[14px] font-bold transition-all duration-300 sm:flex items-center justify-center relative overflow-hidden group",
+                                        "hidden rounded-xl px-5 h-10 min-w-[100px] text-[13px] font-bold transition-all duration-300 sm:flex items-center justify-center relative overflow-hidden group whitespace-nowrap",
                                         ctaBtn
                                     )}
                                     prefetch={true}

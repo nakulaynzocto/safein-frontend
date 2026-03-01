@@ -161,14 +161,14 @@ export default function PricingPage() {
                                                     {!!plan.monthlyEquivalent && plan.planType !== "free" && (
                                                         <div className="mt-1.5 text-xs text-gray-600">
                                                             <span className="text-gray-400">Effective: </span>
-                                                            <span className="text-brand-strong font-semibold">
+                                                            <span className="text-accent font-semibold">
                                                                 {formatCurrency(plan.monthlyEquivalent, plan.currency)}
                                                                 /month
                                                             </span>
                                                         </div>
                                                     )}
                                                 </div>
-                                                <CardDescription className="text-accent mt-2 line-clamp-2 h-10 text-xs">
+                                                <CardDescription className="text-muted-foreground mt-2 line-clamp-2 h-10 text-xs">
                                                     {plan.description}
                                                 </CardDescription>
                                             </CardHeader>
@@ -177,7 +177,7 @@ export default function PricingPage() {
                                                     {plan.features.map((feature, featureIndex) => (
                                                         <div key={featureIndex} className="flex items-start">
                                                             <Check className="text-brand-strong mt-0.5 mr-3 h-5 w-5 shrink-0" />
-                                                            <span className="text-accent text-sm leading-tight">
+                                                            <span className="text-muted-foreground text-sm leading-tight">
                                                                 {feature}
                                                             </span>
                                                         </div>
@@ -218,7 +218,7 @@ export default function PricingPage() {
                         <div className="container mx-auto text-center">
                             <div className="mx-auto max-w-4xl">
                                 <h2 className="text-brand mb-4 text-3xl font-bold">Pricing Summary</h2>
-                                <p className="text-accent mb-8 text-lg">Premium plan total cost comparison</p>
+                                <p className="text-muted-foreground mb-8 text-lg">Premium plan total cost comparison</p>
                                 <div className="scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent flex snap-x snap-mandatory gap-6 overflow-x-auto pb-8">
                                     {plans
                                         .filter((p) => p.planType !== "free")
@@ -250,7 +250,7 @@ export default function PricingPage() {
                                                             {formatCurrency(plan.amount, plan.currency)}
                                                         </div>
                                                         {plan.monthlyEquivalent && (
-                                                            <div className="text-accent text-[10px]">
+                                                            <div className="text-muted-foreground text-[10px]">
                                                                 {formatCurrency(plan.monthlyEquivalent, plan.currency)}
                                                                 /month effective
                                                             </div>
@@ -276,7 +276,7 @@ export default function PricingPage() {
                                 <h2 className="heading-main mb-4 text-4xl font-bold md:text-5xl">
                                     What Our Clients Say
                                 </h2>
-                                <p className="text-accent mx-auto max-w-3xl text-lg">
+                                <p className="text-muted-foreground mx-auto max-w-3xl text-lg">
                                     Real feedback from teams using SafeIn daily
                                 </p>
                             </div>

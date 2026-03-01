@@ -217,9 +217,10 @@ export function EmployeeTable({
                         <Button
                             variant="secondary"
                             size="sm"
-                            className="h-6 text-xs px-2 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-200"
+                            className="h-8 rounded-full px-4 bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-200/50 font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-sm"
                             onClick={() => handleVerify(employee)}
                         >
+                            <ShieldCheck className="h-3.5 w-3.5" />
                             Verify Now
                         </Button>
                     ) : (

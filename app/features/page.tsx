@@ -207,17 +207,17 @@ export default function FeaturesPage() {
                             <div className="space-y-12">
                                 <div className="grid gap-8 sm:grid-cols-2">
                                     {[
-                                        { t: "Personalized URLs", d: "Every host gets a unique link with their bio and slots.", i: <Share2 /> },
-                                        { t: "Instant Slot Sync", d: "Deep integration with Outlook & Google calendars.", i: <Clock /> },
-                                        { t: "Auto Reminders", d: "WhatsApp and Email alerts stop guest no-shows.", i: <BellRing /> },
-                                        { t: "One-Tap Approval", d: "Hosts approve or reject visits from their lock screen.", i: <MousePointerClick /> }
+                                        { t: "Personalized URLs", d: "Unique booking links for every host.", i: <Share2 /> },
+                                        { t: "Instant Slot Sync", d: "Deep integration with Outlook & Google.", i: <Clock /> },
+                                        { t: "Auto Reminders", d: "WhatsApp and Email alerts for guests.", i: <BellRing /> },
+                                        { t: "One-Tap Approval", d: "Approve visits from the lock screen.", i: <MousePointerClick /> }
                                     ].map((c, i) => (
-                                        <div key={i} className="group p-6 rounded-3xl bg-secondary/10 border border-gray-50 hover:bg-white hover:shadow-xl transition-all duration-300">
-                                            <div className="h-12 w-12 bg-white rounded-xl flex items-center justify-center text-accent mb-4 shadow-sm group-hover:bg-accent group-hover:text-white transition-colors">
+                                        <div key={i} className="group p-6 rounded-[2rem] bg-white border border-gray-100 hover:shadow-xl transition-all duration-300">
+                                            <div className="h-12 w-12 bg-accent/5 rounded-2xl flex items-center justify-center text-accent mb-4 transition-colors group-hover:bg-accent group-hover:text-white">
                                                 {React.cloneElement(c.i as React.ReactElement, { size: 24 })}
                                             </div>
-                                            <h4 className="font-bold text-primary mb-2 text-lg">{c.t}</h4>
-                                            <p className="text-sm text-gray-500 leading-relaxed">{c.d}</p>
+                                            <h4 className="font-bold text-brand mb-2 text-lg">{c.t}</h4>
+                                            <p className="text-sm text-gray-500 leading-relaxed font-medium">{c.d}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -258,18 +258,18 @@ export default function FeaturesPage() {
                             <div className="order-2 lg:order-1 space-y-8">
                                 <div className="grid gap-6">
                                     {[
-                                        { t: "OCR ID Scanning", d: "Scan Aadhaar, PAN, or DL and auto-fill details instantly.", i: <Scan /> },
-                                        { t: "OTP Verification", d: "Verify visitor phone numbers via SMS or WhatsApp.", i: <Smartphone /> },
-                                        { t: "Kiosk Mode", d: "Beautiful tablet interface for self-registration.", i: <LayoutDashboard /> },
-                                        { t: "Instant Verification", d: "Secure 6-digit OTP codes for verified entry.", i: <ShieldCheck /> }
+                                        { t: "OCR ID Scanning", d: "Scan IDs and auto-fill details instantly.", i: <Scan /> },
+                                        { t: "OTP Verification", d: "Verify phone numbers via WhatsApp.", i: <Smartphone /> },
+                                        { t: "Kiosk Mode", d: "Premium tablet interface for self-registration.", i: <LayoutDashboard /> },
+                                        { t: "Secure Entry", d: "6-digit OTP codes for verified entry.", i: <ShieldCheck /> }
                                     ].map((c, i) => (
-                                        <div key={i} className="flex gap-6 p-6 rounded-[2rem] bg-white shadow-sm hover:shadow-xl transition-all border border-gray-50 group">
-                                            <div className="h-14 w-14 bg-secondary/30 rounded-2xl flex items-center justify-center text-accent group-hover:bg-primary group-hover:text-white transition-all flex-shrink-0">
+                                        <div key={i} className="flex gap-6 p-6 rounded-[2rem] bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                                            <div className="h-14 w-14 bg-accent/5 rounded-2xl flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all flex-shrink-0">
                                                 {React.cloneElement(c.i as React.ReactElement, { size: 28 })}
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-primary mb-1 text-lg">{c.t}</h4>
-                                                <p className="text-sm text-gray-500 leading-relaxed">{c.d}</p>
+                                                <h4 className="font-bold text-brand mb-1 text-lg">{c.t}</h4>
+                                                <p className="text-sm text-gray-500 leading-relaxed font-medium">{c.d}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -337,18 +337,18 @@ export default function FeaturesPage() {
                             </div>
                             <div className="space-y-8">
                                 {[
-                                    { t: "WhatsApp Bridge", d: "Guests chat via WhatsApp, hosts chat via SafeIn App.", i: <Share2 /> },
-                                    { t: "Internal Messaging", d: "Dedicated channel for security staff and facility managers.", i: <Users /> },
-                                    { t: "Lobby Concierge", d: "Receptionists can instantly update hosts about waiting guests.", i: <Smartphone /> },
-                                    { t: "Privacy Purge", d: "Chat data is automatically deleted after visit completion.", i: <Lock /> }
+                                    { t: "WhatsApp Bridge", d: "Hosts and guests chat via WhatsApp.", i: <Share2 /> },
+                                    { t: "Internal Messaging", d: "Secure channel for security and staff.", i: <Users /> },
+                                    { t: "Lobby Concierge", d: "Instant lobby-to-host updates.", i: <Smartphone /> },
+                                    { t: "Privacy Purge", d: "Chat data is deleted after visits.", i: <Lock /> }
                                 ].map((item, i) => (
-                                    <div key={i} className="flex gap-6 p-1 bg-white hover:bg-slate-50 rounded-[2rem] transition-colors group">
-                                        <div className="h-16 w-16 bg-emerald-500/10 rounded-3xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all flex-shrink-0">
+                                    <div key={i} className="flex gap-6 p-1 bg-white hover:bg-slate-50 rounded-[2.5rem] transition-colors group">
+                                        <div className="h-16 w-16 bg-emerald-500/5 rounded-3xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all flex-shrink-0">
                                             {React.cloneElement(item.i as React.ReactElement, { size: 28 })}
                                         </div>
                                         <div className="pt-2">
-                                            <h4 className="font-bold text-primary text-xl mb-1">{item.t}</h4>
-                                            <p className="text-gray-500 leading-relaxed text-sm pr-4">{item.d}</p>
+                                            <h4 className="font-bold text-brand text-xl mb-1">{item.t}</h4>
+                                            <p className="text-gray-500 leading-relaxed text-sm pr-4 font-medium">{item.d}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -379,18 +379,18 @@ export default function FeaturesPage() {
                             <div className="space-y-10">
                                 <div className="grid gap-8">
                                     {[
-                                        { t: "RBAC Security", d: "Set unique permissions for Guards, Managers, and Admins.", i: <ShieldCheck /> },
-                                        { t: "Bulk Onboarding", d: "Import 10,000+ employees via CSV in seconds.", i: <Upload /> },
-                                        { t: "Manager Insights", d: "Track team presence and visitor patterns in real-time.", i: <BarChart3 /> },
-                                        { t: "Immutable Logs", d: "Complete audit trails for every access change.", i: <Database /> }
+                                        { t: "RBAC Security", d: "Permissions for Guards and Managers.", i: <ShieldCheck /> },
+                                        { t: "Bulk Onboarding", d: "Import 10,000+ employees in seconds.", i: <Upload /> },
+                                        { t: "Manager Insights", d: "Track presence and visitor patterns.", i: <BarChart3 /> },
+                                        { t: "Immutable Logs", d: "Complete audit trails for every change.", i: <Database /> }
                                     ].map((item, i) => (
-                                        <div key={i} className="flex gap-6 p-6 rounded-3xl bg-secondary/10 border border-gray-100 hover:bg-white hover:shadow-xl hover:border-accent/20 transition-all group">
-                                            <div className="h-14 w-14 bg-white rounded-2xl flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all flex-shrink-0 shadow-sm">
+                                        <div key={i} className="flex gap-6 p-6 rounded-[2rem] bg-white border border-gray-100 hover:shadow-xl hover:border-accent/10 transition-all group">
+                                            <div className="h-14 w-14 bg-accent/5 rounded-2xl flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all flex-shrink-0 shadow-sm">
                                                 {React.cloneElement(item.i as React.ReactElement, { size: 28 })}
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-primary text-xl mb-1">{item.t}</h4>
-                                                <p className="text-gray-500 leading-relaxed text-sm pr-4">{item.d}</p>
+                                                <h4 className="font-bold text-brand text-xl mb-1">{item.t}</h4>
+                                                <p className="text-gray-500 leading-relaxed text-sm pr-4 font-medium">{item.d}</p>
                                             </div>
                                         </div>
                                     ))}

@@ -271,42 +271,40 @@ export default function HomePage() {
 
 
                 {/* Comprehensive Feature Set */}
-                <section className="bg-slate-50/50 py-24 sm:py-32">
+                <section className="bg-white py-24 sm:py-32">
                     <div className="container mx-auto px-4 sm:px-6">
                         <div className="mb-20 text-center">
-                            <span className="mb-4 inline-block text-sm font-bold tracking-[0.2em] text-brand-strong uppercase">
-                                Features
-                            </span>
-                            <h2 className="text-brand mb-6 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-                                Engineering the Digital Reception
+                            <h2 className="text-brand mb-6 text-3xl font-black tracking-tight sm:text-4xl md:text-5xl lg:text-6xl">
+                                We offer comprehensive <br className="hidden md:block" />
+                                visitor solutions.
                             </h2>
-                            <p className="text-accent mx-auto max-w-2xl text-lg leading-relaxed sm:text-xl">
-                                Everything you need for professional visitor management in one powerful, 
-                                enterprise-grade platform.
-                            </p>
                         </div>
 
-                        <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-2 max-w-4xl mx-auto">
+                        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
                             {/* Feature 1 */}
-                            <Link href="/features#appointments" className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
-                                <div className="relative mb-6 h-48 w-full overflow-hidden rounded-2xl bg-slate-50">
+                            <Link href="/features#appointments" className="group flex flex-col rounded-[2.5rem] border border-gray-100 bg-white p-4 shadow-sm transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]">
+                                <div className="relative mb-6 aspect-[4/3] w-full overflow-hidden rounded-[2rem]">
                                     <Image
                                         src="/images/features/smart_appointments_hero_1772358159659.png"
                                         alt="Smart Appointment Booking"
                                         fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                        className="object-cover transition-transform duration-700 group-hover:scale-110"
                                     />
                                 </div>
-                                <h3 className="text-brand mb-4 text-xl font-bold sm:text-2xl">Smart Appointment Booking</h3>
-                                <p className="text-accent leading-relaxed">
-                                    Schedule appointments, create shareable booking links, and manage visitors with
-                                    automated notifications and calendar sync.
-                                </p>
+                                <div className="px-4 pb-4 flex flex-col flex-1">
+                                    <h3 className="text-brand mb-3 text-xl font-bold tracking-tight">Smart Appointments</h3>
+                                    <p className="text-gray-500 text-sm leading-relaxed mb-6 font-medium">
+                                        Automated booking engine with real-time calendar sync.
+                                    </p>
+                                    <div className="mt-auto flex items-center gap-2 text-accent font-bold text-sm">
+                                        Learn more <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                    </div>
+                                </div>
                             </Link>
 
                             {/* Feature 2 */}
-                            <Link href="/features#spot-pass" className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
-                                <div className="relative mb-6 h-48 w-full overflow-hidden rounded-2xl bg-slate-50">
+                            <Link href="/features#spot-pass" className="group flex flex-col rounded-[2.5rem] border border-gray-100 bg-white p-4 shadow-sm transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]">
+                                <div className="relative mb-6 aspect-[4/3] w-full overflow-hidden rounded-[2rem]">
                                     <Image
                                         src="/images/features/spot_pass_hero_1772358331734.png"
                                         alt="Spot Pass System"
@@ -314,16 +312,20 @@ export default function HomePage() {
                                         className="object-cover transition-transform duration-500 group-hover:scale-110"
                                     />
                                 </div>
-                                <h3 className="text-brand mb-4 text-xl font-bold sm:text-2xl">Spot Pass System</h3>
-                                <p className="text-accent leading-relaxed">
-                                    Handle walk-in visitors seamlessly with instant registration, 1-click OTP entry, 
-                                    and a streamlined check-in process.
-                                </p>
+                                <div className="px-4 pb-4 flex flex-col flex-1">
+                                    <h3 className="text-brand mb-3 text-xl font-bold tracking-tight">Spot Pass System</h3>
+                                    <p className="text-gray-500 text-sm leading-relaxed mb-6 font-medium">
+                                        Seamless walk-in management with instant host alerts.
+                                    </p>
+                                    <div className="mt-auto flex items-center gap-2 text-accent font-bold text-sm">
+                                        Learn more <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                    </div>
+                                </div>
                             </Link>
 
                             {/* Feature 3 */}
-                            <Link href="/features#chat" className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
-                                <div className="relative mb-6 h-48 w-full overflow-hidden rounded-2xl bg-slate-50">
+                            <Link href="/features#chat" className="group flex flex-col rounded-[2.5rem] border border-gray-100 bg-white p-4 shadow-sm transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]">
+                                <div className="relative mb-6 aspect-[4/3] w-full overflow-hidden rounded-[2rem]">
                                     <Image
                                         src="/images/features/chat_hero_1772358492233.png"
                                         alt="Real-time Chat"
@@ -331,28 +333,36 @@ export default function HomePage() {
                                         className="object-cover transition-transform duration-500 group-hover:scale-110"
                                     />
                                 </div>
-                                <h3 className="text-brand mb-4 text-xl font-bold sm:text-2xl">Real-time Chat</h3>
-                                <p className="text-accent leading-relaxed">
-                                    Instant team communication and automated host-visitor bots for a 
-                                    seamlessly connected office experience.
-                                </p>
+                                <div className="px-4 pb-4 flex flex-col flex-1">
+                                    <h3 className="text-brand mb-3 text-xl font-bold tracking-tight">Real-time Messaging</h3>
+                                    <p className="text-gray-500 text-sm leading-relaxed mb-6 font-medium">
+                                        Secure host-visitor messaging for premium hospitality.
+                                    </p>
+                                    <div className="mt-auto flex items-center gap-2 text-accent font-bold text-sm">
+                                        Learn more <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                    </div>
+                                </div>
                             </Link>
 
                             {/* Feature 4 */}
-                            <Link href="/features#workforce" className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
-                                <div className="relative mb-6 h-48 w-full overflow-hidden rounded-2xl bg-slate-50">
+                            <Link href="/features#workforce" className="group flex flex-col rounded-[2.5rem] border border-gray-100 bg-white p-4 shadow-sm transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]">
+                                <div className="relative mb-6 aspect-[4/3] w-full overflow-hidden rounded-[2rem]">
                                     <Image
                                         src="/images/features/workforce_dashboard_hero_1772358658740.png"
-                                        alt="Employee Management"
+                                        alt="Workforce Hub"
                                         fill
                                         className="object-cover transition-transform duration-500 group-hover:scale-110"
                                     />
                                 </div>
-                                <h3 className="text-brand mb-4 text-xl font-bold sm:text-2xl">Employee Management</h3>
-                                <p className="text-accent leading-relaxed">
-                                    Comprehensive staff directory with bulk import, role-based access control, 
-                                    and automated team onboarding.
-                                </p>
+                                <div className="px-4 pb-4 flex flex-col flex-1">
+                                    <h4 className="text-brand mb-3 text-xl font-bold tracking-tight">Workforce Hub</h4>
+                                    <p className="text-gray-500 text-sm leading-relaxed mb-6 font-medium">
+                                        Enterprise directory management with granular access controls.
+                                    </p>
+                                    <div className="mt-auto flex items-center gap-2 text-accent font-bold text-sm">
+                                        Learn more <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                    </div>
+                                </div>
                             </Link>
                         </div>
                     </div>
@@ -396,7 +406,7 @@ export default function HomePage() {
                                     </p>
                                     <ul className="space-y-8">
                                         <li>
-                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-brand-strong font-semibold transition-colors hover:text-brand">
+                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-accent font-semibold transition-colors hover:text-brand">
                                                 One-Click OTP Check-in <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                             </Link>
                                             <p className="text-accent/80 text-sm leading-relaxed">
@@ -405,7 +415,7 @@ export default function HomePage() {
                                             </p>
                                         </li>
                                         <li>
-                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-brand-strong font-semibold transition-colors hover:text-brand">
+                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-accent font-semibold transition-colors hover:text-brand">
                                                 Digital visitor logs <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                             </Link>
                                             <p className="text-accent/80 text-sm leading-relaxed">
@@ -414,7 +424,7 @@ export default function HomePage() {
                                             </p>
                                         </li>
                                         <li>
-                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-brand-strong font-semibold transition-colors hover:text-brand">
+                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-accent font-semibold transition-colors hover:text-brand">
                                                 Entrance verification <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                             </Link>
                                             <p className="text-accent/80 text-sm leading-relaxed">
@@ -439,7 +449,7 @@ export default function HomePage() {
                                     </p>
                                     <ul className="space-y-8">
                                         <li>
-                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-brand-strong font-semibold transition-colors hover:text-brand">
+                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-accent font-semibold transition-colors hover:text-brand">
                                                 Real-time occupancy tracking <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                             </Link>
                                             <p className="text-accent/80 text-sm leading-relaxed">
@@ -448,7 +458,7 @@ export default function HomePage() {
                                             </p>
                                         </li>
                                         <li>
-                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-brand-strong font-semibold transition-colors hover:text-brand">
+                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-accent font-semibold transition-colors hover:text-brand">
                                                 Visitor pattern analytics <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                             </Link>
                                             <p className="text-accent/80 text-sm leading-relaxed">
@@ -457,7 +467,7 @@ export default function HomePage() {
                                             </p>
                                         </li>
                                         <li>
-                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-brand-strong font-semibold transition-colors hover:text-brand">
+                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-accent font-semibold transition-colors hover:text-brand">
                                                 Automated safety reports <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                             </Link>
                                             <p className="text-accent/80 text-sm leading-relaxed">
@@ -504,7 +514,7 @@ export default function HomePage() {
                                     </p>
                                     <ul className="space-y-8">
                                         <li>
-                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-brand-strong font-semibold transition-colors hover:text-brand">
+                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-accent font-semibold transition-colors hover:text-brand">
                                                 WhatsApp arrival alerts <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                             </Link>
                                             <p className="text-accent/80 text-sm leading-relaxed">
@@ -513,7 +523,7 @@ export default function HomePage() {
                                             </p>
                                         </li>
                                         <li>
-                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-brand-strong font-semibold transition-colors hover:text-brand">
+                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-accent font-semibold transition-colors hover:text-brand">
                                                 Proactive push notifications <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                             </Link>
                                             <p className="text-accent/80 text-sm leading-relaxed">
@@ -522,7 +532,7 @@ export default function HomePage() {
                                             </p>
                                         </li>
                                         <li>
-                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-brand-strong font-semibold transition-colors hover:text-brand">
+                                            <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-accent font-semibold transition-colors hover:text-brand">
                                                 Host-visitor internal messaging <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                             </Link>
                                             <p className="text-accent/80 text-sm leading-relaxed">
@@ -549,7 +559,7 @@ export default function HomePage() {
                                 </span>
                             </div>
                             <h2 className="text-brand mb-6 text-4xl font-extrabold tracking-tight sm:text-5xl">
-                                Tailored for Every <span className="text-brand-strong underline decoration-brand-light/30 decoration-8 underline-offset-4">Enterprise</span>
+                                Tailored for Every <span className="text-accent underline decoration-brand-light/30 decoration-8 underline-offset-4">Enterprise</span>
                             </h2>
                             <p className="text-accent mx-auto max-w-2xl text-lg leading-relaxed sm:text-xl">
                                 From IT Parks in Bangalore to Housing Societies in Mumbai, we secure every sector 

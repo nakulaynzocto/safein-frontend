@@ -172,7 +172,7 @@ export default function ContactPage() {
                                 <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">
                                     Contact Information
                                 </h2>
-                                <p className="text-accent text-lg">Multiple ways to reach our team</p>
+                                <p className="text-muted-foreground text-lg">Multiple ways to reach our team</p>
                             </div>
 
                             <div className="mb-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -183,7 +183,7 @@ export default function ContactPage() {
                                     >
                                         <CardHeader>
                                             <CardTitle className="text-brand text-xl mb-1">{info.title}</CardTitle>
-                                            <CardDescription className="text-accent text-base">
+                                            <CardDescription className="text-muted-foreground text-base">
                                                 {info.description}
                                             </CardDescription>
                                         </CardHeader>
@@ -216,7 +216,7 @@ export default function ContactPage() {
                                     <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">
                                         Send us a Message
                                     </h2>
-                                    <p className="text-accent text-lg">
+                                    <p className="text-muted-foreground text-lg">
                                         Fill out the form below and we'll get back to you within 24 hours
                                     </p>
                                 </div>
@@ -296,7 +296,7 @@ export default function ContactPage() {
                                 <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">
                                     Contact by Department
                                 </h2>
-                                <p className="text-accent text-lg">Reach out to the right team for faster assistance</p>
+                                <p className="text-muted-foreground text-lg">Reach out to the right team for faster assistance</p>
                             </div>
 
                             <div className="grid gap-8 md:grid-cols-3">
@@ -307,7 +307,7 @@ export default function ContactPage() {
                                     >
                                         <CardHeader className="bg-slate-50/50 pb-8">
                                             <CardTitle className="text-brand text-xl mb-1">{dept.title}</CardTitle>
-                                            <CardDescription className="text-accent text-base">
+                                            <CardDescription className="text-muted-foreground text-base">
                                                 {dept.description}
                                             </CardDescription>
                                         </CardHeader>
@@ -319,7 +319,7 @@ export default function ContactPage() {
                                                 </div>
                                                 <div>
                                                     <p className="text-brand text-xs font-bold uppercase tracking-wider mb-1">Response Time</p>
-                                                    <p className="text-accent text-sm">{dept.response}</p>
+                                                    <p className="text-muted-foreground text-sm">{dept.response}</p>
                                                 </div>
                                                 <Button
                                                     variant="outline"

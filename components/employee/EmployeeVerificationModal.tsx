@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useEmployeeVerifyOtpMutation, useEmployeeSendOtpMutation } from "@/store/api/employeeApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { Loader2 } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/inputOtp";
 
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { AddonPurchaseModal } from "@/components/common/AddonPurchaseModal";
@@ -43,9 +44,12 @@ export function EmployeeVerificationModal({
     const [showAddonModal, setShowAddonModal] = useState(false);
     const [limitErrorMessage, setLimitErrorMessage] = useState("");
 
-    const handleVerify = async () => {
+    const handleVerify = async (otpToVerify?: string) => {
+        const finalOtp = otpToVerify || otp;
+        if (!finalOtp || finalOtp.length < 6) return;
+
         try {
-            await verifyOtp({ id: employeeId, otp }).unwrap();
+            await verifyOtp({ id: employeeId, otp: finalOtp }).unwrap();
             showSuccessToast("Employee verified successfully! Credentials sent.");
             onSuccess();
             onOpenChange(false);
@@ -103,15 +107,32 @@ export function EmployeeVerificationModal({
                     ) : (
                         <div className="grid gap-4 py-4">
                             <div className="space-y-2">
-                                <p className="text-sm text-gray-500">Enter the 6-digit code sent to the email.</p>
-                                <Input
-                                    id="otp"
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
-                                    placeholder="Enter 6-digit OTP"
-                                    className="text-center text-lg tracking-widest"
-                                    maxLength={6}
-                                />
+                                <p className="text-sm text-gray-500 text-center">Enter the 6-digit code sent to the email.</p>
+                                <div className="flex justify-center py-2">
+                                    <InputOTP
+                                        id="otp"
+                                        maxLength={6}
+                                        value={otp}
+                                        onChange={(value) => {
+                                            setOtp(value);
+                                            if (value.length === 6) {
+                                                // Small delay to allow user to see the last digit before auto-verifying
+                                                setTimeout(() => handleVerify(value), 100);
+                                            }
+                                        }}
+                                        containerClassName="gap-2"
+                                    >
+                                        <InputOTPGroup className="gap-2">
+                                            {[0, 1, 2, 3, 4, 5].map((index) => (
+                                                <InputOTPSlot
+                                                    key={index}
+                                                    index={index}
+                                                    className="h-12 w-10 sm:h-14 sm:w-12 rounded-xl border-2 border-gray-200 bg-gray-50/50 text-xl font-bold transition-all focus-within:border-[#3882a5] focus-within:ring-[#3882a5]/20 focus-within:bg-white"
+                                                />
+                                            ))}
+                                        </InputOTPGroup>
+                                    </InputOTP>
+                                </div>
                             </div>
                             <div className="flex justify-end">
                                 <Button variant="link" size="sm" onClick={handleSendOtp} disabled={isSending || isVerifying}>

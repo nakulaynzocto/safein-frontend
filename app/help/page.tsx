@@ -85,7 +85,7 @@ export default function HelpPage() {
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
                                 <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">Get Support</h2>
-                                <p className="text-accent text-lg">Choose the support option that works best for you</p>
+                                <p className="text-muted-foreground text-lg">Choose the support option that works best for you</p>
                             </div>
 
                             <div className="grid gap-6 md:grid-cols-3">
@@ -96,7 +96,7 @@ export default function HelpPage() {
                                     >
                                         <CardHeader>
                                             <CardTitle className="text-brand text-xl mb-2">{option.title}</CardTitle>
-                                            <CardDescription className="text-accent text-base leading-relaxed">
+                                            <CardDescription className="text-muted-foreground text-base leading-relaxed">
                                                 {option.description}
                                             </CardDescription>
                                         </CardHeader>
@@ -120,7 +120,7 @@ export default function HelpPage() {
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
                                 <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">Browse by Category</h2>
-                                <p className="text-accent text-lg">Find help organized by topic</p>
+                                <p className="text-muted-foreground text-lg">Find help organized by topic</p>
                             </div>
 
                             <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -131,7 +131,7 @@ export default function HelpPage() {
                                     >
                                         <CardHeader className="bg-white pb-6">
                                             <CardTitle className="text-brand text-xl">{category.title}</CardTitle>
-                                            <CardDescription className="text-accent text-base">
+                                            <CardDescription className="text-muted-foreground text-base">
                                                 {category.description}
                                             </CardDescription>
                                         </CardHeader>
@@ -144,7 +144,7 @@ export default function HelpPage() {
                                                         <li key={articleIndex}>
                                                             <Link
                                                                 href={`/help/${slug}`}
-                                                                className="text-accent hover:text-brand-strong flex items-start gap-3 text-sm hover:underline group"
+                                                                className="text-muted-foreground hover:text-brand flex items-start gap-3 text-sm hover:underline group"
                                                             >
                                                                 <span className="bg-brand mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full transition-transform group-hover:scale-150" />
                                                                 <span>{article.title}</span>
@@ -173,7 +173,7 @@ export default function HelpPage() {
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
                                 <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">Popular Articles</h2>
-                                <p className="text-accent text-lg">Most frequently viewed help articles</p>
+                                <p className="text-muted-foreground text-lg">Most frequently viewed help articles</p>
                             </div>
 
                             <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -186,7 +186,7 @@ export default function HelpPage() {
                                             <div className="mb-4 flex items-start justify-between">
                                                 <Badge
                                                     variant="secondary"
-                                                    className="bg-brand-tint/50 text-brand-strong border-none text-[10px] uppercase tracking-wider font-bold"
+                                                    className="bg-accent/10 text-accent border-none text-[10px] uppercase tracking-wider font-bold"
                                                 >
                                                     {article.category}
                                                 </Badge>
