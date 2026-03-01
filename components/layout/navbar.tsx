@@ -28,24 +28,21 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { SidebarContent } from "@/components/layout/sidebar";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
-    User,
     LogOut,
     UserCircle,
     Menu,
     X,
-    Calendar,
     Users,
     Building2,
-    Shield,
-    FileText,
     HelpCircle,
-    Phone,
     Mail,
     Bell,
     CreditCard,
     Sparkles,
     MessageSquare,
     Settings,
+    ChevronRight,
+    Zap,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { usePathname } from "next/navigation";
@@ -235,12 +232,37 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
 
     return (
         <nav
-            className={`${shouldShowWhiteNavbar
-                ? "border-b border-gray-200/30 bg-white/90 shadow-lg backdrop-blur-md sticky"
-                : "bg-transparent border-transparent shadow-none absolute"
-                } top-0 left-0 right-0 z-50 transition-all duration-300`}
+            className={cn(
+                "top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out fixed",
+                shouldShowWhiteNavbar
+                    ? "border-b border-gray-200/50 bg-white/80 shadow-2xl backdrop-blur-xl py-0"
+                    : "bg-transparent border-transparent shadow-none py-2"
+            )}
         >
-            <div className="w-full px-4 sm:px-6 lg:px-8">
+            {/* Design Accents - Left & Right Side Decoration */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {/* Left Side Accent */}
+                <div className={cn(
+                    "absolute left-[-5%] top-[-50%] w-[30%] h-[200%] blur-[100px] rounded-full transition-all duration-700 opacity-20",
+                    shouldShowWhiteNavbar ? "bg-accent/5" : "bg-white/10"
+                )}></div>
+                
+                {/* Right Side Accent */}
+                <div className={cn(
+                    "absolute right-[-5%] bottom-[-50%] w-[25%] h-[200%] blur-[100px] rounded-full transition-all duration-700 opacity-20",
+                    shouldShowWhiteNavbar ? "bg-brand/5" : "bg-accent/10"
+                )}></div>
+
+                {/* Subtle horizontal gradient overlay */}
+                <div className={cn(
+                    "absolute inset-0 transition-opacity duration-700 opacity-10",
+                    shouldShowWhiteNavbar 
+                        ? "bg-gradient-to-r from-transparent via-gray-100/30 to-transparent" 
+                        : "bg-gradient-to-r from-white/5 via-transparent to-white/5"
+                )}></div>
+            </div>
+
+            <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12">
                 <div className="flex h-20 items-center justify-between">
                     <div className="flex items-center gap-4">
                         {/* Logo - Only show logo, hide text when sidebar is visible (to avoid duplicate branding) */}
@@ -288,20 +310,20 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                     className="flex-shrink-0"
                                     prefetch={true}
                                 >
-                                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-gray-200 bg-white">
+                                    <div className="group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white/10 shadow-2xl backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/20">
                                         <Image
                                             src="/aynzo-logo.png"
                                             alt="Aynzo Logo"
-                                            width={48}
-                                            height={48}
+                                            width={56}
+                                            height={56}
                                             priority
-                                            className="h-full w-full object-contain p-1"
+                                            className="h-full w-full object-contain p-2 transition-transform duration-500 group-hover:rotate-12"
                                             onError={(e) => {
-                                                // Fallback if logo fails to load
                                                 const target = e.currentTarget as HTMLImageElement;
                                                 target.src = "/aynzo-logo.svg";
                                             }}
                                         />
+                                        <div className="animate-shimmer absolute inset-0 opacity-10"></div>
                                     </div>
                                 </Link>
                                 {/* Visitor Management System Text - Show for authenticated users */}
@@ -322,72 +344,43 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                     {/* Center: Navigation Links */}
                     <div className="hidden flex-1 items-center justify-center lg:flex">
                         {!isActuallyAuthenticated && variant !== "dashboard" && (
-                            <div className="flex items-center gap-2">
-                                <Link
-                                    href={routes.publicroute.HOME}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.HOME
-                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                        : `border-transparent ${linkText}`
-                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
-                                    prefetch={true}
-                                >
-                                    <span className="relative z-10">Home</span>
-                                    <div
-                                        className={`absolute inset-0 rounded-lg opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${shouldShowWhiteNavbar ? "from-brand/10 to-brand-strong/10 bg-gradient-to-r" : "bg-white/5"}`}
-                                    />
-                                </Link>
-                                <Link
-                                    href={routes.publicroute.FEATURES}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.FEATURES
-                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                        : `border-transparent ${linkText}`
-                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
-                                    prefetch={true}
-                                >
-                                    <span className="relative z-10">Features</span>
-                                    <div
-                                        className={`absolute inset-0 rounded-lg opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${shouldShowWhiteNavbar ? "from-brand/10 to-brand-strong/10 bg-gradient-to-r" : "bg-white/5"}`}
-                                    />
-                                </Link>
-                                <Link
-                                    href={routes.publicroute.PRICING}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.PRICING
-                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                        : `border-transparent ${linkText}`
-                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
-                                    prefetch={true}
-                                >
-                                    <span className="relative z-10">Pricing</span>
-                                    <div
-                                        className={`absolute inset-0 rounded-lg opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${shouldShowWhiteNavbar ? "from-brand/10 to-brand-strong/10 bg-gradient-to-r" : "bg-white/5"}`}
-                                    />
-                                </Link>
-                                <Link
-                                    href={routes.publicroute.CONTACT}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.CONTACT
-                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                        : `border-transparent ${linkText}`
-                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
-                                    prefetch={true}
-                                >
-                                    <span className="relative z-10">Contact</span>
-                                    <div
-                                        className={`absolute inset-0 rounded-lg opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${shouldShowWhiteNavbar ? "from-brand/10 to-brand-strong/10 bg-gradient-to-r" : "bg-white/5"}`}
-                                    />
-                                </Link>
-                                <Link
-                                    href={routes.publicroute.HELP}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.HELP
-                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                        : `border-transparent ${linkText}`
-                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
-                                    prefetch={true}
-                                >
-                                    <span className="relative z-10">Help</span>
-                                    <div
-                                        className={`absolute inset-0 rounded-lg opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${shouldShowWhiteNavbar ? "from-brand/10 to-brand-strong/10 bg-gradient-to-r" : "bg-white/5"}`}
-                                    />
-                                </Link>
+                            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/5 backdrop-blur-sm ring-1 ring-white/10">
+                                {[
+                                    { label: "Home", href: routes.publicroute.HOME },
+                                    { label: "Features", href: routes.publicroute.FEATURES },
+                                    { label: "Pricing", href: routes.publicroute.PRICING },
+                                    { label: "Contact", href: routes.publicroute.CONTACT },
+                                    { label: "Help", href: routes.publicroute.HELP }
+                                ].map((item) => {
+                                    const isActive = pathname === item.href;
+                                    
+                                    return (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            className={cn(
+                                                "relative px-5 py-2.5 text-sm font-semibold transition-all duration-300 rounded-xl",
+                                                isActive 
+                                                    ? shouldShowWhiteNavbar 
+                                                        ? "text-brand-strong bg-brand/5" 
+                                                        : "text-white bg-white/10"
+                                                    : linkText,
+                                                "hover:scale-105 active:scale-95"
+                                            )}
+                                        >
+                                            <span className="relative z-10">{item.label}</span>
+                                            {isActive && (
+                                                <div className={cn(
+                                                    "absolute bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full",
+                                                    shouldShowWhiteNavbar ? "bg-brand" : "bg-white"
+                                                )} />
+                                            )}
+                                            {!isActive && (
+                                                <div className="absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-white/5" />
+                                            )}
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -693,10 +686,15 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 </Button>
                                 <Link
                                     href={routes.publicroute.REGISTER}
-                                    className={`hidden rounded-lg px-6 py-2 text-[14px] font-semibold transition-all duration-300 sm:flex ${ctaBtn}`}
+                                    className={cn(
+                                        "hidden rounded-xl px-7 py-3 text-[14px] font-bold transition-all duration-300 sm:flex items-center justify-center relative overflow-hidden group",
+                                        ctaBtn
+                                    )}
                                     prefetch={true}
                                 >
-                                    Start 3 Day Trial
+                                    <span className="relative z-10">Start 3 Day Trial</span>
+                                    <div className="animate-shimmer absolute inset-0 opacity-10"></div>
+                                    <div className="absolute inset-x-0 bottom-0 h-0.5 bg-brand-strong/20 transition-all duration-300 group-hover:h-full group-hover:opacity-10"></div>
                                 </Link>
                             </>
                         )}
@@ -722,84 +720,62 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                 <UpgradePlanModal isOpen={isUpgradeModalOpen} onClose={handleCloseUpgradeModal} />
 
                 {isMobileMenuOpen && !isActuallyAuthenticated && (
-                    <div className="border-t border-gray-200/30 bg-white/90 shadow-lg backdrop-blur-md lg:hidden">
-                        <div className="space-y-2 px-4 pt-4 pb-6">
-                            {/* Show public menu links when: forcePublic is true OR not authenticated OR no subscription */}
-                            {(forcePublic || !isAuthenticated || !token || !hasActiveSubscription) && (
-                                <>
-                                    <Link
-                                        href={routes.publicroute.HOME}
-                                        className="block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 hover:scale-105 hover:bg-gray-100/80"
-                                        style={{ color: "#161718" }}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        Home
-                                    </Link>
-                                    <Link
-                                        href={routes.publicroute.FEATURES}
-                                        className="block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 hover:scale-105 hover:bg-gray-100/80"
-                                        style={{ color: "#161718" }}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        Features
-                                    </Link>
-                                    <Link
-                                        href={routes.publicroute.PRICING}
-                                        className="block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 hover:scale-105 hover:bg-gray-100/80"
-                                        style={{ color: "#161718" }}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        Pricing
-                                    </Link>
-                                    <Link
-                                        href={routes.publicroute.CONTACT}
-                                        className="block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 hover:scale-105 hover:bg-gray-100/80"
-                                        style={{ color: "#161718" }}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        Contact
-                                    </Link>
-                                    <Link
-                                        href={routes.publicroute.HELP}
-                                        className="block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 hover:scale-105 hover:bg-gray-100/80"
-                                        style={{ color: "#161718" }}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        Help
-                                    </Link>
-                                    <div className="border-t border-gray-200/50 pt-4">
-                                        {/* Show Sign In / Start Trial if: No token */}
-                                        {!isAuthenticated || !token ? (
-                                            <>
-                                                <Link
-                                                    href={routes.publicroute.LOGIN}
-                                                    className="block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 hover:bg-gray-100/80"
-                                                    style={{ color: "#161718" }}
-                                                    onClick={() => setIsMobileMenuOpen(false)}
-                                                >
-                                                    Sign in
-                                                </Link>
-                                                <Link
-                                                    href={routes.publicroute.REGISTER}
-                                                    className={`block rounded-lg px-4 py-3 text-base font-semibold transition-all duration-300 ${ctaBtn}`}
-                                                    onClick={() => setIsMobileMenuOpen(false)}
-                                                >
-                                                    Start 3 Day Trial
-                                                </Link>
-                                            </>
-                                        ) : isMounted && isAuthenticated && token && !isSubscriptionPage ? (
-                                            /* Show My Account for any logged-in user */
-                                            <Link
-                                                href={routes.privateroute.DASHBOARD}
-                                                className={`block rounded-lg px-4 py-3 text-base font-semibold transition-all duration-300 ${ctaBtn}`}
-                                                onClick={() => setIsMobileMenuOpen(false)}
-                                            >
-                                                My Account
-                                            </Link>
-                                        ) : null}
+                    <div className="absolute top-20 left-0 right-0 border-b border-gray-200/30 bg-white/95 shadow-2xl backdrop-blur-xl lg:hidden animate-in fade-in slide-in-from-top-4 duration-300">
+                        <div className="space-y-1 px-4 pt-4 pb-8">
+                            {[
+                                { label: "Home", href: routes.publicroute.HOME, icon: <UserCircle className="h-5 w-5" /> },
+                                { label: "Features", href: routes.publicroute.FEATURES, icon: <Zap className="h-5 w-5" /> },
+                                { label: "Pricing", href: routes.publicroute.PRICING, icon: <CreditCard className="h-5 w-5" /> },
+                                { label: "Contact", href: routes.publicroute.CONTACT, icon: <Mail className="h-5 w-5" /> },
+                                { label: "Help", href: routes.publicroute.HELP, icon: <HelpCircle className="h-5 w-5" /> }
+                            ].map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className="flex items-center gap-4 rounded-xl px-4 py-4 text-base font-bold transition-all duration-200 active:scale-95 hover:bg-brand/5 group"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-gray-400 transition-colors group-hover:bg-brand/10 group-hover:text-brand">
+                                        {item.icon}
                                     </div>
-                                </>
-                            )}
+                                    <span className="text-[#161718]">{item.label}</span>
+                                </Link>
+                            ))}
+                            
+                            <div className="mt-6 border-t border-gray-100 pt-6 px-2 space-y-4">
+                                {!isAuthenticated || !token ? (
+                                    <>
+                                        <Link
+                                            href={routes.publicroute.LOGIN}
+                                            className="flex h-14 w-full items-center justify-center rounded-2xl bg-gray-50 text-base font-bold text-[#161718] transition-all active:scale-95"
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                        >
+                                            Sign in
+                                        </Link>
+                                        <Link
+                                            href={routes.publicroute.REGISTER}
+                                            className={cn(
+                                                "flex h-14 w-full items-center justify-center rounded-2xl text-base font-bold transition-all active:scale-95 shadow-lg",
+                                                ctaBtn
+                                            )}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                        >
+                                            Start 3 Day Trial
+                                        </Link>
+                                    </>
+                                ) : isMounted && isAuthenticated && token && !isSubscriptionPage ? (
+                                    <Link
+                                        href={routes.privateroute.DASHBOARD}
+                                        className={cn(
+                                            "flex h-14 w-full items-center justify-center rounded-2xl text-base font-bold transition-all active:scale-95 shadow-lg",
+                                            ctaBtn
+                                        )}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        My Account
+                                    </Link>
+                                ) : null}
+                            </div>
                         </div>
                     </div>
                 )}

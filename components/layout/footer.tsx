@@ -105,10 +105,22 @@ const socialLinks: SocialLink[] = [
 
 export function Footer() {
     return (
-        <footer className="bg-[#074463] text-white/90">
-            <div className="w-full px-4 py-12 sm:px-6 lg:px-8">
+        <footer className="relative bg-[#074463] text-white/90 overflow-hidden border-t border-white/5">
+            {/* Design Accents - Left & Right Side Decoration */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {/* Left Side Accent */}
+                <div className="absolute left-[-10%] top-[-20%] w-[40%] h-[140%] bg-accent/10 blur-[120px] rounded-full opacity-30"></div>
+                
+                {/* Right Side Accent */}
+                <div className="absolute right-[-10%] bottom-[-20%] w-[35%] h-[140%] bg-brand/10 blur-[120px] rounded-full opacity-20"></div>
+
+                {/* Subtle horizontal gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/[0.02] via-transparent to-white/[0.02] opacity-50"></div>
+            </div>
+
+            <div className="relative z-10 w-full px-6 py-16 sm:px-12 lg:px-16">
                 {/* Logo Section */}
-                <div className="mb-8 border-b border-white/10 pb-8">
+                <div className="mb-12 border-b border-white/10 pb-10">
                     <Link href="/" className="inline-block">
                         <Image
                             src="/aynzo-logo.png"

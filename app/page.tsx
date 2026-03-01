@@ -35,10 +35,18 @@ import {
     ShieldCheck,
     MessageSquare,
     Activity,
+    UserCircle,
+    Scan,
+    FileOutput,
+    CheckSquare,
+    DoorOpen,
+    Smartphone,
+    Laptop,
 } from "lucide-react";
 import Link from "next/link";
 import { PageSEOHead } from "@/components/seo/pageSEOHead";
 import { generateStructuredData } from "@/lib/seoHelpers";
+import { cn } from "@/lib/utils";
 
 export default function HomePage() {
     const router = useRouter();
@@ -63,6 +71,66 @@ export default function HomePage() {
         }
     };
 
+    const processSteps = [
+        {
+            id: 1,
+            title: "Visitor Arrival",
+            description: "Visitor enters their details at the sleek digital kiosk or pre-registers online.",
+            image: "/home/solutions/smart-checkin.png",
+            badge: "Secure Arrival",
+            color: "from-[#074463] to-[#3882a5]"
+        },
+        {
+            id: 2,
+            title: "Digital Registration",
+            description: "Fast, paperless registration via smartphone or reception iPad.",
+            image: "/home/solutions/quick-registeration.jpg",
+            badge: "No Paperwork",
+            color: "from-[#074463] to-[#3882a5]"
+        },
+        {
+            id: 3,
+            title: "Instant Alerts",
+            description: "Hosts receive real-time notifications on WhatsApp and Email.",
+            image: "/home/solutions/smart-notifications.png",
+            badge: "Instant Sync",
+            color: "from-[#074463] to-[#3882a5]"
+        },
+        {
+            id: 4,
+            title: "Admin Approval",
+            description: "One-click approval from the employee's powerful dashboard.",
+            image: "/home/solutions/powerful-dashboard.jpg",
+            badge: "Secure Access",
+            color: "from-[#074463] to-[#3882a5]"
+        },
+        {
+            id: 5,
+            title: "Security Verification",
+            description: "Gatekeeper verifies the 6-digit secure OTP for final check-in.",
+            image: "/home/hero/Tranform-your-digital-visitor-management.jpg",
+            badge: "Verified OTP",
+            color: "from-[#074463] to-[#3882a5]"
+        },
+        {
+            id: 6,
+            title: "Access Granted",
+            description: "Visual analytics track every successful arrival and departure.",
+            image: "/home/solutions/realtime-analytics.png",
+            badge: "Welcome In",
+            color: "from-[#074463] to-[#3882a5]"
+        }
+    ];
+
+    const [activeStep, setActiveStep] = useState(0);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setActiveStep((prev) => (prev + 1) % processSteps.length);
+        }, 5000);
+        return () => clearInterval(timer);
+    }, [processSteps.length]);
+
     const homeStructuredData = generateStructuredData("home");
 
     return (
@@ -85,86 +153,178 @@ export default function HomePage() {
             />
             <PublicLayout>
                 {/* Hero Section */}
-                <section className="bg-hero-gradient relative pt-20 pb-8 sm:pt-24 sm:pb-10 md:pt-32 md:pb-12">
+                <section className="bg-hero-gradient relative overflow-hidden pt-24 pb-16 sm:pt-32 sm:pb-24 lg:pt-40 lg:pb-32">
+                    {/* Decorative Background Elements */}
+                    <div className="absolute top-0 right-0 -mr-24 -mt-24 h-[500px] w-[500px] rounded-full bg-brand/10 blur-[120px]"></div>
+                    <div className="absolute bottom-0 left-0 -ml-24 -mb-24 h-[400px] w-[400px] rounded-full bg-brand-light/10 blur-[100px]"></div>
+
                     <div className="relative z-10 container mx-auto px-4 sm:px-6">
-                        <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+                        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
                             {/* Left Side - Main Content */}
                             <div className="text-center lg:text-left">
-                                <div className="mb-4 flex flex-wrap items-center justify-center gap-2 sm:mb-6 lg:justify-start">
-                                    <Star className="h-4 w-4 fill-current text-yellow-400 sm:h-5 sm:w-5" />
-                                    <span className="text-sm font-semibold text-yellow-400 sm:text-base">
-                                        4.9/5 Rating
-                                    </span>
-                                    <span className="hidden text-gray-300 sm:inline">•</span>
-                                    <span className="text-sm text-gray-300 sm:text-base">1000+ Happy Clients</span>
+                                <div className="mb-6 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+                                    <div className="badge-glass flex items-center gap-2 rounded-full px-4 py-1.5 transition-all hover:bg-white/10">
+                                        <Star className="h-4 w-4 fill-current text-yellow-400" />
+                                        <span className="text-sm font-semibold text-white">4.9/5 Rating</span>
+                                    </div>
+                                    <div className="hidden h-5 w-[1px] bg-white/20 sm:block"></div>
+                                    <div className="badge-glass rounded-full px-4 py-1.5 text-sm font-medium text-gray-200">
+                                        Trust by 1000+ Enterprises
+                                    </div>
                                 </div>
-                                <h1 className="animate-hero-title mb-4 px-2 text-3xl leading-tight font-bold text-white sm:mb-6 sm:px-0 sm:text-4xl md:text-5xl lg:text-6xl">
-                                    Revolutionize Your Workspace with Smart Visitor Intelligence
+
+                                <h1 className="animate-hero-title mb-6 px-1 text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl lg:leading-[1.1]">
+                                    <span className="text-premium-gradient">Smart Visitor</span> <br />
+                                    Intelligence for Teams
                                 </h1>
-                                <p className="mb-6 px-2 text-base leading-relaxed text-gray-300 sm:mb-8 sm:px-0 sm:text-lg md:text-xl">
-                                    Secure your premises and enhance your corporate image with a sophisticated digital reception. SafeIn streamlines smart appointments, seamless walk-in registrations, and real-time security alerts for modern, productive office environments.
+
+                                <p className="text-accent-light mb-10 max-w-xl px-1 text-lg leading-relaxed text-gray-300 sm:text-xl lg:px-0">
+                                    SafeIn empowers modern organizations with a sophisticated digital reception,
+                                    streamlined appointments, and real-time security intelligence.
                                 </p>
 
-                                {/* 3 Day Trial Badge */}
-                                <div className="bg-brand mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold text-white sm:mb-6 sm:px-4 sm:py-2 sm:text-sm">
-                                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white sm:h-2 sm:w-2"></span>
-                                    Enterprise-Grade Security
-                                </div>
-                                <div className="flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row sm:gap-4 lg:justify-start">
+                                <div className="flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row lg:justify-start">
                                     {isAuthenticated && token ? (
                                         <Button
                                             size="lg"
-                                            className="bg-brand w-full px-6 py-2.5 text-sm font-semibold text-white sm:w-auto sm:px-8 sm:py-3 sm:text-base"
+                                            className="bg-brand relative h-14 w-full overflow-hidden px-10 text-lg font-bold text-white shadow-[0_0_20px_rgba(56,130,165,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(56,130,165,0.6)] sm:w-auto"
                                             asChild
                                         >
-                                            <Link href={routes.privateroute.DASHBOARD}>My Account</Link>
+                                            <Link href={routes.privateroute.DASHBOARD}>
+                                                <span className="relative z-10">My Dashboard</span>
+                                                <div className="animate-shimmer absolute inset-0 opacity-20"></div>
+                                            </Link>
                                         </Button>
                                     ) : (
                                         <Button
                                             size="lg"
-                                            className="bg-brand w-full px-6 py-2.5 text-sm font-semibold text-white sm:w-auto sm:px-8 sm:py-3 sm:text-base"
+                                            className="bg-brand relative h-14 w-full overflow-hidden px-10 text-lg font-bold text-white shadow-[0_0_20px_rgba(56,130,165,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(56,130,165,0.6)] sm:w-auto"
                                             onClick={handleHeroFreeTrialClick}
                                         >
-                                            Get Started Now
+                                            <span className="relative z-10">Experience SafeIn</span>
+                                            <div className="animate-shimmer absolute inset-0 opacity-20"></div>
                                         </Button>
                                     )}
                                     <Button
                                         size="lg"
                                         variant="outline"
-                                        className="w-full border-white px-6 py-2.5 text-sm text-gray-900 hover:bg-white hover:text-gray-900 sm:w-auto sm:px-8 sm:py-3 sm:text-base"
+                                        className="glass-morphism h-14 w-full border-white/20 px-10 text-lg font-semibold text-white transition-all hover:bg-white/10 hover:text-white sm:w-auto"
                                         asChild
                                     >
-                                        <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>
+                                        <Link href={routes.publicroute.CONTACT}>View Live Demo</Link>
                                     </Button>
+                                </div>
+
+                                {/* Security Badge */}
+                                <div className="mt-10 flex items-center justify-center gap-6 opacity-60 grayscale transition-all hover:opacity-100 hover:grayscale-0 lg:justify-start">
+                                    <div className="flex items-center gap-2">
+                                        <ShieldCheck className="h-5 w-5 text-white" />
+                                        <span className="text-xs font-medium tracking-wider text-white uppercase">ISO 27001 Certified</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Globe className="h-5 w-5 text-white" />
+                                        <span className="text-xs font-medium tracking-wider text-white uppercase">GDPR Compliant</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Right Side - Animated Dashboard Preview (using original image) */}
-                            <div className="relative order-first mt-8 lg:order-last lg:mt-0 lg:ml-auto lg:max-w-[434px]">
-                                <div className="absolute -inset-4 rounded-2xl bg-white/40 opacity-30 blur-3xl sm:-inset-6"></div>
-                                <Image
-                                    src="/home/hero/Tranform-your-digital-visitor-management.jpg"
-                                    alt="Transform Your Digital Visitor Management"
-                                    width={364}
-                                    height={224}
-                                    className="dash-glow animate-float-slow h-auto w-full rounded-full shadow-2xl"
-                                    priority
-                                />
-                                <div className="absolute -bottom-3 -left-3 max-w-[200px] rounded-lg border border-white/40 bg-white/90 p-2 shadow-lg backdrop-blur-sm sm:-bottom-5 sm:-left-5 sm:max-w-none sm:p-3">
-                                    <div className="flex items-center gap-2 sm:gap-3">
-                                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-100 sm:h-10 sm:w-10">
-                                            <CheckCircle className="h-4 w-4 text-green-600 sm:h-5 sm:w-5" />
-                                        </div>
-                                        <div className="min-w-0">
-                                            <p className="text-xs font-semibold text-gray-900 sm:text-sm">
-                                                Live dashboard preview
-                                            </p>
-                                            <p className="hidden text-xs text-gray-600 sm:block">
-                                                What your team will see
-                                            </p>
+                            {/* Right Side - Premium Visual Asset */}
+                            <div className="relative mt-12 lg:mt-0">
+
+                                {/* Main Hero Visual Asset - Phone Mockup Style */}
+                                <div className="relative mx-auto max-w-[340px] lg:ml-auto">
+                                    {/* Ambient Glow */}
+                                    <div className={`absolute -inset-10 rounded-full bg-gradient-to-br ${processSteps[activeStep].color} opacity-20 blur-[100px] transition-all duration-1000`}></div>
+                                    
+                                    {/* Smartphone Frame Mockup */}
+                                    <div className="relative z-10 mx-auto w-full overflow-hidden rounded-[3.5rem] border-[8px] border-gray-950 bg-gray-950 shadow-[0_0_60px_rgba(0,0,0,0.5),0_0_0_2px_rgba(255,255,255,0.1)] ring-1 ring-white/10">
+                                        {/* Dynamic Island / Notch */}
+                                        <div className="absolute top-0 left-1/2 z-40 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-gray-950"></div>
+                                        
+                                        <div className="relative aspect-[9/16] w-full overflow-hidden rounded-[2.8rem] bg-gray-950">
+                                            {/* Process Images - Enhanced Alignment */}
+                                            {processSteps.map((step, idx) => (
+                                                <div 
+                                                    key={step.id}
+                                                    className={cn(
+                                                        "absolute inset-0 transition-opacity duration-1000",
+                                                        idx === activeStep ? "opacity-100" : "opacity-0"
+                                                    )}
+                                                >
+                                                    <Image
+                                                        src={step.image}
+                                                        alt={step.title}
+                                                        fill
+                                                        className="object-cover object-top"
+                                                        priority={idx === 0}
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-gray-950/20 to-transparent"></div>
+                                                </div>
+                                            ))}
+
+                                            {/* Mobile UI Overlay */}
+                                            <div className="absolute inset-0 z-30 flex flex-col p-6">
+                                                {/* Top Navigation Simulation */}
+                                                <div className="flex items-center justify-between pt-2">
+                                                    <div className="text-[10px] font-bold text-white/40">9:41</div>
+                                                    <div className="h-4 w-16 rounded-full bg-black/40 backdrop-blur-md ring-1 ring-white/10 flex items-center justify-center">
+                                                        <div className="h-1 w-1 rounded-full bg-white/40"></div>
+                                                    </div>
+                                                    <div className="flex gap-1 text-[10px] font-bold text-white/40 italic">5G</div>
+                                                </div>
+
+                                                {/* Progress Indicators */}
+                                                <div className="mt-4 flex gap-1">
+                                                    {processSteps.map((_, idx) => (
+                                                        <div 
+                                                            key={idx} 
+                                                            className={`h-0.5 flex-1 rounded-full transition-all duration-500 ${idx === activeStep ? "bg-white" : "bg-white/10"}`}
+                                                        />
+                                                    ))}
+                                                </div>
+
+                                                <div className="mt-auto pb-6">
+                                                    <div className={cn(
+                                                        "mb-2.5 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[8px] font-black tracking-widest text-white uppercase backdrop-blur-2xl ring-1 ring-white/20 shadow-xl",
+                                                        `bg-gradient-to-r ${processSteps[activeStep].color}`
+                                                    )}>
+                                                        <span className="relative flex h-1.5 w-1.5">
+                                                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+                                                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white"></span>
+                                                        </span>
+                                                        STEP 0{processSteps[activeStep].id}
+                                                    </div>
+                                                    
+                                                    <h3 className="mb-2 text-xl font-black text-white leading-tight">
+                                                        {processSteps[activeStep].title}
+                                                    </h3>
+                                                    
+                                                    <p className="text-xs text-gray-300 leading-relaxed line-clamp-2">
+                                                        {processSteps[activeStep].description}
+                                                    </p>
+                                                    
+                                                    {/* Compact Status Indicator */}
+                                                    <div className="mt-4 flex items-center justify-between rounded-xl bg-black/40 p-3 backdrop-blur-2xl ring-1 ring-white/10">
+                                                        <div className="flex items-center gap-2">
+                                                            <Activity className="h-3 w-3 text-white/60" />
+                                                            <span className="text-[9px] font-bold text-white/80">{processSteps[activeStep].badge}</span>
+                                                        </div>
+                                                        <div className="flex -space-x-2">
+                                                            {[1, 2].map((i) => (
+                                                                <div key={i} className="h-5 w-5 rounded-full border border-gray-900 overflow-hidden">
+                                                                    <Image src={`/home/hero/avatar-${i}.png`} alt="User" width={20} height={20} />
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Home Indicator */}
+                                                <div className="absolute bottom-1.5 left-1/2 h-1 w-16 -translate-x-1/2 rounded-full bg-white/10"></div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -187,12 +347,12 @@ export default function HomePage() {
                             </p>
                         </div>
 
-                        <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-2 max-w-4xl mx-auto">
                             {/* Feature 1 */}
-                            <div className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
+                            <Link href="/features#appointments" className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
                                 <div className="relative mb-6 h-48 w-full overflow-hidden rounded-2xl bg-slate-50">
                                     <Image
-                                        src="/home/features/feature-booking.png"
+                                        src="/images/features/smart_appointments_hero_1772358159659.png"
                                         alt="Smart Appointment Booking"
                                         fill
                                         className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -203,13 +363,13 @@ export default function HomePage() {
                                     Schedule appointments, create shareable booking links, and manage visitors with
                                     automated notifications and calendar sync.
                                 </p>
-                            </div>
+                            </Link>
 
                             {/* Feature 2 */}
-                            <div className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
+                            <Link href="/features#spot-pass" className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
                                 <div className="relative mb-6 h-48 w-full overflow-hidden rounded-2xl bg-slate-50">
                                     <Image
-                                        src="/home/features/feature-spotpass.png"
+                                        src="/images/features/spot_pass_hero_1772358331734.png"
                                         alt="Spot Pass System"
                                         fill
                                         className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -217,16 +377,16 @@ export default function HomePage() {
                                 </div>
                                 <h3 className="text-brand mb-4 text-xl font-bold sm:text-2xl">Spot Pass System</h3>
                                 <p className="text-accent leading-relaxed">
-                                    Handle walk-in visitors seamlessly with instant registration, QR scan entry, 
+                                    Handle walk-in visitors seamlessly with instant registration, 1-click OTP entry, 
                                     and a streamlined check-in process.
                                 </p>
-                            </div>
+                            </Link>
 
                             {/* Feature 3 */}
-                            <div className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
+                            <Link href="/features#chat" className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
                                 <div className="relative mb-6 h-48 w-full overflow-hidden rounded-2xl bg-slate-50">
                                     <Image
-                                        src="/home/features/feature-chat.png"
+                                        src="/images/features/chat_hero_1772358492233.png"
                                         alt="Real-time Chat"
                                         fill
                                         className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -237,13 +397,13 @@ export default function HomePage() {
                                     Instant team communication and automated host-visitor bots for a 
                                     seamlessly connected office experience.
                                 </p>
-                            </div>
+                            </Link>
 
                             {/* Feature 4 */}
-                            <div className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
+                            <Link href="/features#workforce" className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
                                 <div className="relative mb-6 h-48 w-full overflow-hidden rounded-2xl bg-slate-50">
                                     <Image
-                                        src="/home/features/feature-employees.png"
+                                        src="/images/features/workforce_dashboard_hero_1772358658740.png"
                                         alt="Employee Management"
                                         fill
                                         className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -254,41 +414,7 @@ export default function HomePage() {
                                     Comprehensive staff directory with bulk import, role-based access control, 
                                     and automated team onboarding.
                                 </p>
-                            </div>
-
-                            {/* Feature 5 */}
-                            <div className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
-                                <div className="relative mb-6 h-48 w-full overflow-hidden rounded-2xl bg-slate-50">
-                                    <Image
-                                        src="/home/features/feature-security.png"
-                                        alt="Security & Analytics"
-                                        fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                </div>
-                                <h3 className="text-brand mb-4 text-xl font-bold sm:text-2xl">Security & Analytics</h3>
-                                <p className="text-accent leading-relaxed">
-                                    Advanced security monitoring, visitor pattern analysis, and deep-dive reports 
-                                    for safety and compliance.
-                                </p>
-                            </div>
-
-                            {/* Feature 6 */}
-                            <div className="group relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl sm:p-8">
-                                <div className="relative mb-6 h-48 w-full overflow-hidden rounded-2xl bg-slate-50">
-                                    <Image
-                                        src="/home/features/feature-notifications.png"
-                                        alt="Smart Notifications"
-                                        fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                </div>
-                                <h3 className="text-brand mb-4 text-xl font-bold sm:text-2xl">Smart Notifications</h3>
-                                <p className="text-accent leading-relaxed">
-                                    Multi-channel alerts via WhatsApp, SMS, and push notifications to keep 
-                                    hosts and visitors instantly informed.
-                                </p>
-                            </div>
+                            </Link>
                         </div>
                     </div>
                 </section>
@@ -332,10 +458,10 @@ export default function HomePage() {
                                     <ul className="space-y-8">
                                         <li>
                                             <Link href={routes.publicroute.FEATURES} className="group mb-2 flex items-center text-brand-strong font-semibold transition-colors hover:text-brand">
-                                                Smart check-in flow <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                                One-Click OTP Check-in <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                             </Link>
                                             <p className="text-accent/80 text-sm leading-relaxed">
-                                                Visitors scan a unique QR code to register via their own smartphones, 
+                                                Visitors receive a secure 6-digit security code for verification, 
                                                 eliminating queues and front-desk manual work.
                                             </p>
                                         </li>
@@ -474,14 +600,17 @@ export default function HomePage() {
 
 
                 {/* Industries Section */}
-                <section className="bg-white py-24 sm:py-32">
+                <section className="relative overflow-hidden bg-white py-24 sm:py-32">
                     <div className="container mx-auto px-4 sm:px-6">
                         <div className="mb-20 text-center">
-                            <span className="mb-4 inline-block text-sm font-bold tracking-[0.2em] text-brand-strong uppercase">
-                                Sectors
-                            </span>
-                            <h2 className="text-brand mb-6 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-                                Industries Trusting SafeIn
+                            <div className="bg-brand/5 mb-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 ring-1 ring-brand/10">
+                                <Building2 className="text-brand h-4 w-4" />
+                                <span className="text-xs font-bold tracking-widest text-brand uppercase">
+                                    Industry Solutions
+                                </span>
+                            </div>
+                            <h2 className="text-brand mb-6 text-4xl font-extrabold tracking-tight sm:text-5xl">
+                                Tailored for Every <span className="text-brand-strong underline decoration-brand-light/30 decoration-8 underline-offset-4">Enterprise</span>
                             </h2>
                             <p className="text-accent mx-auto max-w-2xl text-lg leading-relaxed sm:text-xl">
                                 From IT Parks in Bangalore to Housing Societies in Mumbai, we secure every sector 
@@ -492,39 +621,51 @@ export default function HomePage() {
                         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                             {[
                                 { 
-                                    title: "Factories & Industrial", 
-                                    desc: "Streamline workforce check-ins and visitor safety in large-scale manufacturing and industrial plants across India.", 
-                                    img: "/home/industries/industry-it.png" // Using the previous IT image as a placeholder for now
+                                    title: "Industrial & Manufacturing", 
+                                    desc: "Secure workforce tracking for large-scale production plants.", 
+                                    img: "/home/industries/industry-it.png",
+                                    icon: <Zap className="h-5 w-5" />
                                 },
                                 { 
-                                    title: "Housing Societies", 
-                                    desc: "The ultimate digital gatekeeper for modern residential apartment complexes.", 
-                                    img: "/home/industries/industry-housing.png" 
+                                    title: "Luxury Residential", 
+                                    desc: "Premium visitor lobby for modern gated communities.", 
+                                    img: "/home/industries/industry-housing.png",
+                                    icon: <Heart className="h-5 w-5" />
                                 },
                                 { 
-                                    title: "Educational Institutes", 
-                                    desc: "Secure school and university campuses with smart student and faculty tracking.", 
-                                    img: "/home/industries/industry-education.png" 
+                                    title: "Educational Hubs", 
+                                    desc: "Smart campus security for schools and universities.", 
+                                    img: "/home/industries/industry-education.png",
+                                    icon: <Award className="h-5 w-5" />
                                 },
                                 { 
                                     title: "Healthcare Centers", 
-                                    desc: "Efficiently manage patient attendants and visitor flow in world-class medical centers.", 
-                                    img: "/home/hero/Tranform-your-digital-visitor-management.jpg" // Using existing dashboard img for now as it looks professional
+                                    desc: "Efficient patient attendant flow for medical centers.", 
+                                    img: "/home/hero/Tranform-your-digital-visitor-management.jpg",
+                                    icon: <Activity className="h-5 w-5" />
                                 }
                             ].map((industry, i) => (
-                                <div key={i} className="group relative overflow-hidden rounded-[2rem] border border-gray-100 bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
-                                    <div className="relative h-56 w-full overflow-hidden">
+                                <div key={i} className="group relative overflow-hidden rounded-[2.5rem] border border-gray-100 bg-white p-2 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(7,68,99,0.12)]">
+                                    <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem]">
                                         <Image
                                             src={industry.img}
                                             alt={industry.title}
                                             fill
-                                            className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                            className="object-cover transition-transform duration-1000 group-hover:scale-110"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-transparent to-transparent"></div>
-                                    </div>
-                                    <div className="p-8">
-                                        <h3 className="text-brand mb-3 text-xl font-bold sm:text-2xl">{industry.title}</h3>
-                                        <p className="text-accent text-sm leading-relaxed md:text-base">{industry.desc}</p>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-brand/90 via-brand/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-90"></div>
+                                        
+                                        <div className="absolute bottom-0 left-0 p-8 text-white">
+                                            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md">
+                                                {industry.icon}
+                                            </div>
+                                            <h4 className="mb-2 text-xl font-bold leading-tight">
+                                                {industry.title}
+                                            </h4>
+                                            <p className="line-clamp-2 text-sm text-gray-200">
+                                                {industry.desc}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -631,79 +772,6 @@ export default function HomePage() {
                 </section>
 
 
-                {/* Contact Section */}
-                <section className="relative overflow-hidden bg-gradient-to-br from-[#074463] via-[#0a5a82] to-[#074463] pt-24 pb-12 sm:pt-32">
-                    <div className="container mx-auto px-4 sm:px-6">
-                        <div className="mb-20 text-center">
-                            <h2 className="mb-6 text-4xl font-bold tracking-tight text-white md:text-6xl">
-                                Let's Secure Your Workspace
-                            </h2>
-                            <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-200 sm:text-xl">
-                                Ready to transform your digital reception? Our experts are standing by to 
-                                help you choose the perfect solution for your organization.
-                            </p>
-                        </div>
-
-                        <div className="mx-auto grid max-w-6xl gap-16 lg:grid-cols-2">
-                            <div className="relative">
-                                <h3 className="mb-10 text-2xl font-bold text-white sm:text-3xl">Contact Information</h3>
-                                <div className="space-y-8">
-                                    <div className="flex items-center gap-5">
-                                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-lg">
-                                            <Clock className="text-brand h-6 w-6" />
-                                        </div>
-                                        <div>
-                                            <p className="text-lg font-bold text-white">Working Hours</p>
-                                            <p className="text-gray-300">Mon-Fri: 9:00 AM - 6:00 PM</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-5">
-                                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-lg">
-                                            <Mail className="text-brand h-6 w-6" />
-                                        </div>
-                                        <div>
-                                            <p className="text-lg font-bold text-white">Email Support</p>
-                                            <p className="text-gray-300">support@aynzo.com</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-5">
-                                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-lg">
-                                            <Phone className="text-brand h-6 w-6" />
-                                        </div>
-                                        <div>
-                                            <p className="text-lg font-bold text-white">Direct Line</p>
-                                            <p className="text-gray-300">+91 86999 66076</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="relative rounded-[2rem] border border-white/20 bg-white/10 p-8 backdrop-blur-md transition-all hover:bg-white/15 sm:p-12">
-                                <h3 className="mb-6 text-2xl font-bold text-white sm:text-3xl">Get in Touch</h3>
-                                <p className="mb-10 text-lg leading-relaxed text-gray-200">
-                                    Start your journey toward a smarter, safer workspace today. Contact 
-                                    our specialist team for a personalized walkthrough.
-                                </p>
-                                <div className="flex flex-col gap-4 sm:flex-row">
-                                    <Button size="lg" className="bg-brand w-full text-white shadow-lg sm:w-auto sm:px-10" asChild>
-                                        <Link href={routes.publicroute.CONTACT}>Contact Us Now</Link>
-                                    </Button>
-                                    <Button
-                                        size="lg"
-                                        variant="outline"
-                                        className="bg-transparent w-full border-white text-white hover:bg-white hover:text-brand sm:w-auto sm:px-10"
-                                        asChild
-                                    >
-                                        <Link href={routes.publicroute.PRICING}>View Pricing</Link>
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {/* Subtle Background Accent */}
-                    <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/5 blur-3xl"></div>
-                    <div className="absolute -left-24 -bottom-24 h-96 w-96 rounded-full bg-brand/10 blur-3xl"></div>
-                </section>
             </PublicLayout>
         </>
     );

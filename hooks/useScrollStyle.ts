@@ -228,8 +228,8 @@ export function useNavbarScrollStyle(options: UseNavbarScrollStyleOptions): UseN
     // CTA button styling based on navbar style
     const ctaBtn = useMemo(() => {
         return shouldShowWhiteNavbar
-            ? "bg-brand text-white hover:bg-brand/90"
-            : "bg-white text-brand-strong hover:bg-white/90";
+            ? "bg-brand text-white hover:bg-brand/90 shadow-md transition-all active:scale-95"
+            : "bg-white text-brand-strong hover:bg-white/90 shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all active:scale-95";
     }, [shouldShowWhiteNavbar]);
 
     return {
