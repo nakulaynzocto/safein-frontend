@@ -160,88 +160,20 @@ export default function HomePage() {
 
                     <div className="relative z-10 container mx-auto px-4 sm:px-6">
                         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-                            {/* Left Side - Main Content */}
-                            <div className="text-center lg:text-left">
-                                <div className="mb-6 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-                                    <div className="badge-glass flex items-center gap-2 rounded-full px-4 py-1.5 transition-all hover:bg-white/10">
-                                        <Star className="h-4 w-4 fill-current text-yellow-400" />
-                                        <span className="text-sm font-semibold text-white">4.9/5 Rating</span>
-                                    </div>
-                                    <div className="hidden h-5 w-[1px] bg-white/20 sm:block"></div>
-                                    <div className="badge-glass rounded-full px-4 py-1.5 text-sm font-medium text-gray-200">
-                                        Trust by 1000+ Enterprises
-                                    </div>
-                                </div>
-
-                                <h1 className="animate-hero-title mb-6 px-1 text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl lg:leading-[1.1]">
-                                    <span className="text-premium-gradient">Smart Visitor</span> <br />
-                                    Intelligence for Teams
-                                </h1>
-
-                                <p className="text-accent-light mb-10 max-w-xl px-1 text-lg leading-relaxed text-gray-300 sm:text-xl lg:px-0">
-                                    SafeIn empowers modern organizations with a sophisticated digital reception,
-                                    streamlined appointments, and real-time security intelligence.
-                                </p>
-
-                                <div className="flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row lg:justify-start">
-                                    {isAuthenticated && token ? (
-                                        <Button
-                                            size="lg"
-                                            className="bg-brand relative h-14 w-full overflow-hidden px-10 text-lg font-bold text-white shadow-[0_0_20px_rgba(56,130,165,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(56,130,165,0.6)] sm:w-auto"
-                                            asChild
-                                        >
-                                            <Link href={routes.privateroute.DASHBOARD}>
-                                                <span className="relative z-10">My Dashboard</span>
-                                                <div className="animate-shimmer absolute inset-0 opacity-20"></div>
-                                            </Link>
-                                        </Button>
-                                    ) : (
-                                        <Button
-                                            size="lg"
-                                            className="bg-brand relative h-14 w-full overflow-hidden px-10 text-lg font-bold text-white shadow-[0_0_20px_rgba(56,130,165,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(56,130,165,0.6)] sm:w-auto"
-                                            onClick={handleHeroFreeTrialClick}
-                                        >
-                                            <span className="relative z-10">Experience SafeIn</span>
-                                            <div className="animate-shimmer absolute inset-0 opacity-20"></div>
-                                        </Button>
-                                    )}
-                                    <Button
-                                        size="lg"
-                                        variant="outline"
-                                        className="glass-morphism h-14 w-full border-white/20 px-10 text-lg font-semibold text-white transition-all hover:bg-white/10 hover:text-white sm:w-auto"
-                                        asChild
-                                    >
-                                        <Link href={routes.publicroute.CONTACT}>View Live Demo</Link>
-                                    </Button>
-                                </div>
-
-                                {/* Security Badge */}
-                                <div className="mt-10 flex items-center justify-center gap-6 opacity-60 grayscale transition-all hover:opacity-100 hover:grayscale-0 lg:justify-start">
-                                    <div className="flex items-center gap-2">
-                                        <ShieldCheck className="h-5 w-5 text-white" />
-                                        <span className="text-xs font-medium tracking-wider text-white uppercase">ISO 27001 Certified</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Globe className="h-5 w-5 text-white" />
-                                        <span className="text-xs font-medium tracking-wider text-white uppercase">GDPR Compliant</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Right Side - Premium Visual Asset */}
-                            <div className="relative mt-12 lg:mt-0">
+                            {/* Right Side - Premium Visual Asset (Moved up for mobile) */}
+                            <div className="relative order-1 lg:order-2">
 
                                 {/* Main Hero Visual Asset - Phone Mockup Style */}
-                                <div className="relative mx-auto max-w-[340px] lg:ml-auto">
+                                <div className="relative mx-auto max-w-[280px] sm:max-w-[340px] lg:ml-auto">
                                     {/* Ambient Glow */}
                                     <div className={`absolute -inset-10 rounded-full bg-gradient-to-br ${processSteps[activeStep].color} opacity-20 blur-[100px] transition-all duration-1000`}></div>
                                     
                                     {/* Smartphone Frame Mockup */}
-                                    <div className="relative z-10 mx-auto w-full overflow-hidden rounded-[3.5rem] border-[8px] border-gray-950 bg-gray-950 shadow-[0_0_60px_rgba(0,0,0,0.5),0_0_0_2px_rgba(255,255,255,0.1)] ring-1 ring-white/10">
+                                    <div className="relative z-10 mx-auto w-full overflow-hidden rounded-[3rem] sm:rounded-[3.5rem] border-[6px] sm:border-[8px] border-gray-950 bg-gray-950 shadow-[0_0_60px_rgba(0,0,0,0.5),0_0_0_2px_rgba(255,255,255,0.1)] ring-1 ring-white/10">
                                         {/* Dynamic Island / Notch */}
-                                        <div className="absolute top-0 left-1/2 z-40 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-gray-950"></div>
+                                        <div className="absolute top-0 left-1/2 z-40 h-5 sm:h-7 w-20 sm:w-28 -translate-x-1/2 rounded-b-2xl bg-gray-950"></div>
                                         
-                                        <div className="relative aspect-[9/16] w-full overflow-hidden rounded-[2.8rem] bg-gray-950">
+                                        <div className="relative aspect-[9/16] w-full overflow-hidden rounded-[2.5rem] sm:rounded-[2.8rem] bg-gray-950">
                                             {/* Process Images - Enhanced Alignment */}
                                             {processSteps.map((step, idx) => (
                                                 <div 
@@ -257,74 +189,81 @@ export default function HomePage() {
                                                         fill
                                                         className="object-cover object-top"
                                                         priority={idx === 0}
+                                                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                                     />
                                                     <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-gray-950/20 to-transparent"></div>
                                                 </div>
                                             ))}
-
-                                            {/* Mobile UI Overlay */}
-                                            <div className="absolute inset-0 z-30 flex flex-col p-6">
-                                                {/* Top Navigation Simulation */}
-                                                <div className="flex items-center justify-between pt-2">
-                                                    <div className="text-[10px] font-bold text-white/40">9:41</div>
-                                                    <div className="h-4 w-16 rounded-full bg-black/40 backdrop-blur-md ring-1 ring-white/10 flex items-center justify-center">
-                                                        <div className="h-1 w-1 rounded-full bg-white/40"></div>
-                                                    </div>
-                                                    <div className="flex gap-1 text-[10px] font-bold text-white/40 italic">5G</div>
-                                                </div>
-
-                                                {/* Progress Indicators */}
-                                                <div className="mt-4 flex gap-1">
-                                                    {processSteps.map((_, idx) => (
-                                                        <div 
-                                                            key={idx} 
-                                                            className={`h-0.5 flex-1 rounded-full transition-all duration-500 ${idx === activeStep ? "bg-white" : "bg-white/10"}`}
-                                                        />
-                                                    ))}
-                                                </div>
-
-                                                <div className="mt-auto pb-6">
-                                                    <div className={cn(
-                                                        "mb-2.5 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[8px] font-black tracking-widest text-white uppercase backdrop-blur-2xl ring-1 ring-white/20 shadow-xl",
-                                                        `bg-gradient-to-r ${processSteps[activeStep].color}`
-                                                    )}>
-                                                        <span className="relative flex h-1.5 w-1.5">
-                                                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
-                                                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white"></span>
-                                                        </span>
-                                                        STEP 0{processSteps[activeStep].id}
-                                                    </div>
-                                                    
-                                                    <h3 className="mb-2 text-xl font-black text-white leading-tight">
-                                                        {processSteps[activeStep].title}
-                                                    </h3>
-                                                    
-                                                    <p className="text-xs text-gray-300 leading-relaxed line-clamp-2">
-                                                        {processSteps[activeStep].description}
-                                                    </p>
-                                                    
-                                                    {/* Compact Status Indicator */}
-                                                    <div className="mt-4 flex items-center justify-between rounded-xl bg-black/40 p-3 backdrop-blur-2xl ring-1 ring-white/10">
-                                                        <div className="flex items-center gap-2">
-                                                            <Activity className="h-3 w-3 text-white/60" />
-                                                            <span className="text-[9px] font-bold text-white/80">{processSteps[activeStep].badge}</span>
-                                                        </div>
-                                                        <div className="flex -space-x-2">
-                                                            {[1, 2].map((i) => (
-                                                                <div key={i} className="h-5 w-5 rounded-full border border-gray-900 overflow-hidden">
-                                                                    <Image src={`/home/hero/avatar-${i}.png`} alt="User" width={20} height={20} />
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                {/* Home Indicator */}
-                                                <div className="absolute bottom-1.5 left-1/2 h-1 w-16 -translate-x-1/2 rounded-full bg-white/10"></div>
-                                            </div>
                                         </div>
                                     </div>
+                                </div>
                             </div>
+
+                            {/* Left Side - Main Content (Moved down for mobile) */}
+                            <div className="text-center lg:text-left order-2 lg:order-1">
+                                <div className="mb-8 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+                                    <div className="badge-glass flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all hover:bg-white/10">
+                                        <Star className="h-3.5 w-3.5 fill-current text-yellow-400" />
+                                        <span className="text-[11px] font-bold text-white uppercase tracking-wider">4.9/5 Rating</span>
+                                    </div>
+                                    <div className="badge-glass rounded-full px-3 py-1.5 text-[11px] font-bold text-gray-200 uppercase tracking-wider">
+                                        1000+ Enterprises Trusted
+                                    </div>
+                                </div>
+
+                                <h1 className="animate-hero-title mb-6 px-1 text-3xl font-black tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl lg:leading-[1.1]">
+                                    <span className="text-premium-gradient">Smart Visitor</span> <br />
+                                    <span className="text-white lg:opacity-90">Intelligence for Teams</span>
+                                </h1>
+
+                                <p className="text-accent-light mb-10 max-w-xl px-2 text-base leading-relaxed text-gray-300 sm:text-xl lg:px-0 opacity-90">
+                                    SafeIn empowers modern organizations with a sophisticated digital reception,
+                                    streamlined appointments, and real-time security intelligence.
+                                </p>
+
+                                <div className="flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row lg:justify-start px-2 sm:px-0">
+                                    {isAuthenticated && token ? (
+                                        <Button
+                                            size="lg"
+                                            className="bg-brand relative h-12 sm:h-14 w-full overflow-hidden px-8 text-base sm:text-lg font-bold text-white shadow-[0_0_20px_rgba(56,130,165,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(56,130,165,0.6)] sm:w-auto rounded-xl"
+                                            asChild
+                                        >
+                                            <Link href={routes.privateroute.DASHBOARD}>
+                                                <span className="relative z-10">My Dashboard</span>
+                                                <div className="animate-shimmer absolute inset-0 opacity-20"></div>
+                                            </Link>
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            size="lg"
+                                            className="bg-brand relative h-12 sm:h-14 w-full overflow-hidden px-8 text-base sm:text-lg font-bold text-white shadow-[0_0_20px_rgba(56,130,165,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(56,130,165,0.6)] sm:w-auto rounded-xl"
+                                            onClick={handleHeroFreeTrialClick}
+                                        >
+                                            <span className="relative z-10">Experience SafeIn</span>
+                                            <div className="animate-shimmer absolute inset-0 opacity-20"></div>
+                                        </Button>
+                                    )}
+                                    <Button
+                                        size="lg"
+                                        variant="outline"
+                                        className="glass-morphism h-12 sm:h-14 w-full border-white/20 px-8 text-base sm:text-lg font-semibold text-white transition-all hover:bg-white/10 hover:text-white sm:w-auto rounded-xl"
+                                        asChild
+                                    >
+                                        <Link href={routes.publicroute.CONTACT}>View Live Demo</Link>
+                                    </Button>
+                                </div>
+
+                                {/* Security Badge */}
+                                <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 opacity-50 grayscale transition-all hover:opacity-100 hover:grayscale-0 lg:justify-start">
+                                    <div className="flex items-center gap-2">
+                                        <ShieldCheck className="h-4 w-4 text-white" />
+                                        <span className="text-[10px] font-bold tracking-widest text-white uppercase italic">ISO 27001 Certified</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Globe className="h-4 w-4 text-white" />
+                                        <span className="text-[10px] font-bold tracking-widest text-white uppercase italic">GDPR Compliant</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -652,6 +591,7 @@ export default function HomePage() {
                                             alt={industry.title}
                                             fill
                                             className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-brand/90 via-brand/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-90"></div>
                                         

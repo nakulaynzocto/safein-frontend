@@ -233,34 +233,40 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
     return (
         <nav
             className={cn(
-                "top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out fixed",
+                "top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out",
+                variant === "dashboard" ? "sticky" : "fixed",
                 shouldShowWhiteNavbar
-                    ? "border-b border-gray-200/50 bg-white/80 shadow-2xl backdrop-blur-xl py-0"
+                    ? cn(
+                        "border-b border-gray-200/50 bg-white/80 backdrop-blur-xl py-0",
+                        variant === "dashboard" ? "shadow-sm" : "shadow-2xl"
+                    )
                     : "bg-transparent border-transparent shadow-none py-2"
             )}
         >
-            {/* Design Accents - Left & Right Side Decoration */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {/* Left Side Accent */}
-                <div className={cn(
-                    "absolute left-[-5%] top-[-50%] w-[30%] h-[200%] blur-[100px] rounded-full transition-all duration-700 opacity-20",
-                    shouldShowWhiteNavbar ? "bg-accent/5" : "bg-white/10"
-                )}></div>
-                
-                {/* Right Side Accent */}
-                <div className={cn(
-                    "absolute right-[-5%] bottom-[-50%] w-[25%] h-[200%] blur-[100px] rounded-full transition-all duration-700 opacity-20",
-                    shouldShowWhiteNavbar ? "bg-brand/5" : "bg-accent/10"
-                )}></div>
+            {/* Design Accents - Only show on public site, not on dashboard */}
+            {variant !== "dashboard" && (
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    {/* Left Side Accent */}
+                    <div className={cn(
+                        "absolute left-[-5%] top-[-50%] w-[30%] h-[200%] blur-[100px] rounded-full transition-all duration-700 opacity-20",
+                        shouldShowWhiteNavbar ? "bg-accent/5" : "bg-white/10"
+                    )}></div>
+                    
+                    {/* Right Side Accent */}
+                    <div className={cn(
+                        "absolute right-[-5%] bottom-[-50%] w-[25%] h-[200%] blur-[100px] rounded-full transition-all duration-700 opacity-20",
+                        shouldShowWhiteNavbar ? "bg-brand/5" : "bg-accent/10"
+                    )}></div>
 
-                {/* Subtle horizontal gradient overlay */}
-                <div className={cn(
-                    "absolute inset-0 transition-opacity duration-700 opacity-10",
-                    shouldShowWhiteNavbar 
-                        ? "bg-gradient-to-r from-transparent via-gray-100/30 to-transparent" 
-                        : "bg-gradient-to-r from-white/5 via-transparent to-white/5"
-                )}></div>
-            </div>
+                    {/* Subtle horizontal gradient overlay */}
+                    <div className={cn(
+                        "absolute inset-0 transition-opacity duration-700 opacity-10",
+                        shouldShowWhiteNavbar 
+                            ? "bg-gradient-to-r from-transparent via-gray-100/30 to-transparent" 
+                            : "bg-gradient-to-r from-white/5 via-transparent to-white/5"
+                    )}></div>
+                </div>
+            )}
 
             <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12">
                 <div className="flex h-20 items-center justify-between">
@@ -310,14 +316,14 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                     className="flex-shrink-0"
                                     prefetch={true}
                                 >
-                                    <div className="group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white/10 shadow-2xl backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/20">
+                                    <div className="group relative flex h-10 w-10 lg:h-14 lg:w-14 items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl border border-white/20 bg-white/10 shadow-2xl backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/20">
                                         <Image
                                             src="/aynzo-logo.png"
                                             alt="Aynzo Logo"
                                             width={56}
                                             height={56}
                                             priority
-                                            className="h-full w-full object-contain p-2 transition-transform duration-500 group-hover:rotate-12"
+                                            className="h-full w-full object-contain p-1.5 lg:p-2 transition-transform duration-500 group-hover:rotate-12"
                                             onError={(e) => {
                                                 const target = e.currentTarget as HTMLImageElement;
                                                 target.src = "/aynzo-logo.svg";

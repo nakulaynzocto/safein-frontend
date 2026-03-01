@@ -93,6 +93,7 @@ export default function FeaturesPage() {
                                             fill
                                             className="object-contain p-2 lg:p-6"
                                             priority={index === 0}
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                         />
                                     </div>
                                 ))}
@@ -117,6 +118,7 @@ export default function FeaturesPage() {
                                             fill
                                             className="object-contain p-2 lg:p-6"
                                             priority={index === 0}
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                         />
                                     </div>
                                 ))}
