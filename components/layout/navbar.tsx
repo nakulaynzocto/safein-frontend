@@ -300,7 +300,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {shouldShowPrivateNavbar && (
                                     <div className={`hidden items-center lg:flex`}>
                                         <div
-                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white drop-shadow-lg"
+                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white"
                                                 }`}
                                         >
                                             Visitor Management System
@@ -316,7 +316,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                     className="flex-shrink-0"
                                     prefetch={true}
                                 >
-                                    <div className="group relative flex h-10 w-10 lg:h-14 lg:w-14 items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl border border-white/20 bg-white/10 shadow-2xl backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/20">
+                                    <div className="group relative flex h-10 w-10 lg:h-14 lg:w-14 items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/20">
                                         <Image
                                             src="/aynzo-logo.png"
                                             alt="Aynzo Logo"
@@ -336,7 +336,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {shouldShowPrivateNavbar && (
                                     <div className={`hidden items-center lg:flex`}>
                                         <div
-                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white drop-shadow-lg"
+                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white"
                                                 }`}
                                         >
                                             Visitor Management System
@@ -350,7 +350,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                     {/* Center: Navigation Links */}
                     <div className="hidden flex-1 items-center justify-center lg:flex">
                         {!isActuallyAuthenticated && variant !== "dashboard" && (
-                            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/5 backdrop-blur-sm ring-1 ring-white/10">
+                            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
                                 {[
                                     { label: "Home", href: routes.publicroute.HOME },
                                     { label: "Features", href: routes.publicroute.FEATURES },
@@ -701,7 +701,6 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 >
                                     <span className="relative z-10">Start 3 Day Trial</span>
                                     <div className="animate-shimmer absolute inset-0 opacity-10"></div>
-                                    <div className="absolute inset-x-0 bottom-0 h-0.5 bg-brand-strong/20 transition-all duration-300 group-hover:h-full group-hover:opacity-10"></div>
                                 </Link>
                             </>
                         )}

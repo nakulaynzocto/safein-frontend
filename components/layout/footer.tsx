@@ -74,7 +74,7 @@ const socialLinks = [
 
 export function Footer() {
     return (
-        <footer className="relative bg-[#072433] text-white overflow-hidden">
+        <footer className="relative bg-[#074463] text-white overflow-hidden">
             {/* Design Accents - Ambient Glows */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -left-20 -top-20 w-[400px] h-[400px] bg-brand/5 blur-[120px] rounded-full opacity-40"></div>
