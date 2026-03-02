@@ -53,7 +53,7 @@ export default function HelpArticlePage({ params }: PageProps) {
             <div className="flex min-h-screen flex-col" style={{ backgroundColor: "var(--background)" }}>
                 <Navbar forcePublic showUpgradeButton={false} />
                 <main className="flex-1">
-                    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 py-8 sm:py-12">
+                    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 pt-28 pb-12 sm:pt-36 sm:pb-16">
                         <div className="mx-auto container px-4 sm:px-6 lg:px-8">
                             {/* Back Navigation */}
                             <div className="mb-6">

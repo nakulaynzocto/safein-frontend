@@ -216,10 +216,10 @@ export default function PricingPage() {
                     {/* Pricing Summary */}
                     <section className="bg-white px-4 py-16">
                         <div className="container mx-auto text-center">
-                            <div className="mx-auto max-w-4xl">
+                            <div className="mx-auto max-w-6xl">
                                 <h2 className="text-brand mb-4 text-3xl font-bold">Pricing Summary</h2>
                                 <p className="text-muted-foreground mb-8 text-lg">Premium plan total cost comparison</p>
-                                <div className="scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent flex snap-x snap-mandatory gap-6 overflow-x-auto pb-8">
+                                <div className="scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent flex snap-x snap-mandatory gap-6 overflow-x-auto pb-8 px-4">
                                     {plans
                                         .filter((p) => p.planType !== "free")
                                         .map((plan, index) => {
@@ -229,12 +229,12 @@ export default function PricingPage() {
                                             return (
                                                 <div
                                                     key={plan._id}
-                                                    className="w-[200px] flex-none snap-center py-2 sm:w-[260px]"
+                                                    className="w-[240px] flex-none snap-center py-2 sm:w-[280px]"
                                                 >
                                                     <div
-                                                        className={`h-full rounded-xl bg-white p-4 transition-all duration-300 ${plan.isPopular ? "border-brand border-2 shadow-lg" : "border-border border shadow-sm hover:shadow-md"}`}
+                                                        className={`h-full rounded-2xl bg-white p-6 transition-all duration-300 ${plan.isPopular ? "border-brand border-2 shadow-lg" : "border-border border shadow-sm hover:shadow-md"}`}
                                                     >
-                                                        <div className="text-brand-strong mb-1 text-lg font-bold">
+                                                        <div className="text-brand-strong mb-2 text-xl font-bold">
                                                             {plan.planType === "monthly"
                                                                 ? "1 Month"
                                                                 : plan.planType === "quarterly"
@@ -242,21 +242,21 @@ export default function PricingPage() {
                                                                     : "12 Months"}
                                                         </div>
                                                         {plan.discountPercentage && plan.discountPercentage > 0 && (
-                                                            <div className="mb-0.5 text-[10px] text-gray-400 line-through">
+                                                            <div className="mb-1 text-sm text-gray-400 line-through">
                                                                 {formatCurrency(originalAmount, plan.currency)}
                                                             </div>
                                                         )}
-                                                        <div className="mb-1 text-xl font-bold">
+                                                        <div className="mb-2 text-2xl font-bold text-gray-900">
                                                             {formatCurrency(plan.amount, plan.currency)}
                                                         </div>
                                                         {plan.monthlyEquivalent && (
-                                                            <div className="text-muted-foreground text-[10px]">
+                                                            <div className="text-muted-foreground text-xs">
                                                                 {formatCurrency(plan.monthlyEquivalent, plan.currency)}
                                                                 /month effective
                                                             </div>
                                                         )}
                                                         {plan.discountPercentage && plan.discountPercentage > 0 && (
-                                                            <Badge className="mt-1 h-4 bg-green-500 px-2 py-0 text-[9px] text-white">
+                                                            <Badge className="mt-2 bg-green-500 px-3 py-1 text-[10px] text-white">
                                                                 Save {formatCurrency(savedAmount, plan.currency)}
                                                             </Badge>
                                                         )}
@@ -343,30 +343,7 @@ export default function PricingPage() {
                         </div>
                     </section>
 
-                    {/* CTA Section */}
-                    <section className="bg-[#074463] px-4 pt-20 pb-8">
-                        <div className="container mx-auto text-center">
-                            <h2 className="mb-6 text-3xl font-bold text-white md:text-4xl">Ready to Get Started?</h2>
-                            <p className="mx-auto mb-8 max-w-2xl text-xl text-gray-300">
-                                Join thousands of businesses that trust our platform. Start your free trial today.
-                            </p>
-                            <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                                <Button size="lg" className="bg-brand text-white" asChild>
-                                    <Link href={routes.publicroute.REGISTER}>
-                                        Start 3 Day Trial
-                                        <ArrowRight className="ml-2 h-5 w-5" />
-                                    </Link>
-                                </Button>
-                                <Button
-                                    size="lg"
-                                    variant="outline"
-                                    className="border-white text-gray-900 hover:bg-white hover:text-gray-900"
-                                >
-                                    <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>
-                                </Button>
-                            </div>
-                        </div>
-                    </section>
+
                 </div>
             </PublicLayout>
 

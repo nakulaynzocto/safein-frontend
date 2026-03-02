@@ -9,10 +9,102 @@ export interface HelpArticle {
     content: string;
     lastUpdated: string;
     readTime: string;
+    image?: string;
 }
 
 export const helpArticles: HelpArticle[] = [
     // Getting Started
+    {
+        id: "onboarding-guide",
+        title: "SafeIn Onboarding: Complete Step-by-Step Guide",
+        slug: "safein-onboarding-guide",
+        category: "Getting Started",
+        description: "The ultimate guide for new users: From first login to managing your entire visitor ecosystem.",
+        readTime: "10 min read",
+        lastUpdated: "Mar 2026",
+        image: "/images/features/workforce_dashboard_hero_1772358658740.png",
+        content: `
+      <h2>Welcome to SafeIn!</h2>
+      <p>Congratulations on joining India's most advanced visitor intelligence platform. This guide is designed to take you from your first login to a fully operational, high-security digital reception.</p>
+      
+      <p>In <strong>SafeIn</strong>, the workflow is designed to be intuitive. After you log in, follow these critical steps to ensure your organization is secured and efficient.</p>
+
+      <div style="margin: 24px 0;">
+        <img src="/images/features/workforce_dashboard_hero_1772358658740.png" alt="SafeIn Dashboard Overview" style="border-radius: 12px; width: 100%; height: auto; border: 1px solid #eee;" />
+      </div>
+
+      <hr />
+
+      <h2>Step 1: Your First Login & Profile Setup</h2>
+      <p>Once you receive your login credentials, head over to the login page. After successful authentication, your first priority should be your account settings.</p>
+      <ul>
+          <li><strong>Complete Business Profile:</strong> Navigate to <strong>Settings > Profile</strong>. Add your company name, official address, and contact details.</li>
+          <li><strong>Upload Branding:</strong> Go to the branding section to upload your company logo. This logo will appear on visitor invite emails and printed badges.</li>
+          <li><strong>Configure Notifications:</strong> Ensure your SMTP or Email settings are active under <strong>Settings > Email</strong> so that invites reach your guests instantly.</li>
+      </ul>
+
+      <h2>Step 2: Employee Registration & 'Workforce Hub'</h2>
+      <p>A visitor management system is only effective if your employees are registered. Your staff members act as 'Hosts' for visitors.</p>
+      <ul>
+          <li><strong>Manual Registration:</strong> Admins can add individual employees via the <strong>Workforce Hub</strong>. Each employee will need a unique email or mobile number to receive arrival alerts.</li>
+          <li><strong>Bulk Import & Onboarding:</strong> For larger teams, use the <strong>Bulk CSV/Excel Import</strong> feature. This allows you to onboard hundreds of employees in one click.</li>
+          <li><strong>OTP Verification:</strong> When employees join, they verify their accounts using a secure OTP system, ensuring only authorized personnel can act as hosts.</li>
+          <li><strong>Define Roles:</strong> Assign roles such as <em>Admin</em> for full control, or <em>Receptionist</em> for front-desk access only.</li>
+      </ul>
+
+      <div style="margin: 24px 0;">
+        <img src="/images/features/otp_verification_mobile_1772358411976.png" alt="Employee OTP Verification" style="border-radius: 12px; width: 100%; height: auto; border: 1px solid #eee;" />
+      </div>
+
+      <h2>Step 3: Activating 'Smart Appointments'</h2>
+      <p>Now that your team is ready, start inviting guests. SafeIn offers two primary ways to schedule visits:</p>
+      <ul>
+          <li><strong>VIP Booking:</strong> The host fills in the visitor's details directly. The visitor receives an automated <strong>OTP (One-Time Password)</strong> via WhatsApp and Email for secure verification.</li>
+          <li><strong>Invite Links:</strong> Send a registration link via WhatsApp or Email. The visitor clicks the link, fills in their own details, and the appointment is automatically booked.</li>
+          <li><strong>Pre-Verification:</strong> You can ask visitors to provide their details (like vehicle number or ID) before they even arrive.</li>
+      </ul>
+
+      <div style="margin: 24px 0;">
+        <img src="/images/features/smart_appointments_hero_1772358159659.png" alt="Smart Appointments Interface" style="border-radius: 12px; width: 100%; height: auto; border: 1px solid #eee;" />
+      </div>
+
+      <h2>Step 4: Managing Walk-ins with 'Spot Pass'</h2>
+      <p>For visitors who arrive without an appointment, SafeIn provides the <strong>Spot Pass</strong> feature.</p>
+      <ul>
+          <li><strong>Spot Pass Creation:</strong> The security guard or receptionist can generate a 'Spot Pass' directly from the dashboard.</li>
+          <li><strong>Frictionless Entry:</strong> Unlike VIP bookings, <strong>Spot Pass does not require an OTP</strong>, allowing for rapid registration of walk-in guests.</li>
+          <li><strong>Instant Notification:</strong> As soon as a Spot Pass is generated, the assigned host receives an instant alert.</li>
+      </ul>
+
+      <div style="margin: 24px 0;">
+        <img src="/images/features/spot_pass_hero_1772358331734.png" alt="Spot Pass System" style="border-radius: 12px; width: 100%; height: auto; border: 1px solid #eee;" />
+      </div>
+
+      <h2>Step 5: Real-time Employee Chat & Communication</h2>
+      <p>One of the most premium features of SafeIn is the <strong>Integrated Messaging System</strong>.</p>
+      <ul>
+          <li><strong>Host-Visitor Direct Chat:</strong> Hosts can chat directly with their arriving visitors through the dashboard or mobile app.</li>
+          <li><strong>Status Updates:</strong> Tell your visitor <em>"I'm on my way"</em> or <em>"Please wait in the cafe"</em> with one click.</li>
+          <li><strong>Secure History:</strong> All communication is encrypted and stored in the visitor log for security audits.</li>
+          <li><strong>In-App Notifications:</strong> Hosts receive real-time push notifications of new messages from their guests.</li>
+      </ul>
+
+      <div style="margin: 24px 0;">
+        <img src="/images/features/chat_hero_1772358492233.png" alt="Real-time Chat Feature" style="border-radius: 12px; width: 100%; height: auto; border: 1px solid #eee;" />
+      </div>
+
+      <hr />
+
+      <h2>Summary of the Flow</h2>
+      <p>1. <strong>Admin Setup:</strong> Profile & Branding <br/>
+         2. <strong>Workforce:</strong> Manual or Bulk Employee Registration <br/>
+         3. <strong>Operation:</strong> Create Appointments or Spot Passes <br/>
+         4. <strong>Communication:</strong> Chat directly with visitors in real-time <br/>
+         5. <strong>Intelligence:</strong> Review dashboard data.</p>
+      
+      <p>If you encounter any issues during these steps, our <strong>24/7 Live Chat</strong> is available right inside your dashboard to assist you.</p>
+    `,
+    },
     {
         id: "1",
         title: "How to create your first appointment",
@@ -21,11 +113,12 @@ export const helpArticles: HelpArticle[] = [
         description: "A comprehensive guide to scheduling and managing visitor appointments in SafeIn.",
         readTime: "5 min read",
         lastUpdated: "Dec 2025",
+        image: "/images/features/smart_appointments_hero_1772358159659.png",
         content: `
       <h2>Introduction</h2>
-      <p>Scheduling appointments effectively is the cornerstone of a secure and efficient front-desk operation. In <strong>SafeIn</strong>, creating an appointment not only reserves a time slot but also initiates a sequence of automated workflows, including visitor notifications, calendar invites, and security pre-checks.</p>
+      <p>Scheduling appointments effectively is the cornerstone of a secure and efficient operation. In <strong>SafeIn</strong>, creating an appointment initiates a sequence of automated workflows, including visitor notifications and secure QR code generation.</p>
       
-      <p>This guide will walk you through the complete process of creating a new appointment, ensuring you capture all necessary details for a seamless visitor experience.</p>
+      <p>This guide will walk you through the process of creating a new appointment for a seamless visitor experience.</p>
 
       <hr />
 
@@ -34,49 +127,42 @@ export const helpArticles: HelpArticle[] = [
       <h3>1. Accessing the Appointment Module</h3>
       <p>Log in to your SafeIn Dashboard. You can initiate a new appointment from two locations:</p>
       <ul>
-          <li><strong>Quick Actions:</strong> Located on the top-right of the main Dashboard, click the <strong>"Make Appointment"</strong> button for immediate access.</li>
-          <li><strong>Sidebar Navigation:</strong> Click on <strong>"Appointments"</strong> in the left-hand menu, then select <strong>"New Appointment"</strong>.</li>
+          <li><strong>Quick Actions:</strong> Click the <strong>"Make Appointment"</strong> button on the dashboard.</li>
+          <li><strong>Sidebar Navigation:</strong> Click on <strong>"Appointments"</strong>, then select <strong>"New Appointment"</strong>.</li>
       </ul>
 
-      <h3>2. Entering Visitor Information</h3>
-      <p>Accurate data entry is crucial for security and communication. Please fill in the following fields:</p>
+      <h3>2. Choose Booking Method</h3>
+      <p>Decide how you'd like to invite your guest:</p>
       <ul>
-          <li><strong>Visitor Name (Required):</strong> Enter the guest's full legal name as it appears on their ID.</li>
-          <li><strong>Email Address (Required):</strong> This is used to send the invitation, QR code, and parking instructions.</li>
-          <li><strong>Phone Number (Optional):</strong> Useful for SMS notifications (if enabled in your plan).</li>
-          <li><strong>Company/Organization:</strong> The entity the visitor represents.</li>
+          <li><strong>VIP Booking (Manual Entry):</strong> Enter the visitor's Name, Email, and Phone. The system will send them a secure <strong>OTP</strong> to show at the gate.</li>
+          <li><strong>Invite Link:</strong> Copy the unique appointment link and send it via WhatsApp/Email. The guest will fill out their own details to complete the booking.</li>
       </ul>
 
       <blockquote>
-        <strong>Pro Tip:</strong> If the visitor has visited before, start typing their name, and SafeIn will suggest auto-completing their details from the database.
+        <strong>Pro Tip:</strong> If the visitor has visited before, the system will suggest auto-completing their details from the database.
       </blockquote>
 
       <h3>3. Scheduling Details</h3>
       <p>Define the logistics of the visit:</p>
       <ul>
-          <li><strong>Date & Time:</strong> Select the arrival date and expected duration.</li>
-          <li><strong>Visit Type:</strong> Choose from categories like <em>Interview, Client Meeting, Vendor,</em> or <em>Personal</em>. This helps in analytics reporting later.</li>
-          <li><strong>Meeting Room:</strong> (Optional) Assign a specific conference room to prevent booking conflicts.</li>
+          <li><strong>Date & Time:</strong> Select the arrival date and expected time.</li>
+          <li><strong>Visit Type:</strong> Categorize as <em>Interview, Meeting,</em> or <em>Vendor</em> for better reporting.</li>
       </ul>
 
       <h3>4. Host Assignment</h3>
-      <p>By default, you are listed as the host. If you are scheduling on behalf of someone else (e.g., as an Executive Assistant), search and select the correct employee from the <strong>"Host"</strong> dropdown. The assigned host will receive all arrival notifications.</p>
+      <p>By default, you are the host. If scheduling for someone else, select the correct employee from the <strong>"Host"</strong> list. The assigned host will receive instant arrival alerts.</p>
 
       <h3>5. Review and Confirm</h3>
-      <p>Double-check all entered information. Once satisfied, click the <strong>"Create Appointment"</strong> button.</p>
+      <p>Double-check the details and click <strong>"Create Appointment"</strong>.</p>
 
       <hr />
 
       <h2>What Happens Next?</h2>
-      <p>Immediately after creation, the system triggers the following actions:</p>
+      <p>Immediately after creation, the system triggers:</p>
       <ol>
-          <li><strong>Visitor Notification:</strong> The guest receives a branded email containing the date, time, location map, and a unique QR code for express check-in.</li>
-          <li><strong>Calendar Sync:</strong> An invite (.ics file) is sent to both the host and the visitor to add to their Outlook, Google, or Apple calendars.</li>
-          <li><strong>Pre-Registration:</strong> If your security settings require it, a link to sign an NDA or upload ID documents may be included in the invitation.</li>
+          <li><strong>Visitor Notification:</strong> The guest receives an automated message with the <strong>OTP</strong> (for VIP bookings) or the **Form Link** (for invite links).</li>
+          <li><strong>Host Notification:</strong> You (or the assigned host) will receive a confirmation alert once the appointment is finalized.</li>
       </ol>
-
-      <h2>Troubleshooting</h2>
-      <p>If the visitor does not receive the email, please check the spelling of the email address or ask them to check their Spam/Junk folder. You can always <strong>Resend Invite</strong> from the Appointment Details page.</p>
     `,
     },
     {
@@ -84,92 +170,59 @@ export const helpArticles: HelpArticle[] = [
         title: "Setting up visitor registration",
         slug: "setting-up-visitor-registration",
         category: "Getting Started",
-        description: "Configure the check-in process, custom fields, and legal documents for your visitors.",
+        description: "Configure the check-in process and custom fields for your visitors.",
         readTime: "6 min read",
         lastUpdated: "Dec 2025",
+        image: "/images/features/otp_verification_mobile_1772358411976.png",
         content: `
       <h2>Overview</h2>
-      <p>The visitor registration flow is the first touchpoint for your guests. A well-configured flow balances security requirements with a welcoming user experience. SafeIn allows you to customize every step of this process.</p>
+      <p>The visitor registration flow is the first touchpoint for your guests. SafeIn allows you to customize how visitors are onboarded at the security desk or via the <strong>Spot Pass</strong> system.</p>
 
       <h2>Configuration Steps</h2>
 
       <h3>1. Accessing Registration Settings</h3>
-      <p>Navigate to <strong>Settings</strong> > <strong>Visitor Registration</strong>. Here you will see a drag-and-drop interface representing the screens your visitors will see on the Kiosk or iPad.</p>
+      <p>Navigate to <strong>Settings</strong> > <strong>Visitor Registration</strong>. Here you can define the requirements for entry.</p>
 
       <h3>2. Customizing Data Fields</h3>
       <p>Decide what information is mandatory for entry. Common configurations include:</p>
       <ul>
           <li><strong>Standard Fields:</strong> Name, Email, Phone, Company.</li>
-          <li><strong>Custom Fields:</strong> You can add text inputs, dropdowns, or checkboxes. Examples:
-            <ul>
-                <li><em>"Car License Plate"</em> (for parking management)</li>
-                <li><em>"Citizenship"</em> (for export control compliance)</li>
-                <li><em>"Laptop Serial Number"</em> (for asset protection)</li>
-            </ul>
-          </li>
+          <li><strong>Required Fields:</strong> Mark fields as mandatory to ensure complete visitor logs.</li>
       </ul>
 
-      <h3>3. Photo & Document Capture</h3>
-      <p>Enable <strong>Photo Capture</strong> to require a webcam photo of the visitor. This photo will be printed on their badge for visual identification.</p>
-      <p>Enable <strong>Document Scan</strong> if you need to capture a driver's license or passport (requires compatible hardware).</p>
+      <h3>3. ID Scanning & Documents</h3>
+      <p>Enable <strong>OCR ID Scanning</strong> to allow security guards to scan visitor IDs and auto-fill details instantly, reducing manual errors.</p>
+      <p>For VIP bookings, the visitor must provide the <strong>OTP</strong> received on their phone to the guard for verification.</p>
 
-      <h3>4. Legal Agreements (NDAs)</h3>
-      <p>Protect your intellectual property by enabling <strong>NDA Signing</strong>. You can upload your PDF text. The visitor must scroll through and digitally sign on the screen before check-in is permitted. A copy of the signed PDF is stored in their visitor profile.</p>
-
-      <h3>5. Badge Printing</h3>
-      <p>Configure the badge layout under the <strong>Badge Printing</strong> tab. You can toggle:</p>
-      <ul>
-          <li>Visitor Name (Large font)</li>
-          <li>Host Name</li>
-          <li>Wi-Fi Credentials</li>
-          <li>Visitor Photo</li>
-          <li>Your Company Logo</li>
-      </ul>
-
-      <hr />
-
-      <h2>Kiosk Mode</h2>
-      <p>Once configured, open the SafeIn Kiosk App on your tablet. Go to <strong>Settings</strong> in the app and select <strong>"Lock to Kiosk Mode"</strong>. This hinders visitors from closing the app or accessing other tablet functions.</p>
+      <h2>Gatekeeper Interface</h2>
+      <p>Security personnel use the <strong>Gatekeeper App</strong> to verify visitor details and OTPs. Ensure your guards have the appropriate device permissions assigned in the <strong>Workforce Hub</strong>.</p>
     `,
     },
     {
         id: "3",
-        title: "Configuring email notifications",
+        title: "Configuring notifications",
         slug: "configuring-email-notifications",
         category: "Getting Started",
-        description: "Master the communication flow with automated email templates and triggers.",
+        description: "Master the communication flow with automated alerts and triggers.",
         readTime: "4 min read",
         lastUpdated: "Dec 2025",
         content: `
       <h2>The Importance of Communication</h2>
-      <p>Automated status updates ensure that your reception team, hosts, and security staff are always in sync. SafeIn's notification engine handles these communications instantly.</p>
+      <p>Automated status updates ensure that your hosts and security staff are always in sync. SafeIn's notification engine handles these communications via WhatsApp and Email.</p>
 
       <h2>Notification Types</h2>
 
       <h3>1. Visitor Arrival (Host Notification)</h3>
-      <p><strong>Trigger:</strong> Visitor completes check-in at the kiosk.</p>
+      <p><strong>Trigger:</strong> Visitor is checked in by the Gatekeeper or via Spot Pass.</p>
       <p><strong>Recipient:</strong> The assigned Host.</p>
-      <p><strong>Content:</strong> "Your visitor, [Visitor Name], has arrived and is waiting in the lobby."</p>
+      <p><strong>Content:</strong> Instant alert on the dashboard and via WhatsApp.</p>
 
-      <h3>2. Invite Email (Visitor Notification)</h3>
+      <h3>2. Invite (Visitor Notification)</h3>
       <p><strong>Trigger:</strong> Appointment is created.</p>
-      <p><strong>Content:</strong> Contains directions, parking info, and QR code.</p>
+      <p><strong>Content:</strong> Contains visit details and either a secure <strong>OTP</strong> (for VIP bookings) or a <strong>Form Link</strong> (for invite links).</p>
       
-      <h3>3. Watchlist Alert (Security Notification)</h3>
-      <p><strong>Trigger:</strong> A visitor matches an entry on the internal blocklist.</p>
-      <p><strong>Recipient:</strong> Security Team / Admins.</p>
-      <p><strong>Action:</strong> Instant alert requiring manual approval before the visitor can proceed.</p>
-
       <h2>Customizing Templates</h2>
-      <p>Go to <strong>Settings</strong> > <strong>Notifications</strong> > <strong>Email Templates</strong>.</p>
-      <p>You can use dynamic placeholders/variables to personalize the messages:</p>
-      <ul>
-          <li><code>{{visitor_name}}</code></li>
-          <li><code>{{host_name}}</code></li>
-          <li><code>{{appointment_time}}</code></li>
-          <li><code>{{location_name}}</code></li>
-      </ul>
-      <p>Supports basic HTML for branding (adding logos, colors, and footer links).</p>
+      <p>Go to <strong>Settings</strong> > <strong>Notifications</strong>. You can customize the message branding and default content for all outgoing alerts.</p>
     `,
     },
     {
@@ -177,43 +230,36 @@ export const helpArticles: HelpArticle[] = [
         title: "Basic dashboard overview",
         slug: "basic-dashboard-overview",
         category: "Getting Started",
-        description: "Unlocking the power of real-time analytics and operational data on your dashboard.",
+        description: "Unlocking the power of real-time operational data on your dashboard.",
         readTime: "5 min read",
         lastUpdated: "Dec 2025",
         content: `
       <h2>Your Command Center</h2>
-      <p>The SafeIn Dashboard provides a high-level view of your facility's activity. It is designed to give Receptionists and Admins "at-a-glance" situational awareness.</p>
+      <p>The SafeIn Dashboard provides a high-level view of your facility's visitor activity. It is designed to give Admins and Hosts situational awareness.</p>
 
       <h2>Key Metrics Cards</h2>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
         <div>
             <h3>Pending</h3>
-            <p>Visitors scheduled for today who have not yet arrived. Use this to prepare badges or clear security lists in advance.</p>
+            <p>Visitors scheduled for today who have not yet arrived.</p>
         </div>
         <div>
             <h3>Active / Checked In</h3>
-            <p>The total number of guests currently inside the building. Crucial for fire drills and emergency evacuations.</p>
+            <p>The total number of guests currently inside the building.</p>
         </div>
         <div>
             <h3>Completed</h3>
             <p>Visits that have concluded. These records are archived for reporting.</p>
         </div>
-        <div>
-            <h3>Overstay / Time Out</h3>
-            <p>Visitors who are still checked in past their expected departure time. Requires security attention.</p>
-        </div>
       </div>
 
-      <h2>Analytical Charts</h2>
+      <h2>Analytical Trends</h2>
       
-      <h3>Visitor Trends (Monthly)</h3>
-      <p>A bar chart showing visitor volume over the last 30 days. Use this to identify busy days (e.g., "Mondays are our busiest days") and adjust front-desk staffing accordingly.</p>
-
-      <h3>Hourly Distribution</h3>
-      <p>Access the heatmap to see peak arrival times. If you see a spike between 9:00 AM and 10:00 AM, ensure you have extra reception support during that window.</p>
+      <h3>Visitor Distribution</h3>
+      <p>Visual charts identify peak arrival times, helping you manage gate security and entry flow more efficiently.</p>
 
       <h2>Real-Time Activity Feed</h2>
-      <p>The sidebar or bottom feed shows a live log of actions: <em>"John Doe checked in"</em>, <em>"Meeting with Sarah Smith ended"</em>. This provides a granular audit trail of the day's events.</p>
+      <p>The dashboard feed shows a live log of actions: <em>"John Doe checked in"</em>, <em>"New Appointment created"</em>. This provides a granular audit trail of all entry events.</p>
     `,
     },
 
@@ -226,6 +272,7 @@ export const helpArticles: HelpArticle[] = [
         description: "A complete guide to directory management, role assignment, and access control for your staff.",
         readTime: "4 min read",
         lastUpdated: "Dec 2025",
+        image: "/images/features/workforce_dashboard_hero_1772358658740.png",
         content: `
       <h2>Employee Directory Management</h2>
       <p>For the system to function effectively, your employee database must be up to date. Employees need accounts to invite visitors and receive arrival notifications.</p>
@@ -244,11 +291,23 @@ export const helpArticles: HelpArticle[] = [
       <h3>Directory Sync (Enterprise)</h3>
       <p>For larger organizations, manual entry is inefficient. SafeIn supports integration with <strong>Active Directory</strong>, <strong>Google Workspace</strong>, and <strong>Okta</strong>. Configuring this sync ensures that when an employee leaves the company, their SafeIn access is automatically revoked.</p>
 
+      <h2>The Verification Process</h2>
+      <p>Security is our top priority. For an account to become fully operational, every employee must be verified.</p>
+      <ul>
+          <li><strong>Verification Link/OTP:</strong> When an employee is added, they receive a secure invitation. They must click the link and verify their identity via a one-time password (OTP) sent to their official email or phone.</li>
+          <li><strong>Why it's Required:</strong> This ensures that only authorized personnel can act as 'Hosts', create appointments, and receive real-time visitor alerts.</li>
+          <li><strong>Resending Invites:</strong> If an employee hasn't verified their account, you can use the <strong>"Resend Verification"</strong> button from the employee management table.</li>
+      </ul>
+
+      <div style="margin: 24px 0;">
+        <img src="/images/features/otp_verification_mobile_1772358411976.png" alt="Employee Verification Interface" style="border-radius: 12px; width: 100%; height: auto; border: 1px solid #eee;" />
+      </div>
+
       <h2>Editing and Offboarding</h2>
       <p>Click on any employee row to edit their details. If an employee leaves:</p>
       <ul>
           <li><strong>Do NOT Delete:</strong> Deleting a user removes their historical appointment data, breaking your audit trails.</li>
-          <li><strong>Deactivate Instead:</strong> Toggle the "Active" status to "Inactive". This prevents login but preserves all history.</p>
+          <li><strong>Deactivate Instead:</strong> Toggle the "Active" status to "Inactive". This prevents login but preserves all history.</li>
       </ul>
     `,
     },
@@ -260,25 +319,31 @@ export const helpArticles: HelpArticle[] = [
         description: "Understanding the end-to-end lifecycle of a visit from the guest's perspective.",
         readTime: "5 min read",
         lastUpdated: "Dec 2025",
+        image: "/images/features/spot_pass_hero_1772358331734.png",
         content: `
       <h2>The Visitor Journey</h2>
-      <p>A smooth registration process reflects positively on your company brand. Here is the standard workflow:</p>
+      <p>A smooth registration process reflects positively on your company brand. Here is the standard workflow using SafeIn's Smart Appointment and Spot Pass systems:</p>
 
-      <h3>Phase 1: Pre-Arrival</h3>
-      <p>The host creates an invite. The visitor receives an email with a <strong>QuickPass QR Code</strong>. They can save this to their Apple Wallet or Google Pay for easy access.</p>
-
-      <h3>Phase 2: Arrival & Check-In</h3>
-      <p>The visitor walks into the lobby and approaches the iPad Kiosk.</p>
+      <h3>Phase 1: Pre-Arrival & Scheduling</h3>
+      <p>There are two primary ways to schedule a visit:</p>
       <ul>
-          <li><strong>With Invite:</strong> They scan their QR code. The system instantly recognizes them, skips data entry, and prints a badge. <strong>(Time: < 10 seconds)</strong>.</li>
-          <li><strong>Walk-In:</strong> They tap "I'm here to see someone". They manually type their name and search for their host. They take a photo and sign the NDA. <strong>(Time: ~2 minutes)</strong>.</li>
+          <li><strong>VIP Booking:</strong> The host enters the visitor's details. The visitor receives an automated <strong>OTP (One-Time Password)</strong> via WhatsApp and Email for secure verification.</li>
+          <li><strong>Invite Link:</strong> The host sends a link. The visitor opens the link, fills in their details, and the appointment is booked once submitted.</li>
       </ul>
 
-      <h3>Phase 3: The Meeting</h3>
-      <p>The host comes to the lobby to collect the guest. The "Status" in the dashboard changes to "Checked In".</p>
+      <h3>Phase 2: Arrival & Verification</h3>
+      <p>When the visitor arrives at the entry gate:</p>
+      <ul>
+          <li><strong>VIP Booking:</strong> The visitor tells the <strong>OTP</strong> to the Guard. The Guard enters it into the system to verify the identity and appointment instantly.</li>
+          <li><strong>Invite Link Booking:</strong> The Guard checks the visitor's Name/Details in the "Expected Today" list on the dashboard.</li>
+          <li><strong>Spot Pass (Walk-In):</strong> Visitors without a prior invite can be registered on the spot by the Guard. <strong>No OTP is required</strong> for Spot Pass entries.</li>
+      </ul>
+
+      <h3>Phase 3: Real-Time Communication</h3>
+      <p>Once verified, the host receives an instant <strong>Smart Notification</strong>. The host and visitor can use the built-in <strong>Real-time Chat</strong> to coordinate the meeting or provide directions.</p>
 
       <h3>Phase 4: Check-Out</h3>
-      <p>On their way out, the visitor scans their badge at the kiosk or simply taps "Check Out" and types their name. This timestamps their departure and updates the Fire List.</p>
+      <p>On their way out, the visitor's departure is timestamped by the Gatekeeper, providing an accurate audit trail in the <strong>Workforce Hub</strong>.</p>
     `,
     },
     {
@@ -303,7 +368,7 @@ export const helpArticles: HelpArticle[] = [
 
       <h3>3. Receptionist / Security Guard</h3>
       <p><strong>Access:</strong> Dashboard View, Visitor Log (Read/Write).</p>
-      <p><strong>Capabilities:</strong> Can check people in/out, edit visitor details, print badges. <strong>Cannot</strong> access system settings, billing, or export full databases.</p>
+      <p><strong>Capabilities:</strong> Can check people in/out, verify QR codes, and edit visitor details. <strong>Cannot</strong> access system settings, billing, or export full databases.</p>
 
       <h3>4. Employee (Host)</h3>
       <p><strong>Access:</strong> Self-Service Only.</p>
@@ -447,7 +512,7 @@ export const helpArticles: HelpArticle[] = [
         </tr>
         <tr>
             <td>System Config</td>
-            <td>Changing badge layouts, disabling features, updating billing info.</td>
+            <td>Updating branding, disabling features, or updating profile info.</td>
         </tr>
       </table>
 
@@ -510,7 +575,7 @@ export const helpArticles: HelpArticle[] = [
       <p>Go to the <strong>Visitors</strong> tab. Use the filters at the top:</p>
       <ul>
           <li><strong>Date Range:</strong> "Last 30 Days", "This Year", or "Custom Range".</li>
-          <li><strong>Status:</strong> Filter by "Checked In", "Invited", or "Watchlist".</li>
+          <li><strong>Status:</strong> Filter by "Checked In" or "Invited".</li>
           <li><strong>Host:</strong> See visitors for a specific department or person.</li>
       </ul>
 
@@ -518,13 +583,8 @@ export const helpArticles: HelpArticle[] = [
       <p>Click the <strong>"Export"</strong> button. Select format: <strong>CSV</strong> (Excel compatible) or <strong>PDF</strong> (Print friendly).</p>
       <p><em>Note: Large exports (10,000+ records) may take a few minutes and will be emailed to you when ready.</em></p>
 
-      <h2>Scheduled Reports</h2>
-      <p>Don't want to export manually? Set up <strong>Automated Reporting</strong>.</p>
-      <p>Go to <strong>Settings</strong> > <strong>Reports</strong>. Create a schedule:</p>
-      <ul>
-          <li><em>"Send me a PDF summary of all visitors every Friday at 5:00 PM."</em></li>
-          <li><em>"Send the Fire Marshal a list of active visitors every day at 8:00 AM."</em></li>
-      </ul>
+      <h2>Reporting</h2>
+      <p>Automated summaries can be configured to keep everyone informed of arrival patterns and security events.</p>
     `,
     },
     {
@@ -532,28 +592,27 @@ export const helpArticles: HelpArticle[] = [
         title: "Managing visitor check-in and check-out",
         slug: "managing-visitor-check-in-and-check-out",
         category: "User Management",
-        description: "Operational guide for front-desk staff handling guests manually.",
+        description: "Operational guide for Gatekeepers and staff handling guests.",
         readTime: "4 min read",
         lastUpdated: "Dec 2025",
         content: `
-        <h2>Manual Operations for Receptionists</h2>
-        <p>While Kiosks handle self-service, the Receptionist Dashboard is designed for power users who need to manage exceptions.</p>
+        <h2>Operational Checklist</h2>
+        <p>The main operations occur in the **Visitor Log** and via the **Gatekeeper App**.</p>
 
         <h3>Processing a Check-In</h3>
-        <p>If a visitor arrives without a smartphone or finds the kiosk difficult:</p>
+        <p>When a visitor arrives:</p>
         <ol>
-            <li>Ask for their name.</li>
-            <li>Search them in the "Expected Today" list on your dashboard.</li>
-            <li>Click the <strong>Eye Icon</strong> to verify details.</li>
-            <li>Click <strong>"Check In"</strong>.</li>
-            <li><strong>Badge Printing:</strong> You can click "Print Badge" to trigger the printer behind the desk manually.</li>
+            <li><strong>Verify OTP (for VIPs):</strong> Request the OTP from the visitor and enter it into the Gatekeeper dashboard.</li>
+            <li><strong>Check Expected List:</strong> For invite-link arrivals, search for their name in the "Expected Today" list.</li>
+            <li><strong>Spot Pass:</strong> For walk-ins, click <strong>"Spot Pass"</strong> and enter their details directly (no OTP needed).</li>
+            <li><strong>Submit:</strong> Click <strong>"Check In"</strong> to timestamp their entry.</li>
         </ol>
 
         <h3>Processing a Check-Out</h3>
-        <p>It is vital to check visitors out to maintain an accurate emergency evacuation list.</p>
+        <p>Maintaining an accurate building log is vital:</p>
         <ul>
-            <li><strong>Individual:</strong> Search the name in the "Active" list and click "Check Out".</li>
-            <li><strong>Bulk Action:</strong> Verify that the lobby is empty at the end of the day. Select "Select All Active" and click "Force Check Out". *Use a note like "End of Day Auto-Checkout" for the audit trail.*</li>
+            <li><strong>Individual Check-Out:</strong> At the exit point, the Gatekeeper searches the name in the "Active" list and clicks "Check Out".</li>
+            <li><strong>Status Update:</strong> The dashboard is updated instantly for all admins.</li>
         </ul>
       `,
     },
@@ -565,10 +624,9 @@ export const helpCategories = [
         title: "Getting Started",
         description: "Learn the basics of setting up your SafeIn management system",
         articles: [
+            "safein-onboarding-guide",
             "how-to-create-your-first-appointment",
             "setting-up-visitor-registration",
-            "configuring-email-notifications",
-            "basic-dashboard-overview",
         ],
     },
     {
@@ -579,8 +637,6 @@ export const helpCategories = [
             "adding-and-managing-employees",
             "visitor-registration-process",
             "user-roles-and-permissions",
-            "bulk-user-import",
-            "managing-visitor-check-in-and-check-out",
         ],
     },
     {
@@ -591,7 +647,6 @@ export const helpCategories = [
             "data-encryption-and-security",
             "privacy-policy-compliance",
             "access-control-settings",
-            "audit-trail-features",
         ],
     },
 ];

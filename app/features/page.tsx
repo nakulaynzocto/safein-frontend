@@ -178,7 +178,7 @@ export default function FeaturesPage() {
                             </div>
                             <h2 className="text-4xl lg:text-6xl font-black text-primary mb-6">Smart Appointments</h2>
                             <p className="text-xl text-gray-500 max-w-2xl leading-relaxed">
-                                Automated booking engine with real-time calendar sync and guest pre-registration. 
+                                Automated booking engine with VIP OTP verification and guest self-registration links. 
                                 Eliminate queues and front-desk friction.
                             </p>
                         </div>
@@ -207,10 +207,10 @@ export default function FeaturesPage() {
                             <div className="space-y-12">
                                 <div className="grid gap-8 sm:grid-cols-2">
                                     {[
-                                        { t: "Personalized URLs", d: "Unique booking links for every host.", i: <Share2 /> },
-                                        { t: "Instant Slot Sync", d: "Deep integration with Outlook & Google.", i: <Clock /> },
+                                        { t: "VIP OTP Booking", d: "Secure OTP sent directly to VIP guests.", i: <ShieldCheck /> },
+                                        { t: "Invite Links", d: "WhatsApp links for guest self-registration.", i: <Share2 /> },
                                         { t: "Auto Reminders", d: "WhatsApp and Email alerts for guests.", i: <BellRing /> },
-                                        { t: "One-Tap Approval", d: "Approve visits from the lock screen.", i: <MousePointerClick /> }
+                                        { t: "Instant Slot Sync", d: "Deep integration with staff calendars.", i: <Clock /> }
                                     ].map((c, i) => (
                                         <div key={i} className="group p-6 rounded-[2rem] bg-white border border-gray-100 hover:shadow-xl transition-all duration-300">
                                             <div className="h-12 w-12 bg-accent/5 rounded-2xl flex items-center justify-center text-accent mb-4 transition-colors group-hover:bg-accent group-hover:text-white">
@@ -249,7 +249,7 @@ export default function FeaturesPage() {
                             </div>
                             <h2 className="text-4xl lg:text-6xl font-black text-primary mb-6 text-right lg:text-left">Spot Pass System</h2>
                             <p className="text-xl text-gray-500 max-w-2xl leading-relaxed lg:mr-auto">
-                                Frictionless walk-in management with instant ID verification and host alerts. 
+                                Frictionless walk-in management with zero-OTP registration. 
                                 Handle unexpected guests in under 30 seconds.
                             </p>
                         </div>
@@ -259,9 +259,9 @@ export default function FeaturesPage() {
                                 <div className="grid gap-6">
                                     {[
                                         { t: "OCR ID Scanning", d: "Scan IDs and auto-fill details instantly.", i: <Scan /> },
-                                        { t: "OTP Verification", d: "Verify phone numbers via WhatsApp.", i: <Smartphone /> },
-                                        { t: "Kiosk Mode", d: "Premium tablet interface for self-registration.", i: <LayoutDashboard /> },
-                                        { t: "Secure Entry", d: "6-digit OTP codes for verified entry.", i: <ShieldCheck /> }
+                                        { t: "One-Tap Entry", d: "No OTP required for Spot Pass guests.", i: <Zap /> },
+                                        { t: "Guard Interface", d: "Simplified dashboard for security staff.", i: <LayoutDashboard /> },
+                                        { t: "Instant Alerts", d: "Real-time notifications to the host.", i: <BellRing /> }
                                     ].map((c, i) => (
                                         <div key={i} className="flex gap-6 p-6 rounded-[2rem] bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
                                             <div className="h-14 w-14 bg-accent/5 rounded-2xl flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all flex-shrink-0">

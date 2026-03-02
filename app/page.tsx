@@ -375,10 +375,7 @@ export default function HomePage() {
                             <h2 className="text-brand mb-6 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
                                 How it works?
                             </h2>
-                            <p className="text-accent mx-auto max-w-3xl text-lg leading-relaxed sm:text-xl">
-                                Our comprehensive SafeIn management platform is designed to meet the evolving needs of
-                                modern organizations, providing security, efficiency, and peace of mind.
-                            </p>
+
                         </div>
 
                         <div className="space-y-32">
@@ -559,12 +556,9 @@ export default function HomePage() {
                                 </span>
                             </div>
                             <h2 className="text-brand mb-6 text-4xl font-extrabold tracking-tight sm:text-5xl">
-                                Tailored for Every <span className="text-accent underline decoration-brand-light/30 decoration-8 underline-offset-4">Enterprise</span>
+                                Tailored for Every Enterprise
                             </h2>
-                            <p className="text-accent mx-auto max-w-2xl text-lg leading-relaxed sm:text-xl">
-                                From IT Parks in Bangalore to Housing Societies in Mumbai, we secure every sector 
-                                with India's most advanced visitor intelligence.
-                            </p>
+
                         </div>
 
                         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
