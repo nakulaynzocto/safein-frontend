@@ -219,34 +219,18 @@ export function BookingVisitorForm({
                 />
 
                 <div className="space-y-1.5">
-                    {initialEmail ? (
-                        <div className="space-y-1.5">
-                            <Label htmlFor="email" className="text-foreground text-sm font-medium">
-                                Email Address <span className="text-red-500 font-bold">*</span>
-                            </Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                value={initialEmail}
-                                className={`h-12 w-full rounded-xl border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-border focus-visible:ring-1 focus-visible:ring-ring"} text-foreground placeholder:text-muted-foreground bg-gray-50 px-4 py-2 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 font-medium`}
-                                disabled={true}
-                                readOnly={true}
-                            />
-                            <p className="text-muted-foreground text-xs">
-                                This email was used to send you the appointment link
-                            </p>
-                        </div>
-                    ) : (
-                        <InputField
-                            id="email"
-                            label="Email Address"
-                            type="email"
-                            {...register("email")}
-                            placeholder="Enter email address"
-                            error={errors.email?.message}
-                            required
-                        />
-                    )}
+                <InputField
+                    id="email"
+                    label="Email Address"
+                    type="email"
+                    {...register("email")}
+                    placeholder="Enter email address"
+                    error={errors.email?.message}
+                    required
+                    disabled={!!initialEmail}
+                    readOnly={!!initialEmail}
+                    helperText={initialEmail ? "This email was used to send you the appointment link" : undefined}
+                />
                 </div>
             </div>
 

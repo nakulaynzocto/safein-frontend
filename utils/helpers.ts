@@ -176,7 +176,7 @@ export function isEmpty(value: any): boolean {
  * @returns Tailwind CSS color class
  */
 export function getStatusColor(status: string): string {
-    const statusLower = status.toLowerCase();
+    const statusLower = (status || "").toLowerCase();
 
     if (
         statusLower === "active" ||

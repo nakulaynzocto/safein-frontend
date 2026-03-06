@@ -139,7 +139,8 @@ export default function BookAppointmentPage() {
     };
 
     const errorConfig = useMemo(() => {
-        const lowerMsg = errorMessage.toLowerCase();
+        const messageStr = typeof errorMessage === "string" ? errorMessage : String(errorMessage || "");
+        const lowerMsg = messageStr.toLowerCase();
         const isExpired = lowerMsg.includes("expired");
         const isAlreadyUsed =
             lowerMsg.includes("already been used") ||
