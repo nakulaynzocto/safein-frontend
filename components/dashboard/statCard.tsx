@@ -34,15 +34,15 @@ export const StatCard = memo(function StatCard({ title, value, icon: Icon, descr
                 ${onClick ? "cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98]" : ""}
             `}
         >
-            <CardContent className="flex flex-col items-center justify-center p-4 sm:p-5">
-                <div className={`text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-center mb-1.5 ${colorClassName || "text-muted-foreground"}`}>
+            <CardContent className="flex flex-col items-center justify-center py-0.5 px-4 sm:px-5">
+                <div className={`text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-center mb-1 ${colorClassName || "text-muted-foreground"}`}>
                     {title}
                 </div>
                 <div className={`text-2xl sm:text-3xl font-black tracking-tight leading-none ${colorClassName || ""}`}>
                     {value}
                 </div>
                 {description && (
-                    <div className="text-[10px] sm:text-xs text-muted-foreground text-center mt-1.5 opacity-80">
+                    <div className="text-[10px] sm:text-xs text-muted-foreground text-center mt-1 opacity-80">
                         {description}
                     </div>
                 )}
