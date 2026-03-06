@@ -307,7 +307,8 @@ export default function BookAppointmentPage() {
                         {step === "visitor" && (
                             <BookingVisitorForm
                                 initialEmail={appointmentLinkData?.visitorEmail}
-                                initialValues={visitorData || undefined}
+                                initialPhone={appointmentLinkData?.visitorPhone}
+                                initialValues={visitorData}
                                 onSubmit={handleVisitorSubmit}
                                 isLoading={isCreatingVisitor}
                                 appointmentToken={token}

@@ -67,7 +67,7 @@ export function InstallPromptBanner() {
     if (isProtectedPage || !show) return null;
 
     return (
-        <div className="fixed bottom-[76px] md:bottom-3 left-3 z-[9999] w-fit max-w-64 animate-in slide-in-from-bottom-3 fade-in duration-300">
+        <div className="fixed bottom-[76px] md:bottom-3 left-3 z-[9999] w-fit max-w-32 animate-in slide-in-from-bottom-3 fade-in duration-300">
             <div className="relative rounded-xl border border-[#3882a5]/20 bg-white shadow-lg overflow-hidden">
                 {/* Brand accent bar */}
                 <div className="h-0.5 w-full bg-gradient-to-r from-[#074463] via-[#3882a5] to-[#98c7dd]" />

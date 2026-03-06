@@ -68,6 +68,7 @@ const idProofTypes = [
 
 interface BookingVisitorFormProps {
     initialEmail?: string;
+    initialPhone?: string;
     initialValues?: Partial<BookingVisitorFormData>;
     onSubmit: (data: any) => void;
     isLoading?: boolean;
@@ -76,6 +77,7 @@ interface BookingVisitorFormProps {
 
 export function BookingVisitorForm({
     initialEmail,
+    initialPhone,
     initialValues,
     onSubmit,
     isLoading = false,
@@ -93,7 +95,7 @@ export function BookingVisitorForm({
         defaultValues: {
             name: initialValues?.name || "",
             email: initialValues?.email || initialEmail || "",
-            phone: initialValues?.phone || "",
+            phone: initialValues?.phone || initialPhone || "",
             address: {
                 street: initialValues?.address?.street || undefined,
                 city: initialValues?.address?.city || "",
@@ -123,6 +125,7 @@ export function BookingVisitorForm({
     useEffect(() => {
         const opts = { shouldValidate: false, shouldDirty: false };
         if (initialEmail) setValue("email", initialEmail, opts);
+        if (initialPhone) setValue("phone", initialPhone, opts);
         if (initialValues) {
             const { address, idProof, ...rest } = initialValues;
             Object.entries(rest).forEach(([key, value]) => {
@@ -210,6 +213,7 @@ export function BookingVisitorForm({
                             required
                             placeholder="Enter phone number"
                             defaultCountry="in"
+                            disabled={!!initialPhone}
                         />
                     )}
                 />
