@@ -67,50 +67,39 @@ export function InstallPromptBanner() {
     if (isProtectedPage || !show) return null;
 
     return (
-        <div className="fixed bottom-[76px] md:bottom-3 left-3 z-[9999] w-fit max-w-32 animate-in slide-in-from-bottom-3 fade-in duration-300">
-            <div className="relative rounded-xl border border-[#3882a5]/20 bg-white shadow-lg overflow-hidden">
-                {/* Brand accent bar */}
-                <div className="h-0.5 w-full bg-gradient-to-r from-[#074463] via-[#3882a5] to-[#98c7dd]" />
-
-                <div className="px-3 py-2.5">
-                    <button
-                        onClick={handleDismiss}
-                        className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                        aria-label="Dismiss install prompt"
-                    >
-                        <X className="h-3 w-3" />
-                    </button>
-
-                    <div className="flex items-center gap-2.5 pr-8">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src="/aynzo-logo.png"
-                            alt="SafeIn"
-                            className="h-8 w-8 shrink-0 rounded-lg object-contain"
-                        />
-                        <div className="min-w-0 pr-2">
-                            <p className="text-[13px] font-bold text-gray-900 leading-tight">
-                                Install SafeIn App
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="mt-2.5">
-                        <Button
-                            size="sm"
-                            onClick={handleInstall}
-                            disabled={installing}
-                            className="w-full h-8 gap-2 text-xs rounded-lg bg-[#3882a5] hover:bg-[#2d6a87] text-white font-semibold px-4 shadow-sm"
-                        >
-                            {installing ? (
-                                <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                            ) : (
-                                <Download className="h-3.5 w-3.5" />
-                            )}
-                            Install
-                        </Button>
-                    </div>
+        <div className="fixed bottom-[76px] md:bottom-3 left-3 z-[9999] animate-in slide-in-from-bottom-3 fade-in duration-300">
+            <div className="relative flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-2 pr-10 shadow-xl ring-1 ring-black/5">
+                {/* Logo */}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-1.5">
+                    <img
+                        src="/aynzo-logo.png"
+                        alt="Aynzo"
+                        className="h-full w-full object-contain"
+                    />
                 </div>
+
+                {/* Install Button */}
+                <Button
+                    size="sm"
+                    onClick={handleInstall}
+                    disabled={installing}
+                    className="h-9 rounded-xl bg-[#3882a5] px-4 text-[13px] font-bold text-white shadow-sm transition-all hover:bg-[#2d6a87] active:scale-95"
+                >
+                    {installing ? (
+                        <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    ) : (
+                        "Install"
+                    )}
+                </Button>
+
+                {/* Close Button */}
+                <button
+                    onClick={handleDismiss}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                    aria-label="Dismiss install prompt"
+                >
+                    <X className="h-3.5 w-3.5" />
+                </button>
             </div>
         </div>
     );

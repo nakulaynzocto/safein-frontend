@@ -237,36 +237,13 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                 variant === "dashboard" ? "sticky" : "fixed",
                 shouldShowWhiteNavbar
                     ? cn(
-                        "border-b border-gray-200/50 bg-white/80 backdrop-blur-xl py-0",
-                        variant === "dashboard" ? "shadow-sm" : "shadow-2xl"
+                        "border-b border-gray-200/50 bg-white shadow-sm py-0",
+                        variant === "dashboard" ? "shadow-sm" : "shadow-md"
                     )
                     : "bg-transparent border-transparent shadow-none py-2"
             )}
         >
-            {/* Design Accents - Only show on public site, not on dashboard */}
-            {variant !== "dashboard" && (
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    {/* Left Side Accent */}
-                    <div className={cn(
-                        "absolute left-[-5%] top-[-50%] w-[30%] h-[200%] blur-[100px] rounded-full transition-all duration-700 opacity-20",
-                        shouldShowWhiteNavbar ? "bg-accent/5" : "bg-white/10"
-                    )}></div>
-                    
-                    {/* Right Side Accent */}
-                    <div className={cn(
-                        "absolute right-[-5%] bottom-[-50%] w-[25%] h-[200%] blur-[100px] rounded-full transition-all duration-700 opacity-20",
-                        shouldShowWhiteNavbar ? "bg-brand/5" : "bg-accent/10"
-                    )}></div>
-
-                    {/* Subtle horizontal gradient overlay */}
-                    <div className={cn(
-                        "absolute inset-0 transition-opacity duration-700 opacity-10",
-                        shouldShowWhiteNavbar 
-                            ? "bg-gradient-to-r from-transparent via-gray-100/30 to-transparent" 
-                            : "bg-gradient-to-r from-white/5 via-transparent to-white/5"
-                    )}></div>
-                </div>
-            )}
+            {/* Design accents removed for a cleaner look */}
 
             <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12">
                 <div className="flex h-20 items-center justify-between">
@@ -316,7 +293,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                     className="flex-shrink-0"
                                     prefetch={true}
                                 >
-                                    <div className="group relative flex h-10 w-10 lg:h-14 lg:w-14 items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/20">
+                                    <div className="group relative flex h-10 w-10 lg:h-14 lg:w-14 items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:scale-105 shadow-sm">
                                         <Image
                                             src="/aynzo-logo.png"
                                             alt="Aynzo Logo"
@@ -348,9 +325,9 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                     </div>
 
                     {/* Center: Navigation Links */}
-                    <div className="hidden flex-1 items-center justify-center lg:flex">
+                    <div className="hidden flex-1 items-center justify-end lg:flex">
                         {!isActuallyAuthenticated && variant !== "dashboard" && (
-                            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
+                            <div className="flex items-center gap-2 px-2 mr-12">
                                 {[
                                     { label: "Home", href: routes.publicroute.HOME },
                                     { label: "Features", href: routes.publicroute.FEATURES },
@@ -365,13 +342,13 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                             key={item.href}
                                             href={item.href}
                                             className={cn(
-                                                "relative px-5 py-2.5 text-sm font-semibold transition-all duration-300 rounded-xl",
+                                                "relative px-5 py-2.5 text-sm font-bold transition-all duration-300 rounded-xl",
                                                 isActive 
                                                     ? shouldShowWhiteNavbar 
-                                                        ? "text-accent bg-accent/10" 
-                                                        : "text-white bg-white/10"
+                                                        ? "text-[#3882a5]" 
+                                                        : "text-white"
                                                     : linkText,
-                                                "hover:scale-105 active:scale-95"
+                                                "hover:opacity-80 active:scale-95"
                                             )}
                                         >
                                             <span className="relative z-10">{item.label}</span>
@@ -699,7 +676,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                     )}
                                     prefetch={true}
                                 >
-                                    <span className="relative z-10">Start 3 Day Trial</span>
+                                    <span className="relative z-10">Start Trial</span>
                                     <div className="animate-shimmer absolute inset-0 opacity-10"></div>
                                 </Link>
                             </>
@@ -766,7 +743,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                             )}
                                             onClick={() => setIsMobileMenuOpen(false)}
                                         >
-                                            Start 3 Day Trial
+                                            Start Trial
                                         </Link>
                                     </>
                                 ) : isMounted && isAuthenticated && token && !isSubscriptionPage ? (
