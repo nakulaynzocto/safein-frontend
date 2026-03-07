@@ -67,26 +67,23 @@ export function ChatSidebar({
                         <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Global Support Center</p>
                     </div>
                 ) : (
-                    <div className="flex flex-col gap-5">
-                        <div className="flex items-center justify-between">
-                            <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight italic">SafeIn</h1>
-                            <button
-                                onClick={() => setIsGroupModalOpen(true)}
-                                className="h-10 w-10 flex items-center justify-center bg-[#074463] text-white hover:bg-[#0a5a82] rounded-2xl transition-all duration-300 shadow-lg shadow-blue-900/10 active:scale-90"
-                                title="Create Group"
-                            >
-                                <Users className="h-5 w-5" />
-                            </button>
-                        </div>
-                        <div className="relative group">
+                    <div className="flex items-center gap-3">
+                        <div className="relative group flex-1">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-[#074463] transition-colors" />
                             <Input
                                 placeholder="Search conversations..."
-                                className="pl-11 h-12 bg-gray-100 dark:bg-gray-800 border-none focus-visible:ring-2 focus-visible:ring-[#074463]/20 focus:bg-white dark:focus:bg-gray-900 rounded-2xl transition-all duration-300 font-medium text-[15px]"
+                                className="pl-11 h-11 bg-gray-100 dark:bg-gray-800 border-none focus-visible:ring-2 focus-visible:ring-[#074463]/20 focus:bg-white dark:focus:bg-gray-900 rounded-2xl transition-all duration-300 font-medium text-[14px]"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
+                        <button
+                            onClick={() => setIsGroupModalOpen(true)}
+                            className="h-11 w-11 flex-shrink-0 flex items-center justify-center bg-[#074463] text-white hover:bg-[#0a5a82] rounded-2xl transition-all duration-300 shadow-lg shadow-blue-900/10 active:scale-90"
+                            title="Create Group"
+                        >
+                            <Users className="h-5 w-5" />
+                        </button>
                     </div>
                 )}
             </div>

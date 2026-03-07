@@ -65,19 +65,35 @@ export function PhoneInputField({
             setPhoneNumber("");
             return;
         }
-        const cleanValue = value.replace(/\D/g, "");
-        const matchingOptions = countryOptions
-            .filter((opt) => cleanValue.startsWith(opt.phoneCode))
-            .sort((a, b) => b.phoneCode.length - a.phoneCode.length);
 
-        if (matchingOptions.length > 0) {
-            const bestMatch = matchingOptions[0];
-            setSelectedIso(bestMatch.value);
-            setPhoneNumber(cleanValue.slice(bestMatch.phoneCode.length));
+        const startsWithPlus = String(value).startsWith("+");
+        const cleanValue = String(value).replace(/\D/g, "");
+
+        // 1. If it starts with '+', strictly match the best country code
+        if (startsWithPlus) {
+            const matchingOptions = countryOptions
+                .filter((opt) => cleanValue.startsWith(opt.phoneCode))
+                .sort((a, b) => b.phoneCode.length - a.phoneCode.length);
+
+            if (matchingOptions.length > 0) {
+                const bestMatch = matchingOptions[0];
+                setSelectedIso(bestMatch.value);
+                setPhoneNumber(cleanValue.slice(bestMatch.phoneCode.length));
+                return;
+            }
+        }
+
+        // 2. If no '+' prefix, check if it starts with the default country prefix (e.g., 91 for India)
+        const defaultOpt = countryOptions.find(o => o.value === defaultCountry.toUpperCase());
+        if (defaultOpt && cleanValue.length > defaultOpt.phoneCode.length && cleanValue.startsWith(defaultOpt.phoneCode)) {
+            setSelectedIso(defaultOpt.value);
+            setPhoneNumber(cleanValue.slice(defaultOpt.phoneCode.length));
         } else {
+            // 3. Otherwise, treat as a domestic number for the default country
+            if (defaultOpt) setSelectedIso(defaultOpt.value);
             setPhoneNumber(cleanValue);
         }
-    }, [value, countryOptions]);
+    }, [value, countryOptions, defaultCountry]);
 
     // 4. Handlers
     const handleCountryChange = useCallback((option: CountryOption | null) => {

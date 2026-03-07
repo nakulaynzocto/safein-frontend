@@ -179,14 +179,6 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
                         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 touch-pan-y pointer-events-auto">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <InputField
-                                    label="Visitor Name"
-                                    placeholder="Enter visitor name"
-                                    icon={<User className="h-4 w-4" />}
-                                    {...register("name")}
-                                    error={errors.name?.message}
-                                    required
-                                />
                                 <div className="space-y-1">
                                     <Controller
                                         name="phone"
@@ -216,6 +208,15 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                                         error={errors.email?.message}
                                     />
                                 </div>
+
+                                <InputField
+                                    label="Visitor Name"
+                                    placeholder="Enter visitor name"
+                                    icon={<User className="h-4 w-4" />}
+                                    {...register("name")}
+                                    error={errors.name?.message}
+                                    required
+                                />
 
                                 <EmployeeSelectionField />
 

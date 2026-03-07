@@ -140,7 +140,7 @@ export function NewVisitorModal({
                 name: visitorData.name || "",
                 email: visitorData.email || "",
                 phone: visitorData.phone || "",
-                gender: (visitorData as any).gender || "",
+                gender: (visitorData as any).gender?.trim().toLowerCase() || "",
                 address: {
                     street: visitorData.address?.street || "",
                     city: visitorData.address?.city || "",

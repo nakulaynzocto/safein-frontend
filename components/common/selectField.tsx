@@ -102,8 +102,8 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     // Find selected option - convert value to string for comparison
     const selectedOption: RSOption | null = useMemo(() => {
         if (value === null || value === undefined || value === "") return null;
-        const stringValue = String(value);
-        const found = rsOptions.find((o) => o.value === stringValue);
+        const stringValue = String(value).trim().toLowerCase();
+        const found = rsOptions.find((o) => String(o.value).trim().toLowerCase() === stringValue);
         return found ?? null;
     }, [value, rsOptions]);
 
@@ -251,12 +251,14 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
 
     const defaultFormatOptionLabel = (option: RSOption) => (
         <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8 border border-border">
-                <AvatarImage src={option.image} alt={option.label} className="object-cover" />
-                <AvatarFallback className="text-xs font-medium leading-none bg-secondary text-secondary-foreground flex items-center justify-center">
-                    {getInitials(option.label)}
-                </AvatarFallback>
-            </Avatar>
+            {option.image ? (
+                <Avatar className="h-8 w-8 border border-border">
+                    <AvatarImage src={option.image} alt={option.label} className="object-cover" />
+                    <AvatarFallback className="text-xs font-medium leading-none bg-secondary text-secondary-foreground flex items-center justify-center">
+                        {getInitials(option.label)}
+                    </AvatarFallback>
+                </Avatar>
+            ) : null}
             <span className="truncate">{option.label}</span>
         </div>
     );

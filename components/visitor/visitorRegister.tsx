@@ -58,7 +58,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
             name: initialData?.name || "",
             email: initialData?.email || "",
             phone: initialData?.phone || "",
-            gender: (initialData as any)?.gender || ("" as any),
+            gender: (initialData as any)?.gender?.trim().toLowerCase() || ("" as any),
             address: {
                 street: initialData?.address?.street || "",
                 city: initialData?.address?.city || "",
