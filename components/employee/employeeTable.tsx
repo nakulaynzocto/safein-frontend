@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/dropdownMenu";
 import { routes } from "@/utils/routes";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
-import { AddonPurchaseModal } from "@/components/common/AddonPurchaseModal";
 import { formatName, getInitials } from "@/utils/helpers";
 import { EmployeeVerificationModal } from "./EmployeeVerificationModal";
 import { ShieldCheck } from "lucide-react";
@@ -89,7 +88,6 @@ export function EmployeeTable({
     const [showVerifyDialog, setShowVerifyDialog] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    const [showAddonModal, setShowAddonModal] = useState(false);
     const [showStatusDialog, setShowStatusDialog] = useState(false);
     const [pendingStatus, setPendingStatus] = useState<string>("");
     const [limitErrorMessage, setLimitErrorMessage] = useState("");
@@ -117,11 +115,7 @@ export function EmployeeTable({
             console.error("Failed to update status:", error);
             if (error?.status === 403 && error?.data?.message?.includes('limit')) {
                 setLimitErrorMessage(error?.data?.message || "Limit reached. Please upgrade your plan.");
-                if (isExpired) {
-                    setShowUpgradeModal(true);
-                } else {
-                    setShowAddonModal(true);
-                }
+                setShowUpgradeModal(true);
             } else {
                 showErrorToast(error?.data?.message || "Failed to update status");
             }
@@ -342,15 +336,13 @@ export function EmployeeTable({
                             description: "Add your first employee to get started.",
                             primaryActionLabel: isEmployee
                                 ? undefined
-                                : (isExpired ? "Upgrade Plan" : (hasReachedLimit ? "Buy Extra Slots" : "Add Employee")),
+                                : (isExpired || hasReachedLimit ? "Upgrade Plan" : "Add Employee"),
                             icon: User
                         }}
                         onPrimaryAction={() => {
                             if (isEmployee) return;
-                            if (isExpired) {
+                            if (isExpired || hasReachedLimit) {
                                 setShowUpgradeModal(true);
-                            } else if (hasReachedLimit) {
-                                setShowAddonModal(true);
                             } else {
                                 router.push(routes.privateroute.EMPLOYEECREATE);
                             }
@@ -362,13 +354,7 @@ export function EmployeeTable({
 
             <UpgradePlanModal
                 isOpen={showUpgradeModal}
-                onClose={() => setShowUpgradeModal(false)}
-            />
-            <AddonPurchaseModal
-                isOpen={showAddonModal}
-                onClose={() => { setShowAddonModal(false); setLimitErrorMessage(""); }}
-                addonType="employee"
-                message={limitErrorMessage}
+                onClose={() => { setShowUpgradeModal(false); setLimitErrorMessage(""); }}
             />
 
             {/* Pagination */}

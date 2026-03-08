@@ -28,9 +28,6 @@ export function EmployeeList() {
         showUpgradeModal,
         openUpgradeModal,
         closeUpgradeModal,
-        showAddonModal,
-        openAddonModal,
-        closeAddonModal
     } = useSubscriptionActions();
     const [showBulkImportModal, setShowBulkImportModal] = useState(false);
 
@@ -141,11 +138,7 @@ export function EmployeeList() {
                         showUpgradeModal={showUpgradeModal}
                         openUpgradeModal={openUpgradeModal}
                         closeUpgradeModal={closeUpgradeModal}
-                        showAddonModal={showAddonModal}
-                        openAddonModal={openAddonModal}
-                        closeAddonModal={closeAddonModal}
                         upgradeLabel="Upgrade Plan"
-                        buyExtraLabel="Buy Extra Slots"
                         icon={UserPlus}
                     >
                         <div className="flex gap-2">

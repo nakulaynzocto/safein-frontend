@@ -54,7 +54,7 @@ export default function SubscriptionPlansPage() {
                 )}
 
                 {!isLoading && !error && (
-                    <div className="scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent flex snap-x snap-mandatory gap-6 overflow-x-auto pb-8">
+                    <div className="scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent flex snap-x snap-mandatory gap-6 overflow-x-auto pb-8 md:justify-center">
                         {plans.map((plan) => (
                             <div key={plan._id} className="w-[280px] flex-none snap-center py-2 sm:w-[320px]">
                                 <Card

@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Calendar, CalendarPlus, UserPlus, Users, Send, ClipboardList, IdCard, Contact } from "lucide-react";
 import { routes } from "@/utils/routes";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
-import { AddonPurchaseModal } from "@/components/common/AddonPurchaseModal";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
@@ -65,8 +64,6 @@ export function QuickActions() {
     const { user } = useAppSelector((state) => state.auth);
     const { hasReachedEmployeeLimit, hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    const [showAppointmentAddon, setShowAppointmentAddon] = useState(false);
-    const [showEmployeeAddon, setShowEmployeeAddon] = useState(false);
 
     // Check if user is employee
     const isEmployee = checkIsEmployee(user);
@@ -85,17 +82,11 @@ export function QuickActions() {
                             <Button
                                 className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm"
                                 variant="outline"
-                                onClick={() => {
-                                    if (isExpired) {
-                                        setShowUpgradeModal(true);
-                                    } else {
-                                        setShowAppointmentAddon(true);
-                                    }
-                                }}
+                                onClick={() => setShowUpgradeModal(true)}
                             >
                                 <CalendarPlus className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                <span className="line-clamp-2 text-center">
-                                    {isExpired ? "Upgrade to Create More" : "Buy Extra Invites"}
+                                <span className="line-clamp-2 text-center text-primary font-bold">
+                                    Upgrade to Create More
                                 </span>
                             </Button>
                         </>
@@ -143,17 +134,11 @@ export function QuickActions() {
                                 <Button
                                     className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm"
                                     variant="outline"
-                                    onClick={() => {
-                                        if (isExpired) {
-                                            setShowUpgradeModal(true);
-                                        } else {
-                                            setShowEmployeeAddon(true);
-                                        }
-                                    }}
+                                    onClick={() => setShowUpgradeModal(true)}
                                 >
                                     <UserPlus className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                    <span className="line-clamp-2 text-center">
-                                        {isExpired ? "Upgrade to Add More" : "Buy Extra Slots"}
+                                    <span className="line-clamp-2 text-center text-primary font-bold">
+                                        Upgrade to Add More
                                     </span>
                                 </Button>
                             </>
@@ -172,16 +157,6 @@ export function QuickActions() {
                     )}
 
                     <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
-                    <AddonPurchaseModal
-                        isOpen={showAppointmentAddon}
-                        onClose={() => setShowAppointmentAddon(false)}
-                        type="appointment"
-                    />
-                    <AddonPurchaseModal
-                        isOpen={showEmployeeAddon}
-                        onClose={() => setShowEmployeeAddon(false)}
-                        type="employee"
-                    />
                 </div>
             </CardContent>
         </Card>

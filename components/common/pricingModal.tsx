@@ -182,7 +182,13 @@ export function PricingModal({ open, onOpenChange, isRegistrationFlow = false }:
                     </div>
                 ) : (
                     <div
-                        className={`mt-6 grid gap-6 ${displayPlans.length === 1 ? "mx-auto max-w-md grid-cols-1" : displayPlans.length === 2 ? "mx-auto max-w-4xl grid-cols-1 md:grid-cols-2" : "grid-cols-1 md:grid-cols-3"}`}
+                        className={`mt-6 grid gap-6 justify-center ${
+                            displayPlans.length === 1
+                                ? "mx-auto max-w-md grid-cols-1"
+                                : displayPlans.length === 2
+                                ? "mx-auto max-w-4xl grid-cols-1 md:grid-cols-2"
+                                : "mx-auto max-w-5xl grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                        }`}
                     >
                         {displayPlans.map((plan: ISubscriptionPlan) => (
                             <Card

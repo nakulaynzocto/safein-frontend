@@ -63,9 +63,6 @@ export function VisitorList() {
         showUpgradeModal,
         openUpgradeModal,
         closeUpgradeModal,
-        showAddonModal,
-        openAddonModal,
-        closeAddonModal,
     } = useSubscriptionActions();
 
     const { user } = useAppSelector((state) => state.auth);
@@ -132,17 +129,13 @@ export function VisitorList() {
 
     const emptyPrimaryLabel = isEmployee
         ? "Register Visitor"
-        : isExpired
+        : (isExpired || hasReachedVisitorLimit)
             ? "Upgrade Plan"
-            : hasReachedVisitorLimit
-                ? "Buy Extra Invites"
-                : "Register Visitor";
+            : "Register Visitor";
 
     const handlePrimaryAction = () => {
-        if (!isEmployee && isExpired) {
+        if (!isEmployee && (isExpired || hasReachedVisitorLimit)) {
             openUpgradeModal();
-        } else if (!isEmployee && hasReachedVisitorLimit) {
-            openAddonModal();
         } else {
             router.push(routes.privateroute.VISITORREGISTRATION);
         }
@@ -302,11 +295,7 @@ export function VisitorList() {
                             showUpgradeModal={showUpgradeModal}
                             openUpgradeModal={openUpgradeModal}
                             closeUpgradeModal={closeUpgradeModal}
-                            showAddonModal={showAddonModal}
-                            openAddonModal={openAddonModal}
-                            closeAddonModal={closeAddonModal}
                             upgradeLabel="Upgrade"
-                            buyExtraLabel="Buy Extra"
                             icon={Plus}
                             isEmployee={isEmployee}
                             className="h-12 w-12 sm:w-auto sm:px-6 rounded-xl"

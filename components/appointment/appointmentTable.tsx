@@ -136,9 +136,6 @@ export function AppointmentTable({
         showUpgradeModal,
         openUpgradeModal,
         closeUpgradeModal,
-        showAddonModal,
-        openAddonModal,
-        closeAddonModal
     } = useSubscriptionActions();
 
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -186,7 +183,7 @@ export function AppointmentTable({
 
     const emptyPrimaryLabel = isEmployee
         ? "Create Appointment Link"
-        : (hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment");
+        : (isExpired || hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment");
     const emptyTitle = isToday() ? "No appointments for today" : "No appointments yet";
 
     const handleDelete = async () => {
@@ -627,11 +624,7 @@ export function AppointmentTable({
                             showUpgradeModal={showUpgradeModal}
                             openUpgradeModal={openUpgradeModal}
                             closeUpgradeModal={closeUpgradeModal}
-                            showAddonModal={showAddonModal}
-                            openAddonModal={openAddonModal}
-                            closeAddonModal={closeAddonModal}
                             upgradeLabel="Upgrade"
-                            buyExtraLabel="Buy Extra"
                             icon={Plus}
                             isEmployee={isEmployee}
                             className="h-10 w-10 sm:h-12 sm:w-auto sm:px-6 rounded-xl shrink-0"
@@ -662,10 +655,8 @@ export function AppointmentTable({
                         onPrimaryAction={() => {
                             if (isEmployee) {
                                 router.push(routes.privateroute.APPOINTMENT_LINKS);
-                            } else if (isExpired) {
+                            } else if (isExpired || hasReachedAppointmentLimit) {
                                 openUpgradeModal();
-                            } else if (hasReachedAppointmentLimit) {
-                                openAddonModal();
                             } else {
                                 router.push(routes.privateroute.APPOINTMENTCREATE);
                             }

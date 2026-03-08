@@ -53,9 +53,6 @@ export function SpotPassList() {
         showUpgradeModal,
         openUpgradeModal,
         closeUpgradeModal,
-        showAddonModal,
-        openAddonModal,
-        closeAddonModal
     } = useSubscriptionActions();
 
     // Queries & Mutations
@@ -290,11 +287,7 @@ export function SpotPassList() {
                             showUpgradeModal={showUpgradeModal}
                             openUpgradeModal={openUpgradeModal}
                             closeUpgradeModal={closeUpgradeModal}
-                            showAddonModal={showAddonModal}
-                            openAddonModal={openAddonModal}
-                            closeAddonModal={closeAddonModal}
                             upgradeLabel="Upgrade"
-                            buyExtraLabel="Buy Extra"
                             icon={Plus}
                             className="h-12 w-12 sm:w-auto sm:px-6 rounded-xl"
                         >

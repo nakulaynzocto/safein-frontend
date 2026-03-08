@@ -222,10 +222,7 @@ export default function AppointmentLinksPage() {
     const {
         showUpgradeModal,
         openUpgradeModal,
-        closeUpgradeModal,
-        showAddonModal,
-        openAddonModal,
-        closeAddonModal
+        closeUpgradeModal
     } = useSubscriptionActions();
 
     // OTP Modal states
@@ -715,11 +712,7 @@ export default function AppointmentLinksPage() {
                                 showUpgradeModal={showUpgradeModal}
                                 openUpgradeModal={openUpgradeModal}
                                 closeUpgradeModal={closeUpgradeModal}
-                                showAddonModal={showAddonModal}
-                                openAddonModal={openAddonModal}
-                                closeAddonModal={closeAddonModal}
                                 upgradeLabel="Upgrade Plan"
-                                buyExtraLabel="Buy Extra Invites"
                                 className="flex items-center justify-center gap-2 text-xs whitespace-nowrap sm:text-sm text-white px-6 min-w-[150px]"
                             >
                                 <CreateAppointmentLinkModal
@@ -773,17 +766,13 @@ export default function AppointmentLinksPage() {
                         emptyData={{
                             title: "No appointment links found",
                             description: "Create your first appointment link to get started.",
-                            primaryActionLabel: isExpired
+                            primaryActionLabel: isExpired || hasReachedAppointmentLimit
                                 ? "Upgrade Plan"
-                                : hasReachedAppointmentLimit
-                                    ? "Buy Extra Invites"
-                                    : (filterType === "special" ? "Book VIP" : "Create Link"),
+                                : (filterType === "special" ? "Book VIP" : "Create Link"),
                         }}
                         onPrimaryAction={() => {
-                            if (isExpired) {
+                            if (isExpired || hasReachedAppointmentLimit) {
                                 openUpgradeModal();
-                            } else if (hasReachedAppointmentLimit) {
-                                openAddonModal();
                             } else {
                                 if (filterType === "special") {
                                     setShowVipModal(true);

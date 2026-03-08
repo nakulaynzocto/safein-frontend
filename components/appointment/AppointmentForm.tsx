@@ -75,10 +75,7 @@ export function NewAppointmentModal({
     const {
         showUpgradeModal,
         openUpgradeModal,
-        closeUpgradeModal,
-        showAddonModal,
-        openAddonModal,
-        closeAddonModal
+        closeUpgradeModal
     } = useSubscriptionActions();
     const [internalOpen, setInternalOpen] = useState(false);
     const isPage = layout === "page";
@@ -464,11 +461,7 @@ export function NewAppointmentModal({
                         showUpgradeModal={showUpgradeModal}
                         openUpgradeModal={openUpgradeModal}
                         closeUpgradeModal={closeUpgradeModal}
-                        showAddonModal={showAddonModal}
-                        openAddonModal={openAddonModal}
-                        closeAddonModal={closeAddonModal}
                         upgradeLabel="Upgrade Plan"
-                        buyExtraLabel="Buy Extra Appointments"
                         className="w-full min-w-[180px] px-6 sm:w-auto text-white"
                     >
                         <ActionButton

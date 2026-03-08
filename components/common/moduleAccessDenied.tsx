@@ -5,7 +5,6 @@ import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/comp
 import { Button } from "@/components/ui/button";
 import { ShieldAlert, LucideIcon } from "lucide-react";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
-import { AddonPurchaseModal } from "@/components/common/AddonPurchaseModal";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { cn } from "@/lib/utils";
@@ -17,8 +16,6 @@ interface ModuleAccessDeniedProps {
     variant?: "error" | "warning";
     buttonLabel?: string;
     containerHeight?: string;
-    addonType?: 'employee' | 'appointment' | 'spotPass';
-    addonButtonLabel?: string;
     isExpired?: boolean;
 }
 
@@ -29,21 +26,15 @@ export function ModuleAccessDenied({
     variant = "error",
     buttonLabel = "Upgrade Plan",
     containerHeight = "min-h-[60vh]",
-    addonType,
-    addonButtonLabel = "Buy Extra Limits",
     isExpired = false
 }: ModuleAccessDeniedProps) {
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    const [showAddonModal, setShowAddonModal] = useState(false);
     const { user } = useAppSelector((state) => state.auth);
     const isEmployee = checkIsEmployee(user);
 
     const isError = variant === "error";
 
-    // If it's just a limit reach (not expired), and we have an addon, 
-    // we might want the addon button to be primary or the first choice.
-    // BUT only if NOT an employee
-    const showAddonAction = !!addonType && !isExpired && !isEmployee;
+
 
     return (
         <div className={cn(
@@ -86,26 +77,6 @@ export function ModuleAccessDenied({
                         </div>
                     ) : (
                         <>
-                            {showAddonAction ? (
-                                <>
-                                    <Button
-                                        variant="primary"
-                                        size="lg"
-                                        className="w-full sm:w-auto min-w-[160px] shadow-md hover:shadow-lg transition-all h-11 sm:h-12 text-base"
-                                        onClick={() => setShowAddonModal(true)}
-                                    >
-                                        {addonButtonLabel}
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="lg"
-                                        className="w-full sm:w-auto min-w-[160px] h-11 sm:h-12 text-base border-gray-300 hover:bg-gray-50"
-                                        onClick={() => setShowUpgradeModal(true)}
-                                    >
-                                        {buttonLabel}
-                                    </Button>
-                                </>
-                            ) : (
                                 <Button
                                     variant="primary"
                                     size="lg"
@@ -116,7 +87,6 @@ export function ModuleAccessDenied({
                                 >
                                     {buttonLabel}
                                 </Button>
-                            )}
                         </>
                     )}
                 </CardFooter>
@@ -124,11 +94,6 @@ export function ModuleAccessDenied({
             <UpgradePlanModal
                 isOpen={showUpgradeModal}
                 onClose={() => setShowUpgradeModal(false)}
-            />
-            <AddonPurchaseModal
-                isOpen={showAddonModal}
-                onClose={() => setShowAddonModal(false)}
-                type={addonType}
             />
         </div>
     );

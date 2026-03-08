@@ -117,7 +117,7 @@ export default function PricingPage() {
                     {/* Pricing Plans */}
                     <section className="px-4 py-20">
                         <div className="container mx-auto">
-                            <div className="scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent flex snap-x snap-mandatory gap-6 overflow-x-auto pb-12">
+                            <div className="scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent flex snap-x snap-mandatory gap-6 overflow-x-auto pb-12 md:justify-center">
                                 {plans.map((plan: ISubscriptionPlan, index: number) => (
                                     <div key={plan._id} className="w-[300px] flex-none snap-center py-4 sm:w-[320px]">
                                         <Card
@@ -219,7 +219,7 @@ export default function PricingPage() {
                             <div className="mx-auto max-w-6xl">
                                 <h2 className="text-brand mb-4 text-3xl font-bold">Pricing Summary</h2>
                                 <p className="text-muted-foreground mb-8 text-lg">Premium plan total cost comparison</p>
-                                <div className="scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent flex snap-x snap-mandatory gap-6 overflow-x-auto pb-8 px-4">
+                                <div className="scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent flex snap-x snap-mandatory gap-6 overflow-x-auto pb-8 px-4 md:justify-center">
                                     {plans
                                         .filter((p) => p.planType !== "free")
                                         .map((plan, index) => {

@@ -66,9 +66,6 @@ export function SpotPassCreateForm() {
         showUpgradeModal,
         openUpgradeModal,
         closeUpgradeModal,
-        showAddonModal,
-        openAddonModal,
-        closeAddonModal
     } = useSubscriptionActions();
 
     const {
@@ -230,11 +227,7 @@ export function SpotPassCreateForm() {
                             showUpgradeModal={showUpgradeModal}
                             openUpgradeModal={openUpgradeModal}
                             closeUpgradeModal={closeUpgradeModal}
-                            showAddonModal={showAddonModal}
-                            openAddonModal={openAddonModal}
-                            closeAddonModal={closeAddonModal}
                             upgradeLabel="Upgrade Plan"
-                            buyExtraLabel="Buy Extra Passes"
                             className="w-full sm:w-auto min-w-[180px]"
                         >
                             <Button

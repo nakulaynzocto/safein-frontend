@@ -29,7 +29,6 @@ import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { UpgradePlanModal } from "../common/upgradePlanModal";
-import { AddonPurchaseModal } from "../common/AddonPurchaseModal";
 import { ActionButton } from "@/components/common/actionButton";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { FormProvider } from "react-hook-form";
@@ -117,9 +116,6 @@ export function CreateAppointmentLinkModal({
         showUpgradeModal,
         openUpgradeModal,
         closeUpgradeModal,
-        showAddonModal,
-        openAddonModal,
-        closeAddonModal
     } = useSubscriptionActions();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -197,11 +193,7 @@ export function CreateAppointmentLinkModal({
             }
 
             if (hasReachedAppointmentLimit || isExpired) {
-                if (isExpired) {
-                    openUpgradeModal();
-                } else {
-                    openAddonModal();
-                }
+                openUpgradeModal();
                 return;
             }
 
@@ -252,7 +244,7 @@ export function CreateAppointmentLinkModal({
                 setIsSubmitting(false);
             }
         },
-        [createAppointmentLink, reset, setOpen, onSuccess, isEmployee, currentEmployeeId, hasReachedAppointmentLimit, isSubmitting, isCreating, isExpired, openUpgradeModal, openAddonModal],
+        [createAppointmentLink, reset, setOpen, onSuccess, isEmployee, currentEmployeeId, hasReachedAppointmentLimit, isSubmitting, isCreating, isExpired, openUpgradeModal],
     );
 
     const handleOpenChange = useCallback(
@@ -453,15 +445,11 @@ export function CreateAppointmentLinkModal({
                                 isExpired={isExpired}
                                 hasReachedLimit={hasReachedAppointmentLimit}
                                 limitType="appointment"
-                                showUpgradeModal={showUpgradeModal}
-                                openUpgradeModal={openUpgradeModal}
-                                closeUpgradeModal={closeUpgradeModal}
-                                showAddonModal={showAddonModal}
-                                openAddonModal={openAddonModal}
-                                closeAddonModal={closeAddonModal}
-                                upgradeLabel="Upgrade Plan"
-                                buyExtraLabel="Buy Extra Invites"
-                                className="px-6 text-white min-w-[180px]"
+                                 showUpgradeModal={showUpgradeModal}
+                                 openUpgradeModal={openUpgradeModal}
+                                 closeUpgradeModal={closeUpgradeModal}
+                                 upgradeLabel="Upgrade Plan"
+                                 className="px-6 text-white min-w-[180px]"
                             >
                                 <ActionButton
                                     type="submit"
@@ -494,11 +482,6 @@ export function CreateAppointmentLinkModal({
                         <UpgradePlanModal
                             isOpen={showUpgradeModal}
                             onClose={closeUpgradeModal}
-                        />
-                        <AddonPurchaseModal
-                            isOpen={showAddonModal}
-                            onClose={closeAddonModal}
-                            type="appointment"
                         />
                     </>
                 )}

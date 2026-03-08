@@ -21,7 +21,6 @@ import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQue
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
-import { AddonPurchaseModal } from "@/components/common/AddonPurchaseModal";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { InputField } from "../common/inputField";
 
@@ -93,7 +92,6 @@ export function NewEmployeeModal({
     const [generalError, setGeneralError] = useState<string | null>(null);
 
     const { hasReachedEmployeeLimit, isExpired } = useSubscriptionStatus();
-    const [showAddonModal, setShowAddonModal] = useState(false);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     const isEditMode = !!employeeId;
@@ -387,11 +385,11 @@ export function NewEmployeeModal({
                     <ActionButton
                         type="button"
                         variant="primary"
-                        onClick={() => setShowAddonModal(true)}
+                        onClick={() => setShowUpgradeModal(true)}
                         size="xl"
                         className="w-full min-w-[160px] px-6 sm:w-auto text-white"
                     >
-                        Buy Extra Slots
+                        Upgrade Plan
                     </ActionButton>
                 ) : (
                     <ActionButton
@@ -407,11 +405,7 @@ export function NewEmployeeModal({
                 )}
             </div>
 
-            <AddonPurchaseModal
-                isOpen={showAddonModal}
-                onClose={() => setShowAddonModal(false)}
-                type="employee"
-            />
+
 
             <UpgradePlanModal
                 isOpen={showUpgradeModal}

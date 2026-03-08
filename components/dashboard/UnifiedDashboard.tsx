@@ -14,7 +14,6 @@ import { DashboardCharts } from "./dashboardCharts";
 import { calculateAppointmentStats } from "./dashboardUtils";
 import { DashboardSkeleton } from "@/components/common/tableSkeleton";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
-import { AddonPurchaseModal } from "@/components/common/AddonPurchaseModal";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { routes } from "@/utils/routes";
 import { getChartDateRange, getTimezoneOffset } from "@/utils/dateUtils";
@@ -27,7 +26,6 @@ import { APIErrorState } from "@/components/common/APIErrorState";
 export function UnifiedDashboard() {
     const router = useRouter();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    const [showAddonModal, setShowAddonModal] = useState(false);
     const [retryCount, setRetryCount] = useState(0);
     const [loadingTimeout, setLoadingTimeout] = useState(false);
 
@@ -143,10 +141,8 @@ export function UnifiedDashboard() {
     const handleScheduleAppointment = useCallback(() => {
         if (isEmployee) {
             router.push(routes.privateroute.APPOINTMENT_LINKS);
-        } else if (isExpired) {
+        } else if (hasReachedAppointmentLimit || isExpired) {
             setShowUpgradeModal(true);
-        } else if (hasReachedAppointmentLimit) {
-            setShowAddonModal(true);
         } else {
             router.push(routes.privateroute.APPOINTMENTCREATE);
         }
@@ -217,7 +213,7 @@ export function UnifiedDashboard() {
                     description: "No recent appointment activities found.",
                     primaryActionLabel: isEmployee
                         ? "Visitor Invites"
-                        : (isExpired ? "Upgrade Plan" : (hasReachedAppointmentLimit ? "Buy Extra Invites" : "Schedule Appointment")),
+                        : (isExpired || hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment"),
                 }}
                 onPrimaryAction={handleScheduleAppointment}
             />
@@ -225,11 +221,6 @@ export function UnifiedDashboard() {
             <QuickActions />
 
             <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
-            <AddonPurchaseModal
-                isOpen={showAddonModal}
-                onClose={() => setShowAddonModal(false)}
-                type="appointment"
-            />
         </div>
     );
 }

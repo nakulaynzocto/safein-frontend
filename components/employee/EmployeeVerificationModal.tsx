@@ -17,7 +17,6 @@ import { Loader2 } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/inputOtp";
 
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
-import { AddonPurchaseModal } from "@/components/common/AddonPurchaseModal";
 
 interface EmployeeVerificationModalProps {
     open: boolean;
@@ -41,7 +40,6 @@ export function EmployeeVerificationModal({
     const [sendOtp, { isLoading: isSending }] = useEmployeeSendOtpMutation();
     const [otpSent, setOtpSent] = useState(false);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    const [showAddonModal, setShowAddonModal] = useState(false);
     const [limitErrorMessage, setLimitErrorMessage] = useState("");
 
     const handleVerify = async (otpToVerify?: string) => {
@@ -57,11 +55,7 @@ export function EmployeeVerificationModal({
             console.error("Failed to verify:", error);
             if (error?.status === 403 && error?.data?.message?.includes('limit')) {
                 setLimitErrorMessage(error?.data?.message || "Limit reached. Please upgrade your plan.");
-                // Since verification implies activation, and we don't have isExpired prop here, 
-                // we'll default to Addon unless we want to pass isExpired too.
-                // Assuming active subscription if they are verifying. If expired, they probably can't even get here or will see upgrade.
-                // Let's default to Addon as safe bet for "more slots needed".
-                setShowAddonModal(true);
+                setShowUpgradeModal(true);
             } else {
                 showErrorToast(error?.data?.message || "Failed to verify OTP");
             }
@@ -165,12 +159,6 @@ export function EmployeeVerificationModal({
             <UpgradePlanModal
                 isOpen={showUpgradeModal}
                 onClose={() => setShowUpgradeModal(false)}
-            />
-            <AddonPurchaseModal
-                isOpen={showAddonModal}
-                onClose={() => { setShowAddonModal(false); setLimitErrorMessage(""); }}
-                addonType="employee"
-                message={limitErrorMessage}
             />
         </>
     );
