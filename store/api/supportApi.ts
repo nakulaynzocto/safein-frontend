@@ -38,7 +38,7 @@ export const supportApi = createApi({
             transformResponse: (response: { data: any }) => response.data || [],
             providesTags: ['SupportTicket'],
         }),
-        createTicket: builder.mutation<any, { subject: string; message: string }>({
+        createTicket: builder.mutation<any, { subject: string; message: string; attachments?: any[] }>({
             query: (data) => ({
                 url: '/tickets',
                 method: 'POST',
@@ -46,13 +46,21 @@ export const supportApi = createApi({
             }),
             invalidatesTags: ['SupportTicket'],
         }),
-        sendMessage: builder.mutation<any, { ticketId: string; content: string; type?: string }>({
+        sendMessage: builder.mutation<any, { ticketId: string; content: string; type?: string; attachments?: any[] }>({
             query: ({ ticketId, ...data }) => ({
                 url: `/tickets/${ticketId}/messages`,
                 method: 'POST',
                 body: data,
             }),
             invalidatesTags: (result, error, { ticketId }) => [{ type: 'SupportMessage', id: ticketId }],
+        }),
+        uploadSupportFile: builder.mutation<{ url: string; name: string; type: string }, FormData>({
+            query: (formData) => ({
+                url: '/upload',
+                method: 'POST',
+                body: formData,
+            }),
+            transformResponse: (response: { data: { url: string; name: string; type: string } }) => response.data,
         }),
     }),
 });
@@ -63,5 +71,6 @@ export const {
     useGetUserTicketsQuery,
     useLazyGetUserTicketsQuery,
     useCreateTicketMutation,
-    useSendMessageMutation
+    useSendMessageMutation,
+    useUploadSupportFileMutation
 } = supportApi;

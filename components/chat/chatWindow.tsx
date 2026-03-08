@@ -5,6 +5,7 @@ import { ArrowLeft, Phone, Video, Check, CheckCheck, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChatInput } from "./InternalChatInput";
 import { formatName, getInitials } from "@/utils/helpers";
+import Image from "next/image";
 
 interface Message {
     id: string;
@@ -28,7 +29,7 @@ interface ChatWindowProps {
         email?: string;
     };
     currentUser: { id: string };
-    onSendMessage: (text: string) => void;
+    onSendMessage: (text: string, files?: any[]) => void;
     onBack: () => void;
     onSettings?: () => void;
     onLoadMore?: () => void;
@@ -303,7 +304,36 @@ export function ChatWindow({
                                                     </div>
                                                 )}
                                                 <div className="leading-relaxed font-medium tracking-tight">
-                                                    {msg.text}
+                                                    {msg.files && msg.files.filter(f => f.url).length > 0 && (
+                                                        <div className={cn(
+                                                            "mb-2 space-y-2",
+                                                            msg.files.filter(f => f.url).length > 1 ? "grid grid-cols-2 gap-2 space-y-0" : ""
+                                                        )}>
+                                                            {msg.files.filter(f => f.url).map((file, i) => (
+                                                                <div 
+                                                                    key={i} 
+                                                                    className={cn(
+                                                                        "relative rounded-xl overflow-hidden border border-black/5 dark:border-white/10 shadow-sm transition-transform hover:scale-[1.02] cursor-pointer",
+                                                                        msg.files!.filter(f => f.url).length === 1 ? "aspect-[4/3] w-full min-w-[200px] max-w-[400px]" : "aspect-square"
+                                                                    )}
+                                                                    onClick={() => window.open(file.url, '_blank')}
+                                                                >
+                                                                    <Image 
+                                                                        src={file.url} 
+                                                                        alt={file.name} 
+                                                                        fill 
+                                                                        className="object-cover"
+                                                                        sizes="(max-width: 768px) 100vw, 400px"
+                                                                    />
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {msg.text && (
+                                                        <p className={cn(msg.files && msg.files.length > 0 ? "mt-2" : "")}>
+                                                            {msg.text}
+                                                        </p>
+                                                    )}
                                                 </div>
 
                                                 <div className={cn(

@@ -31,6 +31,7 @@ interface Message {
     content: string;
     createdAt: Date;
     type?: string;
+    attachments?: Array<{ url: string; name: string; type: string }>;
 }
 
 export default function SupportWidget() {
@@ -54,6 +55,7 @@ export default function SupportWidget() {
     const [isAuthenticating, setIsAuthenticating] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const { user, token, isAuthenticated, isCurrentRoutePrivate } = useAuthSubscription(); // Get employee session if logged in
+    const [uploadedFile, setUploadedFile] = useState<{ url: string; name: string; type: string } | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const socketRef = useRef<any>(null);
     const isOpenRef = useRef(isOpen);
@@ -256,17 +258,26 @@ export default function SupportWidget() {
     };
 
     const handleSendMessage = async () => {
-        if (!input.trim()) return;
+        if (!input.trim() && !uploadedFile) return;
 
         const msgContent = input;
+        const msgAttachments = uploadedFile ? [uploadedFile] : undefined;
+        
         setInput("");
+        setUploadedFile(null);
         setIsSending(true);
+
+        const eventData: any = { ticketId, content: msgContent };
+        if (msgAttachments) {
+            eventData.attachments = msgAttachments;
+            eventData.type = "image";
+        }
 
         // Use Socket if connected, otherwise fallback to REST
         if (socketRef.current && isConnected) {
             if (!ticketId) {
                 // Create ticket via socket
-                socketRef.current.emit("create_ticket", { subject: "Support Chat", message: msgContent }, (response: any) => {
+                socketRef.current.emit("create_ticket", { subject: "Support Chat", message: msgContent, attachments: msgAttachments }, (response: any) => {
                     setIsSending(false);
                     if (response.status === "ok") {
                         const newTicketId = response.ticket.ticketId;
@@ -277,12 +288,13 @@ export default function SupportWidget() {
                         syncTicketAndHistory(socketRef.current);
                     } else {
                         setInput(msgContent);
+                        setUploadedFile(msgAttachments?.[0] || null);
                         toast.error(response.message || "Failed to start chat");
                     }
                 });
             } else {
                 // Send message via socket
-                socketRef.current.emit("send_message", { ticketId, content: msgContent }, (response: any) => {
+                socketRef.current.emit("send_message", eventData, (response: any) => {
                     setIsSending(false);
                     if (response.status === "ok") {
                         setMessages(prev => {
@@ -291,6 +303,7 @@ export default function SupportWidget() {
                         });
                     } else {
                         setInput(msgContent);
+                        setUploadedFile(msgAttachments?.[0] || null);
                         toast.error(response.message || "Failed to send message");
                     }
                 });
@@ -301,7 +314,11 @@ export default function SupportWidget() {
         // Fallback to REST API if socket not connected
         try {
             if (!ticketId) {
-                const response: any = await restCreateTicket({ subject: "Support Chat", message: msgContent }).unwrap();
+                const response: any = await restCreateTicket({ 
+                    subject: "Support Chat", 
+                    message: msgContent,
+                    attachments: msgAttachments 
+                }).unwrap();
                 setIsSending(false);
                 if (response.success) {
                     setTicketId(response.data.ticket.ticketId);
@@ -312,7 +329,12 @@ export default function SupportWidget() {
                     });
                 }
             } else {
-                const response: any = await restSendMessage({ ticketId, content: msgContent }).unwrap();
+                const response: any = await restSendMessage({ 
+                    ticketId, 
+                    content: msgContent,
+                    attachments: msgAttachments,
+                    type: msgAttachments ? "image" : "text"
+                }).unwrap();
                 setIsSending(false);
                 if (response.success) {
                     setMessages(prev => {
@@ -324,6 +346,7 @@ export default function SupportWidget() {
         } catch (error: any) {
             setIsSending(false);
             setInput(msgContent);
+            setUploadedFile(msgAttachments?.[0] || null);
             toast.error(error.data?.message || "Connection error. Please try again.");
         }
     };
@@ -434,6 +457,9 @@ export default function SupportWidget() {
                                     handleKeyPress={handleKeyPress}
                                     isLoading={isLoading}
                                     isSending={isSending}
+                                    uploadedFile={uploadedFile}
+                                    setUploadedFile={setUploadedFile}
+                                    isSupportChat={true}
                                 />
                             </>
                         )}

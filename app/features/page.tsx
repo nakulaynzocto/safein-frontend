@@ -213,7 +213,7 @@ export default function FeaturesPage() {
                                         { t: "Instant Slot Sync", d: "Deep integration with staff calendars.", i: <Clock /> }
                                     ].map((c, i) => (
                                         <div key={i} className="group p-6 rounded-[2rem] bg-white border border-gray-100 hover:shadow-xl transition-all duration-300">
-                                            <div className="h-12 w-12 bg-accent/5 rounded-2xl flex items-center justify-center text-accent mb-4 transition-colors group-hover:bg-accent group-hover:text-white">
+                                            <div className="h-12 w-12 bg-accent/5 rounded-2xl flex items-center justify-center text-accent mb-4 transition-all duration-300 group-hover:scale-110 group-hover:bg-accent/10">
                                                 {React.cloneElement(c.i as React.ReactElement, { size: 24 })}
                                             </div>
                                             <h4 className="font-bold text-brand mb-2 text-lg">{c.t}</h4>
@@ -264,7 +264,7 @@ export default function FeaturesPage() {
                                         { t: "Instant Alerts", d: "Real-time notifications to the host.", i: <BellRing /> }
                                     ].map((c, i) => (
                                         <div key={i} className="flex gap-6 p-6 rounded-[2rem] bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
-                                            <div className="h-14 w-14 bg-accent/5 rounded-2xl flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all flex-shrink-0">
+                                            <div className="h-14 w-14 bg-accent/5 rounded-2xl flex items-center justify-center text-accent group-hover:scale-110 group-hover:bg-accent/10 transition-all flex-shrink-0">
                                                 {React.cloneElement(c.i as React.ReactElement, { size: 28 })}
                                             </div>
                                             <div>
@@ -343,7 +343,7 @@ export default function FeaturesPage() {
                                     { t: "Privacy Purge", d: "Chat data is deleted after visits.", i: <Lock /> }
                                 ].map((item, i) => (
                                     <div key={i} className="flex gap-6 p-1 bg-white hover:bg-slate-50 rounded-[2.5rem] transition-colors group">
-                                        <div className="h-16 w-16 bg-emerald-500/5 rounded-3xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all flex-shrink-0">
+                                        <div className="h-16 w-16 bg-emerald-500/5 rounded-3xl flex items-center justify-center text-emerald-600 group-hover:scale-110 group-hover:bg-emerald-500/10 transition-all flex-shrink-0">
                                             {React.cloneElement(item.i as React.ReactElement, { size: 28 })}
                                         </div>
                                         <div className="pt-2">
@@ -385,7 +385,7 @@ export default function FeaturesPage() {
                                         { t: "Immutable Logs", d: "Complete audit trails for every change.", i: <Database /> }
                                     ].map((item, i) => (
                                         <div key={i} className="flex gap-6 p-6 rounded-[2rem] bg-white border border-gray-100 hover:shadow-xl hover:border-accent/10 transition-all group">
-                                            <div className="h-14 w-14 bg-accent/5 rounded-2xl flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all flex-shrink-0 shadow-sm">
+                                            <div className="h-14 w-14 bg-accent/5 rounded-2xl flex items-center justify-center text-accent group-hover:scale-110 group-hover:bg-accent/10 transition-all flex-shrink-0 shadow-sm">
                                                 {React.cloneElement(item.i as React.ReactElement, { size: 28 })}
                                             </div>
                                             <div>
