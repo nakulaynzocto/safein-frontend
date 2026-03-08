@@ -577,7 +577,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                                 className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors"
                                             >
                                                 <span className="text-[14px] font-semibold text-[#666666] group-hover:underline flex items-center gap-2">
-                                                    Ask SafeIn
+                                                    Ask SafeIn (report and query)
                                                     <Sparkles className="h-3.5 w-3.5 text-emerald-500" />
                                                 </span>
                                             </DropdownMenuItem>
