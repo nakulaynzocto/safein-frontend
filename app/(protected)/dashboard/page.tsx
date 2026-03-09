@@ -3,7 +3,7 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
-import { DashboardSkeleton } from "@/components/common/tableSkeleton";
+import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { useAppDispatch } from "@/store/hooks";
 import { userSubscriptionApi } from "@/store/api/userSubscriptionApi";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
@@ -48,7 +48,7 @@ export default function DashboardPage() {
 
     // Unified dashboard works for both admin and employee
     return (
-        <Suspense fallback={<DashboardSkeleton />}>
+        <Suspense fallback={<PageSkeleton type="dashboard" />}>
             <CompanyProfileModal isOpen={showCompanyModal} />
             <UnifiedDashboard />
         </Suspense>

@@ -9,7 +9,7 @@ const AppointmentList = lazy(() =>
 
 export default function AppointmentListPage() {
     return (
-        <Suspense fallback={<PageSkeleton />}>
+        <Suspense fallback={<PageSkeleton type="table" showStats={true} />}>
             <AppointmentList />
         </Suspense>
     );

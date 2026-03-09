@@ -247,7 +247,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
 
             <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12">
                 <div className="flex h-20 items-center justify-between">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 lg:gap-3">
                         {/* Logo - Only show logo, hide text when sidebar is visible (to avoid duplicate branding) */}
                         {variant === "dashboard" ? (
                             // For dashboard variant, show minimal branding with text

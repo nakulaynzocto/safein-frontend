@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { SMTPSettings } from "@/components/settings/SMTPSettings";
 import { routes } from "@/utils/routes";
-import { LoadingSpinner } from "@/components/common/loadingSpinner";
+import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 
 export default function SMTPSettingsPage() {
@@ -35,16 +35,16 @@ export default function SMTPSettingsPage() {
             router.replace(routes.privateroute.DASHBOARD);
         }
         return (
-            <div className="flex min-h-[60vh] items-center justify-center">
-                <LoadingSpinner />
+            <div className="container mx-auto max-w-full">
+                <PageSkeleton type="form" />
             </div>
         );
     }
 
     if (!isAuthenticated || isChecking) {
         return (
-            <div className="flex min-h-[60vh] items-center justify-center">
-                <LoadingSpinner />
+            <div className="container mx-auto max-w-full">
+                <PageSkeleton type="form" />
             </div>
         );
     }

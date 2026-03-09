@@ -123,7 +123,18 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                         pathname === routes.privateroute.MESSAGES ? "flex-1 min-h-0 p-0 md:p-4 h-full overflow-hidden flex flex-col" : "container mx-auto px-2 py-4 sm:px-3 sm:py-4 md:px-4 md:py-6 lg:px-6 lg:py-8 pb-32 md:pb-24"
                     )}>
                         {isLoading ? (
-                            <PageSkeleton />
+                            <PageSkeleton 
+                                type={
+                                    pathname === "/" || pathname === routes.privateroute.DASHBOARD 
+                                        ? "dashboard" 
+                                        : pathname.includes("/list") || pathname.includes("/requests") || (pathname.includes("/spot-pass") && !pathname.includes("/create"))
+                                            ? "table"
+                                            : pathname.includes("/create") || pathname.includes("/edit") || pathname.includes("/settings")
+                                                ? "form"
+                                                : "generic"
+                                } 
+                                showStats={pathname === routes.privateroute.APPOINTMENTLIST}
+                            />
                         ) : shouldShowContent ? (
                             // Show content if conditions are met
                             <div className={cn("animate-fade-in flex flex-col", pathname === routes.privateroute.MESSAGES ? "flex-1 min-h-0 h-full" : "min-h-[calc(100vh-200px)]")} style={{ backgroundColor: "var(--background)" }}>

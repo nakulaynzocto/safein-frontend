@@ -92,26 +92,26 @@ export function QuickActions() {
                         closeUpgradeModal={closeUpgradeModal}
                         upgradeLabel="Upgrade to Create More"
                         icon={CalendarPlus}
-                        className="h-16 flex-col bg-transparent w-full text-xs sm:h-20 sm:text-sm border-2 border-dashed border-primary/20 hover:border-primary/40 hover:bg-primary/5 rounded-xl transition-all"
+                        className="h-16 flex-col bg-transparent w-full text-xs sm:h-20 sm:text-sm border-2 border-dashed border-brand/20 hover:border-brand/40 hover:bg-brand/5 rounded-xl transition-all"
                     >
                         {isEmployee ? (
                             <Button
-                                className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm w-full"
+                                className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm w-full text-brand-strong hover:text-brand"
                                 variant="outline"
                                 onClick={() => router.push(routes.privateroute.APPOINTMENT_LINKS)}
                             >
                                 <Send className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                <span className="line-clamp-2 text-center">Visitor Invites</span>
+                                <span className="line-clamp-2 text-center font-medium">Visitor Invites</span>
                             </Button>
                         ) : (
                             <Button
-                                className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm w-full"
+                                className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm w-full text-brand-strong hover:text-brand"
                                 variant="outline"
                                 asChild
                             >
                                 <Link href={routes.privateroute.APPOINTMENTCREATE} prefetch>
                                     <CalendarPlus className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                    <span className="line-clamp-2 text-center">Create Appointment</span>
+                                    <span className="line-clamp-2 text-center font-medium">Create Appointment</span>
                                 </Link>
                             </Button>
                         )}
@@ -120,13 +120,13 @@ export function QuickActions() {
                     {quickActions.map((action) => (
                         <Button
                             key={action.href}
-                            className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm"
+                            className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm text-brand-strong hover:text-brand"
                             variant="outline"
                             asChild
                         >
                             <Link href={action.href} prefetch={true}>
                                 <action.icon className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                <span className="line-clamp-2 text-center">{action.label}</span>
+                                <span className="line-clamp-2 text-center font-medium">{action.label}</span>
                             </Link>
                         </Button>
                     ))}
@@ -141,16 +141,16 @@ export function QuickActions() {
                             closeUpgradeModal={closeUpgradeModal}
                             upgradeLabel="Upgrade to Add More"
                             icon={UserPlus}
-                            className="h-16 flex-col bg-transparent w-full text-xs sm:h-20 sm:text-sm border-2 border-dashed border-primary/20 hover:border-primary/40 hover:bg-primary/5 rounded-xl transition-all"
+                            className="h-16 flex-col bg-transparent w-full text-xs sm:h-20 sm:text-sm border-2 border-dashed border-brand/20 hover:border-brand/40 hover:bg-brand/5 rounded-xl transition-all"
                         >
                             <Button
-                                className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm w-full"
+                                className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm w-full text-brand-strong hover:text-brand"
                                 variant="outline"
                                 asChild
                             >
                                 <Link href={routes.privateroute.EMPLOYEECREATE} prefetch>
                                     <UserPlus className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                    <span className="line-clamp-2 text-center">Add Employee</span>
+                                    <span className="line-clamp-2 text-center font-medium">Add Employee</span>
                                 </Link>
                             </Button>
                         </SubscriptionActionButtons>

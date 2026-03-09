@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
+import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { PendingApprovals } from "@/components/employee-dashboard/PendingApprovals";
 import { useGetAppointmentsQuery } from "@/store/api/appointmentApi";
 import { routes } from "@/utils/routes";
@@ -80,9 +81,7 @@ export default function AppointmentRequestsPage() {
             />
 
             {appointmentsLoading ? (
-                <div className="flex items-center justify-center py-12">
-                    <LoadingSpinner />
-                </div>
+                <PageSkeleton type="table" showStats={false} />
             ) : pendingAppointments.length > 0 ? (
                 <PendingApprovals appointments={pendingAppointments} />
             ) : (

@@ -12,7 +12,7 @@ import { AppointmentsTable } from "./AppointmentsTable";
 import { QuickActions } from "./QuickActions";
 import { DashboardCharts } from "./dashboardCharts";
 import { calculateAppointmentStats } from "./dashboardUtils";
-import { DashboardSkeleton } from "@/components/common/tableSkeleton";
+import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { routes } from "@/utils/routes";
@@ -170,7 +170,7 @@ export function UnifiedDashboard() {
     }, [refetchAppointments, refetchEmployees, refetchVisitors, refetchSubscriptionStatus]);
 
     if (shouldShowSkeleton && !hasError && !loadingTimeout) {
-        return <DashboardSkeleton />;
+        return <PageSkeleton type="dashboard" />;
     }
 
     if (loadingTimeout && isLoading && !hasData && !hasError) {

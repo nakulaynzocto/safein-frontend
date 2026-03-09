@@ -262,66 +262,49 @@ export function PageSkeleton() {
 export function DashboardSkeleton() {
     return (
         <div className="animate-in fade-in space-y-6 duration-500">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                    <Skeleton className="h-8 w-64" />
-                    <Skeleton className="h-4 w-96" />
-                </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {Array.from({ length: 4 }, (_, i) => (
+            {/* Charts Grid - First Row */}
+            <div className="grid gap-3 sm:gap-4 md:gap-6 md:grid-cols-2">
+                {[1, 2].map((i) => (
                     <Card key={i}>
-                        <CardContent className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div className="space-y-2">
-                                    <Skeleton className="h-4 w-20" />
-                                    <Skeleton className="h-8 w-24" />
-                                </div>
-                                <Skeleton className="h-10 w-10 rounded" />
-                            </div>
+                        <CardHeader className="p-3 sm:p-4 md:p-6 pb-2">
+                            <Skeleton className="h-6 w-48 mb-2" />
+                            <Skeleton className="h-4 w-64" />
+                        </CardHeader>
+                        <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                            <Skeleton className="h-[200px] w-full mt-2 sm:h-[250px]" />
                         </CardContent>
                     </Card>
                 ))}
             </div>
 
-            {/* Charts */}
-            <div className="grid gap-6 lg:grid-cols-2">
-                <Card>
-                    <CardHeader>
-                        <Skeleton className="h-6 w-32" />
-                    </CardHeader>
-                    <CardContent>
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <Skeleton className="h-6 w-32" />
-                    </CardHeader>
-                    <CardContent>
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
+            {/* Charts Grid - Second Row */}
+            <div className="grid gap-3 sm:gap-4 md:gap-6 lg:grid-cols-2">
+                {[1, 2].map((i) => (
+                    <Card key={i}>
+                        <CardHeader className="p-3 sm:p-4 md:p-6 pb-2">
+                            <Skeleton className="h-6 w-48 mb-2" />
+                            <Skeleton className="h-4 w-64" />
+                        </CardHeader>
+                        <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                            <Skeleton className="h-[200px] w-full mt-2 sm:h-[250px]" />
+                        </CardContent>
+                    </Card>
+                ))}
             </div>
 
-            {/* Tables */}
-            <div className="grid gap-6 lg:grid-cols-2">
-                <TableSkeleton rows={5} columns={5} />
-                <TableSkeleton rows={5} columns={5} />
-            </div>
+            {/* Recent Appointments Table */}
+            <AppointmentTableSkeleton rows={5} />
 
             {/* Quick Actions */}
             <Card>
                 <CardHeader>
                     <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-4 w-48 mt-2" />
                 </CardHeader>
                 <CardContent>
-                    <div className="grid gap-4 md:grid-cols-3">
-                        {Array.from({ length: 3 }, (_, i) => (
-                            <Skeleton key={i} className="h-20 w-full rounded-lg" />
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 lg:grid-cols-4">
+                        {Array.from({ length: 8 }, (_, i) => (
+                            <Skeleton key={i} className="h-16 w-full rounded-xl sm:h-20" />
                         ))}
                     </div>
                 </CardContent>

@@ -37,8 +37,8 @@ export default function CreateSpotPassPage() {
 
     if (isAuthLoading || !isAuthenticated || isEmployee) {
         return (
-            <div className="container mx-auto max-w-full py-3 sm:py-4 flex justify-center items-center h-[50vh]">
-                <PageSkeleton />
+            <div className="container mx-auto max-w-full py-3 sm:py-4">
+                <PageSkeleton type="form" />
             </div>
         );
     }
@@ -63,7 +63,7 @@ export default function CreateSpotPassPage() {
                     </p>
                 </div>
             </div>
-            <Suspense fallback={<PageSkeleton />}>
+            <Suspense fallback={<PageSkeleton type="form" />}>
                 <SpotPassCreateForm />
             </Suspense>
         </div>

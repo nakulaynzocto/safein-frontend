@@ -1,5 +1,5 @@
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 
 export default function Loading() {
-    return <PageSkeleton />;
+    return <PageSkeleton type="table" showStats={true} />;
 }

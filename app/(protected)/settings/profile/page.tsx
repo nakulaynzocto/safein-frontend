@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { ProfilePageContent } from "@/components/profile";
 import { routes } from "@/utils/routes";
-import { LoadingSpinner } from "@/components/common/loadingSpinner";
+import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 
 export default function ProfilePage() {
@@ -38,8 +38,8 @@ export default function ProfilePage() {
             router.replace(routes.privateroute.DASHBOARD);
         }
         return (
-            <div className="flex min-h-[60vh] items-center justify-center">
-                <LoadingSpinner />
+            <div className="container mx-auto max-w-full">
+                <PageSkeleton type="form" />
             </div>
         );
     }
@@ -47,8 +47,8 @@ export default function ProfilePage() {
     // Show loading while checking
     if (!isAuthenticated || isChecking) {
         return (
-            <div className="flex min-h-[60vh] items-center justify-center">
-                <LoadingSpinner />
+            <div className="container mx-auto max-w-full">
+                <PageSkeleton type="form" />
             </div>
         );
     }

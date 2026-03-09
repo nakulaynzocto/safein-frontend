@@ -46,10 +46,10 @@ export function SubscriptionActionButtons({
                     variant="primary"
                     size="xl"
                     onClick={openUpgradeModal}
-                    className={cn("flex items-center gap-2 text-white px-6 min-w-[150px]", className)}
+                    className={cn("flex items-center gap-2 text-brand-strong px-6 min-w-[150px]", className)}
                 >
-                    <Icon className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                    <span className="whitespace-nowrap">{upgradeLabel}</span>
+                    <Icon className="h-4 w-4 shrink-0 sm:h-5 sm:w-5 text-brand-strong" />
+                    <span className="whitespace-nowrap font-medium text-brand-strong">{upgradeLabel}</span>
                 </Button>
 
                 <UpgradePlanModal
@@ -78,10 +78,10 @@ export function SubscriptionActionButtons({
                 variant="primary"
                 size="xl"
                 onClick={handleSupportChat}
-                className={cn("flex items-center gap-2 text-white px-6 min-w-[150px] bg-accent hover:bg-accent/90", className)}
+                className={cn("flex items-center gap-2 text-brand-strong px-6 min-w-[150px]", className)}
             >
-                <MessageSquareText className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                <span className="whitespace-nowrap">Support Chat</span>
+                <MessageSquareText className="h-4 w-4 shrink-0 sm:h-5 sm:w-5 text-brand-strong" />
+                <span className="whitespace-nowrap font-medium text-brand-strong">Support Chat</span>
             </Button>
         );
     }
