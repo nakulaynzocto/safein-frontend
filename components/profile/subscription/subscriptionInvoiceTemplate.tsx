@@ -110,30 +110,6 @@ export const SubscriptionInvoiceTemplate = forwardRef<
 
                     {/* Info Boxes - Compact */}
                     <div className="px-6 grid grid-cols-2 gap-4 mt-6">
-                        {/* Invoice To */}
-                        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                            <div
-                                style={{ backgroundColor: primaryColor }}
-                                className="px-3 py-1.5 text-white font-bold text-[10px] uppercase tracking-wide"
-                            >
-                                Invoice To:
-                            </div>
-                            <div className="p-3 text-slate-700 text-xs space-y-0.5">
-                                <p className="font-bold text-sm text-slate-900">
-                                    {user?.companyName || "Client"}
-                                </p>
-                                <p className="text-[11px]">{user?.address?.street}</p>
-                                <p className="text-[11px]">
-                                    {user?.address?.city} {user?.address?.state && `, ${user?.address?.state}`} {user?.address?.pincode}
-                                </p>
-                                <p className="text-[11px]">{user?.email}</p>
-                                <p className="text-[11px]">{user?.mobileNumber}</p>
-                                <p className="mt-1 text-[9px] font-bold text-slate-400 uppercase">
-                                    Place of Supply: {user.address.state} ({subscription.placeOfSupplyCode || "N/A"})
-                                </p>
-                            </div>
-                        </div>
-
                         {/* Invoice From */}
                         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
                             <div
@@ -166,6 +142,30 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                                 <p className="text-[11px]">{formatAddress(companyDetails)}</p>
                                 <p className="text-[11px]">{companyDetails.email}</p>
                                 {companyDetails.phone && <p className="text-[11px]">{companyDetails.phone}</p>}
+                            </div>
+                        </div>
+
+                        {/* Invoice To */}
+                        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                            <div
+                                style={{ backgroundColor: primaryColor }}
+                                className="px-3 py-1.5 text-white font-bold text-[10px] uppercase tracking-wide"
+                            >
+                                Invoice To:
+                            </div>
+                            <div className="p-3 text-slate-700 text-xs space-y-0.5">
+                                <p className="font-bold text-sm text-slate-900">
+                                    {user?.companyName || "Client"}
+                                </p>
+                                <p className="text-[11px]">{user?.address?.street}</p>
+                                <p className="text-[11px]">
+                                    {user?.address?.city} {user?.address?.state && `, ${user?.address?.state}`} {user?.address?.pincode}
+                                </p>
+                                <p className="text-[11px]">{user?.email}</p>
+                                <p className="text-[11px]">{user?.mobileNumber}</p>
+                                <p className="mt-1 text-[9px] font-bold text-slate-400 uppercase">
+                                    Place of Supply: {user.address.state} ({subscription.placeOfSupplyCode || "N/A"})
+                                </p>
                             </div>
                         </div>
                     </div>
