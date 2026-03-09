@@ -26,6 +26,15 @@ export default function PricingPage() {
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
 
+    // Hide free trial for logged-in users - they already have it from registration
+    // NOTE: useMemo must be called before any early returns to comply with Rules of Hooks
+    const allPlans = fetchedSubscriptionPlans?.data?.plans || [];
+    const plans = useMemo(() => {
+        return (isAuthenticated && token)
+            ? allPlans.filter((plan: ISubscriptionPlan) => plan.planType !== "free")
+            : allPlans;
+    }, [allPlans, isAuthenticated, token]);
+
     const handleGoToSubscriptionPlan = (plan: ISubscriptionPlan) => {
         if (plan.name === "Enterprise") {
             dispatch(setAssistantMessage(`Hi, I am interested in the ${plan.name} plan. Please help me with the setup.`));
@@ -75,14 +84,6 @@ export default function PricingPage() {
             </PublicLayout>
         );
     }
-
-    const allPlans = fetchedSubscriptionPlans?.data?.plans || [];
-    // Hide free trial for logged-in users - they already have it from registration
-    const plans = useMemo(() => {
-        return (isAuthenticated && token)
-            ? allPlans.filter((plan: ISubscriptionPlan) => plan.planType !== "free")
-            : allPlans;
-    }, [allPlans, isAuthenticated, token]);
 
     return (
         <>

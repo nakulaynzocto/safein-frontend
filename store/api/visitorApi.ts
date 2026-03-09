@@ -27,10 +27,6 @@ export interface Visitor {
         countryCode: string;
         phone: string;
     }>;
-    createdBy: string;
-    isDeleted: boolean;
-    deletedAt?: string | null;
-    deletedBy?: string | null;
     createdAt: string;
     updatedAt: string;
 }
