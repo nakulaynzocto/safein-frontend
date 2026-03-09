@@ -17,6 +17,10 @@ import { visitorSchema, VisitorFormData } from "./visitorSchema";
 import { useCreateVisitorMutation, useUpdateVisitorMutation, useGetVisitorQuery, type CreateVisitorRequest } from "@/store/api/visitorApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
+import { UserPlus } from "lucide-react";
 
 interface NewVisitorModalProps {
     visitorId?: string;
@@ -45,6 +49,12 @@ export function NewVisitorModal({
     const [updateVisitor, { isLoading: isUpdating }] = useUpdateVisitorMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
     const [isFileUploading, setIsFileUploading] = useState(false);
+    const { hasReachedVisitorLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal
+    } = useSubscriptionActions();
 
     const isEditMode = !!visitorId;
     const isLoading = isCreating || isUpdating;
@@ -338,17 +348,29 @@ export function NewVisitorModal({
                 >
                     Cancel
                 </ActionButton>
-                <ActionButton
-                    type="submit"
-                    variant="outline-primary"
-                    disabled={isLoading || isFileUploading}
-                    size="xl"
-                    className="w-full min-w-[200px] px-8 sm:w-auto"
+                <SubscriptionActionButtons
+                    isExpired={isExpired}
+                    hasReachedLimit={hasReachedVisitorLimit && !isEditMode}
+                    limitType="visitor"
+                    showUpgradeModal={showUpgradeModal}
+                    openUpgradeModal={openUpgradeModal}
+                    closeUpgradeModal={closeUpgradeModal}
+                    upgradeLabel="Upgrade Plan"
+                    icon={UserPlus}
+                    className="w-full min-w-[200px] px-8 sm:w-auto text-white"
                 >
-                    {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    {isEditMode ? "Update Visitor" : "Register Visitor"}
-                </ActionButton>
+                    <ActionButton
+                        type="submit"
+                        variant="outline-primary"
+                        disabled={isLoading || isFileUploading}
+                        size="xl"
+                        className="w-full min-w-[200px] px-8 sm:w-auto"
+                    >
+                        {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        {isEditMode ? "Update Visitor" : "Register Visitor"}
+                    </ActionButton>
+                </SubscriptionActionButtons>
             </div>
         </form>
     );

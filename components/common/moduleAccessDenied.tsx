@@ -17,6 +17,7 @@ interface ModuleAccessDeniedProps {
     buttonLabel?: string;
     containerHeight?: string;
     isExpired?: boolean;
+    limitType?: 'employees' | 'visitors' | 'appointments' | 'spotPasses' | null;
 }
 
 export function ModuleAccessDenied({
@@ -26,7 +27,8 @@ export function ModuleAccessDenied({
     variant = "error",
     buttonLabel = "Upgrade Plan",
     containerHeight = "min-h-[60vh]",
-    isExpired = false
+    isExpired = false,
+    limitType = null
 }: ModuleAccessDeniedProps) {
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const { user } = useAppSelector((state) => state.auth);
@@ -94,6 +96,7 @@ export function ModuleAccessDenied({
             <UpgradePlanModal
                 isOpen={showUpgradeModal}
                 onClose={() => setShowUpgradeModal(false)}
+                limitType={limitType}
             />
         </div>
     );

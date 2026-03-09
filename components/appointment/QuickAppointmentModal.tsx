@@ -32,6 +32,10 @@ import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
 import { FormProvider } from "react-hook-form";
 import { EmployeeSelectionField } from "@/components/common/EmployeeSelectionField";
 import { useVisitorAutoFill } from "@/hooks/useVisitorAutoFill";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
+import { UserPlus } from "lucide-react";
 
 const quickAppointmentSchema = (isEmployee: boolean) => yup.object().shape({
     name: yup.string().required("Name is required"),
@@ -72,6 +76,12 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [createSpecialBooking] = useCreateSpecialBookingMutation();
+    const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal
+    } = useSubscriptionActions();
 
     // Use common employee search hook
     const { } = useEmployeeSearch();
@@ -273,21 +283,33 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="px-6">
                                 Cancel
                             </Button>
-                            <ActionButton
-                                type="submit"
-                                variant="primary"
-                                disabled={isSubmitting}
-                                className="px-8"
+                            <SubscriptionActionButtons
+                                isExpired={isExpired}
+                                hasReachedLimit={hasReachedAppointmentLimit}
+                                limitType="appointment"
+                                showUpgradeModal={showUpgradeModal}
+                                openUpgradeModal={openUpgradeModal}
+                                closeUpgradeModal={closeUpgradeModal}
+                                upgradeLabel="Upgrade Plan"
+                                icon={UserPlus}
+                                className="px-8 text-white min-w-[200px]"
                             >
-                                {isSubmitting ? (
-                                    <>
-                                        <LoadingSpinner size="sm" className="mr-2" />
-                                        Booking...
-                                    </>
-                                ) : (
-                                    "Book Appointment"
-                                )}
-                            </ActionButton>
+                                <ActionButton
+                                    type="submit"
+                                    variant="primary"
+                                    disabled={isSubmitting}
+                                    className="px-8"
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <LoadingSpinner size="sm" className="mr-2" />
+                                            Booking...
+                                        </>
+                                    ) : (
+                                        "Book Appointment"
+                                    )}
+                                </ActionButton>
+                            </SubscriptionActionButtons>
                         </DialogFooter>
                     </form>
                 </FormProvider>

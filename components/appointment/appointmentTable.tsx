@@ -35,6 +35,7 @@ import {
     Edit,
     Maximize2,
     Send,
+    UserPlus,
 } from "lucide-react";
 import { Appointment, useResendAppointmentNotificationMutation } from "@/store/api/appointmentApi";
 import { SearchInput } from "@/components/common/searchInput";
@@ -56,6 +57,8 @@ import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { useCooldown } from "@/hooks/useCooldown";
 import { APIErrorState } from "@/components/common/APIErrorState";
+import { useAppDispatch } from "@/store/hooks";
+import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 
 export interface AppointmentTableProps {
     appointments: Appointment[];
@@ -131,6 +134,7 @@ export function AppointmentTable({
     onDateToChange,
 }: AppointmentTableProps) {
     const router = useRouter();
+    const dispatch = useAppDispatch();
     const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
     const {
         showUpgradeModal,
@@ -183,7 +187,7 @@ export function AppointmentTable({
 
     const emptyPrimaryLabel = isEmployee
         ? "Create Appointment Link"
-        : (isExpired || hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment");
+        : (isExpired ? "Upgrade Plan" : (hasReachedAppointmentLimit ? "Support Chat" : "Schedule Appointment"));
     const emptyTitle = isToday() ? "No appointments for today" : "No appointments yet";
 
     const handleDelete = async () => {
@@ -624,8 +628,8 @@ export function AppointmentTable({
                             showUpgradeModal={showUpgradeModal}
                             openUpgradeModal={openUpgradeModal}
                             closeUpgradeModal={closeUpgradeModal}
-                            upgradeLabel="Upgrade"
-                            icon={Plus}
+                            upgradeLabel="Upgrade Plan"
+                            icon={UserPlus}
                             isEmployee={isEmployee}
                             className="h-10 w-10 sm:h-12 sm:w-auto sm:px-6 rounded-xl shrink-0"
                         >
@@ -655,8 +659,11 @@ export function AppointmentTable({
                         onPrimaryAction={() => {
                             if (isEmployee) {
                                 router.push(routes.privateroute.APPOINTMENT_LINKS);
-                            } else if (isExpired || hasReachedAppointmentLimit) {
+                            } else if (isExpired) {
                                 openUpgradeModal();
+                            } else if (hasReachedAppointmentLimit) {
+                                dispatch(setAssistantMessage(`Hi, I've reached my appointment limit. Please help me upgrade my plan.`));
+                                dispatch(setAssistantOpen(true));
                             } else {
                                 router.push(routes.privateroute.APPOINTMENTCREATE);
                             }

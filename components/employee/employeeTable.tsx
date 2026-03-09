@@ -26,9 +26,9 @@ import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { formatName, getInitials } from "@/utils/helpers";
 import { EmployeeVerificationModal } from "./EmployeeVerificationModal";
 import { ShieldCheck } from "lucide-react";
-import { useAppSelector } from "@/store/hooks";
-import { APIErrorState } from "@/components/common/APIErrorState";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 
 import { useUpdateEmployeeMutation } from "@/store/api/employeeApi";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
@@ -82,6 +82,7 @@ export function EmployeeTable({
     headerActions,
 }: EmployeeTableProps) {
     const router = useRouter();
+    const dispatch = useAppDispatch();
 
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showViewDialog, setShowViewDialog] = useState(false);
@@ -336,13 +337,16 @@ export function EmployeeTable({
                             description: "Add your first employee to get started.",
                             primaryActionLabel: isEmployee
                                 ? undefined
-                                : (isExpired || hasReachedLimit ? "Upgrade Plan" : "Add Employee"),
+                                : (isExpired ? "Upgrade Plan" : (hasReachedLimit ? "Support Chat" : "Add Employee")),
                             icon: User
                         }}
                         onPrimaryAction={() => {
                             if (isEmployee) return;
-                            if (isExpired || hasReachedLimit) {
+                            if (isExpired) {
                                 setShowUpgradeModal(true);
+                            } else if (hasReachedLimit) {
+                                dispatch(setAssistantMessage(`Hi, I've reached my employee limit. Please help me upgrade my plan.`));
+                                dispatch(setAssistantOpen(true));
                             } else {
                                 router.push(routes.privateroute.EMPLOYEECREATE);
                             }
@@ -355,6 +359,7 @@ export function EmployeeTable({
             <UpgradePlanModal
                 isOpen={showUpgradeModal}
                 onClose={() => { setShowUpgradeModal(false); setLimitErrorMessage(""); }}
+                limitType="employees"
             />
 
             {/* Pagination */}

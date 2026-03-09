@@ -39,10 +39,13 @@ import {
 import { SpotPassDetailsDialog } from "./SpotPassDetailsDialog";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { useAppDispatch } from "@/store/hooks";
+import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 
 export function SpotPassList() {
     const router = useRouter();
+    const dispatch = useAppDispatch();
     const [searchQuery, setSearchQuery] = useState("");
     const [page, setPage] = useState(1);
     const [selectedPass, setSelectedPass] = useState<SpotPass | null>(null);
@@ -315,9 +318,18 @@ export function SpotPassList() {
                             description: searchQuery
                                 ? "We couldn't find any spot passes matching your search."
                                 : "Give instant entry to walk-in visitors by creating a spot pass.",
-                            primaryActionLabel: "New Spot Pass",
+                            primaryActionLabel: isExpired ? "Upgrade Plan" : (hasReachedSpotPassLimit ? "Support Chat" : "New Spot Pass"),
                         }}
-                        onPrimaryAction={() => router.push(routes.privateroute.SPOT_PASS_CREATE)}
+                        onPrimaryAction={() => {
+                            if (isExpired) {
+                                openUpgradeModal();
+                            } else if (hasReachedSpotPassLimit) {
+                                dispatch(setAssistantMessage(`Hi, I've reached my spot pass limit. Please help me upgrade my plan.`));
+                                dispatch(setAssistantOpen(true));
+                            } else {
+                                router.push(routes.privateroute.SPOT_PASS_CREATE);
+                            }
+                        }}
                         minWidth="1000px"
                     />
                 </div>

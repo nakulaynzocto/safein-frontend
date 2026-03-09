@@ -24,7 +24,7 @@ import { useCreateAppointmentLinkMutation, useCheckVisitorExistsQuery } from "@/
 import { useAppSelector } from "@/store/hooks";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { isValidEmail, isValidPhone, isEmployee as checkIsEmployee } from "@/utils/helpers";
-import { Link2, Mail, User, Phone } from "lucide-react";
+import { Link2, Mail, User, Phone, UserPlus } from "lucide-react";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
@@ -449,6 +449,7 @@ export function CreateAppointmentLinkModal({
                                  openUpgradeModal={openUpgradeModal}
                                  closeUpgradeModal={closeUpgradeModal}
                                  upgradeLabel="Upgrade Plan"
+                                 icon={UserPlus}
                                  className="px-6 text-white min-w-[180px]"
                             >
                                 <ActionButton

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { PublicLayout } from "@/components/layout/publicLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import { userSubscriptionApi } from "@/store/api/userSubscriptionApi";
 
 export default function SubscriptionSuccessPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
     const dispatch = useAppDispatch();
 
     const { user, isAuthenticated, token } = useAuthSubscription();

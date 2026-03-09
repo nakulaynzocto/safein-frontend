@@ -2,10 +2,12 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UIState {
     isAssistantOpen: boolean;
+    initialAssistantMessage: string;
 }
 
 const initialState: UIState = {
     isAssistantOpen: false,
+    initialAssistantMessage: "",
 };
 
 const uiSlice = createSlice({
@@ -18,8 +20,11 @@ const uiSlice = createSlice({
         setAssistantOpen: (state, action: PayloadAction<boolean>) => {
             state.isAssistantOpen = action.payload;
         },
+        setAssistantMessage: (state, action: PayloadAction<string>) => {
+            state.initialAssistantMessage = action.payload;
+        },
     },
 });
 
-export const { toggleAssistant, setAssistantOpen } = uiSlice.actions;
+export const { toggleAssistant, setAssistantOpen, setAssistantMessage } = uiSlice.actions;
 export default uiSlice.reducer;

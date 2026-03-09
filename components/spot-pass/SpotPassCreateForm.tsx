@@ -12,7 +12,7 @@ import { ImageUploadField } from "@/components/common/imageUploadField";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { TextareaField } from "@/components/common/textareaField";
 import { AsyncSelectField } from "@/components/common/asyncSelectField";
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/common/actionButton";
 import { CheckCircle, X } from "lucide-react";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useCreateSpotPassMutation } from "@/store/api/spotPassApi";
@@ -212,14 +212,16 @@ export function SpotPassCreateForm() {
 
                     {/* Action Buttons */}
                     <div className="flex flex-col-reverse gap-3 pt-6 border-t sm:flex-row sm:justify-end">
-                        <Button
+                        <ActionButton
                             type="button"
                             variant="outline"
                             onClick={() => router.back()}
-                            className="mr-3 h-12 rounded-xl border-2 px-8 font-semibold hover:bg-muted sm:w-auto"
+                            disabled={isLoading}
+                            size="xl"
+                            className="w-full px-8 sm:w-auto"
                         >
                             Cancel
-                        </Button>
+                        </ActionButton>
                         <SubscriptionActionButtons
                             isExpired={isExpired}
                             hasReachedLimit={hasReachedSpotPassLimit}
@@ -230,11 +232,11 @@ export function SpotPassCreateForm() {
                             upgradeLabel="Upgrade Plan"
                             className="w-full sm:w-auto min-w-[180px]"
                         >
-                            <Button
+                            <ActionButton
                                 type="submit"
-                                variant="default"
+                                variant="outline-primary"
                                 disabled={isLoading}
-                                size="lg"
+                                size="xl"
                                 className="w-full min-w-[180px] px-6 sm:w-auto"
                             >
                                 {isLoading ? (
@@ -245,7 +247,7 @@ export function SpotPassCreateForm() {
                                         Generate Spot Pass
                                     </>
                                 )}
-                            </Button>
+                            </ActionButton>
                         </SubscriptionActionButtons>
                     </div>
                 </form>

@@ -1,13 +1,15 @@
 import { ReactNode, ElementType } from "react";
 import { Button } from "@/components/ui/button";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
-import { Plus } from "lucide-react";
+import { Plus, MessageSquareText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAppDispatch } from "@/store/hooks";
+import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 
 interface SubscriptionActionButtonsProps {
     isExpired: boolean;
     hasReachedLimit: boolean;
-    limitType: 'employee' | 'appointment' | 'spotPass';
+    limitType: 'employee' | 'appointment' | 'spotPass' | 'visitor';
     showUpgradeModal: boolean;
     openUpgradeModal: () => void;
     closeUpgradeModal: () => void;
@@ -31,9 +33,13 @@ export function SubscriptionActionButtons({
     isEmployee = false,
     className
 }: SubscriptionActionButtonsProps) {
+    const dispatch = useAppDispatch();
 
-    // If limits reached/expired AND not Employee, show subscription actions
-    if (!isEmployee && (isExpired || hasReachedLimit)) {
+    // If Employee, always show children
+    if (isEmployee) return <>{children}</>;
+
+    // Case 1: Subscription Expired
+    if (isExpired) {
         return (
             <>
                 <Button
@@ -49,8 +55,34 @@ export function SubscriptionActionButtons({
                 <UpgradePlanModal
                     isOpen={showUpgradeModal}
                     onClose={closeUpgradeModal}
+                    limitType={
+                        limitType === 'employee' ? 'employees' : 
+                        limitType === 'appointment' ? 'appointments' : 
+                        limitType === 'spotPass' ? 'spotPasses' : 
+                        limitType === 'visitor' ? 'visitors' : null
+                    }
                 />
             </>
+        );
+    }
+
+    // Case 2: Limit Reached (but not expired)
+    if (hasReachedLimit) {
+        const handleSupportChat = () => {
+            dispatch(setAssistantMessage(`Hi, I've reached my ${limitType} limit. Please help me upgrade my plan.`));
+            dispatch(setAssistantOpen(true));
+        };
+
+        return (
+            <Button
+                variant="primary"
+                size="xl"
+                onClick={handleSupportChat}
+                className={cn("flex items-center gap-2 text-white px-6 min-w-[150px] bg-accent hover:bg-accent/90", className)}
+            >
+                <MessageSquareText className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                <span className="whitespace-nowrap">Support Chat</span>
+            </Button>
         );
     }
 

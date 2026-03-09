@@ -13,7 +13,7 @@ import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { supportSocketService } from "@/lib/support-socket";
 import { useLazyGetTicketHistoryQuery, useCreateTicketMutation, useSendMessageMutation } from "@/store/api/supportApi";
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setAssistantOpen } from '@/store/slices/uiSlice';
+import { setAssistantOpen, setAssistantMessage } from '@/store/slices/uiSlice';
 import { useGoogleLoginMutation } from '@/store/api/authApi';
 import { setCredentials } from '@/store/slices/authSlice';
 
@@ -190,6 +190,22 @@ export default function SupportWidget() {
             setUnreadCount(0);
         }
     }, [isOpen]);
+
+    // 4. Handle auto-filled message from Redux
+    const { initialAssistantMessage } = useAppSelector((state) => state.ui);
+
+    useEffect(() => {
+        if (isOpen && initialAssistantMessage) {
+            // Pre-fill the input
+            setInput(initialAssistantMessage);
+            
+            // Clear the message in Redux so it doesn't keep persistent
+            dispatch(setAssistantMessage(""));
+            
+            // Focus input if possible (this might need next tick or higher level component handle)
+            // But just setting input is what was requested (auto enter / auto print)
+        }
+    }, [isOpen, initialAssistantMessage, dispatch, setAssistantMessage]);
 
     // --- Handlers ---
 

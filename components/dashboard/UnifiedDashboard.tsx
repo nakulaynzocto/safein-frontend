@@ -22,10 +22,15 @@ import { LoadingTimeoutDisplay } from "@/components/common/LoadingTimeoutDisplay
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { getErrorMessage } from "@/utils/errorUtils";
 import { APIErrorState } from "@/components/common/APIErrorState";
+import { useAppDispatch } from "@/store/hooks";
+import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 
 export function UnifiedDashboard() {
     const router = useRouter();
+    const dispatch = useAppDispatch();
+    const { hasReachedEmployeeLimit, hasReachedAppointmentLimit, isExpired, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [limitType, setLimitType] = useState<'employees' | 'appointments' | 'visitors' | 'spotPasses' | null>(null);
     const [retryCount, setRetryCount] = useState(0);
     const [loadingTimeout, setLoadingTimeout] = useState(false);
 
@@ -86,7 +91,6 @@ export function UnifiedDashboard() {
         refetchOnFocus: false,
     });
 
-    const { hasReachedAppointmentLimit, isExpired, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
     const { user } = useAppSelector((state) => state.auth);
 
     const isLoading = appointmentsLoading || employeesLoading || visitorsLoading || statsLoading;
@@ -141,12 +145,16 @@ export function UnifiedDashboard() {
     const handleScheduleAppointment = useCallback(() => {
         if (isEmployee) {
             router.push(routes.privateroute.APPOINTMENT_LINKS);
-        } else if (hasReachedAppointmentLimit || isExpired) {
+        } else if (isExpired) {
+            setLimitType("appointments");
             setShowUpgradeModal(true);
+        } else if (hasReachedAppointmentLimit) {
+            dispatch(setAssistantMessage(`Hi, I've reached my appointment limit. Please help me upgrade my plan.`));
+            dispatch(setAssistantOpen(true));
         } else {
             router.push(routes.privateroute.APPOINTMENTCREATE);
         }
-    }, [isEmployee, isExpired, hasReachedAppointmentLimit, router]);
+    }, [isEmployee, isExpired, hasReachedAppointmentLimit, router, dispatch]);
 
     const hasError = useMemo(
         () => appointmentsError || employeesError || visitorsError,
@@ -215,13 +223,18 @@ export function UnifiedDashboard() {
                         ? "Visitor Invites"
                         : (isExpired || hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment"),
                 }}
-                onPrimaryAction={handleScheduleAppointment}
+                onPrimaryAction={
+                    isEmployee
+                        ? handleScheduleAppointment
+                        : (isExpired || hasReachedAppointmentLimit
+                            ? () => { setLimitType("appointments"); setShowUpgradeModal(true); }
+                            : handleScheduleAppointment)
+                }
             />
 
             <QuickActions />
 
-            <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+            <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => { setShowUpgradeModal(false); setLimitType(null); }} limitType={limitType} />
         </div>
     );
 }
-

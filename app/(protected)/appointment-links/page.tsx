@@ -2,7 +2,8 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 import { routes } from "@/utils/routes";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { Card, CardContent } from "@/components/ui/card";
@@ -47,6 +48,7 @@ import {
     MessageSquare,
     Key,
     Send,
+    UserPlus,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -205,6 +207,7 @@ const AppointmentActionCell = ({
 export default function AppointmentLinksPage() {
     // ALL HOOKS MUST BE CALLED AT TOP LEVEL - BEFORE ANY CONDITIONAL RETURNS
     const router = useRouter();
+    const dispatch = useAppDispatch();
     const { user: authUser, isAuthenticated, subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
     const user = authUser; // Maintain compatibility with existing code
     const [isChecking, setIsChecking] = useState(true);
@@ -713,6 +716,7 @@ export default function AppointmentLinksPage() {
                                 openUpgradeModal={openUpgradeModal}
                                 closeUpgradeModal={closeUpgradeModal}
                                 upgradeLabel="Upgrade Plan"
+                                icon={UserPlus}
                                 className="flex items-center justify-center gap-2 text-xs whitespace-nowrap sm:text-sm text-white px-6 min-w-[150px]"
                             >
                                 <CreateAppointmentLinkModal
@@ -766,13 +770,14 @@ export default function AppointmentLinksPage() {
                         emptyData={{
                             title: "No appointment links found",
                             description: "Create your first appointment link to get started.",
-                            primaryActionLabel: isExpired || hasReachedAppointmentLimit
-                                ? "Upgrade Plan"
-                                : (filterType === "special" ? "Book VIP" : "Create Link"),
+                            primaryActionLabel: isExpired ? "Upgrade Plan" : (hasReachedAppointmentLimit ? "Support Chat" : (filterType === "special" ? "Book VIP" : "Create Link")),
                         }}
                         onPrimaryAction={() => {
-                            if (isExpired || hasReachedAppointmentLimit) {
+                            if (isExpired) {
                                 openUpgradeModal();
+                            } else if (hasReachedAppointmentLimit) {
+                                dispatch(setAssistantMessage(`Hi, I've reached my appointment limit. Please help me upgrade my plan.`));
+                                dispatch(setAssistantOpen(true));
                             } else {
                                 if (filterType === "special") {
                                     setShowVipModal(true);

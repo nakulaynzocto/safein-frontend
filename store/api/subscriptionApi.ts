@@ -17,6 +17,7 @@ export interface ISubscriptionPlan {
     updatedAt: string;
     totalAmount?: number;
     taxPercentage?: number;
+    isPublic?: boolean;
 }
 
 interface GetAllSubscriptionPlansResponse {

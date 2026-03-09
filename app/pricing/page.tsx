@@ -3,28 +3,36 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, X, ArrowRight, Star } from "lucide-react";
+import { Check, ArrowRight, Star } from "lucide-react";
 import { routes } from "@/utils/routes";
 import { PublicLayout } from "@/components/layout/publicLayout";
-import Link from "next/link";
 import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan } from "@/store/api/subscriptionApi";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/store/hooks";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { formatCurrency } from "@/utils/helpers";
 import { PageSEOHead } from "@/components/seo/pageSEOHead";
 import { generateStructuredData } from "@/lib/seoHelpers";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
-import { useState } from "react";
+import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
+import { useState, useMemo } from "react";
 
 export default function PricingPage() {
     const pricingStructuredData = generateStructuredData("pricing");
     const { data: fetchedSubscriptionPlans, isLoading, error } = useGetAllSubscriptionPlansQuery({ isActive: true });
     const router = useRouter();
+    const dispatch = useAppDispatch();
     const { isAuthenticated, token } = useAppSelector((state) => state.auth);
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+    const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
 
     const handleGoToSubscriptionPlan = (plan: ISubscriptionPlan) => {
+        if (plan.name === "Enterprise") {
+            dispatch(setAssistantMessage(`Hi, I am interested in the ${plan.name} plan. Please help me with the setup.`));
+            dispatch(setAssistantOpen(true));
+            return;
+        }
+
         if (plan.planType === "free") {
             // For free trial, send to register if not logged in, or dashboard if logged in
             if (!isAuthenticated || !token) {
@@ -42,6 +50,7 @@ export default function PricingPage() {
                 router.push(`${routes.publicroute.LOGIN}?next=${encodedNext}`);
             } else {
                 // User is logged in - open the upgrade modal directly
+                setSelectedPlanId(plan._id);
                 setIsUpgradeModalOpen(true);
             }
         }
@@ -69,9 +78,11 @@ export default function PricingPage() {
 
     const allPlans = fetchedSubscriptionPlans?.data?.plans || [];
     // Hide free trial for logged-in users - they already have it from registration
-    const plans = (isAuthenticated && token)
-        ? allPlans.filter((plan: ISubscriptionPlan) => plan.planType !== "free")
-        : allPlans;
+    const plans = useMemo(() => {
+        return (isAuthenticated && token)
+            ? allPlans.filter((plan: ISubscriptionPlan) => plan.planType !== "free")
+            : allPlans;
+    }, [allPlans, isAuthenticated, token]);
 
     return (
         <>
@@ -135,37 +146,46 @@ export default function PricingPage() {
                                                     {plan.name}
                                                 </CardTitle>
                                                 <div className="mt-2">
-                                                    {!!plan.discountPercentage && plan.discountPercentage > 0 ? (
-                                                        <div className="mb-1">
-                                                            <span className="text-base text-gray-400 line-through">
-                                                                {formatCurrency(
-                                                                    plan.amount / (1 - plan.discountPercentage / 100),
-                                                                    plan.currency,
-                                                                )}
-                                                            </span>
-                                                            <Badge className="ml-2 bg-green-500 text-[10px] text-white">
-                                                                {plan.discountPercentage}% OFF
-                                                            </Badge>
+                                                    {plan.name === 'Enterprise' ? (
+                                                        <div className="py-4">
+                                                            <span className="text-brand-strong text-2xl font-bold">Contact Team</span>
+                                                            <div className="mt-1 text-xs text-gray-500">For Custom Requirements</div>
                                                         </div>
-                                                    ) : null}
-                                                    <span className="text-brand-strong text-3xl font-bold">
-                                                        {formatCurrency(plan.amount, plan.currency)}
-                                                    </span>
-                                                    <div className="mt-1 text-xs">
-                                                        <span className="font-medium text-gray-500">
-                                                            {plan.planType === "free"
-                                                                ? "Free - 3 Days Trial"
-                                                                : `per ${plan.planType.replace("ly", "")}`}
-                                                        </span>
-                                                    </div>
-                                                    {!!plan.monthlyEquivalent && plan.planType !== "free" && (
-                                                        <div className="mt-1.5 text-xs text-gray-600">
-                                                            <span className="text-gray-400">Effective: </span>
-                                                            <span className="text-accent font-semibold">
-                                                                {formatCurrency(plan.monthlyEquivalent, plan.currency)}
-                                                                /month
+                                                    ) : (
+                                                        <>
+                                                            {!!plan.discountPercentage && plan.discountPercentage > 0 ? (
+                                                                <div className="mb-1">
+                                                                    <span className="text-base text-gray-400 line-through">
+                                                                        {formatCurrency(
+                                                                            plan.amount / (1 - plan.discountPercentage / 100),
+                                                                            plan.currency,
+                                                                        )}
+                                                                    </span>
+                                                                    <Badge className="ml-2 bg-green-500 text-[10px] text-white">
+                                                                        {plan.discountPercentage}% OFF
+                                                                    </Badge>
+                                                                </div>
+                                                            ) : null}
+                                                            <span className="text-brand-strong text-3xl font-bold">
+                                                                {formatCurrency(plan.amount, plan.currency)}
                                                             </span>
-                                                        </div>
+                                                            <div className="mt-1 text-xs">
+                                                                <span className="font-medium text-gray-500">
+                                                                    {plan.name === "Free" || plan.planType === "free"
+                                                                        ? "Free Trial"
+                                                                        : `per ${plan.planType.replace("ly", "")}`}
+                                                                </span>
+                                                            </div>
+                                                            {!!plan.monthlyEquivalent && plan.planType !== "free" && plan.name !== "Enterprise" && (
+                                                                <div className="mt-1.5 text-xs text-gray-600">
+                                                                    <span className="text-gray-400">Effective: </span>
+                                                                    <span className="text-accent font-semibold">
+                                                                        {formatCurrency(plan.monthlyEquivalent, plan.currency)}
+                                                                        /month
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </>
                                                     )}
                                                 </div>
                                                 <CardDescription className="text-muted-foreground mt-2 line-clamp-2 h-10 text-xs">
@@ -182,16 +202,7 @@ export default function PricingPage() {
                                                             </span>
                                                         </div>
                                                     ))}
-                                                    {plan.trialDays !== undefined &&
-                                                        plan.trialDays > 0 &&
-                                                        plan.planType === "free" && (
-                                                            <div className="flex items-center opacity-60">
-                                                                <X className="mr-3 h-5 w-5 shrink-0 text-gray-400" />
-                                                                <span className="text-sm text-gray-400">
-                                                                    Limited to {plan.trialDays} days
-                                                                </span>
-                                                            </div>
-                                                        )}
+
                                                 </div>
                                                 <Button
                                                     className={`mt-auto w-full ${plan.planType === "free" || plan.isPopular ? "bg-brand hover:bg-brand-strong text-white" : ""}`}
@@ -202,7 +213,9 @@ export default function PricingPage() {
                                                     }
                                                     onClick={() => handleGoToSubscriptionPlan(plan)}
                                                 >
-                                                    {plan.planType === "free" ? "Start 3 Day Trial" : "Subscribe Now"}
+                                                    {plan.name === "Enterprise" 
+                                                        ? "Contact Sales Team" 
+                                                        : (plan.planType === "free" ? "Start 3 Day Trial" : "Subscribe Now")}
                                                     <ArrowRight className="ml-2 h-4 w-4" />
                                                 </Button>
                                             </CardContent>
@@ -221,7 +234,7 @@ export default function PricingPage() {
                                 <p className="text-muted-foreground mb-8 text-lg">Premium plan total cost comparison</p>
                                 <div className="scrollbar-thin scrollbar-thumb-brand scrollbar-track-transparent flex snap-x snap-mandatory gap-6 overflow-x-auto pb-8 px-4 md:justify-center">
                                     {plans
-                                        .filter((p) => p.planType !== "free")
+                                        .filter((p) => p.planType !== "free" && p.name !== "Enterprise")
                                         .map((plan, index) => {
                                             const originalAmount =
                                                 plan.amount / (1 - (plan.discountPercentage || 0) / 100);
@@ -348,7 +361,14 @@ export default function PricingPage() {
             </PublicLayout>
 
             {/* Upgrade Plan Modal - Opens when logged-in user clicks a paid plan */}
-            <UpgradePlanModal isOpen={isUpgradeModalOpen} onClose={() => setIsUpgradeModalOpen(false)} />
+            <UpgradePlanModal 
+                isOpen={isUpgradeModalOpen} 
+                onClose={() => {
+                    setIsUpgradeModalOpen(false);
+                    setSelectedPlanId(null);
+                }} 
+                initialPlanId={selectedPlanId}
+            />
         </>
     );
 }

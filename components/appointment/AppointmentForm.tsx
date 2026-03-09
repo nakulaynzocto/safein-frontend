@@ -28,7 +28,7 @@ import { useGetEmployeesQuery, useGetEmployeeQuery } from "@/store/api/employeeA
 import { useGetVisitorsQuery, useGetVisitorQuery, Visitor } from "@/store/api/visitorApi";
 import { showSuccessToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
-import { Calendar, Car, Info } from "lucide-react";
+import { Calendar, Car, Info, UserPlus } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { FormContainer } from "@/components/common/formContainer";
 import { ApprovalLinkModal } from "./ApprovalLinkModal";
@@ -462,6 +462,7 @@ export function NewAppointmentModal({
                         openUpgradeModal={openUpgradeModal}
                         closeUpgradeModal={closeUpgradeModal}
                         upgradeLabel="Upgrade Plan"
+                        icon={UserPlus}
                         className="w-full min-w-[180px] px-6 sm:w-auto text-white"
                     >
                         <ActionButton

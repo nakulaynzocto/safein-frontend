@@ -23,6 +23,9 @@ import { routes } from "@/utils/routes";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { InputField } from "../common/inputField";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
+import { UserPlus } from "lucide-react";
 
 const employeeSchema = yup.object({
     name: yup
@@ -92,7 +95,11 @@ export function NewEmployeeModal({
     const [generalError, setGeneralError] = useState<string | null>(null);
 
     const { hasReachedEmployeeLimit, isExpired } = useSubscriptionStatus();
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal
+    } = useSubscriptionActions();
 
     const isEditMode = !!employeeId;
     const isLoading = isCreating || isUpdating;
@@ -371,27 +378,17 @@ export function NewEmployeeModal({
                 >
                     Cancel
                 </ActionButton>
-                {isExpired ? (
-                    <ActionButton
-                        type="button"
-                        variant="destructive"
-                        onClick={() => setShowUpgradeModal(true)}
-                        size="xl"
-                        className="w-full min-w-[160px] px-6 sm:w-auto"
-                    >
-                        Upgrade Plan
-                    </ActionButton>
-                ) : hasReachedEmployeeLimit && !isEditMode ? (
-                    <ActionButton
-                        type="button"
-                        variant="primary"
-                        onClick={() => setShowUpgradeModal(true)}
-                        size="xl"
-                        className="w-full min-w-[160px] px-6 sm:w-auto text-white"
-                    >
-                        Upgrade Plan
-                    </ActionButton>
-                ) : (
+                <SubscriptionActionButtons
+                    isExpired={isExpired}
+                    hasReachedLimit={hasReachedEmployeeLimit && !isEditMode}
+                    limitType="employee"
+                    showUpgradeModal={showUpgradeModal}
+                    openUpgradeModal={openUpgradeModal}
+                    closeUpgradeModal={closeUpgradeModal}
+                    upgradeLabel="Upgrade Plan"
+                    icon={UserPlus}
+                    className="w-full min-w-[160px] px-6 sm:w-auto text-white"
+                >
                     <ActionButton
                         type="submit"
                         variant="outline-primary"
@@ -402,15 +399,15 @@ export function NewEmployeeModal({
                         {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
                         {isEditMode ? "Update Employee" : "Create Employee"}
                     </ActionButton>
-                )}
+                </SubscriptionActionButtons>
             </div>
 
+            {/* Upgrade Modal is handled by SubscriptionActionButtons if limit reached, 
+                but we might still need it if we're not using the component directly in some logic. 
+                However, for this form, the component above is sufficient. */}
 
 
-            <UpgradePlanModal
-                isOpen={showUpgradeModal}
-                onClose={() => setShowUpgradeModal(false)}
-            />
+
         </form>
     );
 

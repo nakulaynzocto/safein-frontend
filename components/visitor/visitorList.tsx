@@ -22,6 +22,7 @@ import {
     RefreshCw,
     Maximize2,
     Users,
+    UserPlus,
 } from "lucide-react";
 import {
     useGetVisitorsQuery,
@@ -44,7 +45,8 @@ import { formatDate, formatName, getInitials } from "@/utils/helpers";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
-import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { DataTable } from "@/components/common/dataTable";
 import { VisitorDetailsDialog } from "./visitorDetailsDialog";
@@ -53,6 +55,7 @@ import { APIErrorState } from "@/components/common/APIErrorState";
 // ─── Main VisitorList ────────────────────────────────────────────────────────
 export function VisitorList() {
     const router = useRouter();
+    const dispatch = useAppDispatch();
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -127,15 +130,23 @@ export function VisitorList() {
     const visitors = visitorsData?.visitors || [];
     const pagination = visitorsData?.pagination;
 
-    const emptyPrimaryLabel = isEmployee
-        ? "Register Visitor"
-        : (isExpired || hasReachedVisitorLimit)
-            ? "Upgrade Plan"
-            : "Register Visitor";
+    const emptyPrimaryLabel = useMemo(() => {
+        if (isEmployee) return "Register Visitor";
+        if (isExpired) return "Upgrade Plan";
+        if (hasReachedVisitorLimit) return "Support Chat";
+        return "Register Visitor";
+    }, [isEmployee, isExpired, hasReachedVisitorLimit]);
 
     const handlePrimaryAction = () => {
-        if (!isEmployee && (isExpired || hasReachedVisitorLimit)) {
-            openUpgradeModal();
+        if (!isEmployee) {
+            if (isExpired) {
+                openUpgradeModal();
+            } else if (hasReachedVisitorLimit) {
+                dispatch(setAssistantMessage(`Hi, I've reached my visitor limit. Please help me upgrade my plan.`));
+                dispatch(setAssistantOpen(true));
+            } else {
+                router.push(routes.privateroute.VISITORREGISTRATION);
+            }
         } else {
             router.push(routes.privateroute.VISITORREGISTRATION);
         }
@@ -291,12 +302,12 @@ export function VisitorList() {
                         <SubscriptionActionButtons
                             isExpired={isExpired}
                             hasReachedLimit={hasReachedVisitorLimit}
-                            limitType="appointment"
+                            limitType="visitor"
                             showUpgradeModal={showUpgradeModal}
                             openUpgradeModal={openUpgradeModal}
                             closeUpgradeModal={closeUpgradeModal}
-                            upgradeLabel="Upgrade"
-                            icon={Plus}
+                            upgradeLabel="Upgrade Plan"
+                            icon={UserPlus}
                             isEmployee={isEmployee}
                             className="h-12 w-12 sm:w-auto sm:px-6 rounded-xl"
                         >
