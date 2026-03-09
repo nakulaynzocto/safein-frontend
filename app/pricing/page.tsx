@@ -146,14 +146,14 @@ export default function PricingPage() {
                                                 <CardTitle className="text-brand text-2xl font-bold">
                                                     {plan.name}
                                                 </CardTitle>
-                                                <div className="mt-2">
+                                                <div className="mt-2 h-24 flex flex-col justify-center items-center">
                                                     {plan.name === 'Enterprise' ? (
-                                                        <div className="py-4">
+                                                        <div>
                                                             <span className="text-brand-strong text-2xl font-bold">Contact Team</span>
                                                             <div className="mt-1 text-xs text-gray-500">For Custom Requirements</div>
                                                         </div>
                                                     ) : (
-                                                        <>
+                                                        <div className="w-full text-center">
                                                             {!!plan.discountPercentage && plan.discountPercentage > 0 ? (
                                                                 <div className="mb-1">
                                                                     <span className="text-base text-gray-400 line-through">
@@ -178,7 +178,7 @@ export default function PricingPage() {
                                                                 </span>
                                                             </div>
                                                             {!!plan.monthlyEquivalent && plan.planType !== "free" && plan.name !== "Enterprise" && (
-                                                                <div className="mt-1.5 text-xs text-gray-600">
+                                                                <div className="mt-1 text-xs text-gray-600">
                                                                     <span className="text-gray-400">Effective: </span>
                                                                     <span className="text-accent font-semibold">
                                                                         {formatCurrency(plan.monthlyEquivalent, plan.currency)}
@@ -186,7 +186,7 @@ export default function PricingPage() {
                                                                     </span>
                                                                 </div>
                                                             )}
-                                                        </>
+                                                        </div>
                                                     )}
                                                 </div>
                                                 <CardDescription className="text-muted-foreground mt-2 line-clamp-2 h-10 text-xs">
@@ -194,7 +194,18 @@ export default function PricingPage() {
                                                 </CardDescription>
                                             </CardHeader>
                                             <CardContent className="flex h-[calc(100%-160px)] flex-col pt-0">
-                                                <div className="scrollbar-hide mb-6 max-h-[300px] flex-grow space-y-3 overflow-y-auto pr-2">
+                                                <Button
+                                                    className="mb-6 w-full bg-brand hover:bg-brand-strong text-white"
+                                                    variant="default"
+                                                    onClick={() => handleGoToSubscriptionPlan(plan)}
+                                                >
+                                                    {plan.name === "Enterprise" 
+                                                        ? "Contact Sales Team" 
+                                                        : (plan.planType === "free" ? "Start 3 Day Trial" : "Subscribe Now")}
+                                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                                </Button>
+
+                                                <div className="scrollbar-hide flex-grow space-y-3 overflow-y-auto pr-2 max-h-[300px]">
                                                     {plan.features.map((feature, featureIndex) => (
                                                         <div key={featureIndex} className="flex items-start">
                                                             <Check className="text-brand-strong mt-0.5 mr-3 h-5 w-5 shrink-0" />
@@ -203,22 +214,7 @@ export default function PricingPage() {
                                                             </span>
                                                         </div>
                                                     ))}
-
                                                 </div>
-                                                <Button
-                                                    className={`mt-auto w-full ${plan.planType === "free" || plan.isPopular ? "bg-brand hover:bg-brand-strong text-white" : ""}`}
-                                                    variant={
-                                                        plan.planType === "free" || plan.isPopular
-                                                            ? "default"
-                                                            : "outline"
-                                                    }
-                                                    onClick={() => handleGoToSubscriptionPlan(plan)}
-                                                >
-                                                    {plan.name === "Enterprise" 
-                                                        ? "Contact Sales Team" 
-                                                        : (plan.planType === "free" ? "Start 3 Day Trial" : "Subscribe Now")}
-                                                    <ArrowRight className="ml-2 h-4 w-4" />
-                                                </Button>
                                             </CardContent>
                                         </Card>
                                     </div>
