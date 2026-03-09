@@ -32,6 +32,7 @@ import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 
 import { useUpdateEmployeeMutation } from "@/store/api/employeeApi";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
+import { APIErrorState } from "@/components/common/APIErrorState";
 
 export interface EmployeeTableProps {
     employees: Employee[];

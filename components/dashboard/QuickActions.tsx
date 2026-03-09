@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, CalendarPlus, UserPlus, Users, Send, ClipboardList, IdCard, Contact } from "lucide-react";
 import { routes } from "@/utils/routes";
-import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
@@ -70,7 +70,6 @@ export function QuickActions() {
         openUpgradeModal,
         closeUpgradeModal
     } = useSubscriptionActions();
-    const [limitType, setLimitType] = useState<'employees' | 'appointments' | null>(null);
 
     // Check if user is employee
     const isEmployee = checkIsEmployee(user);
@@ -157,7 +156,6 @@ export function QuickActions() {
                         </SubscriptionActionButtons>
                     )}
 
-                    <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => { setShowUpgradeModal(false); setLimitType(null); }} limitType={limitType} />
                 </div>
             </CardContent>
         </Card>
