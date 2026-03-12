@@ -7,6 +7,8 @@ import { ScrollArea } from "@/components/ui/scrollArea";
 import { useGetNotificationsQuery, useGetUnreadCountQuery, useMarkAsReadMutation, useMarkAllAsReadMutation, useDeleteNotificationMutation, useDeleteAllNotificationsMutation, Notification } from "@/store/api/notificationApi";
 import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
+import { useRouter } from "next/navigation";
+import { routes } from "@/utils/routes";
 
 interface NotificationModalProps {
     isOpen: boolean;
@@ -14,6 +16,7 @@ interface NotificationModalProps {
 }
 
 export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
+    const router = useRouter();
     const [currentPage, setCurrentPage] = useState(1);
     const limit = 50;
 
@@ -214,6 +217,17 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
                                         onClick={() => {
                                             if (!notification.read) {
                                                 handleMarkAsRead(notification._id);
+                                            }
+
+                                            // Navigate based on metadata or type
+                                            if (notification.metadata?.type === 'special_booking_created' || 
+                                                notification.metadata?.type === 'special_booking_arrival' ||
+                                                notification.metadata?.type === 'special_booking_note_updated') {
+                                                router.push(`${routes.privateroute.APPOINTMENT_LINKS}?type=special`);
+                                                onClose();
+                                            } else if (notification.appointmentId || notification.type.startsWith('appointment_')) {
+                                                router.push(routes.privateroute.APPOINTMENTLIST);
+                                                onClose();
                                             }
                                         }}
                                     >

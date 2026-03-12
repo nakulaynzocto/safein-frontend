@@ -24,7 +24,7 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
-import { User, Mail, FileText, Info, Briefcase, Building, Calendar, Clock } from "lucide-react";
+import { User, Mail, FileText, Info, Briefcase, Building, Calendar, Clock, Car } from "lucide-react";
 import { ActionButton } from "@/components/common/actionButton";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { EnhancedDatePicker } from "@/components/common/enhancedDatePicker";
@@ -56,6 +56,7 @@ const quickAppointmentSchema = (isEmployee: boolean) => yup.object().shape({
     accompanyingCount: yup.number().min(0).max(20).default(0),
     notes: yup.string().optional(),
     address: yup.string().optional(),
+    vehicleNumber: yup.string().optional().max(20, "Vehicle number cannot exceed 20 characters"),
 });
 
 type QuickAppointmentFormData = {
@@ -67,6 +68,7 @@ type QuickAppointmentFormData = {
     accompanyingCount: number;
     notes?: string;
     address?: string;
+    vehicleNumber?: string;
 };
 
 interface QuickAppointmentModalProps {
@@ -133,6 +135,7 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                 accompanyingCount: 0,
                 notes: "",
                 address: "",
+                vehicleNumber: "",
             });
         }
     }, [open, reset, isEmployee, user]);
@@ -164,6 +167,7 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                 accompanyingCount: data.accompanyingCount || 0,
                 notes: data.notes || "",
                 address: data.address || "",
+                vehicleNumber: data.vehicleNumber || "",
             }).unwrap();
 
             showSuccessToast("Special visitor booking created. OTP has been sent to the visitor.");
@@ -251,6 +255,14 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                                     icon={<User className="h-4 w-4" />}
                                     {...register("accompanyingCount")}
                                     error={errors.accompanyingCount?.message}
+                                />
+
+                                <InputField
+                                    label="Vehicle Number"
+                                    placeholder="e.g., MH12AB1234"
+                                    icon={<Car className="h-4 w-4" />}
+                                    {...register("vehicleNumber")}
+                                    error={errors.vehicleNumber?.message}
                                 />
 
                                 <div className="md:col-span-2 space-y-2">

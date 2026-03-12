@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useMemo, useCallback, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
-import { routes } from "@/utils/routes";
+import { routes, fillRoute } from "@/utils/routes";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,7 @@ import {
     Key,
     Send,
     UserPlus,
+    Car,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -179,7 +180,8 @@ const AppointmentActionCell = ({
                         <DropdownMenuItem
                             onClick={() => handleResend(item)}
                             disabled={!!cooldowns[item._id]}
-                            className={`rounded-xl flex items-center gap-2 p-2.5 cursor-pointer ${cooldowns[item._id] ? 'text-gray-400 opacity-50' : 'text-[#3882a5] focus:text-[#3882a5] focus:bg-[#3882a5]/5'
+                            className={`rounded-xl flex items-center gap-2 p-2.5 cursor-pointer ${
+                                cooldowns[item._id] ? 'text-gray-400 opacity-50' : 'text-[#3882a5] focus:text-[#3882a5] focus:bg-[#3882a5]/5'
                                 }`}
                         >
                             <Send className="h-4 w-4" />
@@ -204,9 +206,11 @@ const AppointmentActionCell = ({
     );
 };
 
-export default function AppointmentLinksPage() {
+function AppointmentLinksContent() {
     // ALL HOOKS MUST BE CALLED AT TOP LEVEL - BEFORE ANY CONDITIONAL RETURNS
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const urlType = searchParams.get('type');
     const dispatch = useAppDispatch();
     const { user: authUser, isAuthenticated, subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
     const user = authUser; // Maintain compatibility with existing code
@@ -217,6 +221,15 @@ export default function AppointmentLinksPage() {
     const [limit, setLimit] = useState(10);
     const [isBooked, setIsBooked] = useState<boolean | undefined>(undefined);
     const [filterType, setFilterType] = useState<string>("link");
+
+    // Handle URL type parameter (?type=special or ?type=link)
+    useEffect(() => {
+        if (urlType === 'special') {
+            setFilterType('special');
+        } else if (urlType === 'link') {
+            setFilterType('link');
+        }
+    }, [urlType]);
     const [search, setSearch] = useState("");
     const [deleteLinkId, setDeleteLinkId] = useState<string | null>(null);
     const [showLinkModal, setShowLinkModal] = useState(false);
@@ -375,7 +388,7 @@ export default function AppointmentLinksPage() {
 
     const handleCopyLink = useCallback((link: AppointmentLink) => {
         // Generate booking URL if not provided by backend
-        const bookingUrl = link.bookingUrl || `${window.location.origin}/book-appointment/${link.secureToken}`;
+        const bookingUrl = link.bookingUrl || `${window.location.origin}${fillRoute(routes.publicroute.BOOK_APPOINTMENT, { token: link.secureToken })}`;
 
         if (!bookingUrl) {
             showErrorToast("Unable to generate booking link");
@@ -501,6 +514,21 @@ export default function AppointmentLinksPage() {
                     <span className="text-sm text-gray-600 italic">
                         {item.purpose || "-"}
                     </span>
+                ),
+            },
+            {
+                key: "vehicleNumber",
+                header: "Vehicle",
+                className: filterType === "special" ? "table-cell min-w-[120px]" : "hidden",
+                render: (item: any) => (
+                    item.vehicleNumber ? (
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-gray-700 bg-gray-100/80 px-2 py-1 rounded-md border border-gray-200 uppercase">
+                            <Car className="h-3 w-3 text-[#3882a5]" />
+                            {item.vehicleNumber}
+                        </div>
+                    ) : (
+                        <span className="text-gray-300">-</span>
+                    )
                 ),
             },
             {
@@ -968,5 +996,13 @@ export default function AppointmentLinksPage() {
                 </Dialog>
             </div>
         </div>
+    );
+}
+
+export default function AppointmentLinksPage() {
+    return (
+        <Suspense fallback={<PageSkeleton type="table" />}>
+            <AppointmentLinksContent />
+        </Suspense>
     );
 }

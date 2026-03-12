@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useCallback, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAppSelector } from "@/store/hooks";
@@ -7,6 +8,7 @@ import { baseApi } from "@/store/api/baseApi";
 import { notificationApi } from "@/store/api/notificationApi";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
+import { routes } from "@/utils/routes";
 
 export enum SocketEvents {
     CONNECTION = "connection",
@@ -103,7 +105,7 @@ const getNotificationConfig = (status: string, employeeName: string, visitorName
             type: "appointment_created",
             title: "New Appointment Request 📅",
             message: `${visitorName} has requested an appointment with ${employeeName}.`,
-            toastType: "warning",
+            toastType: "success",
         },
         approved: {
             type: "appointment_approved",
@@ -131,10 +133,11 @@ const getNotificationConfig = (status: string, employeeName: string, visitorName
 };
 
 // Helper: Show toast notification
-const showToast = (config: NotificationConfig) => {
+const showToast = (config: NotificationConfig, onClick?: () => void) => {
     const toastOptions = {
         description: config.message,
         duration: 5000,
+        onClick: onClick,
     };
 
     switch (config.toastType) {
@@ -157,6 +160,7 @@ const showToast = (config: NotificationConfig) => {
 export function useSocket(options: UseSocketOptions = {}) {
     const { onAppointmentUpdated, onAppointmentStatusChanged, onConnect, onDisconnect, showToasts = true } = options;
 
+    const router = useRouter();
     const socketRef = useRef<Socket | null>(null);
     const dispatch = useDispatch();
     const { token, user } = useAppSelector((state) => state.auth);
@@ -208,7 +212,9 @@ export function useSocket(options: UseSocketOptions = {}) {
                     // ADMIN gets all status change notifications with sound
                     // EMPLOYEE does NOT get sound/toast for status changes (they usually perform them)
                     if (isAdmin) {
-                        showToast(config);
+                        showToast(config, () => {
+                            router.push(routes.privateroute.APPOINTMENTLIST);
+                        });
                         playVoiceAlert();
                     }
                 }
@@ -247,7 +253,13 @@ export function useSocket(options: UseSocketOptions = {}) {
                 // ADMIN gets all creations with sound
                 // EMPLOYEE ONLY gets sound for 'pending' (New Request)
                 if (isAdmin || (isEmployee && status === 'pending')) {
-                    showToast(config);
+                    showToast(config, () => {
+                        if (isSpecialVisitor) {
+                            router.push(`${routes.privateroute.APPOINTMENT_LINKS}?type=special`);
+                        } else {
+                            router.push(routes.privateroute.APPOINTMENTLIST);
+                        }
+                    });
                     playVoiceAlert();
                 }
             }
@@ -276,11 +288,30 @@ export function useSocket(options: UseSocketOptions = {}) {
     // - handleAppointmentStatusChange for approve/reject
     // - handleAppointmentCreated for new appointments
     const handleNewNotification = useCallback(
-        () => {
+        (data: any) => {
+            const { payload } = data;
+
+            // Handle special booking notifications (which don't emit specific appointment events)
+            if (payload?.type?.startsWith("special_booking_")) {
+                const config: NotificationConfig = {
+                    type: "appointment_created",
+                    title: payload.title || "Special Visitor Request",
+                    message: payload.message || "",
+                    toastType: "info",
+                };
+
+                if (showToasts) {
+                    showToast(config, () => {
+                        router.push(`${routes.privateroute.APPOINTMENT_LINKS}?type=special`);
+                    });
+                    playVoiceAlert();
+                }
+            }
+
             // Only invalidate notifications to refresh inbox count and list
             invalidateNotifications();
         },
-        [invalidateNotifications],
+        [invalidateNotifications, router, showToasts],
     );
 
     // Fix: Use useRef for stable callbacks to prevent unnecessary re-renders
