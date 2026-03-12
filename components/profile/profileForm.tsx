@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, type ChangeEvent } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { isValidPhoneNumber } from "libphonenumber-js";
 import {
     Save, Loader2, Upload, Mail, Phone, MapPin, Shield,
 } from "lucide-react";
@@ -39,7 +40,11 @@ const createProfileSchema = (isEmployee: boolean) => z.object({
     email: z.string().email("Invalid email format").min(1, "Email is required"),
     mobileNumber: z.string()
         .min(1, "Mobile number is required")
-        .regex(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
+        .refine((val) => {
+            if (!val) return true;
+            const phoneToValidate = val.startsWith("+") ? val : `+${val}`;
+            return isValidPhoneNumber(phoneToValidate);
+        }, "Please enter a valid global phone number with country code"),
     bio: z.string().max(500, "Biography must be less than 500 characters").optional(),
     profilePicture: z.string().optional(),
     address: z.object({
@@ -125,7 +130,11 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                 .max(100, "Company name cannot exceed 100 characters"),
         email: z.string().email("Invalid email format").min(1, "Email is required"),
         mobileNumber: z.string()
-            .regex(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits")
+            .refine((val) => {
+                if (!val) return true;
+                const phoneToValidate = val.startsWith("+") ? val : `+${val}`;
+                return isValidPhoneNumber(phoneToValidate);
+            }, "Please enter a valid global phone number with country code")
             .optional()
             .or(z.literal("")),
         bio: z.string().max(500, "Biography must be less than 500 characters").optional(),

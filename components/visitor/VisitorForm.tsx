@@ -4,6 +4,7 @@ import { useState, useEffect, type ReactNode } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ActionButton } from "@/components/common/actionButton";
@@ -166,7 +167,10 @@ export function NewVisitorModal({
                 blacklisted: (visitorData as any).blacklisted || false,
                 blacklistReason: (visitorData as any).blacklistReason || "",
                 tags: (visitorData as any).tags?.join(", ") || "",
-                emergencyContacts: (visitorData as any).emergencyContacts || [],
+                emergencyContacts: (visitorData as any).emergencyContacts?.map((c: any) => ({
+                    name: c.name,
+                    phone: c.phone?.startsWith("+") ? c.phone : `${c.countryCode || ""}${c.phone || ""}`,
+                })) || [],
             });
         }
     }, [isEditMode, visitorData, reset]);
@@ -225,7 +229,15 @@ export function NewVisitorModal({
                 blacklistReason: data.blacklistReason || undefined,
                 tags: data.tags ? data.tags.split(",").map((t) => t.trim()) : undefined,
                 emergencyContacts: data.emergencyContacts && data.emergencyContacts.length > 0
-                    ? (data.emergencyContacts as any)
+                    ? data.emergencyContacts.map((contact) => {
+                        const fullPhone = contact.phone || "";
+                        const parsed = parsePhoneNumberFromString(fullPhone.startsWith("+") ? fullPhone : `+${fullPhone}`);
+                        return {
+                            name: contact.name || "",
+                            countryCode: parsed ? `+${parsed.countryCallingCode}` : "+91",
+                            phone: parsed ? parsed.nationalNumber : fullPhone.replace(/^\+\d+/, ""),
+                        };
+                    })
                     : undefined,
             };
 

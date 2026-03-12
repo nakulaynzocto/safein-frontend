@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { isValidPhoneNumber } from "libphonenumber-js";
 import {
     Dialog,
     DialogContent,
@@ -27,7 +28,11 @@ const companySchema = yup.object({
     mobileNumber: yup
         .string()
         .required("Mobile number is required")
-        .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
+            if (!value) return false;
+            const phoneToValidate = value.startsWith("+") ? value : `+${value}`;
+            return isValidPhoneNumber(phoneToValidate);
+        }),
     street: yup.string().required("Company address is required"),
     city: yup.string().required("City is required"),
     state: yup.string().required("State is required"),

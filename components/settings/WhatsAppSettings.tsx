@@ -20,6 +20,7 @@ import { APIErrorState } from "@/components/common/APIErrorState";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { isValidPhoneNumber } from "libphonenumber-js";
 import {
     Dialog,
     DialogContent,
@@ -32,22 +33,26 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/inputOtp"
 import { Badge } from "@/components/ui/badge";
 import { ProfileLayout } from "@/components/profile/profileLayout";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const MASKED = "••••••••";
-const PHONE_REGEX = /^\d{10,15}$/;
-
 // ─── Validation Schema ────────────────────────────────────────────────────────
+const MASKED = "••••••••";
 
 const schema = yup.object().shape({
     senderNumber: yup
         .string()
         .required("Sender phone number is required")
-        .matches(PHONE_REGEX, "Phone number must be between 10 and 15 digits"),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
+            if (!value) return false;
+            const phoneToValidate = value.startsWith("+") ? value : `+${value}`;
+            return isValidPhoneNumber(phoneToValidate);
+        }),
     testNumber: yup
         .string()
         .required("Verification number is required")
-        .matches(PHONE_REGEX, "Phone number must be between 10 and 15 digits"),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
+            if (!value) return false;
+            const phoneToValidate = value.startsWith("+") ? value : `+${value}`;
+            return isValidPhoneNumber(phoneToValidate);
+        }),
     phoneNumberId: yup.string().required("Phone Number ID is required"),
     accessToken: yup.string().required("Access Token is required"),
 });

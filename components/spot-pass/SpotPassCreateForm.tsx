@@ -3,6 +3,7 @@
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { isValidPhoneNumber } from "libphonenumber-js";
 import { useRouter } from "next/navigation";
 import { routes } from "@/utils/routes";
 import { FormContainer } from "@/components/common/formContainer";
@@ -33,7 +34,11 @@ const spotPassSchema = yup.object({
         .string()
         .required("Phone number is required")
         .trim()
-        .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
+            if (!value) return false;
+            const phoneToValidate = value.startsWith("+") ? value : `+${value}`;
+            return isValidPhoneNumber(phoneToValidate);
+        }),
     gender: yup.string().required("Gender is required"),
     address: yup
         .string()

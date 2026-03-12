@@ -5,6 +5,14 @@ import { Country } from "country-state-city";
 import Select, { type StylesConfig, type GroupBase } from "react-select";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { 
+    parsePhoneNumberFromString, 
+    isValidPhoneNumber, 
+    AsYouType, 
+    CountryCode, 
+    getExampleNumber 
+} from "libphonenumber-js";
+import examples from "libphonenumber-js/mobile/examples";
 
 interface PhoneInputFieldProps {
     id: string;
@@ -23,6 +31,7 @@ interface PhoneInputFieldProps {
 type CountryOption = {
     value: string;
     label: string;
+    name: string;
     image: string;
     phoneCode: string;
     searchKeywords: string;
@@ -33,7 +42,7 @@ export function PhoneInputField({
     label,
     value = "",
     onChange,
-    error,
+    error: externalError,
     helperText,
     required = false,
     disabled = false,
@@ -46,6 +55,7 @@ export function PhoneInputField({
         return Country.getAllCountries().map((c) => ({
             value: c.isoCode,
             label: `+${c.phonecode}`,
+            name: c.name,
             searchKeywords: `${c.name} ${c.isoCode} ${c.phonecode}`,
             image: `https://flagcdn.com/w40/${c.isoCode.toLowerCase()}.png`,
             phoneCode: c.phonecode,
@@ -57,6 +67,8 @@ export function PhoneInputField({
     const [phoneNumber, setPhoneNumber] = useState("");
     const [isFocused, setIsFocused] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
+    const [internalError, setInternalError] = useState<string | null>(null);
+
     useEffect(() => { setIsMounted(true); }, []);
 
     // 3. Sync value
@@ -66,10 +78,25 @@ export function PhoneInputField({
             return;
         }
 
-        const startsWithPlus = String(value).startsWith("+");
-        const cleanValue = String(value).replace(/\D/g, "");
+        const stringValue = String(value);
+        const startsWithPlus = stringValue.startsWith("+");
+        
+        try {
+            // Try to parse with libphonenumber-js
+            const parsed = parsePhoneNumberFromString(startsWithPlus ? stringValue : `+${stringValue}`);
+            
+            if (parsed && parsed.country) {
+                setSelectedIso(parsed.country as string);
+                setPhoneNumber(parsed.nationalNumber);
+                return;
+            }
+        } catch (e) {
+            // Fallback to manual parsing if it fails
+        }
 
-        // 1. If it starts with '+', strictly match the best country code
+        const cleanValue = stringValue.replace(/\D/g, "");
+
+        // Fallback: If it starts with '+', strictly match the best country code
         if (startsWithPlus) {
             const matchingOptions = countryOptions
                 .filter((opt) => cleanValue.startsWith(opt.phoneCode))
@@ -83,7 +110,7 @@ export function PhoneInputField({
             }
         }
 
-        // 2. If no '+' prefix, check if it starts with the default country prefix (e.g., 91 for India)
+        // 2. If no '+' prefix, check if it starts with the default country prefix
         const defaultOpt = countryOptions.find(o => o.value === defaultCountry.toUpperCase());
         if (defaultOpt && cleanValue.length > defaultOpt.phoneCode.length && cleanValue.startsWith(defaultOpt.phoneCode)) {
             setSelectedIso(defaultOpt.value);
@@ -95,41 +122,83 @@ export function PhoneInputField({
         }
     }, [value, countryOptions, defaultCountry]);
 
-    // 4. Handlers
+    // 4. Validation
+    const validateNumber = useCallback((iso: string, num: string) => {
+        if (!num) {
+            setInternalError(null);
+            return;
+        }
+        
+        const option = countryOptions.find(o => o.value === iso);
+        if (!option) return;
+
+        const fullNumber = `+${option.phoneCode}${num}`;
+        if (!isValidPhoneNumber(fullNumber, iso as CountryCode)) {
+            // Get an example number for this country to show expected length if possible
+            try {
+                const example = getExampleNumber(iso as CountryCode, examples);
+                if (example) {
+                    const exampleNational = example.formatNational().replace(/\D/g, "");
+                    if (num.length < exampleNational.length) {
+                        setInternalError(`Too short for ${iso}`);
+                    } else if (num.length > exampleNational.length) {
+                        setInternalError(`Too long for ${iso}`);
+                    } else {
+                        setInternalError(`Invalid number for ${iso}`);
+                    }
+                } else {
+                    setInternalError(`Invalid number`);
+                }
+            } catch (e) {
+                setInternalError(`Invalid number`);
+            }
+        } else {
+            setInternalError(null);
+        }
+    }, [countryOptions]);
+
+    // 5. Handlers
     const handleCountryChange = useCallback((option: CountryOption | null) => {
         if (option) {
             setSelectedIso(option.value);
-            const fullValue = `${option.phoneCode}${phoneNumber}`;
+            const fullValue = `+${option.phoneCode}${phoneNumber}`;
             onChange(fullValue);
+            validateNumber(option.value, phoneNumber);
         }
-    }, [phoneNumber, onChange]);
+    }, [phoneNumber, onChange, validateNumber]);
 
     const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const inputDigits = e.target.value.replace(/\D/g, "");
         const option = countryOptions.find((o) => o.value === selectedIso);
         const code = option?.phoneCode || "";
 
-        // Limit total length (code + digits) to 15
+        // Standard max length for any phone number is usually 15 digits including code
         const maxDigitsAllowed = 15 - code.length;
-        const digits = inputDigits.substring(0, maxDigitsAllowed);
+        const digits = inputDigits.substring(0, Math.max(10, maxDigitsAllowed + 2)); // Allow slightly more to not be too restrictive during typing
 
         setPhoneNumber(digits);
-        onChange(`${code}${digits}`);
-    }, [countryOptions, selectedIso, onChange]);
+        onChange(`+${code}${digits}`);
+        validateNumber(selectedIso, digits);
+    }, [countryOptions, selectedIso, onChange, validateNumber]);
 
     const selectedOption = useMemo(
         () => countryOptions.find((o) => o.value === selectedIso) ?? null,
         [countryOptions, selectedIso]
     );
 
-    const formatOptionLabel = useCallback((option: CountryOption) => (
-        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+    const formatOptionLabel = useCallback((option: CountryOption, { context }: { context: 'menu' | 'value' }) => (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%" }}>
             <img
                 src={option.image}
                 alt=""
-                style={{ width: 18, height: 12, objectFit: "cover", borderRadius: 2, border: "1px solid rgba(0,0,0,0.1)", flexShrink: 0 }}
+                style={{ width: 20, height: 14, objectFit: "cover", borderRadius: 2, border: "1px solid rgba(0,0,0,0.1)", flexShrink: 0 }}
             />
             <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>{option.label}</span>
+            {context === 'menu' && (
+                <span style={{ fontSize: 12, color: "var(--muted-foreground)", marginLeft: "auto", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {option.name}
+                </span>
+            )}
         </div>
     ), []);
 
@@ -179,11 +248,13 @@ export function PhoneInputField({
             ...base,
             backgroundColor: "var(--popover, #ffffff)",
             border: "1px solid var(--border, #e5e7eb)",
-            borderRadius: 8,
-            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-            marginTop: 4,
+            borderRadius: 12,
+            boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+            marginTop: 8,
             overflow: "hidden",
             zIndex: 9999,
+            width: 300,
+            minWidth: 280,
         }),
         menuList: (base) => ({
             ...base,
@@ -220,6 +291,8 @@ export function PhoneInputField({
         },
         []
     );
+
+    const error = externalError || internalError;
 
     return (
         <div className={cn("space-y-1.5 w-full", className)}>

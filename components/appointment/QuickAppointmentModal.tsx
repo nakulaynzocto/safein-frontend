@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { isValidPhoneNumber } from "libphonenumber-js";
 import {
     Dialog,
     DialogContent,
@@ -43,7 +44,11 @@ const quickAppointmentSchema = (isEmployee: boolean) => yup.object().shape({
     phone: yup
         .string()
         .required("Mobile number is required")
-        .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
+            if (!value) return false;
+            const phoneToValidate = value.startsWith("+") ? value : `+${value}`;
+            return isValidPhoneNumber(phoneToValidate);
+        }),
     purpose: yup.string().required("Purpose of visit is required"),
     employeeId: isEmployee
         ? yup.string().optional().nullable()

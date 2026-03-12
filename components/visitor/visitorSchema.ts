@@ -1,4 +1,5 @@
 import * as yup from "yup";
+import { isValidPhoneNumber } from "libphonenumber-js";
 
 export const visitorSchema = yup.object({
     name: yup.string().required("Name is required").min(2, "Name must be at least 2 characters"),
@@ -6,7 +7,10 @@ export const visitorSchema = yup.object({
     phone: yup
         .string()
         .required("Phone number is required")
-        .matches(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
+            if (!value) return false;
+            return isValidPhoneNumber(value.startsWith("+") ? value : `+${value}`);
+        }),
     gender: yup.string().oneOf(["male", "female", "other"], "Please select gender").optional(),
     address: yup.object({
         street: yup.string().optional(),
@@ -38,9 +42,9 @@ export const visitorSchema = yup.object({
                     .notRequired()
                     .nullable()
                     .transform((value) => (value === "" ? null : value))
-                    .matches(/^\d{10,15}$/, {
-                        message: "Phone number must be between 10 and 15 digits",
-                        excludeEmptyString: true,
+                    .test("is-valid-emergency-phone", "Invalid emergency contact phone", (value) => {
+                        if (!value) return true;
+                        return isValidPhoneNumber(value.startsWith("+") ? value : `+${value}`);
                     }),
             })
         )
@@ -71,6 +75,7 @@ export interface VisitorFormData {
     emergencyContacts?: {
         name?: string | null;
         phone?: string | null;
+        countryCode?: string | null;
     }[];
 }
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { Button } from "@/components/ui/button";
 import { FormContainer } from "@/components/common/formContainer";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -74,9 +75,10 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
             blacklisted: (initialData as any)?.blacklisted || false,
             blacklistReason: (initialData as any)?.blacklistReason || "",
             tags: (initialData as any)?.tags?.join(", ") || "",
-            emergencyContacts: (initialData as any)?.emergencyContacts?.length > 0
-                ? (initialData as any).emergencyContacts
-                : [],
+            emergencyContacts: (initialData as any)?.emergencyContacts?.map((c: any) => ({
+                name: c.name,
+                phone: c.phone?.startsWith("+") ? c.phone : `${c.countryCode || ""}${c.phone || ""}`,
+            })) || [],
         },
     });
 
@@ -136,7 +138,15 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                 blacklistReason: data.blacklistReason || undefined,
                 tags: data.tags ? data.tags.split(",").map((t) => t.trim()) : undefined,
                 emergencyContacts: data.emergencyContacts && data.emergencyContacts.length > 0
-                    ? (data.emergencyContacts as any)
+                    ? data.emergencyContacts.map((contact) => {
+                        const fullPhone = contact.phone || "";
+                        const parsed = parsePhoneNumberFromString(fullPhone.startsWith("+") ? fullPhone : `+${fullPhone}`);
+                        return {
+                            name: contact.name || "",
+                            countryCode: parsed ? `+${parsed.countryCallingCode}` : "+91",
+                            phone: parsed ? parsed.nationalNumber : fullPhone.replace(/^\+\d+/, ""),
+                        };
+                    })
                     : undefined,
             };
 
