@@ -27,11 +27,6 @@ const adminQuickActions: QuickAction[] = [
         label: "View All Appointments",
     },
     {
-        href: routes.privateroute.EMPLOYEELIST,
-        icon: Users,
-        label: "Manage Employees",
-    },
-    {
         href: routes.privateroute.VISITORLIST,
         icon: Contact,
         label: "Manage Visitors",
@@ -130,32 +125,6 @@ export function QuickActions() {
                             </Link>
                         </Button>
                     ))}
-
-                    {!isEmployee && (
-                        <SubscriptionActionButtons
-                            isExpired={isExpired}
-                            hasReachedLimit={hasReachedEmployeeLimit}
-                            limitType="employee"
-                            showUpgradeModal={showUpgradeModal}
-                            openUpgradeModal={openUpgradeModal}
-                            closeUpgradeModal={closeUpgradeModal}
-                            upgradeLabel="Upgrade to Add More"
-                            icon={UserPlus}
-                            className="h-16 flex-col bg-transparent w-full text-xs sm:h-20 sm:text-sm border-2 border-dashed border-brand/20 hover:border-brand/40 hover:bg-brand/5 rounded-xl transition-all"
-                        >
-                            <Button
-                                className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm w-full text-brand-strong hover:text-brand"
-                                variant="outline"
-                                asChild
-                            >
-                                <Link href={routes.privateroute.EMPLOYEECREATE} prefetch>
-                                    <UserPlus className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                    <span className="line-clamp-2 text-center font-medium">Add Employee</span>
-                                </Link>
-                            </Button>
-                        </SubscriptionActionButtons>
-                    )}
-
                 </div>
             </CardContent>
         </Card>
