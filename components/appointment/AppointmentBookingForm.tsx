@@ -205,7 +205,7 @@ export function AppointmentBookingForm({
 
                         <div className="space-y-1.5">
                             <Label className="text-sm font-medium">
-                                Accompanying People
+                                Additional Visitors
                                 <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
                             </Label>
                             <Input

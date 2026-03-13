@@ -75,29 +75,31 @@ export function PhoneInputField({
     useEffect(() => {
         if (!value) {
             setPhoneNumber("");
+            const defaultOpt = countryOptions.find(o => o.value === defaultCountry.toUpperCase());
+            if (defaultOpt) setSelectedIso(defaultOpt.value);
             return;
         }
 
         const stringValue = String(value);
         const startsWithPlus = stringValue.startsWith("+");
-        
-        try {
-            // Try to parse with libphonenumber-js
-            const parsed = parsePhoneNumberFromString(startsWithPlus ? stringValue : `+${stringValue}`);
-            
-            if (parsed && parsed.country) {
-                setSelectedIso(parsed.country as string);
-                setPhoneNumber(parsed.nationalNumber);
-                return;
-            }
-        } catch (e) {
-            // Fallback to manual parsing if it fails
-        }
-
         const cleanValue = stringValue.replace(/\D/g, "");
 
-        // Fallback: If it starts with '+', strictly match the best country code
+        // 1. If it starts with '+', strictly parse it as an international number
         if (startsWithPlus) {
+            try {
+                // Try to parse with libphonenumber-js
+                const parsed = parsePhoneNumberFromString(stringValue);
+                
+                if (parsed && parsed.country) {
+                    setSelectedIso(parsed.country as string);
+                    setPhoneNumber(parsed.nationalNumber);
+                    return;
+                }
+            } catch (e) {
+                // Fallback to manual mapping below
+            }
+
+            // Fallback for startsWithPlus: Match the best country code manually
             const matchingOptions = countryOptions
                 .filter((opt) => cleanValue.startsWith(opt.phoneCode))
                 .sort((a, b) => b.phoneCode.length - a.phoneCode.length);
@@ -110,15 +112,19 @@ export function PhoneInputField({
             }
         }
 
-        // 2. If no '+' prefix, check if it starts with the default country prefix
+        // 2. If no '+' prefix, default to the provided defaultCountry (e.g. IN for +91)
         const defaultOpt = countryOptions.find(o => o.value === defaultCountry.toUpperCase());
-        if (defaultOpt && cleanValue.length > defaultOpt.phoneCode.length && cleanValue.startsWith(defaultOpt.phoneCode)) {
+        if (defaultOpt) {
             setSelectedIso(defaultOpt.value);
-            setPhoneNumber(cleanValue.slice(defaultOpt.phoneCode.length));
-        } else {
-            // 3. Otherwise, treat as a domestic number for the default country
-            if (defaultOpt) setSelectedIso(defaultOpt.value);
-            setPhoneNumber(cleanValue);
+            
+            // Check if the number already starts with the default phone code (without '+')
+            if (cleanValue.length > defaultOpt.phoneCode.length && cleanValue.startsWith(defaultOpt.phoneCode)) {
+                // Treat as "CountryCode + Number" format, strip the code for display
+                setPhoneNumber(cleanValue.slice(defaultOpt.phoneCode.length));
+            } else {
+                // Treat as a raw domestic number
+                setPhoneNumber(cleanValue);
+            }
         }
     }, [value, countryOptions, defaultCountry]);
 

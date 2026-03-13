@@ -81,8 +81,8 @@ export const appointmentSchema = yup.object({
     accompanyingCount: yup
         .number()
         .typeError("Please enter a valid number")
-        .min(0, "Accompanying people cannot be negative")
-        .max(20, "Accompanying people cannot exceed 20")
+        .min(0, "Additional visitors cannot be negative")
+        .max(20, "Additional visitors cannot exceed 20")
         .default(0),
     notes: yup.string().optional().default(""),
     vehicleNumber: yup.string().optional().default(""),

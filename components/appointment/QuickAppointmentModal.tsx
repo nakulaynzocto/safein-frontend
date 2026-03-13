@@ -249,7 +249,7 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                                 />
 
                                 <InputField
-                                    label="Accompanying People"
+                                    label="Additional Visitors"
                                     type="number"
                                     placeholder="Number of people"
                                     icon={<User className="h-4 w-4" />}

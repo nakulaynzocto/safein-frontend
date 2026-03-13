@@ -16,6 +16,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setAssistantOpen, setAssistantMessage } from '@/store/slices/uiSlice';
 import { useGoogleLoginMutation } from '@/store/api/authApi';
 import { setCredentials } from '@/store/slices/authSlice';
+import { isPublicActionRoute } from '@/utils/routes';
 
 // Project color scheme - matching your existing brand
 const GRADIENT_PRIMARY = "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)";
@@ -54,7 +55,7 @@ export default function SupportWidget() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [isAuthenticating, setIsAuthenticating] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
-    const { user, token, isAuthenticated, isCurrentRoutePrivate } = useAuthSubscription(); // Get employee session if logged in
+    const { user, token, isAuthenticated, isCurrentRoutePrivate, pathname } = useAuthSubscription(); // Get employee session if logged in
     const [uploadedFile, setUploadedFile] = useState<{ url: string; name: string; type: string } | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const socketRef = useRef<any>(null);
@@ -376,7 +377,10 @@ export default function SupportWidget() {
 
     // --- Render ---
 
-    if (!mounted) return null;
+    // 5. Hide on public action routes (visitor form, email actions, etc.)
+    const isPublicAction = useMemo(() => isPublicActionRoute(pathname), [pathname]);
+
+    if (!mounted || isPublicAction) return null;
 
     return (
         <div className="fixed inset-0 z-[9999] pointer-events-none flex flex-col items-end justify-end p-4 sm:p-6 font-sans">

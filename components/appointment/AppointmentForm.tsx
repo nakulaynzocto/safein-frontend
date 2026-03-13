@@ -339,7 +339,7 @@ export function NewAppointmentModal({
                             <InputField
                                 type="number"
                                 id="accompanyingCount"
-                                label="Accompanying People (optional)"
+                                label="Additional Visitors"
                                 min={0}
                                 max={20}
                                 step={1}
