@@ -31,23 +31,27 @@ import { UserPlus } from "lucide-react";
 const employeeSchema = yup.object({
     name: yup
         .string()
+        .trim()
         .required("Name is required")
         .min(2, "Name must be at least 2 characters")
         .max(100, "Name cannot exceed 100 characters"),
-    email: yup.string().email("Invalid email address").required("Email is required"),
+    email: yup.string().trim().email("Invalid email address").required("Email is required"),
     phone: yup
         .string()
+        .trim()
         .required("Phone number is required")
         .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
             validatePhone(value)
         ),
     department: yup
         .string()
+        .trim()
         .required("Department is required")
         .min(2, "Department must be at least 2 characters")
         .max(50, "Department cannot exceed 50 characters"),
     designation: yup
         .string()
+        .trim()
         .required("Position is required")
         .min(2, "Position must be at least 2 characters")
         .max(100, "Position cannot exceed 100 characters"),
@@ -96,6 +100,7 @@ export function NewEmployeeModal({
     const [createEmployee, { isLoading: isCreating }] = useCreateEmployeeMutation();
     const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
+    const [isFileUploading, setIsFileUploading] = useState(false);
 
     const { hasReachedEmployeeLimit, isExpired } = useSubscriptionStatus();
     const {
@@ -268,6 +273,7 @@ export function NewEmployeeModal({
                             initialUrl={watch("photo")}
                             enableImageCapture={true}
                             variant="avatar"
+                            onUploadStatusChange={setIsFileUploading}
                         />
                     </div>
                 </div>
@@ -395,12 +401,12 @@ export function NewEmployeeModal({
                     <ActionButton
                         type="submit"
                         variant="outline-primary"
-                        disabled={isLoading || isLoadingEmployee}
+                        disabled={isLoading || isLoadingEmployee || isFileUploading}
                         size="xl"
                         className="w-full min-w-[160px] px-6 sm:w-auto"
                     >
-                        {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-                        {isEditMode ? "Update Employee" : "Create Employee"}
+                        {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : isFileUploading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+                        {isFileUploading ? "Uploading Photo..." : isEditMode ? "Update Employee" : "Create Employee"}
                     </ActionButton>
                 </SubscriptionActionButtons>
             </div>

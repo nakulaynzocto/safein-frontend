@@ -4,9 +4,9 @@
 import * as yup from "yup";
 
 export const appointmentSchema = yup.object({
-    visitorId: yup.string().required("Please select a visitor"),
-    employeeId: yup.string().required("Please select an employee"),
-    purpose: yup.string().required("Purpose of visit is required").min(5, "Purpose must be at least 5 characters"),
+    visitorId: yup.string().trim().required("Please select a visitor"),
+    employeeId: yup.string().trim().required("Please select an employee"),
+    purpose: yup.string().trim().required("Purpose of visit is required").min(5, "Purpose must be at least 5 characters"),
     appointmentDate: yup
         .string()
         .required("Appointment date is required")
@@ -84,9 +84,9 @@ export const appointmentSchema = yup.object({
         .min(0, "Additional visitors cannot be negative")
         .max(20, "Additional visitors cannot exceed 20")
         .default(0),
-    notes: yup.string().optional().default(""),
-    vehicleNumber: yup.string().optional().default(""),
-    vehiclePhoto: yup.string().optional().default(""),
+    notes: yup.string().trim().optional().default(""),
+    vehicleNumber: yup.string().trim().optional().default(""),
+    vehiclePhoto: yup.string().trim().optional().default(""),
 });
 
 export type AppointmentFormData = yup.InferType<typeof appointmentSchema>;

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -37,16 +38,16 @@ const spotPassSchema = yup.object({
         .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
             validatePhone(value)
         ),
-    gender: yup.string().required("Gender is required"),
+    gender: yup.string().trim().required("Gender is required"),
     address: yup
         .string()
         .required("Address is required")
         .trim()
         .min(5, "Address must be at least 5 characters")
         .max(500, "Address cannot exceed 500 characters"),
-    notes: yup.string().optional(),
-    employeeId: yup.string().optional(),
-    photo: yup.string().optional(),
+    notes: yup.string().trim().optional(),
+    employeeId: yup.string().trim().optional(),
+    photo: yup.string().trim().optional(),
 });
 
 type SpotPassFormData = {
@@ -91,6 +92,8 @@ export function SpotPassCreateForm() {
         },
     });
 
+    const [isFileUploading, setIsFileUploading] = useState(false);
+
     const onSubmit = async (data: SpotPassFormData) => {
         // Format phone number before submission
         const submitPhone = formatPhoneForSubmission(data.phone);
@@ -127,6 +130,7 @@ export function SpotPassCreateForm() {
                                     initialUrl={watch("photo")}
                                     enableImageCapture={true}
                                     variant="avatar"
+                                    onUploadStatusChange={setIsFileUploading}
                                 />
                             </div>
                         </div>
@@ -242,12 +246,14 @@ export function SpotPassCreateForm() {
                             <ActionButton
                                 type="submit"
                                 variant="outline-primary"
-                                disabled={isLoading}
+                                disabled={isLoading || isFileUploading}
                                 size="xl"
                                 className="w-full min-w-[180px] px-6 sm:w-auto"
                             >
                                 {isLoading ? (
                                     <>Generating...</>
+                                ) : isFileUploading ? (
+                                    <>Uploading Photo...</>
                                 ) : (
                                     <>
                                         <CheckCircle className="mr-2 h-4 w-4" />

@@ -19,10 +19,11 @@ import { FileText, Camera, Fingerprint } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 const bookingVisitorSchema = yup.object({
-    name: yup.string().required("Name is required").min(2, "Name must be at least 2 characters"),
-    email: yup.string().email("Invalid email address").required("Email is required"),
+    name: yup.string().trim().required("Name is required").min(2, "Name must be at least 2 characters"),
+    email: yup.string().trim().email("Invalid email address").required("Email is required"),
     phone: yup
         .string()
+        .trim()
         .required("Phone number is required")
         .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
             validatePhone(value)
@@ -30,18 +31,19 @@ const bookingVisitorSchema = yup.object({
     address: yup.object({
         street: yup
             .string()
+            .trim()
             .required("Company Address is required")
             .min(2, "Company Address must be at least 2 characters"),
-        city: yup.string().required("City is required"),
-        state: yup.string().required("State is required"),
-        country: yup.string().required("Country is required"),
+        city: yup.string().trim().required("City is required"),
+        state: yup.string().trim().required("State is required"),
+        country: yup.string().trim().required("Country is required"),
     }),
     idProof: yup.object({
-        type: yup.string().optional(),
-        number: yup.string().optional(),
-        image: yup.string().optional(),
+        type: yup.string().trim().optional(),
+        number: yup.string().trim().optional(),
+        image: yup.string().trim().optional(),
     }),
-    photo: yup.string().required("Visitor Photo is required"),
+    photo: yup.string().trim().required("Visitor Photo is required"),
 });
 
 type BookingVisitorFormData = {
