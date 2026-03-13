@@ -24,6 +24,7 @@ import { useCreateAppointmentLinkMutation, useCheckVisitorExistsQuery } from "@/
 import { useAppSelector } from "@/store/hooks";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { isValidEmail, isValidPhone, isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { formatPhoneForSubmission } from "@/utils/phoneUtils";
 import { Link2, Mail, User, Phone, UserPlus } from "lucide-react";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
@@ -183,7 +184,7 @@ export function CreateAppointmentLinkModal({
 
             const contactValue = data.visitorContact.trim();
             const email = isValidEmail(contactValue) ? contactValue.toLowerCase() : undefined;
-            const phone = isValidPhone(contactValue) && !isValidEmail(contactValue) ? contactValue : undefined;
+            let phone = isValidPhone(contactValue) && !isValidEmail(contactValue) ? formatPhoneForSubmission(contactValue) : undefined;
 
             if (!email && !phone) {
                 const error = "Please enter a valid email or phone number.";

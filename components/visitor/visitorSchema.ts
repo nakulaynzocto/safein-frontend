@@ -1,5 +1,5 @@
 import * as yup from "yup";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import { validatePhone } from "@/utils/phoneUtils";
 
 export const visitorSchema = yup.object({
     name: yup.string().required("Name is required").min(2, "Name must be at least 2 characters"),
@@ -7,10 +7,9 @@ export const visitorSchema = yup.object({
     phone: yup
         .string()
         .required("Phone number is required")
-        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
-            if (!value) return false;
-            return isValidPhoneNumber(value.startsWith("+") ? value : `+${value}`);
-        }),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+            validatePhone(value)
+        ),
     gender: yup.string().oneOf(["male", "female", "other"], "Please select gender").optional(),
     address: yup.object({
         street: yup.string().optional(),
@@ -44,7 +43,7 @@ export const visitorSchema = yup.object({
                     .transform((value) => (value === "" ? null : value))
                     .test("is-valid-emergency-phone", "Invalid emergency contact phone", (value) => {
                         if (!value) return true;
-                        return isValidPhoneNumber(value.startsWith("+") ? value : `+${value}`);
+                        return validatePhone(value);
                     }),
             })
         )

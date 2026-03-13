@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, type ChangeEvent } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import { validatePhone } from "@/utils/phoneUtils";
 import {
     Save, Loader2, Upload, Mail, Phone, MapPin, Shield,
 } from "lucide-react";
@@ -40,11 +40,7 @@ const createProfileSchema = (isEmployee: boolean) => z.object({
     email: z.string().email("Invalid email format").min(1, "Email is required"),
     mobileNumber: z.string()
         .min(1, "Mobile number is required")
-        .refine((val) => {
-            if (!val) return true;
-            const phoneToValidate = val.startsWith("+") ? val : `+${val}`;
-            return isValidPhoneNumber(phoneToValidate);
-        }, "Please enter a valid global phone number with country code"),
+        .refine((val) => validatePhone(val), "Please enter a valid global phone number with country code"),
     bio: z.string().max(500, "Biography must be less than 500 characters").optional(),
     profilePicture: z.string().optional(),
     address: z.object({
@@ -132,8 +128,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
         mobileNumber: z.string()
             .refine((val) => {
                 if (!val) return true;
-                const phoneToValidate = val.startsWith("+") ? val : `+${val}`;
-                return isValidPhoneNumber(phoneToValidate);
+                return validatePhone(val);
             }, "Please enter a valid global phone number with country code")
             .optional()
             .or(z.literal("")),

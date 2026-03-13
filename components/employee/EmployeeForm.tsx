@@ -4,7 +4,7 @@ import { useState, useEffect, type ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import { validatePhone } from "@/utils/phoneUtils";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ActionButton } from "@/components/common/actionButton";
@@ -38,12 +38,9 @@ const employeeSchema = yup.object({
     phone: yup
         .string()
         .required("Phone number is required")
-        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
-            if (!value) return false;
-            // Handle case where '+' might be missing but we want to validate it as global
-            const phoneToValidate = value.startsWith("+") ? value : `+${value}`;
-            return isValidPhoneNumber(phoneToValidate);
-        }),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+            validatePhone(value)
+        ),
     department: yup
         .string()
         .required("Department is required")

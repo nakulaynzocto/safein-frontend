@@ -20,7 +20,7 @@ import { APIErrorState } from "@/components/common/APIErrorState";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import { validatePhone } from "@/utils/phoneUtils";
 import {
     Dialog,
     DialogContent,
@@ -40,19 +40,15 @@ const schema = yup.object().shape({
     senderNumber: yup
         .string()
         .required("Sender phone number is required")
-        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
-            if (!value) return false;
-            const phoneToValidate = value.startsWith("+") ? value : `+${value}`;
-            return isValidPhoneNumber(phoneToValidate);
-        }),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+            validatePhone(value)
+        ),
     testNumber: yup
         .string()
         .required("Verification number is required")
-        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
-            if (!value) return false;
-            const phoneToValidate = value.startsWith("+") ? value : `+${value}`;
-            return isValidPhoneNumber(phoneToValidate);
-        }),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+            validatePhone(value)
+        ),
     phoneNumberId: yup.string().required("Phone Number ID is required"),
     accessToken: yup.string().required("Access Token is required"),
 });

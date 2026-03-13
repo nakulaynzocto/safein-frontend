@@ -28,7 +28,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import { validatePhone } from "@/utils/phoneUtils";
 import { useSubmitInquiryMutation } from "@/store/api/inquiryApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { InputField } from "@/components/common/inputField";
@@ -39,11 +39,9 @@ const inquirySchema = yup.object({
     phone: yup
         .string()
         .required("Phone number is required")
-        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
-            if (!value) return false;
-            const phoneToValidate = value.startsWith("+") ? value : `+${value}`;
-            return isValidPhoneNumber(phoneToValidate);
-        }),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+            validatePhone(value)
+        ),
     message: yup.string().required("Message is required").min(10, "Message must be at least 10 characters"),
 });
 

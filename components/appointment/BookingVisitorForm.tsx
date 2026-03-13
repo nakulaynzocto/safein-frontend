@@ -3,7 +3,7 @@
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import { validatePhone, formatPhoneForSubmission } from "@/utils/phoneUtils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -24,11 +24,9 @@ const bookingVisitorSchema = yup.object({
     phone: yup
         .string()
         .required("Phone number is required")
-        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
-            if (!value) return false;
-            const phoneToValidate = value.startsWith("+") ? value : `+${value}`;
-            return isValidPhoneNumber(phoneToValidate);
-        }),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+            validatePhone(value)
+        ),
     address: yup.object({
         street: yup
             .string()
@@ -130,9 +128,14 @@ export function BookingVisitorForm({
     }, [setValue, watch]);
 
     useEffect(() => {
-        const opts = { shouldValidate: false, shouldDirty: false };
+        const opts = { shouldValidate: true, shouldDirty: false };
         if (initialEmail) setValue("email", initialEmail, opts);
-        if (initialPhone) setValue("phone", initialPhone, opts);
+        
+        if (initialPhone) {
+            const formattedPhone = formatPhoneForSubmission(initialPhone);
+            setValue("phone", formattedPhone, opts);
+        }
+
         if (initialValues) {
             const { address, idProof, ...rest } = initialValues;
             Object.entries(rest).forEach(([key, value]) => {
@@ -165,7 +168,7 @@ export function BookingVisitorForm({
                 setValue("photo", initialValues.photo, opts);
             }
         }
-    }, [initialEmail, initialValues, setValue]);
+    }, [initialEmail, initialPhone, initialValues, setValue]);
 
     const handleFormSubmit = (data: BookingVisitorFormData) => {
         const { address, idProof, ...rest } = data;

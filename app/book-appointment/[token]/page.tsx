@@ -7,9 +7,17 @@ import {
     useCreateVisitorThroughLinkMutation,
     useCreateAppointmentThroughLinkMutation,
 } from "@/store/api/appointmentLinkApi";
-import { AppointmentBookingForm } from "@/components/appointment/AppointmentBookingForm";
-import { BookingVisitorForm } from "@/components/appointment/BookingVisitorForm";
+import dynamic from "next/dynamic";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
+
+const AppointmentBookingForm = dynamic(() => import("@/components/appointment/AppointmentBookingForm").then(mod => mod.AppointmentBookingForm), {
+    loading: () => <div className="flex justify-center p-8"><LoadingSpinner /></div>
+});
+
+const BookingVisitorForm = dynamic(() => import("@/components/appointment/BookingVisitorForm").then(mod => mod.BookingVisitorForm), {
+    loading: () => <div className="flex justify-center p-8"><LoadingSpinner /></div>
+});
+
 import { StatusPage } from "@/components/common/statusPage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock } from "lucide-react";

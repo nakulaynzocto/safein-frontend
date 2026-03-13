@@ -3,7 +3,7 @@
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import { validatePhone, formatPhoneForSubmission } from "@/utils/phoneUtils";
 import { useRouter } from "next/navigation";
 import { routes } from "@/utils/routes";
 import { FormContainer } from "@/components/common/formContainer";
@@ -34,11 +34,9 @@ const spotPassSchema = yup.object({
         .string()
         .required("Phone number is required")
         .trim()
-        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
-            if (!value) return false;
-            const phoneToValidate = value.startsWith("+") ? value : `+${value}`;
-            return isValidPhoneNumber(phoneToValidate);
-        }),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+            validatePhone(value)
+        ),
     gender: yup.string().required("Gender is required"),
     address: yup
         .string()
@@ -94,9 +92,13 @@ export function SpotPassCreateForm() {
     });
 
     const onSubmit = async (data: SpotPassFormData) => {
+        // Format phone number before submission
+        const submitPhone = formatPhoneForSubmission(data.phone);
+
         try {
             await createSpotPass({
                 ...data,
+                phone: submitPhone,
                 employeeId: data.employeeId || undefined
             }).unwrap();
             showSuccessToast("Spot Pass generated successfully!");

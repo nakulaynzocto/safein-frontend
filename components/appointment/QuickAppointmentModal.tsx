@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import { validatePhone, formatPhoneForSubmission } from "@/utils/phoneUtils";
 import {
     Dialog,
     DialogContent,
@@ -44,11 +44,9 @@ const quickAppointmentSchema = (isEmployee: boolean) => yup.object().shape({
     phone: yup
         .string()
         .required("Mobile number is required")
-        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => {
-            if (!value) return false;
-            const phoneToValidate = value.startsWith("+") ? value : `+${value}`;
-            return isValidPhoneNumber(phoneToValidate);
-        }),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+            validatePhone(value)
+        ),
     purpose: yup.string().required("Purpose of visit is required"),
     employeeId: isEmployee
         ? yup.string().optional().nullable()
@@ -157,11 +155,14 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                 );
             }
 
+            // Format phone number before submission
+            const submitPhone = formatPhoneForSubmission(data.phone);
+
             // Create Special Booking (Pending OTP)
             await createSpecialBooking({
                 visitorName: data.name,
                 visitorEmail: data.email,
-                visitorPhone: data.phone,
+                visitorPhone: submitPhone,
                 employeeId: submitEmployeeId,
                 purpose: data.purpose,
                 accompanyingCount: data.accompanyingCount || 0,
