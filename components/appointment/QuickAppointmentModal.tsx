@@ -213,6 +213,7 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                                                 error={errors.phone?.message}
                                                 required
                                                 defaultCountry="in"
+                                                autoFocus={true}
                                             />
                                         )}
                                     />

@@ -26,6 +26,7 @@ interface PhoneInputFieldProps {
     placeholder?: string;
     defaultCountry?: string;
     className?: string;
+    autoFocus?: boolean;
 }
 
 type CountryOption = {
@@ -49,6 +50,7 @@ export function PhoneInputField({
     placeholder = "Enter phone number",
     defaultCountry = "IN",
     className,
+    autoFocus = false,
 }: PhoneInputFieldProps) {
     // 1. Prepare country options
     const countryOptions = useMemo<CountryOption[]>(() => {
@@ -357,6 +359,7 @@ export function PhoneInputField({
                     placeholder={placeholder}
                     disabled={disabled}
                     autoComplete="tel"
+                    autoFocus={autoFocus}
                     className="flex-1 min-w-0 h-full bg-transparent border-none pl-1.5 pr-3 text-sm font-medium focus:outline-none placeholder:text-muted-foreground"
                 />
             </div>
