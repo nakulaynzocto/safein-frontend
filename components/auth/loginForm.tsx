@@ -6,19 +6,19 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InputField } from "@/components/common/inputField";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useLoginMutation, useGoogleLoginMutation } from "@/store/api/authApi";
 import { setCredentials } from "@/store/slices/authSlice";
 import { routes } from "@/utils/routes";
-import { showErrorToast, showSuccessToast } from "@/utils/toast";
-import { useState, useEffect } from "react";
+import { showSuccessToast } from "@/utils/toast";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { Loader2, ShieldCheck, RefreshCw } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { encryptData } from "@/utils/crypto";
+
 const loginSchema = yup.object({
     email: yup.string().email("Invalid email address").required("Email is required"),
     password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
@@ -29,7 +29,7 @@ type LoginFormData = yup.InferType<typeof loginSchema>;
 export function LoginForm() {
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const { isAuthenticated, token } = useAppSelector((state) => state.auth);
+    const { isAuthenticated, token, isInitialized } = useAppSelector((state) => state.auth);
     const searchParams = useSearchParams();
     const [login, { isLoading }] = useLoginMutation();
     const [googleLogin, { isLoading: isGoogleLoading }] = useGoogleLoginMutation();
@@ -48,24 +48,24 @@ export function LoginForm() {
 
     // Handle redirection if already authenticated
     useEffect(() => {
-        if (isAuthenticated && token) {
+        if (isInitialized && isAuthenticated && token) {
             const next = searchParams.get("next");
             const target = next || routes.privateroute.DASHBOARD;
             router.replace(target);
         }
-    }, [isAuthenticated, token, router, searchParams]);
+    }, [isInitialized, isAuthenticated, token, router, searchParams]);
 
-    const generateCaptcha = () => {
+    const generateCaptcha = useCallback(() => {
         const n1 = Math.floor(Math.random() * 10) + 1;
         const n2 = Math.floor(Math.random() * 10) + 1;
         setCaptcha({ num1: n1, num2: n2, result: n1 + n2 });
         setCaptchaInput("");
         setCaptchaError(null);
-    };
+    }, []);
 
     useEffect(() => {
         generateCaptcha();
-    }, []);
+    }, [generateCaptcha]);
 
     useEffect(() => {
         const message = searchParams.get("message");
@@ -92,12 +92,8 @@ export function LoginForm() {
                 password: encryptedPassword,
             }).unwrap();
 
-            if (!result.token || result.token === "undefined") {
-                throw new Error("No valid token received from server");
-            }
-
-            if (!result.user) {
-                throw new Error("No user data received from server");
+            if (!result.token || !result.user) {
+                throw new Error("Invalid response from server");
             }
 
             dispatch(setCredentials(result));
@@ -105,7 +101,7 @@ export function LoginForm() {
 
             const next = searchParams.get("next");
             const target = next || routes.privateroute.DASHBOARD;
-            window.location.replace(target);
+            router.replace(target);
         } catch (error: any) {
             const message = error?.data?.message || error?.message || "Login failed";
             setErrorMessage(message);
@@ -123,10 +119,9 @@ export function LoginForm() {
                 if (result.token && result.user) {
                     dispatch(setCredentials(result));
                     showSuccessToast("Login successful with Google!");
-
                     const next = searchParams.get("next");
                     const target = next || routes.privateroute.DASHBOARD;
-                    window.location.replace(target);
+                    router.replace(target);
                 }
             } catch (error: any) {
                 setErrorMessage(error?.data?.message || "Google login failed");
@@ -135,78 +130,86 @@ export function LoginForm() {
         onError: () => setErrorMessage("Google login failed"),
     });
 
+    if (!isInitialized) return null;
+
     return (
-        <div className="w-full">
-            <div className="mb-10 text-center sm:text-left">
-                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Login</h1>
-                <p className="text-muted-foreground mt-2 font-medium text-sm sm:text-base">
-                    Welcome back! Please enter your details.
+        <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="mb-8 text-center sm:text-left">
+                <h1 className="text-3xl font-black text-[#074463] tracking-tight">Login</h1>
+                <p className="text-slate-500 mt-2 font-medium text-sm sm:text-base">
+                    Welcome back! Sign in to manage your visitors.
                 </p>
             </div>
 
             <div className="space-y-6">
                 {errorMessage && (
-                    <Alert variant="destructive" className="border-red-100 bg-red-50 text-red-900 rounded-xl">
-                        <AlertDescription>{errorMessage}</AlertDescription>
+                    <Alert variant="destructive" className="border-red-100 bg-red-50 text-red-900 rounded-xl animate-in shake duration-500">
+                        <AlertDescription className="font-medium">{errorMessage}</AlertDescription>
                     </Alert>
                 )}
 
                 <Button
                     type="button"
                     variant="outline"
-                    className="w-full h-12 rounded-xl border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3 font-semibold transition-colors"
+                    className="w-full h-12 rounded-xl border-slate-200 hover:bg-slate-50 flex items-center justify-center gap-3 font-bold transition-all hover:border-[#3882a5] hover:text-[#3882a5]"
                     onClick={() => handleGoogleLogin()}
                     disabled={isLoading || isGoogleLoading}
                 >
-                    <img src="https://www.google.com/favicon.ico" alt="G" className="w-5 h-5" />
+                    {isGoogleLoading ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                        <img src="https://www.google.com/favicon.ico" alt="G" className="w-5 h-5" />
+                    )}
                     {isGoogleLoading ? "Connecting..." : "Continue with Google"}
                 </Button>
 
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-gray-100" />
+                        <span className="w-full border-t border-slate-100" />
                     </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-4 text-muted-foreground font-medium">Or continue with</span>
+                    <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
+                        <span className="bg-white px-4 text-slate-400">Or use email</span>
                     </div>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div className="space-y-4">
                         <InputField
-                            label="Email"
+                            label="Email Address"
                             type="email"
-                            placeholder="Enter your email"
+                            placeholder="name@company.com"
                             error={errors.email?.message}
                             required
                             {...register("email")}
-                            className="h-12 rounded-xl border-gray-200 focus:border-[#3882a5]"
+                            className="h-12 rounded-xl border-slate-200 focus:ring-[#3882a5]/20 focus:border-[#3882a5]"
                         />
 
-                        <InputField
-                            label="Password"
-                            type="password"
-                            placeholder="Enter your password"
-                            error={errors.password?.message}
-                            required
-                            {...register("password")}
-                            className="h-12 rounded-xl border-gray-200 focus:border-[#3882a5]"
-                        />
-                    </div>
-
-                    <div className="flex items-center justify-end">
-                        <Link
-                            href={routes.publicroute.FORGOT_PASSWORD}
-                            className="text-[#3882a5] text-sm font-semibold hover:underline"
-                        >
-                            Forgot password?
-                        </Link>
+                        <div className="space-y-1">
+                            <InputField
+                                label="Password"
+                                type="password"
+                                placeholder="••••••••"
+                                error={errors.password?.message}
+                                required
+                                {...register("password")}
+                                className="h-12 rounded-xl border-slate-200 focus:ring-[#3882a5]/20 focus:border-[#3882a5]"
+                            />
+                            <div className="flex justify-end">
+                                <Link
+                                    href={routes.publicroute.FORGOT_PASSWORD}
+                                    className="text-[#3882a5] text-xs font-bold hover:underline opacity-80 hover:opacity-100"
+                                >
+                                    Forgot password?
+                                </Link>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="space-y-4">
-                        <div className="space-y-3">
-                            <label className="text-sm font-semibold text-gray-700">
-                                Security Check: {captcha.num1} + {captcha.num2} = ?
+                        <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 space-y-3 transition-all hover:border-[#3882a5]/20 hover:bg-[#3882a5]/5">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                <ShieldCheck className="h-3 w-3 text-[#3882a5]" />
+                                Security Check: {captcha.num1} + {captcha.num2}
                             </label>
                             <div className="flex gap-2">
                                 <InputField
@@ -215,38 +218,39 @@ export function LoginForm() {
                                     value={captchaInput}
                                     onChange={(e) => setCaptchaInput(e.target.value)}
                                     error={captchaError || undefined}
-                                    className="flex-1 h-12 rounded-xl border-gray-200"
+                                    className="flex-1 h-12 rounded-xl border-slate-200 bg-white"
                                     required
                                 />
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    size="sm"
+                                    size="icon"
                                     onClick={generateCaptcha}
-                                    className="h-12 w-12 rounded-xl border-gray-200 hover:bg-gray-50 bg-white"
+                                    className="h-12 w-12 shrink-0 rounded-xl border-slate-200 hover:bg-white bg-white hover:text-[#3882a5] transition-all"
                                     title="Refresh Captcha"
                                 >
-                                    🔄
+                                    <RefreshCw className="h-4 w-4" />
                                 </Button>
                             </div>
                         </div>
 
                         <Button
                             type="submit"
-                            className="w-full h-12 rounded-xl font-bold bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98]"
+                            className="w-full h-12 rounded-xl font-black bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                             disabled={isLoading || isGoogleLoading}
                         >
+                            {isLoading && <Loader2 className="h-5 w-5 animate-spin" />}
                             {isLoading ? "Signing in..." : "Sign In"}
                         </Button>
                     </div>
                 </form>
 
                 <div className="text-center pt-2">
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-slate-500 text-sm font-medium">
                         Don't have an account?{" "}
                         <Link
                             href={routes.publicroute.REGISTER}
-                            className="text-[#3882a5] font-bold hover:underline"
+                            className="text-[#3882a5] font-black hover:underline"
                             prefetch={true}
                         >
                             Create an account
@@ -257,3 +261,4 @@ export function LoginForm() {
         </div>
     );
 }
+

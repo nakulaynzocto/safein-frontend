@@ -2,10 +2,12 @@
 
 import React from "react";
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/utils/routes";
+import { useAppSelector } from "@/store/hooks";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AuthPageLayoutProps {
     children: React.ReactNode;
@@ -15,6 +17,7 @@ interface AuthPageLayoutProps {
 
 export function AuthPageLayout({ children }: AuthPageLayoutProps) {
     const router = useRouter();
+    const { isInitialized } = useAppSelector((state) => state.auth);
 
     return (
         <div className="flex min-h-screen bg-white overflow-hidden">
@@ -34,7 +37,23 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
                 </div>
 
                 <div className="mx-auto w-full max-w-md">
-                    {children}
+                    {!isInitialized ? (
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <Skeleton className="h-10 w-32" />
+                                <Skeleton className="h-4 w-64" />
+                            </div>
+                            <div className="space-y-4 pt-4">
+                                <Skeleton className="h-12 w-full rounded-xl" />
+                                <Skeleton className="h-12 w-full rounded-xl" />
+                                <Skeleton className="h-12 w-full rounded-xl" />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="animate-in fade-in duration-500">
+                            {children}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -48,12 +67,15 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
                     {/* Image in a Premium Frame */}
                     <div className="relative mb-12">
                         <div className="absolute -inset-4 bg-white/10 rounded-full blur-2xl animate-pulse" />
-                        <div className="relative w-[400px] h-[400px] rounded-full overflow-hidden border-8 border-white/20 shadow-2xl bg-white/5 p-4">
-                            <div className="w-full h-full rounded-full overflow-hidden">
-                                <img
+                        <div className="relative w-[400px] h-[400px] rounded-full overflow-hidden border-8 border-white/20 shadow-2xl bg-white/5 p-4 flex items-center justify-center">
+                            <div className="relative w-full h-full rounded-full overflow-hidden">
+                                <Image
                                     src="/images/auth-side.png"
                                     alt="Management Dashboard"
-                                    className="w-full h-full object-cover"
+                                    fill
+                                    priority
+                                    className="object-cover"
+                                    sizes="400px"
                                 />
                             </div>
                         </div>
@@ -78,3 +100,4 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
         </div>
     );
 }
+

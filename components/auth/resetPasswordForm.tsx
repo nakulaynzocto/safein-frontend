@@ -7,12 +7,11 @@ import * as yup from "yup";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InputField } from "@/components/common/inputField";
 import { useResetPasswordMutation } from "@/store/api/authApi";
 import { routes } from "@/utils/routes";
-import { CheckCircle, Lock, ArrowLeft } from "lucide-react";
+import { CheckCircle, Lock, ArrowLeft, Loader2, ShieldAlert } from "lucide-react";
 
 const resetPasswordSchema = yup.object({
     newPassword: yup
@@ -72,44 +71,34 @@ export function ResetPasswordForm() {
 
             // Redirect to login after 3 seconds
             setTimeout(() => {
-                router.push(routes.publicroute.LOGIN);
+                router.replace(routes.publicroute.LOGIN);
             }, 3000);
         } catch (error: any) {
-            let errorMessage = "Failed to reset password";
-
-            if (error?.data?.message) {
-                errorMessage = error.data.message;
-            } else if (error?.message) {
-                errorMessage = error.message;
-            }
-            setSubmitError(errorMessage);
+            setSubmitError(error?.data?.message || error?.message || "Failed to reset password");
         }
     };
 
     if (isSuccess) {
         return (
-            <div className="w-full">
-                <div className="mb-10 text-center">
-                    <div className="mb-6 flex justify-center">
-                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100 shadow-lg shadow-green-100/50">
-                            <CheckCircle className="h-10 w-10 text-green-600" />
-                        </div>
-                    </div>
-                    <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-2">Reset Successful</h1>
-                    <p className="text-muted-foreground text-lg">Your password has been updated</p>
+            <div className="w-full animate-in zoom-in duration-500 flex flex-col items-center justify-center text-center space-y-6">
+                <div className="h-24 w-24 rounded-full bg-[#3882a5]/5 flex items-center justify-center border-4 border-[#3882a5]/10 shadow-xl shadow-[#3882a5]/10">
+                    <CheckCircle className="h-12 w-12 text-[#3882a5]" />
                 </div>
-
-                <div className="space-y-6">
-                    <Alert className="border-green-100 bg-green-50 rounded-xl">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <AlertDescription className="text-green-900 font-medium">
-                            You can now sign in with your new password. Redirecting to login page...
+                <div className="space-y-2">
+                    <h1 className="text-3xl font-black text-[#074463] tracking-tight">Reset Successful!</h1>
+                    <p className="text-slate-500 font-medium max-w-xs mx-auto">
+                        Your password has been updated. You'll be redirected to login shortly.
+                    </p>
+                </div>
+                <div className="w-full space-y-4 pt-4">
+                    <Alert className="border-[#3882a5]/10 bg-[#3882a5]/5 rounded-2xl">
+                        <AlertDescription className="text-[#3882a5] font-bold">
+                            You can now sign in with your new password.
                         </AlertDescription>
                     </Alert>
-
                     <Button
-                        className="w-full h-12 rounded-xl font-bold bg-[#3882a5] hover:bg-[#2c6a88]"
-                        onClick={() => router.push(routes.publicroute.LOGIN)}
+                        className="w-full h-12 rounded-xl font-black bg-[#3882a5] hover:bg-[#2c6a88] text-white"
+                        onClick={() => router.replace(routes.publicroute.LOGIN)}
                     >
                         Go to Sign In
                     </Button>
@@ -118,24 +107,29 @@ export function ResetPasswordForm() {
         );
     }
 
-    if (!token) {
+    if (!token && !isLoading) {
         return (
-            <div className="w-full">
-                <div className="mb-10 text-center lg:text-left">
-                    <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-2">Invalid Reset Link</h1>
-                    <p className="text-muted-foreground text-lg">The password reset link is invalid or has expired</p>
+            <div className="w-full animate-in fade-in duration-500">
+                <div className="mb-10 text-center">
+                    <div className="mb-6 flex justify-center">
+                        <div className="bg-red-50 p-4 rounded-2xl border border-red-100">
+                            <ShieldAlert className="h-10 w-10 text-red-500" />
+                        </div>
+                    </div>
+                    <h1 className="text-3xl font-black text-[#074463] tracking-tight mb-2">Invalid Reset Link</h1>
+                    <p className="text-slate-500 font-medium">This password reset link is invalid or has expired</p>
                 </div>
 
                 <div className="space-y-6">
                     <Alert variant="destructive" className="border-red-100 bg-red-50 text-red-900 rounded-xl">
-                        <AlertDescription>
+                        <AlertDescription className="font-medium">
                             {submitError || "Please request a new password reset link."}
                         </AlertDescription>
                     </Alert>
 
                     <div className="space-y-4">
                         <Button
-                            className="w-full h-12 rounded-xl font-bold bg-[#3882a5] hover:bg-[#2c6a88]"
+                            className="w-full h-12 rounded-xl font-black bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20"
                             onClick={() => router.push(routes.publicroute.FORGOT_PASSWORD)}
                         >
                             Request New Reset Link
@@ -143,9 +137,9 @@ export function ResetPasswordForm() {
                         <div className="text-center pt-2">
                             <Link
                                 href={routes.publicroute.LOGIN}
-                                className="text-[#3882a5] font-bold hover:underline flex items-center justify-center gap-2"
+                                className="text-slate-500 font-bold hover:text-[#3882a5] transition-colors flex items-center justify-center gap-2 group"
                             >
-                                <ArrowLeft className="h-4 w-4" />
+                                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                                 Back to Sign In
                             </Link>
                         </div>
@@ -156,23 +150,25 @@ export function ResetPasswordForm() {
     }
 
     return (
-        <div className="w-full">
-            <div className="mb-10">
-                <div className="mb-6 flex justify-center">
-                    <div className="bg-[#3882a5]/10 flex h-16 w-16 items-center justify-center rounded-2xl shadow-inner">
-                        <Lock className="text-[#3882a5] h-8 w-8" />
+        <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="mb-8">
+                <div className="mb-6 flex justify-center lg:justify-start">
+                    <div className="bg-[#3882a5]/10 flex h-16 w-16 items-center justify-center rounded-2xl shadow-inner border border-[#3882a5]/5 text-[#3882a5]">
+                        <Lock className="h-8 w-8" />
                     </div>
                 </div>
                 <div className="space-y-2 text-center lg:text-left">
-                    <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">Secure Your Account</h1>
-                    <p className="text-muted-foreground text-lg">Enter your new strong password below</p>
+                    <h1 className="text-3xl font-black text-[#074463] tracking-tight">Secure Your Account</h1>
+                    <p className="text-slate-500 font-medium text-sm sm:text-base">
+                        Choose a new strong password for your SafeIn account.
+                    </p>
                 </div>
             </div>
 
             <div className="space-y-6">
                 {submitError && (
-                    <Alert variant="destructive" className="border-red-100 bg-red-50 text-red-900 rounded-xl">
-                        <AlertDescription>{submitError}</AlertDescription>
+                    <Alert variant="destructive" className="border-red-100 bg-red-50 text-red-900 rounded-xl animate-in shake duration-500">
+                        <AlertDescription className="font-medium">{submitError}</AlertDescription>
                     </Alert>
                 )}
 
@@ -181,29 +177,30 @@ export function ResetPasswordForm() {
                         <InputField
                             label="New Password"
                             type="password"
-                            placeholder="Min. 8 characters with numbers"
+                            placeholder="Min. 8 characters"
                             error={errors.newPassword?.message}
                             required
                             {...register("newPassword")}
-                            className="h-12 rounded-xl border-gray-200 focus:border-[#3882a5]"
+                            className="h-12 rounded-xl border-slate-200 focus:ring-[#3882a5]/20 focus:border-[#3882a5]"
                         />
 
                         <InputField
                             label="Confirm Password"
                             type="password"
-                            placeholder="Must match new password"
+                            placeholder="Must match password"
                             error={errors.confirmPassword?.message}
                             required
                             {...register("confirmPassword")}
-                            className="h-12 rounded-xl border-gray-200 focus:border-[#3882a5]"
+                            className="h-12 rounded-xl border-slate-200 focus:ring-[#3882a5]/20 focus:border-[#3882a5]"
                         />
                     </div>
 
                     <Button
                         type="submit"
-                        className="w-full h-12 rounded-xl font-bold bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-lg shadow-blue-500/20"
+                        className="w-full h-12 rounded-xl font-black bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                         disabled={isLoading}
                     >
+                        {isLoading && <Loader2 className="h-5 w-5 animate-spin" />}
                         {isLoading ? "Resetting..." : "Update Password"}
                     </Button>
                 </form>
@@ -211,9 +208,9 @@ export function ResetPasswordForm() {
                 <div className="text-center pt-2">
                     <Link
                         href={routes.publicroute.LOGIN}
-                        className="text-[#3882a5] font-bold hover:underline flex items-center justify-center gap-2"
+                        className="text-slate-500 font-bold hover:text-[#3882a5] transition-colors flex items-center justify-center gap-2 group"
                     >
-                        <ArrowLeft className="h-4 w-4" />
+                        <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                         Back to Sign In
                     </Link>
                 </div>
@@ -221,3 +218,4 @@ export function ResetPasswordForm() {
         </div>
     );
 }
+

@@ -115,7 +115,7 @@ export default function PricingPage() {
                                 pass, appointment links, smart notifications, bulk import, and advanced analytics with
                                 a 3-day free trial.
                             </p>
-                            <div className="mb-4 flex flex-wrap items-center justify-center gap-1.5 px-2 text-yellow-400 sm:gap-2 sm:px-0">
+                            <div className="mb-4 flex flex-wrap items-center justify-center gap-1.5 px-2 text-[#3882a5] sm:gap-2 sm:px-0">
                                 <Star className="h-4 w-4 fill-current sm:h-5 sm:w-5" />
                                 <span className="text-sm font-semibold sm:text-base md:text-lg">4.9/5 Rating</span>
                                 <span className="hidden text-gray-300 sm:inline">•</span>

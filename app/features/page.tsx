@@ -322,10 +322,10 @@ export default function FeaturesPage() {
                                         className="rounded-[3rem] shadow-lg group-hover:scale-[1.02] transition-transform duration-700"
                                     />
                                 </div>
-                                <div className="absolute top-0 right-0 h-64 w-64 bg-emerald-500/10 rounded-full blur-[80px]"></div>
+                                <div className="absolute top-0 right-0 h-64 w-64 bg-[#3882a5]/10 rounded-full blur-[80px]"></div>
                                 <div className="absolute inset-x-0 -bottom-12 flex justify-center lg:justify-end lg:pr-24">
                                     <div className="bg-white p-5 rounded-3xl shadow-2xl border border-gray-50 flex items-center gap-4 animate-float-slow">
-                                        <div className="h-12 w-12 bg-emerald-500 rounded-full flex items-center justify-center text-white">
+                                        <div className="h-12 w-12 bg-[#3882a5] rounded-full flex items-center justify-center text-white">
                                             <Send size={24} />
                                         </div>
                                         <div>
@@ -343,7 +343,7 @@ export default function FeaturesPage() {
                                     { t: "Privacy Purge", d: "Chat data is deleted after visits.", i: <Lock /> }
                                 ].map((item, i) => (
                                     <div key={i} className="flex gap-6 p-1 bg-white hover:bg-slate-50 rounded-[2.5rem] transition-colors group">
-                                        <div className="h-16 w-16 bg-emerald-500/5 rounded-3xl flex items-center justify-center text-emerald-600 group-hover:scale-110 group-hover:bg-emerald-500/10 transition-all flex-shrink-0">
+                                        <div className="h-16 w-16 bg-[#3882a5]/5 rounded-3xl flex items-center justify-center text-[#3882a5] group-hover:scale-110 group-hover:bg-[#3882a5]/10 transition-all flex-shrink-0">
                                             {React.cloneElement(item.i as React.ReactElement, { size: 28 })}
                                         </div>
                                         <div className="pt-2">

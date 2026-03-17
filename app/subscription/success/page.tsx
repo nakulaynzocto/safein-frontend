@@ -1,22 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { PublicLayout } from "@/components/layout/publicLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionApi";
-import { useAuthSubscription } from "@/hooks/useAuthSubscription";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { routes } from "@/utils/routes";
-import { CheckCircle, Loader2, AlertCircle } from "lucide-react";
-import { useAppDispatch } from "@/store/hooks";
+import { CheckCircle, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
 import { userSubscriptionApi } from "@/store/api/userSubscriptionApi";
 
 export default function SubscriptionSuccessPage() {
     const router = useRouter();
     const dispatch = useAppDispatch();
-
-    const { user, isAuthenticated, token } = useAuthSubscription();
+    const { user, isAuthenticated, token, isInitialized } = useAppSelector((state) => state.auth);
 
     const [pollingInterval, setPollingInterval] = useState(5000);
     const [maxPollAttempts] = useState(12);
@@ -32,48 +29,33 @@ export default function SubscriptionSuccessPage() {
         pollingInterval: pollingInterval,
     });
 
-    const subscriptionIsActive = (() => {
+    const subscriptionIsActive = useMemo(() => {
         if (!activeSubscriptionData?.data) return false;
-
         const subscription = activeSubscriptionData.data;
-
-        // ✅ PREFERRED: Use backend-provided flag if available (backend calculates this securely)
-        if (subscription.hasActiveSubscription !== undefined) {
-            return subscription.hasActiveSubscription;
-        }
-
-        // ✅ ALTERNATIVE: Use backend-provided canAccessDashboard flag
-        if (subscription.canAccessDashboard !== undefined) {
-            return subscription.canAccessDashboard;
-        }
-
-        // ⚠️ FALLBACK: Frontend calculation (less secure, but works until backend adds flags)
-        // Explicitly reject cancelled, failed, or pending payments
-        if (
-            subscription.paymentStatus === "cancelled" ||
-            subscription.paymentStatus === "failed" ||
-            subscription.paymentStatus === "pending"
-        ) {
-            return false;
-        }
-
-        // Must be active AND payment must be succeeded
+        if (subscription.hasActiveSubscription !== undefined) return subscription.hasActiveSubscription;
+        if (subscription.canAccessDashboard !== undefined) return subscription.canAccessDashboard;
+        
+        if (["cancelled", "failed", "pending"].includes(subscription.paymentStatus)) return false;
         return subscription.isActive === true && subscription.paymentStatus === "succeeded";
-    })();
+    }, [activeSubscriptionData]);
+
+    useEffect(() => {
+        if (isInitialized && (!isAuthenticated || !token || !user?.id)) {
+            router.replace(routes.publicroute.LOGIN);
+        }
+    }, [isInitialized, isAuthenticated, token, user, router]);
 
     useEffect(() => {
         if (subscriptionIsActive && !isRedirecting) {
             setIsRedirecting(true);
-            // Invalidate subscription query to ensure fresh data on dashboard
-            // Use correct tag types: 'User' and 'Subscription' as defined in the API
             if (user?.id) {
                 dispatch(userSubscriptionApi.util.invalidateTags(["User", "Subscription"]));
             }
-            // Refetch subscription before redirect
             refetchSubscription();
-            setTimeout(() => {
+            const timer = setTimeout(() => {
                 router.replace(routes.privateroute.DASHBOARD);
             }, 1500);
+            return () => clearTimeout(timer);
         }
     }, [subscriptionIsActive, isRedirecting, router, user?.id, dispatch, refetchSubscription]);
 
@@ -89,131 +71,110 @@ export default function SubscriptionSuccessPage() {
         }
     }, [pollAttempts, maxPollAttempts, subscriptionIsActive]);
 
-    useEffect(() => {
-        if (!isAuthenticated || !token || !user?.id) {
-            router.replace(routes.publicroute.LOGIN);
-        }
-    }, [isAuthenticated, token, user, router]);
-
-    if (!isAuthenticated || !token || !user?.id) {
-        return null;
-    }
-
-    if (isRedirecting) {
+    if (!isInitialized) {
         return (
-            <PublicLayout>
-                <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-                    <Card className="w-full max-w-md">
-                        <CardHeader className="text-center">
-                            <div className="mb-4 flex justify-center">
-                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                                    <CheckCircle className="h-8 w-8 text-green-600" />
-                                </div>
-                            </div>
-                            <CardTitle className="text-brand text-2xl">Subscription Activated!</CardTitle>
-                            <CardDescription>Redirecting to dashboard...</CardDescription>
-                        </CardHeader>
-                        <CardContent className="text-center">
-                            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#3882a5] border-t-transparent"></div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </PublicLayout>
+            <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] dark:bg-slate-950 p-4">
+                <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#3882a5] border-t-transparent"></div>
+            </div>
         );
     }
 
-    if (subscriptionIsActive) {
-        return (
-            <PublicLayout>
-                <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-                    <Card className="w-full max-w-md">
-                        <CardHeader className="text-center">
-                            <div className="mb-4 flex justify-center">
-                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                                    <CheckCircle className="h-8 w-8 text-green-600" />
-                                </div>
-                            </div>
-                            <CardTitle className="text-brand text-2xl">Payment Successful!</CardTitle>
-                            <CardDescription>Your subscription has been activated</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4 text-center">
-                            <p className="text-muted-foreground text-sm">Redirecting you to the dashboard...</p>
-                            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#3882a5] border-t-transparent"></div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </PublicLayout>
-        );
-    }
+    if (!isAuthenticated || !token || !user?.id) return null;
 
-    const hasExceededMaxAttempts = pollAttempts >= maxPollAttempts;
-
-    return (
-        <PublicLayout>
-            <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-                <Card className="w-full max-w-md">
+    const renderContent = () => {
+        if (isRedirecting || subscriptionIsActive) {
+            return (
+                <Card className="w-full max-w-md border-0 bg-white/70 shadow-2xl backdrop-blur-xl ring-1 ring-slate-200 dark:bg-slate-900/70 dark:ring-slate-800 animate-in fade-in zoom-in-95 duration-500">
                     <CardHeader className="text-center">
                         <div className="mb-4 flex justify-center">
-                            {hasExceededMaxAttempts ? (
-                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100">
-                                    <AlertCircle className="h-8 w-8 text-yellow-600" />
+                            <div className="relative">
+                                <div className="absolute -inset-2 rounded-full bg-green-100 animate-ping opacity-20" />
+                                <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                                    <CheckCircle className="h-8 w-8 text-green-600" />
                                 </div>
-                            ) : (
-                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-                                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-                                </div>
-                            )}
+                            </div>
                         </div>
-                        <CardTitle className="text-brand text-2xl">
-                            {hasExceededMaxAttempts ? "Verification Taking Longer" : "Verifying Your Payment"}
-                        </CardTitle>
-                        <CardDescription>
-                            {hasExceededMaxAttempts
-                                ? "Your payment is being processed. This may take a few minutes."
-                                : "Please wait while we verify your subscription..."}
-                        </CardDescription>
+                        <CardTitle className="text-[#3882a5] text-2xl font-black">Subscription Activated!</CardTitle>
+                        <CardDescription className="font-medium">Redirecting to dashboard...</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4 text-center">
-                        {hasExceededMaxAttempts ? (
-                            <>
-                                <p className="text-muted-foreground text-sm">
-                                    Your payment has been received and is being processed. You will receive an email
-                                    confirmation once your subscription is activated.
-                                </p>
-                                <div className="space-y-2">
-                                    <Button
-                                        className="w-full"
-                                        onClick={() => {
-                                            setPollAttempts(0);
-                                            setPollingInterval(5000);
-                                        }}
-                                    >
-                                        Check Again
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        className="w-full"
-                                        onClick={() => router.push(routes.publicroute.PRICING)}
-                                    >
-                                        Go to Pricing
-                                    </Button>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <p className="text-muted-foreground text-sm">
-                                    We're verifying your payment with our payment processor. This usually takes a few
-                                    seconds.
-                                </p>
-                                <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#3882a5] border-t-transparent"></div>
-                                <p className="text-muted-foreground text-xs">
-                                    Attempt {pollAttempts} of {maxPollAttempts}
-                                </p>
-                            </>
-                        )}
+                    <CardContent className="text-center pb-8">
+                        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#3882a5] border-t-transparent"></div>
                     </CardContent>
                 </Card>
-            </div>
-        </PublicLayout>
+            );
+        }
+
+        const hasExceededMaxAttempts = pollAttempts >= maxPollAttempts;
+
+        return (
+            <Card className="w-full max-w-md border-0 bg-white/70 shadow-2xl backdrop-blur-xl ring-1 ring-slate-200 dark:bg-slate-900/70 dark:ring-slate-800 animate-in fade-in zoom-in-95 duration-500">
+                <CardHeader className="text-center">
+                    <div className="mb-4 flex justify-center">
+                        {hasExceededMaxAttempts ? (
+                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100">
+                                <AlertCircle className="h-8 w-8 text-yellow-600" />
+                            </div>
+                        ) : (
+                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#3882a5]/10">
+                                <Loader2 className="h-8 w-8 animate-spin text-[#3882a5]" />
+                            </div>
+                        )}
+                    </div>
+                    <CardTitle className="text-[#3882a5] text-2xl font-black">
+                        {hasExceededMaxAttempts ? "Almost There..." : "Verifying Payment"}
+                    </CardTitle>
+                    <CardDescription className="font-medium">
+                        {hasExceededMaxAttempts
+                            ? "Your payment is being processed. This may take a few minutes."
+                            : "Please wait while we sync your new subscription..."}
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6 text-center pb-10">
+                    {hasExceededMaxAttempts ? (
+                        <>
+                            <p className="text-slate-500 text-sm font-medium px-4">
+                                Your payment has been received. You'll receive an email once it's fully activated.
+                            </p>
+                            <div className="space-y-3 px-4">
+                                <Button
+                                    className="w-full h-11 rounded-xl bg-[#3882a5] hover:bg-[#2c6a88] shadow-lg shadow-blue-500/20"
+                                    onClick={() => {
+                                        setPollAttempts(0);
+                                        setPollingInterval(5000);
+                                    }}
+                                >
+                                    Check Again
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="w-full h-11 rounded-xl border-slate-200"
+                                    onClick={() => router.push(routes.privateroute.DASHBOARD)}
+                                >
+                                    Continue to Dashboard
+                                </Button>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="space-y-6">
+                            <p className="text-slate-500 text-sm font-medium px-4">
+                                Handshaking with payment processor...
+                            </p>
+                            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#3882a5] border-t-transparent"></div>
+                            <div className="flex items-center justify-center gap-2 text-[10px] font-bold tracking-widest text-[#3882a5]/40 uppercase">
+                                <ShieldCheck className="h-3 w-3" />
+                                Syncing Securely
+                            </div>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        );
+    };
+
+    return (
+        <div className="flex min-h-screen items-center justify-center p-4 bg-[#f8fafc] dark:bg-slate-950">
+            {renderContent()}
+        </div>
     );
 }
+
