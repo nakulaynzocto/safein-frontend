@@ -16,11 +16,12 @@ export const supportApi = createApi({
 
             if (token) {
                 headers.set("Authorization", `Bearer ${token}`);
-            }
-
-            const gToken = typeof window !== 'undefined' ? localStorage.getItem('safein_support_g_token') : null;
-            if (gToken) {
-                headers.set('x-google-token', gToken);
+            } else {
+                // Only send Google token as fallback to prevent 401 when it expires
+                const gToken = typeof window !== 'undefined' ? localStorage.getItem('safein_support_g_token') : null;
+                if (gToken) {
+                    headers.set('x-google-token', gToken);
+                }
             }
 
             return headers;

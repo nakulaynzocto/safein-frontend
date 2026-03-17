@@ -37,8 +37,8 @@ export class SupportSocketService {
 
         this.socket = io(SUPPORT_URL, {
             auth: {
-                token,       // For Employees
-                googleToken  // For Public Users
+                token,                                       // For Employees & Authenticated Guests
+                googleToken: token ? undefined : googleToken // Only send Google token as fallback
             },
             transports: ['websocket'],
             reconnectionAttempts: 5
