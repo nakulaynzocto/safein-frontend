@@ -32,7 +32,7 @@ export const metadata: Metadata = {
         "appointment scheduling software india",
         "digital visitor register india",
         "SafeIn India",
-        "Aynzo",
+        "SafeIn",
     ],
     authors: [{ name: "Aynzo" }],
     creator: "Aynzo",
@@ -51,12 +51,12 @@ export const metadata: Metadata = {
     generator: "Next.js",
     icons: {
         icon: [
-            { url: "/aynzo-logo.png", sizes: "any", type: "image/png" },
-            { url: "/aynzo-logo.png", sizes: "32x32", type: "image/png" },
-            { url: "/aynzo-logo.png", sizes: "16x16", type: "image/png" },
+            { url: "/safein-logo.svg", sizes: "any", type: "image/svg+xml" },
+            { url: "/safein-identity.png", sizes: "32x32", type: "image/png" },
+            { url: "/safein-identity.png", sizes: "16x16", type: "image/png" },
         ],
-        apple: [{ url: "/aynzo-logo.png", sizes: "180x180", type: "image/png" }],
-        shortcut: "/aynzo-logo.png",
+        apple: [{ url: "/safein-logo.svg", sizes: "180x180", type: "image/svg+xml" }],
+        shortcut: "/safein-logo.svg",
     },
     openGraph: {
         type: "website",
@@ -68,10 +68,10 @@ export const metadata: Metadata = {
             "India's leading visitor management system. Features: Smart appointments, spot pass, real-time chat, and advanced security analytics. Perfect for offices & housing societies.",
         images: [
             {
-                url: "https://safein.aynzo.com/aynzo-logo.png",
+                url: "https://safein.aynzo.com/safein-identity.png",
                 width: 1200,
                 height: 630,
-                alt: "Aynzo Logo - SafeIn Visitor Management System India",
+                alt: "SafeIn Logo - Visitor Management System India",
             },
         ],
     },
@@ -79,8 +79,8 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "SafeIn",
         description: "India's smartest visitor management and appointment scheduling platform.",
-        images: ["https://safein.aynzo.com/aynzo-logo.png"],
-        creator: "@aynzo",
+        images: ["https://safein.aynzo.com/safein-identity.png"],
+        creator: "@safein",
     },
     metadataBase: new URL("https://safein.aynzo.com"),
     alternates: {
@@ -115,9 +115,9 @@ export default function RootLayout({
                     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
                     rel="stylesheet"
                 />
-                <link rel="icon" href="/aynzo-logo.png" type="image/png" />
-                <link rel="apple-touch-icon" href="/aynzo-logo.png" />
-                <link rel="shortcut icon" href="/aynzo-logo.png" type="image/png" />
+                <link rel="icon" href="/safein-identity.png" type="image/png" />
+                <link rel="apple-touch-icon" href="/safein-identity.png" />
+                <link rel="shortcut icon" href="/safein-identity.png" type="image/png" />
                 <link rel="manifest" href="/manifest.webmanifest" />
                 <meta name="mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -136,7 +136,7 @@ export default function RootLayout({
                             "@type": "Organization",
                             name: "Aynzo",
                             url: "https://aynzo.com",
-                            logo: "https://safein.aynzo.com/aynzo-logo.png",
+                            logo: "https://safein.aynzo.com/safein-identity.png",
                             sameAs: [
                                 "https://www.facebook.com/profile.php?id=61579388700386",
                                 "https://www.instagram.com/aynzo.world",
@@ -169,7 +169,7 @@ export default function RootLayout({
                                 name: "Aynzo",
                                 logo: {
                                     "@type": "ImageObject",
-                                    url: "https://safein.aynzo.com/aynzo-logo.png",
+                                    url: "https://safein.aynzo.com/safein-identity.png",
                                     width: 1200,
                                     height: 630,
                                 },

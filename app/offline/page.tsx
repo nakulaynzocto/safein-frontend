@@ -15,7 +15,7 @@ export default function OfflinePage() {
                 {/* Logo */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                    src="/aynzo-logo.png"
+                    src="/safein-logo.svg"
                     alt="SafeIn"
                     className="mx-auto mb-5 h-14 w-14 object-contain"
                 />

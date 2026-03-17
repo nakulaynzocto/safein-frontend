@@ -192,7 +192,7 @@ export default function MessagesPage() {
                     id: adminId,
                     targetUserId: adminId,
                     name: (user as any).companyName || "Support Team",
-                    email: (user as any).email || "support@safein.com",
+                    email: (user as any).email || "support@aynzo.com",
                     avatar: "",
                     lastMessage: "Contact Admin",
                     lastMessageTime: undefined,

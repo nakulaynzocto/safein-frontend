@@ -259,16 +259,16 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 >
                                     <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-gray-200 bg-white">
                                         <Image
-                                            src="/aynzo-logo.png"
-                                            alt="Aynzo Logo"
+                                            src="/safein-logo.svg"
+                                            alt="SafeIn Logo"
                                             width={40}
                                             height={40}
                                             priority
-                                            className="h-full w-full object-contain p-1"
+                                            className="h-full w-full object-contain"
                                             onError={(e) => {
                                                 // Fallback if logo fails to load
                                                 const target = e.currentTarget as HTMLImageElement;
-                                                target.src = "/aynzo-logo.svg";
+                                                target.src = "/safein-identity.png";
                                             }}
                                         />
                                     </div>
@@ -295,15 +295,15 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 >
                                     <div className="group relative flex h-10 w-10 lg:h-14 lg:w-14 items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:scale-105 shadow-sm">
                                         <Image
-                                            src="/aynzo-logo.png"
-                                            alt="Aynzo Logo"
+                                            src="/safein-logo.svg"
+                                            alt="SafeIn Logo"
                                             width={56}
                                             height={56}
                                             priority
-                                            className="h-full w-full object-contain p-1.5 lg:p-2 transition-transform duration-500 group-hover:rotate-12"
+                                            className="h-full w-full object-contain transition-transform duration-500 group-hover:rotate-12"
                                             onError={(e) => {
                                                 const target = e.currentTarget as HTMLImageElement;
-                                                target.src = "/aynzo-logo.svg";
+                                                target.src = "/safein-identity.png";
                                             }}
                                         />
                                         <div className="animate-shimmer absolute inset-0 opacity-10"></div>
@@ -387,10 +387,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                                     alt={user?.companyName || "Company Logo"}
                                                     width={40}
                                                     height={40}
-                                                    className="h-full w-full object-contain p-1"
+                                                    className="h-full w-full object-contain scale-125"
                                                     onError={(e) => {
                                                         const target = e.currentTarget as HTMLImageElement;
-                                                        target.src = "/aynzo-logo.png";
+                                                        target.src = "/safein-identity.png";
                                                         target.className = "h-full w-full object-contain p-1";
                                                     }}
                                                 />
@@ -421,10 +421,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                                     alt={user?.companyName || "Company Logo"}
                                                     width={40}
                                                     height={40}
-                                                    className="h-full w-full object-contain p-1"
+                                                    className="h-full w-full object-contain scale-125"
                                                     onError={(e) => {
                                                         const target = e.currentTarget as HTMLImageElement;
-                                                        target.src = "/aynzo-logo.png";
+                                                        target.src = "/safein-identity.png";
                                                         target.className = "h-full w-full object-contain p-1";
                                                     }}
                                                 />

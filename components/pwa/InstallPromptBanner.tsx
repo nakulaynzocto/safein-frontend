@@ -72,8 +72,8 @@ export function InstallPromptBanner() {
                 {/* Logo */}
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-1.5">
                     <img
-                        src="/aynzo-logo.png"
-                        alt="Aynzo"
+                        src="/safein-logo.svg"
+                        alt="SafeIn"
                         className="h-full w-full object-contain"
                     />
                 </div>

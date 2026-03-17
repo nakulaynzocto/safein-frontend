@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-    /* Aynzo-aligned light theme */
+    /* SafeIn-aligned light theme */
     --background: #ffffff;
     --foreground: #121212;
     --card: #ffffff;

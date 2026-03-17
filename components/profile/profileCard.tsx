@@ -25,7 +25,7 @@ export const ProfileCard = memo(function ProfileCard({ profile }: ProfileCardPro
         if (profile.profilePicture && profile.profilePicture.trim() !== "") {
             return `${profile.profilePicture}${profile.profilePicture.includes("?") ? "&" : "?"}v=${profile.profilePicture.length}`;
         }
-        return "/aynzo-logo.png";
+        return "/safein-logo.svg";
     }, [profile.profilePicture]);
 
     return (
@@ -38,7 +38,7 @@ export const ProfileCard = memo(function ProfileCard({ profile }: ProfileCardPro
                             alt="Profile"
                             key={profile.profilePicture}
                             onError={(e) => {
-                                e.currentTarget.src = "/aynzo-logo.png";
+                                e.currentTarget.src = "/safein-logo.svg";
                             }}
                         />
                         <AvatarFallback className="text-2xl">{initials}</AvatarFallback>

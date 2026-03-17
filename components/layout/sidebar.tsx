@@ -175,7 +175,7 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
             <div className="flex h-full flex-col bg-white">
                 <SheetHeader className="border-b bg-linear-to-r from-gray-50 to-white p-4">
                     <div className="flex items-center gap-3">
-                        <Image src="/aynzo-logo.png" alt="Aynzo Logo" width={100} height={40} className="h-8 w-auto" />
+                        <Image src="/safein-logo.svg" alt="SafeIn Logo" width={100} height={40} className="h-8 w-auto" />
                     </div>
                     <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 </SheetHeader>

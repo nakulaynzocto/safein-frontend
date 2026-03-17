@@ -65,7 +65,7 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
                             Streamline Your Visitor Management Experience
                         </h2>
                         <p className="text-blue-50/80 text-lg leading-relaxed">
-                            Join thousands of organizations using Aynzo to manage their front desk operations with ease and security.
+                            Join thousands of organizations using SafeIn to manage their front desk operations with ease and security.
                         </p>
                     </div>
                 </div>

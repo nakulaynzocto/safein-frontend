@@ -51,7 +51,7 @@ export function PageSEOHead({
         if (keywords.length > 0) {
             updateMetaTag("keywords", keywords.join(", "));
         }
-        updateMetaTag("author", "Aynzo");
+        updateMetaTag("author", "SafeIn");
         updateMetaTag("robots", noindex ? "noindex, nofollow" : "index, follow");
         updateMetaTag("theme-color", safeInSEOConfig.themeColor);
         updateMetaTag("msapplication-TileColor", safeInSEOConfig.themeColor);

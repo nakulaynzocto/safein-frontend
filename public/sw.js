@@ -1,7 +1,7 @@
 // SafeIn PWA Service Worker
 // Version is injected via URL query param: /sw.js?v=1.1
 // Set NEXT_PUBLIC_APP_VERSION in .env to control this — no need to edit this file!
-const _swVersion = new URL(self.location.href).searchParams.get('v') || '1.0';
+const _swVersion = '1.2';
 const CACHE_NAME = `safein-v${_swVersion}`;
 
 const OFFLINE_URL = '/offline';
@@ -10,8 +10,8 @@ const OFFLINE_URL = '/offline';
 const PRECACHE_ASSETS = [
   '/',
   '/offline',
-  '/aynzo-logo.png',
-  '/aynzo-logo.svg',
+  '/safein-identity.png',
+  '/safein-logo.svg',
   '/icon-192.png',
   '/icon-512.png',
   '/icon-maskable-192.png',
@@ -135,8 +135,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: '/aynzo-logo.png',
-      badge: '/aynzo-logo.png',
+      icon: '/safein-logo.svg',
+      badge: '/safein-logo.svg',
       tag: data.tag || 'safein-notification',
       data: { url: data.url || '/' },
       vibrate: [100, 50, 100],

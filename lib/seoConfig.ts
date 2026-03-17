@@ -6,7 +6,7 @@
 export const safeInSEOConfig = {
     siteName: "SafeIn by Aynzo",
     siteUrl: "https://safein.aynzo.com",
-    logoUrl: "https://safein.aynzo.com/aynzo-logo.png",
+    logoUrl: "https://safein.aynzo.com/safein-identity.png",
     description:
         "SafeIn is India's best visitor management and appointment scheduling system. professional visitor check-ins, society security, and business appointment management platform by Aynzo.",
     keywords: [
@@ -19,7 +19,7 @@ export const safeInSEOConfig = {
         "digital visitor register india",
         "office visitor tracking software",
         "safein india",
-        "aynzo visitor system",
+        "safein visitor system",
         "smart appointment app india",
         "visitor check-in system india",
     ],
@@ -27,7 +27,7 @@ export const safeInSEOConfig = {
     creator: "Aynzo",
     publisher: "Aynzo",
     themeColor: "#3882a5",
-    twitterHandle: "@aynzo",
+    twitterHandle: "@safein",
     softwareApplication: {
         name: "SafeIn Visitor Management",
         operatingSystem: "Web/Android/iOS",
@@ -46,7 +46,7 @@ export const safeInSEOConfig = {
     localBusiness: {
         "@type": "SecurityService",
         name: "SafeIn by Aynzo",
-        image: "https://safein.aynzo.com/aynzo-logo.png",
+        image: "https://safein.aynzo.com/safein-identity.png",
         priceRange: "₹₹",
         address: {
             "@type": "PostalAddress",
@@ -71,7 +71,7 @@ export const safeInSEOConfig = {
     organization: {
         name: "Aynzo",
         url: "https://aynzo.com",
-        logo: "https://safein.aynzo.com/aynzo-logo.png",
+        logo: "https://safein.aynzo.com/safein-identity.png",
         address: {
             "@type": "PostalAddress",
             "addressLocality": "Mohali",
@@ -88,10 +88,10 @@ export const safeInSEOConfig = {
         },
         sameAs: [
             "https://www.facebook.com/profile.php?id=61579388700386",
-            "https://www.instagram.com/aynzo.world",
-            "https://x.com/aynzoworld",
+            "https://www.instagram.com/safein.world",
+            "https://x.com/safeinworld",
             "https://www.youtube.com/channel/UC7lY7bl4eALJv4oUwXpfGMg",
-            "https://www.linkedin.com/company/aynzo/",
+            "https://www.linkedin.com/company/safein/",
         ],
     },
 };
@@ -113,7 +113,7 @@ export const safeInPageSEO = {
             "business security solutions india",
             "office appointment system india",
             "SafeIn management",
-            "Aynzo India",
+            "SafeIn India",
         ],
         path: "/",
     },

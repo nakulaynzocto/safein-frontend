@@ -48,12 +48,12 @@ const socialLinks = [
     },
     {
         name: "Instagram",
-        href: "https://www.instagram.com/aynzo.world?igsh=dXhycGs5anVtMnR5",
+        href: "https://www.instagram.com/safein.world?igsh=dXhycGs5anVtMnR5",
         icon: <Instagram className="h-5 w-5" />,
     },
     {
         name: "X",
-        href: "https://x.com/aynzoworld?t=uRJUZAb4glT07Z9FIGfBZA&s=08",
+        href: "https://x.com/safeinworld?t=uRJUZAb4glT07Z9FIGfBZA&s=08",
         icon: (
             <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H1.476l8.6-9.83L0 1.154h7.594l5.243 6.932 6.064-6.932zM16.69 20.497h2.042L7.326 3.652H5.2l11.49 16.845z" />
@@ -67,7 +67,7 @@ const socialLinks = [
     },
     {
         name: "LinkedIn",
-        href: "https://www.linkedin.com/company/aynzo/",
+        href: "https://www.linkedin.com/company/safein/",
         icon: <Linkedin className="h-5 w-5" />,
     },
 ];
@@ -90,11 +90,11 @@ export function Footer() {
                     <div className="lg:col-span-5 space-y-8">
                         <Link href="/" className="inline-block group transition-transform hover:scale-105 duration-300">
                             <Image
-                                src="/aynzo-logo.png"
-                                alt="Aynzo Logo"
+                                src="/safein-logo.svg"
+                                alt="SafeIn Logo"
                                 width={140}
                                 height={56}
-                                className="h-10 w-auto brightness-0 invert"
+                                className="h-12 w-auto brightness-0 invert"
                             />
                         </Link>
                         <p className="text-gray-400 text-lg leading-relaxed max-w-md">
@@ -167,7 +167,7 @@ export function Footer() {
                 {/* Bottom Bar */}
                 <div className="mt-20 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
                     <p className="text-sm text-gray-500 font-medium">
-                        © {new Date().getFullYear()} <span className="text-white">Aynzo Inc.</span> All rights reserved.
+                        © {new Date().getFullYear()} <span className="text-white">Aynzo Global.</span> All rights reserved.
                     </p>
                     
                     <div className="flex items-center gap-8">
