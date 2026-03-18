@@ -48,16 +48,18 @@ export default function SubscriptionSuccessPage() {
     useEffect(() => {
         if (subscriptionIsActive && !isRedirecting) {
             setIsRedirecting(true);
+            
             if (user?.id) {
                 dispatch(userSubscriptionApi.util.invalidateTags(["User", "Subscription"]));
             }
             refetchSubscription();
-            const timer = setTimeout(() => {
+
+            // Store timer in a variable that won't be cleared by the dependency change re-render
+            setTimeout(() => {
                 router.replace(routes.privateroute.DASHBOARD);
             }, 1500);
-            return () => clearTimeout(timer);
         }
-    }, [subscriptionIsActive, isRedirecting, router, user?.id, dispatch, refetchSubscription]);
+    }, [subscriptionIsActive, router, user?.id, dispatch, refetchSubscription]);
 
     useEffect(() => {
         if (isSubscriptionFetching && !subscriptionIsActive) {
