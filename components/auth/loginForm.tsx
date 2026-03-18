@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -27,7 +26,6 @@ const loginSchema = yup.object({
 type LoginFormData = yup.InferType<typeof loginSchema>;
 
 export function LoginForm() {
-    const router = useRouter();
     const dispatch = useAppDispatch();
     const { isAuthenticated, token, isInitialized } = useAppSelector((state) => state.auth);
     const searchParams = useSearchParams();
@@ -51,9 +49,9 @@ export function LoginForm() {
         if (isInitialized && isAuthenticated && token) {
             const next = searchParams.get("next");
             const target = next || routes.privateroute.DASHBOARD;
-            router.replace(target);
+            window.location.href = target;
         }
-    }, [isInitialized, isAuthenticated, token, router, searchParams]);
+    }, [isInitialized, isAuthenticated, token, searchParams]);
 
     const generateCaptcha = useCallback(() => {
         const n1 = Math.floor(Math.random() * 10) + 1;
@@ -101,8 +99,7 @@ export function LoginForm() {
 
             const next = searchParams.get("next");
             const target = next || routes.privateroute.DASHBOARD;
-            router.replace(target);
-            router.refresh();
+            window.location.href = target;
         } catch (error: any) {
             const message = error?.data?.message || error?.message || "Login failed";
             setErrorMessage(message);
@@ -122,8 +119,7 @@ export function LoginForm() {
                     showSuccessToast("Login successful with Google!");
                     const next = searchParams.get("next");
                     const target = next || routes.privateroute.DASHBOARD;
-                    router.replace(target);
-                    router.refresh();
+                    window.location.href = target;
                 }
             } catch (error: any) {
                 setErrorMessage(error?.data?.message || "Google login failed");
