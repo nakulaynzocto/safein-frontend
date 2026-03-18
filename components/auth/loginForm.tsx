@@ -102,6 +102,7 @@ export function LoginForm() {
             const next = searchParams.get("next");
             const target = next || routes.privateroute.DASHBOARD;
             router.replace(target);
+            router.refresh();
         } catch (error: any) {
             const message = error?.data?.message || error?.message || "Login failed";
             setErrorMessage(message);
@@ -122,6 +123,7 @@ export function LoginForm() {
                     const next = searchParams.get("next");
                     const target = next || routes.privateroute.DASHBOARD;
                     router.replace(target);
+                    router.refresh();
                 }
             } catch (error: any) {
                 setErrorMessage(error?.data?.message || "Google login failed");

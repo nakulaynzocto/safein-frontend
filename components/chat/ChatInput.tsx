@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Paperclip, Loader2, Send, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUploadFileMutation } from "@/store/api";
+import { useUploadSupportFileMutation } from "@/store/api/supportApi";
 import { showErrorToast } from "@/utils/toast";
 import Image from "next/image";
 
@@ -33,11 +34,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     isSupportChat = false
 }) => {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
-    const [isUploadingBase64, setIsUploadingBase64] = React.useState(false);
-    // Use Gatekeeper JWT-protected endpoint for internal chat (logged-in employees)
+    // Use support-specific upload endpoint for support widget users (supports Google auth)
+    // Use the Gatekeeper JWT-protected endpoint for internal chat (logged-in employees)
     const [uploadFileGatekeeper, { isLoading: isUploadingGK }] = useUploadFileMutation();
-    // For support chat, we convert to base64 client-side to avoid Cloudinary dependency
-    const isUploading = isSupportChat ? isUploadingBase64 : isUploadingGK;
+    const [uploadFileSupport, { isLoading: isUploadingSup }] = useUploadSupportFileMutation();
+    const isUploading = isSupportChat ? isUploadingSup : isUploadingGK;
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -48,44 +49,31 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             return;
         }
 
-        // For support chat (base64 mode), limit to 2MB to keep socket payload manageable
-        const maxSize = isSupportChat ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
-        const maxSizeLabel = isSupportChat ? '2MB' : '5MB';
-        if (file.size > maxSize) {
-            showErrorToast(`File size must be less than ${maxSizeLabel}`);
+        if (file.size > 5 * 1024 * 1024) {
+            showErrorToast("File size must be less than 5MB");
             return;
         }
 
         try {
+            let result: { url: string; name: string; type: string };
+
             if (isSupportChat) {
-                // Support widget: convert to base64 data URL directly in the browser
-                // This avoids any server-side Cloudinary dependency
-                setIsUploadingBase64(true);
-                const dataUrl = await new Promise<string>((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result as string);
-                    reader.onerror = () => reject(new Error('Failed to read file'));
-                    reader.readAsDataURL(file);
-                });
-                setUploadedFile?.({
-                    url: dataUrl,
-                    name: file.name,
-                    type: file.type,
-                });
+                // Support widget: upload to super-admin-backend (/api/support/upload)
+                // This endpoint validates both JWT and Google tokens via supportProtect
+                const formData = new FormData();
+                formData.append('file', file);
+                result = await uploadFileSupport(formData).unwrap();
             } else {
                 // Internal chat: upload to Gatekeeper (/upload) with JWT
                 const res = await uploadFileGatekeeper({ file }).unwrap();
-                setUploadedFile?.({
-                    url: res.url,
-                    name: file.name,
-                    type: file.type,
-                });
+                result = { url: res.url, name: file.name, type: file.type };
             }
+
+            setUploadedFile?.(result);
         } catch (error: any) {
-            const msg = error?.data?.message || error?.message || "Failed to process image";
+            const msg = error?.data?.message || error?.message || "Failed to upload image";
             showErrorToast(msg);
         } finally {
-            setIsUploadingBase64(false);
             if (fileInputRef.current) {
                 fileInputRef.current.value = "";
             }
@@ -102,7 +90,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             alt="preview" 
                             fill 
                             className="object-cover"
-                            unoptimized={uploadedFile.url.startsWith("data:")}
                         />
                         <button 
                             onClick={() => setUploadedFile?.(null)}
