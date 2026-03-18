@@ -222,7 +222,7 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
                             prefetch={true}
                             className={cn(
                                 "sidebar-item rounded-lg border-0 text-base flex justify-between items-center pr-3",
-                                isActive(item.href) && "active bg-primary/10 text-primary",
+                                isActive(item.href) && "active"
                             )}
                         >
                             <div className="flex items-center">

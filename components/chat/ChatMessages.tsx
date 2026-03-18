@@ -80,7 +80,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                                                     alt={file.name}
                                                     fill
                                                     className="object-cover"
-                                                    unoptimized={file.url.endsWith('.gif')}
+                                                    unoptimized={file.url.endsWith('.gif') || file.url.startsWith('data:')}
                                                 />
                                             </div>
                                         ))}
