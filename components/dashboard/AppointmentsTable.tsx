@@ -4,8 +4,10 @@ import { memo, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/common/dataTable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatDateTime, formatName } from "@/utils/helpers";
+import { formatDateTime, formatName, formatTime } from "@/utils/helpers";
 import { Calendar, Phone, Mail, Building, Maximize2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { StatusBadge } from "@/components/common/statusBadge";
 
 interface AppointmentsTableProps {
     title: string;
@@ -150,10 +152,19 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                         header: "Time",
                         sortable: false,
                         render: (appointment: any) => (
-                            <div className="text-xs sm:text-sm">{appointment.appointmentDetails?.scheduledTime || "N/A"}</div>
+                            <div className="text-xs sm:text-sm">{appointment.appointmentDetails?.scheduledTime ? formatTime(appointment.appointmentDetails.scheduledTime) : "N/A"}</div>
                         ),
                     },
                 ]),
+            {
+                key: "status",
+                header: "Status",
+                sortable: false,
+                render: (appointment: any) => {
+                    const status = appointment.status || "pending";
+                    return <StatusBadge status={status} />;
+                },
+            },
         ],
         [showDateTime],
     );
@@ -168,8 +179,11 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                 <p className="text-muted-foreground text-xs sm:text-sm">{description}</p>
             </div>
             <div className="overflow-hidden rounded-lg border border-border bg-background shadow-xs sm:rounded-xl">
-                <div className="overflow-x-auto -mx-1 sm:mx-0">
-                    <div className="min-w-[600px] sm:min-w-0">
+                <div className="overflow-x-auto sm:mx-0">
+                    <div className={cn(
+                        "sm:min-w-0 w-full",
+                        data && data.length > 0 ? "min-w-[600px]" : "min-w-0"
+                    )}>
                         <DataTable
                             data={data}
                             columns={columns}
@@ -179,6 +193,7 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                             enableSorting={false}
                             emptyData={emptyData}
                             onPrimaryAction={onPrimaryAction}
+                            minHeight="auto"
                         />
                     </div>
                 </div>

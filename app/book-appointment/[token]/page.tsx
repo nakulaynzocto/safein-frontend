@@ -7,19 +7,60 @@ import {
     useCreateVisitorThroughLinkMutation,
     useCreateAppointmentThroughLinkMutation,
 } from "@/store/api/appointmentLinkApi";
-import { AppointmentBookingForm } from "@/components/appointment/AppointmentBookingForm";
-import { BookingVisitorForm } from "@/components/appointment/BookingVisitorForm";
-import { LoadingSpinner } from "@/components/common/loadingSpinner";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
+import { 
+    Clock, 
+    CheckCircle2, 
+    XCircle, 
+    User, 
+    Building2, 
+    CalendarCheck, 
+    ShieldCheck,
+    ArrowRight,
+    ArrowLeft
+} from "lucide-react";
 import { StatusPage } from "@/components/common/statusPage";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { extractIdString, isValidId } from "@/utils/idExtractor";
+import { cn } from "@/lib/utils";
+
+const AppointmentBookingForm = dynamic(() => import("@/components/appointment/AppointmentBookingForm").then(mod => mod.AppointmentBookingForm), {
+    loading: () => <FormSkeleton title="Appointment Details" />
+});
+
+const BookingVisitorForm = dynamic(() => import("@/components/appointment/BookingVisitorForm").then(mod => mod.BookingVisitorForm), {
+    loading: () => <FormSkeleton title="Visitor Information" />
+});
+
+function FormSkeleton({ title }: { title: string }) {
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center gap-3 mb-6">
+                <Skeleton className="h-6 w-6 rounded-full" />
+                <Skeleton className="h-6 w-48" />
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+                {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-10 w-full rounded-lg" />
+                    </div>
+                ))}
+            </div>
+            <Skeleton className="h-32 w-full rounded-lg" />
+            <div className="flex justify-end pt-4">
+                <Skeleton className="h-11 w-40 rounded-xl" />
+            </div>
+        </div>
+    );
+}
 
 export default function BookAppointmentPage() {
     const params = useParams();
     const rawToken = params?.token as string;
-    // Decode the token in case it's URL encoded
     const token = rawToken ? decodeURIComponent(rawToken) : "";
 
     const [step, setStep] = useState<"loading" | "visitor" | "appointment" | "success" | "error">("loading");
@@ -32,96 +73,75 @@ export default function BookAppointmentPage() {
         data: linkData,
         isLoading: isLoadingLink,
         error: linkError,
-    } = useGetAppointmentLinkByTokenQuery(token || "", { skip: !token });
+    } = useGetAppointmentLinkByTokenQuery(token || "", { 
+        skip: !token,
+        refetchOnMountOrArgChange: true 
+    });
 
     const [createVisitorThroughLink, { isLoading: isCreatingVisitor }] = useCreateVisitorThroughLinkMutation();
     const [createAppointmentThroughLink, { isLoading: isCreatingAppointment }] =
         useCreateAppointmentThroughLinkMutation();
 
     useEffect(() => {
-        // Handle missing token
         if (!token) {
             setErrorMessage("Invalid appointment link - token is missing");
             setStep("error");
             return;
         }
 
-        // Handle API errors
         if (linkError) {
             const error = linkError as any;
             const errorMessage = error?.data?.message || error?.message || "Invalid or expired appointment link";
-
-            // Check if it's a 404 or not found error
-            if (error?.status === 404 || error?.status === "FETCH_ERROR" || errorMessage.includes("not found")) {
-                setErrorMessage("Appointment link not found. Please check the link and try again.");
-            } else {
-                setErrorMessage(errorMessage);
-            }
+            setErrorMessage(error?.status === 404 ? "Appointment link not found. Please check the link and try again." : errorMessage);
             setStep("error");
             return;
         }
 
-        // Handle successful data load
         if (linkData) {
             setAppointmentLinkData(linkData);
             if (linkData.visitor) setVisitorData(linkData.visitor);
 
-            // Check if visitorId exists (either from link or found by email check in backend)
             let finalVisitorId: string | null = null;
-
-            // Priority 1: Check direct visitorId from linkData
             if (linkData.visitorId) {
                 const extractedVisitorId = extractIdString(linkData.visitorId);
-                if (isValidId(extractedVisitorId)) {
-                    finalVisitorId = extractedVisitorId;
-                }
+                if (isValidId(extractedVisitorId)) finalVisitorId = extractedVisitorId;
             }
 
-            // Priority 2: Check visitor object _id (when visitor was found by email)
             if (!finalVisitorId && linkData.visitor) {
-                const visitorIdFromObject = extractIdString(
-                    linkData.visitor._id || (linkData.visitor as any).id || linkData.visitor,
-                );
-                if (isValidId(visitorIdFromObject)) {
-                    finalVisitorId = visitorIdFromObject;
-                }
+                const visitorIdFromObject = extractIdString(linkData.visitor._id || (linkData.visitor as any).id || linkData.visitor);
+                if (isValidId(visitorIdFromObject)) finalVisitorId = visitorIdFromObject;
             }
 
-            // If visitor exists, go directly to appointment form
             if (finalVisitorId && isValidId(finalVisitorId)) {
                 setVisitorId(finalVisitorId);
                 setStep("appointment");
-                return;
+            } else {
+                setStep("visitor");
             }
-
-            // Visitor doesn't exist, show visitor form
-            setStep("visitor");
         }
     }, [linkData, linkError, token]);
 
-    const handleVisitorSubmit = async (visitorData: any) => {
+    const handleVisitorSubmit = async (data: any) => {
         if (!token) return;
-
         try {
-            const response = await createVisitorThroughLink({ token, visitorData }).unwrap();
+            const response = await createVisitorThroughLink({ token, visitorData: data }).unwrap();
             const result = (response as any)?.data || response;
             const extractedId = extractIdString(result?._id || result?.id);
 
             if (isValidId(extractedId)) {
                 setVisitorId(extractedId);
-                showSuccessToast("Visitor information saved successfully!");
+                showSuccessToast("Information saved! Let's schedule the time.");
                 setStep("appointment");
             } else {
-                showErrorToast("Failed to get visitor ID. Please try again.");
+                showErrorToast("Failed to process visitor ID.");
             }
         } catch (error: any) {
-            showErrorToast(error?.data?.message || error?.message || "Failed to create visitor");
+            showErrorToast(error?.data?.message || error?.message || "Failed to save information");
         }
     };
 
     const handleAppointmentSubmit = async (appointmentData: any) => {
         if (!visitorId || !appointmentLinkData || !token) return;
-
         try {
             const { visitorId: _, employeeId: __, ...restData } = appointmentData;
             const cleanData = {
@@ -129,45 +149,43 @@ export default function BookAppointmentPage() {
                 visitorId: extractIdString(visitorId),
                 employeeId: extractIdString(appointmentLinkData.employeeId),
             };
-
             await createAppointmentThroughLink({ token, appointmentData: cleanData }).unwrap();
-            showSuccessToast("Appointment booked successfully!");
             setStep("success");
         } catch (error: any) {
-            showErrorToast(error?.data?.message || error?.message || "Failed to create appointment");
+            showErrorToast(error?.data?.message || error?.message || "Failed to book appointment");
         }
     };
 
     const errorConfig = useMemo(() => {
-        const lowerMsg = errorMessage.toLowerCase();
-        const isExpired = lowerMsg.includes("expired");
-        const isAlreadyUsed =
-            lowerMsg.includes("already been used") ||
-            lowerMsg.includes("already created") ||
-            lowerMsg.includes("isbooked");
-
+        const messageStr = String(errorMessage || "");
+        const isExpired = /expired|used|created|isbooked/i.test(messageStr);
         return {
-            isExpired: isExpired || isAlreadyUsed,
-            isAlreadyUsed: isAlreadyUsed,
-            title: isExpired || isAlreadyUsed ? "Link Expired" : "Invalid Link",
-            message:
-                isExpired || isAlreadyUsed
-                    ? "This appointment link has expired or has already been used. Please contact the person who sent you this link to get a new one."
-                    : "This appointment link is invalid. Please contact the person who sent you this link.",
+            title: isExpired ? "Link Expired" : "Invalid Link",
+            message: isExpired 
+                ? "This appointment link has expired or has already been used. Please contact the person who sent you this link."
+                : "This appointment link is invalid. Please contact the person who sent you this link.",
         };
     }, [errorMessage]);
 
     if (step === "loading" || isLoadingLink) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-gray-50">
-                <Card className="w-full max-w-md">
-                    <CardContent className="p-8">
-                        <div className="flex flex-col items-center justify-center space-y-4">
-                            <LoadingSpinner size="lg" />
-                            <p className="text-gray-600">Loading appointment link...</p>
-                        </div>
-                    </CardContent>
-                </Card>
+            <div className="flex min-h-screen items-center justify-center p-4 bg-[#f8fafc] dark:bg-slate-950">
+                <div className="w-full max-w-2xl space-y-8 animate-pulse">
+                    <div className="text-center space-y-4">
+                        <Skeleton className="mx-auto h-16 w-16 rounded-2xl" />
+                        <Skeleton className="mx-auto h-8 w-64 rounded-lg" />
+                        <Skeleton className="mx-auto h-4 w-48 rounded-md" />
+                    </div>
+                    <Card className="overflow-hidden border-0 bg-white/60 shadow-2xl backdrop-blur-xl ring-1 ring-slate-200 dark:bg-slate-900/60 dark:ring-slate-800">
+                        <CardContent className="p-8">
+                            <div className="flex justify-center gap-8 mb-10">
+                                <Skeleton className="h-10 w-32 rounded-full" />
+                                <Skeleton className="h-10 w-32 rounded-full" />
+                            </div>
+                            <FormSkeleton title="Loading" />
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         );
     }
@@ -180,7 +198,6 @@ export default function BookAppointmentPage() {
                 message={errorMessage}
                 description={errorConfig.message}
                 showHomeButton={true}
-                showBackButton={true}
             />
         );
     }
@@ -189,137 +206,147 @@ export default function BookAppointmentPage() {
         return (
             <StatusPage
                 type="success"
-                title="Appointment Booked Successfully!"
-                message="Your appointment has been confirmed. You will receive a confirmation email shortly."
-                description="Thank you for booking your appointment. We look forward to meeting you!"
+                title="Appointment Booked!"
+                message="Your visit has been confirmed successfully."
+                description="A confirmation has been sent to your email. We look forward to seeing you!"
                 showHomeButton={true}
             />
         );
     }
 
+    const employee = appointmentLinkData?.employee || (typeof appointmentLinkData?.employeeId === 'object' ? appointmentLinkData.employeeId : null);
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-3 py-4 sm:px-4 sm:py-8">
-            <div className="mx-auto max-w-4xl">
-                <Card className="border-0 shadow-lg">
-                    <CardHeader className="border-b border-gray-200 pb-4">
-                        <div className="flex flex-col items-center gap-3 sm:gap-4">
-                            {/* Company Logo - Top */}
-                            {appointmentLinkData?.createdBy?.profilePicture ? (
-                                <div className="flex items-center justify-center">
-                                    <img
-                                        src={appointmentLinkData.createdBy.profilePicture}
-                                        alt={appointmentLinkData.createdBy.companyName || "Company Logo"}
-                                        className="h-16 w-auto max-w-[250px] object-contain sm:h-20"
-                                        onError={(e) => {
-                                            // Fallback to company name if logo fails to load
-                                            e.currentTarget.style.display = "none";
-                                        }}
-                                    />
-                                </div>
-                            ) : appointmentLinkData?.createdBy?.companyName ? (
-                                <div className="flex items-center justify-center">
-                                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#3882a5] shadow-md sm:h-20 sm:w-20">
-                                        <span className="text-xl font-bold text-white sm:text-2xl">
-                                            {appointmentLinkData.createdBy.companyName.charAt(0).toUpperCase()}
-                                        </span>
-                                    </div>
-                                </div>
-                            ) : null}
-
-                            {/* Company Name */}
-                            {appointmentLinkData?.createdBy?.companyName && (
-                                <div className="text-center">
-                                    <p className="text-lg font-semibold text-[#3882a5] sm:text-xl">
-                                        {appointmentLinkData.createdBy.companyName}
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Book Your Appointment */}
-                            <CardTitle className="flex items-center justify-center gap-2 text-lg text-[#3882a5]/80 sm:gap-3 sm:text-xl">
-                                <Clock className="h-5 w-5 text-[#3882a5]/80 sm:h-6 sm:w-6" />
-                                Book Your Appointment
-                            </CardTitle>
-
-                            {/* Employee Info */}
-                            {appointmentLinkData?.employee && (
-                                <div className="mt-1 text-center sm:mt-2">
-                                    <p className="text-xs text-gray-700 sm:text-sm">
-                                        Meeting with:{" "}
-                                        <strong className="text-[#3882a5]">{appointmentLinkData.employee.name}</strong>
-                                    </p>
-                                    <p className="mt-1 text-xs text-gray-600">{appointmentLinkData.employee.email}</p>
-                                </div>
-                            )}
-                        </div>
-                    </CardHeader>
-
-                    {/* Steps - After Header */}
-                    {(step === "visitor" || step === "appointment") && (
-                        <div className="border-b border-gray-200 px-4 pt-4 pb-4 sm:px-6 sm:pt-6">
-                            <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4">
-                                <div
-                                    className={`flex items-center gap-2 ${step === "visitor" || step === "appointment" ? "text-[#3882a5]" : "text-gray-400"}`}
-                                >
-                                    <div
-                                        className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all sm:h-10 sm:w-10 ${
-                                            step === "visitor"
-                                                ? "border-[#3882a5] bg-[#3882a5] text-white shadow-md"
-                                                : step === "appointment"
-                                                  ? "border-[#3882a5] bg-[#3882a5] text-white shadow-md"
-                                                  : "border-gray-300 bg-gray-200 text-gray-500"
-                                        }`}
-                                    >
-                                        {step === "visitor" ? "1" : step === "appointment" ? "✓" : "1"}
-                                    </div>
-                                    <span className="hidden text-xs font-medium sm:inline sm:text-sm">
-                                        Visitor Info
-                                    </span>
-                                </div>
-                                <div
-                                    className={`h-0.5 w-12 transition-colors sm:h-1 sm:w-16 md:w-20 ${step === "appointment" ? "bg-[#3882a5]" : "bg-gray-300"}`}
-                                ></div>
-                                <div
-                                    className={`flex items-center gap-2 ${step === "appointment" ? "text-[#3882a5]" : "text-gray-400"}`}
-                                >
-                                    <div
-                                        className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all sm:h-10 sm:w-10 ${
-                                            step === "appointment"
-                                                ? "border-[#3882a5] bg-[#3882a5] text-white shadow-md"
-                                                : "border-gray-300 bg-gray-200 text-gray-500"
-                                        }`}
-                                    >
-                                        {step === "appointment" ? "2" : "2"}
-                                    </div>
-                                    <span className="hidden text-xs font-medium sm:inline sm:text-sm">Appointment</span>
-                                </div>
+        <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 px-4 py-8 sm:py-16 selection:bg-[#3882a5]/30">
+            <div className="mx-auto max-w-3xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                
+                {/* Branding Section */}
+                <div className="flex flex-col items-center gap-4 text-center">
+                    {appointmentLinkData?.createdBy?.profilePicture ? (
+                        <div className="relative group">
+                            <div className="absolute -inset-1 rounded-2xl bg-[#3882a5] opacity-20 blur transition group-hover:opacity-40" />
+                            <div className="relative h-16 w-16 sm:h-20 sm:w-20 overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-100 p-2">
+                                <img
+                                    src={appointmentLinkData.createdBy.profilePicture}
+                                    alt="Logo"
+                                    className="h-full w-full object-contain"
+                                />
                             </div>
                         </div>
+                    ) : (
+                        <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-[#3882a5] shadow-xl text-white font-bold text-2xl">
+                            {appointmentLinkData?.createdBy?.companyName?.charAt(0).toUpperCase() || "S"}
+                        </div>
                     )}
-                    <CardContent className="p-4 sm:p-6">
+                    
+                    <div className="space-y-1">
+                        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                            {appointmentLinkData?.createdBy?.companyName || "Book Appointment"}
+                        </h1>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
+                            {employee?.name ? `Schedule a meeting with ${employee.name}` : "Please fill in the details below"}
+                        </p>
+                    </div>
+                </div>
+
+                <Card className="overflow-hidden border-0 bg-white/70 shadow-2xl backdrop-blur-xl ring-1 ring-slate-200 dark:bg-slate-900/70 dark:ring-slate-800">
+                    {/* Visual Progress Header */}
+                    <div className="bg-[#3882a5]/5 border-b border-slate-100 dark:border-slate-800 px-6 py-4">
+                        <div className="flex items-center justify-center gap-4 sm:gap-12">
+                            <div className={cn(
+                                "flex items-center gap-2 text-sm font-bold transition-all duration-300",
+                                step === "visitor" ? "text-[#3882a5]" : "text-slate-400"
+                            )}>
+                                <div className={cn(
+                                    "flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all",
+                                    step === "visitor" ? "bg-[#3882a5] border-[#3882a5] text-white shadow-lg" : "bg-emerald-50 border-emerald-500 text-emerald-600"
+                                )}>
+                                    {step === "visitor" ? "1" : <CheckCircle2 className="h-4 w-4" />}
+                                </div>
+                                <span className={cn("hidden sm:inline", step !== "visitor" && "opacity-60")}>Visitor Info</span>
+                            </div>
+                            
+                            <div className="h-0.5 w-8 rounded-full bg-slate-200 dark:bg-slate-700" />
+
+                            <div className={cn(
+                                "flex items-center gap-2 text-sm font-bold transition-all duration-300",
+                                step === "appointment" ? "text-[#3882a5]" : "text-slate-400"
+                            )}>
+                                <div className={cn(
+                                    "flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all",
+                                    step === "appointment" ? "bg-[#3882a5] border-[#3882a5] text-white shadow-lg" : "bg-slate-100 border-slate-200 text-slate-400"
+                                )}>
+                                    2
+                                </div>
+                                <span className="hidden sm:inline">Scheduling</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <CardContent className="p-6 sm:p-10">
                         {step === "visitor" && (
-                            <BookingVisitorForm
-                                initialEmail={appointmentLinkData?.visitorEmail}
-                                initialValues={visitorData || undefined}
-                                onSubmit={handleVisitorSubmit}
-                                isLoading={isCreatingVisitor}
-                                appointmentToken={token}
-                            />
+                            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+                                <div className="mb-8 flex items-center gap-3">
+                                    <div className="h-10 w-1 rounded-full bg-[#3882a5]" />
+                                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">Personal Details</h3>
+                                </div>
+                                <BookingVisitorForm
+                                    initialEmail={appointmentLinkData?.visitorEmail}
+                                    initialPhone={appointmentLinkData?.visitorPhone}
+                                    initialValues={visitorData}
+                                    onSubmit={handleVisitorSubmit}
+                                    isLoading={isCreatingVisitor}
+                                    appointmentToken={token}
+                                />
+                            </div>
                         )}
-                        {step === "appointment" && appointmentLinkData && visitorId && (
-                            <AppointmentBookingForm
-                                visitorId={visitorId}
-                                employeeId={extractIdString(appointmentLinkData.employeeId)}
-                                employeeName={appointmentLinkData.employee?.name || ""}
-                                visitorEmail={appointmentLinkData.visitorEmail}
-                                visitorName={visitorData?.name || appointmentLinkData.visitor?.name || ""}
-                                onSubmit={handleAppointmentSubmit}
-                                isLoading={isCreatingAppointment}
-                                appointmentToken={token}
-                            />
+
+                        {step === "appointment" && (
+                            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+                                <div className="mb-8 flex items-center gap-3">
+                                    <div className="h-10 w-1 rounded-full bg-[#3882a5]" />
+                                    <div>
+                                        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">Meeting Schedule</h3>
+                                        <p className="text-xs text-slate-400 mt-1 font-medium">Schedule your visit with {employee?.name}</p>
+                                    </div>
+                                </div>
+                                <div className="relative">
+                                    <AppointmentBookingForm
+                                        visitorId={visitorId!}
+                                        employeeId={extractIdString(appointmentLinkData.employeeId)}
+                                        employeeName={employee?.name || ""}
+                                        visitorEmail={appointmentLinkData.visitorEmail}
+                                        visitorName={visitorData?.name || ""}
+                                        onSubmit={handleAppointmentSubmit}
+                                        isLoading={isCreatingAppointment}
+                                        appointmentToken={token}
+                                    />
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="mt-6 text-slate-400 hover:text-[#3882a5]"
+                                        onClick={() => setStep("visitor")}
+                                    >
+                                        <ArrowLeft className="mr-2 h-4 w-4" />
+                                        Back to Visitor Info
+                                    </Button>
+                                </div>
+                            </div>
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Footer Brand Info */}
+                <div className="flex flex-col items-center gap-4 py-8 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold tracking-wide uppercase">
+                        <ShieldCheck className="h-3 w-3" />
+                        Secure Booking Powered by SafeIn
+                    </div>
+                    <div className="flex gap-6">
+                        <a href="/privacy-policy" className="text-xs text-slate-400 hover:text-[#3882a5] transition-colors">Privacy Policy</a>
+                        <a href="/contact" className="text-xs text-slate-400 hover:text-[#3882a5] transition-colors">Support</a>
+                    </div>
+                </div>
             </div>
         </div>
     );

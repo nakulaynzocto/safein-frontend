@@ -25,7 +25,11 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                 {label && (
                     <label className="text-foreground text-sm font-medium">
                         {label}
-                        {required && <span className="ml-1 text-red-500">*</span>}
+                        {required ? (
+                            <span className="ml-1 text-red-500 font-bold">*</span>
+                        ) : (
+                            <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                        )}
                     </label>
                 )}
                 <div className="relative">
@@ -38,7 +42,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                         type={inputType}
                         autoComplete={autoComplete}
                         className={cn(
-                            "border-border bg-muted/30 text-foreground placeholder:text-muted-foreground focus:ring-ring flex h-12 w-full rounded-xl border px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+                            "border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring flex h-12 w-full rounded-xl border px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
                             icon && "pl-10",
                             error && "border-destructive focus:ring-destructive",
                             isPasswordField && "pr-10",

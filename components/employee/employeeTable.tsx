@@ -26,9 +26,13 @@ import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { formatName, getInitials } from "@/utils/helpers";
 import { EmployeeVerificationModal } from "./EmployeeVerificationModal";
 import { ShieldCheck } from "lucide-react";
+import { isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 
 import { useUpdateEmployeeMutation } from "@/store/api/employeeApi";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
+import { APIErrorState } from "@/components/common/APIErrorState";
 
 export interface EmployeeTableProps {
     employees: Employee[];
@@ -54,6 +58,7 @@ export interface EmployeeTableProps {
     title?: string;
     description?: string;
     hasReachedLimit?: boolean;
+    isExpired?: boolean;
     headerActions?: React.ReactNode;
 }
 
@@ -74,24 +79,49 @@ export function EmployeeTable({
     showHeader = true,
     title,
     hasReachedLimit = false,
+    isExpired = false,
     headerActions,
 }: EmployeeTableProps) {
     const router = useRouter();
+    const dispatch = useAppDispatch();
 
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showViewDialog, setShowViewDialog] = useState(false);
     const [showVerifyDialog, setShowVerifyDialog] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [showStatusDialog, setShowStatusDialog] = useState(false);
+    const [pendingStatus, setPendingStatus] = useState<string>("");
+    const [limitErrorMessage, setLimitErrorMessage] = useState("");
+
+    const { user } = useAppSelector((state) => state.auth);
+    const isEmployee = checkIsEmployee(user);
 
     const [updateEmployee] = useUpdateEmployeeMutation();
 
-    const handleStatusUpdate = async (employee: Employee, newStatus: string) => {
+    const handleStatusUpdate = (employee: Employee, newStatus: string) => {
+        setSelectedEmployee(employee);
+        setPendingStatus(newStatus);
+        setShowStatusDialog(true);
+    };
+
+    const confirmStatusUpdate = async () => {
+        if (!selectedEmployee || !pendingStatus) return;
+
         try {
-            await updateEmployee({ id: employee._id, status: newStatus as any }).unwrap();
+            const newStatus = pendingStatus;
+            await updateEmployee({ id: selectedEmployee._id, status: newStatus as any }).unwrap();
             showSuccessToast(`Employee status updated to ${newStatus}`);
-        } catch (err: any) {
-            showErrorToast(err?.data?.message || "Failed to update status");
+            setShowStatusDialog(false);
+        } catch (error: any) {
+            console.error("Failed to update status:", error);
+            if (error?.status === 403 && error?.data?.message?.includes('limit')) {
+                setLimitErrorMessage(error?.data?.message || "Limit reached. Please upgrade your plan.");
+                setShowUpgradeModal(true);
+            } else {
+                showErrorToast(error?.data?.message || "Failed to update status");
+            }
+            setShowStatusDialog(false);
         }
     };
 
@@ -183,9 +213,10 @@ export function EmployeeTable({
                         <Button
                             variant="secondary"
                             size="sm"
-                            className="h-6 text-xs px-2 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-200"
+                            className="h-8 rounded-full px-4 bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-200/50 font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-sm"
                             onClick={() => handleVerify(employee)}
                         >
+                            <ShieldCheck className="h-3.5 w-3.5" />
                             Verify Now
                         </Button>
                     ) : (
@@ -270,11 +301,10 @@ export function EmployeeTable({
 
     if (error) {
         return (
-            <Card>
-                <CardContent className="pt-6">
-                    <div className="text-center text-red-500">Failed to load employees. Please try again.</div>
-                </CardContent>
-            </Card>
+            <APIErrorState
+                title="Failed to load employees"
+                error={error}
+            />
         );
     }
 
@@ -306,23 +336,36 @@ export function EmployeeTable({
                         emptyData={{
                             title: "No employees yet",
                             description: "Add your first employee to get started.",
-                            primaryActionLabel: hasReachedLimit ? "Upgrade Plan" : "Add Employee",
+                            primaryActionLabel: isEmployee
+                                ? undefined
+                                : (isExpired ? "Upgrade Plan" : (hasReachedLimit ? "Support Chat" : "Add Employee")),
                             icon: User
                         }}
                         onPrimaryAction={() => {
-                            if (hasReachedLimit) {
+                            if (isEmployee) return;
+                            if (isExpired) {
                                 setShowUpgradeModal(true);
+                            } else if (hasReachedLimit) {
+                                dispatch(setAssistantMessage(`Hi, I've reached my employee limit. Please help me upgrade my plan.`));
+                                dispatch(setAssistantOpen(true));
                             } else {
                                 router.push(routes.privateroute.EMPLOYEECREATE);
                             }
                         }}
+                        minWidth="800px"
                     />
                 </div>
             </div>
 
+            <UpgradePlanModal
+                isOpen={showUpgradeModal}
+                onClose={() => { setShowUpgradeModal(false); setLimitErrorMessage(""); }}
+                limitType="employees"
+            />
+
             {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (
-                <div className="flex justify-center">
+                <div className="pt-4">
                     <Pagination
                         currentPage={pagination.currentPage}
                         totalPages={pagination.totalPages}
@@ -349,6 +392,16 @@ export function EmployeeTable({
                     variant="destructive"
                 />
             )}
+
+            <ConfirmationDialog
+                open={showStatusDialog}
+                onOpenChange={setShowStatusDialog}
+                title={`Change Status to ${pendingStatus}`}
+                description={`Are you sure you want to change the status of ${selectedEmployee?.name} to ${pendingStatus}?`}
+                onConfirm={confirmStatusUpdate}
+                confirmText="Update Status"
+                variant={pendingStatus === "Inactive" ? "destructive" : "default"}
+            />
 
             {/* View Details Dialog */}
             <EmployeeDetailsDialog

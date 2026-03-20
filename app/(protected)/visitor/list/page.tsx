@@ -77,7 +77,7 @@ export default function VisitorListPage() {
 
     return (
         <div className="w-full space-y-8">
-            <Suspense fallback={<PageSkeleton />}>
+            <Suspense fallback={<PageSkeleton type="table" />}>
                 <VisitorList />
             </Suspense>
         </div>

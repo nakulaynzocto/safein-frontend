@@ -76,7 +76,7 @@ export default function EmployeeListPage() {
     }
 
     return (
-        <Suspense fallback={<PageSkeleton />}>
+        <Suspense fallback={<PageSkeleton type="table" />}>
             <EmployeeList />
         </Suspense>
     );

@@ -8,7 +8,7 @@
 @custom-variant xs (@media (min-width: 480px));
 
 :root {
-    /* Aynzo-aligned palette for Safein */
+    /* SafeIn-aligned palette for Safein */
     --background: #ffffff;
     /* page background */
     --foreground: #161718;
@@ -50,11 +50,11 @@
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
+    --background: #020617;
     --foreground: oklch(0.985 0 0);
-    --card: oklch(0.145 0 0);
+    --card: #161b22;
     --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.145 0 0);
+    --popover: #020617;
     --popover-foreground: oklch(0.985 0 0);
     --primary: oklch(0.985 0 0);
     --primary-foreground: oklch(0.205 0 0);
@@ -74,7 +74,7 @@
     --chart-3: oklch(0.769 0.188 70.08);
     --chart-4: oklch(0.627 0.265 303.9);
     --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.205 0 0);
+    --sidebar: #020617;
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.488 0.243 264.376);
     --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -85,7 +85,7 @@
 }
 
 @theme inline {
-    --font-sans: var(--font-geist-sans);
+    --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: var(--font-geist-mono);
     --color-background: var(--background);
     --color-foreground: var(--foreground);
@@ -145,7 +145,7 @@
 
     body {
         @apply bg-background text-foreground;
-        font-family: "DM Sans", Roboto, sans-serif;
+        font-family: "Plus Jakarta Sans", "DM Sans", Roboto, sans-serif;
         font-size: 14px;
         color: #161718;
         background-color: var(--background);
@@ -225,21 +225,21 @@
         font-size: 13px;
         font-weight: 500;
         line-height: 18px;
-        font-family: "DM Sans", Roboto, sans-serif;
+        font-family: "Plus Jakarta Sans", Roboto, sans-serif;
     }
 
     /* Form elements */
     input,
     textarea,
     select {
-        font-family: "DM Sans", Roboto, sans-serif;
+        font-family: "Plus Jakarta Sans", Roboto, sans-serif;
         font-size: 13px;
         font-weight: 400;
     }
 
     /* Labels */
     label {
-        font-family: "DM Sans", Roboto, sans-serif;
+        font-family: "Plus Jakarta Sans", Roboto, sans-serif;
         font-size: 13px;
         font-weight: 500;
         color: #161718;
@@ -327,19 +327,6 @@
     .btn-hostinger-secondary:hover {
         background: #f9fafb;
         border-color: #9ca3af;
-    }
-
-    /* Force white text on button hover for accent buttons */
-    [data-slot="button"][class*="border-accent"]:hover,
-    [data-slot="button"][class*="bg-accent"]:hover {
-        color: #ffffff !important;
-    }
-
-    [data-slot="button"][class*="border-accent"]:hover svg,
-    [data-slot="button"][class*="bg-accent"]:hover svg {
-        color: #ffffff !important;
-        fill: #ffffff !important;
-        stroke: #ffffff !important;
     }
 
     /* Sidebar styling - Hostinger style */
@@ -443,7 +430,7 @@
     }
 }
 
-/* Image hover pop animation utilities (Aynzo style) */
+/* Image hover pop animation utilities (SafeIn style) */
 .hover-image-pop {
     transition:
         transform 0.3s ease,
@@ -527,36 +514,52 @@
 
 /* Brand utilities */
 .bg-hero-gradient {
-    background: linear-gradient(to right, rgba(7, 68, 99, 0.95), rgba(56, 130, 165, 0.95));
+    background: linear-gradient(to right, rgba(7, 68, 99, 0.75), rgba(56, 130, 165, 0.75)), url('/home/hero/hero-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
+/* Brand utilities (Standardized) */
 .text-brand {
-    color: #074463;
+    color: var(--primary);
+}
+
+.text-brand-light {
+    color: var(--primary-light);
 }
 
 .text-accent {
-    color: #2c5aa0;
-}
-
-.text-brand-strong {
-    color: #3882a5;
+    color: var(--accent);
 }
 
 .bg-brand {
-    background-color: #3882a5;
+    background-color: var(--primary);
 }
 
-.bg-brand-tint {
-    background-color: #98c7dd;
+.bg-brand-light {
+    background-color: var(--primary-light);
+}
+
+.bg-accent {
+    background-color: var(--accent);
+}
+
+.bg-accent-light {
+    background-color: rgba(56, 130, 165, 0.1);
 }
 
 .border-brand {
-    border-color: #3882a5;
+    border-color: var(--primary);
+}
+
+.border-accent {
+    border-color: var(--accent);
 }
 
 /* Main heading utility to ensure consistent dark blue across the site */
 .heading-main {
-    color: #074463;
+    color: var(--primary);
 }
 
 /* Dashboard hero animation utilities */
@@ -579,7 +582,108 @@
 }
 
 .dash-glow {
-    filter: drop-shadow(0 15px 40px rgba(7, 68, 99, 0.25)) drop-shadow(0 8px 20px rgba(56, 130, 165, 0.25));
+    filter: drop-shadow(0 15px 40px rgba(7, 68, 99, 0.15)) drop-shadow(0 8px 15px rgba(56, 130, 165, 0.1));
+}
+
+/* Premium UI Utilities */
+.glass-morphism {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(7, 68, 99, 0.1);
+}
+
+.badge-glass {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Process Slider Animations */
+@keyframes slideInFromBottom {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-process-text {
+    animation: slideInFromBottom 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(255, 255, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+}
+
+.animate-glow-pulse {
+    animation: pulseGlow 2s infinite;
+}
+
+@keyframes shimmerFast {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.animate-shimmer-fast {
+    position: relative;
+    overflow: hidden;
+}
+
+.animate-shimmer-fast::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    animation: shimmerFast 1.5s infinite;
+}
+
+.text-premium-gradient {
+    background: linear-gradient(135deg, #ffffff 0%, #98c7dd 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+.animate-float-delayed {
+    animation: floatY 9s ease-in-out 1s infinite;
+}
+
+.animate-float-fast {
+    animation: floatY 6s ease-in-out infinite;
 }
 
 /* React-Select Portal Styles - Ensure dropdown appears above all modals and dialogs */
@@ -591,9 +695,9 @@
 
 [class*="__menu"],
 .rs__menu {
-    z-index: 999999 !important;
-    background-color: hsl(var(--background)) !important;
-    border: 1px solid hsl(var(--border)) !important;
+    z-index: 9999 !important;
+    background-color: var(--popover, #ffffff) !important;
+    border: 1px solid var(--border, #e5e7eb) !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
 }
 

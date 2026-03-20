@@ -14,7 +14,14 @@ export interface Option {
     image?: string;
 }
 
-type RSOption = { value: string; label: string; color?: string; searchKeywords?: string; image?: string };
+type RSOption = {
+    value: string;
+    label: string;
+    color?: string;
+    searchKeywords?: string;
+    image?: string;
+    data: Option;
+};
 
 export interface SelectFieldProps {
     label?: string;
@@ -36,9 +43,11 @@ export interface SelectFieldProps {
     disabled?: boolean;
     menuZIndex?: number;
     className?: string;
+    formatOptionLabel?: (option: Option) => React.ReactNode;
+    showDropdownIndicator?: boolean;
 }
 
-const MENU_PORTAL_Z_INDEX = 2147483647; // Maximum z-index value
+const MENU_PORTAL_Z_INDEX = 9999;
 
 const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     {
@@ -60,6 +69,9 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         isRtl,
         isDisabled,
         disabled,
+        menuZIndex,
+        formatOptionLabel,
+        showDropdownIndicator = true,
     },
     ref,
 ) {
@@ -77,26 +89,21 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
 
     // Convert options to react-select format
     const rsOptions: RSOption[] = useMemo(() => {
-        const converted: RSOption[] = options.map((o) => ({
+        return options.map((o) => ({
             value: String(o.value),
             label: o.label,
             color: o.color,
             searchKeywords: o.searchKeywords,
             image: o.image,
+            data: o,
         }));
-
-        // If there's a selected value that's not in the options, we should NOT add a placeholder
-        // Instead, we'll let the parent component handle fetching the actual data
-        // This prevents showing IDs as labels
-
-        return converted;
-    }, [options, value]);
+    }, [options]);
 
     // Find selected option - convert value to string for comparison
     const selectedOption: RSOption | null = useMemo(() => {
         if (value === null || value === undefined || value === "") return null;
-        const stringValue = String(value);
-        const found = rsOptions.find((o) => o.value === stringValue);
+        const stringValue = String(value).trim().toLowerCase();
+        const found = rsOptions.find((o) => String(o.value).trim().toLowerCase() === stringValue);
         return found ?? null;
     }, [value, rsOptions]);
 
@@ -110,16 +117,9 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     );
 
     // Custom filter function for searching
-    // When onInputChange is provided, we're doing server-side search, so show all options
-    // Otherwise, do client-side filtering
     const customFilter = useCallback(
         (option: { label: string; value: string; data: RSOption }, inputValue: string) => {
-            // If onInputChange is provided, we're doing server-side search, so show all options
-            // The API will handle the filtering
-            if (onInputChange) {
-                return true;
-            }
-            // Otherwise, do client-side filtering
+            if (onInputChange) return true;
             if (!inputValue) return true;
             const searchText = inputValue.toLowerCase();
             const label = option.label.toLowerCase();
@@ -135,20 +135,20 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         () => ({
             control: (base, state) => ({
                 ...base,
-                backgroundColor: "#f3f4f64d", // bg-muted/30 approx
-                minHeight: 48, // h-12
+                backgroundColor: "var(--background)",
+                minHeight: 48,
                 height: 48,
-                borderRadius: 12, // rounded-xl
-                borderColor: error ? "#ef4444" : state.isFocused ? "#3882a5" : "#e5e7eb",
+                borderRadius: 12,
+                borderColor: error ? "var(--destructive)" : state.isFocused ? "var(--accent)" : "var(--border)",
                 boxShadow: state.isFocused
                     ? error
-                        ? "0 0 0 2px rgba(239, 68, 68, 0.2)"
-                        : "0 0 0 2px rgba(56, 130, 165, 0.2)"
+                        ? "0 0 0 2px var(--destructive-ring)"
+                        : "0 0 0 2px var(--ring)"
                     : "none",
                 cursor: isFieldDisabled ? "not-allowed" : "pointer",
                 opacity: isFieldDisabled ? 0.6 : 1,
                 "&:hover": {
-                    borderColor: state.isFocused ? (error ? "#ef4444" : "#3882a5") : "#d1d5db",
+                    borderColor: state.isFocused ? (error ? "var(--destructive)" : "var(--accent)") : "var(--border)",
                 },
             }),
             valueContainer: (base) => ({
@@ -157,17 +157,17 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
             }),
             placeholder: (base) => ({
                 ...base,
-                color: "#6b7280",
+                color: "var(--muted-foreground)",
                 fontSize: 14,
             }),
             singleValue: (base) => ({
                 ...base,
-                color: "#161718",
+                color: "var(--foreground)",
                 fontSize: 14,
             }),
             input: (base) => ({
                 ...base,
-                color: "#161718",
+                color: "var(--foreground)",
                 fontSize: 14,
                 margin: 0,
                 padding: 0,
@@ -175,31 +175,32 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
             indicatorSeparator: () => ({ display: "none" }),
             dropdownIndicator: (base, state) => ({
                 ...base,
-                color: "#6b7280",
+                display: showDropdownIndicator ? "flex" : "none",
+                color: "var(--muted-foreground)",
                 padding: "0 8px",
                 transition: "transform 0.2s",
                 transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : undefined,
                 "&:hover": {
-                    color: "#161718",
+                    color: "var(--foreground)",
                 },
             }),
             clearIndicator: (base) => ({
                 ...base,
-                color: "#6b7280",
+                color: "var(--muted-foreground)",
                 padding: "0 4px",
                 "&:hover": {
-                    color: "#ef4444",
+                    color: "var(--destructive)",
                 },
             }),
             menu: (base) => ({
                 ...base,
-                backgroundColor: "#ffffff",
-                border: "1px solid #e5e7eb",
+                backgroundColor: "var(--popover, #ffffff)",
+                border: "1px solid var(--border, #e5e7eb)",
                 borderRadius: 8,
                 boxShadow: "0 10px 40px rgba(0, 0, 0, 0.2)",
                 marginTop: 4,
                 overflow: "hidden",
-                zIndex: MENU_PORTAL_Z_INDEX,
+                zIndex: 9999,
             }),
             menuList: (base) => ({
                 ...base,
@@ -208,42 +209,70 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
             }),
             menuPortal: (base) => ({
                 ...base,
-                zIndex: MENU_PORTAL_Z_INDEX,
+                zIndex: menuZIndex ?? MENU_PORTAL_Z_INDEX,
             }),
             option: (base, { isDisabled: optDisabled, isFocused, isSelected }) => ({
                 ...base,
-                backgroundColor: optDisabled ? "#f9fafb" : isSelected ? "#3882a5" : isFocused ? "#e9eff6" : "#ffffff",
-                color: optDisabled ? "#9ca3af" : isSelected ? "#ffffff" : "#161718",
+                backgroundColor: optDisabled
+                    ? "transparent"
+                    : isSelected
+                        ? "var(--primary)"
+                        : isFocused
+                            ? "var(--accent)"
+                            : "var(--background)",
+                color: optDisabled
+                    ? "var(--muted-foreground)"
+                    : isSelected
+                        ? "var(--primary-foreground)"
+                        : "var(--foreground)",
                 cursor: optDisabled ? "not-allowed" : "pointer",
                 padding: "10px 12px",
                 borderRadius: 4,
                 fontSize: 14,
                 fontWeight: isSelected ? 500 : 400,
                 "&:active": {
-                    backgroundColor: isSelected ? "#2c6b8a" : "#d1e7f2",
+                    backgroundColor: isSelected ? "var(--primary)" : "var(--accent)",
                 },
             }),
             noOptionsMessage: (base) => ({
                 ...base,
-                color: "#6b7280",
+                color: "var(--muted-foreground)",
                 fontSize: 14,
                 padding: "12px",
             }),
             loadingMessage: (base) => ({
                 ...base,
-                color: "#6b7280",
+                color: "var(--muted-foreground)",
                 fontSize: 14,
             }),
         }),
-        [error, isFieldDisabled],
+        [error, isFieldDisabled, showDropdownIndicator, menuZIndex],
+    );
+
+    const defaultFormatOptionLabel = (option: RSOption) => (
+        <div className="flex items-center gap-3">
+            {option.image ? (
+                <Avatar className="h-8 w-8 border border-border">
+                    <AvatarImage src={option.image} alt={option.label} className="object-cover" />
+                    <AvatarFallback className="text-xs font-medium leading-none bg-secondary text-secondary-foreground flex items-center justify-center">
+                        {getInitials(option.label)}
+                    </AvatarFallback>
+                </Avatar>
+            ) : null}
+            <span className="truncate">{option.label}</span>
+        </div>
     );
 
     return (
-        <div className={cn("space-y-1.5", className)}>
+        <div className={cn("space-y-1.5 relative", error ? "z-20" : "z-10", className)}>
             {label && (
                 <label htmlFor={controlId} className="text-foreground text-sm font-medium">
                     {label}
-                    {required && <span className="ml-1 text-red-500">*</span>}
+                    {required ? (
+                        <span className="ml-1 text-red-500 font-bold">*</span>
+                    ) : (
+                        <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                    )}
                 </label>
             )}
 
@@ -277,17 +306,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 escapeClearsValue={false}
                 backspaceRemovesValue={true}
                 menuShouldScrollIntoView={false}
-                formatOptionLabel={(option) => (
-                    <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8 border border-border">
-                            <AvatarImage src={option.image} alt={option.label} className="object-cover" />
-                            <AvatarFallback className="text-xs font-medium leading-none bg-secondary text-secondary-foreground flex items-center justify-center">
-                                {getInitials(option.label)}
-                            </AvatarFallback>
-                        </Avatar>
-                        <span className="truncate">{option.label}</span>
-                    </div>
-                )}
+                formatOptionLabel={formatOptionLabel ? (opt) => formatOptionLabel(opt.data) : defaultFormatOptionLabel}
             />
 
             {error && (

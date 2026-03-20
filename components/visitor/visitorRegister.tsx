@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { Button } from "@/components/ui/button";
 import { FormContainer } from "@/components/common/formContainer";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -36,11 +37,11 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
             initialData.photo);
     const hasSecurityData =
         initialData &&
-        ((initialData as any).emergencyContact?.name ||
-            (initialData as any).emergencyContact?.phone ||
+        ((initialData as any).emergencyContacts?.[0]?.name ||
+            (initialData as any).emergencyContacts?.[0]?.phone ||
             (initialData as any).blacklisted ||
             (initialData as any).tags);
-    
+
     const [showIdVerificationFields, setShowIdVerificationFields] = useState<boolean>(!!hasIdVerificationData);
     const [showSecurityFields, setShowSecurityFields] = useState<boolean>(!!hasSecurityData);
 
@@ -58,7 +59,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
             name: initialData?.name || "",
             email: initialData?.email || "",
             phone: initialData?.phone || "",
-            gender: (initialData as any)?.gender || ("" as any),
+            gender: (initialData as any)?.gender?.trim().toLowerCase() || ("" as any),
             address: {
                 street: initialData?.address?.street || "",
                 city: initialData?.address?.city || "",
@@ -74,10 +75,10 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
             blacklisted: (initialData as any)?.blacklisted || false,
             blacklistReason: (initialData as any)?.blacklistReason || "",
             tags: (initialData as any)?.tags?.join(", ") || "",
-            emergencyContact: {
-                name: (initialData as any)?.emergencyContact?.name || "",
-                phone: (initialData as any)?.emergencyContact?.phone || "",
-            },
+            emergencyContacts: (initialData as any)?.emergencyContacts?.map((c: any) => ({
+                name: c.name,
+                phone: c.phone?.startsWith("+") ? c.phone : `${c.countryCode || ""}${c.phone || ""}`,
+            })) || [],
         },
     });
 
@@ -105,8 +106,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
             setValue("blacklisted", false);
             setValue("blacklistReason", "");
             setValue("tags", "");
-            setValue("emergencyContact.name", "");
-            setValue("emergencyContact.phone", "");
+            setValue("emergencyContacts", []);
         }
     };
 
@@ -137,13 +137,17 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                 blacklisted: data.blacklisted,
                 blacklistReason: data.blacklistReason || undefined,
                 tags: data.tags ? data.tags.split(",").map((t) => t.trim()) : undefined,
-                emergencyContact:
-                    data.emergencyContact?.name || data.emergencyContact?.phone
-                        ? {
-                            name: data.emergencyContact.name || "",
-                            phone: data.emergencyContact.phone || "",
-                        }
-                        : undefined,
+                emergencyContacts: data.emergencyContacts && data.emergencyContacts.length > 0
+                    ? data.emergencyContacts.map((contact) => {
+                        const fullPhone = contact.phone || "";
+                        const parsed = parsePhoneNumberFromString(fullPhone.startsWith("+") ? fullPhone : `+${fullPhone}`);
+                        return {
+                            name: contact.name || "",
+                            countryCode: parsed ? `+${parsed.countryCallingCode}` : "+91",
+                            phone: parsed ? parsed.nationalNumber : fullPhone.replace(/^\+\d+/, ""),
+                        };
+                    })
+                    : undefined,
             };
 
             const result = await createVisitor(visitorPayload).unwrap();
@@ -154,7 +158,9 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
             }
 
             if (onComplete) {
-                onComplete(visitorPayload, result._id);
+                // Robustly extract ID from various possible response structures
+                const visitorId = (result as any)?.data?._id || (result as any)?.data?.id || (result as any)?._id || (result as any)?.id;
+                onComplete(visitorPayload, visitorId);
             }
         } catch (error: any) {
             let errorMessage = error?.data?.message || error?.message || "Failed to register visitor";
@@ -200,7 +206,11 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
     }
 
     const formContent = (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-2" onChange={clearGeneralError}>
+        <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6 pt-2"
+            onChange={clearGeneralError}
+        >
             {generalError && (
                 <Alert variant="destructive" className="mb-4">
                     <AlertDescription>{generalError}</AlertDescription>
@@ -214,8 +224,6 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                 errors={errors}
                 watch={watch}
                 setValue={setValue}
-                showOptionalFields={false}
-                onToggleOptionalFields={() => {}}
                 showIdVerificationFields={showIdVerificationFields}
                 onToggleIdVerificationFields={handleToggleIdVerification}
                 showSecurityFields={showSecurityFields}

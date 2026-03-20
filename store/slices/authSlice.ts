@@ -6,12 +6,14 @@ interface AuthState {
     user: User | null;
     token: string | null;
     isAuthenticated: boolean;
+    isInitialized: boolean;
 }
 
 const initialState: AuthState = {
     user: null,
     token: null,
     isAuthenticated: false,
+    isInitialized: false,
 };
 
 const authSlice = createSlice({
@@ -22,6 +24,7 @@ const authSlice = createSlice({
             state.user = null;
             state.token = null;
             state.isAuthenticated = false;
+            state.isInitialized = true;
             clearAuthData();
         },
         setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
@@ -36,6 +39,7 @@ const authSlice = createSlice({
             state.user = action.payload.user;
             state.token = action.payload.token;
             state.isAuthenticated = true;
+            state.isInitialized = true;
             if (typeof window !== "undefined") {
                 localStorage.setItem("token", action.payload.token);
                 localStorage.setItem("user", JSON.stringify(action.payload.user));
@@ -47,6 +51,10 @@ const authSlice = createSlice({
         setUser: (state, action: PayloadAction<User>) => {
             state.user = action.payload;
             state.isAuthenticated = true;
+            state.isInitialized = true;
+            if (typeof window !== "undefined") {
+                localStorage.setItem("user", JSON.stringify(action.payload));
+            }
         },
         initializeAuth: (state) => {
             if (typeof window !== "undefined") {
@@ -75,9 +83,11 @@ const authSlice = createSlice({
                     clearAuthData();
                 }
             }
+            state.isInitialized = true;
         },
     },
 });
+
 
 export const { logout, setCredentials, setUser, initializeAuth } = authSlice.actions;
 export default authSlice.reducer;

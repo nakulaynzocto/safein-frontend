@@ -17,7 +17,7 @@ export function formatTime(time: string): string {
     const ampm = hour >= 12 ? "PM" : "AM";
     const displayHour = hour % 12 || 12; // Convert 0 to 12, 13-23 to 1-11
     const displayMinutes = min.toString().padStart(2, "0");
-    return `${displayHour}:${displayMinutes}${ampm}`;
+    return `${displayHour}:${displayMinutes} ${ampm}`;
 }
 
 export function formatDateTime(date: string | Date, time?: string): string {
@@ -56,18 +56,10 @@ export function isValidPhone(phone: string): boolean {
 }
 
 export const createUrlParams = (urlData: Record<string, any>): string => {
-    let datasize = Object.keys(urlData)?.length;
-    const keys = Object.keys(urlData);
-    let search = "";
-    if (datasize) {
-        keys.forEach((key) => {
-            if (urlData[key] !== null && urlData[key] !== "" && urlData[key] !== undefined) {
-                search += `${key}=${urlData[key]}&`;
-            }
-        });
-        return search?.substring(0, search.length - 1);
-    }
-    return "";
+    return Object.entries(urlData)
+        .filter(([_, value]) => value !== null && value !== "" && value !== undefined)
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        .join("&");
 };
 
 /**
@@ -148,26 +140,16 @@ export function truncateText(text: string, maxLength: number, suffix: string = "
 export function getInitials(name: string, maxInitials: number = 2): string {
     if (!name) return "U";
 
-    // Clean the name: replace common delimiters/punctuation with spaces
-    // This handles "Name-Surname", "Name (Dept)", "Name_Last"
     const cleanName = name
         .replace(/[(){}[\].,\-_"']/g, " ")
-        .replace(/\s+/g, " ")
         .trim();
 
     if (!cleanName) return name.charAt(0).toUpperCase() || "U";
 
-    const words = cleanName.split(" ");
+    const words = cleanName.split(/\s+/).filter(Boolean);
 
-    // If only one word, return first letter (or first 2 letters if preferred?)
-    // Standard practice is often first letter only for single names.
-    // However, to ensure visibility and consistency, let's stick to initials from words.
-    // If user specifically wants 2 letters for single words (e.g. "Google" -> "Go"), we can change.
-    // But usually "G" is fine.
-
-    if (words.length === 1) {
-        return words[0].charAt(0).toUpperCase();
-    }
+    if (words.length === 0) return "U";
+    if (words.length === 1) return words[0].charAt(0).toUpperCase();
 
     return words
         .slice(0, maxInitials)
@@ -194,7 +176,7 @@ export function isEmpty(value: any): boolean {
  * @returns Tailwind CSS color class
  */
 export function getStatusColor(status: string): string {
-    const statusLower = status.toLowerCase();
+    const statusLower = (status || "").toLowerCase();
 
     if (
         statusLower === "active" ||
@@ -423,83 +405,25 @@ export function getAppointmentDateTime(appointment: AppointmentForStatus): Date 
 }
 
 /**
- * Check if appointment is timed out (scheduled DATE has passed)
- * Date-based timeout: Appointments are valid for the entire scheduled day
- * and timeout at midnight (00:00) of the NEXT day
- * Example: Appointment on 1/2/2026 at 2:00 AM will timeout on 2/2/2026 at 00:00
- * @param appointment - Appointment object with appointmentDetails
- * @returns True if scheduled date has passed (next day or later)
+ * Check if appointment is timed out.
+ * Uses the `isTimedOut` field computed by the backend.
+ * (pending/approved appointments whose scheduledDate is before today)
  */
 export function isAppointmentTimedOut(appointment: AppointmentForStatus): boolean {
-    const scheduledDateTime = getAppointmentDateTime(appointment);
-    if (!scheduledDateTime) return false;
-
-    const now = new Date();
-
-    // Get date only (without time) for comparison
-    // This ensures appointments are valid for the entire scheduled day
-    const scheduledDateOnly = new Date(
-        scheduledDateTime.getFullYear(),
-        scheduledDateTime.getMonth(),
-        scheduledDateTime.getDate(),
-        0, 0, 0, 0  // Set to 00:00:00 (midnight)
-    );
-    const currentDateOnly = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        0, 0, 0, 0  // Set to 00:00:00 (midnight)
-    );
-
-
-    // Check if current date is after scheduled date (next day or later)
-    // Example: If appointment is for 1/2/2026, it will timeout on 2/2/2026 at 00:00
-    return currentDateOnly.getTime() > scheduledDateOnly.getTime();
+    return !!(appointment as any).isTimedOut;
 }
 
 /**
- * Get the effective status for an appointment (handles timeout logic)
- * @param appointment - Appointment object with status and appointmentDetails
- * @returns Effective status string
+ * Get the effective status for an appointment.
+ * Uses `isTimedOut` from the backend response — no client-side date calculation.
+ * Returns 'time_out' if backend marked it as timed out, otherwise the real status.
  */
 export function getAppointmentStatus(appointment: AppointmentForStatus): string {
-    const status = appointment.status || "pending";
-
-    // Only show 'time_out' if:
-    // 1. Status is 'pending' (not approved/rejected/completed)
-    // 2. Both scheduledDate and scheduledTime are available
-    // 3. Current date is after scheduled date (next day or later)
-    // Example: If appointment is for 1/1/2026, it will timeout on 2/1/2026
-    if (status === "pending") {
-        // Check if both date and time are available
-        if (!appointment.appointmentDetails?.scheduledDate || !appointment.appointmentDetails?.scheduledTime) {
-            return status;
-        }
-
-        const scheduledDateTime = getAppointmentDateTime(appointment);
-        if (scheduledDateTime) {
-            const now = new Date();
-
-            // Get date only (without time) for comparison
-            const scheduledDateOnly = new Date(
-                scheduledDateTime.getFullYear(),
-                scheduledDateTime.getMonth(),
-                scheduledDateTime.getDate()
-            );
-            const currentDateOnly = new Date(
-                now.getFullYear(),
-                now.getMonth(),
-                now.getDate()
-            );
-
-            // Check if current date is after scheduled date (next day or later)
-            // If appointment is for 1/1/2026, it will timeout on 2/1/2026
-            if (currentDateOnly.getTime() > scheduledDateOnly.getTime()) {
-                return "time_out";
-            }
-        }
+    if ((appointment as any).isTimedOut) {
+        return "time_out";
     }
-
+    const status = appointment.status || "pending";
+    if (status === "scheduled") return "approved";
     return status;
 }
 
@@ -564,6 +488,8 @@ export function clearAuthData(): void {
     // Clear Storage
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("safein_support_g_token");
+    localStorage.removeItem("safein_support_ticket_id");
     sessionStorage.clear();
 
     // Clear authentication cookies

@@ -1,16 +1,18 @@
 "use client";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import Link from "next/link";
 import { Navbar } from "./navbar";
 import { Sidebar } from "./sidebar";
+import { MobileBottomNav } from "./mobileBottomNav";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { useAppointmentSocket } from "@/hooks/useSocket";
 import { routes } from "@/utils/routes";
 import { clearAuthData } from "@/utils/helpers";
 import { Banner } from "@/components/common/banner";
 import { useChatNotifications } from "@/hooks/useChatNotifications";
+import { cn } from "@/lib/utils";
 
 interface ProtectedLayoutProps {
     children: ReactNode;
@@ -31,6 +33,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
         hasActiveSubscription,
         shouldShowPrivateNavbar,
         expiryWarning,
+        pathname,
     } = useAuthSubscription();
 
     // Show navbar for all authenticated users
@@ -42,6 +45,26 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
     // 🔔 Listen for Chat Notifications globally
     useChatNotifications();
+
+    // Prevent global page scroll for messages page
+    useEffect(() => {
+        if (typeof window !== 'undefined' && pathname === routes.privateroute.MESSAGES) {
+            const originalHtmlOverflow = document.documentElement.style.overflow;
+            const originalBodyOverflow = document.body.style.overflow;
+            
+            // On mobile, we need to hide overflow to stop the "bounce" and outer scroll
+            // On desktop, the container itself manages overflow
+            if (window.innerWidth < 768) {
+                document.documentElement.style.overflow = 'hidden';
+                document.body.style.overflow = 'hidden';
+            }
+            
+            return () => {
+                document.documentElement.style.overflow = originalHtmlOverflow;
+                document.body.style.overflow = originalBodyOverflow;
+            };
+        }
+    }, [pathname]);
 
     // Immediate hard redirect for unauthenticated users in ProtectedLayout
     // This is a fail-safe for the global useAuthSubscription redirect
@@ -86,20 +109,35 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                 {/* Only show sidebar if user has active subscription AND token */}
                 {isClient && !isLoading && shouldShowSidebar && <Sidebar />}
                 <main
-                    className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto transition-opacity duration-200"
+                    className={cn(
+                        "flex-1 flex flex-col transition-opacity duration-200 relative",
+                        pathname === routes.privateroute.MESSAGES ? "overflow-hidden" : "overflow-y-auto"
+                    )}
                     style={{
                         backgroundColor: "var(--background)",
                         WebkitOverflowScrolling: "touch",
-                        scrollBehavior: "smooth",
-                        overscrollBehaviorY: "contain"
                     }}
                 >
-                    <div className="flex-1 container mx-auto max-w-full px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 lg:px-6 lg:py-6 pb-6 sm:pb-8">
+                    <div className={cn(
+                        "w-full max-w-full",
+                        pathname === routes.privateroute.MESSAGES ? "flex-1 min-h-0 p-0 md:p-4 h-full overflow-hidden flex flex-col" : "container mx-auto px-2 py-4 sm:px-3 sm:py-4 md:px-4 md:py-6 lg:px-6 lg:py-8 pb-32 md:pb-24"
+                    )}>
                         {isLoading ? (
-                            <PageSkeleton />
+                            <PageSkeleton 
+                                type={
+                                    pathname === "/" || pathname === routes.privateroute.DASHBOARD 
+                                        ? "dashboard" 
+                                        : pathname.includes("/list") || pathname.includes("/requests") || (pathname.includes("/spot-pass") && !pathname.includes("/create"))
+                                            ? "table"
+                                            : pathname.includes("/create") || pathname.includes("/edit") || pathname.includes("/settings")
+                                                ? "form"
+                                                : "generic"
+                                } 
+                                showStats={pathname === routes.privateroute.APPOINTMENTLIST}
+                            />
                         ) : shouldShowContent ? (
                             // Show content if conditions are met
-                            <div className="animate-fade-in" style={{ backgroundColor: "var(--background)" }}>
+                            <div className={cn("animate-fade-in flex flex-col", pathname === routes.privateroute.MESSAGES ? "flex-1 min-h-0 h-full" : "min-h-[calc(100vh-200px)]")} style={{ backgroundColor: "var(--background)" }}>
                                 {children}
                             </div>
                         ) : (
@@ -118,16 +156,23 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                             </div>
                         )}
                     </div>
-                    {/* Footer matching sidebar style - always at bottom */}
-                    <footer className="border-t bg-gray-50/50 flex-shrink-0" style={{ height: '64px' }}>
-                        <div className="container mx-auto max-w-full h-full flex items-center justify-center">
-                            <div className="text-xs text-gray-500 font-medium">
-                                © 2026 Visitor Management System
+                    {/* Footer - only on desktop and not on messages page */}
+                    {pathname !== routes.privateroute.MESSAGES && (
+                        <footer className="hidden md:flex border-t bg-gray-50/50 flex-shrink-0 mt-auto" style={{ height: '64px' }}>
+                            <div className="container mx-auto max-w-full h-full flex items-center justify-between px-8">
+                                <div className="text-xs text-gray-500 font-medium">
+                                    © 2026 Visitor Management System
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                    Secure & Trusted Platform
+                                </div>
                             </div>
-                        </div>
-                    </footer>
+                        </footer>
+                    )}
                 </main>
             </div>
+            {/* Mobile bottom navigation — Instagram/LinkedIn style */}
+            {isClient && !isLoading && shouldShowSidebar && <MobileBottomNav />}
         </div>
     );
 }

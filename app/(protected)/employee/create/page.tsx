@@ -9,12 +9,15 @@ import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { routes } from "@/utils/routes";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { ModuleAccessDenied } from "@/components/common/moduleAccessDenied";
 
 // Page: Employeecreat (non-modal page version)
 export default function Employeecreat() {
     const router = useRouter();
     const { user, isAuthenticated } = useAppSelector((state) => state.auth);
     const isEmployee = checkIsEmployee(user);
+    const { hasReachedEmployeeLimit, isExpired, isLoading: isLimitsLoading } = useSubscriptionStatus();
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -28,13 +31,15 @@ export default function Employeecreat() {
         }
     }, [isEmployee, isAuthenticated, router]);
 
-    if (!isAuthenticated || isEmployee) {
+    if (!isAuthenticated || isEmployee || isLimitsLoading) {
         return (
             <div className="flex min-h-[60vh] items-center justify-center">
                 <LoadingSpinner />
             </div>
         );
     }
+
+    // Non-blocking UI update: Limits handled inside NewEmployeeModal button state.
 
     return (
         <div className="container mx-auto max-w-full py-3 sm:py-4">

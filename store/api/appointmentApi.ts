@@ -10,9 +10,11 @@ export interface Appointment {
     accompaniedBy?: AccompaniedBy;
     accompanyingCount?: number;
     appointmentDetails: AppointmentDetails;
-    status: "pending" | "approved" | "rejected" | "completed" | "time_out";
+    status: "pending" | "approved" | "rejected" | "completed" | "time_out" | "checked_in";
     checkInTime?: string;
     checkOutTime?: string;
+    checkInNotes?: string;
+    checkOutNotes?: string;
     actualDuration?: number;
     securityDetails: SecurityDetails;
     notifications: NotificationPreferences;
@@ -23,6 +25,7 @@ export interface Appointment {
     createdAt: string;
     updatedAt: string;
     approvalLink?: string | null; // One-time approval link
+    isTimedOut?: boolean;         // Computed by backend: pending/approved past their scheduled date
 }
 
 export interface EmployeeDetails {
@@ -59,8 +62,6 @@ export interface AppointmentDetails {
     purpose: string;
     scheduledDate: string;
     scheduledTime: string;
-    duration: number;
-    meetingRoom: string;
     notes: string;
     vehicleNumber?: string; // Optional vehicle number
     vehiclePhoto?: string; // Optional vehicle photo URL
@@ -163,6 +164,7 @@ export interface AppointmentStats {
     approvedAppointments: number;
     rejectedAppointments: number;
     completedAppointments: number;
+    checkedInAppointments: number;
     checkedOutAppointments: number;
     appointmentsByStatus: Array<{ status: string; count: number }>;
     appointmentsByEmployee: Array<{ employeeId: string; employeeName: string; count: number }>;
@@ -175,6 +177,7 @@ export interface DashboardStats {
     approvedAppointments: number;
     rejectedAppointments: number;
     completedAppointments: number;
+    checkedInAppointments: number;
     upcomingAppointments: number;
     todayAppointments: number;
 }
@@ -194,7 +197,7 @@ export const appointmentApi = baseApi.injectEndpoints({
                 }
                 return response;
             },
-            invalidatesTags: [{ type: "Appointment", id: "LIST" }],
+            invalidatesTags: [{ type: "Appointment", id: "LIST" }, { type: "Subscription" }],
         }),
 
         getAppointments: builder.query<AppointmentListResponse, GetAppointmentsQuery | void>({
@@ -227,16 +230,23 @@ export const appointmentApi = baseApi.injectEndpoints({
             keepUnusedDataFor: 300, // Keep data for 5 minutes
         }),
 
-        // Optimized stats endpoint for dashboard (no data fetching, only aggregation)
+        // Optimized stats endpoint — accepts same filters as the appointments list
         getAppointmentStats: builder.query<{
             total: number;
             pending: number;
             approved: number;
             rejected: number;
             completed: number;
+            checked_in: number;
             cancelled: number;
-        }, void>({
-            query: () => '/appointments/stats',
+            time_out: number;
+        }, { dateFrom?: string; dateTo?: string; search?: string; employeeId?: string } | void>({
+            query: (params) => {
+                const queryParams = createUrlParams(params || {});
+                return queryParams
+                    ? `/appointments/stats?${queryParams}`
+                    : '/appointments/stats';
+            },
             transformResponse: (response: any) => {
                 if (response.success && response.data) {
                     return response.data;
@@ -284,6 +294,7 @@ export const appointmentApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, id) => [
                 { type: "Appointment", id },
                 { type: "Appointment", id: "LIST" },
+                { type: "Subscription" },
             ],
         }),
 
@@ -342,6 +353,7 @@ export const appointmentApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, id) => [
                 { type: "Appointment", id },
                 { type: "Appointment", id: "LIST" },
+                { type: "Subscription" },
             ],
         }),
 
@@ -359,6 +371,7 @@ export const appointmentApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, id) => [
                 { type: "Appointment", id },
                 { type: "Appointment", id: "LIST" },
+                { type: "Subscription" },
             ],
         }),
 
@@ -376,6 +389,7 @@ export const appointmentApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, id) => [
                 { type: "Appointment", id },
                 { type: "Appointment", id: "LIST" },
+                { type: "Subscription" },
             ],
         }),
 

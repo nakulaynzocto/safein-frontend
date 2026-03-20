@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshCcw, Maximize2, Minimize2, X } from 'lucide-react';
+import { Maximize2, Minimize2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // Constants
@@ -42,10 +42,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             </div>
 
             <div className="relative z-10 flex items-center gap-1.5">
-                <Button onClick={refreshHistory} size="icon" variant="ghost" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300">
-                    <RefreshCcw size={16} />
-                </Button>
-                <div className="h-4 w-[1px] bg-white/20 mx-1"></div>
                 <Button onClick={toggleExpand} size="icon" variant="ghost" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300">
                     {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
                 </Button>

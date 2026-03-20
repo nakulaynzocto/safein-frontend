@@ -196,7 +196,7 @@ export function useChat() {
         }
     }, [chats, markRead, dispatch, currentUserId]);
 
-    const sendMessage = useCallback(async (text: string, files: File[] = []) => {
+    const sendMessage = useCallback(async (text: string, files: any[] = []) => {
         if (!activeChat || !socket || !isConnected || !currentUserId) return;
 
         setIsSending(true);
@@ -205,7 +205,7 @@ export function useChat() {
                 chatId: activeChat._id,
                 senderId: currentUserId,
                 text,
-                files: [] // File upload logic handled separately or assumed pre-processed
+                files
             };
 
             socket.emit(SocketEvents.SEND_MESSAGE, payload);

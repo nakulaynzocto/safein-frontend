@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { initializeAuth, logout } from "@/store/slices/authSlice";
-import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionApi";
+import { useGetUserActiveSubscriptionQuery, useGetTrialLimitsStatusQuery } from "@/store/api/userSubscriptionApi";
 import { routes, isPrivateRoute, isPublicRoute, isGuestOnlyRoute, isPublicActionRoute } from "@/utils/routes";
 
 export function useAuthSubscription() {
@@ -15,12 +15,19 @@ export function useAuthSubscription() {
     const { isAuthenticated, token, user } = useAppSelector((state) => state.auth);
     const [isClient, setIsClient] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
+    const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+    const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Initialize auth on mount
+    // IMPORTANT: setIsInitialized must happen AFTER dispatch so Redux
+    // has time to read localStorage and update isAuthenticated
     useEffect(() => {
         setIsClient(true);
         dispatch(initializeAuth());
-        setIsInitialized(true);
+        // Use setTimeout(0) to defer isInitialized until after
+        // the Redux state update from initializeAuth is flushed
+        const t = setTimeout(() => setIsInitialized(true), 0);
+        return () => clearTimeout(t);
     }, [dispatch]);
 
     // Fetch active subscription (only if authenticated and user exists)
@@ -125,24 +132,35 @@ export function useAuthSubscription() {
         };
     }, [subscription]);
 
+    // Safety timeout: if subscription loading takes > 3s, force-unblock
+    useEffect(() => {
+        if (isCurrentRoutePrivate && isSubscriptionLoading && isAuthenticated) {
+            loadingTimeoutRef.current = setTimeout(() => {
+                setLoadingTimedOut(true);
+            }, 3000);
+        } else {
+            // Clear timeout and reset if loading finished
+            if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+            setLoadingTimedOut(false);
+        }
+        return () => {
+            if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+        };
+    }, [isCurrentRoutePrivate, isSubscriptionLoading, isAuthenticated]);
+
     // Determine if loading state should be shown
     const isLoading = useMemo(() => {
-        // If not initialized, show loading
+        // If not initialized or not client-side yet, show loading
         if (!isInitialized || !isClient) return true;
 
-        // If on private route and subscription is loading, show loading
-        // But only for a reasonable time (max 5 seconds) to prevent infinite loading
+        // If timed out, stop showing loading regardless
+        if (loadingTimedOut) return false;
+
+        // If on private route and subscription is still loading, show loading
         if (isCurrentRoutePrivate && isSubscriptionLoading) return true;
 
-        // If on private route and no active subscription, still don't show loading
-        // We want to show the content (dashboard)
-        // This condition is now implicitly handled by the above and the default return false
-        // if (isCurrentRoutePrivate && !hasActiveSubscription && !isSubscriptionLoading) {
-        //     return false;
-        // }
-
         return false;
-    }, [isInitialized, isClient, isCurrentRoutePrivate, isSubscriptionLoading]);
+    }, [isInitialized, isClient, isCurrentRoutePrivate, isSubscriptionLoading, loadingTimedOut]);
 
     // Redirect logic for unauthenticated users on private routes
     useEffect(() => {
@@ -151,18 +169,11 @@ export function useAuthSubscription() {
         }
     }, [isInitialized, isAuthenticated, token, isCurrentRoutePrivate, router]);
 
-    // Force redirect if authenticated but content is hidden (inactive/blocked) for too long
-    useEffect(() => {
-        if (isInitialized && isAuthenticated && isCurrentRoutePrivate && !shouldShowContent && !isLoading) {
-            const timer = setTimeout(() => {
-                // Double check specific conditions to handle "stuck" states
-                // If user is inactive effectively, force them to login
-                router.replace(routes.publicroute.LOGIN);
-                dispatch(logout()); // Clean up client state
-            }, 2000); // 2 second grace period
-            return () => clearTimeout(timer);
-        }
-    }, [isInitialized, isAuthenticated, isCurrentRoutePrivate, shouldShowContent, isLoading, router, dispatch]);
+    // NOTE: Removed the auto-logout effect that was triggering during subscription loading.
+    // It was causing a race condition: user logs in, navigates to dashboard,
+    // subscription API is still loading -> shouldShowContent=false briefly ->
+    // auto-logout fires -> page stuck / user kicked to login.
+    // Now handled gracefully by loadingTimedOut safeguard above.
 
     // Redirect authenticated users from login/register to dashboard
     useEffect(() => {
@@ -180,6 +191,13 @@ export function useAuthSubscription() {
 
     // Note: Free trial is auto-assigned during registration, so all new users will have a subscription
 
+    // Fetch trial limits (permissions & modules)
+    const { data: trialLimitsData } = useGetTrialLimitsStatusQuery(undefined, {
+        skip: !isAuthenticated || !user?.id,
+    });
+
+    const subscriptionLimits = useMemo(() => trialLimitsData?.data, [trialLimitsData]);
+
     return {
         // Auth state
         isAuthenticated,
@@ -196,6 +214,7 @@ export function useAuthSubscription() {
         activeSubscriptionData: subscription,
         isTrialingSubscription,
         expiryWarning,
+        subscriptionLimits, // Export limits and modules
 
         // Route state
         pathname,

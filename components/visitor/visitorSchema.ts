@@ -1,62 +1,85 @@
 import * as yup from "yup";
+import { validatePhone } from "@/utils/phoneUtils";
 
 export const visitorSchema = yup.object({
-    name: yup.string().required("Name is required").min(2, "Name must be at least 2 characters"),
-    email: yup.string().email("Invalid email address").required("Email is required"),
-    phone: yup.string().required("Phone number is required"),
+    name: yup.string().trim().required("Name is required").min(2, "Name must be at least 2 characters"),
+    email: yup.string().trim().email("Invalid email address").optional(),
+    phone: yup
+        .string()
+        .trim()
+        .required("Phone number is required")
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+            validatePhone(value)
+        ),
     gender: yup.string().oneOf(["male", "female", "other"], "Please select gender").optional(),
     address: yup.object({
-        street: yup.string().optional(),
-        city: yup.string().required("City is required"),
-        state: yup.string().required("State is required"),
-        country: yup.string().required("Country is required"),
+        street: yup.string().trim().optional(),
+        city: yup.string().trim().required("City is required"),
+        state: yup.string().trim().required("State is required"),
+        country: yup.string().trim().required("Country is required"),
     }),
     idProof: yup.object({
-        type: yup.string().optional(),
-        number: yup.string().optional(),
-        image: yup.string().optional(),
+        type: yup.string().trim().optional(),
+        number: yup.string().trim().optional(),
+        image: yup.string().trim().optional(),
     }),
     photo: yup.string().optional().default(""),
     blacklisted: yup.boolean().default(false),
-    blacklistReason: yup.string().optional(),
-    tags: yup.string().optional(),
+    blacklistReason: yup.string().trim().optional(),
+    tags: yup.string().trim().optional(),
     emergencyContacts: yup
         .array()
         .of(
             yup.object({
                 name: yup
                     .string()
-                    .required("Contact name is required")
+                    .trim()
+                    .notRequired()
+                    .nullable()
+                    .transform((value) => (value === "" ? null : value))
                     .min(2, "Name must be at least 2 characters"),
-                countryCode: yup
-                    .string()
-                    .required("Country code is required")
-                    .matches(/^\+\d{1,4}$/, "Country code must start with + and contain 1-4 digits (e.g., +91)"),
                 phone: yup
                     .string()
-                    .required("Phone number is required")
-                    .matches(/^\d+$/, "Phone number must contain only digits")
-                    .test(
-                        "total-length",
-                        "Total phone number (country code + phone) must be exactly 15 digits",
-                        function (value) {
-                            const { countryCode } = this.parent;
-                            if (!countryCode || !value) return false;
-
-                            // Remove + from country code and count digits
-                            const countryCodeDigits = countryCode.replace(/^\+/, "");
-                            const totalDigits = countryCodeDigits.length + value.length;
-
-                            return totalDigits === 15;
-                        }
-                    ),
+                    .trim()
+                    .notRequired()
+                    .nullable()
+                    .transform((value) => (value === "" ? null : value))
+                    .test("is-valid-emergency-phone", "Invalid emergency contact phone", (value) => {
+                        if (!value) return true;
+                        return validatePhone(value);
+                    }),
             })
         )
         .optional()
         .default([]),
 });
 
-export type VisitorFormData = yup.InferType<typeof visitorSchema>;
+export interface VisitorFormData {
+    name: string;
+    email?: string;
+    phone: string;
+    gender?: "male" | "female" | "other" | "";
+    address: {
+        street?: string;
+        city: string;
+        state: string;
+        country: string;
+    };
+    idProof: {
+        type?: string;
+        number?: string;
+        image?: string;
+    };
+    photo?: string;
+    blacklisted: boolean;
+    blacklistReason?: string;
+    tags?: string;
+    emergencyContacts?: {
+        name?: string | null;
+        phone?: string | null;
+        countryCode?: string | null;
+    }[];
+}
 
 export const idProofTypes = [
     { value: "aadhaar", label: "Aadhaar Card" },

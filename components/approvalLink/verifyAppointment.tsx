@@ -1,33 +1,34 @@
 "use client";
 
-import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { useVerifyTokenQuery, useUpdateStatusMutation } from "@/store/api/approvalLinkApi";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
     CheckCircle2,
     XCircle,
     Loader2,
+    MapPin,
     Calendar,
     Clock,
     User,
-    Building2,
-    FileText,
     Mail,
     Phone,
-    MapPin,
-    CreditCard,
-    ExternalLink,
-    Maximize2,
+    Building2,
+    ShieldCheck,
+    Briefcase,
+    FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { formatTime } from "@/utils/helpers";
+import { cn } from "@/lib/utils";
 
 export function VerifyAppointment() {
     const params = useParams();
-    const router = useRouter();
     const token = params?.token as string;
 
     const [isProcessing, setIsProcessing] = useState(false);
@@ -36,6 +37,7 @@ export function VerifyAppointment() {
 
     const { data, isLoading, error, refetch } = useVerifyTokenQuery(token, {
         skip: !token,
+        refetchOnMountOrArgChange: true,
     });
 
     const [updateStatus] = useUpdateStatusMutation();
@@ -43,17 +45,17 @@ export function VerifyAppointment() {
     // Handle case when token is missing
     if (!token) {
         return (
-            <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-                <Card className="w-full max-w-md">
-                    <CardHeader className="text-center">
-                        <div className="bg-destructive/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
-                            <XCircle className="text-destructive h-6 w-6" />
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <Card className="w-full max-w-md border-0 bg-white/80 shadow-2xl backdrop-blur-xl dark:bg-slate-900/80">
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-100 p-4 dark:bg-red-900/20">
+                            <XCircle className="h-10 w-10 text-red-600" />
                         </div>
-                        <CardTitle className="text-2xl">Invalid Link</CardTitle>
-                        <CardDescription className="mt-2">
+                        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Invalid Link</h2>
+                        <p className="text-slate-500 dark:text-slate-400">
                             The verification link is missing or invalid. Please check the link and try again.
-                        </CardDescription>
-                    </CardHeader>
+                        </p>
+                    </CardContent>
                 </Card>
             </div>
         );
@@ -77,7 +79,6 @@ export function VerifyAppointment() {
             const errorMessage = err?.data?.message || err?.message || "Failed to update appointment status";
             toast.error(errorMessage);
 
-            // If link is expired or already used, refetch to show the error state
             if (errorMessage.includes("expired") || errorMessage.includes("already used")) {
                 refetch();
             }
@@ -88,435 +89,344 @@ export function VerifyAppointment() {
 
     if (isLoading) {
         return (
-            <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-                <Card className="w-full max-w-md">
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                        <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
-                        <p className="text-muted-foreground">Verifying link...</p>
-                    </CardContent>
-                </Card>
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <div className="w-full max-w-2xl space-y-6">
+                    <div className="space-y-2 text-center">
+                        <Skeleton className="mx-auto h-8 w-48 rounded-lg" />
+                        <Skeleton className="mx-auto h-4 w-64 rounded-md" />
+                    </div>
+                    <Card className="overflow-hidden border-0 bg-white/60 shadow-xl backdrop-blur-md dark:bg-slate-900/60">
+                        <CardContent className="p-0">
+                            <div className="p-6 sm:p-8">
+                                <div className="flex flex-col items-center gap-6 sm:flex-row">
+                                    <Skeleton className="h-24 w-24 rounded-full" />
+                                    <div className="flex-1 space-y-3 text-center sm:text-left">
+                                        <Skeleton className="h-7 w-48 rounded-md mx-auto sm:mx-0" />
+                                        <Skeleton className="h-4 w-32 rounded-md mx-auto sm:mx-0" />
+                                        <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
+                                            <Skeleton className="h-5 w-24 rounded-full" />
+                                            <Skeleton className="h-5 w-24 rounded-full" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                                    <Skeleton className="h-20 rounded-xl" />
+                                    <Skeleton className="h-20 rounded-xl" />
+                                </div>
+                            </div>
+                            <div className="border-t border-slate-100 bg-slate-50/30 p-6 dark:border-slate-800 sm:p-8">
+                                <div className="space-y-4">
+                                    <Skeleton className="h-6 w-40 rounded-md" />
+                                    <div className="space-y-3">
+                                        <Skeleton className="h-12 w-full rounded-lg" />
+                                        <Skeleton className="h-12 w-full rounded-lg" />
+                                        <Skeleton className="h-24 w-full rounded-lg" />
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         );
     }
 
-    // Handle error cases
     if (error || (data && !data.success)) {
         const errorMessage = (error as any)?.data?.message || data?.message || "Invalid or expired link";
         const isExpired = errorMessage.includes("expired") || errorMessage.includes("already used");
 
         return (
-            <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-                <Card className="w-full max-w-md">
-                    <CardHeader className="text-center">
-                        <div className="bg-destructive/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
-                            <XCircle className="text-destructive h-6 w-6" />
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <Card className="w-full max-w-md border-0 bg-white shadow-2xl backdrop-blur-xl dark:bg-slate-900/80">
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center animate-in zoom-in-95 duration-300">
+                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 p-4 dark:bg-amber-900/20">
+                            <XCircle className="h-10 w-10 text-amber-600" />
                         </div>
-                        <CardTitle className="text-2xl">Link Expired or Invalid</CardTitle>
-                        <CardDescription className="mt-2">
-                            {isExpired ? "Link expired or already used" : errorMessage}
-                        </CardDescription>
-                    </CardHeader>
+                        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">
+                            {isExpired ? "Link Expired" : "Invalid Link"}
+                        </h2>
+                        <p className="text-slate-500 dark:text-slate-400">
+                            {isExpired ? "This verification link has expired or has already been used." : errorMessage}
+                        </p>
+                        <Button className="mt-8" variant="outline" onClick={() => (window.location.href = "/")}>
+                            Go to Homepage
+                        </Button>
+                    </CardContent>
                 </Card>
             </div>
         );
     }
 
     const appointment = data?.data?.appointment;
+    if (!appointment) return null;
 
-    if (!appointment) {
+    const scheduledDate = new Date(appointment.appointmentDetails.scheduledDate);
+    const formattedDate = scheduledDate.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+    });
+
+    const currentStatus = completedStatus || appointment.status;
+    const isProcessed = actionCompleted || ["approved", "rejected"].includes(currentStatus);
+
+    if (isProcessed) {
+        const displayStatus = currentStatus === "approved" ? "approved" : "rejected";
         return (
-            <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-                <Card className="w-full max-w-md">
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                        <XCircle className="text-destructive mb-4 h-8 w-8" />
-                        <p className="text-muted-foreground">Appointment not found</p>
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <Card className="w-full max-w-md overflow-hidden border-0 bg-white shadow-2xl dark:bg-slate-900 animate-in zoom-in-95 duration-500">
+                    <div className={cn(
+                        "h-2",
+                        displayStatus === "approved" ? "bg-green-500" : "bg-red-500"
+                    )} />
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                        <div className={cn(
+                            "mb-6 flex h-20 w-20 items-center justify-center rounded-full p-4",
+                            displayStatus === "approved" ? "bg-green-100 dark:bg-green-900/20" : "bg-red-100 dark:bg-red-900/20"
+                        )}>
+                            {displayStatus === "approved" ? (
+                                <CheckCircle2 className="h-10 w-10 text-green-600" />
+                            ) : (
+                                <XCircle className="h-10 w-10 text-red-600" />
+                            )}
+                        </div>
+                        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white capitalize">
+                            Appointment {displayStatus}
+                        </h2>
+                        <p className="text-slate-500 dark:text-slate-400">
+                            {actionCompleted
+                                ? `The appointment has been ${displayStatus} successfully.`
+                                : `This appointment was already ${displayStatus}.`
+                            }
+                        </p>
+                        <div className="mt-8 flex flex-col w-full gap-3">
+                            <div className="rounded-xl border border-dashed border-slate-200 p-4 text-left dark:border-slate-800">
+                                <p className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-2">Details</p>
+                                <p className="text-sm font-semibold truncate">{appointment.visitor.name}</p>
+                                <p className="text-xs text-slate-500">{formattedDate}</p>
+                            </div>
+                            <Button className="w-full" variant="outline" onClick={() => (window.location.href = "/")}>
+                                Back to Portal
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
         );
     }
 
-    // Format date
-    const scheduledDate = new Date(appointment.appointmentDetails.scheduledDate);
-    const formattedDate = scheduledDate.toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
-
-    // Check if appointment is already processed (from server) or just processed (local state)
-    const currentStatus = completedStatus || appointment.status;
-    const isProcessed = actionCompleted || currentStatus === "approved" || currentStatus === "rejected";
-
-    if (isProcessed) {
-        const displayStatus = currentStatus === "approved" ? "approved" : "rejected";
-        return (
-            <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-                <Card className="w-full max-w-md">
-                    <CardHeader className="text-center">
-                        <div
-                            className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${displayStatus === "approved"
-                                ? "bg-green-100 dark:bg-green-900/20"
-                                : "bg-red-100 dark:bg-red-900/20"
-                                }`}
-                        >
-                            {displayStatus === "approved" ? (
-                                <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
-                            ) : (
-                                <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
-                            )}
-                        </div>
-                        <CardTitle className="text-2xl">
-                            Appointment {displayStatus === "approved" ? "Approved" : "Rejected"}
-                        </CardTitle>
-                        <CardDescription className="mt-2">
-                            {actionCompleted
-                                ? `The appointment has been ${displayStatus} successfully.`
-                                : `This appointment is already ${displayStatus}.`
-                            }
-                        </CardDescription>
-                    </CardHeader>
-                </Card>
-            </div>
-        );
-    }
-
     return (
-        <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-2 py-4 sm:px-4 sm:py-12">
-            <Card className="w-full max-w-4xl">
-                <CardHeader className="px-4 pt-4 sm:px-6 sm:pt-6">
-                    <CardTitle className="text-xl sm:text-2xl">Appointment Approval</CardTitle>
-                    <CardDescription className="text-sm sm:text-base">
-                        Review the appointment and visitor details, then approve or reject the request
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 px-4 pb-4 sm:space-y-6 sm:px-6 sm:pb-6">
-                    {/* Visitor Details Section */}
-                    <div className="bg-muted/50 space-y-3 rounded-lg border p-3 sm:space-y-4 sm:p-6">
-                        <h3 className="flex items-center gap-2 text-base font-semibold sm:text-lg">
-                            <User className="h-4 w-4 sm:h-5 sm:w-5" />
-                            Visitor Information
-                        </h3>
+        <div className="flex min-h-screen items-center justify-center px-4 py-8 sm:py-12">
+            <div className="w-full max-w-3xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                {/* Brand Logo or Header */}
+                <div className="flex flex-col items-center gap-2 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#3882a5] shadow-lg shadow-[#3882a5]/20">
+                        <ShieldCheck className="h-7 w-7 text-white" />
+                    </div>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                        SafeIn Verification
+                    </h1>
+                    <p className="max-w-md text-slate-500 dark:text-slate-400">
+                        Please review the meeting details carefully before making a decision.
+                    </p>
+                </div>
 
-                        {/* Visitor Header with Photo */}
-                        <div className="bg-background flex items-center gap-2 rounded-lg border p-3 sm:gap-4 sm:p-4">
-                            <div className="group relative flex-shrink-0">
-                                <Avatar className="h-16 w-16 sm:h-20 sm:w-20">
-                                    <AvatarImage src={appointment.visitor.photo} alt={appointment.visitor.name} />
-                                    <AvatarFallback className="text-lg sm:text-2xl">
-                                        {appointment.visitor.name
-                                            .split(" ")
-                                            .map((n) => n[0])
-                                            .join("")
-                                            .toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
-                                {appointment.visitor.photo && (
-                                    <button
-                                        onClick={() => window.open(appointment.visitor.photo, "_blank")}
-                                        className="absolute right-0 bottom-0 rounded-full bg-[#3882a5] p-1.5 text-white opacity-0 shadow-lg transition-colors group-hover:opacity-100 hover:bg-[#2d6a87]"
-                                        title="View full image"
-                                    >
-                                        <Maximize2 className="h-3.5 w-3.5" />
-                                    </button>
-                                )}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                                <h4 className="truncate text-base font-semibold sm:text-xl">
-                                    {appointment.visitor.name}
-                                </h4>
-                                {appointment.visitor._id && (
-                                    <p className="text-muted-foreground truncate font-mono text-xs sm:text-sm">
-                                        Visitor ID: {appointment.visitor._id}
-                                    </p>
-                                )}
-                                {appointment.visitor.company && (
-                                    <p className="text-muted-foreground truncate text-xs sm:text-sm">
-                                        {appointment.visitor.company}
-                                    </p>
-                                )}
-                                {appointment.visitor.designation && (
-                                    <p className="text-muted-foreground truncate text-xs sm:text-sm">
-                                        {appointment.visitor.designation}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Visitor Contact Details */}
-                        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
-                            <div className="flex items-start gap-2 sm:gap-3">
-                                <Mail className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-xs font-medium sm:text-sm">Email</p>
-                                    <p className="text-muted-foreground text-xs break-all sm:text-sm">
-                                        {appointment.visitor.email}
-                                    </p>
+                <Card className="overflow-hidden border-0 bg-white/70 shadow-2xl backdrop-blur-xl ring-1 ring-slate-200 dark:bg-slate-900/70 dark:ring-slate-800">
+                    <CardContent className="p-0">
+                        {/* Profile Section */}
+                        <div className="relative p-6 sm:p-10">
+                            {/* Decorative elements */}
+                            <div className="absolute right-0 top-0 -mr-16 -mt-16 h-48 w-48 rounded-full bg-[#3882a5]/5 blur-3xl" />
+                            
+                            <div className="relative flex flex-col items-center gap-6 sm:flex-row sm:text-left">
+                                <div className="group relative">
+                                    <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#3882a5] to-[#98c7dd] opacity-30 blur group-hover:opacity-100 transition duration-500" />
+                                    <Avatar className="h-28 w-28 ring-4 ring-white dark:ring-slate-900 sm:h-32 sm:w-32">
+                                        <AvatarImage src={appointment.visitor.photo} alt={appointment.visitor.name} className="object-cover" />
+                                        <AvatarFallback className="bg-slate-100 text-2xl font-bold text-[#3882a5] dark:bg-slate-800">
+                                            {appointment.visitor.name.split(" ").map(n => n[0]).join("").toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
                                 </div>
-                            </div>
-
-                            <div className="flex items-start gap-2 sm:gap-3">
-                                <Phone className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-xs font-medium sm:text-sm">Phone</p>
-                                    <p className="text-muted-foreground text-xs break-all sm:text-sm">
-                                        {appointment.visitor.phone}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Address */}
-                            {appointment.visitor.address && (
-                                <div className="flex items-start gap-2 sm:gap-3 md:col-span-2">
-                                    <MapPin className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-xs font-medium sm:text-sm">Address</p>
-                                        <p className="text-muted-foreground text-xs break-words sm:text-sm">
-                                            {[
-                                                appointment.visitor.address.street,
-                                                appointment.visitor.address.city,
-                                                appointment.visitor.address.state,
-                                                appointment.visitor.address.country,
-                                            ]
-                                                .filter(Boolean)
-                                                .join(", ") || "N/A"}
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ID Proof */}
-                            {appointment.visitor.idProof && (
-                                <>
-                                    <div className="flex items-start gap-2 sm:gap-3">
-                                        <CreditCard className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
-                                        <div className="min-w-0 flex-1">
-                                            <p className="text-xs font-medium sm:text-sm">ID Proof Type</p>
-                                            <Badge variant="outline" className="mt-1 text-xs">
-                                                {appointment.visitor.idProof.type
-                                                    ? appointment.visitor.idProof.type.replace("_", " ").toUpperCase()
-                                                    : "N/A"}
-                                            </Badge>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-start gap-2 sm:gap-3">
-                                        <CreditCard className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
-                                        <div className="min-w-0 flex-1">
-                                            <p className="text-xs font-medium sm:text-sm">ID Proof Number</p>
-                                            {appointment.visitor.idProof.image ? (
-                                                <button
-                                                    onClick={() =>
-                                                        window.open(appointment.visitor.idProof?.image, "_blank")
-                                                    }
-                                                    className="mt-1 flex cursor-pointer items-center gap-2 font-mono text-xs break-all text-[#3882a5] hover:text-[#2d6a87] hover:underline sm:text-sm"
-                                                >
-                                                    <span>{appointment.visitor.idProof.number || "N/A"}</span>
-                                                    <ExternalLink className="h-3 w-3 flex-shrink-0 sm:h-4 sm:w-4" />
-                                                </button>
-                                            ) : (
-                                                <p className="text-muted-foreground mt-1 font-mono text-xs break-all sm:text-sm">
-                                                    {appointment.visitor.idProof.number || "N/A"}
-                                                </p>
+                                <div className="flex-1 space-y-4">
+                                    <div className="space-y-1">
+                                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
+                                            {appointment.visitor.name}
+                                        </h2>
+                                        <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
+                                            {appointment.visitor.company && (
+                                                <Badge variant="secondary" className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                                    <Building2 className="mr-1 h-3 w-3" />
+                                                    {appointment.visitor.company}
+                                                </Badge>
+                                            )}
+                                            {appointment.visitor.designation && (
+                                                <Badge variant="outline" className="border-slate-200 text-slate-600">
+                                                    <Briefcase className="mr-1 h-3 w-3" />
+                                                    {appointment.visitor.designation}
+                                                </Badge>
                                             )}
                                         </div>
                                     </div>
-
-                                    {/* ID Proof Image */}
-                                    {appointment.visitor.idProof.image && (
-                                        <div className="md:col-span-2">
-                                            <p className="mb-2 text-xs font-medium sm:text-sm">ID Proof Image</p>
-                                            <div className="overflow-hidden rounded-lg border">
-                                                <img
-                                                    src={appointment.visitor.idProof.image}
-                                                    alt="ID Proof"
-                                                    className="h-auto max-h-48 w-full cursor-pointer object-contain sm:max-h-64"
-                                                    onClick={() =>
-                                                        window.open(appointment.visitor.idProof?.image, "_blank")
-                                                    }
-                                                />
+                                    
+                                    <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800">
+                                                <Mail className="h-4 w-4" />
                                             </div>
+                                            <span className="truncate">{appointment.visitor.email}</span>
                                         </div>
-                                    )}
-                                </>
-                            )}
+                                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800">
+                                                <Phone className="h-4 w-4" />
+                                            </div>
+                                            <span>{appointment.visitor.phone}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Appointment Details Section */}
-                    <div className="bg-gradient-to-br from-[#3882a5]/5 to-[#3882a5]/10 dark:from-[#3882a5]/10 dark:to-[#3882a5]/5 space-y-3 rounded-xl border border-[#3882a5]/20 dark:border-[#3882a5]/10 p-4 shadow-sm sm:space-y-4 sm:p-6">
-                        <h3 className="flex items-center gap-2 text-base font-semibold text-[#074463] dark:text-[#3882a5] sm:text-lg">
-                            <div className="rounded-lg bg-[#3882a5]/10 p-2">
-                                <Calendar className="h-4 w-4 text-[#3882a5] dark:text-[#3882a5] sm:h-5 sm:w-5" />
-                            </div>
-                            Appointment Details
-                        </h3>
-                        <div className="grid grid-cols-1 gap-4 sm:gap-5">
-                            {/* Date & Time Combined */}
-                            <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
-                                        <Calendar className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">DATE & TIME</p>
-                                        <p className="text-base font-semibold text-gray-900 dark:text-gray-100 sm:text-lg mt-0.5">
-                                            {formattedDate} at {appointment.appointmentDetails.scheduledTime}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Visitor Name */}
-                            <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
-                                        <User className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">VISITOR</p>
-                                        <p className="text-base font-semibold text-gray-900 dark:text-gray-100 sm:text-lg mt-0.5 truncate">
-                                            {appointment.visitor.name}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Purpose */}
-                            {appointment.appointmentDetails.purpose && (
-                                <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                    <div className="flex items-start gap-3">
-                                        <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5 mt-0.5">
-                                            <FileText className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">PURPOSE</p>
-                                            <p className="text-sm text-gray-700 dark:text-gray-300 mt-1.5 leading-relaxed break-words">
-                                                {appointment.appointmentDetails.purpose}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Employee Info */}
-                            <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
-                                        <Building2 className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">MEETING WITH</p>
-                                        <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mt-0.5 truncate">
-                                            {appointment.employee.name}
-                                        </p>
-                                        {appointment.employee.department && (
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                                                {appointment.employee.department}
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Meeting Room & Duration */}
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                {appointment.appointmentDetails.duration && (
-                                    <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
-                                                <Clock className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
+                        {/* Details Grid */}
+                        <div className="border-t border-slate-100 bg-slate-50/50 p-6 dark:border-slate-800 dark:bg-slate-900/30 sm:p-10">
+                            <div className="grid gap-8 md:grid-cols-2">
+                                {/* Left: Appointment Info */}
+                                <div className="space-y-6">
+                                    <div>
+                                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#3882a5]">
+                                            Appointment Information
+                                        </h3>
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700">
+                                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                                                    <Calendar className="h-5 w-5" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-medium text-slate-400">Meeting Date</p>
+                                                    <p className="text-sm font-semibold">{formattedDate}</p>
+                                                </div>
                                             </div>
-                                            <div className="flex-1">
-                                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">DURATION</p>
-                                                <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mt-0.5">
-                                                    {appointment.appointmentDetails.duration} min
+                                            <div className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700">
+                                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                                    <Clock className="h-5 w-5" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-medium text-slate-400">Scheduled Time</p>
+                                                    <p className="text-sm font-semibold">{formatTime(appointment.appointmentDetails.scheduledTime)}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700">
+                                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                                                    <User className="h-5 w-5" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-medium text-slate-400">Meeting With</p>
+                                                    <p className="text-sm font-semibold">{appointment.employee.name}</p>
+                                                    {appointment.employee.department && (
+                                                        <p className="text-[10px] text-slate-500">{appointment.employee.department}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Right: Purpose & Location */}
+                                <div className="space-y-6">
+                                    <div>
+                                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#3882a5]">
+                                            Purpose & Documents
+                                        </h3>
+                                        <div className="space-y-4">
+                                            <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700">
+                                                <div className="mb-2 flex items-center gap-2">
+                                                    <FileText className="h-4 w-4 text-[#3882a5]" />
+                                                    <span className="text-xs font-medium text-slate-400">Meeting Purpose</span>
+                                                </div>
+                                                <p className="text-sm font-medium leading-relaxed italic text-slate-700 dark:text-slate-300">
+                                                    "{appointment.appointmentDetails.purpose}"
                                                 </p>
                                             </div>
-                                        </div>
-                                    </div>
-                                )}
+                                            
+                                            {appointment.visitor.address && (
+                                                <div className="flex items-start gap-3 rounded-xl border border-dashed border-slate-200 p-3 dark:border-slate-700">
+                                                    <MapPin className="mt-0.5 h-4 w-4 text-slate-400" />
+                                                    <div>
+                                                        <p className="text-xs font-medium text-slate-400">Visitor Location</p>
+                                                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                                                            {[appointment.visitor.address.city, appointment.visitor.address.state, appointment.visitor.address.country].filter(Boolean).join(", ")}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
 
-                                {appointment.appointmentDetails.meetingRoom && (
-                                    <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5">
-                                                <Building2 className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">ROOM</p>
-                                                <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mt-0.5 truncate">
-                                                    {appointment.appointmentDetails.meetingRoom}
-                                                </p>
-                                            </div>
+                                            {appointment.visitor.idProof && (
+                                                <div className="flex items-center justify-between rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
+                                                    <div className="flex items-center gap-2">
+                                                        <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                                                        <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                                                            {appointment.visitor.idProof.type.replace("_", " ").toUpperCase()} Verified
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-[10px] font-mono font-medium text-slate-400">
+                                                        {appointment.visitor.idProof.number.slice(0, 4)}••••{appointment.visitor.idProof.number.slice(-2)}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-                                )}
+                                </div>
                             </div>
-
-                            {/* Notes */}
+                            
+                            {/* Notes if any */}
                             {appointment.appointmentDetails.notes && (
-                                <div className="bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                    <div className="flex items-start gap-3">
-                                        <div className="flex items-center justify-center rounded-lg bg-[#3882a5]/10 dark:bg-[#3882a5]/5 p-2.5 mt-0.5">
-                                            <FileText className="h-5 w-5 text-[#3882a5] dark:text-[#3882a5]" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">ADDITIONAL NOTES</p>
-                                            <p className="text-sm text-gray-700 dark:text-gray-300 mt-1.5 leading-relaxed break-words">
-                                                {appointment.appointmentDetails.notes}
-                                            </p>
-                                        </div>
-                                    </div>
+                                <div className="mt-8 rounded-xl bg-[#3882a5]/5 p-4 ring-1 ring-[#3882a5]/10">
+                                    <p className="text-xs font-bold uppercase tracking-widest text-[#3882a5] mb-2 px-1">Host Notes</p>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400 px-1 leading-relaxed">
+                                        {appointment.appointmentDetails.notes}
+                                    </p>
                                 </div>
                             )}
-                        </div>
-                    </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex flex-row justify-end gap-3">
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            onClick={() => handleStatusUpdate("rejected")}
-                            disabled={isProcessing}
-                            className="flex-1 sm:w-auto sm:flex-initial border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
-                        >
-                            {isProcessing ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Processing...
-                                </>
-                            ) : (
-                                <>
-                                    <XCircle className="mr-2 h-4 w-4" />
-                                    Reject
-                                </>
-                            )}
-                        </Button>
-                        <Button
-                            size="lg"
-                            variant="primary"
-                            onClick={() => handleStatusUpdate("approved")}
-                            disabled={isProcessing}
-                            className="flex-1 sm:w-auto sm:flex-initial"
-                        >
-                            {isProcessing ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Processing...
-                                </>
-                            ) : (
-                                <>
-                                    <CheckCircle2 className="mr-2 h-4 w-4" />
-                                    Approve
-                                </>
-                            )}
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
+                            {/* Action Area */}
+                            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-end sm:gap-6">
+                                <button
+                                    onClick={() => handleStatusUpdate("rejected")}
+                                    disabled={isProcessing}
+                                    className="order-2 h-14 w-full rounded-2xl border-2 border-slate-200 text-sm font-bold text-slate-600 transition-all hover:bg-red-50 hover:border-red-100 hover:text-red-500 disabled:opacity-50 sm:order-1 sm:w-40 dark:border-slate-700 dark:hover:bg-red-950/20"
+                                >
+                                    {isProcessing ? "..." : "Decline Request"}
+                                </button>
+                                <button
+                                    onClick={() => handleStatusUpdate("approved")}
+                                    disabled={isProcessing}
+                                    className="order-1 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#3882a5] px-8 text-sm font-bold text-white shadow-lg shadow-[#3882a5]/20 transition-all hover:bg-[#2d6a87] hover:shadow-[#3882a5]/30 active:scale-[0.98] disabled:opacity-50 sm:order-2 sm:w-auto"
+                                >
+                                    {isProcessing ? (
+                                        <Loader2 className="h-5 w-5 animate-spin" />
+                                    ) : (
+                                        <>
+                                            <CheckCircle2 className="h-5 w-5" />
+                                            <span>Approve Meeting</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+                
+                {/* Footer simple link */}
+                <div className="text-center">
+                    <button 
+                        onClick={() => window.location.href = "/"}
+                        className="text-xs font-medium text-slate-400 hover:text-[#3882a5] transition-colors"
+                    >
+                        Powered by <span className="text-[#3a82a5] font-bold">SafeIn</span>
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

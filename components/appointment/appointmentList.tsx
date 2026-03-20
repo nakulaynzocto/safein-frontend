@@ -4,7 +4,7 @@ import { useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAppointmentOperations } from "@/hooks/useAppointmentOperations";
 import { AppointmentTable } from "./appointmentTable";
-import { Appointment, useGetAppointmentsQuery, useGetAppointmentStatsQuery } from "@/store/api/appointmentApi";
+import { Appointment, useGetAppointmentStatsQuery } from "@/store/api/appointmentApi";
 import { StatsGrid } from "@/components/dashboard/statsGrid";
 
 export function AppointmentList() {
@@ -16,10 +16,12 @@ export function AppointmentList() {
         isLoading,
         error,
         isDeleting,
+        isCheckingIn,
         isCheckingOut,
         isApproving,
         isRejecting,
         deleteAppointment,
+        checkInAppointment,
         checkOutAppointment,
         approveAppointment,
         rejectAppointment,
@@ -42,10 +44,19 @@ export function AppointmentList() {
         sortOrder,
     } = useAppointmentOperations();
 
-    const timezoneOffsetMinutes = -new Date().getTimezoneOffset();
+    // Build the same filter params as the table so count cards stay in sync
+    const statsParams = useMemo(() => {
+        const p: { dateFrom?: string; dateTo?: string; search?: string; employeeId?: string } = {};
+        if (searchTerm) p.search = searchTerm;
+        if (dateFrom) p.dateFrom = dateFrom;
+        if (dateTo) p.dateTo = dateTo;
+        if (employeeFilter) p.employeeId = employeeFilter;
+        return Object.keys(p).length > 0 ? p : undefined;
+    }, [searchTerm, dateFrom, dateTo, employeeFilter]);
 
-    // Optimized: Use stats API instead of fetching 200 appointments
-    const { data: appointmentStatsData } = useGetAppointmentStatsQuery();
+    const { data: appointmentStatsData } = useGetAppointmentStatsQuery(statsParams, {
+        refetchOnMountOrArgChange: true,
+    });
 
     const stats = useMemo(() => {
         if (!appointmentStatsData) {
@@ -55,8 +66,9 @@ export function AppointmentList() {
                 approvedAppointments: 0,
                 rejectedAppointments: 0,
                 completedAppointments: 0,
+                checkedInAppointments: 0,
                 timeOutAppointments: 0,
-                todaysAppointments: 0, // Not available from stats API, could be added if needed
+                todaysAppointments: 0,
             };
         }
 
@@ -66,8 +78,9 @@ export function AppointmentList() {
             approvedAppointments: appointmentStatsData.approved || 0,
             rejectedAppointments: appointmentStatsData.rejected || 0,
             completedAppointments: appointmentStatsData.completed || 0,
-            timeOutAppointments: appointmentStatsData.cancelled || 0,
-            todaysAppointments: 0, // Stats API doesn't filter by today, use total for now
+            checkedInAppointments: appointmentStatsData.checked_in || 0,
+            timeOutAppointments: appointmentStatsData.time_out || 0,
+            todaysAppointments: 0,
         };
     }, [appointmentStatsData]);
 
@@ -141,11 +154,13 @@ export function AppointmentList() {
                 onPageSizeChange={setPageSize}
                 onSortChange={handleSortChange}
                 onDelete={deleteAppointment}
+                onCheckIn={checkInAppointment}
                 onCheckOut={checkOutAppointment}
                 onApprove={approveAppointment}
                 onReject={rejectAppointment}
                 onView={handleView}
                 isDeleting={isDeleting}
+                isCheckingIn={isCheckingIn}
                 isCheckingOut={isCheckingOut}
                 isApproving={isApproving}
                 isRejecting={isRejecting}

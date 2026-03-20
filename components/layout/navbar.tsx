@@ -16,6 +16,7 @@ import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { logout, setUser } from "@/store/slices/authSlice";
 import { toggleAssistant } from "@/store/slices/uiSlice";
 import { useLogoutMutation, useGetProfileQuery } from "@/store/api/authApi";
+import { useGetChatsQuery } from "@/store/api/chatApi";
 import { useGetEmployeeQuery, useGetEmployeesQuery } from "@/store/api/employeeApi";
 import { routes } from "@/utils/routes";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
@@ -25,23 +26,23 @@ import { useNavbarScrollStyle } from "@/hooks/useScrollStyle";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { SidebarContent } from "@/components/layout/sidebar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
-    User,
     LogOut,
     UserCircle,
     Menu,
     X,
-    Calendar,
     Users,
     Building2,
-    Shield,
-    FileText,
     HelpCircle,
-    Phone,
     Mail,
     Bell,
     CreditCard,
     Sparkles,
+    MessageSquare,
+    Settings,
+    ChevronRight,
+    Zap,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { usePathname } from "next/navigation";
@@ -62,6 +63,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
     const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const lastProfileUserRef = useRef<string | null>(null);
@@ -118,6 +120,15 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
     const employeeName = isEmployee
         ? formatName(employeeData?.name || employeeFromList?.name || user?.name || "") || user?.email || "Employee"
         : null;
+
+    // Fetch Chats for Badge Count
+    const { data: chats } = useGetChatsQuery(undefined, { skip: !user });
+
+    // Calculate total unread messages
+    const unreadMessagesCount = (chats || []).reduce((acc: number, chat: any) => {
+        const userId = user?.id || (user as any)?._id;
+        return acc + (chat.unreadCounts?.[userId] || 0);
+    }, 0);
 
     useEffect(() => {
         setIsMounted(true);
@@ -211,6 +222,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
     }, [logoutMutation, dispatch]);
 
     const handleOpenUpgradeModal = useCallback(() => {
+        setIsSettingsOpen(false);
         setIsUpgradeModalOpen(true);
     }, []);
 
@@ -220,14 +232,22 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
 
     return (
         <nav
-            className={`${shouldShowWhiteNavbar
-                ? "border-b border-gray-200/30 bg-white/90 shadow-lg backdrop-blur-md"
-                : "bg-hero-gradient backdrop-blur-0 border-transparent shadow-none"
-                } sticky top-0 z-50 transition-all duration-300`}
+            className={cn(
+                "top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out",
+                variant === "dashboard" ? "sticky" : "fixed",
+                shouldShowWhiteNavbar
+                    ? cn(
+                        "border-b border-gray-200/50 bg-white shadow-sm py-0",
+                        variant === "dashboard" ? "shadow-sm" : "shadow-md"
+                    )
+                    : "bg-transparent border-transparent shadow-none py-2"
+            )}
         >
-            <div className="w-full px-4 sm:px-6 lg:px-8">
+            {/* Design accents removed for a cleaner look */}
+
+            <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12">
                 <div className="flex h-20 items-center justify-between">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 lg:gap-3">
                         {/* Logo - Only show logo, hide text when sidebar is visible (to avoid duplicate branding) */}
                         {variant === "dashboard" ? (
                             // For dashboard variant, show minimal branding with text
@@ -239,16 +259,16 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 >
                                     <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-gray-200 bg-white">
                                         <Image
-                                            src="/aynzo-logo.png"
-                                            alt="Aynzo Logo"
+                                            src="/safein-logo.svg"
+                                            alt="SafeIn Logo"
                                             width={40}
                                             height={40}
                                             priority
-                                            className="h-full w-full object-contain p-1"
+                                            className="h-full w-full object-contain"
                                             onError={(e) => {
                                                 // Fallback if logo fails to load
                                                 const target = e.currentTarget as HTMLImageElement;
-                                                target.src = "/aynzo-logo.svg";
+                                                target.src = "/safein-identity.png";
                                             }}
                                         />
                                     </div>
@@ -257,7 +277,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {shouldShowPrivateNavbar && (
                                     <div className={`hidden items-center lg:flex`}>
                                         <div
-                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white drop-shadow-lg"
+                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white"
                                                 }`}
                                         >
                                             Visitor Management System
@@ -273,27 +293,27 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                     className="flex-shrink-0"
                                     prefetch={true}
                                 >
-                                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-gray-200 bg-white">
+                                    <div className="group relative flex h-10 w-10 lg:h-14 lg:w-14 items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:scale-105 shadow-sm">
                                         <Image
-                                            src="/aynzo-logo.png"
-                                            alt="Aynzo Logo"
-                                            width={48}
-                                            height={48}
+                                            src="/safein-logo.svg"
+                                            alt="SafeIn Logo"
+                                            width={56}
+                                            height={56}
                                             priority
-                                            className="h-full w-full object-contain p-1"
+                                            className="h-full w-full object-contain transition-transform duration-500 group-hover:rotate-12"
                                             onError={(e) => {
-                                                // Fallback if logo fails to load
                                                 const target = e.currentTarget as HTMLImageElement;
-                                                target.src = "/aynzo-logo.svg";
+                                                target.src = "/safein-identity.png";
                                             }}
                                         />
+                                        <div className="animate-shimmer absolute inset-0 opacity-10"></div>
                                     </div>
                                 </Link>
                                 {/* Visitor Management System Text - Show for authenticated users */}
                                 {shouldShowPrivateNavbar && (
                                     <div className={`hidden items-center lg:flex`}>
                                         <div
-                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white drop-shadow-lg"
+                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white"
                                                 }`}
                                         >
                                             Visitor Management System
@@ -305,74 +325,45 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                     </div>
 
                     {/* Center: Navigation Links */}
-                    <div className="hidden flex-1 items-center justify-center lg:flex">
+                    <div className="hidden flex-1 items-center justify-end lg:flex">
                         {!isActuallyAuthenticated && variant !== "dashboard" && (
-                            <div className="flex items-center gap-2">
-                                <Link
-                                    href={routes.publicroute.HOME}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.HOME
-                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                        : `border-transparent ${linkText}`
-                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
-                                    prefetch={true}
-                                >
-                                    <span className="relative z-10">Home</span>
-                                    <div
-                                        className={`absolute inset-0 rounded-lg opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${shouldShowWhiteNavbar ? "from-brand/10 to-brand-strong/10 bg-gradient-to-r" : "bg-white/5"}`}
-                                    />
-                                </Link>
-                                <Link
-                                    href={routes.publicroute.FEATURES}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.FEATURES
-                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                        : `border-transparent ${linkText}`
-                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
-                                    prefetch={true}
-                                >
-                                    <span className="relative z-10">Features</span>
-                                    <div
-                                        className={`absolute inset-0 rounded-lg opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${shouldShowWhiteNavbar ? "from-brand/10 to-brand-strong/10 bg-gradient-to-r" : "bg-white/5"}`}
-                                    />
-                                </Link>
-                                <Link
-                                    href={routes.publicroute.PRICING}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.PRICING
-                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                        : `border-transparent ${linkText}`
-                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
-                                    prefetch={true}
-                                >
-                                    <span className="relative z-10">Pricing</span>
-                                    <div
-                                        className={`absolute inset-0 rounded-lg opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${shouldShowWhiteNavbar ? "from-brand/10 to-brand-strong/10 bg-gradient-to-r" : "bg-white/5"}`}
-                                    />
-                                </Link>
-                                <Link
-                                    href={routes.publicroute.CONTACT}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.CONTACT
-                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                        : `border-transparent ${linkText}`
-                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
-                                    prefetch={true}
-                                >
-                                    <span className="relative z-10">Contact</span>
-                                    <div
-                                        className={`absolute inset-0 rounded-lg opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${shouldShowWhiteNavbar ? "from-brand/10 to-brand-strong/10 bg-gradient-to-r" : "bg-white/5"}`}
-                                    />
-                                </Link>
-                                <Link
-                                    href={routes.publicroute.HELP}
-                                    className={`relative inline-flex items-center rounded-lg border-b-2 px-3 py-2 text-[14px] font-medium ${pathname === routes.publicroute.HELP
-                                        ? `${shouldShowWhiteNavbar ? "border-brand" : "border-white"} ${linkText}`
-                                        : `border-transparent ${linkText}`
-                                        } group transition-colors duration-200 ${linkHoverBgClass}`}
-                                    prefetch={true}
-                                >
-                                    <span className="relative z-10">Help</span>
-                                    <div
-                                        className={`absolute inset-0 rounded-lg opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${shouldShowWhiteNavbar ? "from-brand/10 to-brand-strong/10 bg-gradient-to-r" : "bg-white/5"}`}
-                                    />
-                                </Link>
+                            <div className="flex items-center gap-2 px-2 mr-12">
+                                {[
+                                    { label: "Home", href: routes.publicroute.HOME },
+                                    { label: "Features", href: routes.publicroute.FEATURES },
+                                    { label: "Pricing", href: routes.publicroute.PRICING },
+                                    { label: "Contact", href: routes.publicroute.CONTACT },
+                                    { label: "Help", href: routes.publicroute.HELP }
+                                ].map((item) => {
+                                    const isActive = pathname === item.href;
+                                    
+                                    return (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            className={cn(
+                                                "relative px-5 py-2.5 text-sm font-bold transition-all duration-300 rounded-xl",
+                                                isActive 
+                                                    ? shouldShowWhiteNavbar 
+                                                        ? "text-[#3882a5]" 
+                                                        : "text-white"
+                                                    : linkText,
+                                                "hover:opacity-80 active:scale-95"
+                                            )}
+                                        >
+                                            <span className="relative z-10">{item.label}</span>
+                                            {isActive && (
+                                                <div className={cn(
+                                                    "absolute bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full",
+                                                    shouldShowWhiteNavbar ? "bg-brand" : "bg-white"
+                                                )} />
+                                            )}
+                                            {!isActive && (
+                                                <div className="absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-white/5" />
+                                            )}
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -396,10 +387,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                                     alt={user?.companyName || "Company Logo"}
                                                     width={40}
                                                     height={40}
-                                                    className="h-full w-full object-contain p-1"
+                                                    className="h-full w-full object-contain scale-125"
                                                     onError={(e) => {
                                                         const target = e.currentTarget as HTMLImageElement;
-                                                        target.src = "/aynzo-logo.png";
+                                                        target.src = "/safein-identity.png";
                                                         target.className = "h-full w-full object-contain p-1";
                                                     }}
                                                 />
@@ -430,10 +421,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                                     alt={user?.companyName || "Company Logo"}
                                                     width={40}
                                                     height={40}
-                                                    className="h-full w-full object-contain p-1"
+                                                    className="h-full w-full object-contain scale-125"
                                                     onError={(e) => {
                                                         const target = e.currentTarget as HTMLImageElement;
-                                                        target.src = "/aynzo-logo.png";
+                                                        target.src = "/safein-identity.png";
                                                         target.className = "h-full w-full object-contain p-1";
                                                     }}
                                                 />
@@ -451,53 +442,171 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                     </div>
                                 )}
 
-                                {/* ✨ Ask Assistant Button */}
-                                <button
-                                    onClick={() => dispatch(toggleAssistant())}
+
+                                 {/* Messages Icon */}
+                                <Link
+                                    href={routes.privateroute.MESSAGES}
                                     className={cn(
-                                        "flex items-center gap-1.5 sm:gap-2 group px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border-2 transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer",
-                                        shouldShowWhiteNavbar
-                                            ? "border-primary/20 hover:border-primary/40 bg-white"
-                                            : "border-white/20 hover:border-white/40 bg-white/10 backdrop-blur-sm"
+                                        "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors",
+                                        shouldShowWhiteNavbar ? "text-gray-700 hover:bg-gray-100/80" : "text-white hover:bg-white/10"
                                     )}
+                                    title="Messages"
                                 >
-                                    <div className="relative">
-                                        <Sparkles className={cn(
-                                            "w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform",
-                                            shouldShowWhiteNavbar ? "text-primary" : "text-white"
-                                        )} />
-                                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full border border-white dark:border-slate-800 animate-pulse"></div>
-                                    </div>
-                                    <span className={cn(
-                                        "hidden xs:inline-block text-[12px] sm:text-[13px] font-bold transition-opacity group-hover:opacity-80",
-                                        shouldShowWhiteNavbar
-                                            ? "bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
-                                            : "text-white"
-                                    )}>
-                                        Ask SafeIn
-                                    </span>
-                                </button>
+                                    <MessageSquare className="h-5 w-5" />
+                                    {unreadMessagesCount > 0 && (
+                                        <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white shadow-sm">
+                                            {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                                        </span>
+                                    )}
+                                </Link>
 
                                 {/* Notification Bell */}
                                 <NotificationBell
                                     className={shouldShowWhiteNavbar ? "hover:bg-gray-100/80" : "hover:bg-white/10"}
                                     iconClassName={shouldShowWhiteNavbar ? "text-gray-700" : "text-white"}
                                 />
-                                {/* Sidebar Toggle Button - Mobile Only */}
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setIsMobileSidebarOpen(true)}
-                                    className={cn(
-                                        "size-9 md:hidden",
-                                        shouldShowWhiteNavbar
-                                            ? "text-gray-700 hover:bg-gray-100/80"
-                                            : "text-white hover:bg-white/10",
-                                    )}
-                                >
-                                    <Menu className="h-6 w-6" />
-                                    <span className="sr-only">Toggle menu</span>
-                                </Button>
+
+                                 {/* Settings Dropdown */}
+                                 <DropdownMenu open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className={cn(
+                                                "size-9 rounded-full transition-colors",
+                                                shouldShowWhiteNavbar
+                                                    ? "text-gray-700 hover:bg-gray-100/80"
+                                                    : "text-white hover:bg-white/10"
+                                            )}
+                                            title="Settings"
+                                        >
+                                            <Settings className="h-5 w-5" />
+                                            <span className="sr-only">Settings</span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                        align="end"
+                                        sideOffset={8}
+                                        className="w-72 p-0 overflow-hidden rounded-xl border border-border shadow-xl bg-white"
+                                    >
+                                        {/* Header: LinkedIn Style */}
+                                        {user && (
+                                            <div className="p-4 border-b border-border bg-white">
+                                                <div className="flex items-start gap-3">
+                                                    <Avatar className="h-14 w-14 ring-1 ring-border shadow-sm">
+                                                        <AvatarImage src={user.photo || user.profilePicture} alt={user.name} />
+                                                        <AvatarFallback className="text-xl font-bold rounded-full"
+                                                            style={{ background: "#e9eff6", color: "#074463" }}>
+                                                            {(isEmployee
+                                                                ? (employeeName || "E")
+                                                                : (user.companyName || user.name || "A")
+                                                            ).charAt(0).toUpperCase()}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex flex-col min-w-0 pt-1">
+                                                        <p className="text-base font-bold text-[#161718] truncate leading-tight">
+                                                            {isEmployee
+                                                                ? (employeeName || "Employee")
+                                                                : (user.companyName || user.name || "Admin")}
+                                                        </p>
+                                                        <p className="text-xs text-[#6b7280] truncate mt-1">
+                                                            {isEmployee ? "Employee Account" : "Platform Administrator"}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Action Buttons */}
+                                                 <div className="flex gap-2 mt-4">
+                                                     <Button 
+                                                         variant="outline" 
+                                                         size="sm" 
+                                                         className="flex-1 rounded-full h-8 text-[13px] font-semibold border-[#074463] text-[#074463] hover:bg-[#e9eff6] hover:text-[#074463]"
+                                                         onClick={() => {
+                                                             setIsSettingsOpen(false);
+                                                             router.push(routes.privateroute.PROFILE);
+                                                         }}
+                                                     >
+                                                         View Profile
+                                                     </Button>
+                                                     {!isEmployee && (
+                                                         <Button 
+                                                             size="sm" 
+                                                             className="flex-1 rounded-full h-8 text-[13px] font-semibold bg-[#074463] text-white hover:bg-[#05334a]"
+                                                             onClick={handleOpenUpgradeModal}
+                                                         >
+                                                             Upgrade
+                                                         </Button>
+                                                     )}
+                                                 </div>
+                                            </div>
+                                        )}
+
+                                        {/* Account Section */}
+                                        <div className="py-2">
+                                            <div className="px-4 py-1.5">
+                                                <p className="text-[15px] font-bold text-[#161718]">Account</p>
+                                                {!isEmployee && (isTrialingSubscription || !hasActiveSubscription) && (
+                                                    <div className="flex items-center gap-1.5 mt-1.5 group cursor-pointer" onClick={handleOpenUpgradeModal}>
+                                                        <div className="h-3 w-3 bg-[#e68a00] rounded-[2px]" />
+                                                        <p className="text-[13px] font-semibold text-[#666666] group-hover:underline group-hover:text-[#0a66c2]">
+                                                            Try Premium for ₹0
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                             {!isEmployee && (
+                                                 <DropdownMenuItem asChild className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors">
+                                                    <Link href={routes.privateroute.PROFILE} className="text-[14px] font-semibold text-[#666666] group-hover:underline">
+                                                        Settings & Privacy
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                             )}
+                                            {/* WhatsApp and Email Server links removed */}
+                                            <DropdownMenuItem asChild className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors">
+                                                <Link href={routes.publicroute.HELP} className="text-[14px] font-semibold text-[#666666] group-hover:underline">
+                                                    Help
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        </div>
+
+                                        {/* Manage Section */}
+                                        <div className="py-2 border-t border-border">
+                                            <p className="px-4 py-1.5 text-[15px] font-bold text-[#161718]">Manage</p>
+                                            <DropdownMenuItem 
+                                                onClick={() => dispatch(toggleAssistant())}
+                                                className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors"
+                                            >
+                                                <span className="text-[14px] font-semibold text-[#666666] group-hover:underline flex items-center gap-2">
+                                                    Ask SafeIn (report and query)
+                                                    <Sparkles className="h-3.5 w-3.5 text-emerald-500" />
+                                                </span>
+                                            </DropdownMenuItem>
+                                            {!isEmployee && (
+                                                <DropdownMenuItem asChild className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors">
+                                                    <Link href={routes.privateroute.SPOT_PASS} className="text-[14px] font-semibold text-[#666666] group-hover:underline">
+                                                        Spot Pass
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            )}
+                                        </div>
+
+                                        {/* Logout Section */}
+                                        <div className="py-2 border-t border-border">
+                                            <DropdownMenuItem
+                                                onClick={handleLogout}
+                                                disabled={isLoggingOut}
+                                                className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors"
+                                            >
+                                                <span className="text-[14px] font-semibold text-[#666666] group-hover:underline">
+                                                    {isLoggingOut ? "Signing out..." : "Sign Out"}
+                                                </span>
+                                            </DropdownMenuItem>
+                                        </div>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+
+
+
                             </div>
                         )}
 
@@ -546,12 +655,13 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                         {isMounted && (!isAuthenticated || !token) && variant !== "dashboard" && (
                             <>
                                 <Button
-                                    variant="ghost"
+                                    variant="outline"
                                     asChild
                                     className={cn(
-                                        "rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 text-[12px] sm:text-sm font-medium transition-all duration-200 flex items-center justify-center",
-                                        linkHoverBgClass,
-                                        linkText
+                                        "rounded-xl px-4 h-10 min-w-[100px] text-[13px] font-bold transition-all duration-300 flex items-center justify-center border-2",
+                                        shouldShowWhiteNavbar 
+                                            ? "border-brand/20 text-brand hover:bg-brand/5 hover:border-brand/40" 
+                                            : "border-brand-strong/20 text-brand-strong hover:bg-white/10 hover:border-brand-strong/40"
                                     )}
                                 >
                                     <Link href={routes.publicroute.LOGIN} prefetch={true}>
@@ -560,10 +670,14 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 </Button>
                                 <Link
                                     href={routes.publicroute.REGISTER}
-                                    className={`hidden rounded-lg px-6 py-2 text-[14px] font-semibold transition-all duration-300 sm:flex ${ctaBtn}`}
+                                    className={cn(
+                                        "hidden rounded-xl px-5 h-10 min-w-[100px] text-[13px] font-bold transition-all duration-300 sm:flex items-center justify-center relative overflow-hidden group whitespace-nowrap",
+                                        ctaBtn
+                                    )}
                                     prefetch={true}
                                 >
-                                    Start 3 Day Trial
+                                    <span className="relative z-10">Start Trial</span>
+                                    <div className="animate-shimmer absolute inset-0 opacity-10"></div>
                                 </Link>
                             </>
                         )}
@@ -589,97 +703,68 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                 <UpgradePlanModal isOpen={isUpgradeModalOpen} onClose={handleCloseUpgradeModal} />
 
                 {isMobileMenuOpen && !isActuallyAuthenticated && (
-                    <div className="border-t border-gray-200/30 bg-white/90 shadow-lg backdrop-blur-md lg:hidden">
-                        <div className="space-y-2 px-4 pt-4 pb-6">
-                            {/* Show public menu links when: forcePublic is true OR not authenticated OR no subscription */}
-                            {(forcePublic || !isAuthenticated || !token || !hasActiveSubscription) && (
-                                <>
-                                    <Link
-                                        href={routes.publicroute.HOME}
-                                        className="block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 hover:scale-105 hover:bg-gray-100/80"
-                                        style={{ color: "#161718" }}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        Home
-                                    </Link>
-                                    <Link
-                                        href={routes.publicroute.FEATURES}
-                                        className="block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 hover:scale-105 hover:bg-gray-100/80"
-                                        style={{ color: "#161718" }}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        Features
-                                    </Link>
-                                    <Link
-                                        href={routes.publicroute.PRICING}
-                                        className="block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 hover:scale-105 hover:bg-gray-100/80"
-                                        style={{ color: "#161718" }}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        Pricing
-                                    </Link>
-                                    <Link
-                                        href={routes.publicroute.CONTACT}
-                                        className="block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 hover:scale-105 hover:bg-gray-100/80"
-                                        style={{ color: "#161718" }}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        Contact
-                                    </Link>
-                                    <Link
-                                        href={routes.publicroute.HELP}
-                                        className="block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 hover:scale-105 hover:bg-gray-100/80"
-                                        style={{ color: "#161718" }}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        Help
-                                    </Link>
-                                    <div className="border-t border-gray-200/50 pt-4">
-                                        {/* Show Sign In / Start Trial if: No token */}
-                                        {!isAuthenticated || !token ? (
-                                            <>
-                                                <Link
-                                                    href={routes.publicroute.LOGIN}
-                                                    className="block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 hover:bg-gray-100/80"
-                                                    style={{ color: "#161718" }}
-                                                    onClick={() => setIsMobileMenuOpen(false)}
-                                                >
-                                                    Sign in
-                                                </Link>
-                                                <Link
-                                                    href={routes.publicroute.REGISTER}
-                                                    className={`block rounded-lg px-4 py-3 text-base font-semibold transition-all duration-300 ${ctaBtn}`}
-                                                    onClick={() => setIsMobileMenuOpen(false)}
-                                                >
-                                                    Start 3 Day Trial
-                                                </Link>
-                                            </>
-                                        ) : isMounted && isAuthenticated && token && !isSubscriptionPage ? (
-                                            /* Show My Account for any logged-in user */
-                                            <Link
-                                                href={routes.privateroute.DASHBOARD}
-                                                className={`block rounded-lg px-4 py-3 text-base font-semibold transition-all duration-300 ${ctaBtn}`}
-                                                onClick={() => setIsMobileMenuOpen(false)}
-                                            >
-                                                My Account
-                                            </Link>
-                                        ) : null}
+                    <div className="absolute top-20 left-0 right-0 border-b border-gray-200/30 bg-white/95 shadow-2xl backdrop-blur-xl lg:hidden animate-in fade-in slide-in-from-top-4 duration-300">
+                        <div className="space-y-1 px-4 pt-4 pb-8">
+                            {[
+                                { label: "Home", href: routes.publicroute.HOME, icon: <UserCircle className="h-5 w-5" /> },
+                                { label: "Features", href: routes.publicroute.FEATURES, icon: <Zap className="h-5 w-5" /> },
+                                { label: "Pricing", href: routes.publicroute.PRICING, icon: <CreditCard className="h-5 w-5" /> },
+                                { label: "Contact", href: routes.publicroute.CONTACT, icon: <Mail className="h-5 w-5" /> },
+                                { label: "Help", href: routes.publicroute.HELP, icon: <HelpCircle className="h-5 w-5" /> }
+                            ].map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className="flex items-center gap-4 rounded-xl px-4 py-4 text-base font-bold transition-all duration-200 active:scale-95 hover:bg-brand/5 group"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-gray-400 transition-colors group-hover:bg-brand/10 group-hover:text-brand">
+                                        {item.icon}
                                     </div>
-                                </>
-                            )}
+                                    <span className="text-[#161718]">{item.label}</span>
+                                </Link>
+                            ))}
+                            
+                            <div className="mt-6 border-t border-gray-100 pt-6 px-2 space-y-4">
+                                {!isAuthenticated || !token ? (
+                                    <>
+                                        <Link
+                                            href={routes.publicroute.LOGIN}
+                                            className="flex h-14 w-full items-center justify-center rounded-2xl bg-gray-50 text-base font-bold text-[#161718] transition-all active:scale-95"
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                        >
+                                            Sign in
+                                        </Link>
+                                        <Link
+                                            href={routes.publicroute.REGISTER}
+                                            className={cn(
+                                                "flex h-14 w-full items-center justify-center rounded-2xl text-base font-bold transition-all active:scale-95 shadow-lg",
+                                                ctaBtn
+                                            )}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                        >
+                                            Start Trial
+                                        </Link>
+                                    </>
+                                ) : isMounted && isAuthenticated && token && !isSubscriptionPage ? (
+                                    <Link
+                                        href={routes.privateroute.DASHBOARD}
+                                        className={cn(
+                                            "flex h-14 w-full items-center justify-center rounded-2xl text-base font-bold transition-all active:scale-95 shadow-lg",
+                                            ctaBtn
+                                        )}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        My Account
+                                    </Link>
+                                ) : null}
+                            </div>
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Mobile Sidebar Sheet */}
-            {shouldShowPrivateNavbar && (
-                <Sheet open={isMobileSidebarOpen} onOpenChange={setIsMobileSidebarOpen}>
-                    <SheetContent side="left" className="flex w-72 flex-col p-0">
-                        <SidebarContent isMobile onLinkClick={() => setIsMobileSidebarOpen(false)} />
-                    </SheetContent>
-                </Sheet>
-            )}
+
         </nav>
     );
 }

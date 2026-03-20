@@ -18,12 +18,9 @@ import {
     getInitials,
     getAppointmentStatus,
     getAppointmentDateTime,
-    isAppointmentTimedOut,
 } from "@/utils/helpers";
 import {
-    Trash2,
     Eye,
-    Clock,
     LogOut,
     Calendar,
     MoreVertical,
@@ -34,14 +31,17 @@ import {
     Building,
     CheckCircle,
     X,
+    XCircle,
     Edit,
     Maximize2,
     Send,
+    UserPlus,
 } from "lucide-react";
 import { Appointment, useResendAppointmentNotificationMutation } from "@/store/api/appointmentApi";
 import { SearchInput } from "@/components/common/searchInput";
 import DateRangePicker from "@/components/common/dateRangePicker";
 import { AppointmentDetailsDialog } from "./appointmentDetailsDialog";
+import { CheckInDialog } from "./checkInDialog";
 import { CheckOutDialog } from "./checkOutDialog";
 import {
     DropdownMenu,
@@ -51,10 +51,14 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu";
 import { routes } from "@/utils/routes";
-import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { useCooldown } from "@/hooks/useCooldown";
+import { APIErrorState } from "@/components/common/APIErrorState";
+import { useAppDispatch } from "@/store/hooks";
+import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 
 export interface AppointmentTableProps {
     appointments: Appointment[];
@@ -74,10 +78,12 @@ export interface AppointmentTableProps {
     onPageChange: (page: number) => void;
     onDelete?: (appointmentId: string) => void;
     onView?: (appointment: Appointment) => void;
+    onCheckIn?: (appointmentId: string, notes?: string) => void;
     onCheckOut?: (appointmentId: string, notes?: string) => void;
     onApprove?: (appointmentId: string) => void;
     onReject?: (appointmentId: string) => void;
     isDeleting?: boolean;
+    isCheckingIn?: boolean;
     isCheckingOut?: boolean;
     isApproving?: boolean;
     isRejecting?: boolean;
@@ -113,10 +119,12 @@ export function AppointmentTable({
     onPageChange,
     onDelete,
     onView,
+    onCheckIn,
     onCheckOut,
     onApprove,
     onReject,
     isDeleting = false,
+    isCheckingIn = false,
     isCheckingOut = false,
     isApproving = false,
     isRejecting = false,
@@ -126,11 +134,17 @@ export function AppointmentTable({
     onDateToChange,
 }: AppointmentTableProps) {
     const router = useRouter();
-    const { hasReachedAppointmentLimit, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const dispatch = useAppDispatch();
+    const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal,
+    } = useSubscriptionActions();
 
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showViewDialog, setShowViewDialog] = useState(false);
+    const [showCheckInDialog, setShowCheckInDialog] = useState(false);
     const [showCheckOutDialog, setShowCheckOutDialog] = useState(false);
     const [showApproveDialog, setShowApproveDialog] = useState(false);
     const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -173,7 +187,7 @@ export function AppointmentTable({
 
     const emptyPrimaryLabel = isEmployee
         ? "Create Appointment Link"
-        : (hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment");
+        : (isExpired ? "Upgrade Plan" : (hasReachedAppointmentLimit ? "Support Chat" : "Schedule Appointment"));
     const emptyTitle = isToday() ? "No appointments for today" : "No appointments yet";
 
     const handleDelete = async () => {
@@ -181,6 +195,18 @@ export function AppointmentTable({
         await onDelete(selectedAppointment._id);
         setShowDeleteDialog(false);
         setSelectedAppointment(null);
+    };
+
+    const handleCheckIn = async (appointmentId: string, notes?: string) => {
+        if (!onCheckIn) return;
+        setAppointmentLoading(appointmentId, true);
+        try {
+            await onCheckIn(appointmentId, notes);
+            setShowCheckInDialog(false);
+            setSelectedAppointment(null);
+        } finally {
+            setAppointmentLoading(appointmentId, false);
+        }
     };
 
     const handleCheckOut = async (appointmentId: string, notes?: string) => {
@@ -217,6 +243,7 @@ export function AppointmentTable({
 
     const handleView = (appointment: Appointment) => {
         // Close all other modals first
+        setShowCheckInDialog(false);
         setShowCheckOutDialog(false);
         setShowApproveDialog(false);
         setShowRejectDialog(false);
@@ -379,12 +406,6 @@ export function AppointmentTable({
                             >
                                 {formatName(appointment.appointmentDetails?.purpose) || "N/A"}
                             </div>
-                            {appointment.appointmentDetails?.meetingRoom && (
-                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                    <Building className="h-3 w-3" />
-                                    {appointment.appointmentDetails.meetingRoom}
-                                </div>
-                            )}
                         </div>
                     );
                 },
@@ -413,7 +434,7 @@ export function AppointmentTable({
                         return (
                             <div className="flex items-center gap-2">
                                 <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-blue-500"></div>
-                                <span className="text-sm text-gray-500">Processing...</span>
+                                <span className="text-sm text-gray-500 text-[11px]">Processing...</span>
                             </div>
                         );
                     }
@@ -423,8 +444,17 @@ export function AppointmentTable({
                         | "approved"
                         | "rejected"
                         | "completed"
-                        | "time_out";
-                    return <StatusBadge status={effectiveStatus} />;
+                        | "time_out"
+                        | "checked_in";
+
+                    const isTimedOut = effectiveStatus === "time_out";
+                    const status = effectiveStatus;
+
+                    return (
+                        <div className="flex py-1">
+                            <StatusBadge status={effectiveStatus} />
+                        </div>
+                    );
                 },
             },
         ];
@@ -434,16 +464,81 @@ export function AppointmentTable({
             header: "Actions",
             render: (appointment: Appointment) => {
                 const status = typeof appointment.status === "string" ? appointment.status : "pending";
-                const isTimedOut = isAppointmentTimedOut(appointment);
+                const isTimedOut = !!appointment.isTimedOut;
                 const isPending = status === "pending" && !isTimedOut;
                 const isApproved = status === "approved";
                 const isRejected = status === "rejected";
                 const isCompleted = status === "completed";
-
                 const showOnlyView = isRejected || isCompleted;
 
                 return (
-                    <div className="flex justify-center">
+                    <div className="flex items-center gap-1.5 justify-end">
+                        {/* Quick Actions */}
+                        {!isTimedOut && (
+                            <>
+                                {status === "pending" && (
+                                    <>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-7 w-8 p-0 bg-emerald-50/50 border-emerald-500/50 text-emerald-600 hover:bg-emerald-100/50 hover:text-emerald-700 rounded-md shadow-sm transition-all duration-200"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedAppointment(appointment);
+                                                setShowApproveDialog(true);
+                                            }}
+                                            title="Approve"
+                                        >
+                                            <CheckCircle className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-7 w-8 p-0 bg-rose-50/50 border-rose-500/50 text-rose-600 hover:bg-rose-100/50 hover:text-rose-700 rounded-md shadow-sm transition-all duration-200"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedAppointment(appointment);
+                                                setShowRejectDialog(true);
+                                            }}
+                                            title="Reject"
+                                        >
+                                            <XCircle className="h-4 w-4" />
+                                        </Button>
+                                    </>
+                                )}
+                                {status === "approved" && (
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-7 w-8 p-0 bg-indigo-50 border-indigo-500/50 text-indigo-600 hover:bg-indigo-100/50 hover:text-indigo-700 rounded-md shadow-sm transition-all duration-200"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedAppointment(appointment);
+                                            setShowCheckInDialog(true);
+                                        }}
+                                        title="Check In"
+                                    >
+                                        <LogOut className="h-4 w-4 rotate-180" />
+                                    </Button>
+                                )}
+                                {status === "checked_in" && (
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-7 w-8 p-0 bg-orange-50/50 border-orange-500/50 text-orange-600 hover:bg-orange-100/50 hover:text-orange-700 rounded-md shadow-sm transition-all duration-200"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedAppointment(appointment);
+                                            setShowCheckOutDialog(true);
+                                        }}
+                                        title="Check Out"
+                                    >
+                                        <LogOut className="h-4 w-4" />
+                                    </Button>
+                                )}
+                            </>
+                        )}
+
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -461,41 +556,6 @@ export function AppointmentTable({
                                 {isPending && (
                                     <>
                                         <DropdownMenuSeparator />
-                                        {onApprove && (
-                                            <DropdownMenuItem
-                                                onClick={() => {
-                                                    // Close all other modals first
-                                                    setShowViewDialog(false);
-                                                    setShowCheckOutDialog(false);
-                                                    setShowRejectDialog(false);
-                                                    setShowDeleteDialog(false);
-
-                                                    setSelectedAppointment(appointment);
-                                                    setShowApproveDialog(true);
-                                                }}
-                                                disabled={isAppointmentLoading(appointment._id)}
-                                            >
-                                                <CheckCircle className="mr-2 h-4 w-4" />
-                                                Approve
-                                            </DropdownMenuItem>
-                                        )}
-                                        <DropdownMenuItem
-                                            onClick={() => {
-                                                // Close all other modals first
-                                                setShowViewDialog(false);
-                                                setShowCheckOutDialog(false);
-                                                setShowApproveDialog(false);
-                                                setShowDeleteDialog(false);
-
-                                                setSelectedAppointment(appointment);
-                                                setShowRejectDialog(true);
-                                            }}
-                                            disabled={isAppointmentLoading(appointment._id)}
-                                            className="text-red-600 focus:text-red-600"
-                                        >
-                                            <X className="mr-2 h-4 w-4" />
-                                            Reject
-                                        </DropdownMenuItem>
                                         {!isEmployee && (
                                             <DropdownMenuItem onClick={() => handleEdit(appointment)}>
                                                 <Edit className="mr-2 h-4 w-4" />
@@ -514,27 +574,6 @@ export function AppointmentTable({
                                     </>
                                 )}
 
-                                {isApproved && onCheckOut && isAppointmentDatePast(appointment) && (
-                                    <>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem
-                                            onClick={() => {
-                                                // Close all other modals first
-                                                setShowViewDialog(false);
-                                                setShowApproveDialog(false);
-                                                setShowRejectDialog(false);
-                                                setShowDeleteDialog(false);
-
-                                                setSelectedAppointment(appointment);
-                                                setShowCheckOutDialog(true);
-                                            }}
-                                            disabled={isAppointmentLoading(appointment._id)}
-                                        >
-                                            <LogOut className="mr-2 h-4 w-4" />
-                                            Check Out
-                                        </DropdownMenuItem>
-                                    </>
-                                )}
 
                                 {showOnlyView && null}
                             </DropdownMenuContent>
@@ -549,19 +588,10 @@ export function AppointmentTable({
 
     if (error) {
         return (
-            <div className="space-y-6">
-                <Card className="card-hostinger p-4">
-                    <CardContent className="flex items-center justify-center py-8">
-                        <div className="text-center">
-                            <p className="mb-4 text-red-500">Failed to load appointments</p>
-                            <Button onClick={() => window.location.reload()} variant="outline">
-                                <RefreshCw className="mr-2 h-4 w-4" />
-                                Retry
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+            <APIErrorState
+                title="Failed to load appointments"
+                error={error}
+            />
         );
     }
 
@@ -570,16 +600,16 @@ export function AppointmentTable({
 
 
             <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
+                <div className="flex w-full flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                     <SearchInput
-                        placeholder="Search appointments..."
+                        placeholder="Search..."
                         value={searchTerm}
                         onChange={onSearchChange}
                         debounceDelay={500}
-                        className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none"
+                        className="w-full sm:max-w-[300px]"
                     />
-                    <div className="flex shrink-0 items-center gap-2">
-                        <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="flex-1 sm:flex-none">
                             <DateRangePicker
                                 onDateRangeChange={(r) => {
                                     onDateFromChange?.(r.startDate || "");
@@ -590,43 +620,30 @@ export function AppointmentTable({
                                 className="w-full sm:w-auto"
                             />
                         </div>
-                        <div className="flex w-full items-center gap-2 sm:w-auto">
-                            {hasReachedAppointmentLimit ? (
-                                <>
-                                    <Button
-                                        variant="default"
-                                        className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm bg-[#3882a5] hover:bg-[#2d6a87] text-white shadow-md hover:shadow-lg transition-all"
-                                        onClick={() => setShowUpgradeModal(true)}
-                                    >
-                                        <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                        <span className="hidden sm:inline">Upgrade to Schedule More</span>
-                                    </Button>
-                                    <UpgradePlanModal
-                                        isOpen={showUpgradeModal}
-                                        onClose={() => setShowUpgradeModal(false)}
-                                    />
-                                </>
-                            ) : (
-                                <>
-                                    {!isEmployee && (
-                                        <Button
-                                            variant="outline"
-                                            className="flex h-12 min-h-[48px] shrink-0 items-center gap-1.5 rounded-xl px-4 text-xs whitespace-nowrap sm:gap-2 sm:text-sm border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white"
-                                            onClick={() => {
-                                                if (hasReachedAppointmentLimit) {
-                                                    setShowUpgradeModal(true);
-                                                } else {
-                                                    router.push(routes.privateroute.APPOINTMENTCREATE);
-                                                }
-                                            }}
-                                        >
-                                            <Plus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                            <span className="hidden sm:inline">Schedule Appointment</span>
-                                        </Button>
-                                    )}
-                                </>
+                        
+                        <SubscriptionActionButtons
+                            isExpired={isExpired}
+                            hasReachedLimit={hasReachedAppointmentLimit}
+                            limitType="appointment"
+                            showUpgradeModal={showUpgradeModal}
+                            openUpgradeModal={openUpgradeModal}
+                            closeUpgradeModal={closeUpgradeModal}
+                            upgradeLabel="Upgrade Plan"
+                            icon={UserPlus}
+                            isEmployee={isEmployee}
+                            className="h-10 w-10 sm:h-12 sm:w-auto sm:px-6 rounded-xl shrink-0"
+                        >
+                            {!isEmployee && (
+                                <Button
+                                    variant="outline"
+                                    className="flex h-10 w-10 sm:h-12 sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white sm:px-6 sm:min-w-[160px] transition-all"
+                                    onClick={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
+                                >
+                                    <Plus className="h-5 w-5 shrink-0" />
+                                    <span className="hidden sm:inline font-medium">Schedule Appointment</span>
+                                </Button>
                             )}
-                        </div>
+                        </SubscriptionActionButtons>
                     </div>
                 </div>
                 <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
@@ -642,20 +659,24 @@ export function AppointmentTable({
                         onPrimaryAction={() => {
                             if (isEmployee) {
                                 router.push(routes.privateroute.APPOINTMENT_LINKS);
+                            } else if (isExpired) {
+                                openUpgradeModal();
                             } else if (hasReachedAppointmentLimit) {
-                                setShowUpgradeModal(true);
+                                dispatch(setAssistantMessage(`Hi, I've reached my appointment limit. Please help me upgrade my plan.`));
+                                dispatch(setAssistantOpen(true));
                             } else {
                                 router.push(routes.privateroute.APPOINTMENTCREATE);
                             }
                         }}
                         showCard={false}
                         isLoading={isLoading}
+                        minWidth="1000px"
                     />
                 </div>
             </div >
 
             {pagination && pagination.totalPages > 1 && (
-                <div className="flex justify-center">
+                <div className="pt-4">
                     <Pagination
                         currentPage={pagination.currentPage}
                         totalPages={pagination.totalPages}
@@ -674,7 +695,7 @@ export function AppointmentTable({
                         open={showDeleteDialog}
                         onOpenChange={setShowDeleteDialog}
                         title="Delete Appointment"
-                        description={`Are you sure you want to delete appointment ${selectedAppointment?._id}? This will move the appointment to trash.`}
+                        description={<>Are you sure you want to delete the appointment for <strong>{formatName(selectedAppointment?.visitor?.name || (selectedAppointment as any)?.visitorId?.name || "this visitor")}</strong>? This will move it to trash.</>}
                         onConfirm={handleDelete}
                         confirmText={isDeleting ? "Deleting..." : "Delete"}
                         variant="destructive"
@@ -688,7 +709,7 @@ export function AppointmentTable({
                         open={showApproveDialog}
                         onOpenChange={setShowApproveDialog}
                         title="Approve Appointment"
-                        description={`Are you sure you want to approve appointment ${selectedAppointment?._id}? This will change the status to approved.`}
+                        description={<>Are you sure you want to approve the appointment for <strong>{formatName(selectedAppointment?.visitor?.name || (selectedAppointment as any)?.visitorId?.name || "this visitor")}</strong>? This will change the status to approved.</>}
                         onConfirm={() => {
                             if (selectedAppointment) {
                                 handleApprove(selectedAppointment._id);
@@ -707,7 +728,7 @@ export function AppointmentTable({
                 open={showRejectDialog}
                 onOpenChange={setShowRejectDialog}
                 title="Reject Appointment"
-                description={`Are you sure you want to reject appointment ${selectedAppointment?._id}? This will change the status to rejected.`}
+                description={<>Are you sure you want to reject the appointment for <strong>{formatName(selectedAppointment?.visitor?.name || (selectedAppointment as any)?.visitorId?.name || "this visitor")}</strong>? This will change the status to rejected.</>}
                 onConfirm={() => {
                     if (selectedAppointment) {
                         handleReject(selectedAppointment._id);
@@ -719,6 +740,18 @@ export function AppointmentTable({
                 }
                 variant="destructive"
             />
+
+            {
+                onCheckIn && (
+                    <CheckInDialog
+                        appointment={selectedAppointment}
+                        open={showCheckInDialog}
+                        onClose={() => setShowCheckInDialog(false)}
+                        onConfirm={handleCheckIn}
+                        isLoading={isCheckingIn}
+                    />
+                )
+            }
 
             {
                 onCheckOut && (

@@ -8,7 +8,7 @@ export default function PrivacyPolicyPage() {
     return (
         <PublicLayout>
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 py-8 sm:py-12">
-                <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto container px-4 sm:px-6 lg:px-8">
                     <div className="mb-8">
                         <div className="mb-4 flex items-center gap-3">
                             <Shield className="h-8 w-8 text-[#3882a5]" />

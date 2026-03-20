@@ -1,8 +1,9 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MessageSquare, CheckCheck } from 'lucide-react';
+import { MessageSquare, CheckCheck, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import Image from "next/image";
 
 // Constants
 const GRADIENT_PRIMARY = "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)";
@@ -12,6 +13,7 @@ interface Message {
     senderId?: string;
     content: string;
     createdAt: Date;
+    attachments?: Array<{ url: string; name: string; type: string }>;
 }
 
 interface User {
@@ -62,12 +64,34 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                             )}
                                 style={isMe ? { background: GRADIENT_PRIMARY } : {}}
                             >
-                                <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                                {msg.attachments && msg.attachments.filter(f => f.url).length > 0 && (
+                                    <div className={cn(
+                                        "mb-2 space-y-2",
+                                        msg.attachments.filter(f => f.url).length > 1 ? "grid grid-cols-2 gap-2 space-y-0" : ""
+                                    )}>
+                                        {msg.attachments.filter(f => f.url).map((file, i) => (
+                                            <div 
+                                                key={i} 
+                                                className="relative aspect-square min-w-[120px] sm:min-w-[150px] rounded-xl overflow-hidden cursor-pointer hover:opacity-95 active:scale-[0.98] transition-all bg-black/5"
+                                                onClick={() => window.open(file.url, '_blank')}
+                                            >
+                                                <Image 
+                                                    src={file.url} 
+                                                    alt={file.name}
+                                                    fill
+                                                    className="object-cover"
+                                                    unoptimized={file.url.endsWith('.gif') || file.url.startsWith('data:')}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                {msg.content && <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>}
                                 <div className={cn(
                                     "text-[9px] mt-1.5 flex justify-end items-center gap-1.5 font-medium",
                                     isMe ? "text-blue-100/80" : "text-gray-400"
                                 )}>
-                                    {format(new Date(msg.createdAt), "HH:mm")}
+                                    {format(new Date(msg.createdAt), "hh:mm a")}
                                     {isMe && <CheckCheck className="w-3 h-3 text-emerald-300" />}
                                 </div>
                             </div>

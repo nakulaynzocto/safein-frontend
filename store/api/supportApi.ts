@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type { RootState } from '../store';
 
 const SUPPORT_API_BASE_URL = process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL
     ? `${process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL}/support`
@@ -9,15 +10,20 @@ export const supportApi = createApi({
     reducerPath: 'supportApi',
     baseQuery: fetchBaseQuery({
         baseUrl: SUPPORT_API_BASE_URL,
-        prepareHeaders: (headers) => {
-            // Support chat might need special headers or local tokens
-            const gToken = typeof window !== 'undefined' ? localStorage.getItem('safein_support_g_token') : null;
-            if (gToken) {
-                headers.set('x-google-token', gToken);
+        prepareHeaders: (headers, { getState }) => {
+            const state = getState() as RootState;
+            const token = state.auth.token;
+
+            if (token) {
+                headers.set("Authorization", `Bearer ${token}`);
+            } else {
+                // Only send Google token as fallback to prevent 401 when it expires
+                const gToken = typeof window !== 'undefined' ? localStorage.getItem('safein_support_g_token') : null;
+                if (gToken) {
+                    headers.set('x-google-token', gToken);
+                }
             }
 
-            // If it's an employee, we might want their main auth token too
-            // However, super-admin-backend might have different validation logic
             return headers;
         },
     }),
@@ -33,7 +39,7 @@ export const supportApi = createApi({
             transformResponse: (response: { data: any }) => response.data || [],
             providesTags: ['SupportTicket'],
         }),
-        createTicket: builder.mutation<any, { subject: string; message: string }>({
+        createTicket: builder.mutation<any, { subject: string; message: string; attachments?: any[] }>({
             query: (data) => ({
                 url: '/tickets',
                 method: 'POST',
@@ -41,13 +47,21 @@ export const supportApi = createApi({
             }),
             invalidatesTags: ['SupportTicket'],
         }),
-        sendMessage: builder.mutation<any, { ticketId: string; content: string; type?: string }>({
+        sendMessage: builder.mutation<any, { ticketId: string; content: string; type?: string; attachments?: any[] }>({
             query: ({ ticketId, ...data }) => ({
                 url: `/tickets/${ticketId}/messages`,
                 method: 'POST',
                 body: data,
             }),
             invalidatesTags: (result, error, { ticketId }) => [{ type: 'SupportMessage', id: ticketId }],
+        }),
+        uploadSupportFile: builder.mutation<{ url: string; name: string; type: string }, FormData>({
+            query: (formData) => ({
+                url: '/upload',
+                method: 'POST',
+                body: formData,
+            }),
+            transformResponse: (response: { data: { url: string; name: string; type: string } }) => response.data,
         }),
     }),
 });
@@ -58,5 +72,6 @@ export const {
     useGetUserTicketsQuery,
     useLazyGetUserTicketsQuery,
     useCreateTicketMutation,
-    useSendMessageMutation
+    useSendMessageMutation,
+    useUploadSupportFileMutation
 } = supportApi;

@@ -13,6 +13,7 @@ import {
     useGetSubscriptionHistoryQuery,
     ISubscriptionHistory,
 } from "@/store/api/userSubscriptionApi";
+import { useGetSafeinProfileQuery } from "@/store/api/safeinProfileApi";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
@@ -32,12 +33,17 @@ export function ProfileSubscription() {
         skip: !isAuthenticated || !user?.id,
     });
 
+    const { data: safeinProfileResponse } = useGetSafeinProfileQuery(undefined, {
+        skip: !isAuthenticated || !user?.id,
+    });
+
     const { data: subscriptionHistoryData, isLoading: isHistoryLoading } = useGetSubscriptionHistoryQuery(undefined, {
         skip: !isAuthenticated || !user?.id,
     });
 
     const subscriptionHistory: ISubscriptionHistory[] = subscriptionHistoryData?.data || [];
     const subscription = activeSubscriptionData?.data;
+    const businessProfile = safeinProfileResponse?.data;
 
     // Handle initial loading state
     if (isSubscriptionLoading) {
@@ -93,6 +99,7 @@ export function ProfileSubscription() {
                 totalPages={totalPages > 0 ? totalPages : 1}
                 onPageChange={handlePageChange}
                 user={user}
+                businessProfile={businessProfile}
             />
 
             <UpgradePlanModal isOpen={isUpgradeModalOpen} onClose={() => setIsUpgradeModalOpen(false)} />

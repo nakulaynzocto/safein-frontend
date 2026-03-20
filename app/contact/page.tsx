@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { validatePhone } from "@/utils/phoneUtils";
 import { useSubmitInquiryMutation } from "@/store/api/inquiryApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { InputField } from "@/components/common/inputField";
@@ -38,7 +39,9 @@ const inquirySchema = yup.object({
     phone: yup
         .string()
         .required("Phone number is required")
-        .matches(/^[0-9+-\s]{10,20}$/, "Invalid phone number"),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+            validatePhone(value)
+        ),
     message: yup.string().required("Message is required").min(10, "Message must be at least 10 characters"),
 });
 
@@ -92,20 +95,6 @@ export default function ContactPage() {
             details: "+91 86999 66076",
             action: "tel:+918699966076",
         },
-        {
-            icon: Clock,
-            title: "Business Hours",
-            description: "When we're available",
-            details: "Monday - Friday: 9:00 AM - 6:00 PM EST\nSaturday: 10:00 AM - 4:00 PM EST",
-            action: null,
-        },
-        {
-            icon: MapPin,
-            title: "Office Address",
-            description: "Visit our office",
-            details: "Zirakpur, Mohali\nPunjab - 140603\nIndia",
-            action: null,
-        },
     ];
 
     const departments = [
@@ -152,8 +141,8 @@ export default function ContactPage() {
             <PublicLayout>
                 <div className="min-h-screen bg-white">
                     {/* Hero Section */}
-                    <section className="bg-hero-gradient px-4 py-12 sm:px-6 sm:py-16 md:py-20">
-                        <div className="container mx-auto text-center">
+                    <section className="bg-hero-gradient relative flex min-h-[400px] items-center pt-20 pb-12 sm:min-h-[450px] sm:px-6 sm:pt-28 md:min-h-[500px] md:pt-32">
+                        <div className="container mx-auto px-4 sm:px-6 text-center">
                             <h1 className="mb-4 px-2 text-3xl leading-tight font-bold text-white sm:mb-6 sm:px-0 sm:text-4xl md:text-5xl lg:text-6xl">
                                 Get in Touch
                             </h1>
@@ -165,130 +154,104 @@ export default function ContactPage() {
                         </div>
                     </section>
 
-                    {/* Contact Information */}
-                    <section className="px-4 py-20">
-                        <div className="container mx-auto">
-                            <div className="mb-16 text-center">
-                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">
-                                    Contact Information
-                                </h2>
-                                <p className="text-accent text-lg">Multiple ways to reach our team</p>
-                            </div>
+                    {/* Contact Section - Side by Side layout */}
+                    <section className="bg-white px-4 py-24 sm:px-6">
+                        <div className="container mx-auto max-w-5xl">
+                            <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-12 lg:gap-16 items-start">
+                                {/* Left Side: Contact Information */}
+                                <div className="lg:order-1 lg:sticky lg:top-24 space-y-10 pt-10">
 
-                            <div className="mb-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                                {contactInfo.map((info, index) => (
-                                    <Card
-                                        key={index}
-                                        className="text-center transition-shadow duration-300 hover:shadow-lg"
-                                    >
-                                        <CardHeader>
-                                            <div className="bg-brand-tint mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg">
-                                                <info.icon className="text-brand-strong h-6 w-6" />
+                                    <div className="space-y-10">
+                                        {contactInfo.map((info, index) => (
+                                            <div key={index} className="flex gap-6 group">
+                                                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-brand ring-1 ring-slate-100 transition-all duration-300 group-hover:bg-brand group-hover:text-white group-hover:shadow-lg group-hover:shadow-brand/30 group-hover:-translate-y-1">
+                                                    <info.icon className="h-6 w-6" />
+                                                </div>
+                                                <div className="flex flex-col justify-center">
+                                                    <h3 className="text-lg font-bold text-brand-strong mb-1">{info.title}</h3>
+                                                    <p className="text-muted-foreground text-sm mb-2 font-medium">{info.description}</p>
+                                                    <div className="text-brand-strong font-bold text-base whitespace-pre-line leading-relaxed">
+                                                        {info.action ? (
+                                                            <a href={info.action} className="hover:text-brand transition-colors">
+                                                                {info.details}
+                                                            </a>
+                                                        ) : (
+                                                            <span>{info.details}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <CardTitle className="text-brand text-lg">{info.title}</CardTitle>
-                                            <CardDescription className="text-accent">
-                                                {info.description}
-                                            </CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <p className="text-accent mb-4 text-sm whitespace-pre-line">
-                                                {info.details}
-                                            </p>
-                                            {info.action && (
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="border-brand text-brand-strong hover:!text-white"
-                                                    asChild
-                                                >
-                                                    <Link href={info.action}>Contact Us</Link>
-                                                </Button>
-                                            )}
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Contact Form */}
-                    <section className="bg-white px-4 py-20">
-                        <div className="container mx-auto">
-                            <div className="mx-auto max-w-2xl">
-                                <div className="mb-12 text-center">
-                                    <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">
-                                        Send us a Message
-                                    </h2>
-                                    <p className="text-accent text-lg">
-                                        Fill out the form below and we'll get back to you within 24 hours
-                                    </p>
+                                        ))}
+                                    </div>
                                 </div>
 
-                                <Card className="shadow-lg">
-                                    <CardContent className="p-8">
-                                        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-                                            {/* Name */}
-                                            <InputField
-                                                label="Name"
-                                                placeholder="Enter your full name"
-                                                error={errors.name?.message}
-                                                {...register("name")}
-                                                required
-                                            />
-
-                                            {/* Email and Phone */}
-                                            <div className="grid gap-6 md:grid-cols-2">
+                                {/* Right Side: Contact Form */}
+                                <div className="lg:order-2">
+                                    <Card className="shadow-2xl shadow-brand-tint/10 border-none rounded-[2rem] overflow-hidden bg-white ring-1 ring-gray-100">
+                                        <CardContent className="p-8 sm:p-10">
+                                            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+                                                {/* Name */}
                                                 <InputField
-                                                    label="Email Address"
-                                                    type="email"
-                                                    placeholder="Enter your email"
-                                                    error={errors.email?.message}
-                                                    {...register("email")}
+                                                    label="Name"
+                                                    placeholder="Enter your full name"
+                                                    error={errors.name?.message}
+                                                    {...register("name")}
                                                     required
                                                 />
-                                                <InputField
-                                                    label="Phone Number"
-                                                    placeholder="Enter your phone number"
-                                                    error={errors.phone?.message}
-                                                    {...register("phone")}
-                                                    required
-                                                />
-                                            </div>
 
-                                            {/* Message */}
-                                            <div className="space-y-1.5">
-                                                <Label
-                                                    htmlFor="message"
-                                                    className="text-foreground text-sm font-medium"
-                                                >
-                                                    Message
-                                                    <span className="ml-1 text-red-500">*</span>
-                                                </Label>
-                                                <Textarea
-                                                    id="message"
-                                                    placeholder="Tell us more about your inquiry..."
-                                                    className={cn(
-                                                        "focus:ring-brand mt-2 min-h-[120px]",
-                                                        errors.message && "border-destructive focus:ring-destructive",
+                                                {/* Email and Phone */}
+                                                <div className="grid gap-6 md:grid-cols-2">
+                                                    <InputField
+                                                        label="Email Address"
+                                                        type="email"
+                                                        placeholder="Enter your email"
+                                                        error={errors.email?.message}
+                                                        {...register("email")}
+                                                        required
+                                                    />
+                                                    <InputField
+                                                        label="Phone Number"
+                                                        placeholder="Enter your phone number"
+                                                        error={errors.phone?.message}
+                                                        {...register("phone")}
+                                                        required
+                                                    />
+                                                </div>
+
+                                                {/* Message */}
+                                                <div className="space-y-1.5">
+                                                    <Label
+                                                        htmlFor="message"
+                                                        className="text-foreground text-sm font-medium"
+                                                    >
+                                                        Message
+                                                        <span className="ml-1 text-red-500">*</span>
+                                                    </Label>
+                                                    <Textarea
+                                                        id="message"
+                                                        placeholder="Tell us more about your inquiry..."
+                                                        className={cn(
+                                                            "focus:ring-brand mt-2 min-h-[160px] rounded-xl border-gray-200 resize-none",
+                                                            errors.message && "border-destructive focus:ring-destructive",
+                                                        )}
+                                                        {...register("message")}
+                                                    />
+                                                    {errors.message?.message && (
+                                                        <p className="text-destructive text-xs mt-1">{errors.message.message}</p>
                                                     )}
-                                                    {...register("message")}
-                                                />
-                                                {errors.message?.message && (
-                                                    <p className="text-destructive text-xs">{errors.message.message}</p>
-                                                )}
-                                            </div>
+                                                </div>
 
-                                            <Button
-                                                type="submit"
-                                                className="bg-brand w-full text-white"
-                                                disabled={isSubmitting}
-                                            >
-                                                {isSubmitting ? "Sending..." : "Send Message"}
-                                                <Send className="ml-2 h-4 w-4" />
-                                            </Button>
-                                        </form>
-                                    </CardContent>
-                                </Card>
+                                                <Button
+                                                    type="submit"
+                                                    className="bg-brand w-full text-white h-14 rounded-xl text-lg font-bold shadow-lg shadow-brand/20 transition-all hover:scale-[1.01] hover:shadow-xl active:scale-95"
+                                                    disabled={isSubmitting}
+                                                >
+                                                    {isSubmitting ? "Sending..." : "Send Message"}
+                                                </Button>
+                                            </form>
+                                        </CardContent>
+                                    </Card>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -297,45 +260,41 @@ export default function ContactPage() {
                     <section className="px-4 py-20">
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
-                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl">
+                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">
                                     Contact by Department
                                 </h2>
-                                <p className="text-accent text-lg">Reach out to the right team for faster assistance</p>
+                                <p className="text-muted-foreground text-lg">Reach out to the right team for faster assistance</p>
                             </div>
 
                             <div className="grid gap-8 md:grid-cols-3">
                                 {departments.map((dept, index) => (
                                     <Card
                                         key={index}
-                                        className="text-center transition-shadow duration-300 hover:shadow-lg"
+                                        className="text-center transition-all duration-300 hover:shadow-lg border-gray-100 overflow-hidden rounded-2xl"
                                     >
-                                        <CardHeader>
-                                            <div className="bg-brand-tint mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg">
-                                                <dept.icon className="text-brand-strong h-6 w-6" />
-                                            </div>
-                                            <CardTitle className="text-brand text-xl">{dept.title}</CardTitle>
-                                            <CardDescription className="text-accent text-base">
+                                        <CardHeader className="bg-slate-50/50 pb-8">
+                                            <CardTitle className="text-brand text-xl mb-1">{dept.title}</CardTitle>
+                                            <CardDescription className="text-muted-foreground text-base">
                                                 {dept.description}
                                             </CardDescription>
                                         </CardHeader>
-                                        <CardContent>
-                                            <div className="space-y-4">
-                                                <div>
-                                                    <p className="text-brand text-sm font-medium">Email:</p>
-                                                    <p className="text-brand-strong text-sm">{dept.email}</p>
+                                        <CardContent className="pt-8">
+                                            <div className="space-y-6">
+                                                <div className="bg-brand-tint/30 py-4 rounded-xl">
+                                                    <p className="text-brand text-xs font-bold uppercase tracking-wider mb-1">Email</p>
+                                                    <p className="text-brand-strong text-lg font-semibold">{dept.email}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-brand text-sm font-medium">Response Time:</p>
-                                                    <p className="text-accent text-sm">{dept.response}</p>
+                                                    <p className="text-brand text-xs font-bold uppercase tracking-wider mb-1">Response Time</p>
+                                                    <p className="text-muted-foreground text-sm">{dept.response}</p>
                                                 </div>
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    className="border-brand text-brand-strong hover:!text-white"
+                                                    className="border-brand text-brand-strong hover:!text-white rounded-full w-full h-10"
                                                     asChild
                                                 >
                                                     <Link href={`mailto:${dept.email}`}>
-                                                        <MessageSquare className="mr-2 h-4 w-4" />
                                                         Send Email
                                                     </Link>
                                                 </Button>
@@ -347,30 +306,7 @@ export default function ContactPage() {
                         </div>
                     </section>
 
-                    {/* CTA Section */}
-                    <section className="bg-[#074463] px-4 pt-20 pb-8">
-                        <div className="container mx-auto text-center">
-                            <h2 className="mb-6 text-3xl font-bold text-white md:text-4xl">Ready to Get Started?</h2>
-                            <p className="mx-auto mb-8 max-w-2xl text-xl text-gray-300">
-                                Don't wait - start managing your visitors more efficiently today with our free trial.
-                            </p>
-                            <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                                <Button size="lg" className="bg-brand text-white" asChild>
-                                    <Link href={routes.publicroute.REGISTER}>
-                                        Start 3 Day Trial
-                                        <ArrowRight className="ml-2 h-5 w-5" />
-                                    </Link>
-                                </Button>
-                                <Button
-                                    size="lg"
-                                    variant="outline"
-                                    className="border-white text-gray-900 hover:bg-white hover:text-gray-900"
-                                >
-                                    <Link href={routes.publicroute.PRICING}>View Pricing</Link>
-                                </Button>
-                            </div>
-                        </div>
-                    </section>
+
                 </div>
             </PublicLayout>
         </>

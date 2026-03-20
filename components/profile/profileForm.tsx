@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, type ChangeEvent } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { validatePhone } from "@/utils/phoneUtils";
 import {
     Save, Loader2, Upload, Mail, Phone, MapPin, Shield,
 } from "lucide-react";
@@ -19,6 +20,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { CountryStateCitySelect } from "@/components/common/countryStateCity";
+import { PhoneInputField } from "@/components/common/phoneInputField";
 import { Textarea } from "@/components/ui/textarea"; // Using Textarea component
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useUploadFileMutation } from "@/store/api";
@@ -29,22 +32,24 @@ import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 // Expanded Schema to match Super Admin
 // Note: Schema validation will be conditional based on user role
 const createProfileSchema = (isEmployee: boolean) => z.object({
-    companyName: isEmployee 
+    companyName: isEmployee
         ? z.string().optional() // Optional for employees (will be ignored)
         : z.string()
             .min(2, "Company name must be at least 2 characters")
             .max(100, "Company name cannot exceed 100 characters"),
     email: z.string().email("Invalid email format").min(1, "Email is required"),
-    mobileNumber: z.string().max(20, "Mobile number too long").optional(),
+    mobileNumber: z.string()
+        .min(1, "Mobile number is required")
+        .refine((val) => validatePhone(val), "Please enter a valid global phone number with country code"),
     bio: z.string().max(500, "Biography must be less than 500 characters").optional(),
     profilePicture: z.string().optional(),
     address: z.object({
-        street: z.string().max(200, "Address too long").optional(),
-        city: z.string().max(100, "City too long").optional(),
-        state: z.string().max(100, "State too long").optional(),
-        country: z.string().max(100, "Country too long").optional(),
-        pincode: z.string().max(20, "Pincode too long").optional(),
-    }).optional(),
+        street: z.string().min(1, "Street address is required").max(200, "Address too long"),
+        city: z.string().min(1, "City is required").max(100, "City too long"),
+        state: z.string().min(1, "State is required").max(100, "State too long"),
+        country: z.string().min(1, "Country is required").max(100, "Country too long"),
+        pincode: z.string().min(1, "Pincode is required").max(20, "Pincode too long"),
+    }),
     socialLinks: z.object({
         linkedin: z.string().url("Invalid LinkedIn URL").optional().or(z.literal("")),
         twitter: z.string().url("Invalid Twitter URL").optional().or(z.literal("")),
@@ -84,7 +89,7 @@ interface ProfileFormProps {
 export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     const { user: currentUser } = useAppSelector((state) => state.auth);
     const isEmployee = checkIsEmployee(currentUser);
-    
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [profileImage, setProfileImage] = useState<string | null>(profile?.profilePicture || null);
     const [isUploading, setIsUploading] = useState(false);
@@ -102,7 +107,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
             street: profile?.address?.street || "",
             city: profile?.address?.city || "",
             state: profile?.address?.state || "",
-            country: profile?.address?.country || "India",
+            country: profile?.address?.country || "IN",
             pincode: profile?.address?.pincode || "",
         },
         socialLinks: {
@@ -114,21 +119,27 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     };
     // Create schema based on employee status
     const profileSchema = z.object({
-        companyName: isEmployee 
+        companyName: isEmployee
             ? z.string().optional() // Optional for employees (will be ignored)
             : z.string()
                 .min(2, "Company name must be at least 2 characters")
                 .max(100, "Company name cannot exceed 100 characters"),
         email: z.string().email("Invalid email format").min(1, "Email is required"),
-        mobileNumber: z.string().max(20, "Mobile number too long").optional(),
+        mobileNumber: z.string()
+            .refine((val) => {
+                if (!val) return true;
+                return validatePhone(val);
+            }, "Please enter a valid global phone number with country code")
+            .optional()
+            .or(z.literal("")),
         bio: z.string().max(500, "Biography must be less than 500 characters").optional(),
         profilePicture: z.string().optional(),
         address: z.object({
-            street: z.string().max(200, "Address too long").optional(),
-            city: z.string().max(100, "City too long").optional(),
-            state: z.string().max(100, "State too long").optional(),
-            country: z.string().max(100, "Country too long").optional(),
-            pincode: z.string().max(20, "Pincode too long").optional(),
+            street: z.string().min(1, "Street address is required").max(200, "Address too long"),
+            city: z.string().min(1, "City is required").max(100, "City too long"),
+            state: z.string().min(1, "State is required").max(100, "State too long"),
+            country: z.string().min(1, "Country is required").max(100, "Country too long"),
+            pincode: z.string().min(1, "Pincode is required").max(20, "Pincode too long"),
         }),
         socialLinks: z.object({
             linkedin: z.string().url("Invalid LinkedIn URL").optional().or(z.literal("")),
@@ -137,10 +148,11 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
         }),
         isActive: z.boolean().optional(),
     });
-    
+
     const {
         register,
         handleSubmit,
+        control,
         formState: { errors },
         setValue,
         reset,
@@ -163,7 +175,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                     street: profile.address?.street || "",
                     city: profile.address?.city || "",
                     state: profile.address?.state || "",
-                    country: profile.address?.country || "India",
+                    country: profile.address?.country || "IN",
                     pincode: profile.address?.pincode || "",
                 },
                 socialLinks: {
@@ -345,7 +357,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                     {...register("companyName")}
                                     disabled={isEmployee}
                                     readOnly={isEmployee}
-                                    className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${isEmployee ? "opacity-60 cursor-not-allowed bg-gray-100" : ""} ${errors.companyName ? "border-destructive" : ""}`}
+                                    className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${isEmployee ? "opacity-60 cursor-not-allowed bg-gray-100" : ""} ${errors.companyName ? "border-destructive" : ""}`}
                                     style={isEmployee ? { pointerEvents: 'none', backgroundColor: '#f3f4f6' } : {}}
                                 />
                                 {errors.companyName && (
@@ -368,7 +380,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                         id="email"
                                         {...register("email")}
                                         disabled // Usually email is immutable or requires specific flow
-                                        className={`pl-10 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground ${errors.email ? "border-destructive" : ""}`}
+                                        className={`pl-10 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground ${errors.email ? "border-destructive" : ""}`}
                                     />
                                 </div>
                                 {errors.email && (
@@ -377,26 +389,22 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label
-                                    htmlFor="mobileNumber"
-                                    className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
-                                >
-                                    Contact Number
-                                </Label>
-                                <div className="relative group">
-                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
-                                        <Phone size={16} />
-                                    </div>
-                                    <Input
-                                        id="mobileNumber"
-                                        {...register("mobileNumber")}
-                                        className={`pl-10 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground ${errors.mobileNumber ? "border-destructive" : ""}`}
-                                        placeholder="10-digit mobile number"
-                                    />
-                                </div>
-                                {errors.mobileNumber && (
-                                    <p className="text-xs text-destructive mt-1">{errors.mobileNumber.message}</p>
-                                )}
+                                <Controller
+                                    name="mobileNumber"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <PhoneInputField
+                                            id="mobileNumber"
+                                            label="Contact Number"
+                                            value={field.value || ""}
+                                            onChange={(val) => field.onChange(val)}
+                                            placeholder="Enter contact number"
+                                            error={errors.mobileNumber?.message}
+                                            required
+                                            defaultCountry="in"
+                                        />
+                                    )}
+                                />
                             </div>
 
                             <div className="space-y-2">
@@ -410,7 +418,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                     id="bio"
                                     {...register("bio")}
                                     rows={3}
-                                    className={`w-full rounded-xl border border-border bg-muted/30 px-3 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus:bg-background transition-all disabled:cursor-not-allowed disabled:opacity-50 font-medium resize-none ${errors.bio ? "border-destructive" : ""}`}
+                                    className={`w-full rounded-xl border border-border bg-background px-3 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus:bg-background transition-all disabled:cursor-not-allowed disabled:opacity-50 font-medium resize-none ${errors.bio ? "border-destructive" : ""}`}
                                     placeholder="Write a short bio about yourself..."
                                 />
                                 {errors.bio && (
@@ -434,84 +442,53 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             htmlFor="street"
                                             className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
                                         >
-                                            Street / Locality
+                                            Street / Locality <span className="text-destructive font-bold">*</span>
                                         </Label>
                                         <Input
                                             id="street"
                                             {...register("address.street")}
-                                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.street ? "border-destructive" : ""}`}
+                                            className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.street ? "border-destructive" : ""}`}
                                         />
                                         {errors.address?.street && (
                                             <p className="text-xs text-destructive mt-1">{errors.address.street.message}</p>
                                         )}
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label
-                                                htmlFor="city"
-                                                className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
-                                            >
-                                                City
-                                            </Label>
-                                            <Input
-                                                id="city"
-                                                {...register("address.city")}
-                                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.city ? "border-destructive" : ""}`}
-                                            />
-                                            {errors.address?.city && (
-                                                <p className="text-xs text-destructive mt-1">{errors.address.city.message}</p>
-                                            )}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label
-                                                htmlFor="state"
-                                                className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
-                                            >
-                                                State
-                                            </Label>
-                                            <Input
-                                                id="state"
-                                                {...register("address.state")}
-                                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.state ? "border-destructive" : ""}`}
-                                            />
-                                            {errors.address?.state && (
-                                                <p className="text-xs text-destructive mt-1">{errors.address.state.message}</p>
-                                            )}
-                                        </div>
+                                    <div className="pt-2">
+                                        <CountryStateCitySelect
+                                            value={{
+                                                country: watch("address.country") || "IN",
+                                                state: watch("address.state") || "",
+                                                city: watch("address.city") || "",
+                                            }}
+                                            onChange={(v: any) => {
+                                                setValue("address.country", v.country, { shouldDirty: true });
+                                                setValue("address.state", v.state, { shouldDirty: true });
+                                                setValue("address.city", v.city, { shouldDirty: true });
+                                            }}
+                                            errors={{
+                                                country: errors.address?.country?.message,
+                                                state: errors.address?.state?.message,
+                                                city: errors.address?.city?.message,
+                                            }}
+                                            required={true}
+                                        />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label
-                                                htmlFor="country"
-                                                className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
-                                            >
-                                                Country
-                                            </Label>
-                                            <Input
-                                                id="country"
-                                                {...register("address.country")}
-                                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.country ? "border-destructive" : ""}`}
-                                            />
-                                            {errors.address?.country && (
-                                                <p className="text-xs text-destructive mt-1">{errors.address.country.message}</p>
-                                            )}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label
-                                                htmlFor="pincode"
-                                                className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
-                                            >
-                                                Pincode
-                                            </Label>
-                                            <Input
-                                                id="pincode"
-                                                {...register("address.pincode")}
-                                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.pincode ? "border-destructive" : ""}`}
-                                            />
-                                            {errors.address?.pincode && (
-                                                <p className="text-xs text-destructive mt-1">{errors.address.pincode.message}</p>
-                                            )}
-                                        </div>
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="pincode"
+                                            className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                        >
+                                            Pincode <span className="text-destructive font-bold">*</span>
+                                        </Label>
+                                        <Input
+                                            id="pincode"
+                                            {...register("address.pincode")}
+                                            className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.pincode ? "border-destructive" : ""}`}
+                                            placeholder="e.g. 123456"
+                                        />
+                                        {errors.address?.pincode && (
+                                            <p className="text-xs text-destructive mt-1">{errors.address.pincode.message}</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -534,7 +511,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             id="linkedin"
                                             {...register("socialLinks.linkedin")}
                                             placeholder="https://linkedin.com/in/..."
-                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                            className="pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -548,7 +525,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             id="twitter"
                                             {...register("socialLinks.twitter")}
                                             placeholder="https://twitter.com/..."
-                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                            className="pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -562,7 +539,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             id="website"
                                             {...register("socialLinks.website")}
                                             placeholder="https://..."
-                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                            className="pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                         />
                                     </div>
                                 </div>
@@ -573,7 +550,9 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                             <Button
                                 type="submit"
                                 disabled={isSubmitting || isUploading || !canSave}
-                                className="min-w-[120px]"
+                                variant="primary"
+                                size="xl"
+                                className="min-w-[200px] shadow-lg shadow-[#3882a5]/20 transition-all active:scale-[0.98]"
                             >
                                 {isSubmitting ? (
                                     <>

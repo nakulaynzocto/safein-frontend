@@ -8,6 +8,7 @@ export interface User {
     roles?: string[]; // Backend returns roles array
     companyName: string;
     profilePicture?: string;
+    photo?: string; // Personal photo for employees
     department?: string;
     designation?: string;
     employeeId?: string;
@@ -105,6 +106,7 @@ const normalizeUser = (userData: any) => {
         ...userData,
         id: userData.id || userData._id || userData.id,
         profilePicture: userData.profilePicture || "",
+        photo: userData.photo || "",
         role: userData.role || roles[0] || 'admin',
         roles: roles,
         // Ensure employeeId is set if user is an employee
@@ -120,6 +122,27 @@ export const authApi = baseApi.injectEndpoints({
                 url: "/users/login",
                 method: "POST",
                 body: credentials,
+            }),
+            transformResponse: (response: any) => {
+                let data = response;
+                if (response.success && response.data) {
+                    data = response.data;
+                }
+
+                if (data && data.user) {
+                    data.user = normalizeUser(data.user);
+                }
+
+                return data;
+            },
+            invalidatesTags: ["User"],
+        }),
+
+        googleLogin: builder.mutation<AuthResponse, { token: string }>({
+            query: (data) => ({
+                url: "/users/google-login",
+                method: "POST",
+                body: data,
             }),
             transformResponse: (response: any) => {
                 let data = response;
@@ -355,11 +378,19 @@ export const authApi = baseApi.injectEndpoints({
             },
             invalidatesTags: ["User"],
         }),
+        updateFCMToken: builder.mutation<void, { fcmToken: string }>({
+            query: (data) => ({
+                url: "/users/fcm-token",
+                method: "POST",
+                body: data,
+            }),
+        }),
     }),
 });
 
 export const {
     useLoginMutation,
+    useGoogleLoginMutation,
     useRegisterMutation,
     useVerifyOtpMutation,
     useResendOtpMutation,
@@ -371,4 +402,5 @@ export const {
     useResetPasswordMutation,
     useSetupEmployeePasswordMutation,
     useExchangeImpersonationTokenMutation,
+    useUpdateFCMTokenMutation,
 } = authApi;

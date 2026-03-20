@@ -15,6 +15,9 @@ export interface ISubscriptionPlan {
     trialDays?: number;
     createdAt: string;
     updatedAt: string;
+    totalAmount?: number;
+    taxPercentage?: number;
+    isPublic?: boolean;
 }
 
 interface GetAllSubscriptionPlansResponse {

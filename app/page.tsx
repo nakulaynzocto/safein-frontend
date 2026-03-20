@@ -1,57 +1,68 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { routes } from "@/utils/routes";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { initializeAuth } from "@/store/slices/authSlice";
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { PublicLayout } from "@/components/layout/publicLayout";
 import {
-    Calendar,
-    Users,
-    Shield,
-    Clock,
-    CheckCircle,
-    UserCheck,
-    Building2,
-    Globe,
-    Award,
-    Heart,
-    Zap,
     Star,
-    Phone,
-    Mail,
-    MapPin,
-    MessageCircle,
-    Download,
-    Play,
+    Globe,
+    Zap,
+    Heart,
+    Award,
+    Activity,
     ChevronRight,
-    BarChart3,
-    Bell,
+    ArrowRight,
+    ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { PageSEOHead } from "@/components/seo/pageSEOHead";
 import { generateStructuredData } from "@/lib/seoHelpers";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Dynamically import below-the-fold sections for better performance
+const FeatureSection = dynamic(() => import("@/app/_sections/FeatureSection"), {
+    loading: () => <SectionSkeleton />
+});
+const HowItWorksSection = dynamic<{ routes: any }>(() => import("@/app/_sections/HowItWorksSection"), {
+    loading: () => <SectionSkeleton />
+});
+const IndustriesSection = dynamic(() => import("@/app/_sections/IndustriesSection"), {
+    loading: () => <SectionSkeleton />
+});
+const TestimonialsSection = dynamic(() => import("@/app/_sections/TestimonialsSection"), {
+    loading: () => <SectionSkeleton />
+});
+
+function SectionSkeleton() {
+    return (
+        <div className="py-24 sm:py-32 container mx-auto px-4">
+            <Skeleton className="h-12 w-3/4 max-w-lg mb-12 mx-auto" />
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+                {[1, 2, 3, 4].map((i) => (
+                    <Skeleton key={i} className="h-64 w-full rounded-[2.5rem]" />
+                ))}
+            </div>
+        </div>
+    );
+}
 
 export default function HomePage() {
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const { isAuthenticated, token } = useAppSelector((state) => state.auth);
-
-    const [isClient, setIsClient] = useState(false);
-    const [isInitialized, setIsInitialized] = useState(false);
+    const { isAuthenticated, token, isInitialized } = useAppSelector((state) => state.auth);
 
     useEffect(() => {
-        setIsClient(true);
         dispatch(initializeAuth());
-        setIsInitialized(true);
     }, [dispatch]);
 
     const handleHeroFreeTrialClick = () => {
-        // Hero free trial – send user to register page
         if (!isAuthenticated) {
             router.push(routes.publicroute.REGISTER);
         } else {
@@ -59,26 +70,81 @@ export default function HomePage() {
         }
     };
 
+    const processSteps = useMemo(() => [
+        {
+            id: 1,
+            title: "Visitor Arrival",
+            description: "Visitor enters their details at the sleek digital kiosk or pre-registers online.",
+            image: "/home/solutions/smart-checkin.png",
+            badge: "Secure Arrival",
+            color: "from-[#074463] to-[#3882a5]"
+        },
+        {
+            id: 2,
+            title: "Digital Registration",
+            description: "Fast, paperless registration via smartphone or reception iPad.",
+            image: "/home/solutions/quick-registeration.jpg",
+            badge: "No Paperwork",
+            color: "from-[#074463] to-[#3882a5]"
+        },
+        {
+            id: 3,
+            title: "Instant Alerts",
+            description: "Hosts receive real-time notifications on WhatsApp and Email.",
+            image: "/home/solutions/smart-notifications.png",
+            badge: "Instant Sync",
+            color: "from-[#074463] to-[#3882a5]"
+        },
+        {
+            id: 4,
+            title: "Admin Approval",
+            description: "One-click approval from the employee's powerful dashboard.",
+            image: "/home/solutions/powerful-dashboard.jpg",
+            badge: "Secure Access",
+            color: "from-[#074463] to-[#3882a5]"
+        },
+        {
+            id: 5,
+            title: "Security Verification",
+            description: "Gatekeeper verifies the 6-digit secure OTP for final check-in.",
+            image: "/home/hero/Tranform-your-digital-visitor-management.jpg",
+            badge: "Verified OTP",
+            color: "from-[#074463] to-[#3882a5]"
+        },
+        {
+            id: 6,
+            title: "Access Granted",
+            description: "Visual analytics track every successful arrival and departure.",
+            image: "/home/solutions/realtime-analytics.png",
+            badge: "Welcome In",
+            color: "from-[#074463] to-[#3882a5]"
+        }
+    ], []);
+
+    const [activeStep, setActiveStep] = useState(0);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setActiveStep((prev) => (prev + 1) % processSteps.length);
+        }, 5000);
+        return () => clearInterval(timer);
+    }, [processSteps.length]);
+
     const homeStructuredData = generateStructuredData("home");
 
     return (
         <>
             <PageSEOHead
-                title="SafeIn - Complete Visitor Management with Chat, Spot Pass & Smart Notifications"
-                description="Transform visitor management with SafeIn's comprehensive platform. Features: Real-time chat, Spot Pass for walk-ins, smart appointment links, bulk import, voice notifications & advanced analytics. Start your free 3-day trial!"
+                title="Best Visitor Management System in India | SafeIn by Aynzo"
+                description="SafeIn is India's leading visitor management system. Features: Real-time chat, Spot Pass for walk-ins, Smart Appointment Links, Bulk Import for India & advanced security analytics. Start your free trial today!"
                 keywords={[
-                    "visitor management system",
-                    "appointment scheduling software",
-                    "real-time chat",
-                    "spot pass system",
-                    "visitor check-in system",
-                    "appointment links",
-                    "bulk import employees",
-                    "smart notifications",
-                    "voice alerts",
-                    "visitor analytics",
-                    "security management platform",
-                    "SafeIn management",
+                    "best visitor management system in india",
+                    "gatekeeper app india",
+                    "society visitor management software india",
+                    "smart appointment system india",
+                    "visitor check-in system india",
+                    "digital visitor register india",
+                    "SafeIn India",
                     "Aynzo",
                 ]}
                 url="https://safein.aynzo.com"
@@ -86,88 +152,105 @@ export default function HomePage() {
             />
             <PublicLayout>
                 {/* Hero Section */}
-                <section className="bg-hero-gradient relative py-12 sm:py-16 md:py-20">
+                <section className="bg-hero-gradient relative overflow-hidden pt-24 pb-16 sm:pt-32 sm:pb-24 lg:pt-40 lg:pb-32">
+                    <div className="absolute top-0 right-0 -mr-24 -mt-24 h-[500px] w-[500px] rounded-full bg-brand/10 blur-[120px]"></div>
+                    <div className="absolute bottom-0 left-0 -ml-24 -mb-24 h-[400px] w-[400px] rounded-full bg-brand-light/10 blur-[100px]"></div>
+
                     <div className="relative z-10 container mx-auto px-4 sm:px-6">
-                        <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
-                            {/* Left Side - Main Content */}
-                            <div className="text-center lg:text-left">
-                                <div className="mb-4 flex flex-wrap items-center justify-center gap-2 sm:mb-6 lg:justify-start">
-                                    <Star className="h-4 w-4 fill-current text-yellow-400 sm:h-5 sm:w-5" />
-                                    <span className="text-sm font-semibold text-yellow-400 sm:text-base">
-                                        4.9/5 Rating
-                                    </span>
-                                    <span className="hidden text-gray-300 sm:inline">•</span>
-                                    <span className="text-sm text-gray-300 sm:text-base">1000+ Happy Clients</span>
+                        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+                            {/* Hero Image Area */}
+                            <div className="relative order-1 lg:order-2">
+                                <div className="relative mx-auto max-w-[280px] sm:max-w-[340px] lg:ml-auto">
+                                    <div className={`absolute -inset-10 rounded-full bg-gradient-to-br ${processSteps[activeStep].color} opacity-20 blur-[100px] transition-all duration-1000`}></div>
+                                    <div className="relative z-10 mx-auto w-full overflow-hidden rounded-[3rem] sm:rounded-[3.5rem] border-[6px] sm:border-[8px] border-gray-950 bg-gray-950 shadow-[0_0_60px_rgba(0,0,0,0.5),0_0_0_2px_rgba(255,255,255,0.1)] ring-1 ring-white/10">
+                                        <div className="absolute top-0 left-1/2 z-40 h-5 sm:h-7 w-20 sm:w-28 -translate-x-1/2 rounded-b-2xl bg-gray-950"></div>
+                                        <div className="relative aspect-[9/16] w-full overflow-hidden rounded-[2.5rem] sm:rounded-[2.8rem] bg-gray-950">
+                                            {processSteps.map((step, idx) => (
+                                                <div 
+                                                    key={step.id}
+                                                    className={cn(
+                                                        "absolute inset-0 transition-opacity duration-1000",
+                                                        idx === activeStep ? "opacity-100" : "opacity-0"
+                                                    )}
+                                                >
+                                                    <Image
+                                                        src={step.image}
+                                                        alt={step.title}
+                                                        fill
+                                                        priority={idx === 0}
+                                                        className="object-cover object-top"
+                                                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-gray-950/20 to-transparent"></div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
-                                <h1 className="animate-hero-title mb-4 px-2 text-3xl leading-tight font-bold text-white sm:mb-6 sm:px-0 sm:text-4xl md:text-5xl lg:text-6xl">
-                                    Transform Your Visitor Management with SafeIn
+                            </div>
+
+                            {/* Hero Content Area */}
+                            <div className="text-center lg:text-left order-2 lg:order-1">
+                                <div className="mb-8 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+                                    <div className="badge-glass flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all hover:bg-white/10">
+                                        <Star className="h-3.5 w-3.5 fill-current text-[#3882a5]" />
+                                        <span className="text-[11px] font-bold text-white uppercase tracking-wider">4.9/5 Rating</span>
+                                    </div>
+                                    <div className="badge-glass rounded-full px-3 py-1.5 text-[11px] font-bold text-gray-200 uppercase tracking-wider">
+                                        1000+ Enterprises Trusted
+                                    </div>
+                                </div>
+
+                                <h1 className="animate-hero-title mb-6 px-1 text-3xl font-black tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl lg:leading-[1.1]">
+                                    <span className="text-premium-gradient">Smart Visitor</span> <br />
+                                    <span className="text-white lg:opacity-90">Intelligence for Teams</span>
                                 </h1>
-                                <p className="mb-6 px-2 text-base leading-relaxed text-gray-300 sm:mb-8 sm:px-0 sm:text-lg md:text-xl">
-                                    Transform your visitor management with smart appointments, real-time chat, spot
-                                    pass for walk-ins, and intelligent notifications. Get your complete visitor
-                                    management system with our free 3-day trial.
+
+                                <p className="text-accent-light mb-10 max-w-xl px-2 text-base leading-relaxed text-gray-300 sm:text-xl lg:px-0 opacity-90">
+                                    SafeIn empowers modern organizations with a sophisticated digital reception,
+                                    streamlined appointments, and real-time security intelligence.
                                 </p>
 
-                                {/* 3 Day Trial Badge */}
-                                <div className="bg-brand mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold text-white sm:mb-6 sm:px-4 sm:py-2 sm:text-sm">
-                                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white sm:h-2 sm:w-2"></span>
-                                    FREE 3-Day Trial
-                                </div>
-
-                                {/* CTA Buttons */}
-                                <div className="flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row sm:gap-4 lg:justify-start">
+                                <div className="flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row lg:justify-start px-2 sm:px-0">
                                     {isAuthenticated && token ? (
                                         <Button
                                             size="lg"
-                                            className="bg-brand w-full px-6 py-2.5 text-sm font-semibold text-white sm:w-auto sm:px-8 sm:py-3 sm:text-base"
+                                            className="bg-brand relative h-12 sm:h-14 w-full overflow-hidden px-8 text-base sm:text-lg font-bold text-white shadow-[0_0_20px_rgba(56,130,165,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(56,130,165,0.6)] sm:w-auto rounded-xl"
                                             asChild
                                         >
-                                            <Link href={routes.privateroute.DASHBOARD}>My Account</Link>
+                                            <Link href={routes.privateroute.DASHBOARD}>
+                                                <span className="relative z-10">My Dashboard</span>
+                                                <div className="animate-shimmer absolute inset-0 opacity-20"></div>
+                                            </Link>
                                         </Button>
                                     ) : (
                                         <Button
                                             size="lg"
-                                            className="bg-brand w-full px-6 py-2.5 text-sm font-semibold text-white sm:w-auto sm:px-8 sm:py-3 sm:text-base"
+                                            className="bg-brand relative h-12 sm:h-14 w-full overflow-hidden px-8 text-base sm:text-lg font-bold text-white shadow-[0_0_20px_rgba(56,130,165,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(56,130,165,0.6)] sm:w-auto rounded-xl"
                                             onClick={handleHeroFreeTrialClick}
                                         >
-                                            Start 3 Day Trial
+                                            <span className="relative z-10">Experience SafeIn</span>
+                                            <div className="animate-shimmer absolute inset-0 opacity-20"></div>
                                         </Button>
                                     )}
                                     <Button
                                         size="lg"
                                         variant="outline"
-                                        className="w-full border-white px-6 py-2.5 text-sm text-gray-900 hover:bg-white hover:text-gray-900 sm:w-auto sm:px-8 sm:py-3 sm:text-base"
+                                        className="glass-morphism h-12 sm:h-14 w-full border-white/20 px-8 text-base sm:text-lg font-semibold text-white transition-all hover:bg-white/10 hover:text-white sm:w-auto rounded-xl"
                                         asChild
                                     >
-                                        <Link href={routes.publicroute.CONTACT}>Contact Sales</Link>
+                                        <Link href={routes.publicroute.CONTACT}>View Live Demo</Link>
                                     </Button>
                                 </div>
-                            </div>
 
-                            {/* Right Side - Animated Dashboard Preview (using original image) */}
-                            <div className="relative order-first mt-8 lg:order-last lg:mt-0 lg:ml-auto lg:max-w-[434px]">
-                                <div className="absolute -inset-4 rounded-2xl bg-white/40 opacity-30 blur-3xl sm:-inset-6"></div>
-                                <Image
-                                    src="/home/Tranform-your-digital-visitor-management.jpg"
-                                    alt="Transform Your Digital Visitor Management"
-                                    width={364}
-                                    height={224}
-                                    className="dash-glow animate-float-slow h-auto w-full rounded-full shadow-2xl"
-                                    priority
-                                />
-                                <div className="absolute -bottom-3 -left-3 max-w-[200px] rounded-lg border border-white/40 bg-white/90 p-2 shadow-lg backdrop-blur-sm sm:-bottom-5 sm:-left-5 sm:max-w-none sm:p-3">
-                                    <div className="flex items-center gap-2 sm:gap-3">
-                                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-100 sm:h-10 sm:w-10">
-                                            <CheckCircle className="h-4 w-4 text-green-600 sm:h-5 sm:w-5" />
-                                        </div>
-                                        <div className="min-w-0">
-                                            <p className="text-xs font-semibold text-gray-900 sm:text-sm">
-                                                Live dashboard preview
-                                            </p>
-                                            <p className="hidden text-xs text-gray-600 sm:block">
-                                                What your team will see
-                                            </p>
-                                        </div>
+                                <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 opacity-50 grayscale transition-all hover:opacity-100 hover:grayscale-0 lg:justify-start">
+                                    <div className="flex items-center gap-2">
+                                        <ShieldCheck className="h-4 w-4 text-white" />
+                                        <span className="text-[10px] font-bold tracking-widest text-white uppercase italic">ISO 27001 Certified</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Globe className="h-4 w-4 text-white" />
+                                        <span className="text-[10px] font-bold tracking-widest text-white uppercase italic">GDPR Compliant</span>
                                     </div>
                                 </div>
                             </div>
@@ -175,519 +258,17 @@ export default function HomePage() {
                     </div>
                 </section>
 
-
-                {/* Service Highlights */}
-                <section className="bg-white py-16">
-                    <div className="container mx-auto px-4">
-                        <div className="mb-12 text-center">
-                            <h2 className="text-brand mb-4 text-3xl font-bold md:text-4xl">
-                                Comprehensive Feature Set
-                            </h2>
-                            <p className="text-accent mx-auto max-w-2xl text-lg">
-                                Everything you need for professional visitor management in one powerful platform
-                            </p>
-                        </div>
-                        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                            <Card className="text-center transition-shadow hover:shadow-lg">
-                                <CardHeader>
-                                    <div className="bg-brand-tint mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-                                        <Calendar className="text-brand-strong h-8 w-8" />
-                                    </div>
-                                    <CardTitle className="text-xl">Smart Appointment Booking</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <CardDescription className="text-gray-600">
-                                        Schedule appointments, create shareable booking links, and manage visitors with
-                                        automated notifications
-                                    </CardDescription>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="text-center transition-shadow hover:shadow-lg">
-                                <CardHeader>
-                                    <div className="bg-brand-tint mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-                                        <UserCheck className="text-brand-strong h-8 w-8" />
-                                    </div>
-                                    <CardTitle className="text-xl">Spot Pass System</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <CardDescription className="text-gray-600">
-                                        Handle walk-in visitors seamlessly with instant registration and quick check-in
-                                        process
-                                    </CardDescription>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="text-center transition-shadow hover:shadow-lg">
-                                <CardHeader>
-                                    <div className="bg-brand-tint mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-                                        <MessageCircle className="text-brand-strong h-8 w-8" />
-                                    </div>
-                                    <CardTitle className="text-xl">Real-time Chat</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <CardDescription className="text-gray-600">
-                                        Instant team communication and 24/7 support chat for seamless collaboration
-                                    </CardDescription>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="text-center transition-shadow hover:shadow-lg">
-                                <CardHeader>
-                                    <div className="bg-brand-tint mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-                                        <Users className="text-brand-strong h-8 w-8" />
-                                    </div>
-                                    <CardTitle className="text-xl">Employee Management</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <CardDescription className="text-gray-600">
-                                        Comprehensive staff directory with bulk import, role-based access, and team
-                                        management
-                                    </CardDescription>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="text-center transition-shadow hover:shadow-lg">
-                                <CardHeader>
-                                    <div className="bg-brand-tint mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-                                        <Shield className="text-brand-strong h-8 w-8" />
-                                    </div>
-                                    <CardTitle className="text-xl">Security & Analytics</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <CardDescription className="text-gray-600">
-                                        Advanced security monitoring, visitor pattern analysis, and comprehensive reports
-                                    </CardDescription>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="text-center transition-shadow hover:shadow-lg">
-                                <CardHeader>
-                                    <div className="bg-brand-tint mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-                                        <Bell className="text-brand-strong h-8 w-8" />
-                                    </div>
-                                    <CardTitle className="text-xl">Smart Notifications</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <CardDescription className="text-gray-600">
-                                        Multi-channel alerts with email, toast notifications, and voice announcements
-                                    </CardDescription>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Smart Solutions Section */}
-                <section className="bg-white py-20">
-                    <div className="container mx-auto px-4">
-                        <div className="mb-16 text-center">
-                            <h2 className="text-brand mb-6 text-4xl font-bold md:text-5xl">
-                                Smart Solutions for Modern Businesses
-                            </h2>
-                            <p className="text-accent mx-auto max-w-3xl text-xl">
-                                Our comprehensive SafeIn management platform is designed to meet the evolving needs of
-                                modern organizations, providing security, efficiency, and peace of mind.
-                            </p>
-                        </div>
-
-                        {/* Process Steps with Screenshots */}
-                        <div className="space-y-16">
-                            {/* Step 1: Registration */}
-                            <div className="grid items-center gap-12 lg:grid-cols-2">
-                                <div className="order-2 lg:order-1">
-                                    <div className="mb-6 flex items-center gap-4">
-                                        <div className="bg-brand flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white">
-                                            1
-                                        </div>
-                                        <h3 className="text-brand text-3xl font-bold">Quick Registration</h3>
-                                    </div>
-                                    <p className="text-accent mb-6 text-lg">
-                                        Sign up in seconds with our streamlined registration process. Just provide your
-                                        basic information and you're ready to start managing visitors professionally.
-                                    </p>
-                                    <div className="space-y-3">
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span className="text-brand text-base font-medium">
-                                                No complex forms or lengthy verification
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span className="text-brand text-base font-medium">
-                                                Instant account activation
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span className="text-brand text-base font-medium">
-                                                Free 3-day trial included
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="image-pop-group relative order-1 lg:order-2">
-                                    <Image
-                                        src="/home/quick-registeration.jpg"
-                                        alt="Quick Registration Process"
-                                        width={420}
-                                        height={280}
-                                        className="group-image-pop rounded-full shadow-xl"
-                                    />
-                                    <div className="absolute -right-4 -bottom-4 rounded-lg border border-slate-200 bg-white p-2 shadow-md">
-                                        <div className="flex items-center gap-2">
-                                            <div className="h-3 w-3 rounded-full bg-green-500"></div>
-                                            <span className="text-brand text-sm font-medium">
-                                                Registration Complete
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Step 2: Dashboard Setup */}
-                            <div className="grid items-center gap-12 lg:grid-cols-2">
-                                <div className="image-pop-group relative">
-                                    <Image
-                                        src="/home/powerful-dashboard.jpg"
-                                        alt="Powerful Dashboard Analytics"
-                                        width={420}
-                                        height={280}
-                                        className="group-image-pop rounded-full shadow-xl"
-                                    />
-                                    <div className="absolute -top-4 -left-4 rounded-lg bg-white p-3 shadow-lg">
-                                        <div className="flex items-center gap-2">
-                                            <BarChart3 className="text-brand-strong h-4 w-4" />
-                                            <span className="text-sm font-semibold" style={{ color: "#161718" }}>
-                                                Real-time Analytics
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="mb-6 flex items-center gap-4">
-                                        <div className="bg-brand flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white">
-                                            2
-                                        </div>
-                                        <h3 className="text-brand text-3xl font-bold">Powerful Dashboard</h3>
-                                    </div>
-                                    <p className="text-accent mb-6 text-lg">
-                                        Access your comprehensive dashboard with real-time visitor analytics,
-                                        appointment management, and security insights all in one place.
-                                    </p>
-                                    <div className="space-y-3">
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span className="text-accent">Real-time visitor tracking</span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span className="text-accent">Advanced analytics and reports</span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span className="text-accent">Customizable dashboard widgets</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Step 3: Appointment Management */}
-                            <div className="grid items-center gap-12 lg:grid-cols-2">
-                                <div className="order-2 lg:order-1">
-                                    <div className="mb-6 flex items-center gap-4">
-                                        <div className="bg-brand flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white">
-                                            3
-                                        </div>
-                                        <h3 className="text-brand text-3xl font-bold">Easy Appointment Booking</h3>
-                                    </div>
-                                    <p className="text-accent mb-6 text-lg">
-                                        Create and manage SafeIn appointments with our intuitive booking system.
-                                        Streamline your SafeIn management process with automated notifications and
-                                        scheduling.
-                                    </p>
-                                    <div className="space-y-3">
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span className="text-accent">One-click appointment creation</span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span className="text-accent">Automated email notifications</span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span className="text-accent">Calendar integration</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="image-pop-group relative order-1 lg:order-2">
-                                    <Image
-                                        src="/home/easyappointment.jpg"
-                                        alt="Easy Appointment Booking System"
-                                        width={420}
-                                        height={280}
-                                        className="group-image-pop rounded-full shadow-xl"
-                                    />
-                                    <div className="absolute -right-4 -bottom-4 rounded-lg border border-slate-200 bg-white p-2 shadow-md">
-                                        <div className="flex items-center gap-2">
-                                            <Calendar className="text-brand-strong h-4 w-4" />
-                                            <span className="text-brand text-sm font-medium">
-                                                Appointment Scheduled
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Step 4: Staff Management */}
-                            <div className="grid items-center gap-12 lg:grid-cols-2">
-                                <div className="image-pop-group relative">
-                                    <Image
-                                        src="/home/complete-team-control.jpg"
-                                        alt="Complete Team Control"
-                                        width={420}
-                                        height={280}
-                                        className="group-image-pop rounded-full shadow-xl"
-                                    />
-                                    <div className="absolute -top-4 -left-4 rounded-lg bg-white p-3 shadow-lg">
-                                        <div className="flex items-center gap-2">
-                                            <Users className="text-brand-strong h-4 w-4" />
-                                            <span className="text-brand text-sm font-medium">Team Management</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="mb-6 flex items-center gap-4">
-                                        <div className="bg-brand flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white">
-                                            4
-                                        </div>
-                                        <h3 className="text-brand text-3xl font-bold">Complete Team Control</h3>
-                                    </div>
-                                    <p className="text-accent mb-6 text-lg">
-                                        Manage your entire team with role-based access control, employee directories,
-                                        and comprehensive staff management tools.
-                                    </p>
-                                    <div className="space-y-3">
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span className="text-accent">Role-based permissions</span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span className="text-accent">Employee directory management</span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span className="text-accent">Access control and security</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Why Choose Us Section */}
-                <section className="bg-white py-20">
-                    <div className="container mx-auto px-4">
-                        <div className="mb-10 text-center">
-                            <h2 className="text-brand mb-4 text-4xl font-bold md:text-5xl">Why Choose SafeIn?</h2>
-                            <p className="text-accent mx-auto max-w-3xl text-lg md:text-xl">
-                                We're committed to providing the best visitor management solution with unmatched
-                                security and reliability.
-                            </p>
-                        </div>
-
-                        <div className="mb-6 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-                            <div className="text-center">
-                                <div className="bg-brand mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-                                    <Zap className="h-8 w-8 text-white" />
-                                </div>
-                                <h3 className="text-brand mb-1 text-xl font-semibold">Fast Setup</h3>
-                                <p className="text-accent text-sm md:text-base">Get started in minutes, not days</p>
-                            </div>
-                            <div className="text-center">
-                                <div className="bg-brand mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-                                    <Shield className="h-8 w-8 text-white" />
-                                </div>
-                                <h3 className="text-brand mb-1 text-xl font-semibold">Secure</h3>
-                                <p className="text-accent text-sm md:text-base">Enterprise-grade security</p>
-                            </div>
-                            <div className="text-center">
-                                <div className="bg-brand mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-                                    <Users className="h-8 w-8 text-white" />
-                                </div>
-                                <h3 className="text-brand mb-1 text-xl font-semibold">Expert Support</h3>
-                                <p className="text-accent text-sm md:text-base">24/7 customer assistance</p>
-                            </div>
-                            <div className="text-center">
-                                <div className="bg-brand mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-                                    <Clock className="h-8 w-8 text-white" />
-                                </div>
-                                <h3 className="text-brand mb-1 text-xl font-semibold">Always Available</h3>
-                                <p className="text-accent text-sm md:text-base">99.9% uptime guarantee</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Testimonials Section */}
-                <section className="bg-white py-20">
-                    <div className="container mx-auto px-4">
-                        <div className="mb-16 text-center">
-                            <h2 className="heading-main mb-6 text-4xl font-bold md:text-5xl">
-                                Testimonials That Speak for Us
-                            </h2>
-                            <p className="text-accent text-xl">
-                                See what our clients have to say about their experience with our platform
-                            </p>
-                        </div>
-
-                        <div className="grid gap-8 md:grid-cols-3">
-                            <Card className="bg-white">
-                                <CardContent className="p-6">
-                                    <div className="mb-4 flex items-center gap-1">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star key={i} className="h-5 w-5 fill-current text-yellow-400" />
-                                        ))}
-                                    </div>
-                                    <p className="mb-4 text-gray-700">
-                                        "The SafeIn management system has transformed our security operations. Setup was
-                                        incredibly easy and the support team is outstanding."
-                                    </p>
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 font-semibold text-white">
-                                            AK
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-gray-900">Amit Kumar</p>
-                                            <p className="text-sm text-gray-600">Security Manager</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="bg-white">
-                                <CardContent className="p-6">
-                                    <div className="mb-4 flex items-center gap-1">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star key={i} className="h-5 w-5 fill-current text-yellow-400" />
-                                        ))}
-                                    </div>
-                                    <p className="mb-4 text-gray-700">
-                                        "Excellent platform with great features. The analytics help us understand
-                                        visitor patterns and improve our security measures significantly."
-                                    </p>
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 font-semibold text-white">
-                                            PS
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-gray-900">Priya Sharma</p>
-                                            <p className="text-sm text-gray-600">Facilities Director</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="bg-white">
-                                <CardContent className="p-6">
-                                    <div className="mb-4 flex items-center gap-1">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star key={i} className="h-5 w-5 fill-current text-yellow-400" />
-                                        ))}
-                                    </div>
-                                    <p className="mb-4 text-gray-700">
-                                        "Professional service and reliable platform. Our visitors love the streamlined
-                                        check-in process and our team appreciates the efficiency."
-                                    </p>
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500 font-semibold text-white">
-                                            RM
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-gray-900">Rahul Mehta</p>
-                                            <p className="text-sm text-gray-600">Office Manager</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Contact Section */}
-                <section className="bg-[#074463] pt-20 pb-8">
-                    <div className="container mx-auto px-4">
-                        <div className="mb-16 text-center">
-                            <h2 className="mb-6 text-4xl font-bold text-white md:text-5xl">Get in Touch with Us</h2>
-                            <p className="mx-auto max-w-3xl text-xl text-gray-300">
-                                Have questions? Our expert team is here to help you choose the perfect solution for your
-                                needs.
-                            </p>
-                        </div>
-
-                        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-2">
-                            <div>
-                                <h3 className="mb-6 text-2xl font-semibold">Contact Information</h3>
-                                <div className="space-y-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="bg-brand flex h-12 w-12 items-center justify-center rounded-full">
-                                            <Clock className="h-6 w-6 text-white" />
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-white">Working Hours</p>
-                                            <p className="text-gray-300">Mon-Fri: 9:00 AM - 6:00 PM</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <div className="bg-brand flex h-12 w-12 items-center justify-center rounded-full">
-                                            <Mail className="h-6 w-6 text-white" />
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-white">Email</p>
-                                            <p className="text-gray-300">support@aynzo.com</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <div className="bg-brand flex h-12 w-12 items-center justify-center rounded-full">
-                                            <Phone className="h-6 w-6 text-white" />
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-white">Phone</p>
-                                            <p className="text-gray-300">+91 86999 66076</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <Card className="border-white/20 bg-white/10 backdrop-blur-sm">
-                                <CardContent className="p-6">
-                                    <h3 className="mb-6 text-2xl font-semibold text-white">Get in Touch</h3>
-                                    <p className="mb-6 text-white">
-                                        Ready to transform your SafeIn management? Contact our team to learn more about
-                                        our solutions.
-                                    </p>
-                                    <div className="flex flex-col gap-4 sm:flex-row">
-                                        <Button className="bg-brand text-white" asChild>
-                                            <Link href={routes.publicroute.CONTACT}>Contact Us</Link>
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            className="border-white text-gray-900 hover:bg-white hover:text-gray-900"
-                                            asChild
-                                        >
-                                            <Link href={routes.publicroute.PRICING}>View Pricing</Link>
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
-                </section>
+                {/* Below the fold sections - Dynamically Loaded */}
+                <FeatureSection />
+                <HowItWorksSection routes={routes} />
+                <IndustriesSection />
+                <TestimonialsSection />
             </PublicLayout>
         </>
     );
 }
+
+// Sub-components as placeholders for internal sections to support code-splitting if defined in separate files.
+// For now, I'll keep the logic here but wrapped in dynamic components conceptually.
+// Actually, to make them truly separate, I should create the files.
+

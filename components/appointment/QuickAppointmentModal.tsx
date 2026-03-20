@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { validatePhone, formatPhoneForSubmission } from "@/utils/phoneUtils";
 import {
     Dialog,
     DialogContent,
@@ -12,43 +13,60 @@ import {
     DialogDescription,
     DialogFooter,
 } from "@/components/ui/dialog";
+import { useVisitorExistenceCheck } from "@/hooks/useVisitorExistenceCheck";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { InputField } from "@/components/common/inputField";
 import { AsyncSelectField } from "@/components/common/asyncSelectField";
 import { appointmentLinkApi } from "@/store/api/appointmentLinkApi";
 import { useCreateSpecialBookingMutation } from "@/store/api/specialBookingApi";
-import { useLazyGetVisitorsQuery } from "@/store/api/visitorApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
-import { User, Mail, Phone, FileText, Info, Briefcase, Calendar, Clock } from "lucide-react";
+import { User, Mail, FileText, Info, Briefcase, Building, Calendar, Clock, Car } from "lucide-react";
 import { ActionButton } from "@/components/common/actionButton";
+import { PhoneInputField } from "@/components/common/phoneInputField";
 import { EnhancedDatePicker } from "@/components/common/enhancedDatePicker";
 import { EnhancedTimePicker } from "@/components/common/enhancedTimePicker";
 import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
+import { FormProvider } from "react-hook-form";
+import { EmployeeSelectionField } from "@/components/common/EmployeeSelectionField";
+import { useVisitorAutoFill } from "@/hooks/useVisitorAutoFill";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
+import { UserPlus } from "lucide-react";
 
 const quickAppointmentSchema = (isEmployee: boolean) => yup.object().shape({
     name: yup.string().required("Name is required"),
-    email: yup.string().email("Invalid email").required("Email is required"),
-    phone: yup.string().required("Mobile number is required"),
+    email: yup.string().email("Invalid email").optional(),
+    phone: yup
+        .string()
+        .required("Mobile number is required")
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+            validatePhone(value)
+        ),
     purpose: yup.string().required("Purpose of visit is required"),
     employeeId: isEmployee
         ? yup.string().optional().nullable()
         : yup.string().required("Please select an employee"),
     accompanyingCount: yup.number().min(0).max(20).default(0),
     notes: yup.string().optional(),
+    address: yup.string().optional(),
+    vehicleNumber: yup.string().optional().max(20, "Vehicle number cannot exceed 20 characters"),
 });
 
 type QuickAppointmentFormData = {
     name: string;
-    email: string;
+    email?: string;
     phone: string;
     purpose: string;
     employeeId?: string | null;
     accompanyingCount: number;
     notes?: string;
+    address?: string;
+    vehicleNumber?: string;
 };
 
 interface QuickAppointmentModalProps {
@@ -63,10 +81,24 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [createSpecialBooking] = useCreateSpecialBookingMutation();
-    const [triggerSearch, { isFetching: isSearchingVisitor }] = useLazyGetVisitorsQuery();
+    const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal
+    } = useSubscriptionActions();
 
     // Use common employee search hook
-    const { loadEmployeeOptions } = useEmployeeSearch();
+    const { } = useEmployeeSearch();
+
+    const methods = useForm<QuickAppointmentFormData>({
+        resolver: yupResolver(quickAppointmentSchema(isEmployee)) as any,
+        defaultValues: {
+            purpose: "Official VIP Meeting",
+            employeeId: "",
+            accompanyingCount: 0,
+        }
+    });
 
     const {
         register,
@@ -78,47 +110,18 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
         trigger,
         clearErrors,
         getValues,
-    } = useForm<QuickAppointmentFormData>({
-        resolver: yupResolver(quickAppointmentSchema(isEmployee)) as any,
-        defaultValues: {
-            purpose: "Official VIP Meeting",
-            employeeId: "",
-            accompanyingCount: 0,
-        }
+    } = methods;
+
+
+    const { emailExists, phoneExists } = useVisitorAutoFill({
+        nameFieldName: "name",
+        phoneFieldName: "phone",
+        emailFieldName: "email",
+        methods,
+        silent: true
     });
 
-    const watchedEmail = watch("email");
-
-    // Auto-fill visitor details
-    useEffect(() => {
-        const timeoutId = setTimeout(async () => {
-            if (watchedEmail && watchedEmail.includes("@") && watchedEmail.length > 5) {
-                try {
-                    const result = await triggerSearch({ search: watchedEmail }).unwrap();
-                    if (result.visitors && result.visitors.length > 0) {
-                        const visitor = result.visitors.find((v: any) => v.email.toLowerCase() === watchedEmail.toLowerCase());
-
-                        if (visitor) {
-                            // Valid match found, auto-fill
-                            // For now, just update and show toast
-                            reset({
-                                ...getValues(), // Need getValues from useForm
-                                name: visitor.name,
-                                phone: visitor.phone,
-                            });
-                            showSuccessToast("Visitor details found and auto-filled!");
-                        }
-                    }
-                } catch (error) {
-                    // Ignore search errors
-                }
-            }
-        }, 800); // 800ms debounce
-
-        return () => clearTimeout(timeoutId);
-    }, [watchedEmail, triggerSearch, reset]);
-
-    // Reset form when modal opens and set employeeId for employees
+    // Reset form when modal opens
     useEffect(() => {
         if (open) {
             reset({
@@ -129,9 +132,12 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                 employeeId: isEmployee ? (user?.employeeId || "") : "",
                 accompanyingCount: 0,
                 notes: "",
+                address: "",
+                vehicleNumber: "",
             });
         }
     }, [open, reset, isEmployee, user]);
+
 
     const onSubmit = async (data: QuickAppointmentFormData) => {
         setIsSubmitting(true);
@@ -149,15 +155,20 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                 );
             }
 
+            // Format phone number before submission
+            const submitPhone = formatPhoneForSubmission(data.phone);
+
             // Create Special Booking (Pending OTP)
             await createSpecialBooking({
                 visitorName: data.name,
                 visitorEmail: data.email,
-                visitorPhone: data.phone,
+                visitorPhone: submitPhone,
                 employeeId: submitEmployeeId,
                 purpose: data.purpose,
                 accompanyingCount: data.accompanyingCount || 0,
                 notes: data.notes || "",
+                address: data.address || "",
+                vehicleNumber: data.vehicleNumber || "",
             }).unwrap();
 
             showSuccessToast("Special visitor booking created. OTP has been sent to the visitor.");
@@ -184,115 +195,143 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
-                    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 touch-pan-y pointer-events-auto">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <InputField
-                                label="Visitor Name"
-                                placeholder="Enter visitor name"
-                                icon={<User className="h-4 w-4" />}
-                                {...register("name")}
-                                error={errors.name?.message}
-                                required
-                            />
-                            <InputField
-                                label="Email Address"
-                                type="email"
-                                placeholder="visitor@example.com"
-                                icon={<Mail className="h-4 w-4" />}
-                                {...register("email")}
-                                error={errors.email?.message}
-                                required
-                            />
-                            <InputField
-                                label="Mobile Number"
-                                placeholder="Enter mobile number"
-                                icon={<Phone className="h-4 w-4" />}
-                                {...register("phone")}
-                                error={errors.phone?.message}
-                                required
-                                maxLength={15}
-                            />
-
-                            {!isEmployee && (
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium leading-none flex items-center gap-2">
-                                        <Briefcase className="h-4 w-4" />
-                                        Employee to Meet <span className="text-red-500">*</span>
-                                    </label>
+                <FormProvider {...methods}>
+                    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
+                        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 touch-pan-y pointer-events-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
                                     <Controller
-                                        name="employeeId"
+                                        name="phone"
                                         control={control}
                                         render={({ field }) => (
-                                            <AsyncSelectField
+                                            <PhoneInputField
+                                                id="phone"
+                                                label="Mobile Number"
                                                 value={field.value || ""}
-                                                onChange={field.onChange}
-                                                loadOptions={loadEmployeeOptions}
-                                                placeholder="Search employees..."
-                                                isClearable={false}
-                                                error={errors.employeeId?.message}
-                                                cacheOptions={true}
-                                                defaultOptions={true}
+                                                onChange={(val) => field.onChange(val)}
+                                                placeholder="Enter mobile number"
+                                                error={errors.phone?.message}
+                                                required
+                                                defaultCountry="in"
+                                                autoFocus={true}
                                             />
                                         )}
                                     />
                                 </div>
-                            )}
 
-                            <InputField
-                                label="Purpose of Visit"
-                                placeholder="e.g., Official VIP Visit"
-                                icon={<Info className="h-4 w-4" />}
-                                {...register("purpose")}
-                                error={errors.purpose?.message}
-                                required
-                            />
+                                <div className="space-y-1">
+                                    <InputField
+                                        label="Email Address"
+                                        type="email"
+                                        placeholder="visitor@example.com"
+                                        icon={<Mail className="h-4 w-4" />}
+                                        {...register("email")}
+                                        error={errors.email?.message}
+                                    />
+                                </div>
 
-                            <InputField
-                                label="Accompanying People"
-                                type="number"
-                                placeholder="Number of people"
-                                icon={<User className="h-4 w-4" />}
-                                {...register("accompanyingCount")}
-                                error={errors.accompanyingCount?.message}
-                            />
-
-                            <div className="md:col-span-2 space-y-2">
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    Notes
-                                </label>
-                                <Textarea
-                                    placeholder="Add any notes here..."
-                                    {...register("notes")}
-                                    className={errors.notes ? "border-red-500" : ""}
-                                    rows={3}
+                                <InputField
+                                    label="Visitor Name"
+                                    placeholder="Enter visitor name"
+                                    icon={<User className="h-4 w-4" />}
+                                    {...register("name")}
+                                    error={errors.name?.message}
+                                    required
                                 />
-                                {errors.notes && <p className="text-xs text-red-500">{errors.notes.message}</p>}
+
+                                <EmployeeSelectionField />
+
+                                <InputField
+                                    label="Purpose of Visit"
+                                    placeholder="e.g., Official VIP Visit"
+                                    icon={<Info className="h-4 w-4" />}
+                                    {...register("purpose")}
+                                    error={errors.purpose?.message}
+                                    required
+                                />
+
+                                <InputField
+                                    label="Additional Visitors"
+                                    type="number"
+                                    placeholder="Number of people"
+                                    icon={<User className="h-4 w-4" />}
+                                    {...register("accompanyingCount")}
+                                    error={errors.accompanyingCount?.message}
+                                />
+
+                                <InputField
+                                    label="Vehicle Number"
+                                    placeholder="e.g., MH12AB1234"
+                                    icon={<Car className="h-4 w-4" />}
+                                    {...register("vehicleNumber")}
+                                    error={errors.vehicleNumber?.message}
+                                />
+
+                                <div className="md:col-span-2 space-y-2">
+                                    <label className="text-sm font-medium leading-none flex items-center gap-2">
+                                        <Building className="h-4 w-4" />
+                                        Address
+                                        <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                                    </label>
+                                    <Textarea
+                                        placeholder="Enter visitor address"
+                                        {...register("address")}
+                                        className={errors.address ? "border-red-500" : ""}
+                                        rows={2}
+                                    />
+                                    {errors.address && <p className="text-xs text-red-500">{errors.address.message}</p>}
+                                </div>
+
+                                <div className="md:col-span-2 space-y-2">
+                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Notes
+                                        <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                                    </label>
+                                    <Textarea
+                                        placeholder="Add any notes here..."
+                                        {...register("notes")}
+                                        className={errors.notes ? "border-red-500" : ""}
+                                        rows={3}
+                                    />
+                                    {errors.notes && <p className="text-xs text-red-500">{errors.notes.message}</p>}
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <DialogFooter className="p-6 pt-4 border-t bg-gray-50/50">
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="px-6">
-                            Cancel
-                        </Button>
-                        <ActionButton
-                            type="submit"
-                            variant="primary"
-                            disabled={isSubmitting}
-                            className="px-8"
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <LoadingSpinner size="sm" className="mr-2" />
-                                    Booking...
-                                </>
-                            ) : (
-                                "Book Appointment"
-                            )}
-                        </ActionButton>
-                    </DialogFooter>
-                </form>
+                        <DialogFooter className="p-6 pt-4 border-t bg-gray-50/50">
+                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="px-6">
+                                Cancel
+                            </Button>
+                            <SubscriptionActionButtons
+                                isExpired={isExpired}
+                                hasReachedLimit={hasReachedAppointmentLimit}
+                                limitType="appointment"
+                                showUpgradeModal={showUpgradeModal}
+                                openUpgradeModal={openUpgradeModal}
+                                closeUpgradeModal={closeUpgradeModal}
+                                upgradeLabel="Upgrade Plan"
+                                icon={UserPlus}
+                                className="px-8 text-white min-w-[200px]"
+                            >
+                                <ActionButton
+                                    type="submit"
+                                    variant="primary"
+                                    disabled={isSubmitting}
+                                    className="px-8"
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <LoadingSpinner size="sm" className="mr-2" />
+                                            Booking...
+                                        </>
+                                    ) : (
+                                        "Book Appointment"
+                                    )}
+                                </ActionButton>
+                            </SubscriptionActionButtons>
+                        </DialogFooter>
+                    </form>
+                </FormProvider>
             </DialogContent>
         </Dialog>
     );

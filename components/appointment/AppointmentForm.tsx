@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, type ReactNode } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
+import { VehicleInfoSection } from "./VehicleInfoSection";
 import { Button } from "@/components/ui/button";
 import { ActionButton } from "@/components/common/actionButton";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -13,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SelectField } from "@/components/common/selectField";
 import { InputField } from "@/components/common/inputField";
+import { TextareaField } from "@/components/common/textareaField";
 import { EnhancedDatePicker } from "@/components/common/enhancedDatePicker";
 import { EnhancedTimePicker } from "@/components/common/enhancedTimePicker";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
@@ -26,11 +28,14 @@ import { useGetEmployeesQuery, useGetEmployeeQuery } from "@/store/api/employeeA
 import { useGetVisitorsQuery, useGetVisitorQuery, Visitor } from "@/store/api/visitorApi";
 import { showSuccessToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
-import { Calendar, Car, Info } from "lucide-react";
+import { Calendar, Car, Info, UserPlus } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { FormContainer } from "@/components/common/formContainer";
 import { ApprovalLinkModal } from "./ApprovalLinkModal";
-import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
+
+
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useDebounce } from "@/hooks/useDebounce";
 import { appointmentSchema, type AppointmentFormData } from "./helpers/appointmentValidation";
@@ -47,6 +52,7 @@ import { getDefaultFormValues, appointmentToFormValues } from "./helpers/formRes
 
 interface NewAppointmentModalProps {
     appointmentId?: string;
+    initialVisitorId?: string;
     triggerButton?: ReactNode;
     onSuccess?: () => void;
     open?: boolean;
@@ -56,6 +62,7 @@ interface NewAppointmentModalProps {
 
 export function NewAppointmentModal({
     appointmentId,
+    initialVisitorId,
     triggerButton,
     onSuccess,
     open: controlledOpen,
@@ -64,15 +71,20 @@ export function NewAppointmentModal({
 }: NewAppointmentModalProps) {
     const router = useRouter();
 
+    const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal
+    } = useSubscriptionActions();
     const [internalOpen, setInternalOpen] = useState(false);
     const isPage = layout === "page";
     const [generalError, setGeneralError] = useState<string | null>(null);
     const [approvalLink, setApprovalLink] = useState<string | null>(null);
     const [showApprovalLinkModal, setShowApprovalLinkModal] = useState(false);
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
     const [employeeSearchInput, setEmployeeSearchInput] = useState("");
     const [visitorSearchInput, setVisitorSearchInput] = useState("");
-    const [showVehicleFields, setShowVehicleFields] = useState<boolean>(false);
     const [isFileUploading, setIsFileUploading] = useState(false);
 
     const debouncedEmployeeSearch = useDebounce(employeeSearchInput, 500);
@@ -84,7 +96,7 @@ export function NewAppointmentModal({
 
     const [createAppointment, { isLoading: isCreating }] = useCreateAppointmentMutation();
     const [updateAppointment, { isLoading: isUpdating }] = useUpdateAppointmentMutation();
-    const { hasReachedAppointmentLimit } = useSubscriptionStatus();
+
     const isLoading = isCreating || isUpdating;
     const {
         data: employeesData,
@@ -113,6 +125,11 @@ export function NewAppointmentModal({
         skip: !appointmentId,
     });
 
+    const methods = useForm<AppointmentFormData>({
+        resolver: yupResolver(appointmentSchema),
+        defaultValues: getDefaultFormValues(),
+    });
+
     const {
         register,
         handleSubmit,
@@ -123,10 +140,7 @@ export function NewAppointmentModal({
         watch,
         clearErrors,
         trigger,
-    } = useForm<AppointmentFormData>({
-        resolver: yupResolver(appointmentSchema),
-        defaultValues: getDefaultFormValues(),
-    });
+    } = methods;
 
     const selectedEmployeeId = watch("employeeId");
     const selectedVisitorId = watch("visitorId");
@@ -192,17 +206,14 @@ export function NewAppointmentModal({
             clearErrors();
             setEmployeeSearchInput("");
             setVisitorSearchInput("");
+        } else if (initialVisitorId && !isEditMode) {
+            setValue("visitorId", initialVisitorId);
         }
-    }, [open, reset, clearErrors]);
+    }, [open, reset, clearErrors, initialVisitorId, isEditMode, setValue]);
 
     useEffect(() => {
         if (isEditMode && existingAppointment && open) {
             reset(appointmentToFormValues(existingAppointment));
-            // Set vehicle fields toggle if vehicle data exists
-            const hasVehicleData =
-                existingAppointment?.appointmentDetails?.vehicleNumber ||
-                existingAppointment?.appointmentDetails?.vehiclePhoto;
-            setShowVehicleFields(!!hasVehicleData);
         }
     }, [isEditMode, existingAppointment, open, reset]);
 
@@ -217,10 +228,7 @@ export function NewAppointmentModal({
     const onSubmit = async (data: AppointmentFormData) => {
         if (isLoading) return;
 
-        if (!isEditMode && hasReachedAppointmentLimit) {
-            setShowUpgradeModal(true);
-            return;
-        }
+
 
         setGeneralError(null);
 
@@ -269,281 +277,217 @@ export function NewAppointmentModal({
     const defaultTrigger = <Button variant="default">{isEditMode ? "Edit Appointment" : "New Appointment"}</Button>;
 
     const formContent = (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-2">
-            {generalError && (
-                <Alert variant="destructive" className="mb-4">
-                    <AlertDescription>{generalError}</AlertDescription>
-                </Alert>
-            )}
+        <FormProvider {...methods}>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-2">
+                {generalError && (
+                    <Alert variant="destructive" className="mb-4">
+                        <AlertDescription>{generalError}</AlertDescription>
+                    </Alert>
+                )}
 
-            <div className="space-y-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <Controller
-                        name="visitorId"
-                        control={control}
-                        render={({ field }) => (
-                            <SelectField
-                                label="Visitor"
-                                placeholder="Select visitor"
-                                options={visitorOptions}
-                                value={field.value}
-                                onChange={(val) => {
-                                    field.onChange(val ?? "");
-                                    handleVisitorSelect(val);
-                                }}
-                                onInputChange={handleVisitorSearchChange}
-                                error={
-                                    errors.visitorId?.message || (visitorsError ? "Failed to load visitors" : undefined)
-                                }
-                                isLoading={isLoadingVisitors}
-                                isClearable={false}
-                                required
-                            />
-                        )}
-                    />
-
-                    <Controller
-                        name="employeeId"
-                        control={control}
-                        render={({ field }) => (
-                            <SelectField
-                                label="Employee to Meet"
-                                placeholder="Select employee"
-                                options={employeeOptions}
-                                value={field.value}
-                                onChange={(val) => {
-                                    field.onChange(val ?? "");
-                                }}
-                                onInputChange={handleEmployeeSearchChange}
-                                error={
-                                    errors.employeeId?.message ||
-                                    (employeesError ? "Failed to load employees" : undefined)
-                                }
-                                isLoading={isLoadingEmployees}
-                                isClearable={false}
-                                required
-                            />
-                        )}
-                    />
-
-                    <div className="space-y-1.5">
-                        <Label className="text-sm font-medium">
-                            Accompanying People <span className="text-muted-foreground font-normal">(optional)</span>
-                        </Label>
-                        <Input
-                            type="number"
-                            min={0}
-                            max={20}
-                            step={1}
-                            placeholder="Number of people (e.g., 0, 1, 2)"
-                            {...register("accompanyingCount")}
-                            className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.accompanyingCount ? "border-destructive" : ""}`}
-                        />
-                        {errors.accompanyingCount && (
-                            <span className="text-destructive text-xs">{errors.accompanyingCount.message}</span>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Second Row: Appointment Date, Appointment Time, Purpose of Visit */}
-            <div className="space-y-4 pt-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <Controller
-                        control={control}
-                        name="appointmentDate"
-                        render={({ field }) => (
-                            <EnhancedDatePicker
-                                label="Appointment Date"
-                                value={field.value}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    if (value) {
-                                        const selectedDate = new Date(value + "T00:00:00");
-                                        selectedDate.setHours(0, 0, 0, 0);
-                                        const today = new Date();
-                                        today.setHours(0, 0, 0, 0);
-
-                                        if (selectedDate < today) {
-                                            trigger("appointmentDate");
-                                            return;
-                                        }
-                                    }
-                                    field.onChange(value);
-                                    if (errors.appointmentTime) {
-                                        clearErrors("appointmentTime");
-                                    }
-                                    trigger("appointmentDate");
-                                }}
-                                error={errors.appointmentDate?.message}
-                                required
-                            />
-                        )}
-                    />
-
-                    <Controller
-                        control={control}
-                        name="appointmentTime"
-                        render={({ field }) => {
-                            let normalizedDate = watch("appointmentDate");
-                            if (normalizedDate && normalizedDate.includes("/")) {
-                                const parts = normalizedDate.split("/");
-                                if (parts.length === 3) {
-                                    normalizedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                                }
-                            }
-                            return (
-                                <EnhancedTimePicker
-                                    label="Appointment Time"
+                <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        <Controller
+                            name="visitorId"
+                            control={control}
+                            render={({ field }) => (
+                                <SelectField
+                                    label="Visitor"
+                                    placeholder="Select visitor"
+                                    options={visitorOptions}
                                     value={field.value}
-                                    onChange={(e) => {
-                                        field.onChange(e);
-                                        if (errors.appointmentDate) {
-                                            clearErrors("appointmentDate");
-                                        }
+                                    onChange={(val) => {
+                                        field.onChange(val ?? "");
+                                        handleVisitorSelect(val);
                                     }}
-                                    error={errors.appointmentTime?.message}
-                                    selectedDate={normalizedDate}
+                                    onInputChange={handleVisitorSearchChange}
+                                    error={
+                                        errors.visitorId?.message || (visitorsError ? "Failed to load visitors" : undefined)
+                                    }
+                                    isLoading={isLoadingVisitors}
+                                    isClearable={false}
                                     required
                                 />
-                            );
-                        }}
-                    />
+                            )}
+                        />
 
-                    <InputField
-                        label="Purpose of Visit"
-                        placeholder="Brief description of the visit purpose"
-                        error={errors.purpose?.message}
-                        {...register("purpose")}
-                        required
-                    />
+                        <Controller
+                            name="employeeId"
+                            control={control}
+                            render={({ field }) => (
+                                <SelectField
+                                    label="Employee to Meet"
+                                    placeholder="Select employee"
+                                    options={employeeOptions}
+                                    value={field.value}
+                                    onChange={(val) => {
+                                        field.onChange(val ?? "");
+                                    }}
+                                    onInputChange={handleEmployeeSearchChange}
+                                    error={
+                                        errors.employeeId?.message ||
+                                        (employeesError ? "Failed to load employees" : undefined)
+                                    }
+                                    isLoading={isLoadingEmployees}
+                                    isClearable={false}
+                                    required
+                                />
+                            )}
+                        />
+
+                        <div className="md:col-span-1">
+                            <InputField
+                                type="number"
+                                id="accompanyingCount"
+                                label="Additional Visitors"
+                                min={0}
+                                max={20}
+                                step={1}
+                                placeholder="e.g., 0, 1, 2"
+                                {...register("accompanyingCount")}
+                                error={errors.accompanyingCount?.message}
+                            />
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            {/* Visit Information Section */}
-            <div className="space-y-4 pt-4">
-                <div className="space-y-1.5">
-                    <Label htmlFor="notes" className="text-sm font-medium">
-                        Notes <span className="text-muted-foreground font-normal">(optional)</span>
-                    </Label>
-                    <Textarea
+                {/* Second Row: Appointment Date, Appointment Time, Purpose of Visit */}
+                <div className="space-y-4 pt-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        <Controller
+                            control={control}
+                            name="appointmentDate"
+                            render={({ field }) => (
+                                <EnhancedDatePicker
+                                    label="Appointment Date"
+                                    value={field.value}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value) {
+                                            const selectedDate = new Date(value + "T00:00:00");
+                                            selectedDate.setHours(0, 0, 0, 0);
+                                            const today = new Date();
+                                            today.setHours(0, 0, 0, 0);
+
+                                            if (selectedDate < today) {
+                                                trigger("appointmentDate");
+                                                return;
+                                            }
+                                        }
+                                        field.onChange(value);
+                                        if (errors.appointmentTime) {
+                                            clearErrors("appointmentTime");
+                                        }
+                                        trigger("appointmentDate");
+                                    }}
+                                    error={errors.appointmentDate?.message}
+                                    required
+                                />
+                            )}
+                        />
+
+                        <Controller
+                            control={control}
+                            name="appointmentTime"
+                            render={({ field }) => {
+                                let normalizedDate = watch("appointmentDate");
+                                if (normalizedDate && normalizedDate.includes("/")) {
+                                    const parts = normalizedDate.split("/");
+                                    if (parts.length === 3) {
+                                        normalizedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                                    }
+                                }
+                                return (
+                                    <EnhancedTimePicker
+                                        label="Appointment Time"
+                                        value={field.value}
+                                        onChange={(e) => {
+                                            field.onChange(e);
+                                            if (errors.appointmentDate) {
+                                                clearErrors("appointmentDate");
+                                            }
+                                        }}
+                                        error={errors.appointmentTime?.message}
+                                        selectedDate={normalizedDate}
+                                        required
+                                    />
+                                );
+                            }}
+                        />
+
+                        <InputField
+                            label="Purpose of Visit"
+                            placeholder="Brief description of the visit purpose"
+                            error={errors.purpose?.message}
+                            {...register("purpose")}
+                            required
+                        />
+                    </div>
+                </div>
+
+                {/* Visit Information Section */}
+                <div className="space-y-4 pt-4">
+                    <TextareaField
                         id="notes"
-                        {...register("notes")}
+                        label="Notes (optional)"
                         placeholder="Any additional information or special requirements"
-                        className={`bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.notes ? "border-destructive" : ""}`}
+                        {...register("notes")}
+                        error={errors.notes?.message}
                         rows={4}
                     />
-                    {errors.notes && <span className="text-destructive text-xs">{errors.notes.message}</span>}
                 </div>
-            </div>
 
-            {/* Vehicle Fields Toggle */}
-            <div className="border-t pt-4">
-                <div className="bg-muted/30 flex items-center justify-between rounded-lg border p-4">
-                    <div className="flex items-center gap-3">
-                        <Car className="text-muted-foreground h-5 w-5" />
-                        <div>
-                            <Label htmlFor="vehicle-fields-toggle" className="cursor-pointer text-sm font-medium">
-                                Add Vehicle Information
-                            </Label>
-                            <p className="text-muted-foreground mt-0.5 text-xs">
-                                Include vehicle number and photo if applicable
-                            </p>
-                        </div>
-                    </div>
-                    <Switch
-                        id="vehicle-fields-toggle"
-                        checked={showVehicleFields}
-                        onCheckedChange={(checked) => {
-                            setShowVehicleFields(checked);
-                            if (!checked) {
-                                setValue("vehicleNumber", "");
-                                setValue("vehiclePhoto", "");
-                            }
-                        }}
-                        className="data-[state=unchecked]:bg-gray-200 dark:data-[state=unchecked]:bg-gray-700"
-                    />
-                </div>
-            </div>
+                <VehicleInfoSection
+                    appointmentToken={undefined}
+                    variant="switch"
+                    onUploadStatusChange={setIsFileUploading}
+                />
 
-            {/* Vehicle Information Section (Optional) - Only shown when toggle is ON */}
-            {showVehicleFields && (
-                <div className="animate-in fade-in slide-in-from-top-2 space-y-4 pt-4 duration-200">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
-                        {/* Vehicle Photo */}
-                        <div className="flex flex-col space-y-2">
-                            <Label className="text-foreground text-sm font-medium">
-                                Vehicle Photo <span className="text-muted-foreground font-normal">(optional)</span>
-                            </Label>
-                            <div className="flex justify-start">
-                                <ImageUploadField
-                                    name="vehiclePhoto"
-                                    label=""
-                                    register={register}
-                                    setValue={setValue}
-                                    errors={errors.vehiclePhoto}
-                                    initialUrl={watch("vehiclePhoto")}
-                                    enableImageCapture={true}
-                                    onUploadStatusChange={setIsFileUploading}
-                                    variant="avatar"
-                                />
-                            </div>
-                            {errors.vehiclePhoto && (
-                                <p className="text-xs text-red-500 mt-1">{errors.vehiclePhoto.message}</p>
+                <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-end">
+                    <ActionButton
+                        type="button"
+                        variant="outline"
+                        onClick={handleClose}
+                        disabled={isLoading}
+                        size="xl"
+                        className="w-full px-6 sm:w-auto"
+                    >
+                        Cancel
+                    </ActionButton>
+                    <SubscriptionActionButtons
+                        isExpired={isExpired}
+                        hasReachedLimit={hasReachedAppointmentLimit && !isEditMode}
+                        limitType="appointment"
+                        showUpgradeModal={showUpgradeModal}
+                        openUpgradeModal={openUpgradeModal}
+                        closeUpgradeModal={closeUpgradeModal}
+                        upgradeLabel="Upgrade Plan"
+                        icon={UserPlus}
+                        className="w-full min-w-[180px] px-6 sm:w-auto text-white"
+                    >
+                        <ActionButton
+                            type="submit"
+                            variant="outline-primary"
+                            disabled={isLoading || isFileUploading}
+                            size="xl"
+                            className="w-full min-w-[180px] px-6 sm:w-auto"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <LoadingSpinner size="sm" className="mr-2" />
+                                    <span>{isEditMode ? "Updating..." : "Scheduling..."}</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Calendar className="mr-2 h-4 w-4" />
+                                    <span>{isEditMode ? "Update" : "Schedule"} Appointment</span>
+                                </>
                             )}
-                        </div>
-
-                        {/* Vehicle Number */}
-                        <div className="flex flex-col space-y-2">
-                            <Label htmlFor="vehicleNumber" className="text-foreground text-sm font-medium">
-                                Vehicle Number <span className="text-muted-foreground font-normal">(optional)</span>
-                            </Label>
-                            <Input
-                                id="vehicleNumber"
-                                {...register("vehicleNumber")}
-                                placeholder="e.g., DL01AB1234"
-                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.vehicleNumber ? "border-destructive" : ""}`}
-                            />
-                            {errors.vehicleNumber && (
-                                <p className="text-xs text-red-500 mt-1">{errors.vehicleNumber.message}</p>
-                            )}
-                        </div>
-                    </div>
+                        </ActionButton>
+                    </SubscriptionActionButtons>
                 </div>
-            )}
-
-            <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-end">
-                <ActionButton
-                    type="button"
-                    variant="outline"
-                    onClick={handleClose}
-                    disabled={isLoading}
-                    size="xl"
-                    className="w-full px-6 sm:w-auto"
-                >
-                    Cancel
-                </ActionButton>
-                <ActionButton
-                    type="submit"
-                    variant="outline-primary"
-                    disabled={isLoading || isFileUploading}
-                    size="xl"
-                    className="w-full min-w-[180px] px-6 sm:w-auto"
-                >
-                    {isLoading ? (
-                        <>
-                            <LoadingSpinner size="sm" className="mr-2" />
-                            <span>{isEditMode ? "Updating..." : "Scheduling..."}</span>
-                        </>
-                    ) : (
-                        <>
-                            <Calendar className="mr-2 h-4 w-4" />
-                            <span>{isEditMode ? "Update" : "Schedule"} Appointment</span>
-                        </>
-                    )}
-                </ActionButton>
-            </div>
-        </form>
+            </form >
+        </FormProvider>
     );
 
     const renderedForm = isPage ? (
@@ -592,7 +536,7 @@ export function NewAppointmentModal({
                 />
             )}
 
-            <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+
         </>
     );
 }

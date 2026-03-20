@@ -46,7 +46,7 @@ export const uploadApi = baseApi.injectEndpoints({
                 }
                 throw new Error(response?.message || "Upload failed");
             },
-            transformErrorResponse: (response: any, meta) => {
+            transformErrorResponse: (response: any, meta: any) => {
                 if (response?.data) {
                     if (typeof response.data === "string") {
                         return { message: response.data };
@@ -63,15 +63,17 @@ export const uploadApi = baseApi.injectEndpoints({
                     return { message: response.message };
                 }
 
-                if (meta?.response?.status === 401) {
+                const status = meta?.response?.status;
+
+                if (status === 401) {
                     return { message: "Authentication required. Please check your appointment link." };
                 }
 
-                if (meta?.response?.status === 400) {
+                if (status === 400) {
                     return { message: "Invalid file or request. Please check the file and try again." };
                 }
 
-                if (meta?.response?.status === 413) {
+                if (status === 413) {
                     return { message: "File too large. Maximum size is 5MB." };
                 }
 
@@ -81,7 +83,6 @@ export const uploadApi = baseApi.injectEndpoints({
             },
         }),
     }),
-    overrideExisting: false,
 });
 
 export const { useUploadFileMutation } = uploadApi;

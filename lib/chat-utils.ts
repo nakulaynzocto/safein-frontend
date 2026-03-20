@@ -59,7 +59,7 @@ export const formatChatUser = (user: any): FormattedChatUser => {
         id: String(user._id || user.id),
         name: name,
         email: user.email || "",
-        avatar: user.profilePicture || "",
+        avatar: user.photo || user.profilePicture || user.avatar || "",
         role: role,
         lastSeen: user.lastLoginAt || user.updatedAt
     };
@@ -152,7 +152,7 @@ export const buildParticipantsMap = (
         if (!map.has(id) || (map.get(id)?.name === map.get(id)?.avatar)) {
             map.set(id, {
                 name: displayName,
-                avatar: u.profilePicture || u.avatar || ""
+                avatar: u.photo || u.profilePicture || u.avatar || ""
             });
         }
     };
@@ -195,7 +195,7 @@ export const transformMessageForDisplay = (
         const s = msg.senderId as any;
         senderId = String(s._id || s.id || "");
         senderObjName = s.name || s.email?.split('@')[0];
-        senderObjAvatar = s.profilePicture || s.avatar;
+        senderObjAvatar = s.photo || s.profilePicture || s.avatar;
     } else {
         senderId = String(msg.senderId || "");
     }

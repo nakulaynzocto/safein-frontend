@@ -4,6 +4,7 @@ import { useState, useEffect, type ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { validatePhone } from "@/utils/phoneUtils";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ActionButton } from "@/components/common/actionButton";
@@ -20,25 +21,37 @@ import { FormContainer } from "@/components/common/formContainer";
 import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQuery } from "@/store/api";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { InputField } from "../common/inputField";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
+import { UserPlus } from "lucide-react";
 
 const employeeSchema = yup.object({
     name: yup
         .string()
+        .trim()
         .required("Name is required")
         .min(2, "Name must be at least 2 characters")
         .max(100, "Name cannot exceed 100 characters"),
-    email: yup.string().email("Invalid email address").required("Email is required"),
+    email: yup.string().trim().email("Invalid email address").required("Email is required"),
     phone: yup
         .string()
+        .trim()
         .required("Phone number is required")
-        .matches(/^[\+]?[0-9]{10,15}$/, "Please enter a valid phone number"),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+            validatePhone(value)
+        ),
     department: yup
         .string()
+        .trim()
         .required("Department is required")
         .min(2, "Department must be at least 2 characters")
         .max(50, "Department cannot exceed 50 characters"),
     designation: yup
         .string()
+        .trim()
         .required("Position is required")
         .min(2, "Position must be at least 2 characters")
         .max(100, "Position cannot exceed 100 characters"),
@@ -87,6 +100,14 @@ export function NewEmployeeModal({
     const [createEmployee, { isLoading: isCreating }] = useCreateEmployeeMutation();
     const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
+    const [isFileUploading, setIsFileUploading] = useState(false);
+
+    const { hasReachedEmployeeLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal
+    } = useSubscriptionActions();
 
     const isEditMode = !!employeeId;
     const isLoading = isCreating || isUpdating;
@@ -252,6 +273,7 @@ export function NewEmployeeModal({
                             initialUrl={watch("photo")}
                             enableImageCapture={true}
                             variant="avatar"
+                            onUploadStatusChange={setIsFileUploading}
                         />
                     </div>
                 </div>
@@ -263,34 +285,24 @@ export function NewEmployeeModal({
                     </h3>
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor="name" className="text-sm font-medium">
-                                Full Name <span className="text-destructive">*</span>
-                            </Label>
-                            <Input
-                                id="name"
-                                {...register("name")}
-                                placeholder="Enter employee's full name"
-                                aria-required="true"
-                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.name ? "border-destructive" : ""}`}
-                            />
-                            {errors.name && <span className="text-destructive text-xs">{errors.name.message}</span>}
-                        </div>
+                        <InputField
+                            id="name"
+                            label="Full Name"
+                            {...register("name")}
+                            placeholder="Enter employee's full name"
+                            error={errors.name?.message}
+                            required
+                        />
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor="email" className="text-sm font-medium">
-                                Email Address <span className="text-destructive">*</span>
-                            </Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                {...register("email", { onChange: clearGeneralError })}
-                                placeholder="Enter email address"
-                                aria-required="true"
-                                className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.email ? "border-destructive" : ""}`}
-                            />
-                            {errors.email && <span className="text-destructive text-xs">{errors.email.message}</span>}
-                        </div>
+                        <InputField
+                            id="email"
+                            label="Email Address"
+                            type="email"
+                            {...register("email", { onChange: clearGeneralError })}
+                            placeholder="Enter email address"
+                            error={errors.email?.message}
+                            required
+                        />
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 pt-2">
@@ -310,34 +322,20 @@ export function NewEmployeeModal({
                                     required
                                     placeholder="Enter phone number"
                                     defaultCountry="in"
-                                    className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                 />
                             )}
                         />
 
-                        <Controller
-                            name="department"
-                            control={control}
-                            rules={{ required: "Department is required" }}
-                            render={({ field }) => (
-                                <div className="flex flex-col gap-1.5">
-                                    <Label className="text-sm font-medium">
-                                        Department <span className="text-destructive">*</span>
-                                    </Label>
-                                    <Input
-                                        id="department"
-                                        placeholder="Enter department"
-                                        value={field.value || ""}
-                                        onChange={(e) => field.onChange(e.target.value)}
-                                        aria-required="true"
-                                        className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.department ? "border-destructive" : ""}`}
-                                    />
-                                    {errors.department && (
-                                        <span className="text-destructive text-xs">{errors.department.message}</span>
-                                    )}
-                                </div>
-                            )}
-                        />
+                        <div className="flex flex-col gap-1.5">
+                            <InputField
+                                id="department"
+                                label="Department"
+                                placeholder="Enter department"
+                                {...register("department")}
+                                error={errors.department?.message}
+                                required
+                            />
+                        </div>
                     </div>
 
                     <h3 className="text-sm font-bold uppercase tracking-widest text-[#3882a5] mt-6 mb-2">
@@ -345,30 +343,13 @@ export function NewEmployeeModal({
                     </h3>
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-
-
-                        <Controller
-                            name="designation"
-                            control={control}
-                            rules={{ required: "Position is required" }}
-                            render={({ field }) => (
-                                <div className="flex flex-col gap-1.5">
-                                    <Label className="text-sm font-medium">
-                                        Position <span className="text-destructive">*</span>
-                                    </Label>
-                                    <Input
-                                        id="designation"
-                                        placeholder="e.g., CEO, VP, HR, Manager"
-                                        value={field.value || ""}
-                                        onChange={(e) => field.onChange(e.target.value)}
-                                        aria-required="true"
-                                        className={`pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.designation ? "border-destructive" : ""}`}
-                                    />
-                                    {errors.designation && (
-                                        <span className="text-destructive text-xs">{errors.designation.message}</span>
-                                    )}
-                                </div>
-                            )}
+                        <InputField
+                            id="designation"
+                            label="Position"
+                            placeholder="e.g., CEO, VP, HR, Manager"
+                            {...register("designation")}
+                            error={errors.designation?.message}
+                            required
                         />
 
                         {(isEditMode && employeeData?.isVerified) && (
@@ -385,7 +366,7 @@ export function NewEmployeeModal({
                                             onChange={(val) => field.onChange(val)}
                                             error={errors.status?.message}
                                             isClearable={false}
-                                            className="pl-4 h-12 bg-muted/30 border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
+                                            className="pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium"
                                         />
                                     </div>
                                 )}
@@ -406,17 +387,36 @@ export function NewEmployeeModal({
                 >
                     Cancel
                 </ActionButton>
-                <ActionButton
-                    type="submit"
-                    variant="outline-primary"
-                    disabled={isLoading || isLoadingEmployee}
-                    size="xl"
-                    className="w-full min-w-[160px] px-6 sm:w-auto"
+                <SubscriptionActionButtons
+                    isExpired={isExpired}
+                    hasReachedLimit={hasReachedEmployeeLimit && !isEditMode}
+                    limitType="employee"
+                    showUpgradeModal={showUpgradeModal}
+                    openUpgradeModal={openUpgradeModal}
+                    closeUpgradeModal={closeUpgradeModal}
+                    upgradeLabel="Upgrade Plan"
+                    icon={UserPlus}
+                    className="w-full min-w-[160px] px-6 sm:w-auto text-white"
                 >
-                    {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-                    {isEditMode ? "Update Employee" : "Create Employee"}
-                </ActionButton>
+                    <ActionButton
+                        type="submit"
+                        variant="outline-primary"
+                        disabled={isLoading || isLoadingEmployee || isFileUploading}
+                        size="xl"
+                        className="w-full min-w-[160px] px-6 sm:w-auto"
+                    >
+                        {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : isFileUploading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+                        {isFileUploading ? "Uploading Photo..." : isEditMode ? "Update Employee" : "Create Employee"}
+                    </ActionButton>
+                </SubscriptionActionButtons>
             </div>
+
+            {/* Upgrade Modal is handled by SubscriptionActionButtons if limit reached, 
+                but we might still need it if we're not using the component directly in some logic. 
+                However, for this form, the component above is sufficient. */}
+
+
+
         </form>
     );
 

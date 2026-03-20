@@ -5,3 +5,4 @@ export * from "./appointmentApi";
 export * from "./visitorApi";
 export * from "./uploadApi";
 export * from "./inquiryApi";
+export * from "./safeinProfileApi";

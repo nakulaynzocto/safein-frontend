@@ -4,7 +4,7 @@ import { createUrlParams } from "@/utils/helpers";
 export interface SpecialBooking {
     _id: string;
     visitorName: string;
-    visitorEmail: string;
+    visitorEmail?: string;
     visitorPhone: string;
     employeeId: {
         _id: string;
@@ -17,6 +17,8 @@ export interface SpecialBooking {
     scheduledTime: string;
     accompanyingCount: number;
     notes?: string;
+    address?: string;
+    vehicleNumber?: string;
     status: 'pending' | 'verified' | 'cancelled';
     createdBy: string;
     visitorId?: string;
@@ -66,7 +68,14 @@ export const specialBookingApi = baseApi.injectEndpoints({
                 body: data,
             }),
             transformResponse: (response: any) => response.data || response,
-            invalidatesTags: [{ type: "AppointmentLink", id: "LIST" }, { type: "Appointment", id: "LIST" }],
+            invalidatesTags: [
+                { type: "AppointmentLink", id: "LIST" },
+                { type: "Appointment", id: "LIST" },
+                { type: "Appointment", id: "STATS" },
+                { type: "Visitor", id: "LIST" },
+                { type: "Visitor", id: "COUNT" },
+                "DashboardStats" as any
+            ],
         }),
         updateSpecialBookingNote: builder.mutation<any, { bookingId: string; notes: string }>({
             query: (data) => ({

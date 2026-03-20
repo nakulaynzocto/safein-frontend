@@ -94,7 +94,11 @@ export function EnhancedDatePicker({
             {label && (
                 <label className="text-foreground text-sm font-medium">
                     {label}
-                    {required && <span className="ml-1 text-red-500">*</span>}
+                    {required ? (
+                        <span className="ml-1 text-red-500 font-bold">*</span>
+                    ) : (
+                        <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                    )}
                 </label>
             )}
             <Popover open={open} onOpenChange={setOpen} modal={true}>
@@ -102,7 +106,7 @@ export function EnhancedDatePicker({
                     <Button
                         variant="outline"
                         className={cn(
-                            "group h-12 w-full justify-start text-left font-medium rounded-xl bg-muted/30 pl-4 border-border", // Updated styles
+                            "group h-12 w-full justify-start text-left font-medium rounded-xl bg-background pl-4 border-border", // Updated styles
                             !dateValue && "text-muted-foreground hover:bg-[#3882a5] hover:text-white",
                             error && "border-destructive focus:ring-destructive",
                         )}

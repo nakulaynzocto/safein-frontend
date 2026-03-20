@@ -11,6 +11,9 @@ import { useAppSelector } from "@/store/hooks";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { routes } from "@/utils/routes";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
+import { UserPlus } from "lucide-react";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 
 interface DashboardHeaderProps {
     companyName?: string;
@@ -19,9 +22,13 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ companyName }: DashboardHeaderProps) {
     const router = useRouter();
     const { user } = useAppSelector((state) => state.auth);
-    const { hasReachedAppointmentLimit } = useSubscriptionStatus();
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    
+    const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal
+    } = useSubscriptionActions();
+
     // Check if user is employee
     const isEmployee = checkIsEmployee(user);
 
@@ -30,33 +37,28 @@ export function DashboardHeader({ companyName }: DashboardHeaderProps) {
             <div className="flex w-full gap-2 sm:w-auto">
                 {!isEmployee && (
                     // For admin: Show "New Appointment" button
-                    <>
-                        {hasReachedAppointmentLimit ? (
-                            <>
-                                <Button
-                                    onClick={() => setShowUpgradeModal(true)}
-                                    variant="outline-primary"
-                                    className="flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-muted/30 text-xs whitespace-nowrap sm:w-auto sm:text-sm"
-                                >
-                                    <CalendarPlus className="mr-1 h-5 w-5 shrink-0 sm:mr-2" />
-                                    <span className="hidden sm:inline">Upgrade to Create More</span>
-                                    <span className="sm:hidden">Upgrade</span>
-                                </Button>
-                                <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
-                            </>
-                        ) : (
-                            <Button
-                                variant="outline-primary"
-                                className="flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-muted/30 text-xs whitespace-nowrap sm:w-auto sm:text-sm"
-                                asChild
-                            >
-                                <Link href={routes.privateroute.APPOINTMENTCREATE} prefetch>
-                                    <CalendarPlus className="mr-1.5 h-5 w-5 shrink-0" />
-                                    New Appointment
-                                </Link>
-                            </Button>
-                        )}
-                    </>
+                    <SubscriptionActionButtons
+                        isExpired={isExpired}
+                        hasReachedLimit={hasReachedAppointmentLimit}
+                        limitType="appointment"
+                        showUpgradeModal={showUpgradeModal}
+                        openUpgradeModal={openUpgradeModal}
+                        closeUpgradeModal={closeUpgradeModal}
+                        upgradeLabel="Upgrade Plan"
+                        icon={UserPlus}
+                        className="h-12 w-full sm:w-auto text-white"
+                    >
+                        <Button
+                            variant="outline-primary"
+                            className="flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-muted/30 text-xs whitespace-nowrap sm:w-auto sm:text-sm"
+                            asChild
+                        >
+                            <Link href={routes.privateroute.APPOINTMENTCREATE} prefetch>
+                                <CalendarPlus className="mr-1.5 h-5 w-5 shrink-0" />
+                                New Appointment
+                            </Link>
+                        </Button>
+                    </SubscriptionActionButtons>
                 )}
             </div>
         </PageHeader>

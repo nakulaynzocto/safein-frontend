@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, MessageSquareText, X } from 'lucide-react';
+import { MessageSquare, MessageSquareText, X, Loader2 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { toast } from 'sonner';
 import { ChatHeader } from './ChatHeader';
@@ -13,7 +13,10 @@ import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { supportSocketService } from "@/lib/support-socket";
 import { useLazyGetTicketHistoryQuery, useCreateTicketMutation, useSendMessageMutation } from "@/store/api/supportApi";
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setAssistantOpen } from '@/store/slices/uiSlice';
+import { setAssistantOpen, setAssistantMessage } from '@/store/slices/uiSlice';
+import { useGoogleLoginMutation } from '@/store/api/authApi';
+import { setCredentials } from '@/store/slices/authSlice';
+import { isPublicActionRoute } from '@/utils/routes';
 
 // Project color scheme - matching your existing brand
 const GRADIENT_PRIMARY = "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)";
@@ -21,11 +24,22 @@ const GRADIENT_ACCENT = "linear-gradient(135deg, var(--accent) 0%, var(--primary
 const COLOR_PRIMARY = "var(--primary)";
 const COLOR_ACCENT = "var(--accent)";
 
+// Types
+interface Message {
+    _id?: string;
+    sender: "user" | "agent";
+    senderId?: string;
+    content: string;
+    createdAt: Date;
+    type?: string;
+    attachments?: Array<{ url: string; name: string; type: string }>;
+}
+
 export default function SupportWidget() {
     const dispatch = useAppDispatch();
     const { isAssistantOpen: isOpen } = useAppSelector((state) => state.ui);
     const setIsOpen = (val: boolean) => dispatch(setAssistantOpen(val));
-    const [messages, setMessages] = useState<any[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isConnected, setIsConnected] = useState(false);
 
@@ -39,8 +53,10 @@ export default function SupportWidget() {
     const [mounted, setMounted] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [isAuthenticating, setIsAuthenticating] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
-    const { user, token, isAuthenticated, isCurrentRoutePrivate } = useAuthSubscription(); // Get employee session if logged in
+    const { user, token, isAuthenticated, isCurrentRoutePrivate, pathname } = useAuthSubscription(); // Get employee session if logged in
+    const [uploadedFile, setUploadedFile] = useState<{ url: string; name: string; type: string } | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const socketRef = useRef<any>(null);
     const isOpenRef = useRef(isOpen);
@@ -49,6 +65,7 @@ export default function SupportWidget() {
     const [fetchHistory] = useLazyGetTicketHistoryQuery();
     const [restCreateTicket] = useCreateTicketMutation();
     const [restSendMessage] = useSendMessageMutation();
+    const [googleLogin] = useGoogleLoginMutation();
 
     // --- Effects ---
 
@@ -70,16 +87,33 @@ export default function SupportWidget() {
         let socket: any = null;
 
         const savedGoogleToken = localStorage.getItem("safein_support_g_token");
-        // Hard check to ensure it's not a string "undefined" or empty
-        if (savedGoogleToken && savedGoogleToken !== "undefined" && savedGoogleToken !== "null") {
+
+        // Priority 1: Main App Session (Employee/Admin)
+        if (token && isAuthenticated) {
+            setUserMode("public_verified");
+            // Pass both tokens if available, backend will prioritize appropriately
+            socket = supportSocketService.connect(token, savedGoogleToken || undefined);
+            socketRef.current = socket;
+        }
+        // Priority 2: Saved Google Session (Public User / Guest)
+        else if (savedGoogleToken && savedGoogleToken !== "undefined" && savedGoogleToken !== "null") {
             setGoogleToken(savedGoogleToken);
             setUserMode("public_verified");
             socket = supportSocketService.connect(undefined, savedGoogleToken);
             socketRef.current = socket;
         } else {
-            if (savedGoogleToken) localStorage.removeItem("safein_support_g_token");
-            setUserMode("none");
-            return;
+            // Handle Logout or No Session
+            // We use a small timeout to prevent flicker during fast auth transitions (like Google -> Main App)
+            const timeout = setTimeout(() => {
+                if (!isAuthenticating && !googleToken && !token) {
+                    if (savedGoogleToken) localStorage.removeItem("safein_support_g_token");
+                    setUserMode("none");
+                    setMessages([]);
+                    setTicketId(null);
+                    localStorage.removeItem("safein_support_ticket_id");
+                }
+            }, 500);
+            return () => clearTimeout(timeout);
         }
 
         if (!socket) return;
@@ -106,14 +140,20 @@ export default function SupportWidget() {
             setIsLoading(false);
             // Handle both "Authentication error" and "Authentication failed" messages
             if (err.message && (err.message.includes("Authentication error") || err.message.includes("Authentication failed"))) {
-                console.warn("[Support Chat] Auth failed, reverting to guest mode...");
-                localStorage.removeItem("safein_support_g_token");
-                setGoogleToken(null);
-                setUserMode("none");
-                // Stop the socket from constantly retrying with a bad token
+                // If we are logged in via main app, don't revert to "none" mode immediately
+                // Only revert if we were explicitly using Priority 2 (googleToken only)
+                if (!token || !isAuthenticated) {
+                    localStorage.removeItem("safein_support_g_token");
+                    setGoogleToken(null);
+                    setUserMode("none");
+                } else {
+                    console.warn("[Support Chat] Support socket auth failed for main app session.");
+                    // Keep userMode as "public_verified" so they see the chat window loading or error state
+                    // rather than being kicked back to login button
+                }
                 if (socket) socket.disconnect();
             } else {
-                console.error("[Support Chat] Connection error:", err.message);
+                console.warn("[Support Chat] Real-time server unreachable. Falling back to REST API.", err.message);
             }
         };
 
@@ -136,7 +176,7 @@ export default function SupportWidget() {
             socket.off("connect_error", onConnectError);
             socket.off("disconnect", onDisconnect);
         };
-    }, [mounted, googleToken]);
+    }, [mounted, googleToken, token, isAuthenticated]);
 
     // 2. Auto-scroll to bottom of chat
     useEffect(() => {
@@ -151,6 +191,22 @@ export default function SupportWidget() {
             setUnreadCount(0);
         }
     }, [isOpen]);
+
+    // 4. Handle auto-filled message from Redux
+    const { initialAssistantMessage } = useAppSelector((state) => state.ui);
+
+    useEffect(() => {
+        if (isOpen && initialAssistantMessage) {
+            // Pre-fill the input
+            setInput(initialAssistantMessage);
+            
+            // Clear the message in Redux so it doesn't keep persistent
+            dispatch(setAssistantMessage(""));
+            
+            // Focus input if possible (this might need next tick or higher level component handle)
+            // But just setting input is what was requested (auto enter / auto print)
+        }
+    }, [isOpen, initialAssistantMessage, dispatch, setAssistantMessage]);
 
     // --- Handlers ---
 
@@ -190,6 +246,19 @@ export default function SupportWidget() {
             localStorage.setItem("safein_support_g_token", gToken);
             setGoogleToken(gToken);
             setUserMode("public_verified");
+
+            // ALSO log them into the main app so they are "really" logged in
+            try {
+                setIsAuthenticating(true);
+                const result = await googleLogin({ token: gToken }).unwrap();
+                if (result.token && result.user) {
+                    dispatch(setCredentials(result));
+                }
+            } catch (err) {
+                console.error("Failed to sync main app auth with support google login:", err);
+            } finally {
+                setIsAuthenticating(false);
+            }
         },
         onError: () => {
             toast.error("Google Login Failed");
@@ -206,17 +275,26 @@ export default function SupportWidget() {
     };
 
     const handleSendMessage = async () => {
-        if (!input.trim()) return;
+        if (!input.trim() && !uploadedFile) return;
 
         const msgContent = input;
+        const msgAttachments = uploadedFile ? [uploadedFile] : undefined;
+        
         setInput("");
+        setUploadedFile(null);
         setIsSending(true);
+
+        const eventData: any = { ticketId, content: msgContent };
+        if (msgAttachments) {
+            eventData.attachments = msgAttachments;
+            eventData.type = "image";
+        }
 
         // Use Socket if connected, otherwise fallback to REST
         if (socketRef.current && isConnected) {
             if (!ticketId) {
                 // Create ticket via socket
-                socketRef.current.emit("create_ticket", { subject: "Support Chat", message: msgContent }, (response: any) => {
+                socketRef.current.emit("create_ticket", { subject: "Support Chat", message: msgContent, attachments: msgAttachments }, (response: any) => {
                     setIsSending(false);
                     if (response.status === "ok") {
                         const newTicketId = response.ticket.ticketId;
@@ -227,12 +305,13 @@ export default function SupportWidget() {
                         syncTicketAndHistory(socketRef.current);
                     } else {
                         setInput(msgContent);
+                        setUploadedFile(msgAttachments?.[0] || null);
                         toast.error(response.message || "Failed to start chat");
                     }
                 });
             } else {
                 // Send message via socket
-                socketRef.current.emit("send_message", { ticketId, content: msgContent }, (response: any) => {
+                socketRef.current.emit("send_message", eventData, (response: any) => {
                     setIsSending(false);
                     if (response.status === "ok") {
                         setMessages(prev => {
@@ -241,6 +320,7 @@ export default function SupportWidget() {
                         });
                     } else {
                         setInput(msgContent);
+                        setUploadedFile(msgAttachments?.[0] || null);
                         toast.error(response.message || "Failed to send message");
                     }
                 });
@@ -251,7 +331,11 @@ export default function SupportWidget() {
         // Fallback to REST API if socket not connected
         try {
             if (!ticketId) {
-                const response: any = await restCreateTicket({ subject: "Support Chat", message: msgContent }).unwrap();
+                const response: any = await restCreateTicket({ 
+                    subject: "Support Chat", 
+                    message: msgContent,
+                    attachments: msgAttachments 
+                }).unwrap();
                 setIsSending(false);
                 if (response.success) {
                     setTicketId(response.data.ticket.ticketId);
@@ -262,7 +346,12 @@ export default function SupportWidget() {
                     });
                 }
             } else {
-                const response: any = await restSendMessage({ ticketId, content: msgContent }).unwrap();
+                const response: any = await restSendMessage({ 
+                    ticketId, 
+                    content: msgContent,
+                    attachments: msgAttachments,
+                    type: msgAttachments ? "image" : "text"
+                }).unwrap();
                 setIsSending(false);
                 if (response.success) {
                     setMessages(prev => {
@@ -274,6 +363,7 @@ export default function SupportWidget() {
         } catch (error: any) {
             setIsSending(false);
             setInput(msgContent);
+            setUploadedFile(msgAttachments?.[0] || null);
             toast.error(error.data?.message || "Connection error. Please try again.");
         }
     };
@@ -287,7 +377,10 @@ export default function SupportWidget() {
 
     // --- Render ---
 
-    if (!mounted) return null;
+    // 5. Hide on public action routes (visitor form, email actions, etc.)
+    const isPublicAction = useMemo(() => isPublicActionRoute(pathname), [pathname]);
+
+    if (!mounted || isPublicAction) return null;
 
     return (
         <div className="fixed inset-0 z-[9999] pointer-events-none flex flex-col items-end justify-end p-4 sm:p-6 font-sans">
@@ -321,34 +414,48 @@ export default function SupportWidget() {
                                     <div className="absolute bottom-10 right-10 w-24 h-24 bg-primary-light/10 rounded-full blur-2xl"></div>
                                 </div>
 
+                                {isLoading || isAuthenticating ? (
+                                    <div className="flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-500">
+                                        <div className="relative">
+                                            <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
+                                            <Loader2 className="w-12 h-12 animate-spin text-primary relative z-10" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="font-bold text-gray-900 dark:text-white">Authenticating...</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">Please wait while we secure your connection</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-150">
+                                            <h4 className="font-bold text-gray-900 dark:text-white text-xl">Welcome! 👋</h4>
+                                            <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed">
+                                                This authorization is for security purposes. Sign in with Google to start chatting with our support team.
+                                            </p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed pt-2">
+                                                You can also contact our support team by phone:
+                                            </p>
+                                            <a href="tel:+918699966076" className="text-sm font-semibold text-primary hover:text-accent transition-colors">
+                                                +91 86999 66076
+                                            </a>
+                                        </div>
 
-                                <div className="space-y-3 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-150">
-                                    <h4 className="font-bold text-gray-900 dark:text-white text-xl">Welcome! 👋</h4>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed">
-                                        This authorization is for security purposes. Sign in with Google to start chatting with our support team.
-                                    </p>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed pt-2">
-                                        You can also contact our support team by phone:
-                                    </p>
-                                    <a href="tel:+918699966076" className="text-sm font-semibold text-primary hover:text-accent transition-colors">
-                                        +91 86999 66076
-                                    </a>
-                                </div>
+                                        <Button
+                                            onClick={() => loginWithGoogle()}
+                                            className="w-full bg-white dark:bg-slate-800 text-gray-800 dark:text-white border-2 border-gray-200 dark:border-slate-700 hover:border-accent dark:hover:border-accent hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 shadow-lg flex items-center justify-center gap-3 h-12 rounded-xl font-semibold group animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300"
+                                        >
+                                            <img src="https://www.google.com/favicon.ico" alt="G" className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                            Continue with Google
+                                        </Button>
 
-                                <Button
-                                    onClick={() => loginWithGoogle()}
-                                    className="w-full bg-white dark:bg-slate-800 text-gray-800 dark:text-white border-2 border-gray-200 dark:border-slate-700 hover:border-accent dark:hover:border-accent hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 shadow-lg flex items-center justify-center gap-3 h-12 rounded-xl font-semibold group animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300"
-                                >
-                                    <img src="https://www.google.com/favicon.ico" alt="G" className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    Continue with Google
-                                </Button>
-
-                                <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1.5 animate-in fade-in duration-700 delay-500">
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                                    </svg>
-                                    Secure & encrypted • We'll notify you via email
-                                </p>
+                                        <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1.5 animate-in fade-in duration-700 delay-500">
+                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                            </svg>
+                                            Secure & encrypted • We'll notify you via email
+                                        </p>
+                                    </>
+                                )}
                             </div>
                         )}
 
@@ -370,6 +477,9 @@ export default function SupportWidget() {
                                     handleKeyPress={handleKeyPress}
                                     isLoading={isLoading}
                                     isSending={isSending}
+                                    uploadedFile={uploadedFile}
+                                    setUploadedFile={setUploadedFile}
+                                    isSupportChat={true}
                                 />
                             </>
                         )}

@@ -12,7 +12,7 @@ import { AppointmentsTable } from "./AppointmentsTable";
 import { QuickActions } from "./QuickActions";
 import { DashboardCharts } from "./dashboardCharts";
 import { calculateAppointmentStats } from "./dashboardUtils";
-import { DashboardSkeleton } from "@/components/common/tableSkeleton";
+import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { routes } from "@/utils/routes";
@@ -21,10 +21,16 @@ import { ErrorDisplay } from "@/components/common/ErrorDisplay";
 import { LoadingTimeoutDisplay } from "@/components/common/LoadingTimeoutDisplay";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { getErrorMessage } from "@/utils/errorUtils";
+import { APIErrorState } from "@/components/common/APIErrorState";
+import { useAppDispatch } from "@/store/hooks";
+import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 
 export function UnifiedDashboard() {
     const router = useRouter();
+    const dispatch = useAppDispatch();
+    const { hasReachedEmployeeLimit, hasReachedAppointmentLimit, isExpired, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [limitType, setLimitType] = useState<'employees' | 'appointments' | 'visitors' | 'spotPasses' | null>(null);
     const [retryCount, setRetryCount] = useState(0);
     const [loadingTimeout, setLoadingTimeout] = useState(false);
 
@@ -85,7 +91,6 @@ export function UnifiedDashboard() {
         refetchOnFocus: false,
     });
 
-    const { hasReachedAppointmentLimit, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
     const { user } = useAppSelector((state) => state.auth);
 
     const isLoading = appointmentsLoading || employeesLoading || visitorsLoading || statsLoading;
@@ -119,6 +124,7 @@ export function UnifiedDashboard() {
                 approvedAppointments: 0,
                 rejectedAppointments: 0,
                 completedAppointments: 0,
+                checkedInAppointments: 0,
                 timeOutAppointments: 0,
             };
         }
@@ -129,7 +135,8 @@ export function UnifiedDashboard() {
             approvedAppointments: appointmentStatsData.approved || 0,
             rejectedAppointments: appointmentStatsData.rejected || 0,
             completedAppointments: appointmentStatsData.completed || 0,
-            timeOutAppointments: appointmentStatsData.cancelled || 0,
+            checkedInAppointments: appointmentStatsData.checked_in || 0,
+            timeOutAppointments: appointmentStatsData.time_out || 0,
         };
     }, [appointmentStatsData]);
 
@@ -138,14 +145,16 @@ export function UnifiedDashboard() {
     const handleScheduleAppointment = useCallback(() => {
         if (isEmployee) {
             router.push(routes.privateroute.APPOINTMENT_LINKS);
+        } else if (isExpired) {
+            setLimitType("appointments");
+            setShowUpgradeModal(true);
+        } else if (hasReachedAppointmentLimit) {
+            dispatch(setAssistantMessage(`Hi, I've reached my appointment limit. Please help me upgrade my plan.`));
+            dispatch(setAssistantOpen(true));
         } else {
-            if (hasReachedAppointmentLimit) {
-                setShowUpgradeModal(true);
-            } else {
-                router.push(routes.privateroute.APPOINTMENTCREATE);
-            }
+            router.push(routes.privateroute.APPOINTMENTCREATE);
         }
-    }, [isEmployee, hasReachedAppointmentLimit, router]);
+    }, [isEmployee, isExpired, hasReachedAppointmentLimit, router, dispatch]);
 
     const hasError = useMemo(
         () => appointmentsError || employeesError || visitorsError,
@@ -161,7 +170,7 @@ export function UnifiedDashboard() {
     }, [refetchAppointments, refetchEmployees, refetchVisitors, refetchSubscriptionStatus]);
 
     if (shouldShowSkeleton && !hasError && !loadingTimeout) {
-        return <DashboardSkeleton />;
+        return <PageSkeleton type="dashboard" />;
     }
 
     if (loadingTimeout && isLoading && !hasData && !hasError) {
@@ -182,17 +191,18 @@ export function UnifiedDashboard() {
 
         return (
             <div className="space-y-6">
-                <ErrorDisplay
+                <APIErrorState
                     title="Failed to load dashboard data"
-                    message={errorMessages || "Failed to load dashboard data"}
+                    description={errorMessages}
                     onRetry={handleRetry}
+                    error={appointmentsError || employeesError || visitorsError}
                 />
             </div>
         );
     }
 
     return (
-        <div className={`space-y-4 sm:space-y-6 ${isEmployee ? 'px-1 sm:px-0' : ''}`}>
+        <div className="space-y-4 sm:space-y-6">
             <DashboardCharts
                 appointmentsData={appointments}
                 employeesData={[]} // Charts use appointments data mainly, employee/visitor lists not needed
@@ -211,15 +221,20 @@ export function UnifiedDashboard() {
                     description: "No recent appointment activities found.",
                     primaryActionLabel: isEmployee
                         ? "Visitor Invites"
-                        : (hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment"),
+                        : (isExpired || hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment"),
                 }}
-                onPrimaryAction={handleScheduleAppointment}
+                onPrimaryAction={
+                    isEmployee
+                        ? handleScheduleAppointment
+                        : (isExpired || hasReachedAppointmentLimit
+                            ? () => { setLimitType("appointments"); setShowUpgradeModal(true); }
+                            : handleScheduleAppointment)
+                }
             />
 
             <QuickActions />
 
-            <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+            <UpgradePlanModal isOpen={showUpgradeModal} onClose={() => { setShowUpgradeModal(false); setLimitType(null); }} limitType={limitType} />
         </div>
     );
 }
-

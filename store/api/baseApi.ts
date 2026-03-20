@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../store";
 import { logout } from "../slices/authSlice";
-import { routes } from "../../utils/routes";
+import { routes, isPublicRoute, isPrivateRoute, isGuestOnlyRoute, isPublicActionRoute } from "../../utils/routes";
 import { clearAuthData } from "../../utils/helpers";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4010/api/v1";
@@ -38,13 +38,23 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
                 const searchParams = new URLSearchParams(window.location.search);
                 const hasAppointmentToken = searchParams.has("token") || searchParams.has("appointmentToken");
 
+                // Check if current path is a public action or public route using utilities
+                const isPublicAction = isPublicActionRoute(currentPath);
+                const isPublic = isPublicRoute(currentPath);
+
                 const isOnPublicBookingPage =
-                    currentPath?.includes("/book-appointment/") ||
-                    currentPath?.includes("/verify/") ||
-                    currentPath?.includes("/email-action/") ||
+                    isPublicAction ||
+                    isPublic ||
                     hasAppointmentToken;
 
                 if (isOnPublicBookingPage || isUploadRequest) {
+                    // Just clear auth data but don't redirect if we're on a public page
+                    // This allows the user to stay on the public page (e.g. Home, Help) 
+                    // even if their old session/token has expired.
+                    if (!isLoginRequest && !isLogoutRequest && !isRegisterRequest) {
+                        api.dispatch(logout());
+                        clearAuthData();
+                    }
                     return result;
                 }
             }
@@ -58,13 +68,11 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
                     clearAuthData();
 
                     const currentPath = window.location.pathname;
-                    const isOnAuthPage =
-                        currentPath === routes.publicroute.LOGIN ||
-                        currentPath === routes.publicroute.REGISTER ||
-                        currentPath === routes.publicroute.FORGOT_PASSWORD ||
-                        currentPath === routes.publicroute.RESET_PASSWORD;
+                    const isOnAuthPage = isGuestOnlyRoute(currentPath);
+                    const isPrivate = isPrivateRoute(currentPath);
 
-                    if (!isOnAuthPage) {
+                    // ONLY redirect if we are on a private route and not already on an auth page
+                    if (isPrivate && !isOnAuthPage) {
                         // Use setTimeout to allow Redux to propagate if app is mounted
                         // causing cleaner exit
                         setTimeout(() => {

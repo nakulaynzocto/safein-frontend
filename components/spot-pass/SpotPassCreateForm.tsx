@@ -1,21 +1,27 @@
 "use client";
 
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { validatePhone, formatPhoneForSubmission } from "@/utils/phoneUtils";
 import { useRouter } from "next/navigation";
 import { routes } from "@/utils/routes";
 import { FormContainer } from "@/components/common/formContainer";
 import { InputField } from "@/components/common/inputField";
 import { SelectField } from "@/components/common/selectField";
 import { ImageUploadField } from "@/components/common/imageUploadField";
+import { PhoneInputField } from "@/components/common/phoneInputField";
 import { TextareaField } from "@/components/common/textareaField";
 import { AsyncSelectField } from "@/components/common/asyncSelectField";
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/common/actionButton";
 import { CheckCircle, X } from "lucide-react";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useCreateSpotPassMutation } from "@/store/api/spotPassApi";
 import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
+import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 
 // Form Schema
 const spotPassSchema = yup.object({
@@ -29,17 +35,19 @@ const spotPassSchema = yup.object({
         .string()
         .required("Phone number is required")
         .trim()
-        .matches(/^[\+]?[0-9]{10,15}$/, "Phone number must be valid (10-15 digits)"),
-    gender: yup.string().required("Gender is required"),
+        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+            validatePhone(value)
+        ),
+    gender: yup.string().trim().required("Gender is required"),
     address: yup
         .string()
         .required("Address is required")
         .trim()
         .min(5, "Address must be at least 5 characters")
         .max(500, "Address cannot exceed 500 characters"),
-    notes: yup.string().default("").trim(),
-    employeeId: yup.string().optional(),
-    photo: yup.string().default(""),
+    notes: yup.string().trim().optional(),
+    employeeId: yup.string().trim().optional(),
+    photo: yup.string().trim().optional(),
 });
 
 type SpotPassFormData = {
@@ -57,6 +65,13 @@ export function SpotPassCreateForm() {
     const [createSpotPass, { isLoading }] = useCreateSpotPassMutation();
     const { loadEmployeeOptions } = useEmployeeSearch();
 
+    const { hasReachedSpotPassLimit, isExpired } = useSubscriptionStatus();
+    const {
+        showUpgradeModal,
+        openUpgradeModal,
+        closeUpgradeModal,
+    } = useSubscriptionActions();
+
     const {
         register,
         handleSubmit,
@@ -65,7 +80,7 @@ export function SpotPassCreateForm() {
         control,
         formState: { errors },
     } = useForm<SpotPassFormData>({
-        resolver: yupResolver(spotPassSchema),
+        resolver: yupResolver(spotPassSchema) as any,
         defaultValues: {
             name: "",
             phone: "",
@@ -77,10 +92,16 @@ export function SpotPassCreateForm() {
         },
     });
 
+    const [isFileUploading, setIsFileUploading] = useState(false);
+
     const onSubmit = async (data: SpotPassFormData) => {
+        // Format phone number before submission
+        const submitPhone = formatPhoneForSubmission(data.phone);
+
         try {
             await createSpotPass({
                 ...data,
+                phone: submitPhone,
                 employeeId: data.employeeId || undefined
             }).unwrap();
             showSuccessToast("Spot Pass generated successfully!");
@@ -105,10 +126,11 @@ export function SpotPassCreateForm() {
                                     name="photo"
                                     register={register}
                                     setValue={setValue}
-                                    errors={errors.photo}
+                                    errors={errors.photo as any}
                                     initialUrl={watch("photo")}
                                     enableImageCapture={true}
                                     variant="avatar"
+                                    onUploadStatusChange={setIsFileUploading}
                                 />
                             </div>
                         </div>
@@ -123,16 +145,24 @@ export function SpotPassCreateForm() {
                                     label="Full Name"
                                     placeholder="Enter visitor's full name"
                                     {...register("name")}
-                                    error={errors.name?.message}
+                                    error={errors.name?.message as string}
                                     required
                                 />
-                                <InputField
-                                    label="Phone Number"
-                                    placeholder="Enter mobile number"
-                                    {...register("phone")}
-                                    error={errors.phone?.message}
-                                    required
-                                    maxLength={15}
+                                <Controller
+                                    name="phone"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <PhoneInputField
+                                            id="phone"
+                                            label="Phone Number"
+                                            value={field.value || ""}
+                                            onChange={(value) => field.onChange(value)}
+                                            error={errors.phone?.message as string}
+                                            required
+                                            placeholder="Enter phone number"
+                                            defaultCountry="in"
+                                        />
+                                    )}
                                 />
                                 <SelectField
                                     label="Gender"
@@ -143,7 +173,7 @@ export function SpotPassCreateForm() {
                                     ]}
                                     value={watch("gender")}
                                     onChange={(val) => setValue("gender", val)}
-                                    error={errors.gender?.message}
+                                    error={errors.gender?.message as string}
                                     required
                                 />
 
@@ -161,7 +191,7 @@ export function SpotPassCreateForm() {
                                                 loadOptions={loadEmployeeOptions}
                                                 placeholder="Search employees..."
                                                 isClearable={true}
-                                                error={errors.employeeId?.message}
+                                                error={errors.employeeId?.message as string}
                                                 cacheOptions={true}
                                                 defaultOptions={true}
                                             />
@@ -175,7 +205,7 @@ export function SpotPassCreateForm() {
                                     label="Address"
                                     placeholder="Enter current address"
                                     {...register("address")}
-                                    error={errors.address?.message}
+                                    error={errors.address?.message as string}
                                     required
                                     rows={2}
                                 />
@@ -184,7 +214,7 @@ export function SpotPassCreateForm() {
                                     label="Notes (Optional)"
                                     placeholder="Any additional information or special requirements"
                                     {...register("notes")}
-                                    error={errors.notes?.message}
+                                    error={errors.notes?.message as string}
                                     rows={2}
                                 />
                             </div>
@@ -193,25 +223,48 @@ export function SpotPassCreateForm() {
 
                     {/* Action Buttons */}
                     <div className="flex flex-col-reverse gap-3 pt-6 border-t sm:flex-row sm:justify-end">
-                        <Button
+                        <ActionButton
                             type="button"
                             variant="outline"
-                            onClick={() => router.push(routes.privateroute.SPOT_PASS)}
-                            className="h-12 rounded-xl px-8 font-semibold text-gray-600 sm:w-auto"
-                        >
-                            <X className="mr-2 h-4 w-4" />
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
+                            onClick={() => router.back()}
                             disabled={isLoading}
-                            className="h-12 rounded-xl bg-[#3882a5] px-8 font-semibold text-white hover:bg-[#3882a5]/90 sm:w-auto"
+                            size="xl"
+                            className="w-full px-8 sm:w-auto"
                         >
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Generate Pass
-                        </Button>
+                            Cancel
+                        </ActionButton>
+                        <SubscriptionActionButtons
+                            isExpired={isExpired}
+                            hasReachedLimit={hasReachedSpotPassLimit}
+                            limitType="spotPass"
+                            showUpgradeModal={showUpgradeModal}
+                            openUpgradeModal={openUpgradeModal}
+                            closeUpgradeModal={closeUpgradeModal}
+                            upgradeLabel="Upgrade Plan"
+                            className="w-full sm:w-auto min-w-[180px]"
+                        >
+                            <ActionButton
+                                type="submit"
+                                variant="outline-primary"
+                                disabled={isLoading || isFileUploading}
+                                size="xl"
+                                className="w-full min-w-[180px] px-6 sm:w-auto"
+                            >
+                                {isLoading ? (
+                                    <>Generating...</>
+                                ) : isFileUploading ? (
+                                    <>Uploading Photo...</>
+                                ) : (
+                                    <>
+                                        <CheckCircle className="mr-2 h-4 w-4" />
+                                        Generate Spot Pass
+                                    </>
+                                )}
+                            </ActionButton>
+                        </SubscriptionActionButtons>
                     </div>
                 </form>
+
             </FormContainer>
         </div>
     );

@@ -6,7 +6,7 @@ import { PageSkeleton } from "@/components/common/pageSkeleton";
 
 export default function SpotPassPage() {
     return (
-        <Suspense fallback={<PageSkeleton />}>
+        <Suspense fallback={<PageSkeleton type="table" />}>
             <SpotPassList />
         </Suspense>
     );

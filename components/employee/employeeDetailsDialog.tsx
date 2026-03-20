@@ -25,12 +25,12 @@ const employee_details_config = [
     {
         key: "createdAt",
         label: "Created At",
-        format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm"),
+        format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' hh:mm a"),
     },
     {
         key: "updatedAt",
         label: "Updated At",
-        format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' HH:mm"),
+        format: (val: string) => formatDate(val, "MMM dd, yyyy 'at' hh:mm a"),
     },
 ];
 

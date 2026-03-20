@@ -4,7 +4,7 @@ import { createUrlParams } from "@/utils/helpers";
 export interface Visitor {
     _id: string;
     name: string;
-    email: string;
+    email?: string;
     phone: string;
     address: {
         street: string;
@@ -27,10 +27,6 @@ export interface Visitor {
         countryCode: string;
         phone: string;
     }>;
-    createdBy: string;
-    isDeleted: boolean;
-    deletedAt?: string | null;
-    deletedBy?: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -48,7 +44,7 @@ export interface VisitorSearchResponse {
 
 export interface CreateVisitorRequest {
     name: string;
-    email: string;
+    email?: string;
     phone: string;
     address: {
         street?: string;
@@ -166,7 +162,7 @@ export const visitorApi = baseApi.injectEndpoints({
                 }
                 return response;
             },
-            invalidatesTags: [{ type: "Visitor" as const, id: "LIST" }],
+            invalidatesTags: [{ type: "Visitor" as const, id: "LIST" }, { type: "Subscription" }],
         }),
 
         getVisitors: builder.query<VisitorListResponse, GetVisitorsQuery | void>({
@@ -252,6 +248,7 @@ export const visitorApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, id) => [
                 { type: "Visitor" as const, id },
                 { type: "Visitor" as const, id: "LIST" },
+                { type: "Subscription" },
             ],
         }),
     }),

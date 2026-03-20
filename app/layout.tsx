@@ -8,24 +8,31 @@ import { ErrorBoundary } from "@/components/common/errorBoundary";
 import { NavigationProgress } from "@/components/common/navigationProgress";
 import { NavigationProgressProvider } from "@/components/common/navigationProgressProvider";
 import { RouteOptimizer } from "@/components/common/routeOptimizer";
+import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
+import { InstallPromptBanner } from "@/components/pwa/InstallPromptBanner";
+import { NotificationHandler } from "@/components/notifications/NotificationHandler";
+import type { Viewport } from "next";
+
+export const viewport: Viewport = {
+    themeColor: "#3882a5",
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+};
 
 export const metadata: Metadata = {
-    title: "SafeIn - Professional Visitor Management & Appointment System | Aynzo",
+    title: "SafeIn",
     description:
-        "Transform your visitor management with SafeIn's comprehensive appointment scheduling system. Streamline check-ins, manage visitors, and enhance security with our professional platform. Start your free 3-day trial today!",
+        "Transform your visitor management with SafeIn's comprehensive platform in India. Streamline check-ins, manage society visitors, and enhance security with our professional system. Start your free 3-day trial today!",
     keywords: [
-        "visitor management system",
-        "appointment scheduling software",
-        "visitor check-in system",
-        "security management platform",
-        "visitor registration",
-        "appointment booking",
-        "visitor tracking",
-        "business security",
-        "visitor analytics",
-        "SafeIn management",
-        "Aynzo",
-        "digital solutions",
+        "best visitor management system in india",
+        "visitor management software india",
+        "gatekeeper app india",
+        "society visitor management india",
+        "appointment scheduling software india",
+        "digital visitor register india",
+        "SafeIn India",
+        "SafeIn",
     ],
     authors: [{ name: "Aynzo" }],
     creator: "Aynzo",
@@ -33,44 +40,64 @@ export const metadata: Metadata = {
     robots: {
         index: true,
         follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+        },
     },
     generator: "Next.js",
     icons: {
         icon: [
-            { url: "/aynzo-logo.png", sizes: "any", type: "image/png" },
-            { url: "/aynzo-logo.png", sizes: "32x32", type: "image/png" },
-            { url: "/aynzo-logo.png", sizes: "16x16", type: "image/png" },
+            { url: "/safein-logo.svg", sizes: "any", type: "image/svg+xml" },
+            { url: "/safein-identity.png", sizes: "32x32", type: "image/png" },
+            { url: "/safein-identity.png", sizes: "16x16", type: "image/png" },
         ],
-        apple: [{ url: "/aynzo-logo.png", sizes: "180x180", type: "image/png" }],
-        shortcut: "/aynzo-logo.png",
+        apple: [{ url: "/safein-logo.svg", sizes: "180x180", type: "image/svg+xml" }],
+        shortcut: "/safein-logo.svg",
     },
     openGraph: {
         type: "website",
-        locale: "en_US",
+        locale: "en_IN",
         url: "https://safein.aynzo.com",
         siteName: "SafeIn by Aynzo",
-        title: "SafeIn - Professional Visitor Management & Appointment System",
+        title: "SafeIn",
         description:
-            "Transform your visitor management with SafeIn's comprehensive appointment scheduling system. Streamline check-ins, manage visitors, and enhance security with our professional platform.",
+            "India's leading visitor management system. Features: Smart appointments, spot pass, real-time chat, and advanced security analytics. Perfect for offices & housing societies.",
         images: [
             {
-                url: "https://safein.aynzo.com/aynzo-logo.png",
+                url: "https://safein.aynzo.com/safein-identity.png",
                 width: 1200,
                 height: 630,
-                alt: "Aynzo Logo - SafeIn Visitor Management System",
+                alt: "SafeIn Logo - Visitor Management System India",
             },
         ],
     },
     twitter: {
         card: "summary_large_image",
-        title: "SafeIn - Professional Visitor Management & Appointment System",
-        description: "Transform your visitor management with SafeIn's comprehensive appointment scheduling system.",
-        images: ["https://safein.aynzo.com/aynzo-logo.png"],
-        creator: "@aynzo",
+        title: "SafeIn",
+        description: "India's smartest visitor management and appointment scheduling platform.",
+        images: ["https://safein.aynzo.com/safein-identity.png"],
+        creator: "@safein",
     },
     metadataBase: new URL("https://safein.aynzo.com"),
     alternates: {
         canonical: "https://safein.aynzo.com",
+        languages: {
+            "en-IN": "https://safein.aynzo.com",
+        },
+    },
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "default",
+        title: "SafeIn",
+    },
+    formatDetection: {
+        telephone: true,
+        address: true,
+        email: true,
     },
 };
 
@@ -80,17 +107,26 @@ export default function RootLayout({
     children: ReactNode;
 }>) {
     return (
-        <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+        <html lang="en-IN" className="scroll-smooth" suppressHydrationWarning>
             <head>
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
                 <link
-                    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
+                    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
                     rel="stylesheet"
                 />
-                <link rel="icon" href="/aynzo-logo.png" type="image/png" />
-                <link rel="apple-touch-icon" href="/aynzo-logo.png" />
-                <link rel="shortcut icon" href="/aynzo-logo.png" type="image/png" />
+                <link rel="icon" href="/safein-identity.png" type="image/png" />
+                <link rel="apple-touch-icon" href="/safein-identity.png" />
+                <link rel="shortcut icon" href="/safein-identity.png" type="image/png" />
+                <link rel="manifest" href="/manifest.webmanifest" />
+                <meta name="mobile-web-app-capable" content="yes" />
+                <meta name="apple-mobile-web-app-capable" content="yes" />
+                <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+                <meta name="apple-mobile-web-app-title" content="SafeIn" />
+                <meta name="geo.region" content="IN-PB" />
+                <meta name="geo.placename" content="Mohali" />
+                <meta name="geo.position" content="30.7046;76.7179" />
+                <meta name="ICBM" content="30.7046, 76.7179" />
                 {/* Structured Data for Organization Logo (Google Search) */}
                 <script
                     type="application/ld+json"
@@ -100,7 +136,7 @@ export default function RootLayout({
                             "@type": "Organization",
                             name: "Aynzo",
                             url: "https://aynzo.com",
-                            logo: "https://safein.aynzo.com/aynzo-logo.png",
+                            logo: "https://safein.aynzo.com/safein-identity.png",
                             sameAs: [
                                 "https://www.facebook.com/profile.php?id=61579388700386",
                                 "https://www.instagram.com/aynzo.world",
@@ -110,8 +146,10 @@ export default function RootLayout({
                             ],
                             contactPoint: {
                                 "@type": "ContactPoint",
-                                telephone: "+91-86999-66076",
+                                telephone: "+91 86999 66076",
                                 contactType: "customer service",
+                                areaServed: "IN",
+                                availableLanguage: "en",
                                 email: "support@aynzo.com",
                             },
                         }),
@@ -131,7 +169,7 @@ export default function RootLayout({
                                 name: "Aynzo",
                                 logo: {
                                     "@type": "ImageObject",
-                                    url: "https://safein.aynzo.com/aynzo-logo.png",
+                                    url: "https://safein.aynzo.com/safein-identity.png",
                                     width: 1200,
                                     height: 630,
                                 },
@@ -184,6 +222,10 @@ export default function RootLayout({
                             >
                                 {children}
                             </Suspense>
+                            {/* PWA & Notifications */}
+                            <ServiceWorkerRegistrar />
+                            <InstallPromptBanner />
+                            <NotificationHandler />
                         </Providers>
                     </NavigationProgressProvider>
                 </ErrorBoundary>
