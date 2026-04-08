@@ -16,6 +16,7 @@ import { CheckCircle } from "lucide-react";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { VisitorFormFields } from "./visitorFormFields";
 import { visitorSchema, VisitorFormData } from "./visitorSchema";
+import { useUserCountry } from "@/hooks/useUserCountry";
 
 interface VisitorRegisterProps {
     onComplete?: (data: CreateVisitorRequest, visitorId?: string) => void;
@@ -27,6 +28,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
     const [createVisitor, { isLoading, isSuccess }] = useCreateVisitorMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
     const [isFileUploading, setIsFileUploading] = useState(false);
+    const defaultCountry = useUserCountry();
 
     // Separate states for ID Verification and Security sections
     const hasIdVerificationData =
@@ -64,7 +66,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                 street: initialData?.address?.street || "",
                 city: initialData?.address?.city || "",
                 state: initialData?.address?.state || "",
-                country: initialData?.address?.country || "IN",
+                country: initialData?.address?.country || defaultCountry,
             },
             idProof: {
                 type: initialData?.idProof?.type || "",

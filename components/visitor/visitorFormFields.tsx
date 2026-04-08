@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { VisitorFormData, idProofTypes } from "./visitorSchema";
 import { useVisitorExistenceCheck } from "@/hooks/useVisitorExistenceCheck";
 import { EmergencyContactsField } from "./EmergencyContactsField";
+import { useUserCountry } from "@/hooks/useUserCountry";
 
 interface VisitorFormFieldsProps {
     register: UseFormRegister<VisitorFormData>;
@@ -46,6 +47,7 @@ export function VisitorFormFields({
 }: VisitorFormFieldsProps) {
     const watchedEmail = watch("email");
     const watchedPhone = watch("phone");
+    const defaultCountry = useUserCountry();
 
     const { emailExists, phoneExists } = useVisitorExistenceCheck(watchedEmail, watchedPhone, visitorId);
 
@@ -78,7 +80,7 @@ export function VisitorFormFields({
                                     error={errors.phone?.message || (phoneExists ? "This phone number is already registered" : undefined)}
                                     required
                                     placeholder="Enter phone number"
-                                    defaultCountry="in"
+                                    defaultCountry={watch("address.country") || defaultCountry}
                                 />
                             )}
                         />
@@ -129,6 +131,10 @@ export function VisitorFormFields({
                         setValue("address.country", v.country);
                         setValue("address.state", v.state);
                         setValue("address.city", v.city);
+                        // Sync phone country code when address country changes
+                        if (v.country) {
+                            setValue("phone", "");
+                        }
                     }}
                     errors={{
                         country: errors.address?.country?.message as string,

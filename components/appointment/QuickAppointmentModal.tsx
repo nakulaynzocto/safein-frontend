@@ -37,6 +37,7 @@ import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { UserPlus } from "lucide-react";
+import { useUserCountry } from "@/hooks/useUserCountry";
 
 const quickAppointmentSchema = (isEmployee: boolean) => yup.object().shape({
     name: yup.string().required("Name is required"),
@@ -79,6 +80,7 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
     const { user } = useAppSelector((state) => state.auth);
     const isEmployee = checkIsEmployee(user);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const userCountry = useUserCountry();
 
     const [createSpecialBooking] = useCreateSpecialBookingMutation();
     const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
@@ -212,7 +214,7 @@ export function QuickAppointmentModal({ open, onOpenChange, onSuccess }: QuickAp
                                                 placeholder="Enter mobile number"
                                                 error={errors.phone?.message}
                                                 required
-                                                defaultCountry="in"
+                                                defaultCountry={userCountry}
                                                 autoFocus={true}
                                             />
                                         )}

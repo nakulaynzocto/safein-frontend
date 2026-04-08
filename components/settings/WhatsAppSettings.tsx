@@ -18,6 +18,7 @@ import { ActionButton } from "@/components/common/actionButton";
 import { FormContainer } from "@/components/common/formContainer";
 import { APIErrorState } from "@/components/common/APIErrorState";
 import { useForm, Controller } from "react-hook-form";
+import { useUserCountry } from "@/hooks/useUserCountry";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { validatePhone } from "@/utils/phoneUtils";
@@ -70,6 +71,7 @@ export function WhatsAppSettings() {
     const [updateSettings, { isLoading: isUpdating }] = useUpdateSettingsMutation();
     const [initiateVerify, { isLoading: isInitiatingVerify }] = useInitiateWhatsAppVerificationMutation();
     const [confirmVerify, { isLoading: isConfirmingVerify }] = useConfirmWhatsAppVerificationMutation();
+    const userCountry = useUserCountry();
 
     const [showOtpModal, setShowOtpModal] = useState(false);
     const [otpValue, setOtpValue] = useState("");
@@ -236,7 +238,7 @@ export function WhatsAppSettings() {
                                                 placeholder="Enter sender number"
                                                 error={errors.senderNumber?.message}
                                                 required
-                                                defaultCountry="in"
+                                                defaultCountry={userCountry}
                                                 helperText="The verified WhatsApp number for your account"
                                             />
                                         )}
@@ -253,7 +255,7 @@ export function WhatsAppSettings() {
                                                 placeholder="Enter recipient number"
                                                 error={errors.testNumber?.message}
                                                 required
-                                                defaultCountry="in"
+                                                defaultCountry={userCountry}
                                                 helperText="Number where you will receive the verification code"
                                             />
                                         )}

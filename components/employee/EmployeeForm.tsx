@@ -27,6 +27,7 @@ import { InputField } from "../common/inputField";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { UserPlus } from "lucide-react";
+import { useUserCountry } from "@/hooks/useUserCountry";
 
 const employeeSchema = yup.object({
     name: yup
@@ -101,6 +102,7 @@ export function NewEmployeeModal({
     const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
     const [isFileUploading, setIsFileUploading] = useState(false);
+    const userCountry = useUserCountry();
 
     const { hasReachedEmployeeLimit, isExpired } = useSubscriptionStatus();
     const {
@@ -321,7 +323,7 @@ export function NewEmployeeModal({
                                     error={errors.phone?.message}
                                     required
                                     placeholder="Enter phone number"
-                                    defaultCountry="in"
+                                    defaultCountry={userCountry}
                                 />
                             )}
                         />

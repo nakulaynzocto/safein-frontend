@@ -17,6 +17,7 @@ import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { useEffect, useState } from "react";
 import { FileText, Camera, Fingerprint } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { useUserCountry } from "@/hooks/useUserCountry";
 
 const bookingVisitorSchema = yup.object({
     name: yup.string().trim().required("Name is required").min(2, "Name must be at least 2 characters"),
@@ -89,6 +90,7 @@ export function BookingVisitorForm({
     isLoading = false,
     appointmentToken,
 }: BookingVisitorFormProps) {
+    const userCountry = useUserCountry();
     const {
         register,
         handleSubmit,
@@ -106,7 +108,7 @@ export function BookingVisitorForm({
                 street: initialValues?.address?.street || undefined,
                 city: initialValues?.address?.city || "",
                 state: initialValues?.address?.state || "",
-                country: initialValues?.address?.country || "IN",
+                country: initialValues?.address?.country || userCountry,
             },
             idProof: {
                 type: initialValues?.idProof?.type || undefined,
@@ -125,9 +127,9 @@ export function BookingVisitorForm({
     useEffect(() => {
         const currentCountry = watch("address.country");
         if (!currentCountry) {
-            setValue("address.country", "IN", { shouldValidate: false, shouldDirty: false });
+            setValue("address.country", userCountry, { shouldValidate: false, shouldDirty: false });
         }
-    }, [setValue, watch]);
+    }, [setValue, watch, userCountry]);
 
     useEffect(() => {
         const opts = { shouldValidate: true, shouldDirty: false };
@@ -150,7 +152,7 @@ export function BookingVisitorForm({
                         street: address.street || undefined,
                         city: address.city || "",
                         state: address.state || "",
-                        country: address.country || "IN",
+                        country: address.country || userCountry,
                     } as any,
                     opts,
                 );
@@ -224,7 +226,7 @@ export function BookingVisitorForm({
                             error={errors.phone?.message}
                             required
                             placeholder="Enter phone number"
-                            defaultCountry="in"
+                            defaultCountry={watch("address.country") || userCountry}
                             disabled={!!initialPhone}
                         />
                     )}
@@ -258,6 +260,10 @@ export function BookingVisitorForm({
                         setValue("address.country", v.country);
                         setValue("address.state", v.state);
                         setValue("address.city", v.city);
+                        // Reset phone when country changes (so new dial code takes effect)
+                        if (v.country && !initialPhone) {
+                            setValue("phone", "");
+                        }
                     }}
                     errors={{
                         country: errors.address?.country?.message as string,

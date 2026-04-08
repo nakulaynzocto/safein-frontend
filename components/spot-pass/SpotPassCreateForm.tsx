@@ -22,6 +22,7 @@ import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
+import { useUserCountry } from "@/hooks/useUserCountry";
 
 // Form Schema
 const spotPassSchema = yup.object({
@@ -64,6 +65,7 @@ export function SpotPassCreateForm() {
     const router = useRouter();
     const [createSpotPass, { isLoading }] = useCreateSpotPassMutation();
     const { loadEmployeeOptions } = useEmployeeSearch();
+    const userCountry = useUserCountry();
 
     const { hasReachedSpotPassLimit, isExpired } = useSubscriptionStatus();
     const {
@@ -160,7 +162,7 @@ export function SpotPassCreateForm() {
                                             error={errors.phone?.message as string}
                                             required
                                             placeholder="Enter phone number"
-                                            defaultCountry="in"
+                                            defaultCountry={userCountry}
                                         />
                                     )}
                                 />

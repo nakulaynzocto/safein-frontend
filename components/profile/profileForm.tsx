@@ -28,6 +28,7 @@ import { useUploadFileMutation } from "@/store/api";
 import { User as UserType } from "@/store/api/authApi";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { useUserCountry } from "@/hooks/useUserCountry";
 
 // Expanded Schema to match Super Admin
 // Note: Schema validation will be conditional based on user role
@@ -89,6 +90,7 @@ interface ProfileFormProps {
 export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     const { user: currentUser } = useAppSelector((state) => state.auth);
     const isEmployee = checkIsEmployee(currentUser);
+    const userCountry = useUserCountry();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [profileImage, setProfileImage] = useState<string | null>(profile?.profilePicture || null);
@@ -107,7 +109,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
             street: profile?.address?.street || "",
             city: profile?.address?.city || "",
             state: profile?.address?.state || "",
-            country: profile?.address?.country || "IN",
+            country: profile?.address?.country || userCountry,
             pincode: profile?.address?.pincode || "",
         },
         socialLinks: {
@@ -175,7 +177,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                     street: profile.address?.street || "",
                     city: profile.address?.city || "",
                     state: profile.address?.state || "",
-                    country: profile.address?.country || "IN",
+                    country: profile.address?.country || userCountry,
                     pincode: profile.address?.pincode || "",
                 },
                 socialLinks: {
@@ -401,7 +403,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             placeholder="Enter contact number"
                                             error={errors.mobileNumber?.message}
                                             required
-                                            defaultCountry="in"
+                                            defaultCountry={watch("address.country") || userCountry}
                                         />
                                     )}
                                 />
@@ -456,7 +458,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                     <div className="pt-2">
                                         <CountryStateCitySelect
                                             value={{
-                                                country: watch("address.country") || "IN",
+                                                country: watch("address.country") || userCountry,
                                                 state: watch("address.state") || "",
                                                 city: watch("address.city") || "",
                                             }}

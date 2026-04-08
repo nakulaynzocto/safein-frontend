@@ -22,6 +22,8 @@ import { useAppDispatch } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { Building2, MapPin, Phone, Loader2 } from "lucide-react";
+import { useUserCountry } from "@/hooks/useUserCountry";
+import { useEffect } from "react";
 
 const companySchema = yup.object({
     companyName: yup.string().required("Company name is required"),
@@ -48,7 +50,10 @@ interface CompanyProfileModalProps {
 }
 
 export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
+    const userCountry = useUserCountry();
     const [updateProfile, { isLoading }] = useUpdateProfileMutation();
+    // Track selected country for phone default (ISO code like "IN", "US", "GB")
+    const [phoneDefaultCountry, setPhoneDefaultCountry] = useState(userCountry);
 
     const {
         register,
@@ -60,11 +65,19 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
     } = useForm<CompanyFormData>({
         resolver: yupResolver(companySchema),
         defaultValues: {
-            country: "IN",
+            country: userCountry,
             state: "",
             city: "",
         },
     });
+    
+    // Sync country and phone default when userCountry hook updates (e.g. after auth load)
+    useEffect(() => {
+        if (userCountry) {
+            setPhoneDefaultCountry(userCountry);
+            setValue("country", userCountry, { shouldValidate: true });
+        }
+    }, [userCountry, setValue]);
 
     const dispatch = useAppDispatch();
     const onSubmit = async (data: CompanyFormData) => {
@@ -130,7 +143,7 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                                         placeholder="Enter mobile number"
                                         error={errors.mobileNumber?.message}
                                         required
-                                        defaultCountry="in"
+                                        defaultCountry={phoneDefaultCountry}
                                     />
                                 )}
                             />
@@ -147,6 +160,12 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                                     setValue("country", val.country, { shouldValidate: true });
                                     setValue("state", val.state, { shouldValidate: true });
                                     setValue("city", val.city, { shouldValidate: true });
+                                    // Sync phone country code when country changes
+                                    if (val.country) {
+                                        setPhoneDefaultCountry(val.country);
+                                        // Reset phone so the new country's dial code is applied
+                                        setValue("mobileNumber", "");
+                                    }
                                 }}
                                 errors={{
                                     country: errors.country?.message,

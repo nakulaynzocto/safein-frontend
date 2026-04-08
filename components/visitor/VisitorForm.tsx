@@ -22,6 +22,7 @@ import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { UserPlus } from "lucide-react";
+import { useUserCountry } from "@/hooks/useUserCountry";
 
 interface NewVisitorModalProps {
     visitorId?: string;
@@ -59,6 +60,7 @@ export function NewVisitorModal({
 
     const isEditMode = !!visitorId;
     const isLoading = isCreating || isUpdating;
+    const defaultCountry = useUserCountry();
 
     const { data: visitorData, isLoading: isLoadingVisitor } = useGetVisitorQuery(visitorId!, {
         skip: !isEditMode,
@@ -102,7 +104,7 @@ export function NewVisitorModal({
                 street: "",
                 city: "",
                 state: "",
-                country: "IN",
+                country: defaultCountry,
             },
             idProof: {
                 type: "",
@@ -123,10 +125,10 @@ export function NewVisitorModal({
             setGeneralError(null);
             clearErrors();
         } else {
-            // Set default country to India when modal opens
+            // Set default country from hook when modal opens
             const currentCountry = watch("address.country");
             if (!currentCountry) {
-                setValue("address.country", "IN", { shouldValidate: false, shouldDirty: false });
+                setValue("address.country", defaultCountry, { shouldValidate: false, shouldDirty: false });
             }
         }
     }, [open, reset, clearErrors, setValue, watch]);
@@ -156,7 +158,7 @@ export function NewVisitorModal({
                     street: visitorData.address?.street || "",
                     city: visitorData.address?.city || "",
                     state: visitorData.address?.state || "",
-                    country: visitorData.address?.country || "IN",
+                    country: visitorData.address?.country || defaultCountry,
                 },
                 idProof: {
                     type: visitorData.idProof?.type || "",
