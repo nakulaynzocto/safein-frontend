@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, MessageSquareText, X, Loader2 } from 'lucide-react';
+import { MessageSquare, MessageSquareText, X, Loader2, Shield } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { toast } from 'sonner';
 import { ChatHeader } from './ChatHeader';
@@ -427,33 +427,52 @@ export default function SupportWidget() {
                                     </div>
                                 ) : (
                                     <>
-                                        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-150">
-                                            <h4 className="font-bold text-gray-900 dark:text-white text-xl">Welcome! 👋</h4>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed">
-                                                This authorization is for security purposes. Sign in with Google to start chatting with our support team.
+                                    <div className="flex flex-col items-center w-full animate-in fade-in slide-in-from-bottom-4 duration-700 pt-8">
+
+                                        <div className="space-y-6 text-center mb-10">
+                                            <div className="space-y-2">
+                                                <h4 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                                                    SafeIn <span className="text-[#3882a5]">Support</span>
+                                                </h4>
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
+                                                    <p className="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">
+                                                        Agents Online
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-relaxed max-w-[260px] mx-auto">
+                                                Experience enterprise-grade support. Sign in to start a secure conversation with our team.
                                             </p>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed pt-2">
-                                                You can also contact our support team by phone:
-                                            </p>
-                                            <a href="tel:+918699966076" className="text-sm font-semibold text-primary hover:text-accent transition-colors">
-                                                +91 86999 66076
-                                            </a>
                                         </div>
 
-                                        <Button
-                                            onClick={() => loginWithGoogle()}
-                                            className="w-full bg-white dark:bg-slate-800 text-gray-800 dark:text-white border-2 border-gray-200 dark:border-slate-700 hover:border-accent dark:hover:border-accent hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 shadow-lg flex items-center justify-center gap-3 h-12 rounded-xl font-semibold group animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300"
-                                        >
-                                            <img src="https://www.google.com/favicon.ico" alt="G" className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                            Continue with Google
-                                        </Button>
+                                        <div className="w-full space-y-4">
+                                            <Button
+                                                onClick={() => loginWithGoogle()}
+                                                className="w-full bg-[#074463] text-white hover:bg-[#05334a] h-14 rounded-2xl font-black text-lg shadow-xl shadow-[#074463]/20 transition-all duration-300 flex items-center justify-center gap-3 group active:scale-95"
+                                            >
+                                                <img src="https://www.google.com/favicon.ico" alt="" className="w-5 h-5 brightness-0 invert" />
+                                                Continue with Google
+                                            </Button>
 
-                                        <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1.5 animate-in fade-in duration-700 delay-500">
-                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                                            </svg>
-                                            Secure & encrypted • We'll notify you via email
-                                        </p>
+                                            <div className="pt-4 flex flex-col items-center gap-4">
+                                                <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                                                    <Shield size={12} className="text-[#3882a5]" />
+                                                    Secure Support Channel
+                                                </div>
+                                                
+                                                <div className="h-px w-12 bg-slate-100 dark:bg-slate-800"></div>
+
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase">Emergency Support</p>
+                                                    <a href="tel:+918699966076" className="text-slate-900 dark:text-white font-black hover:text-primary transition-colors">
+                                                        +91 86999 66076
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     </>
                                 )}
                             </div>

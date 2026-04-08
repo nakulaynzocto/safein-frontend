@@ -9,7 +9,6 @@ import { NavigationProgress } from "@/components/common/navigationProgress";
 import { NavigationProgressProvider } from "@/components/common/navigationProgressProvider";
 import { RouteOptimizer } from "@/components/common/routeOptimizer";
 import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
-import { InstallPromptBanner } from "@/components/pwa/InstallPromptBanner";
 import { NotificationHandler } from "@/components/notifications/NotificationHandler";
 import type { Viewport } from "next";
 
@@ -224,7 +223,6 @@ export default function RootLayout({
                             </Suspense>
                             {/* PWA & Notifications */}
                             <ServiceWorkerRegistrar />
-                            <InstallPromptBanner />
                             <NotificationHandler />
                         </Providers>
                     </NavigationProgressProvider>

@@ -25,8 +25,8 @@ const footerSections: FooterSection[] = [
     {
         title: "Product",
         links: [
-            { label: "App Features", href: "/features" },
-            { label: "Pricing Plans", href: "/pricing" },
+            { label: "App Features", href: "/#features" },
+            { label: "Pricing Plans", href: "/#pricing" },
             { label: "Help Center", href: "/help" },
         ],
     },
@@ -34,7 +34,7 @@ const footerSections: FooterSection[] = [
         title: "Company",
         links: [
             { label: "About Aynzo", href: "https://aynzo.com", external: true },
-            { label: "Contact Us", href: "/contact" },
+            { label: "Contact Us", href: "/#contact" },
             { label: "Privacy Policy", href: "/privacy-policy" },
         ],
     },

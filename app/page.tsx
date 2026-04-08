@@ -19,6 +19,13 @@ import {
     ChevronRight,
     ArrowRight,
     ShieldCheck,
+    Clock,
+    User,
+    Bell,
+    Shield,
+    MessageSquare,
+    BarChart3,
+    Printer,
 } from "lucide-react";
 import Link from "next/link";
 import { PageSEOHead } from "@/components/seo/pageSEOHead";
@@ -33,6 +40,12 @@ const FeatureSection = dynamic(() => import("@/app/_sections/FeatureSection"), {
 const HowItWorksSection = dynamic<{ routes: any }>(() => import("@/app/_sections/HowItWorksSection"), {
     loading: () => <SectionSkeleton />
 });
+const PricingSection = dynamic(() => import("@/app/_sections/PricingSection"), {
+    loading: () => <SectionSkeleton />
+});
+const ContactSection = dynamic(() => import("@/app/_sections/ContactSection"), {
+    loading: () => <SectionSkeleton />
+});
 const IndustriesSection = dynamic(() => import("@/app/_sections/IndustriesSection"), {
     loading: () => <SectionSkeleton />
 });
@@ -42,7 +55,7 @@ const TestimonialsSection = dynamic(() => import("@/app/_sections/TestimonialsSe
 
 function SectionSkeleton() {
     return (
-        <div className="py-24 sm:py-32 container mx-auto px-4">
+        <div className="py-12 sm:py-16 container mx-auto px-4">
             <Skeleton className="h-12 w-3/4 max-w-lg mb-12 mx-auto" />
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
                 {[1, 2, 3, 4].map((i) => (
@@ -75,7 +88,7 @@ export default function HomePage() {
             id: 1,
             title: "Visitor Arrival",
             description: "Visitor enters their details at the sleek digital kiosk or pre-registers online.",
-            image: "/home/solutions/smart-checkin.png",
+            image: "/home/custom/kiosk.png",
             badge: "Secure Arrival",
             color: "from-[#074463] to-[#3882a5]"
         },
@@ -83,7 +96,7 @@ export default function HomePage() {
             id: 2,
             title: "Digital Registration",
             description: "Fast, paperless registration via smartphone or reception iPad.",
-            image: "/home/solutions/quick-registeration.jpg",
+            image: "/home/custom/booking.png",
             badge: "No Paperwork",
             color: "from-[#074463] to-[#3882a5]"
         },
@@ -99,7 +112,7 @@ export default function HomePage() {
             id: 4,
             title: "Admin Approval",
             description: "One-click approval from the employee's powerful dashboard.",
-            image: "/home/solutions/powerful-dashboard.jpg",
+            image: "/home/custom/dashboard.png",
             badge: "Secure Access",
             color: "from-[#074463] to-[#3882a5]"
         },
@@ -107,7 +120,7 @@ export default function HomePage() {
             id: 5,
             title: "Security Verification",
             description: "Gatekeeper verifies the 6-digit secure OTP for final check-in.",
-            image: "/home/hero/Tranform-your-digital-visitor-management.jpg",
+            image: "/home/custom/gatekeeper.png",
             badge: "Verified OTP",
             color: "from-[#074463] to-[#3882a5]"
         },
@@ -115,20 +128,80 @@ export default function HomePage() {
             id: 6,
             title: "Access Granted",
             description: "Visual analytics track every successful arrival and departure.",
-            image: "/home/solutions/realtime-analytics.png",
+            image: "/home/custom/dashboard.png",
             badge: "Welcome In",
             color: "from-[#074463] to-[#3882a5]"
         }
     ], []);
 
-    const [activeStep, setActiveStep] = useState(0);
+    const coreFeatureSteps = useMemo(() => [
+        {
+            id: 1,
+            title: "Smart Pre-Booking",
+            description: "Empower visitors to book slots in advance with automated calendar sync for a prioritized and professional arrival experience.",
+            image: "/home/custom/booking.png",
+            color: "from-[#3882a5]/20 to-[#3882a5]/10",
+            icon: <User className="h-7 w-7" />
+        },
+        {
+            id: 2,
+            title: "Instant Spot Pass",
+            description: "Manage walk-in visitors effortlessly with quick gate-side registrations and instant notifications sent directly to the hosts.",
+            image: "/home/custom/kiosk.png",
+            color: "from-[#3882a5]/20 to-[#3882a5]/10",
+            icon: <Bell className="h-7 w-7" />
+        },
+        {
+            id: 3,
+            title: "Secured OTP Verification",
+            description: "Enhance office safety with secure 6-digit OTP codes and real-time gatekeeper verification for every checked-in visitor.",
+            image: "/home/custom/gatekeeper.png",
+            color: "from-[#3882a5]/20 to-[#3882a5]/10",
+            icon: <Shield className="h-7 w-7" />
+        },
+        {
+            id: 4,
+            title: "Real-time Messaging",
+            description: "Enable secure and instant communication between hosts and visitors through our built-in premium messaging platform.",
+            image: "/home/custom/dashboard.png",
+            color: "from-[#3882a5]/20 to-[#3882a5]/10",
+            icon: <MessageSquare className="h-7 w-7" />
+        },
+        {
+            id: 5,
+            title: "Insightful Dashboard",
+            description: "Visualize visitor footprints, peak hours, and security compliance with our powerful analytics dashboard.",
+            image: "/home/custom/dashboard.png",
+            color: "from-[#3882a5]/20 to-[#3882a5]/10",
+            icon: <BarChart3 className="h-7 w-7" />
+        },
+        {
+            id: 6,
+            title: "Instant Badge Printing",
+            description: "Generate professional, high-security visitor badges instantly upon check-in for enhanced on-premise identification.",
+            image: "/home/custom/kiosk.png",
+            color: "from-[#3882a5]/20 to-[#3882a5]/10",
+            icon: <Printer className="h-7 w-7" />
+        }
+    ], []);
+
+
+    const [heroActiveStep, setHeroActiveStep] = useState(0);
+    const [featuresActiveStep, setFeaturesActiveStep] = useState(0);
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            setActiveStep((prev) => (prev + 1) % processSteps.length);
-        }, 5000);
-        return () => clearInterval(timer);
+        const heroTimer = setInterval(() => {
+            setHeroActiveStep((prev) => (prev + 1) % processSteps.length);
+        }, 2000);
+        return () => clearInterval(heroTimer);
     }, [processSteps.length]);
+
+    useEffect(() => {
+        const featuresTimer = setInterval(() => {
+            setFeaturesActiveStep((prev) => (prev + 1) % coreFeatureSteps.length);
+        }, 4000); // Slower cycle for reading steps
+        return () => clearInterval(featuresTimer);
+    }, [coreFeatureSteps.length]);
 
     const homeStructuredData = generateStructuredData("home");
 
@@ -158,33 +231,86 @@ export default function HomePage() {
 
                     <div className="relative z-10 container mx-auto px-4 sm:px-6">
                         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-                            {/* Hero Image Area */}
-                            <div className="relative order-1 lg:order-2">
-                                <div className="relative mx-auto max-w-[280px] sm:max-w-[340px] lg:ml-auto">
-                                    <div className={`absolute -inset-10 rounded-full bg-gradient-to-br ${processSteps[activeStep].color} opacity-20 blur-[100px] transition-all duration-1000`}></div>
-                                    <div className="relative z-10 mx-auto w-full overflow-hidden rounded-[3rem] sm:rounded-[3.5rem] border-[6px] sm:border-[8px] border-gray-950 bg-gray-950 shadow-[0_0_60px_rgba(0,0,0,0.5),0_0_0_2px_rgba(255,255,255,0.1)] ring-1 ring-white/10">
-                                        <div className="absolute top-0 left-1/2 z-40 h-5 sm:h-7 w-20 sm:w-28 -translate-x-1/2 rounded-b-2xl bg-gray-950"></div>
-                                        <div className="relative aspect-[9/16] w-full overflow-hidden rounded-[2.5rem] sm:rounded-[2.8rem] bg-gray-950">
-                                            {processSteps.map((step, idx) => (
-                                                <div 
-                                                    key={step.id}
-                                                    className={cn(
-                                                        "absolute inset-0 transition-opacity duration-1000",
-                                                        idx === activeStep ? "opacity-100" : "opacity-0"
-                                                    )}
-                                                >
-                                                    <Image
-                                                        src={step.image}
-                                                        alt={step.title}
-                                                        fill
-                                                        priority={idx === 0}
-                                                        className="object-cover object-top"
-                                                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                                    />
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-gray-950/20 to-transparent"></div>
-                                                </div>
-                                            ))}
+                            {/* Hero Image Area - Dual Device Showcase */}
+                            <div className="relative order-1 lg:order-2 perspective-[2000px] mb-12 sm:mb-0">
+                                <div className="relative mx-auto max-w-[450px] sm:max-w-[600px] lg:ml-auto select-none py-10 sm:py-20 animate-float-slow">
+                                    <div className={`absolute -inset-20 rounded-full bg-gradient-to-br from-[#3882a5]/30 to-[#074463]/20 opacity-30 blur-[140px] transition-all duration-1000`}></div>
+                                    <div className={`absolute -inset-10 rounded-full bg-gradient-to-br from-brand/20 to-brand/10 opacity-20 blur-[120px] transition-all duration-1000`}></div>
+                                    
+                                    {/* 1. Landscape Kiosk (Background) */}
+                                    <div className="absolute -left-12 sm:-left-20 top-[45%] -translate-y-1/2 w-[320px] sm:w-[440px] opacity-100 transition-all duration-700"
+                                         style={{ transform: 'rotateY(25deg) rotateX(10deg) translateZ(-50px)', transformStyle: 'preserve-3d' }}>
+                                        
+                                        {/* Kiosk Stand Neck */}
+                                        <div className="absolute -bottom-20 left-1/2 z-0 h-40 w-12 -translate-x-1/2 rounded-xl bg-gradient-to-b from-gray-900 to-black border-x border-white/5 opacity-80 shadow-2xl"></div>
+                                        <div className="absolute -bottom-24 left-1/2 z-0 h-8 w-40 -translate-x-1/2 rounded-[50%] bg-black/40 blur-[4px]"></div>
+
+                                        {/* Kiosk Body */}
+                                        <div className="relative z-10 w-full aspect-[16/10] overflow-hidden rounded-[2.5rem] border-[12px] border-gray-950 bg-gray-950 shadow-2xl ring-1 ring-white/10">
+                                            {/* Digital Screen Content (Pure Images) */}
+                                            <div className="relative w-full h-full bg-gray-950 overflow-hidden">
+                                                {processSteps.map((step, idx) => (
+                                                    <div 
+                                                        key={`bg-${step.id}`}
+                                                        className={cn(
+                                                            "absolute inset-0 transition-opacity duration-1000",
+                                                            idx === heroActiveStep ? "opacity-100 scale-100" : "opacity-0 scale-105"
+                                                        )}
+                                                    >
+                                                        <Image
+                                                            src={step.image}
+                                                            alt={step.title}
+                                                            fill
+                                                            sizes="(max-width: 768px) 320px, 440px"
+                                                            className="object-cover transition-transform duration-[2000ms] ease-linear"
+                                                            style={{ transform: idx === heroActiveStep ? 'scale(1.1)' : 'scale(1)' }}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
+                                    </div>
+
+                                    {/* 2. Modern Smartphone (Main Foreground) */}
+                                    <div className="relative z-20 ml-auto w-[220px] sm:w-[280px] transition-all duration-500 hover:scale-[1.05]"
+                                         style={{ transform: 'rotateY(-15deg) rotateX(8deg) translateZ(80px)', transformStyle: 'preserve-3d' }}>
+                                        
+                                        {/* Smartphone Frame (Solid Pro Black) */}
+                                        <div className="relative w-full overflow-hidden rounded-[2.8rem] border-[10px] border-gray-950 bg-gray-950 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.1)] ring-[3px] ring-[#3882a5]/30">
+                                            
+                                            {/* Top Speaker/Sensors Notch */}
+                                            <div className="absolute top-0 left-1/2 z-40 h-6 w-28 -translate-x-1/2 rounded-b-2xl bg-gray-950 shadow-inner">
+                                                <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-gray-800"></div>
+                                            </div>
+
+                                            {/* Digital Screen Content (Pure Images) */}
+                                            <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-[2.2rem] bg-gray-950 shadow-inner ring-1 ring-white/10">
+                                                <div className="absolute inset-0 z-0">
+                                                    {processSteps.map((step, idx) => (
+                                                        <div 
+                                                            key={`fg-${step.id}`}
+                                                            className={cn(
+                                                                "absolute inset-0 transition-opacity duration-1000",
+                                                                idx === heroActiveStep ? "opacity-100 scale-100" : "opacity-0 scale-110"
+                                                            )}
+                                                        >
+                                                            <Image
+                                                                src={step.image}
+                                                                alt={step.title}
+                                                                fill
+                                                                priority={idx === heroActiveStep}
+                                                                sizes="(max-width: 768px) 220px, 280px"
+                                                                className="object-cover transition-transform duration-[2000ms] ease-linear"
+                                                                style={{ transform: idx === heroActiveStep ? 'scale(1.15)' : 'scale(1)' }}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Premium Gloss Reflection */}
+                                        <div className="absolute inset-0 z-30 pointer-events-none rounded-[2.8rem] bg-gradient-to-tr from-transparent via-white/5 to-white/15 opacity-70"></div>
                                     </div>
                                 </div>
                             </div>
@@ -203,12 +329,12 @@ export default function HomePage() {
 
                                 <h1 className="animate-hero-title mb-6 px-1 text-3xl font-black tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl lg:leading-[1.1]">
                                     <span className="text-premium-gradient">Smart Visitor</span> <br />
-                                    <span className="text-white lg:opacity-90">Intelligence for Teams</span>
+                                    <span className="text-white lg:opacity-90">Management for Offices</span>
                                 </h1>
 
                                 <p className="text-accent-light mb-10 max-w-xl px-2 text-base leading-relaxed text-gray-300 sm:text-xl lg:px-0 opacity-90">
-                                    SafeIn empowers modern organizations with a sophisticated digital reception,
-                                    streamlined appointments, and real-time security intelligence.
+                                    Make your reception digital. Easy check-ins, 
+                                    fast visitor alerts, and better office security.
                                 </p>
 
                                 <div className="flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row lg:justify-start px-2 sm:px-0">
@@ -229,7 +355,7 @@ export default function HomePage() {
                                             className="bg-brand relative h-12 sm:h-14 w-full overflow-hidden px-8 text-base sm:text-lg font-bold text-white shadow-[0_0_20px_rgba(56,130,165,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(56,130,165,0.6)] sm:w-auto rounded-xl"
                                             onClick={handleHeroFreeTrialClick}
                                         >
-                                            <span className="relative z-10">Experience SafeIn</span>
+                                            <span className="relative z-10">Start Free Trial</span>
                                             <div className="animate-shimmer absolute inset-0 opacity-20"></div>
                                         </Button>
                                     )}
@@ -239,7 +365,7 @@ export default function HomePage() {
                                         className="glass-morphism h-12 sm:h-14 w-full border-white/20 px-8 text-base sm:text-lg font-semibold text-white transition-all hover:bg-white/10 hover:text-white sm:w-auto rounded-xl"
                                         asChild
                                     >
-                                        <Link href={routes.publicroute.CONTACT}>View Live Demo</Link>
+                                        <Link href={routes.publicroute.CONTACT}>See How It Works</Link>
                                     </Button>
                                 </div>
 
@@ -260,9 +386,156 @@ export default function HomePage() {
 
                 {/* Below the fold sections - Dynamically Loaded */}
                 <FeatureSection />
+
+                {/* Features Section - Interactive Visitor Journey (Better Design & Project Colors) */}
+                <section id="core-features" className="relative overflow-hidden bg-white py-12 sm:py-16">
+                    <div className="container relative z-10 mx-auto px-4 sm:px-6">
+                        <div className="mb-12 text-center">
+                            <h2 className="mb-4 text-3xl font-black text-slate-900 sm:text-5xl">
+                                Powerful <span className="text-[#3882a5]">Core Features</span>
+                            </h2>
+                            <p className="mx-auto max-w-2xl text-slate-600 text-lg sm:text-xl font-medium leading-relaxed max-w-3xl">
+                                Discover the advanced capabilities that make SafeIn the most 
+                                trusted digital visitor management solution for modern offices.
+                            </p>
+                        </div>
+
+                        <div className="grid items-center gap-12 lg:grid-cols-3 xl:gap-20">
+                            {/* Left Side Features */}
+                            <div className="order-2 space-y-12 lg:order-1">
+                                {coreFeatureSteps.slice(0, 3).map((step, idx) => (
+                                    <div 
+                                        key={step.id}
+                                        onMouseEnter={() => setFeaturesActiveStep(idx)}
+                                        className={cn(
+                                            "group flex items-start gap-6 transition-all duration-500 cursor-pointer p-4 rounded-3xl",
+                                            featuresActiveStep === idx ? "bg-slate-50 shadow-sm" : "hover:bg-slate-50/50"
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-all duration-500",
+                                            featuresActiveStep === idx ? "bg-[#3882a5] text-white shadow-lg" : "bg-slate-100 text-[#3882a5]"
+                                        )}>
+                                            {step.icon}
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <h3 className={cn(
+                                                "mb-2 text-2xl font-black tracking-tight transition-colors duration-300",
+                                                featuresActiveStep === idx ? "text-slate-900" : "text-slate-700"
+                                            )}>
+                                                {step.title}
+                                            </h3>
+                                            <p className="text-base font-medium leading-relaxed text-slate-500 max-w-[280px]">
+                                                {step.description}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Center Feature Smartphone */}
+                            <div className="order-1 flex justify-center lg:order-2">
+                                <div className="relative w-full max-w-[300px] perspective-[1500px]">
+                                    <div className="absolute -inset-10 rounded-full transition-all duration-1000 blur-[80px] opacity-10 bg-[#3882a5]"></div>
+                                    
+                                    {/* Smartphone Frame (Solid Pro Black) */}
+                                    <div className="relative z-10 w-full overflow-hidden rounded-[2.8rem] border-[12px] border-slate-900 bg-slate-900 shadow-[0_60px_100px_-20px_rgba(7,68,99,0.3)] ring-[4px] ring-[#3882a5]/30 transition-all duration-700 hover:scale-[1.05]">
+                                        <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-[2.2rem] bg-slate-950 shadow-inner ring-1 ring-white/10">
+                                            {coreFeatureSteps.map((step, idx) => (
+                                                <div 
+                                                    key={`feature-img-${step.id}`}
+                                                    className={cn(
+                                                        "absolute inset-0 transition-opacity duration-700 ease-in-out",
+                                                        idx === featuresActiveStep ? "opacity-100 scale-100" : "opacity-0 scale-105"
+                                                    )}
+                                                >
+                                                    <Image
+                                                        src={step.image}
+                                                        alt={step.title}
+                                                        fill
+                                                        priority={idx === 0}
+                                                        className="object-cover"
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                                                </div>
+                                            ))}
+                                            
+                                            {/* Smartphone Gloss */}
+                                            <div className="absolute inset-0 z-20 pointer-events-none bg-gradient-to-tr from-transparent via-white/10 to-white/20 opacity-40"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Side Features */}
+                            <div className="order-3 space-y-12">
+                                {coreFeatureSteps.slice(3, 6).map((step, idx) => {
+                                    const actualIdx = idx + 3;
+                                    return (
+                                        <div 
+                                            key={step.id}
+                                            onMouseEnter={() => setFeaturesActiveStep(actualIdx)}
+                                            className={cn(
+                                                "group flex items-start gap-6 transition-all duration-500 cursor-pointer p-4 rounded-3xl",
+                                                featuresActiveStep === actualIdx ? "bg-slate-50 shadow-sm" : "hover:bg-slate-50/50"
+                                            )}
+                                        >
+                                            <div className={cn(
+                                                "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-all duration-500",
+                                                featuresActiveStep === actualIdx ? "bg-[#3882a5] text-white shadow-lg" : "bg-slate-100 text-[#3882a5]"
+                                            )}>
+                                                {step.icon}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <h3 className={cn(
+                                                    "mb-2 text-2xl font-black tracking-tight transition-colors duration-300",
+                                                    featuresActiveStep === actualIdx ? "text-slate-900" : "text-slate-700"
+                                                )}>
+                                                    {step.title}
+                                                </h3>
+                                                <p className="text-base font-medium leading-relaxed text-slate-500 max-w-[280px]">
+                                                    {step.description}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* CTA at Bottom of Features */}
+                        <div className="mt-20 flex flex-col items-center justify-center gap-6 text-center">
+                            <div className="flex -space-x-3">
+                                {[
+                                    "/home/hero/avatar-1.png",
+                                    "/home/hero/avatar-2.png",
+                                    "/home/hero/avatar-3.png",
+                                    "/home/hero/avatar-custom.png"
+                                ].map((src, i) => (
+                                    <div key={i} className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-white bg-slate-100 shadow-sm transition-transform hover:scale-110 hover:z-10">
+                                        <Image
+                                            src={src}
+                                            alt={`Trusted Client ${i + 1}`}
+                                            fill
+                                            sizes="48px"
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                ))}
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-[#074463] text-xs font-bold text-white shadow-sm">
+                                    +500
+                                </div>
+                            </div>
+                            <p className="text-sm font-bold text-slate-900 uppercase tracking-widest opacity-60">
+                                Trusted by <span className="font-extrabold">500+ Offices</span> Worldwide
+                            </p>
+                        </div>
+                    </div>
+                </section>
                 <HowItWorksSection routes={routes} />
+                <PricingSection />
                 <IndustriesSection />
-                <TestimonialsSection />
+                <ContactSection />
             </PublicLayout>
         </>
     );

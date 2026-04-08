@@ -32,18 +32,22 @@ export default function IndustriesSection() {
     ];
 
     return (
-        <section className="relative overflow-hidden bg-white py-24 sm:py-32">
+        <section className="relative overflow-hidden bg-white py-12 sm:py-16">
             <div className="container mx-auto px-4 sm:px-6">
-                <div className="mb-20 text-center">
+                <div className="mb-16 text-center">
                     <div className="bg-[#3882a5]/5 mb-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 ring-1 ring-[#3882a5]/10">
                         <Building2 className="text-[#3882a5] h-4 w-4" />
                         <span className="text-xs font-bold tracking-widest text-[#3882a5] uppercase">
                             Industry Solutions
                         </span>
                     </div>
-                    <h2 className="text-[#074463] mb-6 text-4xl font-extrabold tracking-tight sm:text-5xl">
-                        Tailored for Every Enterprise
+                    <h2 className="text-slate-900 mb-4 text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
+                        Tailored for <span className="text-[#3882a5]">Every Enterprise</span>
                     </h2>
+                    <p className="mx-auto max-w-3xl text-slate-600 text-lg sm:text-xl font-medium leading-relaxed">
+                        SafeIn adapts to your unique workflow, providing specialized security and 
+                        efficiency layers for every industry, from luxury high-rises to industrial complexes.
+                    </p>
                 </div>
 
                 <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">

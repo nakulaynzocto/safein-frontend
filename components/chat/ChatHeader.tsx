@@ -21,24 +21,19 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     isConnected
 }) => {
     return (
-        <div className="relative p-5 flex justify-between items-center shadow-md z-10 overflow-hidden shrink-0">
-            {/* Background with Gradient */}
-            <div className="absolute inset-0 opacity-95 transition-all duration-500" style={{ background: GRADIENT_PRIMARY }}></div>
-
+        <div className="relative p-5 flex justify-between items-center shadow-lg z-10 overflow-hidden shrink-0 bg-[#074463]">
             {/* Animated Patterns */}
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/10 blur-3xl -translate-y-10 translate-x-10 animate-pulse"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-primary-light/20 blur-2xl translate-y-8 -translate-x-8"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-primary/10 blur-3xl -translate-y-10 translate-x-10 animate-pulse"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-accent/10 blur-2xl translate-y-8 -translate-x-8"></div>
 
             {/* Content */}
             <div className="relative z-10 flex flex-col">
-                <h3 className="text-white font-bold text-lg tracking-wide flex items-center gap-2">
-                    Start Conversation
-                    <span className="flex h-2 w-2">
-                        <span className={`animate-ping absolute inline-flex h-2 w-2 rounded-full opacity-75 ${isConnected ? "bg-emerald-400" : "bg-red-400"}`}></span>
-                        <span className={`relative inline-flex rounded-full h-2 w-2 ${isConnected ? "bg-emerald-500" : "bg-red-500"}`}></span>
-                    </span>
-                </h3>
-                <p className="text-blue-100/90 text-xs font-medium">We typically reply in few minutes</p>
+                <div className="flex items-center gap-2 mb-0.5">
+                    <h3 className="text-white font-black text-lg tracking-tight">
+                        Verified Support
+                    </h3>
+                </div>
+                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Expert Agents Online</p>
             </div>
 
             <div className="relative z-10 flex items-center gap-1.5">

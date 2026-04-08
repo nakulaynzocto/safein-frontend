@@ -330,9 +330,9 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                             <div className="flex items-center gap-2 px-2 mr-12">
                                 {[
                                     { label: "Home", href: routes.publicroute.HOME },
-                                    { label: "Features", href: routes.publicroute.FEATURES },
-                                    { label: "Pricing", href: routes.publicroute.PRICING },
-                                    { label: "Contact", href: routes.publicroute.CONTACT },
+                                    { label: "Features", href: "/#features" },
+                                    { label: "Pricing", href: "/#pricing" },
+                                    { label: "Contact", href: "/#contact" },
                                     { label: "Help", href: routes.publicroute.HELP }
                                 ].map((item) => {
                                     const isActive = pathname === item.href;
@@ -707,9 +707,9 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                         <div className="space-y-1 px-4 pt-4 pb-8">
                             {[
                                 { label: "Home", href: routes.publicroute.HOME, icon: <UserCircle className="h-5 w-5" /> },
-                                { label: "Features", href: routes.publicroute.FEATURES, icon: <Zap className="h-5 w-5" /> },
-                                { label: "Pricing", href: routes.publicroute.PRICING, icon: <CreditCard className="h-5 w-5" /> },
-                                { label: "Contact", href: routes.publicroute.CONTACT, icon: <Mail className="h-5 w-5" /> },
+                                { label: "Features", href: "/#journey", icon: <Zap className="h-5 w-5" /> },
+                                { label: "Pricing", href: "/#pricing", icon: <CreditCard className="h-5 w-5" /> },
+                                { label: "Contact", href: "/#contact", icon: <Mail className="h-5 w-5" /> },
                                 { label: "Help", href: routes.publicroute.HELP, icon: <HelpCircle className="h-5 w-5" /> }
                             ].map((item) => (
                                 <Link

@@ -143,6 +143,15 @@
         -moz-osx-font-smoothing: grayscale;
     }
 
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+
     body {
         @apply bg-background text-foreground;
         font-family: "Plus Jakarta Sans", "DM Sans", Roboto, sans-serif;
