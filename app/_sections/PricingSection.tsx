@@ -70,7 +70,7 @@ export default function PricingSection() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4 pt-6 pb-12">
+                <div className="flex flex-wrap justify-center gap-8 pt-6 pb-12">
                     {plans.map((plan: ISubscriptionPlan) => (
                         <Card
                             key={plan._id}

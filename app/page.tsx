@@ -239,7 +239,7 @@ export default function HomePage() {
                                     
                                     {/* 1. Landscape Kiosk (Background) */}
                                     <div className="absolute -left-12 sm:-left-20 top-[45%] -translate-y-1/2 w-[320px] sm:w-[440px] opacity-100 transition-all duration-700"
-                                         style={{ transform: 'rotateY(25deg) rotateX(10deg) translateZ(-50px)', transformStyle: 'preserve-3d' }}>
+                                         style={{ transform: 'rotateY(30deg) rotateX(10deg) translateZ(-50px)', transformStyle: 'preserve-3d' }}>
                                         
                                         {/* Kiosk Stand Neck */}
                                         <div className="absolute -bottom-20 left-1/2 z-0 h-40 w-12 -translate-x-1/2 rounded-xl bg-gradient-to-b from-gray-900 to-black border-x border-white/5 opacity-80 shadow-2xl"></div>
@@ -273,7 +273,7 @@ export default function HomePage() {
 
                                     {/* 2. Modern Smartphone (Main Foreground) */}
                                     <div className="relative z-20 ml-auto w-[220px] sm:w-[280px] transition-all duration-500 hover:scale-[1.05]"
-                                         style={{ transform: 'rotateY(-15deg) rotateX(8deg) translateZ(80px)', transformStyle: 'preserve-3d' }}>
+                                         style={{ transform: 'rotateY(-30deg) rotateX(8deg) translateZ(80px)', transformStyle: 'preserve-3d' }}>
                                         
                                         {/* Smartphone Frame (Solid Pro Black) */}
                                         <div className="relative w-full overflow-hidden rounded-[2.8rem] border-[10px] border-gray-950 bg-gray-950 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.1)] ring-[3px] ring-[#3882a5]/30">
@@ -284,7 +284,7 @@ export default function HomePage() {
                                             </div>
 
                                             {/* Digital Screen Content (Pure Images) */}
-                                            <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-[2.2rem] bg-gray-950 shadow-inner ring-1 ring-white/10">
+                                            <div className="relative aspect-[9/18] w-full overflow-hidden rounded-[2.2rem] bg-gray-950 shadow-inner ring-1 ring-white/10">
                                                 <div className="absolute inset-0 z-0">
                                                     {processSteps.map((step, idx) => (
                                                         <div 
@@ -440,7 +440,7 @@ export default function HomePage() {
                                     
                                     {/* Smartphone Frame (Solid Pro Black) */}
                                     <div className="relative z-10 w-full overflow-hidden rounded-[2.8rem] border-[12px] border-slate-900 bg-slate-900 shadow-[0_60px_100px_-20px_rgba(7,68,99,0.3)] ring-[4px] ring-[#3882a5]/30 transition-all duration-700 hover:scale-[1.05]">
-                                        <div className="relative aspect-[9/19.5] w-full overflow-hidden rounded-[2.2rem] bg-slate-950 shadow-inner ring-1 ring-white/10">
+                                        <div className="relative aspect-[9/18] w-full overflow-hidden rounded-[2.2rem] bg-slate-950 shadow-inner ring-1 ring-white/10">
                                             {coreFeatureSteps.map((step, idx) => (
                                                 <div 
                                                     key={`feature-img-${step.id}`}
