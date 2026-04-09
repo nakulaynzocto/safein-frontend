@@ -118,6 +118,9 @@ export function NewEmployeeModal({
         skip: !isEditMode,
     });
 
+    const isEmailLocked = isEditMode && !!employeeData?.isEmailVerified;
+    const isPhoneLocked = isEditMode && !!employeeData?.isPhoneVerified;
+
     const {
         register,
         handleSubmit,
@@ -184,12 +187,18 @@ export function NewEmployeeModal({
         try {
             setGeneralError(null);
 
-            const employeeData = {
-                ...data,
-            };
+            const payload = { ...data };
+            if (isEditMode && employeeData) {
+                if (employeeData.isEmailVerified) {
+                    payload.email = employeeData.email;
+                }
+                if (employeeData.isPhoneVerified) {
+                    payload.phone = employeeData.phone;
+                }
+            }
 
             if (isEditMode) {
-                await updateEmployee({ id: employeeId!, ...employeeData }).unwrap();
+                await updateEmployee({ id: employeeId!, ...payload }).unwrap();
                 showSuccessToast("Employee updated successfully");
 
                 if (!isPage) {
@@ -203,7 +212,7 @@ export function NewEmployeeModal({
                     router.push(routes.privateroute.EMPLOYEELIST);
                 }
             } else {
-                await createEmployee(employeeData).unwrap();
+                await createEmployee(payload).unwrap();
                 showSuccessToast("Employee created successfully");
                 reset();
 
@@ -304,6 +313,8 @@ export function NewEmployeeModal({
                             placeholder="Enter email address"
                             error={errors.email?.message}
                             required
+                            disabled={isEmailLocked}
+                            className={isEmailLocked ? "opacity-60 cursor-not-allowed" : undefined}
                         />
                     </div>
 
@@ -324,6 +335,7 @@ export function NewEmployeeModal({
                                     required
                                     placeholder="Enter phone number"
                                     defaultCountry={userCountry}
+                                    disabled={isPhoneLocked}
                                 />
                             )}
                         />

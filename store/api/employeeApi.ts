@@ -15,6 +15,10 @@ export interface Employee {
     createdAt: string;
     updatedAt: string;
     isVerified: boolean;
+    /** When true, email must not be edited (OTP and/or linked user verified) */
+    isEmailVerified?: boolean;
+    /** When true, phone must not be edited (linked user verified mobile) */
+    isPhoneVerified?: boolean;
 }
 
 export interface CreateEmployeeRequest {
