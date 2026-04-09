@@ -47,7 +47,7 @@ export function AppointmentLinkSelectionModal({
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-6">
-                        {/* Option 1: Send Link */}
+                        {/* Option 1: Invite Link */}
                         <button
                             onClick={() => handleOptionSelect("link")}
                             className={cn(
@@ -59,14 +59,14 @@ export function AppointmentLinkSelectionModal({
                                 <Link2 className="h-8 w-8" />
                             </div>
                             <div className="text-center">
-                                <h3 className="font-bold text-lg">Send Link</h3>
+                                <h3 className="font-bold text-lg">Invite Link</h3>
                                 <p className="text-sm text-muted-foreground mt-1">
                                     Visitor fills their own details
                                 </p>
                             </div>
                         </button>
 
-                        {/* Option 2: Special Visitor */}
+                        {/* Option 2: Priority Booking */}
                         <button
                             onClick={() => handleOptionSelect("quick")}
                             className={cn(
@@ -78,9 +78,9 @@ export function AppointmentLinkSelectionModal({
                                 <Zap className="h-8 w-8" />
                             </div>
                             <div className="text-center">
-                                <h3 className="font-bold text-lg">Special Visitor</h3>
+                                <h3 className="font-bold text-lg">Priority Booking</h3>
                                 <p className="text-sm text-muted-foreground mt-1">
-                                    Instantly book appointment
+                                    Create appointment directly
                                 </p>
                             </div>
                         </button>

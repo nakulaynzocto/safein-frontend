@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useId, useMemo, useState, useEffect, useCallback } from "react";
+import { forwardRef, useId, useMemo, useState, useEffect, useCallback, type ReactNode } from "react";
 import Select, { type GroupBase, type StylesConfig, type SingleValue } from "react-select";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -43,7 +43,7 @@ export interface SelectFieldProps {
     disabled?: boolean;
     menuZIndex?: number;
     className?: string;
-    formatOptionLabel?: (option: Option) => React.ReactNode;
+    formatOptionLabel?: (option: Option) => ReactNode;
     showDropdownIndicator?: boolean;
 }
 
@@ -83,8 +83,15 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
 
     // Track if component is mounted (for SSR safety)
     const [isMounted, setIsMounted] = useState(false);
+    const [useMenuPortal, setUseMenuPortal] = useState(false);
     useEffect(() => {
         setIsMounted(true);
+        const updatePortalMode = () => {
+            setUseMenuPortal(window.innerWidth >= 640);
+        };
+        updatePortalMode();
+        window.addEventListener("resize", updatePortalMode);
+        return () => window.removeEventListener("resize", updatePortalMode);
     }, []);
 
     // Convert options to react-select format
@@ -201,6 +208,9 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 marginTop: 4,
                 overflow: "hidden",
                 zIndex: 9999,
+                width: "100%",
+                minWidth: "100%",
+                maxWidth: "calc(100vw - 2rem)",
             }),
             menuList: (base) => ({
                 ...base,
@@ -296,8 +306,8 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 classNamePrefix="rs"
                 aria-invalid={!!error}
                 aria-describedby={describedBy}
-                menuPortalTarget={isMounted ? document.body : null}
-                menuPosition="fixed"
+                menuPortalTarget={isMounted && useMenuPortal ? document.body : null}
+                menuPosition={useMenuPortal ? "fixed" : "absolute"}
                 menuPlacement="auto"
                 closeMenuOnSelect={true}
                 blurInputOnSelect={false}

@@ -19,6 +19,7 @@ export interface SpecialBooking {
     notes?: string;
     address?: string;
     vehicleNumber?: string;
+    visitorPhoto?: string;
     status: 'pending' | 'verified' | 'cancelled';
     createdBy: string;
     visitorId?: string;
@@ -37,10 +38,23 @@ export interface SpecialBookingListResponse {
     };
 }
 
+export interface CreateSpecialBookingPayload {
+    visitorName: string;
+    visitorEmail?: string;
+    visitorPhone: string;
+    employeeId: string;
+    purpose: string;
+    accompanyingCount: number;
+    notes?: string;
+    address?: string;
+    vehicleNumber?: string;
+    visitorPhoto?: string;
+}
+
 export const specialBookingApi = baseApi.injectEndpoints({
     overrideExisting: true,
     endpoints: (builder) => ({
-        createSpecialBooking: builder.mutation<SpecialBooking, any>({
+        createSpecialBooking: builder.mutation<SpecialBooking, CreateSpecialBookingPayload>({
             query: (data) => ({
                 url: "/special-bookings",
                 method: "POST",

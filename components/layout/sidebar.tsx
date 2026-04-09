@@ -65,9 +65,15 @@ const baseNavigation: Array<{
             roles: ["admin", "employee"], // Both admin and employee can see
         },
         {
-            name: "Visitor Invites",
-            href: routes.privateroute.APPOINTMENT_LINKS,
+            name: "Invite Links",
+            href: routes.privateroute.APPOINTMENT_LINKS_SEND_LINK,
             icon: LinkIcon,
+            roles: ["admin", "employee"], // Both admin and employee
+        },
+        {
+            name: "Priority Bookings",
+            href: routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING,
+            icon: UserCircle,
             roles: ["admin", "employee"], // Both admin and employee
         },
         {
@@ -150,11 +156,16 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
             return pathname === routes.privateroute.APPOINTMENT_REQUESTS;
         }
 
-        if (href === routes.privateroute.APPOINTMENT_LINKS) {
+        if (href === routes.privateroute.APPOINTMENT_LINKS_SEND_LINK) {
             return (
-                pathname === routes.privateroute.APPOINTMENT_LINKS ||
-                pathname?.startsWith(routes.privateroute.APPOINTMENT_LINKS)
+                pathname === routes.privateroute.APPOINTMENT_LINKS_SEND_LINK ||
+                pathname === routes.privateroute.APPOINTMENT_LINKS_CREATE ||
+                pathname === routes.privateroute.APPOINTMENT_LINKS
             );
+        }
+
+        if (href === routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING) {
+            return pathname === routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING;
         }
 
         if (href === routes.privateroute.SPOT_PASS) {

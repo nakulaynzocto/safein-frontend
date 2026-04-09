@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useMemo, useCallback, useEffect, Suspense } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 import { routes, fillRoute } from "@/utils/routes";
@@ -23,21 +23,12 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { formatDate, formatDateTime, isEmployee as checkIsEmployee } from "@/utils/helpers";
 import {
     Plus,
-    LayoutGrid,
-    List,
     Trash2,
-    Search,
-    Filter,
     RefreshCw,
-    MoreVertical,
     MoreHorizontal,
     Copy,
-    QrCode,
     Mail,
-    Link as LinkIcon,
-    Download,
     Check,
-    ShieldAlert,
     Link2,
     User,
     CheckCircle,
@@ -61,8 +52,6 @@ import {
 import { AppointmentLink } from "@/store/api/appointmentLinkApi";
 import { getInitials, formatName } from "@/utils/helpers";
 import { useCooldown } from "@/hooks/useCooldown";
-import { CreateAppointmentLinkModal } from "@/components/appointment/CreateAppointmentLinkModal";
-import { QuickAppointmentModal } from "@/components/appointment/QuickAppointmentModal";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { StatusBadge } from "@/components/common/statusBadge";
@@ -209,8 +198,7 @@ const AppointmentActionCell = ({
 function AppointmentLinksContent() {
     // ALL HOOKS MUST BE CALLED AT TOP LEVEL - BEFORE ANY CONDITIONAL RETURNS
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const urlType = searchParams.get('type');
+    const pathname = usePathname();
     const dispatch = useAppDispatch();
     const { user: authUser, isAuthenticated, subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
     const user = authUser; // Maintain compatibility with existing code
@@ -222,18 +210,18 @@ function AppointmentLinksContent() {
     const [isBooked, setIsBooked] = useState<boolean | undefined>(undefined);
     const [filterType, setFilterType] = useState<string>("link");
 
-    // Handle URL type parameter (?type=special or ?type=link)
+    // Drive mode from route only. Sidebar navigation controls selected mode.
     useEffect(() => {
-        if (urlType === 'special') {
+        if (pathname === routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING) {
             setFilterType('special');
-        } else if (urlType === 'link') {
-            setFilterType('link');
+            setPage(1);
+            return;
         }
-    }, [urlType]);
+        setFilterType('link');
+        setPage(1);
+    }, [pathname]);
     const [search, setSearch] = useState("");
     const [deleteLinkId, setDeleteLinkId] = useState<string | null>(null);
-    const [showLinkModal, setShowLinkModal] = useState(false);
-    const [showVipModal, setShowVipModal] = useState(false);
     const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
     const {
         showUpgradeModal,
@@ -253,10 +241,7 @@ function AppointmentLinksContent() {
     const [showEditNoteModal, setShowEditNoteModal] = useState(false);
     const [noteValue, setNoteValue] = useState("");
 
-    // Use cooldown hook
     const { cooldowns, startCooldown, isOnCooldown } = useCooldown();
-
-    // ... hooks ...
 
     const [updateSpecialBookingNote, { isLoading: isUpdatingNote }] = useUpdateSpecialBookingNoteMutation();
 
@@ -273,8 +258,6 @@ function AppointmentLinksContent() {
         }
     };
 
-    // Fetch Appointment Links
-    // Fetch Appointment Links
     const { data: linksData, isLoading: isLoadingLinks, error: linksError, refetch: refetchLinks } = useGetAllAppointmentLinksQuery({
         page,
         limit,
@@ -333,8 +316,6 @@ function AppointmentLinksContent() {
     const isLoading = filterType === "link" ? isLoadingLinks : isLoadingSpecial;
     const paginationData = filterType === "link" ? linksData?.pagination : specialData?.pagination;
 
-    // Refetch both
-    // Refetch active query
     const refetchAll = useCallback(() => {
         if (filterType === "link") refetchLinks();
         if (filterType === "special") refetchSpecial();
@@ -409,7 +390,7 @@ function AppointmentLinksContent() {
                     const visitorId = item.visitorId;
                     const visitor = !isSpecial
                         ? (item.visitor || (typeof visitorId === "object" && visitorId !== null ? visitorId : null))
-                        : { name: item.visitorName, phone: item.visitorPhone };
+                        : { name: item.visitorName, phone: item.visitorPhone, photo: item.visitorPhoto };
 
                     const visitorName = visitor?.name || "Unknown Visitor";
                     const formattedName = formatName(visitorName) || visitorName;
@@ -592,11 +573,6 @@ function AppointmentLinksContent() {
 
 
 
-    const handleFilterChange = useCallback((value: string) => {
-        setFilterType(value);
-        setPage(1);
-    }, []);
-
     // useEffect for redirects - must be after all other hooks
     useEffect(() => {
         if (!isAuthenticated) {
@@ -692,8 +668,8 @@ function AppointmentLinksContent() {
 
             {/* Table Section */}
             <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="flex flex-col w-full gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                    <div className="w-full sm:w-[260px] sm:flex-none">
+                <div className="flex w-full flex-row flex-nowrap items-center gap-2 sm:gap-3">
+                    <div className="min-w-0 flex-1">
                         <SearchInput
                             placeholder="Search by visitor..."
                             value={search}
@@ -702,29 +678,7 @@ function AppointmentLinksContent() {
                             className="w-full"
                         />
                     </div>
-                    <div className="flex w-full items-center gap-2 sm:w-auto sm:justify-end">
-                        <div className="flex-1 sm:w-auto sm:flex-none">
-                            <div className="flex p-1 bg-gray-100/80 rounded-lg border border-gray-200">
-                                <button
-                                    onClick={() => handleFilterChange("link")}
-                                    className={`flex-1 sm:flex-none px-4 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${filterType === "link"
-                                        ? "bg-white text-[#3882a5] shadow-sm ring-1 ring-black/5"
-                                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
-                                        }`}
-                                >
-                                    Send Link
-                                </button>
-                                <button
-                                    onClick={() => handleFilterChange("special")}
-                                    className={`flex-1 sm:flex-none px-4 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${filterType === "special"
-                                        ? "bg-white text-[#3882a5] shadow-sm ring-1 ring-black/5"
-                                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
-                                        }`}
-                                >
-                                    VIP Booking
-                                </button>
-                            </div>
-                        </div>
+                    <div className="flex shrink-0 items-center gap-2">
                         <Button
                             variant="outline"
                             size="icon"
@@ -747,41 +701,27 @@ function AppointmentLinksContent() {
                                 icon={UserPlus}
                                 className="flex items-center justify-center gap-2 text-xs whitespace-nowrap sm:text-sm text-white px-6 min-w-[150px]"
                             >
-                                <CreateAppointmentLinkModal
-                                    open={showLinkModal}
-                                    onOpenChange={setShowLinkModal}
-                                    onSuccess={() => {
-                                        refetchAll();
-                                    }}
-                                />
-                                <QuickAppointmentModal
-                                    open={showVipModal}
-                                    onOpenChange={setShowVipModal}
-                                    onSuccess={() => {
-                                        refetchAll();
-                                    }}
-                                />
                                 <ActionButton
                                     variant="outline-primary"
                                     size="xl"
                                     className="flex items-center justify-center sm:gap-2 text-xs whitespace-nowrap sm:text-sm"
                                     onClick={() => {
                                         if (filterType === "special") {
-                                            setShowVipModal(true);
+                                            router.push(routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING_CREATE);
                                         } else {
-                                            setShowLinkModal(true);
+                                            router.push(routes.privateroute.APPOINTMENT_LINKS_CREATE);
                                         }
                                     }}
                                 >
                                     {filterType === "special" ? (
                                         <>
                                             <User className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                            <span className="hidden sm:inline">Book VIP</span>
+                                            <span className="hidden sm:inline">Create Priority Booking</span>
                                         </>
                                     ) : (
                                         <>
                                             <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                            <span className="hidden sm:inline">Create Link</span>
+                                            <span className="hidden sm:inline">Create Invite Link</span>
                                         </>
                                     )}
                                 </ActionButton>
@@ -798,7 +738,7 @@ function AppointmentLinksContent() {
                         emptyData={{
                             title: "No appointment links found",
                             description: "Create your first appointment link to get started.",
-                            primaryActionLabel: isExpired ? "Upgrade Plan" : (hasReachedAppointmentLimit ? "Support Chat" : (filterType === "special" ? "Book VIP" : "Create Link")),
+                            primaryActionLabel: isExpired ? "Upgrade Plan" : (hasReachedAppointmentLimit ? "Support Chat" : (filterType === "special" ? "Create Priority Booking" : "Create Invite Link")),
                         }}
                         onPrimaryAction={() => {
                             if (isExpired) {
@@ -808,9 +748,9 @@ function AppointmentLinksContent() {
                                 dispatch(setAssistantOpen(true));
                             } else {
                                 if (filterType === "special") {
-                                    setShowVipModal(true);
+                                    router.push(routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING_CREATE);
                                 } else {
-                                    setShowLinkModal(true);
+                                    router.push(routes.privateroute.APPOINTMENT_LINKS_CREATE);
                                 }
                             }
                         }}

@@ -49,6 +49,10 @@ export const routes = {
         APPOINTMENTEDIT: "/appointment/[id]",
         APPOINTMENT_REQUESTS: "/appointment/requests",
         APPOINTMENT_LINKS: "/appointment-links",
+        APPOINTMENT_LINKS_SEND_LINK: "/appointment-links/send-link",
+        APPOINTMENT_LINKS_VIP_BOOKING: "/appointment-links/vip-booking",
+        APPOINTMENT_LINKS_VIP_BOOKING_CREATE: "/appointment-links/vip-booking/create",
+        APPOINTMENT_LINKS_CREATE: "/appointment-links/create",
 
         // Settings Routes
         SETTINGS: "/settings",

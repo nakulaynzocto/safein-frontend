@@ -30,7 +30,7 @@ const allNavItems: NavItem[] = [
     { name: "Employees",  href: routes.privateroute.EMPLOYEELIST, icon: Users, roles: ["admin"] },
     { name: "Visitors",   href: routes.privateroute.VISITORLIST, icon: UserPlus, roles: ["admin"] },
     { name: "Appointments", href: routes.privateroute.APPOINTMENTLIST, icon: Calendar, roles: ["admin", "employee"] },
-    { name: "Invites",    href: routes.privateroute.APPOINTMENT_LINKS, icon: LinkIcon, roles: ["admin", "employee"] },
+    { name: "Invites",    href: routes.privateroute.APPOINTMENT_LINKS_SEND_LINK, icon: LinkIcon, roles: ["admin", "employee"] },
     { name: "Messages",   href: routes.privateroute.MESSAGES, icon: MessageSquare, roles: ["admin", "employee"] },
     { name: "Settings",   href: routes.privateroute.PROFILE, icon: Settings, roles: ["admin"] },
     { name: "Approvals",  href: routes.privateroute.APPOINTMENT_REQUESTS, icon: ClipboardList, roles: ["employee"] },

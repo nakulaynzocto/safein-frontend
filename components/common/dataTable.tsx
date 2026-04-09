@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "./EmptyState";
 import { TableSkeleton } from "./tableSkeleton";
-import { ArrowUpDown, ArrowUp, ArrowDown, Plus } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, Plus, type LucideIcon } from "lucide-react";
 
 interface Column<T> {
     key: keyof T | string;
@@ -23,8 +23,10 @@ interface EmptyData {
     primaryActionLabel?: string;
     secondaryActionLabel?: string;
     route?: string;
-    icon?: any;
+    icon?: LucideIcon;
     onPrimaryAction?: () => void;
+    /** Rendered above primary CTA (e.g. mobile-only shortcuts) */
+    beforePrimaryAction?: ReactNode;
 }
 
 interface DataTableProps<T> {
@@ -143,6 +145,7 @@ export function DataTable<T extends Record<string, any>>({
             <EmptyState
                 title={emptyData?.title || emptyMessage}
                 description={emptyData?.description || description}
+                beforeAction={emptyData?.beforePrimaryAction}
                 action={action}
                 icon={emptyData?.icon}
             />

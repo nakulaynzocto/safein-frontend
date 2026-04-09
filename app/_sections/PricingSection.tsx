@@ -70,16 +70,17 @@ export default function PricingSection() {
                     </p>
                 </div>
 
-                <div className="flex flex-wrap justify-center gap-8 pt-6 pb-12">
-                    {plans.map((plan: ISubscriptionPlan) => (
-                        <Card
-                            key={plan._id}
-                            className={`relative flex flex-col transition-all duration-300 rounded-[2.5rem] border-2 max-w-sm mx-auto w-full ${
-                                plan.isPopular 
-                                    ? "border-[#3882a5] shadow-[0_20px_50px_-12px_rgba(56,130,165,0.15)] ring-4 ring-[#3882a5]/5" 
-                                    : "border-slate-100 shadow-sm hover:border-slate-200"
-                            }`}
-                        >
+                <div className="overflow-x-auto pb-6 pt-6">
+                    <div className="mx-auto flex w-max min-w-full flex-nowrap justify-start gap-8 px-1">
+                        {plans.map((plan: ISubscriptionPlan) => (
+                            <Card
+                                key={plan._id}
+                                className={`relative flex w-[300px] min-w-[300px] flex-col rounded-[2.5rem] border-2 transition-all duration-300 sm:w-[320px] sm:min-w-[320px] ${
+                                    plan.isPopular
+                                        ? "border-[#3882a5] shadow-[0_20px_50px_-12px_rgba(56,130,165,0.15)] ring-4 ring-[#3882a5]/5"
+                                        : "border-slate-100 shadow-sm hover:border-slate-200"
+                                }`}
+                            >
                             {plan.isPopular && (
                                 <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2 transform">
                                     <Badge className="bg-[#3882a5] px-4 py-1 text-white shadow-md rounded-full border-none">
@@ -140,8 +141,9 @@ export default function PricingSection() {
                                     ))}
                                 </div>
                             </CardContent>
-                        </Card>
-                    ))}
+                            </Card>
+                        ))}
+                    </div>
                 </div>
             </div>
 
