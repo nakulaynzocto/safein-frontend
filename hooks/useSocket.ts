@@ -8,7 +8,7 @@ import { baseApi } from "@/store/api/baseApi";
 import { notificationApi } from "@/store/api/notificationApi";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
-import { routes } from "@/utils/routes";
+import { routes, isPublicActionRoute } from "@/utils/routes";
 
 export enum SocketEvents {
     CONNECTION = "connection",
@@ -166,6 +166,10 @@ export function useSocket(options: UseSocketOptions = {}) {
     const { token, user } = useAppSelector((state) => state.auth);
     const [isConnected, setIsConnected] = useState(false);
     const isConnectedRef = useRef(false);
+    const isPublicActionContext = useCallback(() => {
+        if (typeof window === "undefined") return false;
+        return isPublicActionRoute(window.location.pathname || "");
+    }, []);
 
     const invalidateAppointments = useCallback(() => {
         dispatch(
@@ -209,6 +213,11 @@ export function useSocket(options: UseSocketOptions = {}) {
                 invalidateNotifications();
 
                 if (showToasts) {
+                    if (isPublicActionContext()) {
+                        invalidateAppointments();
+                        onAppointmentStatusChanged?.(data);
+                        return;
+                    }
                     // ADMIN gets all status change notifications with sound
                     // EMPLOYEE does NOT get sound/toast for status changes (they usually perform them)
                     if (isAdmin) {
@@ -223,7 +232,7 @@ export function useSocket(options: UseSocketOptions = {}) {
             invalidateAppointments();
             onAppointmentStatusChanged?.(data);
         },
-        [showToasts, invalidateAppointments, invalidateNotifications, onAppointmentStatusChanged, user],
+        [showToasts, invalidateAppointments, invalidateNotifications, onAppointmentStatusChanged, user, isPublicActionContext],
     );
 
     // Handle appointment created
@@ -250,6 +259,10 @@ export function useSocket(options: UseSocketOptions = {}) {
             invalidateNotifications();
 
             if (showToasts) {
+                if (isPublicActionContext()) {
+                    invalidateAppointments();
+                    return;
+                }
                 // ADMIN gets all creations with sound
                 // EMPLOYEE ONLY gets sound for 'pending' (New Request)
                 if (isAdmin || (isEmployee && status === 'pending')) {
@@ -266,7 +279,7 @@ export function useSocket(options: UseSocketOptions = {}) {
 
             invalidateAppointments();
         },
-        [showToasts, invalidateAppointments, invalidateNotifications, user],
+        [showToasts, invalidateAppointments, invalidateNotifications, user, isPublicActionContext],
     );
 
     // Handle appointment updated
@@ -301,6 +314,10 @@ export function useSocket(options: UseSocketOptions = {}) {
                 };
 
                 if (showToasts) {
+                    if (isPublicActionContext()) {
+                        invalidateNotifications();
+                        return;
+                    }
                     showToast(config, () => {
                         router.push(`${routes.privateroute.APPOINTMENT_LINKS}?type=special`);
                     });
@@ -311,7 +328,7 @@ export function useSocket(options: UseSocketOptions = {}) {
             // Only invalidate notifications to refresh inbox count and list
             invalidateNotifications();
         },
-        [invalidateNotifications, router, showToasts],
+        [invalidateNotifications, router, showToasts, isPublicActionContext],
     );
 
     // Fix: Use useRef for stable callbacks to prevent unnecessary re-renders

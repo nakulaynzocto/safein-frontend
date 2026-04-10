@@ -122,6 +122,7 @@ export const baseApi = createApi({
         "SpotPass",
         "Chat",
         "DashboardStats",
+        "QRSetup",
     ],
     endpoints: () => ({}),
     refetchOnMountOrArgChange: false,

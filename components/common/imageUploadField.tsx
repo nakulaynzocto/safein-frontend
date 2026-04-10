@@ -19,6 +19,8 @@ interface ImageUploadFieldProps {
     appointmentToken?: string; // Token for public upload endpoint
     onUploadStatusChange?: (isUploading: boolean) => void;
     variant?: "default" | "avatar";
+    autoOpenCamera?: boolean;
+    directCameraOnly?: boolean;
 }
 
 export function ImageUploadField({
@@ -32,6 +34,8 @@ export function ImageUploadField({
     appointmentToken,
     onUploadStatusChange,
     variant = "default",
+    autoOpenCamera = false,
+    directCameraOnly = false,
 }: ImageUploadFieldProps) {
     const [previewImage, setPreviewImage] = useState<string | null>(initialUrl || null);
     const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -46,6 +50,7 @@ export function ImageUploadField({
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
+    const hasAutoOpenedRef = useRef(false);
     const fileInputId = `${name}-file-input`;
 
     const validateFile = (file: File): void => {
@@ -243,7 +248,11 @@ export function ImageUploadField({
         e?.preventDefault();
         e?.stopPropagation();
         if (enableImageCapture) {
-            setShowCaptureOptions(true);
+            if (directCameraOnly) {
+                startCamera();
+            } else {
+                setShowCaptureOptions(true);
+            }
         } else {
             fileInputRef.current?.click();
         }
@@ -294,6 +303,16 @@ export function ImageUploadField({
         }
     }, [initialUrl]);
 
+    useEffect(() => {
+        if (!autoOpenCamera || hasAutoOpenedRef.current || !enableImageCapture || previewImage) {
+            return;
+        }
+        hasAutoOpenedRef.current = true;
+        startCamera();
+        // intentionally once per mount for explicit capture-first flows
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [autoOpenCamera, enableImageCapture, previewImage]);
+
 
     if (variant === "avatar") {
         return (
@@ -302,29 +321,31 @@ export function ImageUploadField({
 
                 {/* Camera Modal (Reuse existing logic) */}
                 {isCapturing && (
-                    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black p-2 sm:p-4">
-                        <div className="relative mx-auto flex h-full w-full max-w-2xl flex-col justify-center">
-                            <video
-                                ref={videoRef}
-                                className="h-auto max-h-[85vh] w-full rounded-lg object-contain sm:max-h-[80vh]"
-                                autoPlay
-                                playsInline
-                                muted
-                            />
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+                        <div className="relative flex w-full max-w-md flex-col items-center gap-4 rounded-3xl bg-[#0b1320]/80 p-4 sm:p-6">
+                            <div className="relative h-[280px] w-[280px] overflow-hidden rounded-full border-4 border-white/20 shadow-2xl sm:h-[340px] sm:w-[340px]">
+                                <video
+                                    ref={videoRef}
+                                    className="h-full w-full object-cover"
+                                    autoPlay
+                                    playsInline
+                                    muted
+                                />
+                            </div>
                             <canvas ref={canvasRef} className="hidden" />
 
-                            <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
+                            <div className="absolute top-4 right-4 sm:top-5 sm:right-5">
                                 <Button
                                     type="button"
                                     onClick={switchCamera}
-                                    className="bg-opacity-90 hover:bg-opacity-100 rounded-full bg-white p-2 text-black shadow-lg sm:p-3"
+                                    className="rounded-full bg-white p-2 text-black shadow-lg hover:bg-gray-100 sm:p-3"
                                     title={`Switch to ${facingMode === "environment" ? "Front" : "Back"} Camera`}
                                 >
                                     <RotateCw className="h-4 w-4 sm:h-5 sm:w-5" />
                                 </Button>
                             </div>
 
-                            <div className="absolute right-0 bottom-2 left-0 flex justify-center gap-2 px-2 sm:bottom-4 sm:gap-4">
+                            <div className="mt-1 flex w-full justify-center gap-2 sm:gap-4">
                                 <Button
                                     type="button"
                                     onClick={capturePhoto}
@@ -447,15 +468,17 @@ export function ImageUploadField({
 
             <div className="flex flex-col gap-3">
                 {isCapturing && (
-                    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black p-2 sm:p-4">
-                        <div className="relative mx-auto flex h-full w-full max-w-2xl flex-col justify-center">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent p-2 sm:p-4">
+                        <div className="relative flex w-full max-w-md flex-col items-center gap-4 rounded-3xl bg-[#0b1320]/80 p-4 sm:p-6">
+                            <div className="relative h-[280px] w-[280px] overflow-hidden rounded-full border-4 border-white/20 shadow-2xl sm:h-[340px] sm:w-[340px]">
                             <video
                                 ref={videoRef}
-                                className="h-auto max-h-[85vh] w-full rounded-lg object-contain sm:max-h-[80vh]"
+                                className="h-full w-full object-cover"
                                 autoPlay
                                 playsInline
                                 muted
                             />
+                            </div>
                             <canvas ref={canvasRef} className="hidden" />
 
                             <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
@@ -469,7 +492,7 @@ export function ImageUploadField({
                                 </Button>
                             </div>
 
-                            <div className="absolute right-0 bottom-2 left-0 flex justify-center gap-2 px-2 sm:bottom-4 sm:gap-4">
+                            <div className="mt-1 flex w-full justify-center gap-2 sm:gap-4">
                                 <Button
                                     type="button"
                                     onClick={capturePhoto}
@@ -525,7 +548,7 @@ export function ImageUploadField({
                 {previewImage ? (
                     <div className="group relative">
                         <div
-                            className={`relative flex h-40 w-40 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 shadow-md transition-all duration-300 hover:shadow-lg sm:h-40 sm:w-40 sm:rounded-xl ${uploadSuccess
+                            className={`relative mx-auto flex h-56 w-56 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 shadow-md transition-all duration-300 hover:shadow-lg sm:h-64 sm:w-64 ${uploadSuccess
                                 ? "border-green-400 bg-white ring-2 ring-green-200"
                                 : imageError
                                     ? "border-red-400 bg-red-50 ring-2 ring-red-200"
@@ -540,7 +563,7 @@ export function ImageUploadField({
                             }}
                         >
                             {isUploading && (
-                                <div className="bg-opacity-95 absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white">
+                                <div className="bg-opacity-95 absolute inset-0 z-10 flex items-center justify-center rounded-full bg-white">
                                     <div className="flex flex-col items-center">
                                         <div className="h-8 w-8 animate-spin rounded-full border-3 border-[#3882a5]/20 border-t-[#3882a5]"></div>
                                         <span className="mt-3 text-xs font-medium text-[#3882a5] sm:text-sm">
@@ -577,10 +600,10 @@ export function ImageUploadField({
                                         handleClearFile();
                                     }}
                                     disabled={isUploading}
-                                    className="absolute top-1.5 right-1.5 z-20 rounded-full bg-red-500 p-2 text-white opacity-100 shadow-md transition-opacity duration-200 hover:bg-red-600 active:bg-red-700 sm:top-2 sm:right-2 sm:p-1.5"
-                                    title="Remove image"
+                                    className="absolute top-2 right-2 z-20 rounded-full bg-red-500 p-2 text-white opacity-100 shadow-md transition-opacity duration-200 hover:bg-red-600 active:bg-red-700"
+                                    title="Retake photo"
                                 >
-                                    <X className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                                    <X className="h-4 w-4" />
                                 </button>
                             )}
 
@@ -594,7 +617,7 @@ export function ImageUploadField({
                 ) : (
                     <div className="relative">
                         <div
-                            className={`group flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-gradient-to-br from-gray-50 to-gray-100 shadow-sm transition-all duration-300 hover:from-[#3882a5]/5 hover:to-[#3882a5]/10 hover:shadow-md sm:h-40 sm:w-40 sm:rounded-xl ${isUploading
+                            className={`group mx-auto flex h-56 w-56 cursor-pointer flex-col items-center justify-center rounded-full border-2 border-dashed bg-gradient-to-br from-gray-50 to-gray-100 shadow-sm transition-all duration-300 hover:from-[#3882a5]/5 hover:to-[#3882a5]/10 hover:shadow-md sm:h-64 sm:w-64 ${isUploading
                                 ? "border-[#3882a5]/40 bg-[#3882a5]/5 ring-2 ring-[#3882a5]/20"
                                 : "border-gray-300 hover:border-[#3882a5]/40 hover:ring-2 hover:ring-[#3882a5]/20"
                                 }`
@@ -620,18 +643,18 @@ export function ImageUploadField({
                                         triggerFileInput(e);
                                     }}
                                 >
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 shadow-inner transition-all duration-300 group-hover:bg-[#3882a5]/10 group-hover:shadow-md sm:h-14 sm:w-14">
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-200 shadow-inner transition-all duration-300 group-hover:bg-[#3882a5]/10 group-hover:shadow-md sm:h-16 sm:w-16">
                                         {enableImageCapture ? (
-                                            <Camera className="h-6 w-6 text-gray-500 transition-colors duration-300 group-hover:text-[#3882a5] sm:h-7 sm:w-7" />
+                                            <Camera className="h-7 w-7 text-gray-500 transition-colors duration-300 group-hover:text-[#3882a5] sm:h-8 sm:w-8" />
                                         ) : (
-                                            <ImageIcon className="h-6 w-6 text-gray-500 transition-colors duration-300 group-hover:text-[#3882a5] sm:h-7 sm:w-7" />
+                                            <ImageIcon className="h-7 w-7 text-gray-500 transition-colors duration-300 group-hover:text-[#3882a5] sm:h-8 sm:w-8" />
                                         )}
                                     </div>
                                     <span className="mt-3 text-center text-xs font-medium text-gray-600 transition-colors duration-300 group-hover:text-[#3882a5] sm:mt-4 sm:text-sm">
-                                        {enableImageCapture ? "Take or Upload Photo" : "Upload Image"}
+                                        {enableImageCapture ? (directCameraOnly ? "Open Camera" : "Take or Upload Photo") : "Upload Image"}
                                     </span>
                                     <span className="mt-1.5 text-center text-xs text-gray-400 sm:mt-2">
-                                        PNG, JPG up to 5MB
+                                        {enableImageCapture ? (directCameraOnly ? "Tap to capture photo" : "PNG, JPG up to 5MB") : "PNG, JPG up to 5MB"}
                                     </span>
                                 </div>
                             )}

@@ -14,38 +14,41 @@ import { CountryStateCitySelect } from "@/components/common/countryStateCity";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { ImageUploadField } from "@/components/common/imageUploadField";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FileText, Camera, Fingerprint } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useUserCountry } from "@/hooks/useUserCountry";
 
-const bookingVisitorSchema = yup.object({
-    name: yup.string().trim().required("Name is required").min(2, "Name must be at least 2 characters"),
-    email: yup.string().trim().email("Invalid email address").required("Email is required"),
-    phone: yup
-        .string()
-        .trim()
-        .required("Phone number is required")
-        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
-            validatePhone(value)
-        ),
-    address: yup.object({
-        street: yup
+const createBookingVisitorSchema = (collectPhotoInForm: boolean) =>
+    yup.object({
+        name: yup.string().trim().required("Name is required").min(2, "Name must be at least 2 characters"),
+        email: yup.string().trim().email("Invalid email address").required("Email is required"),
+        phone: yup
             .string()
             .trim()
-            .required("Company Address is required")
-            .min(2, "Company Address must be at least 2 characters"),
-        city: yup.string().trim().required("City is required"),
-        state: yup.string().trim().required("State is required"),
-        country: yup.string().trim().required("Country is required"),
-    }),
-    idProof: yup.object({
-        type: yup.string().trim().optional(),
-        number: yup.string().trim().optional(),
-        image: yup.string().trim().optional(),
-    }),
-    photo: yup.string().trim().required("Visitor Photo is required"),
-});
+            .required("Phone number is required")
+            .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) =>
+                validatePhone(value)
+            ),
+        address: yup.object({
+            street: yup
+                .string()
+                .trim()
+                .required("Company Address is required")
+                .min(2, "Company Address must be at least 2 characters"),
+            city: yup.string().trim().required("City is required"),
+            state: yup.string().trim().required("State is required"),
+            country: yup.string().trim().required("Country is required"),
+        }),
+        idProof: yup.object({
+            type: yup.string().trim().optional(),
+            number: yup.string().trim().optional(),
+            image: yup.string().trim().optional(),
+        }),
+        photo: collectPhotoInForm
+            ? yup.string().trim().required("Visitor Photo is required")
+            : yup.string().trim().optional().default(""),
+    });
 
 type BookingVisitorFormData = {
     name: string;
@@ -80,6 +83,7 @@ interface BookingVisitorFormProps {
     onSubmit: (data: any) => void;
     isLoading?: boolean;
     appointmentToken?: string; // Token for public upload endpoint
+    collectPhotoInForm?: boolean;
 }
 
 export function BookingVisitorForm({
@@ -89,8 +93,10 @@ export function BookingVisitorForm({
     onSubmit,
     isLoading = false,
     appointmentToken,
+    collectPhotoInForm = true,
 }: BookingVisitorFormProps) {
     const userCountry = useUserCountry();
+    const bookingVisitorSchema = useMemo(() => createBookingVisitorSchema(collectPhotoInForm), [collectPhotoInForm]);
     const {
         register,
         handleSubmit,
@@ -203,6 +209,32 @@ export function BookingVisitorForm({
             className="space-y-4 sm:space-y-6"
             noValidate
         >
+            {/* Address Information - Top priority */}
+            <div className="space-y-4">
+                <CountryStateCitySelect
+                    value={{
+                        country: watch("address.country") || "",
+                        state: watch("address.state") || "",
+                        city: watch("address.city") || "",
+                    }}
+                    onChange={(v) => {
+                        setValue("address.country", v.country);
+                        setValue("address.state", v.state);
+                        setValue("address.city", v.city);
+                        // Reset phone when country changes (so new dial code takes effect)
+                        if (v.country && !initialPhone) {
+                            setValue("phone", "");
+                        }
+                    }}
+                    errors={{
+                        country: errors.address?.country?.message as string,
+                        state: errors.address?.state?.message as string,
+                        city: errors.address?.city?.message as string,
+                    }}
+                    required
+                />
+            </div>
+
             {/* Personal Information Section */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <InputField
@@ -233,45 +265,19 @@ export function BookingVisitorForm({
                 />
 
                 <div className="space-y-1.5">
-                <InputField
-                    id="email"
-                    label="Email Address"
-                    type="email"
-                    {...register("email")}
-                    placeholder="Enter email address"
-                    error={errors.email?.message}
-                    required
-                    disabled={!!initialEmail}
-                    readOnly={!!initialEmail}
-                    helperText={initialEmail ? "This email was used to send you the appointment link" : undefined}
-                />
+                    <InputField
+                        id="email"
+                        label="Email Address"
+                        type="email"
+                        {...register("email")}
+                        placeholder="Enter email address"
+                        error={errors.email?.message}
+                        required
+                        disabled={!!initialEmail}
+                        readOnly={!!initialEmail}
+                        helperText={initialEmail ? "This email was used to send you the appointment link" : undefined}
+                    />
                 </div>
-            </div>
-
-            {/* Address Information */}
-            <div className="space-y-4">
-                <CountryStateCitySelect
-                    value={{
-                        country: watch("address.country") || "",
-                        state: watch("address.state") || "",
-                        city: watch("address.city") || "",
-                    }}
-                    onChange={(v) => {
-                        setValue("address.country", v.country);
-                        setValue("address.state", v.state);
-                        setValue("address.city", v.city);
-                        // Reset phone when country changes (so new dial code takes effect)
-                        if (v.country && !initialPhone) {
-                            setValue("phone", "");
-                        }
-                    }}
-                    errors={{
-                        country: errors.address?.country?.message as string,
-                        state: errors.address?.state?.message as string,
-                        city: errors.address?.city?.message as string,
-                    }}
-                    required
-                />
             </div>
 
             {/* Company Address Section */}
@@ -286,7 +292,7 @@ export function BookingVisitorForm({
             />
 
             {/* ID Verification & Photos */}
-            <div className="space-y-6 pt-2">
+            {collectPhotoInForm && <div className="space-y-6 pt-2">
                 {/* Required Visitor Photo */}
                 <div className="flex flex-col space-y-3 bg-gray-50/50 p-4 rounded-2xl border border-dashed border-gray-200">
                     <Label className="text-foreground text-sm font-semibold flex items-center gap-2">
@@ -402,7 +408,7 @@ export function BookingVisitorForm({
                         </div>
                     </div>
                 )}
-            </div>
+            </div>}
 
             <div className="flex flex-col-reverse justify-end gap-3 border-t pt-4 sm:flex-row sm:gap-4 sm:pt-6">
                 <Button

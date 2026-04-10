@@ -29,7 +29,7 @@ export interface AppointmentLink {
 
 export interface CreateAppointmentLinkRequest {
     visitorEmail?: string;
-    visitorPhone: string;
+    visitorPhone?: string;
     employeeId: string;
     expiresInDays?: number;
 }
@@ -51,6 +51,12 @@ export interface AppointmentLinkListResponse {
 export interface CheckVisitorResponse {
     exists: boolean;
     visitorId?: string;
+}
+
+export interface CreateBookingThroughLinkRequest {
+    token: string;
+    visitorData?: CreateVisitorRequest;
+    appointmentData: any;
 }
 
 export const appointmentLinkApi = baseApi.injectEndpoints({
@@ -143,6 +149,14 @@ export const appointmentLinkApi = baseApi.injectEndpoints({
             }),
             transformResponse: (response: any) => response?.data || response,
         }),
+        createBookingThroughLink: builder.mutation<any, CreateBookingThroughLinkRequest>({
+            query: ({ token, visitorData, appointmentData }) => ({
+                url: `/appointment-links/public/${encodeURIComponent(token)}/submit`,
+                method: "POST",
+                body: { visitorData, appointmentData },
+            }),
+            transformResponse: (response: any) => response?.data || response,
+        }),
     }),
 });
 
@@ -155,4 +169,5 @@ export const {
     useResendAppointmentLinkMutation,
     useCreateVisitorThroughLinkMutation,
     useCreateAppointmentThroughLinkMutation,
+    useCreateBookingThroughLinkMutation,
 } = appointmentLinkApi;

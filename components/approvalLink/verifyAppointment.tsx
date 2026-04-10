@@ -158,6 +158,8 @@ export function VerifyAppointment() {
     }
 
     const appointment = data?.data?.appointment;
+    const isUsedLink = !!data?.data?.isUsed;
+    const isExpiredByTime = !!data?.data?.isExpiredByTime;
     if (!appointment) return null;
 
     const scheduledDate = new Date(appointment.appointmentDetails.scheduledDate);
@@ -170,12 +172,34 @@ export function VerifyAppointment() {
 
     const currentStatus = completedStatus || appointment.status;
     const isProcessed = actionCompleted || ["approved", "rejected"].includes(currentStatus);
+    const shouldShowExpiredState = isUsedLink && !isProcessed && (isExpiredByTime || currentStatus === "pending");
+
+    if (shouldShowExpiredState) {
+        return (
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <Card className="w-full max-w-md border-0 bg-white shadow-2xl backdrop-blur-xl dark:bg-slate-900/80">
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 p-4 dark:bg-amber-900/20">
+                            <XCircle className="h-10 w-10 text-amber-600" />
+                        </div>
+                        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Link Expired</h2>
+                        <p className="text-slate-500 dark:text-slate-400">
+                            This verification link is no longer active.
+                        </p>
+                        <Button className="mt-8" variant="outline" onClick={() => (window.location.href = "/")}>
+                            Go to Homepage
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     if (isProcessed) {
         const displayStatus = currentStatus === "approved" ? "approved" : "rejected";
         return (
             <div className="flex min-h-screen items-center justify-center p-4">
-                <Card className="w-full max-w-md overflow-hidden border-0 bg-white shadow-2xl dark:bg-slate-900 animate-in zoom-in-95 duration-500">
+                <Card className="w-full max-w-lg overflow-hidden border-0 bg-white shadow-2xl dark:bg-slate-900 animate-in zoom-in-95 duration-500">
                     <div className={cn(
                         "h-2",
                         displayStatus === "approved" ? "bg-green-500" : "bg-red-500"
@@ -200,11 +224,37 @@ export function VerifyAppointment() {
                                 : `This appointment was already ${displayStatus}.`
                             }
                         </p>
-                        <div className="mt-8 flex flex-col w-full gap-3">
+                        <div className="mt-8 flex w-full flex-col gap-3">
                             <div className="rounded-xl border border-dashed border-slate-200 p-4 text-left dark:border-slate-800">
-                                <p className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-2">Details</p>
-                                <p className="text-sm font-semibold truncate">{appointment.visitor.name}</p>
-                                <p className="text-xs text-slate-500">{formattedDate}</p>
+                                <p className="mb-3 text-xs font-medium uppercase tracking-wider text-slate-400">Visitor Details</p>
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-14 w-14 border border-slate-200 dark:border-slate-700">
+                                        <AvatarImage src={appointment.visitor?.photo} alt={appointment.visitor?.name || "Visitor"} className="object-cover" />
+                                        <AvatarFallback className="bg-slate-100 text-sm font-bold text-[#3882a5] dark:bg-slate-800">
+                                            {(appointment.visitor?.name || "V")
+                                                .split(" ")
+                                                .map((n: string) => n[0])
+                                                .join("")
+                                                .toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-semibold">{appointment.visitor?.name || "-"}</p>
+                                        <p className="text-xs text-slate-500">{appointment.visitor?.phone || "-"}</p>
+                                    </div>
+                                </div>
+                                <div className="mt-3 grid grid-cols-2 gap-2">
+                                    <div className="rounded-lg bg-slate-50 p-2 dark:bg-slate-800/60">
+                                        <p className="text-[10px] uppercase text-slate-500">Date</p>
+                                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">{formattedDate}</p>
+                                    </div>
+                                    <div className="rounded-lg bg-slate-50 p-2 dark:bg-slate-800/60">
+                                        <p className="text-[10px] uppercase text-slate-500">Time</p>
+                                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                                            {formatTime(appointment?.appointmentDetails?.scheduledTime)}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                             <Button className="w-full" variant="outline" onClick={() => (window.location.href = "/")}>
                                 Back to Portal

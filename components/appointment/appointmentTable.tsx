@@ -600,16 +600,16 @@ export function AppointmentTable({
 
 
             <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="flex w-full flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex w-full flex-row flex-nowrap items-center justify-between gap-2 sm:gap-4">
                     <SearchInput
                         placeholder="Search..."
                         value={searchTerm}
                         onChange={onSearchChange}
                         debounceDelay={500}
-                        className="w-full sm:max-w-[300px]"
+                        className="min-w-0 flex-1 sm:max-w-[300px]"
                     />
-                    <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="flex-1 sm:flex-none">
+                    <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+                        <div className="shrink-0">
                             <DateRangePicker
                                 onDateRangeChange={(r) => {
                                     onDateFromChange?.(r.startDate || "");
@@ -617,7 +617,7 @@ export function AppointmentTable({
                                     onPageChange?.(1);
                                 }}
                                 initialValue={dateFrom && dateTo ? { startDate: dateFrom, endDate: dateTo } : undefined}
-                                className="w-full sm:w-auto"
+                                className="w-auto"
                             />
                         </div>
                         

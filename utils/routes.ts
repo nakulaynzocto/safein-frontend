@@ -27,6 +27,7 @@ export const routes = {
 
         // Appointment Booking (Missing previously)
         BOOK_APPOINTMENT: "/book-appointment/[token]",
+        QR_SCAN: "/scan/[slug]",
     },
 
     privateroute: {
@@ -60,6 +61,7 @@ export const routes = {
         SETTINGS_NOTIFICATION: "/settings/notification",
         SETTINGS_WHATSAPP: "/settings/whatsapp",
         SETTINGS_SMTP: "/settings/smtp",
+        SETTINGS_QR_CHECKIN: "/settings/qr-checkin",
         SPOT_PASS: "/spot-pass",
         SPOT_PASS_CREATE: "/spot-pass/create",
         MESSAGES: "/messages",
@@ -163,6 +165,7 @@ export const isPublicActionRoute = (path: string): boolean => {
     return (
         path.startsWith("/verify/") ||
         path.startsWith("/book-appointment/") ||
+        path.startsWith("/scan/") ||
         path.startsWith("/email-action/") ||
         path.startsWith("/employee-setup")
     );

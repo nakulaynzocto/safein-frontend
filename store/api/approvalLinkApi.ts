@@ -17,6 +17,8 @@ export interface VerifyTokenResponse {
     message: string;
     data: {
         isValid: boolean;
+        isUsed?: boolean;
+        isExpiredByTime?: boolean;
         appointment?: {
             _id: string;
             appointmentId: string;

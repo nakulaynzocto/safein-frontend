@@ -47,6 +47,9 @@ export interface CreateSpecialBookingPayload {
     accompanyingCount: number;
     notes?: string;
     address?: string;
+    country?: string;
+    state?: string;
+    city?: string;
     vehicleNumber?: string;
     visitorPhoto?: string;
 }

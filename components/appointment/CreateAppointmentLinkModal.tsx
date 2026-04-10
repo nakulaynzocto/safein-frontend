@@ -252,7 +252,7 @@ export function CreateAppointmentLinkModal({
                 setGeneralError(null);
                 const result = await createAppointmentLink({
                     visitorEmail: email,
-                    visitorPhone: phone || "", // Backend might expect phone, if not present we send empty or previous logic had it required
+                    visitorPhone: phone,
                     employeeId: submitEmployeeId,
                     expiresInDays: data.expiresInDays || 1,
                 }).unwrap();

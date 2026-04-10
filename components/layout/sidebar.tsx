@@ -27,6 +27,7 @@ import {
     Link as LinkIcon,
     MessageSquare,
     Mail,
+    QrCode,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -75,6 +76,12 @@ const baseNavigation: Array<{
             href: routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING,
             icon: UserCircle,
             roles: ["admin", "employee"], // Both admin and employee
+        },
+        {
+            name: "QR Check-in",
+            href: routes.privateroute.SETTINGS_QR_CHECKIN,
+            icon: QrCode,
+            roles: ["admin"], // Only admin
         },
         {
             name: "Spot Pass",
@@ -170,6 +177,10 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
 
         if (href === routes.privateroute.SPOT_PASS) {
             return pathname === routes.privateroute.SPOT_PASS;
+        }
+
+        if (href === routes.privateroute.SETTINGS_QR_CHECKIN) {
+            return pathname === routes.privateroute.SETTINGS_QR_CHECKIN;
         }
 
         return false;

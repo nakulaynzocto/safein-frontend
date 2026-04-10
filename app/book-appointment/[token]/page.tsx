@@ -2,23 +2,20 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
+import { useForm } from "react-hook-form";
 import {
     useGetAppointmentLinkByTokenQuery,
-    useCreateVisitorThroughLinkMutation,
-    useCreateAppointmentThroughLinkMutation,
+    useCreateBookingThroughLinkMutation,
 } from "@/store/api/appointmentLinkApi";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
-    Clock, 
     CheckCircle2, 
-    XCircle, 
-    User, 
-    Building2, 
-    CalendarCheck, 
     ShieldCheck,
+    ArrowLeft,
+    Home,
     ArrowRight,
-    ArrowLeft
+    Camera,
 } from "lucide-react";
 import { StatusPage } from "@/components/common/statusPage";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +23,8 @@ import { Button } from "@/components/ui/button";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { extractIdString, isValidId } from "@/utils/idExtractor";
 import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import { ImageUploadField } from "@/components/common/imageUploadField";
 
 const AppointmentBookingForm = dynamic(() => import("@/components/appointment/AppointmentBookingForm").then(mod => mod.AppointmentBookingForm), {
     loading: () => <FormSkeleton title="Appointment Details" />
@@ -63,11 +62,25 @@ export default function BookAppointmentPage() {
     const rawToken = params?.token as string;
     const token = rawToken ? decodeURIComponent(rawToken) : "";
 
-    const [step, setStep] = useState<"loading" | "visitor" | "appointment" | "success" | "error">("loading");
+    const [step, setStep] = useState<"loading" | "details" | "photo" | "appointment" | "review" | "success" | "already_booked" | "error">("loading");
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [visitorId, setVisitorId] = useState<string | null>(null);
     const [appointmentLinkData, setAppointmentLinkData] = useState<any>(null);
     const [visitorData, setVisitorData] = useState<any>(null);
+    const [visitorDraft, setVisitorDraft] = useState<any>(null);
+    const [appointmentDraft, setAppointmentDraft] = useState<any>(null);
+    const [submittedAppointmentId, setSubmittedAppointmentId] = useState<string | null>(null);
+    const [isPhotoUploading, setIsPhotoUploading] = useState(false);
+
+    const {
+        register: photoRegister,
+        setValue: setPhotoValue,
+        handleSubmit: handlePhotoSubmit,
+        watch: watchPhoto,
+        formState: { errors: photoErrors },
+    } = useForm<{ photo: string }>({
+        defaultValues: { photo: "" },
+    });
 
     const {
         data: linkData,
@@ -78,9 +91,9 @@ export default function BookAppointmentPage() {
         refetchOnMountOrArgChange: true 
     });
 
-    const [createVisitorThroughLink, { isLoading: isCreatingVisitor }] = useCreateVisitorThroughLinkMutation();
-    const [createAppointmentThroughLink, { isLoading: isCreatingAppointment }] =
-        useCreateAppointmentThroughLinkMutation();
+    const [createBookingThroughLink, { isLoading: isSubmittingBooking }] = useCreateBookingThroughLinkMutation();
+
+    const employee = appointmentLinkData?.employee || (typeof appointmentLinkData?.employeeId === 'object' ? appointmentLinkData.employeeId : null);
 
     useEffect(() => {
         if (!token) {
@@ -101,6 +114,11 @@ export default function BookAppointmentPage() {
             setAppointmentLinkData(linkData);
             if (linkData.visitor) setVisitorData(linkData.visitor);
 
+            if (linkData.isBooked) {
+                setStep("already_booked");
+                return;
+            }
+
             let finalVisitorId: string | null = null;
             if (linkData.visitorId) {
                 const extractedVisitorId = extractIdString(linkData.visitorId);
@@ -114,42 +132,55 @@ export default function BookAppointmentPage() {
 
             if (finalVisitorId && isValidId(finalVisitorId)) {
                 setVisitorId(finalVisitorId);
+                if (linkData.visitor) {
+                    setVisitorDraft(linkData.visitor);
+                    setVisitorData(linkData.visitor);
+                }
                 setStep("appointment");
             } else {
-                setStep("visitor");
+                setStep("details");
             }
         }
     }, [linkData, linkError, token]);
 
     const handleVisitorSubmit = async (data: any) => {
-        if (!token) return;
-        try {
-            const response = await createVisitorThroughLink({ token, visitorData: data }).unwrap();
-            const result = (response as any)?.data || response;
-            const extractedId = extractIdString(result?._id || result?.id);
+        setVisitorDraft(data);
+        setVisitorData(data);
+        setPhotoValue("photo", data?.photo || "");
+        setStep("photo");
+    };
 
-            if (isValidId(extractedId)) {
-                setVisitorId(extractedId);
-                showSuccessToast("Information saved! Let's schedule the time.");
-                setStep("appointment");
-            } else {
-                showErrorToast("Failed to process visitor ID.");
-            }
-        } catch (error: any) {
-            showErrorToast(error?.data?.message || error?.message || "Failed to save information");
-        }
+    const handlePhotoStepSubmit = async (data: { photo: string }) => {
+        if (!visitorDraft) return;
+        const payload = { ...visitorDraft, photo: data.photo };
+        setVisitorDraft(payload);
+        setVisitorData(payload);
+        setStep("appointment");
     };
 
     const handleAppointmentSubmit = async (appointmentData: any) => {
-        if (!visitorId || !appointmentLinkData || !token) return;
+        setAppointmentDraft(appointmentData);
+        setStep("review");
+    };
+
+    const handleFinalSubmit = async () => {
+        if (!appointmentLinkData || !token || !appointmentDraft) return;
         try {
-            const { visitorId: _, employeeId: __, ...restData } = appointmentData;
+            const { visitorId: _, employeeId: __, ...restData } = appointmentDraft;
             const cleanData = {
                 ...restData,
-                visitorId: extractIdString(visitorId),
                 employeeId: extractIdString(appointmentLinkData.employeeId),
             };
-            await createAppointmentThroughLink({ token, appointmentData: cleanData }).unwrap();
+            const response = await createBookingThroughLink({
+                token,
+                visitorData: visitorDraft || visitorData || undefined,
+                appointmentData: cleanData,
+            }).unwrap();
+            const result = (response as any)?.data || response;
+            const appointmentId = extractIdString(result?._id || result?.id);
+            if (appointmentId) {
+                setSubmittedAppointmentId(appointmentId);
+            }
             setStep("success");
         } catch (error: any) {
             showErrorToast(error?.data?.message || error?.message || "Failed to book appointment");
@@ -204,131 +235,267 @@ export default function BookAppointmentPage() {
 
     if (step === "success") {
         return (
-            <StatusPage
-                type="success"
-                title="Appointment Booked!"
-                message="Your visit has been confirmed successfully."
-                description="A confirmation has been sent to your email. We look forward to seeing you!"
-                showHomeButton={true}
-            />
+            <div className="min-h-screen bg-[#f7fafc] px-4 py-10">
+                <div className="mx-auto w-full max-w-2xl">
+                    <Card className="overflow-hidden border border-emerald-200 bg-white shadow-[0_10px_30px_rgba(16,185,129,0.08)]">
+                        <div className="bg-gradient-to-r from-emerald-50 to-white px-6 py-6 text-center">
+                            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+                                <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                            </div>
+                            <h2 className="text-3xl font-extrabold tracking-tight text-emerald-700">Appointment Booked!</h2>
+                            <p className="mt-2 text-sm text-slate-600">Your visit request has been submitted successfully for approval.</p>
+                        </div>
+
+                        <CardContent className="space-y-5 p-6">
+                            <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
+                                <div>
+                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Visitor</p>
+                                    <p className="text-sm font-semibold text-slate-900">{visitorData?.name || "-"}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Host</p>
+                                    <p className="text-sm font-semibold text-slate-900">{employee?.name || "-"}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Date & Time</p>
+                                    <p className="text-sm font-semibold text-slate-900">
+                                        {submittedAppointmentId ? "Scheduled" : "Submitted"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Reference</p>
+                                    <p className="text-sm font-semibold text-slate-900">{submittedAppointmentId || "Generated"}</p>
+                                </div>
+                            </div>
+
+                            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-center">
+                                <p className="text-sm font-semibold text-emerald-700">Please wait at reception. You will be notified once approved.</p>
+                            </div>
+
+                            <div className="flex justify-center">
+                                <Button variant="outline" onClick={() => window.location.assign("/")}>
+                                    <Home className="mr-2 h-4 w-4" /> Go Home
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
         );
     }
 
-    const employee = appointmentLinkData?.employee || (typeof appointmentLinkData?.employeeId === 'object' ? appointmentLinkData.employeeId : null);
+    if (step === "already_booked") {
+        return (
+            <div className="min-h-screen bg-[#f7fafc] px-4 py-10">
+                <div className="mx-auto w-full max-w-2xl">
+                    <Card className="overflow-hidden border border-[#3882a5]/25 bg-white shadow-[0_10px_30px_rgba(56,130,165,0.12)]">
+                        <div className="bg-gradient-to-r from-[#3882a5]/10 to-white px-6 py-6 text-center">
+                            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[#3882a5]/15">
+                                <CheckCircle2 className="h-8 w-8 text-[#3882a5]" />
+                            </div>
+                            <h2 className="text-3xl font-extrabold tracking-tight text-[#074463]">Already Booked</h2>
+                            <p className="mt-2 text-sm text-slate-600">You have already booked this appointment link.</p>
+                        </div>
+                        <CardContent className="space-y-5 p-6">
+                            <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
+                                <div>
+                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Visitor</p>
+                                    <p className="text-sm font-semibold text-slate-900">{visitorData?.name || "Existing Visitor"}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Meeting With</p>
+                                    <p className="text-sm font-semibold text-slate-900">{employee?.name || "-"}</p>
+                                </div>
+                            </div>
+                            <div className="rounded-xl border border-[#3882a5]/25 bg-[#3882a5]/8 p-4 text-center">
+                                <p className="text-sm font-semibold text-[#1f4f67]">No action needed. Your previous booking is already submitted.</p>
+                            </div>
+                            <div className="flex justify-center">
+                                <Button variant="outline" onClick={() => window.location.assign("/")}>
+                                    <Home className="mr-2 h-4 w-4" /> Go Home
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 px-4 py-8 sm:py-16 selection:bg-[#3882a5]/30">
-            <div className="mx-auto max-w-3xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                
-                {/* Branding Section */}
-                <div className="flex flex-col items-center gap-4 text-center">
-                    {appointmentLinkData?.createdBy?.profilePicture ? (
-                        <div className="relative group">
-                            <div className="absolute -inset-1 rounded-2xl bg-[#3882a5] opacity-20 blur transition group-hover:opacity-40" />
-                            <div className="relative h-16 w-16 sm:h-20 sm:w-20 overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-100 p-2">
-                                <img
-                                    src={appointmentLinkData.createdBy.profilePicture}
-                                    alt="Logo"
-                                    className="h-full w-full object-contain"
-                                />
+        <div className="min-h-screen bg-[#f7fafc] px-3 py-4 sm:px-5 sm:py-10">
+            <div className="mx-auto w-full max-w-5xl space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="rounded-3xl border border-[#3882a5]/15 bg-white p-4 shadow-[0_10px_30px_rgba(7,68,99,0.08)] sm:p-6">
+                    <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:gap-4 sm:text-left">
+                        {appointmentLinkData?.createdBy?.profilePicture ? (
+                            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-white p-1 ring-1 ring-slate-200 sm:h-16 sm:w-16">
+                                <img src={appointmentLinkData.createdBy.profilePicture} alt="Logo" className="h-full w-full rounded-xl object-contain" />
                             </div>
+                        ) : (
+                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#3882a5] text-xl font-bold text-white sm:h-16 sm:w-16">
+                                {appointmentLinkData?.createdBy?.companyName?.charAt(0).toUpperCase() || "S"}
+                            </div>
+                        )}
+                        <div className="min-w-0">
+                            <h1 className="truncate text-2xl font-extrabold tracking-tight text-[#0f172a] sm:text-4xl">
+                                {appointmentLinkData?.createdBy?.companyName || "Book Appointment"}
+                            </h1>
+                            <p className="mt-1 text-sm font-medium text-slate-500">
+                                {employee?.name ? `Schedule a meeting with ${employee.name}` : "Complete both steps to confirm appointment"}
+                            </p>
                         </div>
-                    ) : (
-                        <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-[#3882a5] shadow-xl text-white font-bold text-2xl">
-                            {appointmentLinkData?.createdBy?.companyName?.charAt(0).toUpperCase() || "S"}
-                        </div>
-                    )}
-                    
-                    <div className="space-y-1">
-                        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-                            {appointmentLinkData?.createdBy?.companyName || "Book Appointment"}
-                        </h1>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
-                            {employee?.name ? `Schedule a meeting with ${employee.name}` : "Please fill in the details below"}
-                        </p>
                     </div>
                 </div>
 
-                <Card className="overflow-hidden border-0 bg-white/70 shadow-2xl backdrop-blur-xl ring-1 ring-slate-200 dark:bg-slate-900/70 dark:ring-slate-800">
-                    {/* Visual Progress Header */}
-                    <div className="bg-[#3882a5]/5 border-b border-slate-100 dark:border-slate-800 px-6 py-4">
-                        <div className="flex items-center justify-center gap-4 sm:gap-12">
-                            <div className={cn(
-                                "flex items-center gap-2 text-sm font-bold transition-all duration-300",
-                                step === "visitor" ? "text-[#3882a5]" : "text-slate-400"
-                            )}>
-                                <div className={cn(
-                                    "flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all",
-                                    step === "visitor" ? "bg-[#3882a5] border-[#3882a5] text-white shadow-lg" : "bg-emerald-50 border-emerald-500 text-emerald-600"
-                                )}>
-                                    {step === "visitor" ? "1" : <CheckCircle2 className="h-4 w-4" />}
-                                </div>
-                                <span className={cn("hidden sm:inline", step !== "visitor" && "opacity-60")}>Visitor Info</span>
-                            </div>
-                            
-                            <div className="h-0.5 w-8 rounded-full bg-slate-200 dark:bg-slate-700" />
-
-                            <div className={cn(
-                                "flex items-center gap-2 text-sm font-bold transition-all duration-300",
-                                step === "appointment" ? "text-[#3882a5]" : "text-slate-400"
-                            )}>
-                                <div className={cn(
-                                    "flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all",
-                                    step === "appointment" ? "bg-[#3882a5] border-[#3882a5] text-white shadow-lg" : "bg-slate-100 border-slate-200 text-slate-400"
-                                )}>
-                                    2
-                                </div>
-                                <span className="hidden sm:inline">Scheduling</span>
-                            </div>
+                <Card className="overflow-hidden border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
+                    <div className="border-b border-slate-100 bg-gradient-to-r from-[#3882a5]/10 via-[#3882a5]/5 to-transparent px-3 py-4 sm:px-6">
+                        <div className="flex items-center sm:justify-center gap-3 sm:gap-7 overflow-x-auto">
+                            {[
+                                { key: "details", label: "Your Details", index: 1 },
+                                { key: "photo", label: "Capture Photo", index: 2 },
+                                { key: "appointment", label: "Book", index: 3 },
+                                { key: "review", label: "Review", index: 4 },
+                            ].map((item, idx, arr) => {
+                                const order = ["details", "photo", "appointment", "review"];
+                                const currentIndex = order.indexOf(step as any);
+                                const itemIndex = order.indexOf(item.key);
+                                const isDone = itemIndex < currentIndex;
+                                const isActive = item.key === step;
+                                return (
+                                    <div key={item.key} className="flex items-center gap-3">
+                                        <div className={cn("flex items-center gap-2 text-sm font-bold transition-all", isActive ? "text-[#3882a5]" : isDone ? "text-emerald-700" : "text-slate-400")}>
+                                            <span className={cn("flex h-8 w-8 items-center justify-center rounded-full border-2", isActive ? "bg-[#3882a5] border-[#3882a5] text-white" : isDone ? "bg-emerald-500 border-emerald-500 text-white" : "bg-slate-100 border-slate-200 text-slate-500")}>
+                                                {isDone ? <CheckCircle2 className="h-4 w-4" /> : item.index}
+                                            </span>
+                                            <span>{item.label}</span>
+                                        </div>
+                                        {idx < arr.length - 1 && <div className="h-[2px] w-8 rounded-full bg-slate-200" />}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
-                    <CardContent className="p-6 sm:p-10">
-                        {step === "visitor" && (
+                    <CardContent className="p-4 sm:p-6 lg:p-8">
+                        {step === "details" && (
                             <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                                <div className="mb-8 flex items-center gap-3">
-                                    <div className="h-10 w-1 rounded-full bg-[#3882a5]" />
-                                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">Personal Details</h3>
+                                <div className="mb-4 rounded-xl border border-[#3882a5]/20 bg-[#3882a5]/5 p-3">
+                                    <h3 className="text-base font-bold text-[#1f4f67]">Step 1: Fill visitor details</h3>
+                                    <p className="text-xs text-slate-600">Contact information verify karke next karein.</p>
                                 </div>
                                 <BookingVisitorForm
                                     initialEmail={appointmentLinkData?.visitorEmail}
                                     initialPhone={appointmentLinkData?.visitorPhone}
-                                    initialValues={visitorData}
+                                    initialValues={visitorDraft || visitorData}
                                     onSubmit={handleVisitorSubmit}
-                                    isLoading={isCreatingVisitor}
+                                    isLoading={isSubmittingBooking}
                                     appointmentToken={token}
+                                    collectPhotoInForm={false}
                                 />
+                            </div>
+                        )}
+
+                        {step === "photo" && (
+                            <div className="animate-in fade-in slide-in-from-right-4 duration-500 space-y-6">
+                                <div className="rounded-xl border border-[#3882a5]/20 bg-[#3882a5]/5 p-3">
+                                    <h3 className="text-base font-bold text-[#1f4f67]">Step 2: Capture visitor photo</h3>
+                                    <p className="text-xs text-slate-600">Clear face photo required for secure verification.</p>
+                                </div>
+                                <form onSubmit={handlePhotoSubmit(handlePhotoStepSubmit)} className="space-y-4">
+                                    <div className="mx-auto w-full max-w-md rounded-xl border border-dashed border-[#3882a5]/25 bg-white p-4">
+                                        <ImageUploadField
+                                            name="photo"
+                                            register={photoRegister as any}
+                                            setValue={setPhotoValue as any}
+                                            errors={photoErrors.photo as any}
+                                            initialUrl={watchPhoto("photo")}
+                                            label="Capture visitor face photo"
+                                            enableImageCapture={true}
+                                            onUploadStatusChange={setIsPhotoUploading}
+                                            variant="default"
+                                            autoOpenCamera={true}
+                                            directCameraOnly={true}
+                                        />
+                                    </div>
+                                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+                                        <Button type="button" variant="outline" onClick={() => setStep("details")}>
+                                            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                                        </Button>
+                                        <Button type="submit" disabled={!watchPhoto("photo") || isPhotoUploading}>
+                                            Continue to Appointment <ArrowRight className="ml-2 h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </form>
                             </div>
                         )}
 
                         {step === "appointment" && (
                             <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                                <div className="mb-8 flex items-center gap-3">
-                                    <div className="h-10 w-1 rounded-full bg-[#3882a5]" />
-                                    <div>
-                                        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">Meeting Schedule</h3>
-                                        <p className="text-xs text-slate-400 mt-1 font-medium">Schedule your visit with {employee?.name}</p>
-                                    </div>
+                                <div className="mb-4 rounded-xl border border-[#3882a5]/20 bg-[#3882a5]/5 p-3">
+                                    <h3 className="text-base font-bold text-[#1f4f67]">Step 3: Book appointment</h3>
+                                    <p className="text-xs text-slate-600">Choose date/time and review before submit.</p>
                                 </div>
                                 <div className="relative">
                                     <AppointmentBookingForm
-                                        visitorId={visitorId!}
+                                        visitorId={visitorId || "000000000000000000000000"}
                                         employeeId={extractIdString(appointmentLinkData.employeeId)}
                                         employeeName={employee?.name || ""}
                                         visitorEmail={appointmentLinkData.visitorEmail}
-                                        visitorName={visitorData?.name || ""}
+                                        visitorName={visitorDraft?.name || visitorData?.name || ""}
                                         onSubmit={handleAppointmentSubmit}
-                                        isLoading={isCreatingAppointment}
+                                        isLoading={isSubmittingBooking}
                                         appointmentToken={token}
+                                        submitLabel="Review Details"
                                     />
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="mt-6 text-slate-400 hover:text-[#3882a5]"
-                                        onClick={() => setStep("visitor")}
-                                    >
-                                        <ArrowLeft className="mr-2 h-4 w-4" />
-                                        Back to Visitor Info
+                                    {!visitorId && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="mt-6 text-slate-400 hover:text-[#3882a5]"
+                                            onClick={() => setStep("photo")}
+                                        >
+                                            <ArrowLeft className="mr-2 h-4 w-4" />
+                                            Back
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {step === "review" && (
+                            <div className="animate-in fade-in slide-in-from-right-4 duration-500 space-y-4">
+                                <div className="rounded-xl border border-[#3882a5]/20 bg-[#3882a5]/5 p-3">
+                                    <h3 className="text-base font-bold text-[#1f4f67]">Step 4: Review & Submit</h3>
+                                    <p className="text-xs text-slate-600">Final details verify karke appointment submit karein.</p>
+                                </div>
+                                <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
+                                    <div>
+                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Visitor</p>
+                                        <p className="text-sm font-semibold text-slate-900">{visitorDraft?.name || visitorData?.name || "-"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Meeting With</p>
+                                        <p className="text-sm font-semibold text-slate-900">{employee?.name || "-"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Date</p>
+                                        <p className="text-sm font-semibold text-slate-900">{appointmentDraft?.appointmentDetails?.scheduledDate || "-"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Time</p>
+                                        <p className="text-sm font-semibold text-slate-900">{appointmentDraft?.appointmentDetails?.scheduledTime || "-"}</p>
+                                    </div>
+                                </div>
+                                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Purpose</p>
+                                    <p className="text-sm font-semibold text-slate-900">{appointmentDraft?.appointmentDetails?.purpose || "-"}</p>
+                                </div>
+                                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+                                    <Button variant="outline" onClick={() => setStep("appointment")}>
+                                        <ArrowLeft className="mr-2 h-4 w-4" /> Edit appointment
+                                    </Button>
+                                    <Button onClick={handleFinalSubmit} disabled={isSubmittingBooking}>
+                                        {isSubmittingBooking ? "Submitting..." : "Submit Request"}
                                     </Button>
                                 </div>
                             </div>
@@ -336,8 +503,7 @@ export default function BookAppointmentPage() {
                     </CardContent>
                 </Card>
 
-                {/* Footer Brand Info */}
-                <div className="flex flex-col items-center gap-4 py-8 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex flex-col items-center gap-4 py-4 sm:py-6">
                     <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold tracking-wide uppercase">
                         <ShieldCheck className="h-3 w-3" />
                         Secure Booking Powered by SafeIn

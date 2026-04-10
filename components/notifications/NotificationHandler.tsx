@@ -2,13 +2,17 @@
 
 import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
+import { usePathname } from "next/navigation";
 import { requestNotificationPermission } from "@/lib/firebaseMessaging";
 import { useUpdateFCMTokenMutation } from "@/store/api/authApi";
 import { messaging } from "@/lib/firebase";
 import { onMessage } from "firebase/messaging";
 import { toast } from "sonner";
+import { isPublicActionRoute } from "@/utils/routes";
 
 export function NotificationHandler() {
+    const pathname = usePathname();
+    const isPublicAction = isPublicActionRoute(pathname || "");
     const { user, isAuthenticated } = useSelector((state: any) => state.auth);
     const [updateFCMToken] = useUpdateFCMTokenMutation();
     const hasRequested = useRef(false);
@@ -35,6 +39,7 @@ export function NotificationHandler() {
         if (!messaging) return;
 
         const unsubscribe = onMessage(messaging, (payload) => {
+            if (isPublicAction) return;
             // 1. Play notification sound
             const audio = new Audio("/sounds/notification.mp3");
             audio.play().catch(() => {
@@ -51,7 +56,7 @@ export function NotificationHandler() {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [isPublicAction]);
 
     return null;
 }

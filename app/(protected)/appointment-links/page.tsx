@@ -678,7 +678,7 @@ function AppointmentLinksContent() {
                             className="w-full"
                         />
                     </div>
-                    <div className="flex shrink-0 items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
                         <Button
                             variant="outline"
                             size="icon"
@@ -699,12 +699,12 @@ function AppointmentLinksContent() {
                                 closeUpgradeModal={closeUpgradeModal}
                                 upgradeLabel="Upgrade Plan"
                                 icon={UserPlus}
-                                className="flex items-center justify-center gap-2 text-xs whitespace-nowrap sm:text-sm text-white px-6 min-w-[150px]"
+                                className="flex h-9 w-9 items-center justify-center gap-2 rounded-lg text-xs whitespace-nowrap sm:h-auto sm:w-auto sm:px-6 sm:min-w-[150px] sm:text-sm text-white"
                             >
                                 <ActionButton
                                     variant="outline-primary"
                                     size="xl"
-                                    className="flex items-center justify-center sm:gap-2 text-xs whitespace-nowrap sm:text-sm"
+                                    className="flex h-9 w-9 items-center justify-center rounded-lg p-0 text-xs whitespace-nowrap sm:h-auto sm:w-auto sm:gap-2 sm:p-3 sm:text-sm"
                                     onClick={() => {
                                         if (filterType === "special") {
                                             router.push(routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING_CREATE);

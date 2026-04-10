@@ -25,6 +25,7 @@ import { User, Mail, Info, Car, UserPlus, ClipboardList, Camera } from "lucide-r
 import { Switch } from "@/components/ui/switch";
 import { ActionButton } from "@/components/common/actionButton";
 import { PhoneInputField } from "@/components/common/phoneInputField";
+import { CountryStateCitySelect } from "@/components/common/countryStateCity";
 import { useEmployeeSearch } from "@/hooks/useEmployeeSearch";
 import { FormProvider } from "react-hook-form";
 import { EmployeeSelectionField } from "@/components/common/EmployeeSelectionField";
@@ -53,6 +54,9 @@ const quickAppointmentSchema = (isEmployee: boolean) =>
         accompanyingCount: yup.number().min(0).max(20).default(0),
         notes: yup.string().optional(),
         address: yup.string().optional(),
+        country: yup.string().optional(),
+        state: yup.string().optional(),
+        city: yup.string().optional(),
         vehicleNumber: yup.string().optional().max(20, "Vehicle number cannot exceed 20 characters"),
         visitorPhoto: yup.string().optional(),
     });
@@ -66,6 +70,9 @@ type QuickAppointmentFormData = {
     accompanyingCount: number;
     notes?: string;
     address?: string;
+    country?: string;
+    state?: string;
+    city?: string;
     vehicleNumber?: string;
     visitorPhoto?: string;
 };
@@ -138,6 +145,9 @@ export function QuickAppointmentModal({
                 accompanyingCount: 0,
                 notes: "",
                 address: "",
+                country: "",
+                state: "",
+                city: "",
                 vehicleNumber: "",
                 visitorPhoto: "",
             });
@@ -168,6 +178,9 @@ export function QuickAppointmentModal({
                 accompanyingCount: data.accompanyingCount || 0,
                 notes: data.notes || "",
                 address: data.address || "",
+                country: data.country || "",
+                state: data.state || "",
+                city: data.city || "",
                 vehicleNumber: data.vehicleNumber || "",
                 visitorPhoto: data.visitorPhoto?.trim() || undefined,
             }).unwrap();
@@ -340,6 +353,25 @@ export function QuickAppointmentModal({
 
                             {showOptionalVisitDetails && (
                                 <div className="animate-in fade-in slide-in-from-top-2 space-y-5 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm duration-300 dark:border-gray-800 dark:bg-gray-950/50">
+                                    <CountryStateCitySelect
+                                        value={{
+                                            country: watch("country") || "",
+                                            state: watch("state") || "",
+                                            city: watch("city") || "",
+                                        }}
+                                        onChange={(v) => {
+                                            setValue("country", v.country);
+                                            setValue("state", v.state);
+                                            setValue("city", v.city);
+                                        }}
+                                        errors={{
+                                            country: errors.country?.message as string,
+                                            state: errors.state?.message as string,
+                                            city: errors.city?.message as string,
+                                        }}
+                                        required={false}
+                                    />
+
                                     <InputField
                                         label="Vehicle Number (Optional)"
                                         placeholder="e.g., MH12AB1234"
