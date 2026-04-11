@@ -21,7 +21,7 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
-import { User, Mail, Info, Car, UserPlus, ClipboardList, Camera } from "lucide-react";
+import { User, Info, Car, UserPlus, ClipboardList, Camera, Mail } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { ActionButton } from "@/components/common/actionButton";
 import { PhoneInputField } from "@/components/common/phoneInputField";
@@ -40,7 +40,6 @@ import { cn } from "@/lib/utils";
 const quickAppointmentSchema = (isEmployee: boolean) =>
     yup.object().shape({
         name: yup.string().required("Name is required"),
-        email: yup.string().email("Invalid email").optional(),
         phone: yup
             .string()
             .required("Mobile number is required")
@@ -59,12 +58,20 @@ const quickAppointmentSchema = (isEmployee: boolean) =>
         city: yup.string().optional(),
         vehicleNumber: yup.string().optional().max(20, "Vehicle number cannot exceed 20 characters"),
         visitorPhoto: yup.string().optional(),
+        email: yup
+            .string()
+            .trim()
+            .optional()
+            .test("email-optional", "Please enter a valid email address", (value) => {
+                if (!value || value.trim() === "") return true;
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+            }),
     });
 
 type QuickAppointmentFormData = {
     name: string;
-    email?: string;
     phone: string;
+    email?: string;
     purpose: string;
     employeeId?: string | null;
     accompanyingCount: number;
@@ -110,6 +117,7 @@ export function QuickAppointmentModal({
             employeeId: "",
             accompanyingCount: 0,
             visitorPhoto: "",
+            email: "",
         },
     });
 
@@ -126,7 +134,6 @@ export function QuickAppointmentModal({
     useVisitorAutoFill({
         nameFieldName: "name",
         phoneFieldName: "phone",
-        emailFieldName: "email",
         methods,
         silent: true,
     });
@@ -138,8 +145,8 @@ export function QuickAppointmentModal({
             setShowOptionalVisitDetails(false);
             reset({
                 name: "",
-                email: "",
                 phone: "",
+                email: "",
                 purpose: "Official VIP Meeting",
                 employeeId: isEmployee ? user?.employeeId || "" : "",
                 accompanyingCount: 0,
@@ -171,8 +178,8 @@ export function QuickAppointmentModal({
 
             await createSpecialBooking({
                 visitorName: data.name,
-                visitorEmail: data.email,
                 visitorPhone: submitPhone,
+                ...(data.email?.trim() ? { visitorEmail: data.email.trim().toLowerCase() } : {}),
                 employeeId: submitEmployeeId,
                 purpose: data.purpose,
                 accompanyingCount: data.accompanyingCount || 0,
@@ -266,18 +273,9 @@ export function QuickAppointmentModal({
                                 )}
                             />
 
-                            <InputField
-                                label="Email Address"
-                                type="email"
-                                placeholder="visitor@example.com"
-                                icon={<Mail className="h-4 w-4" />}
-                                {...register("email")}
-                                error={errors.email?.message}
-                            />
-
                             {isEmployee ? (
                                 <>
-                                    <div className="md:col-span-2">
+                                    <div className="min-w-0">
                                         <InputField
                                             label="Visitor Name"
                                             placeholder="Enter visitor name"
@@ -285,6 +283,17 @@ export function QuickAppointmentModal({
                                             {...register("name")}
                                             error={errors.name?.message}
                                             required
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <InputField
+                                            label="Email"
+                                            placeholder="visitor@email.com"
+                                            type="email"
+                                            icon={<Mail className="h-4 w-4" />}
+                                            {...register("email")}
+                                            error={errors.email?.message}
+                                            required={false}
                                         />
                                     </div>
                                     <div className="hidden">
@@ -300,6 +309,15 @@ export function QuickAppointmentModal({
                                         {...register("name")}
                                         error={errors.name?.message}
                                         required
+                                    />
+                                    <InputField
+                                        label="Email"
+                                        placeholder="visitor@email.com"
+                                        type="email"
+                                        icon={<Mail className="h-4 w-4" />}
+                                        {...register("email")}
+                                        error={errors.email?.message}
+                                        required={false}
                                     />
                                     <div className="min-w-0">
                                         <EmployeeSelectionField />

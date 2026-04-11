@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import { DataTable } from "@/components/common/dataTable";
 import { ConfirmationDialog } from "@/components/common/confirmationDialog";
 import { Pagination } from "@/components/common/pagination";
@@ -278,7 +279,7 @@ export function AppointmentTable({
         return scheduledDateTime < now;
     };
 
-    const getColumns = () => {
+    const columns = useMemo(() => {
         const baseColumns = [
             {
                 key: "visitorName",
@@ -288,47 +289,19 @@ export function AppointmentTable({
                     const visitorNameRaw = visitor?.name || "Unknown Visitor";
                     const visitorName = formatName(visitorNameRaw) || visitorNameRaw;
                     const visitorPhone = visitor?.phone || "N/A";
-                    const visitorEmail = visitor?.email || "N/A";
                     const visitorCompany = visitor?.company || "";
-                    // Get photo from visitor object, handle both populated and non-populated cases
                     const visitorPhoto = visitor?.photo || (visitor as any)?.profilePicture || "";
 
                     return (
                         <div className="flex min-w-0 items-center gap-3">
-                            <div className="group relative shrink-0">
-                                <Avatar className="h-10 w-10">
-                                    {visitorPhoto ? (
-                                        <AvatarImage
-                                            key={visitorPhoto}
-                                            src={visitorPhoto}
-                                            alt={visitorName}
-                                        />
-                                    ) : null}
-                                    <AvatarFallback className="flex items-center justify-center leading-none text-xs">
-                                        {getInitials(visitorName, 2)}
-                                    </AvatarFallback>
-                                </Avatar>
-                                {visitorPhoto && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            window.open(visitorPhoto, "_blank");
-                                        }}
-                                        className="absolute -right-1 -bottom-1 rounded-full bg-[#3882a5] p-1 text-white opacity-0 shadow-md transition-colors group-hover:opacity-100 hover:bg-[#2d6a87]"
-                                        title="View full image"
-                                    >
-                                        <Maximize2 className="h-2.5 w-2.5" />
-                                    </button>
-                                )}
-                            </div>
+                            <UserAvatar
+                                src={visitorPhoto}
+                                name={visitorName}
+                                size="md"
+                                allowExpand
+                            />
                             <div className="min-w-0 flex-1">
                                 <div className="truncate font-medium">{visitorName}</div>
-                                {visitorEmail !== "N/A" && (
-                                    <div className="flex items-center gap-1 truncate text-xs text-gray-500">
-                                        <Mail className="h-3 w-3 shrink-0" />
-                                        <span className="truncate">{visitorEmail}</span>
-                                    </div>
-                                )}
                                 <div className="flex items-center gap-1 text-xs text-gray-500">
                                     <Phone className="h-3 w-3 shrink-0" />
                                     <span>{visitorPhone}</span>
@@ -350,37 +323,17 @@ export function AppointmentTable({
                     const employeeName = formatName(employeeNameRaw) || employeeNameRaw;
                     const employeeEmail = employee?.email || "N/A";
                     const employeeDepartment = employee?.department || "";
-                    // Get photo from employee object, handle both populated and non-populated cases
                     const employeePhoto = employee?.photo || (employee as any)?.profilePicture || "";
 
                     return (
                         <div className="flex items-center gap-3">
-                            <div className="group relative shrink-0">
-                                <Avatar className="h-10 w-10">
-                                    {employeePhoto ? (
-                                        <AvatarImage
-                                            key={employeePhoto}
-                                            src={employeePhoto}
-                                            alt={employeeName}
-                                        />
-                                    ) : null}
-                                    <AvatarFallback className="bg-blue-100 text-blue-600 flex items-center justify-center leading-none text-xs">
-                                        {getInitials(employeeName, 2)}
-                                    </AvatarFallback>
-                                </Avatar>
-                                {employeePhoto && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            window.open(employeePhoto, "_blank");
-                                        }}
-                                        className="absolute -right-1 -bottom-1 rounded-full bg-[#3882a5] p-1 text-white opacity-0 shadow-md transition-colors group-hover:opacity-100 hover:bg-[#2d6a87]"
-                                        title="View full image"
-                                    >
-                                        <Maximize2 className="h-2.5 w-2.5" />
-                                    </button>
-                                )}
-                            </div>
+                            <UserAvatar
+                                src={employeePhoto}
+                                name={employeeName}
+                                size="md"
+                                allowExpand
+                                fallbackClassName="bg-blue-100 text-blue-600"
+                            />
                             <div>
                                 <div className="font-medium">{employeeName}</div>
                                 <div className="text-sm text-gray-500">{formatName(employeeDepartment) || "N/A"}</div>
@@ -396,19 +349,11 @@ export function AppointmentTable({
             {
                 key: "purpose",
                 header: "Purpose",
-                render: (appointment: Appointment) => {
-                    const visitor = (appointment as any).visitorId || appointment.visitor;
-                    return (
-                        <div className="space-y-1">
-                            <div
-                                className="max-w-[200px] truncate text-sm"
-                                title={appointment.appointmentDetails?.purpose || "N/A"}
-                            >
-                                {formatName(appointment.appointmentDetails?.purpose) || "N/A"}
-                            </div>
-                        </div>
-                    );
-                },
+                render: (appointment: Appointment) => (
+                    <div className="max-w-[200px] truncate text-sm" title={appointment.appointmentDetails?.purpose || "N/A"}>
+                        {formatName(appointment.appointmentDetails?.purpose) || "N/A"}
+                    </div>
+                ),
             },
             {
                 key: "appointmentDate",
@@ -433,158 +378,128 @@ export function AppointmentTable({
                     if (isAppointmentLoading(appointment._id)) {
                         return (
                             <div className="flex items-center gap-2">
-                                <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-blue-500"></div>
-                                <span className="text-sm text-gray-500 text-[11px]">Processing...</span>
+                                <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-primary"></div>
+                                <span className="text-[11px] text-gray-500">Processing...</span>
                             </div>
                         );
                     }
-
-                    const effectiveStatus = getAppointmentStatus(appointment) as
-                        | "pending"
-                        | "approved"
-                        | "rejected"
-                        | "completed"
-                        | "time_out"
-                        | "checked_in";
-
-                    const isTimedOut = effectiveStatus === "time_out";
-                    const status = effectiveStatus;
+                    return <StatusBadge status={getAppointmentStatus(appointment) as any} />;
+                },
+            },
+            {
+                key: "actions",
+                header: "Actions",
+                className: "text-right",
+                render: (appointment: Appointment) => {
+                    const status = typeof appointment.status === "string" ? appointment.status : "pending";
+                    const isTimedOut = !!appointment.isTimedOut;
+                    const isPending = status === "pending" && !isTimedOut;
+                    const isApproved = status === "approved";
+                    const isCheckedIn = status === "checked_in";
 
                     return (
-                        <div className="flex py-1">
-                            <StatusBadge status={effectiveStatus} />
+                        <div className="flex items-center gap-1.5 justify-end">
+                            {!isTimedOut && (
+                                <>
+                                    {isPending && (
+                                        <>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="h-7 w-8 p-0 bg-emerald-50/50 border-emerald-500/50 text-emerald-600 hover:bg-emerald-100/50"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedAppointment(appointment);
+                                                    setShowApproveDialog(true);
+                                                }}
+                                            >
+                                                <CheckCircle className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="h-7 w-8 p-0 bg-rose-50/50 border-rose-500/50 text-rose-600 hover:bg-rose-100/50"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedAppointment(appointment);
+                                                    setShowRejectDialog(true);
+                                                }}
+                                            >
+                                                <XCircle className="h-4 w-4" />
+                                            </Button>
+                                        </>
+                                    )}
+                                    {isApproved && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-7 w-8 p-0 bg-indigo-50 border-indigo-500/50 text-indigo-600"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedAppointment(appointment);
+                                                setShowCheckInDialog(true);
+                                            }}
+                                        >
+                                            <LogOut className="h-4 w-4 rotate-180" />
+                                        </Button>
+                                    )}
+                                    {isCheckedIn && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-7 w-8 p-0 bg-orange-50/50 border-orange-500/50 text-orange-600"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedAppointment(appointment);
+                                                setShowCheckOutDialog(true);
+                                            }}
+                                        >
+                                            <LogOut className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                                </>
+                            )}
+
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                        <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                    {onView && (
+                                        <DropdownMenuItem onClick={() => handleView(appointment)}>
+                                            <Eye className="mr-2 h-4 w-4" /> View Details
+                                        </DropdownMenuItem>
+                                    )}
+                                    {isPending && (
+                                        <>
+                                            <DropdownMenuSeparator />
+                                            {!isEmployee && (
+                                                <DropdownMenuItem onClick={() => handleEdit(appointment)}>
+                                                    <Edit className="mr-2 h-4 w-4" /> Edit
+                                                </DropdownMenuItem>
+                                            )}
+                                            <DropdownMenuItem
+                                                onClick={() => handleResend(appointment._id)}
+                                                disabled={!!cooldowns[appointment._id]}
+                                            >
+                                                <Send className="mr-2 h-4 w-4" />
+                                                {cooldowns[appointment._id] ? `Resend (${cooldowns[appointment._id]}s)` : 'Resend'}
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     );
                 },
             },
         ];
 
-        baseColumns.push({
-            key: "actions",
-            header: "Actions",
-            render: (appointment: Appointment) => {
-                const status = typeof appointment.status === "string" ? appointment.status : "pending";
-                const isTimedOut = !!appointment.isTimedOut;
-                const isPending = status === "pending" && !isTimedOut;
-                const isApproved = status === "approved";
-                const isRejected = status === "rejected";
-                const isCompleted = status === "completed";
-                const showOnlyView = isRejected || isCompleted;
-
-                return (
-                    <div className="flex items-center gap-1.5 justify-end">
-                        {/* Quick Actions */}
-                        {!isTimedOut && (
-                            <>
-                                {status === "pending" && (
-                                    <>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            className="h-7 w-8 p-0 bg-emerald-50/50 border-emerald-500/50 text-emerald-600 hover:bg-emerald-100/50 hover:text-emerald-700 rounded-md shadow-sm transition-all duration-200"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedAppointment(appointment);
-                                                setShowApproveDialog(true);
-                                            }}
-                                            title="Approve"
-                                        >
-                                            <CheckCircle className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            className="h-7 w-8 p-0 bg-rose-50/50 border-rose-500/50 text-rose-600 hover:bg-rose-100/50 hover:text-rose-700 rounded-md shadow-sm transition-all duration-200"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedAppointment(appointment);
-                                                setShowRejectDialog(true);
-                                            }}
-                                            title="Reject"
-                                        >
-                                            <XCircle className="h-4 w-4" />
-                                        </Button>
-                                    </>
-                                )}
-                                {status === "approved" && (
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="h-7 w-8 p-0 bg-indigo-50 border-indigo-500/50 text-indigo-600 hover:bg-indigo-100/50 hover:text-indigo-700 rounded-md shadow-sm transition-all duration-200"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedAppointment(appointment);
-                                            setShowCheckInDialog(true);
-                                        }}
-                                        title="Check In"
-                                    >
-                                        <LogOut className="h-4 w-4 rotate-180" />
-                                    </Button>
-                                )}
-                                {status === "checked_in" && (
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="h-7 w-8 p-0 bg-orange-50/50 border-orange-500/50 text-orange-600 hover:bg-orange-100/50 hover:text-orange-700 rounded-md shadow-sm transition-all duration-200"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedAppointment(appointment);
-                                            setShowCheckOutDialog(true);
-                                        }}
-                                        title="Check Out"
-                                    >
-                                        <LogOut className="h-4 w-4" />
-                                    </Button>
-                                )}
-                            </>
-                        )}
-
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                    <MoreVertical className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                                {onView && (
-                                    <DropdownMenuItem onClick={() => handleView(appointment)}>
-                                        <Eye className="mr-2 h-4 w-4" />
-                                        View Details
-                                    </DropdownMenuItem>
-                                )}
-
-                                {isPending && (
-                                    <>
-                                        <DropdownMenuSeparator />
-                                        {!isEmployee && (
-                                            <DropdownMenuItem onClick={() => handleEdit(appointment)}>
-                                                <Edit className="mr-2 h-4 w-4" />
-                                                Edit
-                                            </DropdownMenuItem>
-                                        )}
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem
-                                            onClick={() => handleResend(appointment._id)}
-                                            disabled={!!cooldowns[appointment._id]}
-                                            className={cooldowns[appointment._id] ? 'opacity-50' : ''}
-                                        >
-                                            <Send className="mr-2 h-4 w-4" />
-                                            {cooldowns[appointment._id] ? `Resend (${cooldowns[appointment._id]}s)` : 'Resend'}
-                                        </DropdownMenuItem>
-                                    </>
-                                )}
-
-
-                                {showOnlyView && null}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                );
-            },
-        });
-
         return baseColumns;
-    };
+    }, [onView, handleEdit, handleResend, isEmployee, cooldowns, loadingAppointments, router]);
+
 
     if (error) {
         return (

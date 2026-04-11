@@ -61,35 +61,42 @@ import { ModuleAccessDenied } from "@/components/common/moduleAccessDenied";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { Input } from "@/components/ui/input";
+import { OtpDigitBoxes } from "@/components/common/otpDigitBoxes";
 
 interface AppointmentActionCellProps {
     item: any;
     user: any;
     handleCopyLink: (link: any) => void;
-    handleResend: (item: any) => void;
-    cooldowns: Record<string, number>;
     setDeleteLinkId: (id: string) => void;
     setSelectedBookingId: (id: string) => void;
     setNoteValue: (value: string) => void;
     setShowEditNoteModal: (show: boolean) => void;
     handleInlineVerifyOtp: (bookingId: string, otp: string) => Promise<void>;
     isVerifyingInline: string | null;
+    handleResendApi: (item: any) => Promise<boolean>;
 }
 
 const AppointmentActionCell = ({
     item,
     user,
     handleCopyLink,
-    handleResend,
-    cooldowns,
     setDeleteLinkId,
     setSelectedBookingId,
     setNoteValue,
     setShowEditNoteModal,
     handleInlineVerifyOtp,
-    isVerifyingInline
+    isVerifyingInline,
+    handleResendApi,
 }: AppointmentActionCellProps) => {
+    const { cooldowns, startCooldown } = useCooldown();
     const [otpValue, setOtpValue] = useState("");
+
+    const handleResend = async () => {
+        const success = await handleResendApi(item);
+        if (success) {
+            startCooldown(item._id);
+        }
+    };
     const isCreator = user?._id && (
         item.createdBy === user._id ||
         (typeof item.createdBy === 'object' && item.createdBy?._id === user._id)
@@ -167,7 +174,7 @@ const AppointmentActionCell = ({
 
                     {!isBooked && (
                         <DropdownMenuItem
-                            onClick={() => handleResend(item)}
+                            onClick={handleResend}
                             disabled={!!cooldowns[item._id]}
                             className={`rounded-xl flex items-center gap-2 p-2.5 cursor-pointer ${
                                 cooldowns[item._id] ? 'text-gray-400 opacity-50' : 'text-[#3882a5] focus:text-[#3882a5] focus:bg-[#3882a5]/5'
@@ -241,9 +248,33 @@ function AppointmentLinksContent() {
     const [showEditNoteModal, setShowEditNoteModal] = useState(false);
     const [noteValue, setNoteValue] = useState("");
 
-    const { cooldowns, startCooldown, isOnCooldown } = useCooldown();
+    // Auto-verify when 4 digits are entered
+    useEffect(() => {
+        if (otpValue.length === 4 && showOtpModal) {
+            handleVerifyOtp();
+        }
+    }, [otpValue, showOtpModal]);
 
     const [updateSpecialBookingNote, { isLoading: isUpdatingNote }] = useUpdateSpecialBookingNoteMutation();
+    const [verifyOtp, { isLoading: isVerifying }] = useVerifySpecialBookingOtpMutation();
+    const [deleteAppointmentLink, { isLoading: isDeleting }] = useDeleteAppointmentLinkMutation();
+    const [resendLink] = useResendAppointmentLinkMutation();
+    const [resendOtp] = useResendOtpMutation();
+
+    const handleResendApi = useCallback(async (item: any) => {
+        try {
+            if (item.entryType === 'special') {
+                await resendOtp({ bookingId: item._id }).unwrap();
+            } else {
+                await resendLink(item._id).unwrap();
+            }
+            showSuccessToast("Notification resent successfully");
+            return true;
+        } catch (error: any) {
+            showErrorToast(error.data?.message || "Failed to resend notification");
+            return false;
+        }
+    }, [resendOtp, resendLink]);
 
     const handleUpdateNote = async () => {
         if (!selectedBookingId) return;
@@ -278,27 +309,6 @@ function AppointmentLinksContent() {
         skip: !isAuthenticated || isChecking || filterType === "link",
     });
 
-    const [verifyOtp, { isLoading: isVerifying }] = useVerifySpecialBookingOtpMutation();
-    const [deleteAppointmentLink, { isLoading: isDeleting }] = useDeleteAppointmentLinkMutation();
-    const [resendLink] = useResendAppointmentLinkMutation();
-    const [resendOtp] = useResendOtpMutation();
-
-    const handleResend = useCallback(async (item: any) => {
-        if (isOnCooldown(item._id)) return;
-
-        try {
-            if (item.entryType === 'special') {
-                await resendOtp({ bookingId: item._id }).unwrap();
-            } else {
-                await resendLink(item._id).unwrap();
-            }
-            showSuccessToast("Notification resent successfully");
-            startCooldown(item._id);
-        } catch (error: any) {
-            showErrorToast(error.data?.message || "Failed to resend notification");
-        }
-    }, [isOnCooldown, startCooldown, resendOtp, resendLink]);
-
     // Combined Data
     const combinedList = useMemo(() => {
         if (filterType === "link") {
@@ -308,7 +318,6 @@ function AppointmentLinksContent() {
         return (specialData?.bookings || []).map(b => ({
             ...b,
             entryType: 'special',
-            visitorEmail: b.visitorEmail,
             isBooked: b.status === 'verified',
         }));
     }, [linksData, specialData, filterType]);
@@ -383,7 +392,7 @@ function AppointmentLinksContent() {
     const columns = useMemo(
         () => [
             {
-                key: "visitorEmail",
+                key: "visitorPhone",
                 header: "Visitor",
                 render: (item: any) => {
                     const isSpecial = item.entryType === 'special';
@@ -394,8 +403,7 @@ function AppointmentLinksContent() {
 
                     const visitorName = visitor?.name || "Unknown Visitor";
                     const formattedName = formatName(visitorName) || visitorName;
-                    const visitorEmail = item.visitorEmail;
-                    const visitorPhone = visitor?.phone || "N/A";
+                    const visitorPhone = visitor?.phone || item.visitorPhone || "N/A";
                     const visitorPhoto = (visitor as any)?.photo || "";
 
                     return (
@@ -430,15 +438,9 @@ function AppointmentLinksContent() {
                                     {isSpecial && <span className="text-[10px] bg-purple-100/50 text-purple-700 border border-purple-200 px-1.5 py-0.5 rounded-md uppercase font-bold tracking-wider shadow-sm">VIP</span>}
                                 </div>
                                 <div className="flex items-center gap-1 truncate text-xs text-gray-500">
-                                    <Mail className="h-3 w-3 shrink-0" />
-                                    <span className="truncate">{visitorEmail}</span>
+                                    <Phone className="h-3 w-3 shrink-0" />
+                                    <span className="truncate">{visitorPhone}</span>
                                 </div>
-                                {visitorPhone !== "N/A" && (
-                                    <div className="flex items-center gap-1 truncate text-xs text-gray-500">
-                                        <Phone className="h-3 w-3 shrink-0" />
-                                        <span className="truncate">{visitorPhone}</span>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     );
@@ -554,8 +556,7 @@ function AppointmentLinksContent() {
                         item={item}
                         user={user}
                         handleCopyLink={handleCopyLink}
-                        handleResend={handleResend}
-                        cooldowns={cooldowns}
+                        handleResendApi={handleResendApi}
                         setDeleteLinkId={setDeleteLinkId}
                         setSelectedBookingId={setSelectedBookingId}
                         setNoteValue={setNoteValue}
@@ -566,9 +567,7 @@ function AppointmentLinksContent() {
                 ),
             },
         ],
-        // Don't include cooldowns in dependencies to prevent re-render on every tick
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [handleCopyLink, handleResend, filterType, user, isVerifyingInline, handleInlineVerifyOtp, cooldowns],
+        [handleCopyLink, handleResendApi, filterType, user, isVerifyingInline, handleInlineVerifyOtp],
     );
 
 
@@ -795,72 +794,14 @@ function AppointmentLinksContent() {
                             </DialogDescription>
                         </DialogHeader>
                         <div className="py-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-3">OTP Code</label>
-                            <div className="flex justify-center gap-3">
-                                {[0, 1, 2, 3].map((index) => (
-                                    <input
-                                        key={index}
-                                        id={`otp-${index}`}
-                                        type="text"
-                                        inputMode="numeric"
-                                        maxLength={1}
-                                        value={otpValue[index] || ''}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/\D/g, '');
-                                            if (value) {
-                                                const newOtp = otpValue.split('');
-                                                newOtp[index] = value;
-                                                const newOtpValue = newOtp.join('');
-                                                setOtpValue(newOtpValue);
-
-                                                // Auto-focus next input
-                                                if (index < 3) {
-                                                    document.getElementById(`otp-${index + 1}`)?.focus();
-                                                }
-
-                                                // Auto-submit when all 4 digits are entered
-                                                if (index === 3 && newOtpValue.length === 4) {
-                                                    handleVerifyOtp();
-                                                }
-                                            }
-                                        }}
-                                        onKeyDown={(e) => {
-                                            // Handle backspace
-                                            if (e.key === 'Backspace' && !otpValue[index] && index > 0) {
-                                                const newOtp = otpValue.split('');
-                                                newOtp[index - 1] = '';
-                                                setOtpValue(newOtp.join(''));
-                                                document.getElementById(`otp-${index - 1}`)?.focus();
-                                            } else if (e.key === 'Backspace' && otpValue[index]) {
-                                                const newOtp = otpValue.split('');
-                                                newOtp[index] = '';
-                                                setOtpValue(newOtp.join(''));
-                                            }
-                                            // Handle arrow keys
-                                            else if (e.key === 'ArrowLeft' && index > 0) {
-                                                document.getElementById(`otp-${index - 1}`)?.focus();
-                                            } else if (e.key === 'ArrowRight' && index < 3) {
-                                                document.getElementById(`otp-${index + 1}`)?.focus();
-                                            }
-                                        }}
-                                        onPaste={(e) => {
-                                            e.preventDefault();
-                                            const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
-                                            setOtpValue(pastedData);
-
-                                            // Focus the last filled box or the first empty one
-                                            const nextIndex = Math.min(pastedData.length, 3);
-                                            document.getElementById(`otp-${nextIndex}`)?.focus();
-
-                                            // Auto-submit if 4 digits pasted
-                                            if (pastedData.length === 4) {
-                                                setTimeout(() => handleVerifyOtp(), 100);
-                                            }
-                                        }}
-                                        className="w-14 h-16 sm:w-16 sm:h-18 text-center text-2xl sm:text-3xl font-bold border-2 rounded-lg focus:border-[#3882a5] focus:ring-2 focus:ring-[#3882a5]/20 outline-none transition-all"
-                                        autoFocus={index === 0}
-                                    />
-                                ))}
+                            <label className="block text-sm font-medium text-gray-700 mb-3 text-center sm:text-left">OTP Code</label>
+                            <div className="flex justify-center">
+                                <OtpDigitBoxes
+                                    value={otpValue}
+                                    onChange={setOtpValue}
+                                    length={4}
+                                    disabled={isVerifying}
+                                />
                             </div>
                         </div>
                         <DialogFooter className="flex flex-col sm:flex-row gap-3">

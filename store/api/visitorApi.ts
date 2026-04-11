@@ -33,7 +33,6 @@ export interface Visitor {
 
 export interface VisitorSearchRequest {
     phone?: string;
-    email?: string;
 }
 
 export interface VisitorSearchResponse {
@@ -44,7 +43,7 @@ export interface VisitorSearchResponse {
 
 export interface CreateVisitorRequest {
     name: string;
-    email?: string;
+    email?: string | null;
     phone: string;
     address: {
         street?: string;
@@ -71,7 +70,7 @@ export interface CreateVisitorRequest {
 
 export interface UpdateVisitorRequest {
     name?: string;
-    email?: string;
+    email?: string | null;
     phone?: string;
     address?: {
         street?: string;

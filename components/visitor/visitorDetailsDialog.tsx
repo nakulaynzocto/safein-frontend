@@ -7,8 +7,8 @@ import { formatDate, formatDateTime, formatName } from "@/utils/helpers";
 import { Visitor } from "@/store/api/visitorApi";
 import {
     User,
-    Mail,
     Phone,
+    Mail,
     MapPin,
     CreditCard,
     Calendar,
@@ -23,7 +23,6 @@ import {
 
 const visitor_details_config = [
     { key: "name", label: "Full Name", icon: User },
-    { key: "email", label: "Email", icon: Mail },
     { key: "phone", label: "Phone", icon: Phone },
     {
         key: "createdAt",
@@ -102,13 +101,15 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
                                 )}
                                 <div className="mt-2 flex flex-col sm:flex-row flex-wrap items-center sm:items-start gap-1 sm:gap-3">
                                     <div className="flex items-center gap-2">
-                                        <Mail className="text-muted-foreground h-3.5 w-3.5" />
-                                        <span className="text-muted-foreground text-xs sm:text-sm break-all">{visitor.email}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
                                         <Phone className="text-muted-foreground h-3.5 w-3.5" />
                                         <span className="text-muted-foreground text-xs sm:text-sm break-all">{visitor.phone}</span>
                                     </div>
+                                    {visitor.email && (
+                                        <div className="flex items-center gap-2">
+                                            <Mail className="text-muted-foreground h-3.5 w-3.5" />
+                                            <span className="text-muted-foreground text-xs sm:text-sm break-all">{visitor.email}</span>
+                                        </div>
+                                    )}
                                     {visitor.gender && (
                                         <Badge variant="secondary" className="h-5 text-[9px] sm:text-[10px] capitalize">
                                             {visitor.gender}

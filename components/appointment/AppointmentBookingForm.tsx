@@ -15,6 +15,7 @@ import { ActionButton } from "@/components/common/actionButton";
 import { VehicleInfoSection } from "./VehicleInfoSection";
 import { showErrorToast } from "@/utils/toast";
 import { extractIdString, isValidId } from "@/utils/idExtractor";
+import { cn } from "@/lib/utils";
 import { appointmentSchema, type AppointmentFormData } from "./helpers/appointmentValidation";
 
 import { 
@@ -30,7 +31,7 @@ interface AppointmentBookingFormProps {
     visitorId: string;
     employeeId?: string;
     employeeName?: string;
-    visitorEmail: string;
+    visitorPhone?: string;
     visitorName: string;
     employees?: Array<{
         _id: string;
@@ -50,7 +51,7 @@ export function AppointmentBookingForm({
     visitorId,
     employeeId,
     employeeName,
-    visitorEmail,
+    visitorPhone,
     visitorName,
     employees = [],
     onSubmit,
@@ -92,8 +93,18 @@ export function AppointmentBookingForm({
     } = methods;
 
     const watchedEmployeeId = watch("employeeId");
-    const watchedValues = useWatch({ control });
     const lastDraftHashRef = React.useRef<string>("");
+
+    React.useEffect(() => {
+        const subscription = watch((values) => {
+            if (!onDraftChange) return;
+            const nextHash = JSON.stringify(values || {});
+            if (nextHash === lastDraftHashRef.current) return;
+            lastDraftHashRef.current = nextHash;
+            onDraftChange(values as Partial<AppointmentFormData>);
+        });
+        return () => subscription.unsubscribe();
+    }, [watch, onDraftChange]);
 
     React.useEffect(() => {
         setValue("visitorId", normalizedVisitorId, { shouldValidate: false });
@@ -111,14 +122,6 @@ export function AppointmentBookingForm({
         if (employees.length !== 1) return;
         setValue("employeeId", employees[0]._id, { shouldValidate: true, shouldDirty: true });
     }, [isQRBooking, employees, watchedEmployeeId, setValue]);
-
-    React.useEffect(() => {
-        if (!onDraftChange) return;
-        const nextHash = JSON.stringify(watchedValues || {});
-        if (nextHash === lastDraftHashRef.current) return;
-        lastDraftHashRef.current = nextHash;
-        onDraftChange((watchedValues || {}) as Partial<AppointmentFormData>);
-    }, [watchedValues, onDraftChange]);
 
     const handleInvalidSubmit = (formErrors: typeof errors) => {
         const firstError = Object.values(formErrors).find((error) => !!error?.message);
@@ -178,11 +181,13 @@ export function AppointmentBookingForm({
                 <div className="grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-slate-50/50 p-6 md:grid-cols-2">
                     <div className="space-y-2">
                         <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Visitor</Label>
-                        <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                        <div className="flex h-12 items-center gap-3 rounded-lg border border-slate-100 bg-white px-3 shadow-sm">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
                                 <User className="h-4 w-4" />
                             </div>
-                            <span className="text-sm font-semibold text-slate-900">{visitorName || visitorEmail || "Visitor"}</span>
+                            <span className="min-w-0 truncate text-sm font-semibold text-slate-900">
+                                {visitorName || visitorPhone || "Visitor"}
+                            </span>
                         </div>
                     </div>
                     
@@ -195,9 +200,15 @@ export function AppointmentBookingForm({
                                 render={({ field }) => (
                                     <div className="space-y-2">
                                         <Select onValueChange={field.onChange} value={field.value}>
-                                            <SelectTrigger className="w-full h-12 rounded-xl border-slate-200 bg-white shadow-sm focus:ring-[#3882a5]">
-                                                <div className="flex items-center gap-2 text-slate-700">
-                                                    <Briefcase className="h-4 w-4 text-[#3882a5]" />
+                                            <SelectTrigger
+                                                className={cn(
+                                                    "h-12 w-full rounded-lg border-slate-100 bg-white px-3 py-0 text-left shadow-sm focus:ring-[#3882a5]",
+                                                    "data-[size=default]:!h-12 data-[size=default]:!min-h-0",
+                                                    "[&_[data-slot=select-value]]:line-clamp-1 [&_[data-slot=select-value]]:min-w-0",
+                                                )}
+                                            >
+                                                <div className="flex h-full min-w-0 flex-1 items-center gap-3 text-slate-700">
+                                                    <Briefcase className="h-4 w-4 shrink-0 text-[#3882a5]" />
                                                     <SelectValue placeholder="Select an employee" />
                                                 </div>
                                             </SelectTrigger>
@@ -206,14 +217,16 @@ export function AppointmentBookingForm({
                                                 <SelectItem
                                                     key={emp._id}
                                                     value={emp._id}
+                                                    textValue={`${emp.name} ${emp.department} ${emp.designation ?? ""}`}
                                                     className="rounded-md px-2 py-2 data-[highlighted]:bg-[#3882a5] data-[highlighted]:text-white"
                                                 >
-                                                    <div className="flex flex-col items-start py-0.5">
-                                                        <span className="font-bold text-inherit">{emp.name}</span>
-                                                        <span className="text-[10px] uppercase tracking-tight text-inherit opacity-80">
-                                                            {emp.department} • {emp.designation}
+                                                    <span className="block min-w-0 max-w-full truncate text-left font-semibold">
+                                                        {emp.name}
+                                                        <span className="ml-1 text-[10px] font-normal opacity-90">
+                                                            · {emp.department}
+                                                            {emp.designation ? ` · ${emp.designation}` : ""}
                                                         </span>
-                                                    </div>
+                                                    </span>
                                                 </SelectItem>
                                             ))}
                                             </SelectContent>
@@ -223,11 +236,11 @@ export function AppointmentBookingForm({
                                 )}
                             />
                         ) : (
-                            <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#3882a5]/10 text-[#3882a5]">
+                            <div className="flex h-12 items-center gap-3 rounded-lg border border-slate-100 bg-white px-3 shadow-sm">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#3882a5]/10 text-[#3882a5]">
                                     <User className="h-4 w-4" />
                                 </div>
-                                <span className="text-sm font-semibold text-slate-900">{employeeName || "Employee"}</span>
+                                <span className="min-w-0 truncate text-sm font-semibold text-slate-900">{employeeName || "Employee"}</span>
                             </div>
                         )}
                         {errors.employeeId && (

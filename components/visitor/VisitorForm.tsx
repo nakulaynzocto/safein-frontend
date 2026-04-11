@@ -209,7 +209,9 @@ export function NewVisitorModal({
 
             const visitorPayload: CreateVisitorRequest = {
                 name: data.name,
-                email: data.email,
+                email: isEditMode
+                    ? (data.email?.trim() ? data.email.trim() : null)
+                    : data.email?.trim() || undefined,
                 phone: data.phone,
                 gender: (data.gender as any) || undefined,
                 address: {
@@ -274,9 +276,7 @@ export function NewVisitorModal({
         } catch (error: any) {
             if (error?.data?.message) {
                 const message = error.data.message.toLowerCase();
-                if (message.includes("email") && message.includes("already exists")) {
-                    setGeneralError("Email address is already registered");
-                } else if (message.includes("phone") && message.includes("already exists")) {
+                if (message.includes("phone") && message.includes("already exists")) {
                     setGeneralError("Phone number is already registered");
                 } else if (message.includes("id proof")) {
                     const friendlyMessage = error.data.message

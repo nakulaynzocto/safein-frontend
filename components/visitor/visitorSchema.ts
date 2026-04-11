@@ -3,7 +3,14 @@ import { validatePhone } from "@/utils/phoneUtils";
 
 export const visitorSchema = yup.object({
     name: yup.string().trim().required("Name is required").min(2, "Name must be at least 2 characters"),
-    email: yup.string().trim().email("Invalid email address").optional(),
+    email: yup
+        .string()
+        .trim()
+        .optional()
+        .test("email-format", "Please enter a valid email address", (value) => {
+            if (!value || value.length === 0) return true;
+            return yup.string().email().isValidSync(value);
+        }),
     phone: yup
         .string()
         .trim()

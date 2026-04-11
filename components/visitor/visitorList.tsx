@@ -206,7 +206,9 @@ export function VisitorList() {
                         {visitor.email && (
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                 <Mail className="h-3 w-3 shrink-0 text-[#3882a5]" />
-                                <span className="truncate max-w-[150px]">{visitor.email}</span>
+                                <span className="truncate max-w-[140px]" title={visitor.email}>
+                                    {visitor.email}
+                                </span>
                             </div>
                         )}
                     </div>

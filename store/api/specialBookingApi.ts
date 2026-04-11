@@ -4,7 +4,6 @@ import { createUrlParams } from "@/utils/helpers";
 export interface SpecialBooking {
     _id: string;
     visitorName: string;
-    visitorEmail?: string;
     visitorPhone: string;
     employeeId: {
         _id: string;
@@ -40,8 +39,8 @@ export interface SpecialBookingListResponse {
 
 export interface CreateSpecialBookingPayload {
     visitorName: string;
-    visitorEmail?: string;
     visitorPhone: string;
+    visitorEmail?: string;
     employeeId: string;
     purpose: string;
     accompanyingCount: number;

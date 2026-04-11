@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
@@ -21,6 +22,96 @@ interface ImageUploadFieldProps {
     variant?: "default" | "avatar";
     autoOpenCamera?: boolean;
     directCameraOnly?: boolean;
+}
+
+function CameraCapturePortal({
+    open,
+    videoRef,
+    canvasRef,
+    facingMode,
+    onSwitchCamera,
+    onCapture,
+    onCancel,
+    compactCaptureLabel,
+}: {
+    open: boolean;
+    videoRef: React.RefObject<HTMLVideoElement | null>;
+    canvasRef: React.RefObject<HTMLCanvasElement | null>;
+    facingMode: "environment" | "user";
+    onSwitchCamera: (e?: React.MouseEvent) => void;
+    onCapture: (e?: React.MouseEvent) => void;
+    onCancel: (e?: React.MouseEvent) => void;
+    compactCaptureLabel?: boolean;
+}) {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!open || !mounted) return null;
+
+    return createPortal(
+        <div
+            className="fixed inset-0 z-[100] flex items-stretch justify-center bg-black/80 backdrop-blur-sm sm:items-center sm:p-4"
+            style={{
+                paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+                paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
+            }}
+        >
+            <div className="relative flex min-h-[100dvh] w-full max-w-full flex-col items-center justify-center gap-4 overflow-y-auto bg-[#0b1320]/92 px-4 py-6 shadow-2xl sm:min-h-0 sm:max-h-[min(100dvh,52rem)] sm:max-w-3xl sm:rounded-3xl sm:bg-[#0b1320]/90 sm:p-8">
+                <div className="relative h-[min(78vmin,26rem)] w-[min(78vmin,26rem)] shrink-0 overflow-hidden rounded-full border-4 border-white/20 shadow-2xl sm:h-[min(72vmin,22rem)] sm:w-[min(72vmin,22rem)] md:h-[min(70vmin,24rem)] md:w-[min(70vmin,24rem)]">
+                    <video
+                        ref={videoRef}
+                        className="h-full w-full object-cover"
+                        autoPlay
+                        playsInline
+                        muted
+                    />
+                </div>
+                <canvas ref={canvasRef} className="hidden" />
+
+                <div
+                    className="absolute right-3 sm:right-5"
+                    style={{ top: "max(0.75rem, env(safe-area-inset-top))" }}
+                >
+                    <Button
+                        type="button"
+                        onClick={onSwitchCamera}
+                        className="rounded-full bg-white p-2 text-black shadow-lg hover:bg-gray-100 sm:p-3"
+                        title={`Switch to ${facingMode === "environment" ? "Front" : "Back"} Camera`}
+                    >
+                        <RotateCw className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </Button>
+                </div>
+
+                <div className="mt-2 flex w-full shrink-0 flex-wrap justify-center gap-2 sm:mt-1 sm:gap-4">
+                    <Button
+                        type="button"
+                        onClick={onCapture}
+                        className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm text-black shadow-lg hover:bg-gray-200 sm:px-6 sm:py-3 sm:text-base"
+                    >
+                        <Camera className="h-4 w-4 sm:h-5 sm:w-5" />
+                        {compactCaptureLabel ? (
+                            <>
+                                <span className="hidden sm:inline">Capture Photo</span>
+                                <span className="sm:hidden">Capture</span>
+                            </>
+                        ) : (
+                            <span>Capture Photo</span>
+                        )}
+                    </Button>
+                    <Button
+                        type="button"
+                        onClick={onCancel}
+                        className="rounded-full bg-red-500 px-4 py-2 text-sm text-white shadow-lg hover:bg-red-600 sm:px-6 sm:py-3 sm:text-base"
+                    >
+                        Cancel
+                    </Button>
+                </div>
+            </div>
+        </div>,
+        document.body,
+    );
 }
 
 export function ImageUploadField({
@@ -320,52 +411,15 @@ export function ImageUploadField({
                 {label && <Label className="text-sm font-medium text-gray-700">{label}</Label>}
 
                 {/* Camera Modal (Reuse existing logic) */}
-                {isCapturing && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-                        <div className="relative flex w-full max-w-md flex-col items-center gap-4 rounded-3xl bg-[#0b1320]/80 p-4 sm:p-6">
-                            <div className="relative h-[280px] w-[280px] overflow-hidden rounded-full border-4 border-white/20 shadow-2xl sm:h-[340px] sm:w-[340px]">
-                                <video
-                                    ref={videoRef}
-                                    className="h-full w-full object-cover"
-                                    autoPlay
-                                    playsInline
-                                    muted
-                                />
-                            </div>
-                            <canvas ref={canvasRef} className="hidden" />
-
-                            <div className="absolute top-4 right-4 sm:top-5 sm:right-5">
-                                <Button
-                                    type="button"
-                                    onClick={switchCamera}
-                                    className="rounded-full bg-white p-2 text-black shadow-lg hover:bg-gray-100 sm:p-3"
-                                    title={`Switch to ${facingMode === "environment" ? "Front" : "Back"} Camera`}
-                                >
-                                    <RotateCw className="h-4 w-4 sm:h-5 sm:w-5" />
-                                </Button>
-                            </div>
-
-                            <div className="mt-1 flex w-full justify-center gap-2 sm:gap-4">
-                                <Button
-                                    type="button"
-                                    onClick={capturePhoto}
-                                    className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm text-black shadow-lg hover:bg-gray-200 sm:px-6 sm:py-3 sm:text-base"
-                                >
-                                    <Camera className="h-4 w-4 sm:h-5 sm:w-5" />
-                                    <span className="hidden sm:inline">Capture Photo</span>
-                                    <span className="sm:hidden">Capture</span>
-                                </Button>
-                                <Button
-                                    type="button"
-                                    onClick={cancelCamera}
-                                    className="rounded-full bg-red-500 px-4 py-2 text-sm text-white shadow-lg hover:bg-red-600 sm:px-6 sm:py-3 sm:text-base"
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <CameraCapturePortal
+                    open={isCapturing}
+                    videoRef={videoRef}
+                    canvasRef={canvasRef}
+                    facingMode={facingMode}
+                    onSwitchCamera={switchCamera}
+                    onCapture={capturePhoto}
+                    onCancel={cancelCamera}
+                />
 
                 {/* Source Selection Modal (Reuse existing logic) */}
                 {showCaptureOptions && (
@@ -467,52 +521,16 @@ export function ImageUploadField({
             {label && <Label className="text-sm font-medium text-gray-700">{label}</Label>}
 
             <div className="flex flex-col gap-3">
-                {isCapturing && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent p-2 sm:p-4">
-                        <div className="relative flex w-full max-w-md flex-col items-center gap-4 rounded-3xl bg-[#0b1320]/80 p-4 sm:p-6">
-                            <div className="relative h-[280px] w-[280px] overflow-hidden rounded-full border-4 border-white/20 shadow-2xl sm:h-[340px] sm:w-[340px]">
-                            <video
-                                ref={videoRef}
-                                className="h-full w-full object-cover"
-                                autoPlay
-                                playsInline
-                                muted
-                            />
-                            </div>
-                            <canvas ref={canvasRef} className="hidden" />
-
-                            <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
-                                <Button
-                                    type="button"
-                                    onClick={switchCamera}
-                                    className="bg-opacity-90 hover:bg-opacity-100 rounded-full bg-white p-2 text-black shadow-lg sm:p-3"
-                                    title={`Switch to ${facingMode === "environment" ? "Front" : "Back"} Camera`}
-                                >
-                                    <RotateCw className="h-4 w-4 sm:h-5 sm:w-5" />
-                                </Button>
-                            </div>
-
-                            <div className="mt-1 flex w-full justify-center gap-2 sm:gap-4">
-                                <Button
-                                    type="button"
-                                    onClick={capturePhoto}
-                                    className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm text-black shadow-lg hover:bg-gray-200 sm:px-6 sm:py-3 sm:text-base"
-                                >
-                                    <Camera className="h-4 w-4 sm:h-5 sm:w-5" />
-                                    <span className="hidden sm:inline">Capture Photo</span>
-                                    <span className="sm:hidden">Capture</span>
-                                </Button>
-                                <Button
-                                    type="button"
-                                    onClick={cancelCamera}
-                                    className="rounded-full bg-red-500 px-4 py-2 text-sm text-white shadow-lg hover:bg-red-600 sm:px-6 sm:py-3 sm:text-base"
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <CameraCapturePortal
+                    open={isCapturing}
+                    videoRef={videoRef}
+                    canvasRef={canvasRef}
+                    facingMode={facingMode}
+                    onSwitchCamera={switchCamera}
+                    onCapture={capturePhoto}
+                    onCancel={cancelCamera}
+                    compactCaptureLabel
+                />
 
                 {showCaptureOptions && (
                     <div className="fixed inset-0 z-40 flex items-center justify-center p-4">

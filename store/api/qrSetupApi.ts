@@ -45,6 +45,22 @@ export const qrSetupApi = baseApi.injectEndpoints({
             transformResponse: (response: any) => response?.data || response,
             keepUnusedDataFor: 3600, // Cache public info for 1 hour
         }),
+        sendQrPhoneOtp: builder.mutation<{ sent: boolean }, { slug: string; phone: string }>({
+            query: ({ slug, phone }) => ({
+                url: `/qr-setup/public/${encodeURIComponent(slug)}/phone/send-otp`,
+                method: "POST",
+                body: { phone },
+            }),
+            transformResponse: (response: any) => response?.data || response,
+        }),
+        verifyQrPhoneOtp: builder.mutation<{ verified: boolean }, { slug: string; phone: string; otp: string }>({
+            query: ({ slug, phone, otp }) => ({
+                url: `/qr-setup/public/${encodeURIComponent(slug)}/phone/verify-otp`,
+                method: "POST",
+                body: { phone, otp },
+            }),
+            transformResponse: (response: any) => response?.data || response,
+        }),
         createVisitorThroughQR: builder.mutation<any, { slug: string; visitorData: any }>({
             query: ({ slug, visitorData }) => ({
                 url: `/qr-setup/public/${slug}/visitor`,
@@ -68,6 +84,8 @@ export const {
     useGetQRConfigQuery,
     useRegenerateQRSlugMutation,
     useGetPublicCompanyInfoQuery,
+    useSendQrPhoneOtpMutation,
+    useVerifyQrPhoneOtpMutation,
     useCreateVisitorThroughQRMutation,
     useCreateAppointmentThroughQRMutation,
 } = qrSetupApi;

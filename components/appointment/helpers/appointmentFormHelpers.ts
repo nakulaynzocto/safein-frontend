@@ -69,12 +69,13 @@ export const formatEmployeeSearchKeywords = (emp: any): string => {
  * Format visitor label for select option
  */
 export const formatVisitorLabel = (visitor: any): string => {
-    return `${visitor.name} (${visitor.email})`;
+    const phone = visitor.phone || "";
+    return phone ? `${visitor.name} (${phone})` : visitor.name;
 };
 
 /**
  * Format visitor search keywords
  */
 export const formatVisitorSearchKeywords = (visitor: any): string => {
-    return `${visitor.name} ${visitor.email ?? ""} ${visitor.phone ?? ""}`.trim();
+    return `${visitor.name} ${visitor.phone ?? ""}`.trim();
 };

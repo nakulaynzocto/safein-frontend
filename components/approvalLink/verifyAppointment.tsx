@@ -14,7 +14,6 @@ import {
     Calendar,
     Clock,
     User,
-    Mail,
     Phone,
     Building2,
     ShieldCheck,
@@ -320,19 +319,11 @@ export function VerifyAppointment() {
                                         </div>
                                     </div>
                                     
-                                    <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-                                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800">
-                                                <Mail className="h-4 w-4" />
-                                            </div>
-                                            <span className="truncate">{appointment.visitor.email}</span>
+                                    <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800">
+                                            <Phone className="h-4 w-4" />
                                         </div>
-                                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800">
-                                                <Phone className="h-4 w-4" />
-                                            </div>
-                                            <span>{appointment.visitor.phone}</span>
-                                        </div>
+                                        <span>{appointment.visitor.phone}</span>
                                     </div>
                                 </div>
                             </div>

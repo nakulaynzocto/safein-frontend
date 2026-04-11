@@ -7,7 +7,6 @@ import {
     useGetAppointmentLinkByTokenQuery,
     useCreateBookingThroughLinkMutation,
 } from "@/store/api/appointmentLinkApi";
-import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
     CheckCircle2, 
@@ -25,14 +24,9 @@ import { extractIdString, isValidId } from "@/utils/idExtractor";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { ImageUploadField } from "@/components/common/imageUploadField";
-
-const AppointmentBookingForm = dynamic(() => import("@/components/appointment/AppointmentBookingForm").then(mod => mod.AppointmentBookingForm), {
-    loading: () => <FormSkeleton title="Appointment Details" />
-});
-
-const BookingVisitorForm = dynamic(() => import("@/components/appointment/BookingVisitorForm").then(mod => mod.BookingVisitorForm), {
-    loading: () => <FormSkeleton title="Visitor Information" />
-});
+import { AppointmentBookingForm } from "@/components/appointment/AppointmentBookingForm";
+import { BookingVisitorForm } from "@/components/appointment/BookingVisitorForm";
+import { OtpVerificationStep } from "@/components/appointment/OtpVerificationStep";
 
 function FormSkeleton({ title }: { title: string }) {
     return (
@@ -62,7 +56,7 @@ export default function BookAppointmentPage() {
     const rawToken = params?.token as string;
     const token = rawToken ? decodeURIComponent(rawToken) : "";
 
-    const [step, setStep] = useState<"loading" | "details" | "photo" | "appointment" | "review" | "success" | "already_booked" | "error">("loading");
+    const [step, setStep] = useState<"loading" | "verification" | "details" | "photo" | "appointment" | "review" | "success" | "already_booked" | "error">("loading");
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [visitorId, setVisitorId] = useState<string | null>(null);
     const [appointmentLinkData, setAppointmentLinkData] = useState<any>(null);
@@ -138,10 +132,15 @@ export default function BookAppointmentPage() {
                 }
                 setStep("appointment");
             } else {
-                setStep("details");
+                setStep("verification");
             }
         }
     }, [linkData, linkError, token]);
+
+    const handlePhoneVerified = (phone: string) => {
+        setVisitorDraft((prev: any) => ({ ...prev, phone }));
+        setStep("details");
+    };
 
     const handleVisitorSubmit = async (data: any) => {
         setVisitorDraft(data);
@@ -351,25 +350,26 @@ export default function BookAppointmentPage() {
                     <div className="border-b border-slate-100 bg-gradient-to-r from-[#3882a5]/10 via-[#3882a5]/5 to-transparent px-3 py-4 sm:px-6">
                         <div className="flex items-center sm:justify-center gap-3 sm:gap-7 overflow-x-auto">
                             {[
-                                { key: "details", label: "Your Details", index: 1 },
-                                { key: "photo", label: "Capture Photo", index: 2 },
-                                { key: "appointment", label: "Book", index: 3 },
-                                { key: "review", label: "Review", index: 4 },
+                                { key: "verification", label: "Verify", index: 1 },
+                                { key: "details", label: "Details", index: 2 },
+                                { key: "photo", label: "Photo", index: 3 },
+                                { key: "appointment", label: "Book", index: 4 },
+                                { key: "review", label: "Review", index: 5 },
                             ].map((item, idx, arr) => {
-                                const order = ["details", "photo", "appointment", "review"];
+                                const order = ["verification", "details", "photo", "appointment", "review"];
                                 const currentIndex = order.indexOf(step as any);
                                 const itemIndex = order.indexOf(item.key);
                                 const isDone = itemIndex < currentIndex;
                                 const isActive = item.key === step;
                                 return (
-                                    <div key={item.key} className="flex items-center gap-3">
-                                        <div className={cn("flex items-center gap-2 text-sm font-bold transition-all", isActive ? "text-[#3882a5]" : isDone ? "text-emerald-700" : "text-slate-400")}>
-                                            <span className={cn("flex h-8 w-8 items-center justify-center rounded-full border-2", isActive ? "bg-[#3882a5] border-[#3882a5] text-white" : isDone ? "bg-emerald-500 border-emerald-500 text-white" : "bg-slate-100 border-slate-200 text-slate-500")}>
+                                    <div key={item.key} className="flex items-center gap-3 shrink-0">
+                                        <div className={cn("flex items-center gap-2 text-xs sm:text-sm font-bold transition-all", isActive ? "text-[#3882a5]" : isDone ? "text-emerald-700" : "text-slate-400")}>
+                                            <span className={cn("flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full border-2", isActive ? "bg-[#3882a5] border-[#3882a5] text-white" : isDone ? "bg-emerald-500 border-emerald-500 text-white" : "bg-slate-100 border-slate-200 text-slate-500")}>
                                                 {isDone ? <CheckCircle2 className="h-4 w-4" /> : item.index}
                                             </span>
-                                            <span>{item.label}</span>
+                                            <span className="whitespace-nowrap">{item.label}</span>
                                         </div>
-                                        {idx < arr.length - 1 && <div className="h-[2px] w-8 rounded-full bg-slate-200" />}
+                                        {idx < arr.length - 1 && <div className="hidden sm:block h-[2px] w-4 sm:w-8 rounded-full bg-slate-200" />}
                                     </div>
                                 );
                             })}
@@ -377,6 +377,15 @@ export default function BookAppointmentPage() {
                     </div>
 
                     <CardContent className="p-4 sm:p-6 lg:p-8">
+                        {step === "verification" && (
+                            <OtpVerificationStep
+                                token={token}
+                                initialPhone={appointmentLinkData?.visitorPhone}
+                                companyName={appointmentLinkData?.createdBy?.companyName}
+                                onVerified={handlePhoneVerified}
+                            />
+                        )}
+
                         {step === "details" && (
                             <div className="animate-in fade-in slide-in-from-right-4 duration-500">
                                 <div className="mb-4 rounded-xl border border-[#3882a5]/20 bg-[#3882a5]/5 p-3">
@@ -384,8 +393,9 @@ export default function BookAppointmentPage() {
                                     <p className="text-xs text-slate-600">Contact information verify karke next karein.</p>
                                 </div>
                                 <BookingVisitorForm
+                                    initialPhone={visitorDraft?.phone || appointmentLinkData?.visitorPhone}
                                     initialEmail={appointmentLinkData?.visitorEmail}
-                                    initialPhone={appointmentLinkData?.visitorPhone}
+                                    lockedEmailHelperText="This email is tied to your invite link and cannot be changed."
                                     initialValues={visitorDraft || visitorData}
                                     onSubmit={handleVisitorSubmit}
                                     isLoading={isSubmittingBooking}
@@ -440,7 +450,7 @@ export default function BookAppointmentPage() {
                                         visitorId={visitorId || "000000000000000000000000"}
                                         employeeId={extractIdString(appointmentLinkData.employeeId)}
                                         employeeName={employee?.name || ""}
-                                        visitorEmail={appointmentLinkData.visitorEmail}
+                                        visitorPhone={visitorDraft?.phone || visitorData?.phone || appointmentLinkData?.visitorPhone}
                                         visitorName={visitorDraft?.name || visitorData?.name || ""}
                                         onSubmit={handleAppointmentSubmit}
                                         isLoading={isSubmittingBooking}
@@ -472,6 +482,16 @@ export default function BookAppointmentPage() {
                                     <div>
                                         <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Visitor</p>
                                         <p className="text-sm font-semibold text-slate-900">{visitorDraft?.name || visitorData?.name || "-"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Email</p>
+                                        <p className="text-sm font-semibold text-slate-900">{visitorDraft?.email || visitorData?.email || "-"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Phone</p>
+                                        <p className="text-sm font-semibold text-slate-900">
+                                            {visitorDraft?.phone || visitorData?.phone || appointmentLinkData?.visitorPhone || "-"}
+                                        </p>
                                     </div>
                                     <div>
                                         <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Meeting With</p>

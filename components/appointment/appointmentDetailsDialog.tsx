@@ -2,12 +2,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/common/UserAvatar";
 import { format } from "date-fns";
 import { Appointment } from "@/store/api/appointmentApi";
 import {
     ExternalLink,
     User,
-    Mail,
     Phone,
     Calendar,
     Clock,
@@ -37,7 +37,6 @@ const getFieldValue = (appointment: Appointment, key: string): any => {
     const fieldMap: Record<string, (appt: Appointment) => any> = {
         _id: (appt) => appt._id || "N/A",
         visitorName: (appt) => (appt as any).visitorId?.name || appt.visitor?.name || "N/A",
-        visitorEmail: (appt) => (appt as any).visitorId?.email || appt.visitor?.email || "N/A",
         visitorPhone: (appt) => (appt as any).visitorId?.phone || appt.visitor?.phone || "N/A",
         visitorPhoto: (appt) => (appt as any).visitorId?.photo || (appt as any).visitor?.photo || "",
         employeeName: (appt) => (appt as any).employeeId?.name || appt.employee?.name || "N/A",
@@ -66,7 +65,6 @@ const statusVariants: Record<string, "secondary" | "default" | "destructive" | "
 
 const fieldConfig = [
     { key: "visitorName", label: "Visitor Name" },
-    { key: "visitorEmail", label: "Visitor Email" },
     { key: "visitorPhone", label: "Visitor Phone" },
     { key: "employeeName", label: "Meeting With" },
     { key: "purpose", label: "Purpose" },
@@ -149,35 +147,18 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close, on
                     {/* Profile Header - LinkedIn/Facebook Style */}
                     <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 border-b pb-6">
                         {/* Left Side - Visitor Photo */}
-                        <div className="group relative shrink-0">
-                            <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
-                                <AvatarImage src={visitorPhoto} alt={visitorName} />
-                                <AvatarFallback className="text-xl sm:text-2xl flex items-center justify-center leading-none">
-                                    {getInitials(visitorName, 2)}
-                                </AvatarFallback>
-                            </Avatar>
-                            {visitorPhoto && (
-                                <button
-                                    onClick={() => window.open(visitorPhoto, "_blank")}
-                                    className="absolute right-0 bottom-0 rounded-full bg-[#3882a5] p-1.5 text-white opacity-0 shadow-lg transition-colors group-hover:opacity-100 hover:bg-[#2d6a87]"
-                                    title="View full image"
-                                >
-                                    <Maximize2 className="h-3.5 w-3.5" />
-                                </button>
-                            )}
-                        </div>
+                        <UserAvatar
+                            src={visitorPhoto}
+                            name={visitorName}
+                            size="xl"
+                            allowExpand
+                        />
 
                         {/* Right Side - Visitor Info & Status */}
                         <div className="flex-1 space-y-3 text-center sm:text-left w-full">
                             <div>
                                 <h3 className="text-lg sm:text-xl font-semibold">{visitorName}</h3>
                                 <div className="mt-2 flex flex-col sm:flex-row flex-wrap items-center sm:items-start gap-1 sm:gap-4">
-                                    <div className="flex items-center gap-2">
-                                        <Mail className="text-muted-foreground h-3.5 w-3.5" />
-                                        <span className="text-muted-foreground text-xs sm:text-sm break-all">
-                                            {getFieldValue(appointment, "visitorEmail")}
-                                        </span>
-                                    </div>
                                     <div className="flex items-center gap-2">
                                         <Phone className="text-muted-foreground h-3.5 w-3.5" />
                                         <span className="text-muted-foreground text-xs sm:text-sm break-all">
@@ -197,7 +178,6 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close, on
                         {fieldConfig.map(({ key, label, format, optional, showOnlyForCompleted }) => {
                             if (
                                 key === "visitorName" ||
-                                key === "visitorEmail" ||
                                 key === "visitorPhone" ||
                                 key === "status"
                             )
@@ -229,15 +209,12 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close, on
                                     <div className="text-foreground text-sm font-semibold">
                                         {key === "employeeName" ? (
                                             <div className="flex items-center gap-2">
-                                                <Avatar className="h-6 w-6">
-                                                    <AvatarImage
-                                                        src={(appointment as any).employeeId?.photo || appointment.employee?.photo || (appointment as any).employeeId?.profilePicture || (appointment.employee as any)?.profilePicture || ""}
-                                                        alt={value}
-                                                    />
-                                                    <AvatarFallback className="text-[10px] flex items-center justify-center leading-none">
-                                                        {getInitials(value, 2)}
-                                                    </AvatarFallback>
-                                                </Avatar>
+                                                <UserAvatar
+                                                    src={(appointment as any).employeeId?.photo || appointment.employee?.photo || (appointment as any).employeeId?.profilePicture || (appointment.employee as any)?.profilePicture || ""}
+                                                    name={value}
+                                                    size="sm"
+                                                    fallbackClassName="text-[10px]"
+                                                />
                                                 <span>{formatName(renderFieldValue(key, value, format)) || "N/A"}</span>
                                             </div>
                                         ) : (

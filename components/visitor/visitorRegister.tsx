@@ -118,7 +118,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
         try {
             const visitorPayload: CreateVisitorRequest = {
                 name: data.name,
-                email: data.email,
+                email: data.email?.trim() || undefined,
                 phone: data.phone,
                 gender: (data.gender as any) || undefined,
                 address: {

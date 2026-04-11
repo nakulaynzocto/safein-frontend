@@ -45,11 +45,10 @@ export function VisitorFormFields({
     visitorId,
     initialData,
 }: VisitorFormFieldsProps) {
-    const watchedEmail = watch("email");
     const watchedPhone = watch("phone");
     const defaultCountry = useUserCountry();
 
-    const { emailExists, phoneExists } = useVisitorExistenceCheck(watchedEmail, watchedPhone, visitorId);
+    const { phoneExists } = useVisitorExistenceCheck(watchedPhone, visitorId);
 
     return (
         <div className="space-y-6">
@@ -89,11 +88,11 @@ export function VisitorFormFields({
                     <div className="md:col-span-2 lg:col-span-1">
                         <InputField
                             id="email"
-                            label="Email Address"
                             type="email"
+                            label="Email (optional)"
                             {...register("email")}
-                            placeholder="Enter email address"
-                            error={errors.email?.message || (emailExists ? "This email is already registered" : undefined)}
+                            placeholder="name@example.com"
+                            error={errors.email?.message}
                         />
                     </div>
 

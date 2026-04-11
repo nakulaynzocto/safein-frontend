@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import {
     useGetPublicCompanyInfoQuery,
+    useSendQrPhoneOtpMutation,
+    useVerifyQrPhoneOtpMutation,
     useCreateVisitorThroughQRMutation,
     useCreateAppointmentThroughQRMutation,
 } from "@/store/api/qrSetupApi";
-import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
     CheckCircle2, 
@@ -21,6 +22,8 @@ import {
     CalendarClock,
     FileText,
     Home,
+    MessageCircle,
+    Clock,
 } from "lucide-react";
 import { StatusPage } from "@/components/common/statusPage";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,14 +33,12 @@ import { extractIdString, isValidId } from "@/utils/idExtractor";
 import { cn } from "@/lib/utils";
 import { ImageUploadField } from "@/components/common/imageUploadField";
 import { Label } from "@/components/ui/label";
-
-const AppointmentBookingForm = dynamic(() => import("@/components/appointment/AppointmentBookingForm").then(mod => mod.AppointmentBookingForm), {
-    loading: () => <FormSkeleton title="Appointment Details" />
-});
-
-const BookingVisitorForm = dynamic(() => import("@/components/appointment/BookingVisitorForm").then(mod => mod.BookingVisitorForm), {
-    loading: () => <FormSkeleton title="Visitor Information" />
-});
+import { PhoneInputField } from "@/components/common/phoneInputField";
+import { validatePhone, formatPhoneForSubmission } from "@/utils/phoneUtils";
+import { useUserCountry } from "@/hooks/useUserCountry";
+import { AppointmentBookingForm } from "@/components/appointment/AppointmentBookingForm";
+import { BookingVisitorForm } from "@/components/appointment/BookingVisitorForm";
+import { OtpDigitBoxes } from "@/components/common/otpDigitBoxes";
 
 function FormSkeleton({ title }: { title: string }) {
     return (
@@ -66,8 +67,12 @@ export default function QRScanPage() {
     const params = useParams();
     const slug = params?.slug as string;
 
-    const [step, setStep] = useState<"loading" | "details" | "photo" | "appointment" | "review" | "success" | "error">("loading");
+    const [step, setStep] = useState<
+        "loading" | "verify_phone" | "details" | "photo" | "appointment" | "review" | "success" | "error"
+    >("loading");
     const [errorMessage, setErrorMessage] = useState<string>("");
+    const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
+    const [otpSent, setOtpSent] = useState(false);
     const [visitorId, setVisitorId] = useState<string | null>(null);
     const [visitorData, setVisitorData] = useState<any>(null);
     const [visitorDraft, setVisitorDraft] = useState<any>(null);
@@ -75,16 +80,47 @@ export default function QRScanPage() {
     const [appointmentFormDraft, setAppointmentFormDraft] = useState<any>(null);
     const [submittedAppointmentId, setSubmittedAppointmentId] = useState<string | null>(null);
     const [isPhotoUploading, setIsPhotoUploading] = useState(false);
+    const defaultCountry = useUserCountry();
+
+    const {
+        control: verifyControl,
+        register: verifyRegister,
+        handleSubmit: handleVerifySubmit,
+        watch: watchVerifyPhone,
+        reset: resetVerifyForm,
+    } = useForm<{ phone: string; otp: string }>({
+        defaultValues: { phone: "", otp: "" },
+    });
 
     const {
         register: photoRegister,
         setValue: setPhotoValue,
         handleSubmit: handlePhotoSubmit,
         watch: watchPhoto,
+        reset: resetPhotoForm,
         formState: { errors: photoErrors },
     } = useForm<{ photo: string }>({
         defaultValues: { photo: "" },
     });
+
+    /** Return to step 1 on the same QR URL (fresh check-in). */
+    const restartQrBookingFlow = useCallback(() => {
+        setVerifiedPhone(null);
+        setOtpSent(false);
+        setVisitorId(null);
+        setVisitorData(null);
+        setVisitorDraft(null);
+        setAppointmentDraft(null);
+        setAppointmentFormDraft(null);
+        setSubmittedAppointmentId(null);
+        setIsPhotoUploading(false);
+        resetVerifyForm({ phone: "", otp: "" });
+        resetPhotoForm({ photo: "" });
+        setStep("verify_phone");
+        if (typeof window !== "undefined") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+    }, [resetVerifyForm, resetPhotoForm]);
 
     const {
         data: companyInfo,
@@ -96,6 +132,8 @@ export default function QRScanPage() {
 
     const [createVisitor, { isLoading: isCreatingVisitor }] = useCreateVisitorThroughQRMutation();
     const [createAppointment, { isLoading: isCreatingAppointment }] = useCreateAppointmentThroughQRMutation();
+    const [sendQrOtp, { isLoading: isSendingOtp }] = useSendQrPhoneOtpMutation();
+    const [verifyQrOtp, { isLoading: isVerifyingOtp }] = useVerifyQrPhoneOtpMutation();
 
     useEffect(() => {
         if (!slug) {
@@ -112,9 +150,48 @@ export default function QRScanPage() {
         }
 
         if (companyInfo) {
-            setStep("details");
+            setStep((s) => (s === "loading" ? "verify_phone" : s));
         }
     }, [companyInfo, infoError, slug]);
+
+    const onSendOtp = async () => {
+        if (!slug) return;
+        const raw = watchVerifyPhone("phone");
+        if (!validatePhone(raw)) {
+            showErrorToast("Please enter a valid phone number with country code.");
+            return;
+        }
+        try {
+            const phone = formatPhoneForSubmission(raw);
+            await sendQrOtp({ slug, phone }).unwrap();
+            setOtpSent(true);
+            showSuccessToast("Verification code sent to your WhatsApp.");
+        } catch (e: any) {
+            showErrorToast(e?.data?.message || e?.message || "Could not send code.");
+        }
+    };
+
+    const onVerifyOtpSubmit = async (data: { phone: string; otp: string }) => {
+        if (!slug) return;
+        if (!validatePhone(data.phone)) {
+            showErrorToast("Please enter a valid phone number.");
+            return;
+        }
+        const phone = formatPhoneForSubmission(data.phone);
+        const otp = data.otp?.replace(/\D/g, "").trim() || "";
+        if (!/^\d{6}$/.test(otp)) {
+            showErrorToast("Enter the 6-digit code sent to your WhatsApp.");
+            return;
+        }
+        try {
+            await verifyQrOtp({ slug, phone, otp }).unwrap();
+            setVerifiedPhone(phone);
+            setStep("details");
+            showSuccessToast("Phone verified. Please complete your details.");
+        } catch (e: any) {
+            showErrorToast(e?.data?.message || e?.message || "Verification failed.");
+        }
+    };
 
     const handleVisitorDetailsSubmit = async (data: any) => {
         setVisitorDraft(data);
@@ -170,6 +247,7 @@ export default function QRScanPage() {
 
     const company = companyInfo?.company;
     const steps = [
+        { key: "verify_phone", label: "Verify phone" },
         { key: "details", label: "Your Details" },
         { key: "photo", label: "Capture Photo" },
         { key: "appointment", label: "Book" },
@@ -246,8 +324,9 @@ export default function QRScanPage() {
                             </div>
 
                             <div className="flex justify-center">
-                                <Button variant="outline" onClick={() => window.location.assign("/")}>
-                                    <Home className="mr-2 h-4 w-4" /> Go Home
+                                <Button type="button" variant="outline" onClick={restartQrBookingFlow}>
+                                    <Home className="mr-2 h-4 w-4" />
+                                    Check in again
                                 </Button>
                             </div>
                         </CardContent>
@@ -275,7 +354,7 @@ export default function QRScanPage() {
                             <h1 className="truncate text-2xl font-extrabold tracking-tight text-[#0f172a] sm:text-4xl">
                                 Welcome to {company?.companyName}
                             </h1>
-                            <p className="mt-1 text-sm font-medium text-slate-500">Complete all 4 steps for fast visitor approval</p>
+                            <p className="mt-1 text-sm font-medium text-slate-500">Complete all 5 steps for fast visitor approval</p>
                         </div>
                     </div>
                 </div>
@@ -332,13 +411,153 @@ export default function QRScanPage() {
                     </div>
 
                     <CardContent className="p-4 sm:p-6 lg:p-8">
+                        {step === "verify_phone" && (
+                            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+                                <div className="mx-auto w-full max-w-lg sm:max-w-xl">
+                                    <form
+                                        onSubmit={(e) => {
+                                            if (!otpSent) {
+                                                e.preventDefault();
+                                                return;
+                                            }
+                                            handleVerifySubmit(onVerifyOtpSubmit)(e);
+                                        }}
+                                        className="w-full"
+                                    >
+                                        {/* Step A */}
+                                        <div className="flex gap-4">
+                                            <div
+                                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#3882a5] text-sm font-bold text-white shadow-sm"
+                                                aria-hidden
+                                            >
+                                                1
+                                            </div>
+                                            <div className="min-w-0 flex-1 space-y-4">
+                                                <div>
+                                                    <p className="text-sm font-semibold text-[#0f172a]">Enter your number</p>
+                                                    <p className="text-xs text-slate-500">Include your country code.</p>
+                                                </div>
+                                                <Controller
+                                                    name="phone"
+                                                    control={verifyControl}
+                                                    render={({ field }) => (
+                                                        <PhoneInputField
+                                                            id="qr-verify-phone"
+                                                            label="Mobile number"
+                                                            value={field.value}
+                                                            onChange={(v) => field.onChange(v)}
+                                                            required
+                                                            placeholder="Enter mobile with country code"
+                                                            defaultCountry={defaultCountry}
+                                                        />
+                                                    )}
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="outline-primary"
+                                                    size="xl"
+                                                    className="w-full font-semibold shadow-sm"
+                                                    disabled={isSendingOtp || !watchVerifyPhone("phone")?.trim()}
+                                                    onClick={onSendOtp}
+                                                >
+                                                    {isSendingOtp ? (
+                                                        "Sending…"
+                                                    ) : otpSent ? (
+                                                        <>
+                                                            <MessageCircle className="h-4 w-4" />
+                                                            Resend code
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <MessageCircle className="h-4 w-4" />
+                                                            Send verification code
+                                                        </>
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {otpSent && (
+                                            <>
+                                                <div className="relative my-8 sm:my-10">
+                                                    <div className="absolute inset-0 flex items-center" aria-hidden>
+                                                        <div className="w-full border-t border-slate-200" />
+                                                    </div>
+                                                    <div className="relative flex justify-center">
+                                                        <span className="bg-card px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                                                            Then enter code
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Step B — only after code is sent */}
+                                                <div className="flex gap-4">
+                                                    <div
+                                                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#3882a5] text-sm font-bold text-white shadow-sm"
+                                                        aria-hidden
+                                                    >
+                                                        2
+                                                    </div>
+                                                    <div className="min-w-0 flex-1 space-y-4">
+                                                        <div>
+                                                            <p className="text-sm font-semibold text-[#0f172a]">Enter the WhatsApp code</p>
+                                                            <p className="text-xs text-slate-500">
+                                                                Type the code you received below.
+                                                            </p>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label
+                                                                htmlFor="qr-verify-otp"
+                                                                className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+                                                            >
+                                                                Verification code
+                                                            </Label>
+                                                            <Controller
+                                                                name="otp"
+                                                                control={verifyControl}
+                                                                render={({ field }) => (
+                                                                    <OtpDigitBoxes
+                                                                        id="qr-verify-otp"
+                                                                        value={field.value || ""}
+                                                                        onChange={field.onChange}
+                                                                    />
+                                                                )}
+                                                            />
+                                                            <p className="flex items-center gap-1.5 text-xs text-slate-500">
+                                                                <Clock className="h-3.5 w-3.5 shrink-0 text-[#3882a5]" />
+                                                                Enter 6 digits only. Code is valid for 10 minutes.
+                                                            </p>
+                                                        </div>
+                                                        <Button
+                                                            type="submit"
+                                                            variant="primary"
+                                                            size="xl"
+                                                            className="w-full font-semibold shadow-md shadow-[#3882a5]/20"
+                                                            disabled={
+                                                                isVerifyingOtp ||
+                                                                (watchVerifyPhone("otp")?.replace(/\D/g, "")?.length ?? 0) !== 6
+                                                            }
+                                                        >
+                                                            {isVerifyingOtp ? "Verifying…" : "Verify & continue"}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </form>
+                                </div>
+                            </div>
+                        )}
+
                         {step === "details" && (
                             <div className="animate-in fade-in slide-in-from-right-4 duration-500">
                                 <div className="mb-4 flex items-start gap-3 rounded-2xl border border-[#3882a5]/20 bg-[#3882a5]/5 p-3 sm:p-4">
                                     <div className="rounded-lg bg-[#3882a5]/15 p-2 text-[#3882a5]"><User className="h-4 w-4" /></div>
                                     <div>
-                                        <p className="text-sm font-bold text-[#1f4f67]">Step 1: Fill visitor details</p>
-                                        <p className="text-xs text-slate-600">Name, contact and address details fill karein.</p>
+                                        <p className="text-sm font-bold text-[#1f4f67]">Step 2: Fill visitor details</p>
+                                        <p className="text-xs text-slate-600">
+                                            Name, address, and ID — your mobile number is already verified.
+                                        </p>
                                     </div>
                                 </div>
                                 <BookingVisitorForm
@@ -346,7 +565,24 @@ export default function QRScanPage() {
                                     isLoading={isCreatingVisitor}
                                     collectPhotoInForm={false}
                                     initialValues={visitorDraft || undefined}
+                                    initialPhone={verifiedPhone || undefined}
+                                    lockedPhoneHelperText="This number is verified and cannot be changed."
                                 />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="mt-4 text-slate-500 hover:text-[#3882a5]"
+                                    onClick={() => {
+                                        setVerifiedPhone(null);
+                                        setOtpSent(false);
+                                        setVisitorDraft(null);
+                                        setStep("verify_phone");
+                                    }}
+                                >
+                                    <ArrowLeft className="mr-2 h-4 w-4" />
+                                    Change mobile number
+                                </Button>
                             </div>
                         )}
 
@@ -355,20 +591,31 @@ export default function QRScanPage() {
                                 <div className="flex items-start gap-3 rounded-2xl border border-[#3882a5]/20 bg-[#3882a5]/5 p-3 sm:p-4">
                                     <div className="rounded-lg bg-[#3882a5]/15 p-2 text-[#3882a5]"><Camera className="h-4 w-4" /></div>
                                     <div>
-                                        <h3 className="text-base font-bold text-[#1f4f67] sm:text-lg">Step 2: Capture Visitor Photo</h3>
+                                        <h3 className="text-base font-bold text-[#1f4f67] sm:text-lg">Step 3: Capture Visitor Photo</h3>
                                         <p className="mt-1 text-sm text-slate-600">Clear face photo required for secure entry verification.</p>
                                     </div>
                                 </div>
                                 <form onSubmit={handlePhotoSubmit(handlePhotoStepSubmit)} className="space-y-5">
                                     <div className="rounded-2xl border border-[#3882a5]/20 bg-gradient-to-b from-[#f8fcff] to-white p-4 shadow-sm sm:p-6">
-                                        <div className="grid gap-4 md:grid-cols-[1fr_1.4fr] md:gap-6">
-                                            <div className="rounded-xl border border-[#3882a5]/15 bg-[#f8fcff] p-3 sm:p-4">
-                                                <p className="text-sm font-bold text-[#1f4f67]">Photo guidelines</p>
-                                                <ul className="mt-2 space-y-1.5 text-[11px] leading-relaxed text-slate-700 sm:text-xs">
-                                                    <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#3882a5]" />Face centered and clearly visible</li>
-                                                    <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#3882a5]" />Good lighting, no blur</li>
-                                                    <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#3882a5]" />No mask/sunglasses</li>
-                                                    <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#3882a5]" />Single person only</li>
+                                        <div className="grid gap-4 md:grid-cols-[1fr_1.4fr] md:items-stretch md:gap-6">
+                                            <div className="flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-[#3882a5]/15 bg-[#f8fcff] px-4 py-8 text-center sm:min-h-[260px] sm:px-6 md:min-h-0 md:h-full md:py-6">
+                                                <ul className="mx-auto mt-4 w-max max-w-[min(100%,17rem)] space-y-2 text-left text-[11px] leading-relaxed text-slate-700 sm:text-xs">
+                                                    <li className="flex gap-2">
+                                                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#3882a5]" />
+                                                        <span>Face centered and clearly visible</span>
+                                                    </li>
+                                                    <li className="flex gap-2">
+                                                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#3882a5]" />
+                                                        <span>Good lighting, no blur</span>
+                                                    </li>
+                                                    <li className="flex gap-2">
+                                                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#3882a5]" />
+                                                        <span>No mask/sunglasses</span>
+                                                    </li>
+                                                    <li className="flex gap-2">
+                                                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#3882a5]" />
+                                                        <span>Single person only</span>
+                                                    </li>
                                                 </ul>
                                             </div>
                                             <div className="rounded-xl border border-dashed border-[#3882a5]/25 bg-white p-4 sm:p-5">
@@ -410,14 +657,16 @@ export default function QRScanPage() {
                                 <div className="mb-5 flex items-start gap-3 rounded-2xl border border-[#3882a5]/20 bg-[#3882a5]/5 p-3 sm:p-4">
                                     <div className="rounded-lg bg-[#3882a5]/15 p-2 text-[#3882a5]"><Building2 className="h-4 w-4" /></div>
                                     <div>
-                                        <h3 className="text-base font-bold text-slate-800 sm:text-lg">Step 3: Book Appointment</h3>
-                                        <p className="text-sm text-slate-500">Employee, date and time select karke next karein.</p>
+                                        <h3 className="text-base font-bold text-slate-800 sm:text-lg">Step 4: Book Appointment</h3>
+                                        <p className="text-sm text-slate-500">
+                                            Choose your host, date, and time, then continue.
+                                        </p>
                                     </div>
                                 </div>
                                 <AppointmentBookingForm
                                     visitorId={visitorId || "000000000000000000000000"}
                                     visitorName={visitorData?.name || ""}
-                                    visitorEmail={visitorData?.email || ""}
+                                    visitorPhone={visitorData?.phone || ""}
                                     employees={companyInfo?.employees || []}
                                     onSubmit={handleAppointmentSubmit}
                                     onDraftChange={setAppointmentFormDraft}
@@ -443,8 +692,8 @@ export default function QRScanPage() {
                                 <div className="flex items-start gap-3 rounded-2xl border border-[#3882a5]/20 bg-[#3882a5]/5 p-3 sm:p-4">
                                     <div className="rounded-lg bg-[#3882a5]/15 p-2 text-[#3882a5]"><CalendarClock className="h-4 w-4" /></div>
                                     <div>
-                                        <h3 className="text-base font-bold text-slate-800 sm:text-lg">Step 4: Review & Submit</h3>
-                                        <p className="text-sm text-slate-500">Final details verify karke request submit karein.</p>
+                                        <h3 className="text-base font-bold text-slate-800 sm:text-lg">Step 5: Review & Submit</h3>
+                                        <p className="text-sm text-slate-500">Review everything, then submit your request.</p>
                                     </div>
                                 </div>
                                 <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
@@ -468,12 +717,12 @@ export default function QRScanPage() {
                                                         <p className="text-sm font-medium text-slate-800">{visitorDraft?.name || "-"}</p>
                                                     </div>
                                                     <div>
-                                                        <p className="text-[11px] font-semibold uppercase text-slate-500">Phone</p>
-                                                        <p className="text-sm font-medium text-slate-800">{visitorDraft?.phone || "-"}</p>
+                                                        <p className="text-[11px] font-semibold uppercase text-slate-500">Email</p>
+                                                        <p className="text-sm font-medium text-slate-800">{visitorDraft?.email || "-"}</p>
                                                     </div>
                                                     <div>
-                                                        <p className="text-[11px] font-semibold uppercase text-slate-500">Email</p>
-                                                        <p className="break-all text-sm font-medium text-slate-800">{visitorDraft?.email || "-"}</p>
+                                                        <p className="text-[11px] font-semibold uppercase text-slate-500">Phone</p>
+                                                        <p className="text-sm font-medium text-slate-800">{visitorDraft?.phone || "-"}</p>
                                                     </div>
                                                     <div>
                                                         <p className="text-[11px] font-semibold uppercase text-slate-500">Address</p>

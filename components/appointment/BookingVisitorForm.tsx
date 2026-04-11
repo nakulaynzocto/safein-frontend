@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { validatePhone, formatPhoneForSubmission } from "@/utils/phoneUtils";
@@ -22,7 +22,14 @@ import { useUserCountry } from "@/hooks/useUserCountry";
 const createBookingVisitorSchema = (collectPhotoInForm: boolean) =>
     yup.object({
         name: yup.string().trim().required("Name is required").min(2, "Name must be at least 2 characters"),
-        email: yup.string().trim().email("Invalid email address").required("Email is required"),
+        email: yup
+            .string()
+            .trim()
+            .optional()
+            .test("email-format", "Please enter a valid email address", (value) => {
+                if (!value || value.length === 0) return true;
+                return yup.string().email().isValidSync(value);
+            }),
         phone: yup
             .string()
             .trim()
@@ -52,7 +59,7 @@ const createBookingVisitorSchema = (collectPhotoInForm: boolean) =>
 
 type BookingVisitorFormData = {
     name: string;
-    email: string;
+    email?: string;
     phone: string;
     address: {
         street: string;
@@ -77,8 +84,12 @@ const idProofTypes = [
 ];
 
 interface BookingVisitorFormProps {
-    initialEmail?: string;
     initialPhone?: string;
+    /** Shown when phone field is disabled (e.g. verified QR number or link-preset phone). */
+    lockedPhoneHelperText?: string;
+    initialEmail?: string;
+    /** Shown when email is disabled (e.g. email used when the invite link was created). */
+    lockedEmailHelperText?: string;
     initialValues?: Partial<BookingVisitorFormData>;
     onSubmit: (data: any) => void;
     isLoading?: boolean;
@@ -87,8 +98,10 @@ interface BookingVisitorFormProps {
 }
 
 export function BookingVisitorForm({
-    initialEmail,
     initialPhone,
+    lockedPhoneHelperText,
+    initialEmail,
+    lockedEmailHelperText,
     initialValues,
     onSubmit,
     isLoading = false,
@@ -129,61 +142,61 @@ export function BookingVisitorForm({
     const [isFileUploading, setIsFileUploading] = useState(false);
     const [showIdProof, setShowIdProof] = useState(false);
 
-    // Set default country to India if not set
+    const [watchedCountry, watchedState, watchedCity] = useWatch({
+        control,
+        name: ["address.country", "address.state", "address.city"],
+    });
+
+    // Set default country only if not set
     useEffect(() => {
-        const currentCountry = watch("address.country");
-        if (!currentCountry) {
+        if (!watchedCountry && userCountry) {
             setValue("address.country", userCountry, { shouldValidate: false, shouldDirty: false });
         }
-    }, [setValue, watch, userCountry]);
+    }, [userCountry, setValue, watchedCountry]);
 
     useEffect(() => {
-        const opts = { shouldValidate: true, shouldDirty: false };
-        if (initialEmail) setValue("email", initialEmail, opts);
+        if (!initialValues && !initialPhone && !initialEmail) return;
         
+        const opts = { shouldValidate: true, shouldDirty: false };
+
         if (initialPhone) {
             const formattedPhone = formatPhoneForSubmission(initialPhone);
             setValue("phone", formattedPhone, opts);
         }
 
+        if (initialEmail) {
+            setValue("email", initialEmail, opts);
+        }
+
         if (initialValues) {
             const { address, idProof, ...rest } = initialValues;
             Object.entries(rest).forEach(([key, value]) => {
-                if (value) setValue(key as any, value, opts);
+                if (value !== undefined) setValue(key as any, value, opts);
             });
             if (address) {
-                setValue(
-                    "address",
-                    {
-                        street: address.street || undefined,
-                        city: address.city || "",
-                        state: address.state || "",
-                        country: address.country || userCountry,
-                    } as any,
-                    opts,
-                );
+                setValue("address", {
+                    street: address.street || "",
+                    city: address.city || "",
+                    state: address.state || "",
+                    country: address.country || userCountry,
+                }, opts);
             }
             if (idProof) {
-                setValue(
-                    "idProof",
-                    {
-                        type: idProof.type || undefined,
-                        number: idProof.number || undefined,
-                        image: idProof.image || "",
-                    } as any,
-                    opts,
-                );
-            }
-            if (initialValues?.photo) {
-                setValue("photo", initialValues.photo, opts);
+                setValue("idProof", {
+                    type: idProof.type || "",
+                    number: idProof.number || "",
+                    image: idProof.image || "",
+                }, opts);
             }
         }
-    }, [initialEmail, initialPhone, initialValues, setValue]);
+    }, [initialPhone, initialEmail, initialValues, setValue, userCountry]);
 
     const handleFormSubmit = (data: BookingVisitorFormData) => {
-        const { address, idProof, ...rest } = data;
+        const { address, idProof, email, ...rest } = data;
+        const emailTrim = email?.trim();
         const payload = {
             ...rest,
+            email: emailTrim || undefined,
             address: {
                 street: address.street?.trim() || undefined,
                 city: address.city,
@@ -213,14 +226,14 @@ export function BookingVisitorForm({
             <div className="space-y-4">
                 <CountryStateCitySelect
                     value={{
-                        country: watch("address.country") || "",
-                        state: watch("address.state") || "",
-                        city: watch("address.city") || "",
+                        country: watchedCountry || "",
+                        state: watchedState || "",
+                        city: watchedCity || "",
                     }}
                     onChange={(v) => {
-                        setValue("address.country", v.country);
-                        setValue("address.state", v.state);
-                        setValue("address.city", v.city);
+                        setValue("address.country", v.country, { shouldValidate: true });
+                        setValue("address.state", v.state, { shouldValidate: true });
+                        setValue("address.city", v.city, { shouldValidate: true });
                         // Reset phone when country changes (so new dial code takes effect)
                         if (v.country && !initialPhone) {
                             setValue("phone", "");
@@ -235,47 +248,60 @@ export function BookingVisitorForm({
                 />
             </div>
 
-            {/* Personal Information Section */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <InputField
-                    id="name"
-                    label="Full Name"
-                    {...register("name")}
-                    placeholder="Enter full name"
-                    error={errors.name?.message}
-                    required
-                />
-
-                <Controller
-                    name="phone"
-                    control={control}
-                    render={({ field }) => (
-                        <PhoneInputField
-                            id="phone"
-                            label="Phone Number"
-                            value={field.value}
-                            onChange={(value) => field.onChange(value)}
-                            error={errors.phone?.message}
-                            required
-                            placeholder="Enter phone number"
-                            defaultCountry={watch("address.country") || userCountry}
-                            disabled={!!initialPhone}
-                        />
-                    )}
-                />
-
-                <div className="space-y-1.5">
+            {/* Personal Information — name, email, phone in one row on md+ */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:items-start">
+                <div className="min-w-0">
+                    <InputField
+                        id="name"
+                        label="Full Name"
+                        {...register("name")}
+                        placeholder="Enter full name"
+                        error={errors.name?.message}
+                        required
+                    />
+                </div>
+                <div className="min-w-0">
                     <InputField
                         id="email"
-                        label="Email Address"
                         type="email"
+                        autoComplete="email"
+                        label="Email"
                         {...register("email")}
-                        placeholder="Enter email address"
-                        error={errors.email?.message}
-                        required
+                        placeholder="name@example.com"
+                        error={errors.email?.message as string | undefined}
+                        required={!!initialEmail}
                         disabled={!!initialEmail}
-                        readOnly={!!initialEmail}
-                        helperText={initialEmail ? "This email was used to send you the appointment link" : undefined}
+                        helperText={
+                            initialEmail
+                                ? lockedEmailHelperText ||
+                                  "This email was used when your appointment link was created"
+                                : undefined
+                        }
+                    />
+                </div>
+                <div className="min-w-0">
+                    <Controller
+                        name="phone"
+                        control={control}
+                        render={({ field }) => (
+                            <PhoneInputField
+                                id="phone"
+                                label="Phone Number"
+                                value={field.value}
+                                onChange={(value) => field.onChange(value)}
+                                error={errors.phone?.message}
+                                required
+                                placeholder="Enter phone number"
+                                defaultCountry={watchedAddress?.country || userCountry}
+                                disabled={!!initialPhone}
+                                helperText={
+                                    initialPhone
+                                        ? lockedPhoneHelperText ||
+                                          "This number was used when your appointment link was created"
+                                        : undefined
+                                }
+                            />
+                        )}
                     />
                 </div>
             </div>

@@ -65,6 +65,17 @@ const getSocketUrl = (): string | null => {
     return apiUrl.replace("/api/v1", "");
 };
 
+/** Normalize Mongo/socket ids so strict string checks don't skip handlers */
+function normalizeAppointmentIdFromPayload(payload: any): string {
+    const raw = payload?.appointment?._id ?? payload?.appointment?.id ?? payload?.appointmentId;
+    if (raw == null || raw === "") return "";
+    if (typeof raw === "string") return raw.trim();
+    if (typeof raw === "object" && raw !== null && "$oid" in (raw as object)) {
+        return String((raw as { $oid: string }).$oid).trim();
+    }
+    return String(raw).trim();
+}
+
 // Helper: Extract names from payload (backend always provides these)
 const extractNames = (payload: any): { employeeName: string; visitorName: string } => {
     if (payload?.employeeName && payload?.visitorName) {
@@ -132,12 +143,13 @@ const getNotificationConfig = (status: string, employeeName: string, visitorName
     return configs[status] || configs.pending;
 };
 
-// Helper: Show toast notification
-const showToast = (config: NotificationConfig, onClick?: () => void) => {
+// Helper: Show toast notification (optional id dedupes socket + FCM double-fire)
+const showToast = (config: NotificationConfig, onClick?: () => void, toastId?: string) => {
     const toastOptions = {
         description: config.message,
         duration: 5000,
         onClick: onClick,
+        ...(toastId ? { id: toastId } : {}),
     };
 
     switch (config.toastType) {
@@ -164,6 +176,7 @@ export function useSocket(options: UseSocketOptions = {}) {
     const socketRef = useRef<Socket | null>(null);
     const dispatch = useDispatch();
     const { token, user } = useAppSelector((state) => state.auth);
+    const resolvedUserId = user?.id || (user as any)?._id;
     const [isConnected, setIsConnected] = useState(false);
     const isConnectedRef = useRef(false);
     const isPublicActionContext = useCallback(() => {
@@ -194,9 +207,9 @@ export function useSocket(options: UseSocketOptions = {}) {
     const handleAppointmentStatusChange = useCallback(
         (data: any) => {
             const { payload } = data;
-            const appointmentId = payload?.appointment?._id || payload?.appointmentId || "";
+            const appointmentId = normalizeAppointmentIdFromPayload(payload);
 
-            if (!appointmentId || typeof appointmentId !== "string" || !appointmentId.trim()) {
+            if (!appointmentId) {
                 invalidateAppointments();
                 onAppointmentStatusChanged?.(data);
                 return;
@@ -221,9 +234,13 @@ export function useSocket(options: UseSocketOptions = {}) {
                     // ADMIN gets all status change notifications with sound
                     // EMPLOYEE does NOT get sound/toast for status changes (they usually perform them)
                     if (isAdmin) {
-                        showToast(config, () => {
-                            router.push(routes.privateroute.APPOINTMENTLIST);
-                        });
+                        showToast(
+                            config,
+                            () => {
+                                router.push(routes.privateroute.APPOINTMENTLIST);
+                            },
+                            `appointment-status-${appointmentId}-${status}`,
+                        );
                         playVoiceAlert();
                     }
                 }
@@ -232,17 +249,17 @@ export function useSocket(options: UseSocketOptions = {}) {
             invalidateAppointments();
             onAppointmentStatusChanged?.(data);
         },
-        [showToasts, invalidateAppointments, invalidateNotifications, onAppointmentStatusChanged, user, isPublicActionContext],
+        [showToasts, invalidateAppointments, invalidateNotifications, onAppointmentStatusChanged, user, isPublicActionContext, router],
     );
 
     // Handle appointment created
     const handleAppointmentCreated = useCallback(
         (data: any) => {
             const { payload } = data;
-            const appointmentId = payload?.appointment?._id || payload?.appointmentId || "";
+            const appointmentId = normalizeAppointmentIdFromPayload(payload);
             const status = payload?.appointment?.status || payload?.status || "pending";
 
-            if (!appointmentId || typeof appointmentId !== "string" || !appointmentId.trim()) {
+            if (!appointmentId) {
                 invalidateAppointments();
                 return;
             }
@@ -266,20 +283,24 @@ export function useSocket(options: UseSocketOptions = {}) {
                 // ADMIN gets all creations with sound
                 // EMPLOYEE ONLY gets sound for 'pending' (New Request)
                 if (isAdmin || (isEmployee && status === 'pending')) {
-                    showToast(config, () => {
-                        if (isSpecialVisitor) {
-                            router.push(`${routes.privateroute.APPOINTMENT_LINKS}?type=special`);
-                        } else {
-                            router.push(routes.privateroute.APPOINTMENTLIST);
-                        }
-                    });
+                    showToast(
+                        config,
+                        () => {
+                            if (isSpecialVisitor) {
+                                router.push(`${routes.privateroute.APPOINTMENT_LINKS}?type=special`);
+                            } else {
+                                router.push(routes.privateroute.APPOINTMENTLIST);
+                            }
+                        },
+                        `appointment-created-${appointmentId}`,
+                    );
                     playVoiceAlert();
                 }
             }
 
             invalidateAppointments();
         },
-        [showToasts, invalidateAppointments, invalidateNotifications, user, isPublicActionContext],
+        [showToasts, invalidateAppointments, invalidateNotifications, user, isPublicActionContext, router],
     );
 
     // Handle appointment updated
@@ -368,8 +389,8 @@ export function useSocket(options: UseSocketOptions = {}) {
         const connectHandler = () => {
             isConnectedRef.current = true;
             setIsConnected(true);
-            if (user?.id) {
-                socket.emit(SocketEvents.JOIN_USER_ROOM, user.id);
+            if (resolvedUserId) {
+                socket.emit(SocketEvents.JOIN_USER_ROOM, resolvedUserId);
             }
             onConnectRef.current?.();
         };
@@ -394,7 +415,8 @@ export function useSocket(options: UseSocketOptions = {}) {
         socket.on(SocketEvents.NEW_NOTIFICATION, handleNewNotification);
     }, [
         token,
-        user?.id,
+        resolvedUserId,
+        showToasts,
         handleAppointmentStatusChange,
         handleAppointmentCreated,
         handleAppointmentUpdated,
@@ -407,14 +429,22 @@ export function useSocket(options: UseSocketOptions = {}) {
             // Remove all event listeners before disconnecting
             socketRef.current.removeAllListeners();
 
-            if (user?.id) {
-                socketRef.current.emit(SocketEvents.LEAVE_USER_ROOM, user.id);
+            if (resolvedUserId) {
+                socketRef.current.emit(SocketEvents.LEAVE_USER_ROOM, resolvedUserId);
             }
             socketRef.current.disconnect();
             socketRef.current = null;
             isConnectedRef.current = false;
         }
-    }, [user?.id]);
+    }, [resolvedUserId, showToasts]);
+
+    // Join user room when socket is connected but user id was not ready on first connect (fixes missing real-time toasts)
+    useEffect(() => {
+        if (typeof window === "undefined" || !token || !resolvedUserId) return;
+        const s = socketRef.current;
+        if (!s?.connected) return;
+        s.emit(SocketEvents.JOIN_USER_ROOM, resolvedUserId);
+    }, [token, resolvedUserId, isConnected]);
 
     // Fix: Properly handle socket connection lifecycle with stable references
     useEffect(() => {

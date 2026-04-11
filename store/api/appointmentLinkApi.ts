@@ -6,8 +6,8 @@ export interface AppointmentLink {
     _id: string;
     visitorId?: string;
     visitor?: Partial<Visitor> & { _id?: string };
+    visitorPhone?: string;
     visitorEmail?: string;
-    visitorPhone: string;
     employeeId: string;
     employee?: {
         _id: string;
@@ -28,8 +28,8 @@ export interface AppointmentLink {
 }
 
 export interface CreateAppointmentLinkRequest {
-    visitorEmail?: string;
     visitorPhone?: string;
+    visitorEmail?: string;
     employeeId: string;
     expiresInDays?: number;
 }
@@ -98,10 +98,9 @@ export const appointmentLinkApi = baseApi.injectEndpoints({
             keepUnusedDataFor: 0,
         }),
 
-        checkVisitorExists: builder.query<CheckVisitorResponse, { email?: string; phone?: string }>({
-            query: ({ email, phone }) => {
-                const params: any = {};
-                if (email) params.email = email.trim().toLowerCase();
+        checkVisitorExists: builder.query<CheckVisitorResponse, { phone?: string }>({
+            query: ({ phone }) => {
+                const params: Record<string, string> = {};
                 if (phone) params.phone = phone.trim();
                 const queryParams = createUrlParams(params);
                 return `/appointment-links/check-visitor${queryParams ? `?${queryParams}` : ""}`;
@@ -157,6 +156,22 @@ export const appointmentLinkApi = baseApi.injectEndpoints({
             }),
             transformResponse: (response: any) => response?.data || response,
         }),
+
+        sendVisitorOtp: builder.mutation<any, { phone: string; token: string }>({
+            query: ({ phone, token }) => ({
+                url: `/appointment-links/public/${encodeURIComponent(token)}/send-otp`,
+                method: "POST",
+                body: { phone },
+            }),
+        }),
+
+        verifyVisitorOtp: builder.mutation<any, { phone: string; otp: string }>({
+            query: ({ phone, otp }) => ({
+                url: `/appointment-links/public/verify-otp`,
+                method: "POST",
+                body: { phone, otp },
+            }),
+        }),
     }),
 });
 
@@ -170,4 +185,6 @@ export const {
     useCreateVisitorThroughLinkMutation,
     useCreateAppointmentThroughLinkMutation,
     useCreateBookingThroughLinkMutation,
+    useSendVisitorOtpMutation,
+    useVerifyVisitorOtpMutation,
 } = appointmentLinkApi;
