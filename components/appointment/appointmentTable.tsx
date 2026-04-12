@@ -564,7 +564,7 @@ export function AppointmentTable({
                 <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
                     <DataTable
                         data={appointments}
-                        columns={getColumns()}
+                        columns={columns}
                         emptyMessage="No appointments found. Try adjusting your search criteria."
                         emptyData={{
                             title: emptyTitle,
