@@ -22,6 +22,7 @@ import { useGetProfileQuery } from "@/store/api/authApi";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
 import { cn } from "@/lib/utils";
+import { DeliverySetupWarning } from "@/components/common/DeliverySetupWarning";
 
 const QR_CANVAS_ID = "tenant-qr-canvas";
 const COPY_FEEDBACK_MS = 1500;
@@ -87,28 +88,7 @@ function buildBrandedQrDataUrl(sourceCanvas: HTMLCanvasElement, companyName: str
     return out.toDataURL("image/png");
 }
 
-function PreviewDownloadActions({
-    scanUrl,
-    onDownload,
-    className,
-}: {
-    scanUrl: string;
-    onDownload: () => void;
-    className?: string;
-}) {
-    return (
-        <div className={cn("flex gap-2", className)}>
-            <Button className="min-w-[130px] flex-1 sm:flex-none" variant="outline" type="button" onClick={() => window.open(scanUrl, "_blank")}>
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Preview
-            </Button>
-            <Button className="min-w-[130px] flex-1 sm:flex-none" type="button" onClick={onDownload}>
-                <Download className="mr-2 h-4 w-4" />
-                Download
-            </Button>
-        </div>
-    );
-}
+
 
 export default function QrCheckinSettingsPage() {
     const { data: config, isLoading } = useGetQRConfigQuery();
@@ -201,91 +181,164 @@ export default function QrCheckinSettingsPage() {
     }
 
     return (
-        <div className="space-y-5 pb-24 sm:space-y-6 sm:pb-6">
-            <div>
-                <h1 className="text-xl font-bold sm:text-2xl">QR Check-in</h1>
-                <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-                    Visitors scan this QR to request appointment and entry approval.
-                </p>
-            </div>
+        <div className="space-y-8 pb-24 sm:pb-8">
+            <DeliverySetupWarning />
 
-            <div className="grid gap-4 lg:grid-cols-3 lg:gap-6">
-                <Card className="order-1 lg:col-span-1">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <QrCode className="h-5 w-5" />
-                            QR Code
+            <div className="grid gap-6 lg:grid-cols-12">
+                {/* QR Preview Card */}
+                <Card className="order-1 overflow-hidden border-none shadow-xl lg:col-span-5">
+                    <CardHeader className="bg-slate-50/50 pb-4">
+                        <CardTitle className="flex items-center gap-2 text-lg font-semibold text-[#074463]">
+                            <div className="rounded-lg bg-[#3882a5]/10 p-2 text-[#3882a5]">
+                                <QrCode className="h-5 w-5" />
+                            </div>
+                            QR Identity Card
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4 text-center">
-                        <div className="mx-auto w-fit rounded-xl border bg-white p-3 sm:p-4">
-                            <QRCodeCanvas
-                                id={QR_CANVAS_ID}
-                                value={scanUrl}
-                                size={220}
-                                level="H"
-                                includeMargin
-                                imageSettings={{
-                                    src: "/safein-logo.svg",
-                                    height: 34,
-                                    width: 34,
-                                    excavate: true,
-                                }}
-                            />
+                    <CardContent className="space-y-6 pt-6 text-center">
+                        <div className="group relative mx-auto w-fit">
+                            <div className="absolute inset-0 -m-1 rounded-2xl bg-gradient-to-tr from-[#3882a5] to-blue-300 opacity-20 blur-sm transition-opacity group-hover:opacity-40" />
+                            <div className="relative rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
+                                <QRCodeCanvas
+                                    id={QR_CANVAS_ID}
+                                    value={scanUrl}
+                                    size={240}
+                                    level="H"
+                                    includeMargin
+                                    imageSettings={{
+                                        src: "/safein-logo.svg",
+                                        height: 38,
+                                        width: 38,
+                                        excavate: true,
+                                    }}
+                                />
+                            </div>
                         </div>
-                        <p className="text-sm font-medium">{companyName || "—"}</p>
-                        <PreviewDownloadActions scanUrl={scanUrl} onDownload={handleDownload} className="hidden justify-center sm:flex" />
+
+                        <div className="space-y-1">
+                            <h3 className="text-lg font-bold text-slate-800">{companyName || "Your Company"}</h3>
+                            <p className="text-sm text-muted-foreground">Reception Check-in Station</p>
+                        </div>
+
+                        <div className="hidden grid-cols-2 gap-3 sm:grid">
+                            <Button
+                                className="w-full border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/5"
+                                variant="outline"
+                                type="button"
+                                onClick={() => window.open(scanUrl, "_blank")}
+                            >
+                                <ExternalLink className="mr-2 h-4 w-4" />
+                                Preview
+                            </Button>
+                            <Button
+                                className="w-full bg-[#3882a5] shadow-md hover:bg-[#2d6a87]"
+                                type="button"
+                                onClick={handleDownload}
+                            >
+                                <Download className="mr-2 h-4 w-4" />
+                                Download
+                            </Button>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">High-resolution PNG for printing and display</p>
                     </CardContent>
                 </Card>
 
-                <Card className="order-2 lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle>Public Scan Link</CardTitle>
-                        <CardDescription>Use this at your reception desk.</CardDescription>
+                {/* Configuration & Links Card */}
+                <Card className="order-2 overflow-hidden border-none shadow-xl lg:col-span-7">
+                    <CardHeader className="bg-slate-50/50 pb-4">
+                        <CardTitle className="text-lg font-semibold text-[#074463]">Deployment & Settings</CardTitle>
+                        <CardDescription>Manage how visitors access your check-in portal</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-2 sm:space-y-0">
-                            <div className="flex items-center gap-2">
-                                <Input value={scanUrl} readOnly className="text-xs sm:text-sm" />
-                                <Button variant="outline" className="shrink-0" type="button" onClick={handleCopy} aria-label="Copy scan link">
-                                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                                </Button>
+                    <CardContent className="space-y-8 pt-6">
+                        {/* URL Management */}
+                        <div className="space-y-4">
+                            <Label className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+                                Public Scan Link
+                            </Label>
+                            <div className="relative group">
+                                <div className="flex overflow-hidden rounded-xl border-2 border-slate-100 bg-slate-50/50 transition-all focus-within:border-[#3882a5]/30 focus-within:bg-white group-hover:border-slate-200">
+                                    <div className="flex items-center bg-slate-100/80 px-4 text-slate-500">
+                                        <ExternalLink className="h-4 w-4" />
+                                    </div>
+                                    <Input
+                                        value={scanUrl}
+                                        readOnly
+                                        className="border-none bg-transparent py-6 font-mono text-xs focus-visible:ring-0 sm:text-sm"
+                                    />
+                                    <Button
+                                        variant="ghost"
+                                        className="h-auto rounded-none border-l bg-white px-4 text-[#3882a5] hover:bg-slate-50"
+                                        type="button"
+                                        onClick={handleCopy}
+                                    >
+                                        {copied ? (
+                                            <Check className="h-4 w-4 text-green-600" />
+                                        ) : (
+                                            <Copy className="h-4 w-4" />
+                                        )}
+                                    </Button>
+                                </div>
                             </div>
-                            <p className="px-1 text-xs text-muted-foreground">Reception me isi link ka latest QR display karein.</p>
+                            <div className="rounded-lg bg-blue-50/50 p-3 text-xs leading-relaxed text-[#3882a5]">
+                                <strong>Pro-Tip:</strong> Print the QR code and place it at your reception desk or
+                                gate entrance for easy visitor self-check-in.
+                            </div>
                         </div>
 
-                        <div className="space-y-3 border-t pt-4">
-                            <Label>QR Slug</Label>
+                        {/* Slug Configuration */}
+                        <div className="rounded-2xl border border-slate-100 bg-slate-50/30 p-5 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-sm font-semibold text-slate-700">QR Slug (Identifier)</Label>
+                                {editing && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-8 text-slate-500 hover:text-slate-700"
+                                        onClick={cancelEditing}
+                                    >
+                                        Cancel
+                                    </Button>
+                                )}
+                            </div>
+
                             {!editing ? (
-                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                    <span className="rounded-md bg-muted px-2 py-1 text-sm font-semibold">{currentSlug}</span>
-                                    <Button className="w-full sm:w-auto" variant="ghost" type="button" onClick={startEditing}>
-                                        <RefreshCw className="mr-2 h-4 w-4" />
-                                        Change slug
+                                <div className="flex items-center justify-between gap-4 rounded-xl border bg-white p-3">
+                                    <code className="bg-slate-100 px-2 py-1 rounded text-sm font-bold text-[#074463]">
+                                        {currentSlug}
+                                    </code>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-9 border-dashed text-[#3882a5] hover:bg-[#3882a5]/5"
+                                        onClick={startEditing}
+                                    >
+                                        <RefreshCw className="mr-2 h-3 w-3" />
+                                        Customize
                                     </Button>
                                 </div>
                             ) : (
-                                <div className="space-y-3">
-                                    <Input
-                                        value={customSlug}
-                                        onChange={(e) => setCustomSlug(e.target.value)}
-                                        placeholder={currentSlug}
-                                        autoComplete="off"
-                                    />
-                                    <div className="flex flex-col gap-2 sm:flex-row">
-                                        <Button
-                                            className="w-full sm:w-auto"
-                                            type="button"
-                                            onClick={() => setIsConfirmOpen(true)}
-                                            disabled={!canSaveSlug}
-                                        >
-                                            {isUpdating ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-                                            Save
-                                        </Button>
-                                        <Button className="w-full sm:w-auto" variant="outline" type="button" onClick={cancelEditing}>
-                                            Cancel
-                                        </Button>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Input
+                                            value={customSlug}
+                                            onChange={(e) => setCustomSlug(e.target.value)}
+                                            placeholder={currentSlug}
+                                            className="h-11 rounded-xl border-2 focus-visible:ring-[#3882a5]/20"
+                                            autoComplete="off"
+                                        />
+                                        <p className="text-[11px] text-muted-foreground italic">
+                                            Characters allowed: a-z, 0-9, and hyphens.
+                                        </p>
                                     </div>
+                                    <Button
+                                        className="w-full bg-[#3882a5] hover:bg-[#2d6a87] rounded-xl h-11"
+                                        type="button"
+                                        onClick={() => setIsConfirmOpen(true)}
+                                        disabled={!canSaveSlug}
+                                    >
+                                        {isUpdating ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+                                        {isUpdating ? "Updating Profile..." : "Apply New Slug"}
+                                    </Button>
                                 </div>
                             )}
                         </div>
@@ -293,9 +346,21 @@ export default function QrCheckinSettingsPage() {
                 </Card>
             </div>
 
-            <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 p-3 backdrop-blur sm:hidden">
-                <div className="mx-auto flex max-w-md">
-                    <PreviewDownloadActions scanUrl={scanUrl} onDownload={handleDownload} className="w-full" />
+            {/* Mobile Actions Overlay */}
+            <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-white/80 p-4 backdrop-blur-md sm:hidden">
+                <div className="mx-auto flex max-w-md gap-3">
+                    <Button
+                        variant="outline"
+                        className="flex-1 h-12 border-slate-200"
+                        onClick={() => window.open(scanUrl, "_blank")}
+                    >
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Preview
+                    </Button>
+                    <Button className="flex-1 h-12 bg-[#3882a5]" onClick={handleDownload}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download
+                    </Button>
                 </div>
             </div>
 

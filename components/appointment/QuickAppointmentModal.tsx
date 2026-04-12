@@ -8,10 +8,15 @@ import { validatePhone, formatPhoneForSubmission } from "@/utils/phoneUtils";
 import {
     Dialog,
     DialogContent,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { routes } from "@/utils/routes";
+import { useGetSettingsQuery } from "@/store/api/settingsApi";
 import { Textarea } from "@/components/ui/textarea";
 import { InputField } from "@/components/common/inputField";
 import { ImageUploadField } from "@/components/common/imageUploadField";
@@ -21,7 +26,7 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
-import { User, Info, Car, UserPlus, ClipboardList, Camera, Mail } from "lucide-react";
+import { User, Info, Car, UserPlus, ClipboardList, Camera, Mail, Phone } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { ActionButton } from "@/components/common/actionButton";
 import { PhoneInputField } from "@/components/common/phoneInputField";
@@ -36,6 +41,8 @@ import { SubscriptionActionButtons } from "@/components/common/SubscriptionActio
 import { useUserCountry } from "@/hooks/useUserCountry";
 import { FormContainer } from "@/components/common/formContainer";
 import { cn } from "@/lib/utils";
+import { ConfigurationRequiredModal } from "../common/ConfigurationRequiredModal";
+import { useConfigurationModal } from "@/hooks/useConfigurationModal";
 
 const quickAppointmentSchema = (isEmployee: boolean) =>
     yup.object().shape({
@@ -102,6 +109,19 @@ export function QuickAppointmentModal({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isFileUploading, setIsFileUploading] = useState(false);
     const [showOptionalVisitDetails, setShowOptionalVisitDetails] = useState(false);
+    const {
+        configWarning,
+        openConfigModal,
+        closeConfigModal,
+        smtpOk,
+        whatsappOk,
+        hasAnyDeliveryChannel,
+        settingsReady,
+        settingsFetching,
+        checkConfiguration,
+    } = useConfigurationModal();
+    const [confirmSendOpen, setConfirmSendOpen] = useState(false);
+    const [pendingBookingData, setPendingBookingData] = useState<QuickAppointmentFormData | null>(null);
     const userCountry = useUserCountry();
 
     const [createSpecialBooking] = useCreateSpecialBookingMutation();
@@ -142,6 +162,9 @@ export function QuickAppointmentModal({
 
     useEffect(() => {
         if (isActive) {
+            closeConfigModal();
+            setConfirmSendOpen(false);
+            setPendingBookingData(null);
             setShowOptionalVisitDetails(false);
             reset({
                 name: "",
@@ -161,7 +184,7 @@ export function QuickAppointmentModal({
         }
     }, [isActive, reset, isEmployee, user]);
 
-    const onSubmit = async (data: QuickAppointmentFormData) => {
+    const executeBooking = async (data: QuickAppointmentFormData) => {
         setIsSubmitting(true);
         try {
             const submitEmployeeId = isEmployee ? user?.employeeId : data.employeeId;
@@ -203,6 +226,31 @@ export function QuickAppointmentModal({
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const onSubmit = async (data: QuickAppointmentFormData) => {
+        if (hasReachedAppointmentLimit || isExpired) {
+            openUpgradeModal();
+            return;
+        }
+
+        if (!checkConfiguration("any")) return;
+
+        if (!isEmployee && settingsReady && hasAnyDeliveryChannel) {
+            setPendingBookingData(data);
+            setConfirmSendOpen(true);
+            return;
+        }
+
+        await executeBooking(data);
+    };
+
+    const handleConfirmSend = async () => {
+        if (!pendingBookingData) return;
+        setConfirmSendOpen(false);
+        const payload = pendingBookingData;
+        setPendingBookingData(null);
+        await executeBooking(payload);
     };
 
     const textareaClass = (hasError?: boolean) =>
@@ -272,10 +320,19 @@ export function QuickAppointmentModal({
                                     />
                                 )}
                             />
+                            <InputField
+                                label="Email"
+                                placeholder="visitor@email.com"
+                                type="email"
+                                icon={<Mail className="h-4 w-4" />}
+                                {...register("email")}
+                                error={errors.email?.message}
+                                required={false}
+                            />
 
                             {isEmployee ? (
                                 <>
-                                    <div className="min-w-0">
+                                    <div className="min-w-0 md:col-span-2">
                                         <InputField
                                             label="Visitor Name"
                                             placeholder="Enter visitor name"
@@ -283,17 +340,6 @@ export function QuickAppointmentModal({
                                             {...register("name")}
                                             error={errors.name?.message}
                                             required
-                                        />
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <InputField
-                                            label="Email"
-                                            placeholder="visitor@email.com"
-                                            type="email"
-                                            icon={<Mail className="h-4 w-4" />}
-                                            {...register("email")}
-                                            error={errors.email?.message}
-                                            required={false}
                                         />
                                     </div>
                                     <div className="hidden">
@@ -309,15 +355,6 @@ export function QuickAppointmentModal({
                                         {...register("name")}
                                         error={errors.name?.message}
                                         required
-                                    />
-                                    <InputField
-                                        label="Email"
-                                        placeholder="visitor@email.com"
-                                        type="email"
-                                        icon={<Mail className="h-4 w-4" />}
-                                        {...register("email")}
-                                        error={errors.email?.message}
-                                        required={false}
                                     />
                                     <div className="min-w-0">
                                         <EmployeeSelectionField />
@@ -458,7 +495,11 @@ export function QuickAppointmentModal({
                         <ActionButton
                             type="submit"
                             variant="outline-primary"
-                            disabled={isSubmitting || isFileUploading}
+                            disabled={
+                                isSubmitting ||
+                                isFileUploading ||
+                                (!!user?.id && !isEmployee && settingsFetching && !settingsReady)
+                            }
                             size="xl"
                             className="w-full min-w-[160px] px-6 sm:w-auto sm:min-w-[200px]"
                         >
@@ -473,25 +514,133 @@ export function QuickAppointmentModal({
         </FormProvider>
     );
 
+    const deliverySummary = (
+        <ul className="mt-2 list-none space-y-2 text-sm text-muted-foreground">
+            {smtpOk && (
+                <li className="flex gap-2 rounded-lg border border-border/80 bg-muted/30 px-3 py-2">
+                    <Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#3882a5]" aria-hidden />
+                    <span>
+                        <span className="font-semibold text-foreground">Email</span> — SMTP is configured. Email-based
+                        notifications can be used by your workspace.
+                    </span>
+                </li>
+            )}
+            {whatsappOk && (
+                <li className="flex gap-2 rounded-lg border border-border/80 bg-muted/30 px-3 py-2">
+                    <Phone className="mt-0.5 h-4 w-4 shrink-0 text-[#3882a5]" aria-hidden />
+                    <span>
+                        <span className="font-semibold text-foreground">WhatsApp</span> — Meta Cloud API is verified. The
+                        visitor entry code is sent to the <strong className="text-foreground">WhatsApp</strong> number
+                        you entered.
+                    </span>
+                </li>
+            )}
+        </ul>
+    );
+
+    const deliveryModalFooterBtnClass =
+        "h-auto min-h-9 shrink py-2.5 text-center text-sm leading-snug whitespace-normal md:h-9 md:shrink-0 md:py-2 md:text-[13px] md:leading-[18px] md:whitespace-nowrap";
+
+    const modals = (
+        <>
+            <ConfigurationRequiredModal
+                isOpen={configWarning !== null}
+                onClose={closeConfigModal}
+                type={configWarning}
+            />
+
+            <Dialog
+                open={confirmSendOpen}
+                onOpenChange={(v) => {
+                    if (!v) {
+                        setConfirmSendOpen(false);
+                        setPendingBookingData(null);
+                    }
+                }}
+            >
+                <DialogContent className="max-h-[90dvh] gap-3 overflow-y-auto p-4 sm:gap-4 sm:p-6 sm:max-w-[480px]">
+                    <DialogHeader className="gap-1.5 pr-10 text-left sm:gap-2 sm:pr-0">
+                        <DialogTitle className="text-base leading-snug font-semibold sm:text-lg sm:leading-none">
+                            Confirm how the visitor will be notified
+                        </DialogTitle>
+                        <DialogDescription className="sr-only">
+                            Review configured notification channels before creating the special visitor booking.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3 text-left text-sm leading-relaxed break-words text-pretty text-muted-foreground sm:text-base">
+                        <p>
+                            Based on your current configuration, this booking will use the channels below. Use{" "}
+                            <strong className="text-foreground">Confirm &amp; book</strong> to continue.
+                        </p>
+                        {deliverySummary}
+                        {smtpOk && !whatsappOk && (
+                            <p className="rounded-lg border border-amber-200/80 bg-amber-50 px-3 py-2 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
+                                <strong className="font-semibold">Note:</strong> The entry code is normally sent on{" "}
+                                <strong>WhatsApp</strong>. WhatsApp is not verified — configure it in Settings for reliable
+                                delivery to the visitor&apos;s phone.
+                            </p>
+                        )}
+                        {!smtpOk && whatsappOk && (
+                            <p className="rounded-lg border border-border/80 bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                                Custom <strong className="text-foreground">SMTP</strong> is not configured. Email-based
+                                alerts from your domain may be limited until SMTP is set up.
+                            </p>
+                        )}
+                    </div>
+                    <DialogFooter className="flex-col-reverse gap-2 md:flex-row md:flex-wrap md:justify-end [&>*]:w-full md:[&>*]:w-auto md:[&>*]:min-w-0 md:[&>*]:max-w-full">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className={deliveryModalFooterBtnClass}
+                            onClick={() => {
+                                setConfirmSendOpen(false);
+                                setPendingBookingData(null);
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="primary"
+                            className={deliveryModalFooterBtnClass}
+                            onClick={() => void handleConfirmSend()}
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? "Booking…" : "Confirm & book"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
+    );
+
     if (renderMode === "page") {
-        return <FormContainer isPage={true}>{formBody}</FormContainer>;
+        return (
+            <>
+                <FormContainer isPage={true}>{formBody}</FormContainer>
+                {modals}
+            </>
+        );
     }
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-[90vh] overflow-hidden bg-white p-4 sm:max-w-3xl sm:p-6 dark:bg-gray-900">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-xl">
-                        <User className="h-5 w-5 text-accent" />
-                        Special Visitor Booking
-                    </DialogTitle>
-                    <DialogDescription className="sr-only">
-                        Quickly book an appointment for a special visitor by entering their details and schedule.
-                    </DialogDescription>
-                </DialogHeader>
+        <>
+            <Dialog open={open} onOpenChange={onOpenChange}>
+                <DialogContent className="max-h-[90vh] overflow-hidden bg-white p-4 sm:max-w-3xl sm:p-6 dark:bg-gray-900">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-xl">
+                            <User className="h-5 w-5 text-accent" />
+                            Special Visitor Booking
+                        </DialogTitle>
+                        <DialogDescription className="sr-only">
+                            Quickly book an appointment for a special visitor by entering their details and schedule.
+                        </DialogDescription>
+                    </DialogHeader>
 
-                <FormContainer isPage={false}>{formBody}</FormContainer>
-            </DialogContent>
-        </Dialog>
+                    <FormContainer isPage={false}>{formBody}</FormContainer>
+                </DialogContent>
+            </Dialog>
+            {modals}
+        </>
     );
 }

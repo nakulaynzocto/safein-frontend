@@ -292,7 +292,7 @@ export function BookingVisitorForm({
                                 error={errors.phone?.message}
                                 required
                                 placeholder="Enter phone number"
-                                defaultCountry={watchedAddress?.country || userCountry}
+                                defaultCountry={watchedCountry || userCountry}
                                 disabled={!!initialPhone}
                                 helperText={
                                     initialPhone

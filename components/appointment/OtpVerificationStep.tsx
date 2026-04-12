@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { useSendVisitorOtpMutation, useVerifyVisitorOtpMutation } from "@/store/api/appointmentLinkApi";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
@@ -100,9 +99,9 @@ export function OtpVerificationStep({
                 {!isOtpSent ? (
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="phone" className="text-sm font-semibold">Mobile Number</Label>
                             <PhoneInputField
                                 id="phone"
+                                label="Mobile Number"
                                 value={phone}
                                 onChange={setPhone}
                                 defaultCountry={userCountry}

@@ -18,7 +18,7 @@ export function NotificationHandler() {
     const hasRequested = useRef(false);
 
     useEffect(() => {
-        if (isAuthenticated && user?._id && !hasRequested.current) {
+        if (isAuthenticated && user?.id && !hasRequested.current) {
             const handleToken = async () => {
                 const token = await requestNotificationPermission();
                 if (token) {
@@ -32,7 +32,7 @@ export function NotificationHandler() {
             };
             handleToken();
         }
-    }, [isAuthenticated, user?._id, updateFCMToken]);
+    }, [isAuthenticated, user?.id, updateFCMToken]);
 
     // Handle foreground messages
     useEffect(() => {

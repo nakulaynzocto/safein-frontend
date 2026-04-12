@@ -6,7 +6,7 @@ import { forwardRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Eye, EyeOff } from "lucide-react";
 
-interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string;
     error?: string;
     helperText?: string;

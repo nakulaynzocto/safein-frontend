@@ -28,8 +28,6 @@ import {
     Plus,
     RefreshCw,
     Phone,
-    Mail,
-    Building,
     CheckCircle,
     X,
     XCircle,
@@ -289,7 +287,6 @@ export function AppointmentTable({
                     const visitorNameRaw = visitor?.name || "Unknown Visitor";
                     const visitorName = formatName(visitorNameRaw) || visitorNameRaw;
                     const visitorPhone = visitor?.phone || "N/A";
-                    const visitorCompany = visitor?.company || "";
                     const visitorPhoto = visitor?.photo || (visitor as any)?.profilePicture || "";
 
                     return (
@@ -306,9 +303,6 @@ export function AppointmentTable({
                                     <Phone className="h-3 w-3 shrink-0" />
                                     <span>{visitorPhone}</span>
                                 </div>
-                                {visitorCompany && (
-                                    <div className="mt-0.5 truncate text-xs text-gray-400">{formatName(visitorCompany)}</div>
-                                )}
                             </div>
                         </div>
                     );
@@ -321,12 +315,11 @@ export function AppointmentTable({
                     const employee = (appointment as any).employeeId || appointment.employee;
                     const employeeNameRaw = employee?.name || "Unknown Employee";
                     const employeeName = formatName(employeeNameRaw) || employeeNameRaw;
-                    const employeeEmail = employee?.email || "N/A";
-                    const employeeDepartment = employee?.department || "";
+                    const employeePhone = employee?.phone || "N/A";
                     const employeePhoto = employee?.photo || (employee as any)?.profilePicture || "";
 
                     return (
-                        <div className="flex items-center gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
                             <UserAvatar
                                 src={employeePhoto}
                                 name={employeeName}
@@ -334,12 +327,11 @@ export function AppointmentTable({
                                 allowExpand
                                 fallbackClassName="bg-blue-100 text-blue-600"
                             />
-                            <div>
-                                <div className="font-medium">{employeeName}</div>
-                                <div className="text-sm text-gray-500">{formatName(employeeDepartment) || "N/A"}</div>
-                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                    <Mail className="h-3 w-3" />
-                                    {employeeEmail}
+                            <div className="min-w-0 flex-1">
+                                <div className="truncate font-medium">{employeeName}</div>
+                                <div className="flex items-center gap-1 text-xs text-gray-500">
+                                    <Phone className="h-3 w-3 shrink-0" />
+                                    <span>{employeePhone}</span>
                                 </div>
                             </div>
                         </div>

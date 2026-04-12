@@ -27,7 +27,6 @@ import {
     RefreshCw,
     MoreHorizontal,
     Copy,
-    Mail,
     Check,
     Link2,
     User,
@@ -62,6 +61,8 @@ import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { Input } from "@/components/ui/input";
 import { OtpDigitBoxes } from "@/components/common/otpDigitBoxes";
+import { DeliverySetupWarning } from "@/components/common/DeliverySetupWarning";
+import { OtpVerificationModal } from "@/components/common/OtpVerificationModal";
 
 interface AppointmentActionCellProps {
     item: any;
@@ -97,9 +98,9 @@ const AppointmentActionCell = ({
             startCooldown(item._id);
         }
     };
-    const isCreator = user?._id && (
-        item.createdBy === user._id ||
-        (typeof item.createdBy === 'object' && item.createdBy?._id === user._id)
+    const isCreator = user?.id && (
+        item.createdBy === user.id ||
+        (typeof item.createdBy === 'object' && item.createdBy?._id === user.id)
     );
     const isSpecial = item.entryType === 'special';
     const isBooked = item.isBooked;
@@ -247,47 +248,11 @@ function AppointmentLinksContent() {
     const [selectedNote, setSelectedNote] = useState("");
     const [showEditNoteModal, setShowEditNoteModal] = useState(false);
     const [noteValue, setNoteValue] = useState("");
-
-    // Auto-verify when 4 digits are entered
-    useEffect(() => {
-        if (otpValue.length === 4 && showOtpModal) {
-            handleVerifyOtp();
-        }
-    }, [otpValue, showOtpModal]);
-
     const [updateSpecialBookingNote, { isLoading: isUpdatingNote }] = useUpdateSpecialBookingNoteMutation();
     const [verifyOtp, { isLoading: isVerifying }] = useVerifySpecialBookingOtpMutation();
     const [deleteAppointmentLink, { isLoading: isDeleting }] = useDeleteAppointmentLinkMutation();
     const [resendLink] = useResendAppointmentLinkMutation();
     const [resendOtp] = useResendOtpMutation();
-
-    const handleResendApi = useCallback(async (item: any) => {
-        try {
-            if (item.entryType === 'special') {
-                await resendOtp({ bookingId: item._id }).unwrap();
-            } else {
-                await resendLink(item._id).unwrap();
-            }
-            showSuccessToast("Notification resent successfully");
-            return true;
-        } catch (error: any) {
-            showErrorToast(error.data?.message || "Failed to resend notification");
-            return false;
-        }
-    }, [resendOtp, resendLink]);
-
-    const handleUpdateNote = async () => {
-        if (!selectedBookingId) return;
-        try {
-            await updateSpecialBookingNote({ bookingId: selectedBookingId, notes: noteValue }).unwrap();
-            showSuccessToast("Note updated successfully");
-            setShowEditNoteModal(false);
-            setNoteValue("");
-            refetchAll();
-        } catch (error: any) {
-            showErrorToast(error.data?.message || "Failed to update note");
-        }
-    };
 
     const { data: linksData, isLoading: isLoadingLinks, error: linksError, refetch: refetchLinks } = useGetAllAppointmentLinksQuery({
         page,
@@ -309,6 +274,78 @@ function AppointmentLinksContent() {
         skip: !isAuthenticated || isChecking || filterType === "link",
     });
 
+
+    const refetchAll = useCallback(() => {
+        if (filterType === "link") refetchLinks();
+        if (filterType === "special") refetchSpecial();
+    }, [refetchLinks, refetchSpecial, filterType]);
+
+    const handleUpdateNote = async () => {
+        if (!selectedBookingId) return;
+        try {
+            await updateSpecialBookingNote({ bookingId: selectedBookingId, notes: noteValue }).unwrap();
+            showSuccessToast("Note updated successfully");
+            setShowEditNoteModal(false);
+            setNoteValue("");
+            refetchAll();
+        } catch (error: any) {
+            showErrorToast(error.data?.message || "Failed to update note");
+        }
+    };
+
+    const processOtpVerification = useCallback(async (bookingId: string, otp: string, isInline: boolean = true) => {
+        if (!otp || otp.length < 4) {
+            showErrorToast("Please enter a valid OTP");
+            return;
+        }
+
+        try {
+            if (isInline) setIsVerifyingInline(bookingId);
+            await verifyOtp({ bookingId, otp }).unwrap();
+            showSuccessToast(isInline ? "OTP verified successfully!" : "OTP verified and appointment scheduled!");
+            
+            if (!isInline) {
+                setShowOtpModal(false);
+                setOtpValue("");
+            }
+            refetchAll();
+        } catch (error: any) {
+            showErrorToast(error.data?.message || "Invalid OTP");
+        } finally {
+            if (isInline) setIsVerifyingInline(null);
+        }
+    }, [verifyOtp, refetchAll]);
+
+    // Auto-verify when 6 digits are entered (Standardized to 6)
+    useEffect(() => {
+        if (otpValue.length === 6 && showOtpModal && selectedBookingId) {
+            processOtpVerification(selectedBookingId, otpValue, false);
+        }
+    }, [otpValue, showOtpModal, selectedBookingId, processOtpVerification]);
+
+
+
+    const handleResendApi = useCallback(async (item: any) => {
+        try {
+            if (item.entryType === 'special') {
+                await resendOtp({ bookingId: item._id }).unwrap();
+            } else {
+                await resendLink(item._id).unwrap();
+            }
+            showSuccessToast("Notification resent successfully");
+            return true;
+        } catch (error: any) {
+            showErrorToast(error.data?.message || "Failed to resend notification");
+            return false;
+        }
+    }, [resendOtp, resendLink]);
+
+
+
+
+
+
+
     // Combined Data
     const combinedList = useMemo(() => {
         if (filterType === "link") {
@@ -325,10 +362,7 @@ function AppointmentLinksContent() {
     const isLoading = filterType === "link" ? isLoadingLinks : isLoadingSpecial;
     const paginationData = filterType === "link" ? linksData?.pagination : specialData?.pagination;
 
-    const refetchAll = useCallback(() => {
-        if (filterType === "link") refetchLinks();
-        if (filterType === "special") refetchSpecial();
-    }, [refetchLinks, refetchSpecial, filterType]);
+
 
     // ALL HOOKS (useCallback, useMemo) MUST BE CALLED BEFORE CONDITIONAL RETURNS
     const handleDelete = useCallback(async () => {
@@ -345,36 +379,7 @@ function AppointmentLinksContent() {
         }
     }, [deleteLinkId, deleteAppointmentLink, refetchAll]);
 
-    const handleVerifyOtp = async () => {
-        if (!selectedBookingId || !otpValue) return;
-        try {
-            await verifyOtp({ bookingId: selectedBookingId, otp: otpValue }).unwrap();
-            showSuccessToast("OTP verified and appointment scheduled!");
-            setShowOtpModal(false);
-            setOtpValue("");
-            refetchAll();
-        } catch (error: any) {
-            showErrorToast(error.data?.message || "Invalid OTP");
-        }
-    };
 
-    const handleInlineVerifyOtp = useCallback(async (bookingId: string, otp: string) => {
-        if (!otp || otp.length < 4) {
-            showErrorToast("Please enter a valid OTP");
-            return;
-        }
-
-        try {
-            setIsVerifyingInline(bookingId);
-            await verifyOtp({ bookingId, otp }).unwrap();
-            showSuccessToast("OTP verified successfully!");
-            refetchAll();
-        } catch (error: any) {
-            showErrorToast(error.data?.message || "Invalid OTP");
-        } finally {
-            setIsVerifyingInline(null);
-        }
-    }, [verifyOtp, refetchAll]);
 
     const handleCopyLink = useCallback((link: AppointmentLink) => {
         // Generate booking URL if not provided by backend
@@ -461,7 +466,7 @@ function AppointmentLinksContent() {
 
                     const employeeNameRaw = employee.name || "Unknown Employee";
                     const employeeName = formatName(employeeNameRaw) || employeeNameRaw;
-                    const employeeEmail = employee.email || "N/A";
+                    const employeePhone = employee.phone || "N/A";
 
                     return (
                         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
@@ -473,8 +478,8 @@ function AppointmentLinksContent() {
                             <div className="min-w-0 flex-1">
                                 <div className="truncate text-sm font-medium sm:text-base">{employeeName}</div>
                                 <div className="flex items-center gap-1 truncate text-xs text-gray-500">
-                                    <Mail className="h-3 w-3 shrink-0" />
-                                    <span className="truncate">{employeeEmail}</span>
+                                    <Phone className="h-3 w-3 shrink-0" />
+                                    <span className="truncate">{employeePhone}</span>
                                 </div>
                             </div>
                         </div>
@@ -561,13 +566,13 @@ function AppointmentLinksContent() {
                         setSelectedBookingId={setSelectedBookingId}
                         setNoteValue={setNoteValue}
                         setShowEditNoteModal={setShowEditNoteModal}
-                        handleInlineVerifyOtp={handleInlineVerifyOtp}
+                        handleInlineVerifyOtp={(bid, otp) => processOtpVerification(bid, otp, true)}
                         isVerifyingInline={isVerifyingInline}
                     />
                 ),
             },
         ],
-        [handleCopyLink, handleResendApi, filterType, user, isVerifyingInline, handleInlineVerifyOtp],
+        [handleCopyLink, handleResendApi, filterType, user, isVerifyingInline, processOtpVerification],
     );
 
 
@@ -611,8 +616,7 @@ function AppointmentLinksContent() {
 
     return (
         <div className="space-y-4 sm:space-y-6">
-            {/* Header Card */}
-
+            <DeliverySetupWarning />
 
             {/* Stats Cards */}
             {linksData?.stats && (
@@ -782,43 +786,15 @@ function AppointmentLinksContent() {
                 />
 
                 {/* OTP Verification Modal */}
-                <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
-                    <DialogContent className="sm:max-w-[400px]">
-                        <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-                                <Key className="h-5 w-5 text-orange-600" />
-                                Verify OTP
-                            </DialogTitle>
-                            <DialogDescription>
-                                Enter the 4-digit OTP sent to the visitor's mobile.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="py-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-3 text-center sm:text-left">OTP Code</label>
-                            <div className="flex justify-center">
-                                <OtpDigitBoxes
-                                    value={otpValue}
-                                    onChange={setOtpValue}
-                                    length={4}
-                                    disabled={isVerifying}
-                                />
-                            </div>
-                        </div>
-                        <DialogFooter className="flex flex-col sm:flex-row gap-3">
-                            <Button variant="outline" onClick={() => setShowOtpModal(false)} className="w-full sm:flex-1">
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={handleVerifyOtp}
-                                disabled={otpValue.length !== 4 || isVerifying}
-                                variant="primary"
-                                className="w-full sm:flex-1"
-                            >
-                                {isVerifying ? <LoadingSpinner size="sm" className="mr-2" /> : "Verify & Schedule"}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                <OtpVerificationModal
+                    isOpen={showOtpModal}
+                    onClose={() => setShowOtpModal(false)}
+                    onVerify={(otp) => processOtpVerification(selectedBookingId!, otp, false)}
+                    isLoading={isVerifying}
+                    length={6}
+                    title="Verify VIP Booking"
+                    description="Enter the 6-digit code sent to the visitor's WhatsApp number to authorize this priority entry."
+                />
 
                 {/* Note Viewer Modal */}
                 <Dialog open={showNoteModal} onOpenChange={setShowNoteModal}>

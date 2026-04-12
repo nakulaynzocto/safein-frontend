@@ -30,12 +30,18 @@ import { UpgradePlanModal } from "../common/upgradePlanModal";
 import { ActionButton } from "@/components/common/actionButton";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FormProvider } from "react-hook-form";
 import { EmployeeSelectionField } from "@/components/common/EmployeeSelectionField";
 import { VisitorExistenceStatus } from "@/components/visitor/VisitorExistenceStatus";
 import { useVisitorExistenceCheck } from "@/hooks/useVisitorExistenceCheck";
 import { useUserCountry } from "@/hooks/useUserCountry";
+import { useGetSettingsQuery } from "@/store/api/settingsApi";
+import Link from "next/link";
+import { routes } from "@/utils/routes";
+import { ConfigurationRequiredModal } from "../common/ConfigurationRequiredModal";
+import { useConfigurationModal } from "@/hooks/useConfigurationModal";
 
 const EXPIRATION_CONFIG = {
     "30m": { days: 0.0208, label: "30 minutes" },
@@ -123,17 +129,24 @@ export function CreateAppointmentLinkModal({
     } = useSubscriptionActions();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [inviteChannel, setInviteChannel] = useState<"email" | "phone">("email");
-
-    const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
     const { user } = useAppSelector((state) => state.auth);
+    const isEmployee = checkIsEmployee(user);
+    const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
     const userCountry = useUserCountry();
+
+    const {
+        configWarning,
+        openConfigModal,
+        closeConfigModal,
+        whatsappOk,
+        settingsReady,
+        checkConfiguration,
+    } = useConfigurationModal();
 
     const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
     const setOpen = onOpenChange || setInternalOpen;
 
     const [createAppointmentLink, { isLoading: isCreating }] = useCreateAppointmentLinkMutation();
-
-    const isEmployee = checkIsEmployee(user);
 
     const currentEmployeeId = user?.employeeId || null;
 
@@ -165,6 +178,7 @@ export function CreateAppointmentLinkModal({
                 expiresInDays: 1,
             });
             setInviteChannel("email");
+            closeConfigModal();
         }
     }, [open, reset, isEmployee, currentEmployeeId]);
 
@@ -209,6 +223,12 @@ export function CreateAppointmentLinkModal({
             if (hasReachedAppointmentLimit || isExpired) {
                 openUpgradeModal();
                 return;
+            }
+
+            if (inviteChannel === "email") {
+                if (!checkConfiguration("email")) return;
+            } else {
+                if (!checkConfiguration("phone")) return;
             }
 
             setIsSubmitting(true);
@@ -275,6 +295,9 @@ export function CreateAppointmentLinkModal({
             isExpired,
             openUpgradeModal,
             inviteChannel,
+            settingsReady,
+            whatsappOk,
+            checkConfiguration,
         ],
     );
 
@@ -303,6 +326,7 @@ export function CreateAppointmentLinkModal({
                 setInviteChannel("email");
                 setGeneralError(null);
                 setIsSubmitting(false);
+                closeConfigModal();
             }
         },
         [setOpen, reset, isEmployee, currentEmployeeId, isSubmitting, isCreating],
@@ -331,6 +355,7 @@ export function CreateAppointmentLinkModal({
         setInviteChannel("email");
         setGeneralError(null);
         setIsSubmitting(false);
+        closeConfigModal();
     }, [setOpen, reset, isEmployee, currentEmployeeId, isSubmitting, isCreating]);
 
     const formHeader =
@@ -569,6 +594,12 @@ export function CreateAppointmentLinkModal({
             {!(hasReachedAppointmentLimit || isExpired) && (
                 <UpgradePlanModal isOpen={showUpgradeModal} onClose={closeUpgradeModal} />
             )}
+
+            <ConfigurationRequiredModal
+                isOpen={configWarning !== null}
+                onClose={closeConfigModal}
+                type={configWarning}
+            />
         </>
     );
 

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import {
     useGetSettingsQuery,
     useUpdateSettingsMutation,
@@ -11,12 +10,29 @@ import {
 } from "@/store/api/settingsApi";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Loader2, MessageSquare, Save, Key, CheckCircle } from "lucide-react";
+import {
+    Loader2,
+    MessageSquare,
+    Save,
+    Key,
+    Info,
+    ListOrdered,
+    Cloud,
+} from "lucide-react";
+import { SettingsHeader } from "./SettingsHeader";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    WHATSAPP_META_TEMPLATES,
+    WHATSAPP_META_TEMPLATE_LANGUAGE,
+    WHATSAPP_PLAIN_TEXT_NOTE,
+} from "@/constants/whatsappMetaTemplates";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { InputField } from "@/components/common/inputField";
+import { MaskedInputField, MASKED_DISPLAY_VALUE } from "@/components/common/MaskedInputField";
 import { ActionButton } from "@/components/common/actionButton";
 import { FormContainer } from "@/components/common/formContainer";
 import { APIErrorState } from "@/components/common/APIErrorState";
+import { OtpVerificationModal } from "@/components/common/OtpVerificationModal";
 import { useForm, Controller } from "react-hook-form";
 import { useUserCountry } from "@/hooks/useUserCountry";
 import * as yup from "yup";
@@ -35,7 +51,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProfileLayout } from "@/components/profile/profileLayout";
 
 // ─── Validation Schema ────────────────────────────────────────────────────────
-const MASKED = "••••••••";
+
 
 const schema = yup.object().shape({
     senderNumber: yup
@@ -74,8 +90,6 @@ export function WhatsAppSettings() {
     const userCountry = useUserCountry();
 
     const [showOtpModal, setShowOtpModal] = useState(false);
-    const [otpValue, setOtpValue] = useState("");
-
 
 
     const {
@@ -114,13 +128,13 @@ export function WhatsAppSettings() {
 
     const credentialsChanged =
         watch("phoneNumberId") !== (settings?.whatsapp?.phoneNumberId || "") ||
-        (currentAccessToken !== MASKED && currentAccessToken !== (settings?.whatsapp?.accessToken || ""));
+        (currentAccessToken !== MASKED_DISPLAY_VALUE && currentAccessToken !== (settings?.whatsapp?.accessToken || ""));
 
     const isVerified =
         !!settings?.whatsapp?.metaVerified || !!settings?.whatsapp?.verified;
 
     const needsVerification =
-        credentialsChanged && (!!currentAccessToken && currentAccessToken !== MASKED);
+        credentialsChanged && (!!currentAccessToken && currentAccessToken !== MASKED_DISPLAY_VALUE);
 
     // ── Handlers ───────────────────────────────────────────────────────────────
 
@@ -158,7 +172,7 @@ export function WhatsAppSettings() {
         }
     };
 
-    const handleVerifyOtp = async () => {
+    const handleVerifyOtp = async (otpValue: string) => {
         if (otpValue.length !== 6) {
             toast.error("Please enter a valid 6-digit code.");
             return;
@@ -166,7 +180,6 @@ export function WhatsAppSettings() {
         try {
             await confirmVerify({ otp: otpValue }).unwrap();
             setShowOtpModal(false);
-            setOtpValue("");
             toast.success("WhatsApp configuration verified and saved!");
         } catch (err: any) {
             toast.error(err?.data?.message || "Invalid or expired verification code.");
@@ -183,117 +196,114 @@ export function WhatsAppSettings() {
                 {() => (
                     <div className="mx-auto w-full max-w-full">
                         {/* ── Page Header ── */}
-                        <div className="mb-6">
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center gap-3 flex-wrap">
-                                    <h1 className="text-foreground text-xl font-bold tracking-tight">
-                                        WhatsApp Configuration
-                                    </h1>
+                        <SettingsHeader
+                            title="WhatsApp Configuration"
+                            description="Connect your Meta WhatsApp Cloud API — credentials are stored per account (not on the server .env)."
+                            isVerified={isVerified}
+                            icon={Cloud}
+                            extraBadges={
+                                <Badge
+                                    variant="outline"
+                                    className="bg-blue-50/50 text-blue-600 border-blue-100 flex items-center gap-1 py-1 px-2.5 rounded-full text-[10px] font-medium"
+                                >
+                                    <Key className="h-3 w-3" />
+                                    Secure &amp; Encrypted
+                                </Badge>
+                            }
+                        />
 
-                                    {isVerified ? (
-                                        <Badge className="bg-emerald-500 text-white border-transparent flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-bold shadow-sm">
-                                            <CheckCircle className="h-3.5 w-3.5" />
-                                            Verified
-                                        </Badge>
-                                    ) : (
-                                        <Badge
-                                            variant="outline"
-                                            className="text-muted-foreground border-dashed border-muted-foreground/30 flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-bold"
-                                        >
-                                            Not Verified
-                                        </Badge>
-                                    )}
-
-                                    <Badge
-                                        variant="outline"
-                                        className="bg-blue-50/50 text-blue-600 border-blue-100 flex items-center gap-1 py-1 px-2.5 rounded-full text-[10px] font-medium"
-                                    >
-                                        <Key className="h-3 w-3" />
-                                        Secure &amp; Encrypted
-                                    </Badge>
-                                </div>
-
-                                <p className="text-muted-foreground text-sm font-medium">
-                                    Configure your official Meta WhatsApp Business API settings.
-                                </p>
-                            </div>
-                        </div>
-
-
-
-                        {/* ── Form ── */}
+                        {/* ── Credentials first (single page, no steps) ── */}
                         <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                                {/* Phone Numbers */}
-                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                    <Controller
-                                        name="senderNumber"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <PhoneInputField
-                                                id="senderNumber"
-                                                label="Sender Phone Number"
-                                                value={field.value || ""}
-                                                onChange={(val) => field.onChange(val)}
-                                                placeholder="Enter sender number"
-                                                error={errors.senderNumber?.message}
+                                <Card className="border-border/80 shadow-sm rounded-2xl overflow-hidden">
+                                    <CardHeader className="pb-2 border-b bg-muted/20">
+                                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                                            <CardTitle className="text-lg flex items-center gap-2">
+                                                <Cloud className="h-5 w-5 text-[#3882a5]" aria-hidden />
+                                                Meta Cloud API credentials
+                                            </CardTitle>
+                                            <Badge
+                                                variant="outline"
+                                                className="w-fit text-[10px] uppercase tracking-wider text-muted-foreground"
+                                            >
+                                                WhatsApp Cloud API
+                                            </Badge>
+                                        </div>
+                                        <CardDescription className="text-sm pt-1">
+                                            From{" "}
+                                            <strong className="text-foreground">developers.facebook.com</strong> → your app
+                                            → WhatsApp → API Setup. Values are stored encrypted per account.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="pt-6 space-y-8">
+                                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 bg-muted/15 p-6 rounded-2xl border border-dashed border-border/80">
+                                            <InputField
+                                                label="Phone Number ID"
+                                                placeholder="e.g. 10472938439201"
+                                                {...register("phoneNumberId")}
+                                                error={errors.phoneNumberId?.message}
                                                 required
-                                                defaultCountry={userCountry}
-                                                helperText="The verified WhatsApp number for your account"
+                                                className="h-12 bg-background border-border rounded-xl font-medium"
+                                                helperText="From Meta → WhatsApp → API Setup"
                                             />
-                                        )}
-                                    />
-                                    <Controller
-                                        name="testNumber"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <PhoneInputField
-                                                id="testNumber"
-                                                label="OTP Recipient Number"
-                                                value={field.value || ""}
-                                                onChange={(val) => field.onChange(val)}
-                                                placeholder="Enter recipient number"
-                                                error={errors.testNumber?.message}
+                                            <MaskedInputField
+                                                label="Permanent access token"
+                                                placeholder={isVerified ? MASKED_DISPLAY_VALUE : "EAAG...."}
+                                                {...register("accessToken")}
+                                                error={errors.accessToken?.message}
                                                 required
-                                                defaultCountry={userCountry}
-                                                helperText="Number where you will receive the verification code"
+                                                className="h-12 bg-background border-border rounded-xl font-medium"
+                                                helperText={
+                                                    isVerified
+                                                        ? "Leave unchanged if masked to keep the current token"
+                                                        : "System user or long-lived token with whatsapp_business_messaging"
+                                                }
                                             />
-                                        )}
-                                    />
-                                </div>
+                                        </div>
 
-                                {/* Meta Fields */}
-                                <div className="space-y-6 pt-4 border-t">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-sm font-semibold text-foreground">Meta Cloud API Credentials</h3>
-                                        <Badge variant="outline" className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                                            Meta Business API
-                                        </Badge>
-                                    </div>
+                                        <div className="space-y-4">
+                                            <h3 className="text-sm font-semibold text-foreground">Phone numbers</h3>
+                                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                                <Controller
+                                                    name="senderNumber"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <PhoneInputField
+                                                            id="senderNumber"
+                                                            label="Sender phone number"
+                                                            value={field.value || ""}
+                                                            onChange={(val) => field.onChange(val)}
+                                                            placeholder="Enter sender number"
+                                                            error={errors.senderNumber?.message}
+                                                            required
+                                                            defaultCountry={userCountry}
+                                                            helperText="Your WhatsApp Business display number"
+                                                        />
+                                                    )}
+                                                />
+                                                <Controller
+                                                    name="testNumber"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <PhoneInputField
+                                                            id="testNumber"
+                                                            label="OTP recipient number"
+                                                            value={field.value || ""}
+                                                            onChange={(val) => field.onChange(val)}
+                                                            placeholder="Enter recipient number"
+                                                            error={errors.testNumber?.message}
+                                                            required
+                                                            defaultCountry={userCountry}
+                                                            helperText="Where the verification code is sent"
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
 
-                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 bg-muted/20 p-6 rounded-2xl border border-dashed">
-                                        <InputField
-                                            label="Phone Number ID"
-                                            placeholder="e.g. 10472938439201"
-                                            {...register("phoneNumberId")}
-                                            error={errors.phoneNumberId?.message}
-                                            required
-                                            className="h-12 bg-background border-border rounded-xl font-medium"
-                                        />
-                                        <InputField
-                                            label="Access Token"
-                                            type="password"
-                                            placeholder="EAAG...."
-                                            {...register("accessToken")}
-                                            error={errors.accessToken?.message}
-                                            required
-                                            className="h-12 bg-background border-border rounded-xl font-medium"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Footer Actions */}
-                                <div className="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end border-t border-border/50">
+                                <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end border-t border-border/50">
                                     <ActionButton
                                         type="button"
                                         variant="outline"
@@ -327,66 +337,88 @@ export function WhatsAppSettings() {
                             </form>
                         </FormContainer>
 
-                        {/* ── OTP Verification Modal ── */}
-                        <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
-                            <DialogContent className="sm:max-w-md bg-white p-6 rounded-2xl border-none shadow-2xl">
-                                <DialogHeader className="text-center space-y-2">
-                                    <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
-                                        <MessageSquare className="h-6 w-6 text-primary" />
+                        {/* ── Template guide below (reference only) ── */}
+                        <div className="mt-10 space-y-4">
+                            <h2 className="text-base font-bold text-foreground tracking-tight">
+                                Message templates setup guide
+                            </h2>
+                            <p className="text-sm text-muted-foreground">
+                                Approve these templates in Meta before notifications work. Same flow as before — no extra
+                                steps here.
+                            </p>
+
+                            <Card className="border-border/80 shadow-sm rounded-2xl">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="text-base flex items-center gap-2">
+                                        <ListOrdered className="h-4 w-4 text-[#3882a5]" />
+                                        Before messages deliver
+                                    </CardTitle>
+                                    <CardDescription>
+                                        In <strong>Meta Business Suite</strong> or{" "}
+                                        <strong>developers.facebook.com</strong>, create or approve these{" "}
+                                        <strong>template names</strong> for your WhatsApp Business account. Our app sends
+                                        them with language code{" "}
+                                        <Badge variant="secondary" className="mx-0.5 align-middle text-[10px]">
+                                            {WHATSAPP_META_TEMPLATE_LANGUAGE}
+                                        </Badge>
+                                        .
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <ol className="list-decimal pl-5 space-y-2 text-sm text-muted-foreground">
+                                        <li>Open your app → WhatsApp → API Setup (Cloud API).</li>
+                                        <li>
+                                            Under <strong>Message templates</strong>, ensure each row below exists and is{" "}
+                                            <strong>Approved</strong> (same names, English).
+                                        </li>
+                                        <li>Body wording can match your brand, but variable count and order must align.</li>
+                                    </ol>
+
+                                    <div className="overflow-x-auto rounded-xl border bg-muted/10">
+                                        <table className="w-full min-w-[640px] text-left text-sm">
+                                            <thead>
+                                                <tr className="border-b bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
+                                                    <th className="px-4 py-3 font-semibold">Template name</th>
+                                                    <th className="px-4 py-3 font-semibold">Used for</th>
+                                                    <th className="px-4 py-3 font-semibold">Body variables</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {WHATSAPP_META_TEMPLATES.map((row) => (
+                                                    <tr key={row.name} className="border-b border-border/60 last:border-0">
+                                                        <td className="px-4 py-3 font-mono text-xs font-medium text-foreground">
+                                                            {row.name}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-muted-foreground">{row.usedFor}</td>
+                                                        <td className="px-4 py-3 text-xs text-muted-foreground">
+                                                            {row.variables}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <DialogTitle className="text-2xl font-bold tracking-tight">
-                                        Verify WhatsApp
-                                    </DialogTitle>
-                                    <DialogDescription className="text-muted-foreground font-medium">
-                                        We&quot;ve sent a 6-digit verification code to your registered mobile number via WhatsApp.
-                                    </DialogDescription>
-                                </DialogHeader>
 
-                                <div className="flex flex-col items-center justify-center py-6 gap-6">
-                                    <InputOTP maxLength={6} value={otpValue} onChange={setOtpValue} className="gap-2">
-                                        <InputOTPGroup className="gap-2">
-                                            {Array.from({ length: 6 }, (_, i) => (
-                                                <InputOTPSlot
-                                                    key={i}
-                                                    index={i}
-                                                    className="h-12 w-10 sm:h-14 sm:w-12 rounded-xl border-2"
-                                                />
-                                            ))}
-                                        </InputOTPGroup>
-                                    </InputOTP>
-                                    <p className="text-sm text-muted-foreground text-center">
-                                        Verify these credentials to enable WhatsApp notifications.
-                                    </p>
-                                </div>
+                                    <div className="flex gap-3 rounded-xl border border-blue-100 bg-blue-50/50 p-4 text-sm text-blue-900 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-100">
+                                        <Info className="h-5 w-5 shrink-0 opacity-80" aria-hidden />
+                                        <p>
+                                            <strong>Plain text (not a template):</strong> {WHATSAPP_PLAIN_TEXT_NOTE}
+                                        </p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
 
-                                <DialogFooter className="flex-col gap-3 sm:flex-col sm:space-x-0">
-                                    <ActionButton
-                                        onClick={handleVerifyOtp}
-                                        disabled={isConfirmingVerify || otpValue.length !== 6}
-                                        variant="primary"
-                                        size="xl"
-                                        className="w-full shadow-lg shadow-[#3882a5]/20 transition-all active:scale-[0.98]"
-                                    >
-                                        {isConfirmingVerify ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Verifying...
-                                            </>
-                                        ) : (
-                                            "Complete Verification"
-                                        )}
-                                    </ActionButton>
-
-                                    <Button
-                                        variant="ghost"
-                                        onClick={() => setShowOtpModal(false)}
-                                        className="w-full text-muted-foreground font-medium"
-                                    >
-                                        Cancel
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
+                        {/* OTP Verification Modal */}
+                        <OtpVerificationModal
+                            isOpen={showOtpModal}
+                            onClose={() => setShowOtpModal(false)}
+                            onVerify={(otp) => handleVerifyOtp(otp)}
+                            isLoading={isConfirmingVerify}
+                            length={6}
+                            title="Verify WhatsApp API"
+                            description="We sent a 6-digit code via your Meta WhatsApp Cloud API credentials. Enter it to confirm connection."
+                        />
                     </div>
                 )}
             </ProfileLayout>

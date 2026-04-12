@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, ReactNode, useEffect } from "react";
-import { User, CreditCard, Calendar, Phone, Mail, Bell } from "lucide-react";
+import { User, CreditCard, Phone, Mail, Bell, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
@@ -9,7 +9,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { routes } from "@/utils/routes";
 import Link from "next/link";
 
-type TabType = "profile" | "notification" | "subscription" | "whatsapp" | "smtp";
+type TabType = "profile" | "notification" | "subscription" | "whatsapp" | "smtp" | "sms";
 
 interface ProfileLayoutProps {
     children: (activeTab: TabType) => ReactNode;
@@ -28,6 +28,8 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
             setActiveTab("whatsapp");
         } else if (pathname === routes.privateroute.SETTINGS_SMTP) {
             setActiveTab("smtp");
+        } else if (pathname === routes.privateroute.SETTINGS_SMS) {
+            setActiveTab("sms");
         } else if (pathname === routes.privateroute.SETTINGS_NOTIFICATION) {
             setActiveTab("notification");
         } else if (pathname === routes.privateroute.PROFILE) {
@@ -70,6 +72,13 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
             icon: Mail,
             roles: ["admin"],
             href: routes.privateroute.SETTINGS_SMTP,
+        },
+        {
+            id: "sms" as const,
+            label: "SMS (Twilio)",
+            icon: MessageSquare,
+            roles: ["admin"],
+            href: routes.privateroute.SETTINGS_SMS,
         },
     ];
 

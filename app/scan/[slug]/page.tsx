@@ -80,6 +80,8 @@ export default function QRScanPage() {
     const [appointmentFormDraft, setAppointmentFormDraft] = useState<any>(null);
     const [submittedAppointmentId, setSubmittedAppointmentId] = useState<string | null>(null);
     const [isPhotoUploading, setIsPhotoUploading] = useState(false);
+    /** Inline under mobile (409 from API) — not shown as toast */
+    const [phoneStepNotice, setPhoneStepNotice] = useState("");
     const defaultCountry = useUserCountry();
 
     const {
@@ -116,11 +118,17 @@ export default function QRScanPage() {
         setIsPhotoUploading(false);
         resetVerifyForm({ phone: "", otp: "" });
         resetPhotoForm({ photo: "" });
+        setPhoneStepNotice("");
         setStep("verify_phone");
         if (typeof window !== "undefined") {
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
     }, [resetVerifyForm, resetPhotoForm]);
+
+    const watchedVerifyPhone = watchVerifyPhone("phone");
+    useEffect(() => {
+        setPhoneStepNotice("");
+    }, [watchedVerifyPhone]);
 
     const {
         data: companyInfo,
@@ -167,7 +175,16 @@ export default function QRScanPage() {
             setOtpSent(true);
             showSuccessToast("Verification code sent to your WhatsApp.");
         } catch (e: any) {
-            showErrorToast(e?.data?.message || e?.message || "Could not send code.");
+            const status = e?.status ?? e?.data?.statusCode;
+            const msg =
+                e?.data?.message ||
+                e?.message ||
+                "Could not send code.";
+            if (status === 409) {
+                setPhoneStepNotice(msg);
+                return;
+            }
+            showErrorToast(msg);
         }
     };
 
@@ -189,7 +206,13 @@ export default function QRScanPage() {
             setStep("details");
             showSuccessToast("Phone verified. Please complete your details.");
         } catch (e: any) {
-            showErrorToast(e?.data?.message || e?.message || "Verification failed.");
+            const status = e?.status ?? e?.data?.statusCode;
+            const msg = e?.data?.message || e?.message || "Verification failed.";
+            if (status === 409) {
+                setPhoneStepNotice(msg);
+                return;
+            }
+            showErrorToast(msg);
         }
     };
 
@@ -452,6 +475,14 @@ export default function QRScanPage() {
                                                         />
                                                     )}
                                                 />
+                                                {phoneStepNotice ? (
+                                                    <p
+                                                        role="alert"
+                                                        className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100"
+                                                    >
+                                                        {phoneStepNotice}
+                                                    </p>
+                                                ) : null}
                                                 <Button
                                                     type="button"
                                                     variant="outline-primary"

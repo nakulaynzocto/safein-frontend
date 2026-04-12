@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { ActionButton } from "@/components/common/actionButton";
 import { BrandSwitch } from "@/components/common/BrandSwitch";
 import { ConfirmationDialog } from "@/components/common/confirmationDialog";
+import { SettingsHeader } from "./SettingsHeader";
 
 // --- Sub-components (Optimized & Memoized) ---
 
@@ -66,6 +67,12 @@ const NotificationCard = memo(({ title, description, type, config, onToggle }: a
                 checked={config[type].whatsapp} 
                 onChange={() => onToggle(`${type}.whatsapp`)} 
             />
+            <SettingItem 
+                label="SMS" 
+                subLabel="Send via Twilio, Msg91, or Fast2SMS" 
+                checked={config[type].sms} 
+                onChange={() => onToggle(`${type}.sms`)} 
+            />
         </div>
     </div>
 ));
@@ -79,10 +86,11 @@ export function NotificationSettings() {
 
     const [config, setConfig] = useState<any>({
         emailEnabled: true,
-        whatsappEnabled: true,
-        visitor: { email: true, whatsapp: true },
-        employee: { email: true, whatsapp: true },
-        appointment: { email: true, whatsapp: true },
+        whatsappEnabled: false,
+        smsEnabled: true,
+        visitor: { email: true, whatsapp: false, sms: true },
+        employee: { email: true, whatsapp: false, sms: true },
+        appointment: { email: true, whatsapp: false, sms: true },
     });
 
     const [modal, setModal] = useState({ isOpen: false, path: "" });
@@ -91,18 +99,22 @@ export function NotificationSettings() {
         if (settings?.notifications) {
             setConfig({
                 emailEnabled: settings.notifications.emailEnabled ?? true,
-                whatsappEnabled: settings.notifications.whatsappEnabled ?? true,
+                whatsappEnabled: settings.notifications.whatsappEnabled ?? false,
+                smsEnabled: settings.notifications.smsEnabled ?? true,
                 visitor: {
                     email: settings.notifications.visitor?.email ?? true,
-                    whatsapp: settings.notifications.visitor?.whatsapp ?? true,
+                    whatsapp: settings.notifications.visitor?.whatsapp ?? false,
+                    sms: settings.notifications.visitor?.sms ?? true,
                 },
                 employee: {
                     email: settings.notifications.employee?.email ?? true,
-                    whatsapp: settings.notifications.employee?.whatsapp ?? true,
+                    whatsapp: settings.notifications.employee?.whatsapp ?? false,
+                    sms: settings.notifications.employee?.sms ?? true,
                 },
                 appointment: {
                     email: settings.notifications.appointment?.email ?? true,
-                    whatsapp: settings.notifications.appointment?.whatsapp ?? true,
+                    whatsapp: settings.notifications.appointment?.whatsapp ?? false,
+                    sms: settings.notifications.appointment?.sms ?? true,
                 },
             });
         }
@@ -152,16 +164,13 @@ export function NotificationSettings() {
             <ProfileLayout>
                 {() => (
                     <div className="space-y-6 pb-12">
-                        <div>
-                            <h1 className="text-2xl font-bold tracking-tight text-gray-900 border-b-2 border-[#3882a5] w-fit mb-2">
-                                Notification Center
-                            </h1>
-                            <p className="text-muted-foreground text-sm">
-                                Configure how you and your visitors receive updates across different channels.
-                            </p>
-                        </div>
+                        <SettingsHeader
+                            title="Notification Center"
+                            description="Configure how you and your visitors receive updates across different channels. Master switches control global enablement."
+                            icon={CalendarCheck}
+                        />
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <MasterSwitchCard 
                                 title="Email (SMTP)" 
                                 description="Master switch for all email alerts" 
@@ -175,6 +184,13 @@ export function NotificationSettings() {
                                 checked={config.whatsappEnabled} 
                                 isEnabled={config.whatsappEnabled}
                                 onChange={() => handleToggle("whatsappEnabled")} 
+                            />
+                            <MasterSwitchCard 
+                                title="SMS (Twilio)" 
+                                description="Master switch for SMS alerts" 
+                                checked={config.smsEnabled} 
+                                isEnabled={config.smsEnabled}
+                                onChange={() => handleToggle("smsEnabled")} 
                             />
                         </div>
 

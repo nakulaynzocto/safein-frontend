@@ -1,35 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import {
-    useGetSettingsQuery,
-    useSaveSMTPConfigMutation,
-    useUpdateSettingsMutation,
+import { 
+    useGetSettingsQuery, 
+    useSaveSMTPConfigMutation, 
+    useUpdateSettingsMutation 
 } from "@/store/api/settingsApi";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
-    ArrowLeft,
-    CheckCircle,
-    Key,
-    Loader2,
     Mail,
     Save,
     Server,
-    ShieldAlert,
+    Key,
+    Loader2,
 } from "lucide-react";
+import { SettingsHeader } from "./SettingsHeader";
 import { InputField } from "@/components/common/inputField";
+import { MaskedInputField, MASKED_DISPLAY_VALUE } from "@/components/common/MaskedInputField";
 import { ActionButton } from "@/components/common/actionButton";
 import { FormContainer } from "@/components/common/formContainer";
-import { Badge } from "@/components/ui/badge";
 import { APIErrorState } from "@/components/common/APIErrorState";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-
-// ─── Validation Schema ────────────────────────────────────────────────────────
+import { ProfileLayout } from "@/components/profile/profileLayout";
+import { cn } from "@/lib/utils";
 
 const schema = yup.object().shape({
     host: yup.string().required("SMTP host is required"),
@@ -41,8 +37,6 @@ const schema = yup.object().shape({
     fromEmail: yup.string().email("Must be a valid email").required("Sender email is required"),
 });
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface FormValues {
     host: string;
     port: number;
@@ -52,8 +46,6 @@ interface FormValues {
     fromName: string;
     fromEmail: string;
 }
-
-// ─── SMTP Provider Presets ────────────────────────────────────────────────────
 
 const PRESETS = [
     { label: "Gmail", host: "smtp.gmail.com", port: 587, secure: false },
@@ -65,15 +57,7 @@ const PRESETS = [
     { label: "Custom", host: "", port: 587, secure: false },
 ];
 
-// ─── Sub-Component: Preset Button ─────────────────────────────────────────────
-
-interface PresetButtonProps {
-    label: string;
-    isSelected: boolean;
-    onClick: () => void;
-}
-
-function PresetButton({ label, isSelected, onClick }: PresetButtonProps) {
+function PresetButton({ label, isSelected, onClick }: { label: string; isSelected: boolean; onClick: () => void }) {
     return (
         <button
             type="button"
@@ -90,21 +74,12 @@ function PresetButton({ label, isSelected, onClick }: PresetButtonProps) {
     );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
-import { ProfileLayout } from "@/components/profile/profileLayout";
-
 export function SMTPSettings() {
     const router = useRouter();
     const { data: settings, isLoading, error } = useGetSettingsQuery();
-    const [updateSettings, { isLoading: isUpdatingSettings }] = useUpdateSettingsMutation();
     const [saveSMTP, { isLoading: isSaving }] = useSaveSMTPConfigMutation();
-
     const [selectedPreset, setSelectedPreset] = useState<string>("Custom");
 
-
-
-    const MASKED = "••••••••";
     const isVerified = !!settings?.smtp?.verified;
 
     const {
@@ -128,26 +103,21 @@ export function SMTPSettings() {
         },
     });
 
-    // Populate form from stored settings
     useEffect(() => {
         if (!settings?.smtp || isDirty) return;
-
         const smtp = settings.smtp;
         const matchedPreset = PRESETS.find((p) => p.host === smtp.host)?.label ?? "Custom";
         setSelectedPreset(matchedPreset);
-
         reset({
             host: smtp.host || "",
             port: smtp.port || 587,
             secure: smtp.secure ?? false,
             user: smtp.user || "",
-            pass: smtp.pass || "", // arrives as • masked
+            pass: smtp.pass || "",
             fromName: smtp.fromName || "",
             fromEmail: smtp.fromEmail || "",
         });
     }, [settings, reset, isDirty]);
-
-    // ── Preset selection ──────────────────────────────────────────────────────
 
     const applyPreset = (preset: typeof PRESETS[0]) => {
         setSelectedPreset(preset.label);
@@ -158,13 +128,10 @@ export function SMTPSettings() {
         }
     };
 
-    // ── Submit ────────────────────────────────────────────────────────────────
-
     const onSubmit = async (data: FormValues) => {
-        // If user hasn't changed the masked password, don't re-send it
         const payload = {
             ...data,
-            pass: data.pass === MASKED ? "" : data.pass,
+            pass: data.pass === MASKED_DISPLAY_VALUE ? "" : data.pass,
         };
 
         if (!payload.pass && !isVerified) {
@@ -174,16 +141,14 @@ export function SMTPSettings() {
 
         try {
             const result = await saveSMTP(payload as any).unwrap();
-            toast.success("SMTP configuration verified and saved! A test email was sent to your inbox.");
-
-            // Sync form with the new data and clear dirty state
+            toast.success("SMTP configuration verified and saved!");
             if (result.smtp) {
                 reset({
                     host: result.smtp.host || "",
                     port: result.smtp.port || 587,
                     secure: result.smtp.secure ?? false,
                     user: result.smtp.user || "",
-                    pass: MASKED, // Now it's saved, show masked
+                    pass: MASKED_DISPLAY_VALUE,
                     fromName: result.smtp.fromName || "",
                     fromEmail: result.smtp.fromEmail || "",
                 });
@@ -193,82 +158,23 @@ export function SMTPSettings() {
         }
     };
 
-
-    // ── Render ─────────────────────────────────────────────────────────────────
-
-    if (error) {
-        return (
-            <APIErrorState
-                title="Failed to load settings"
-                error={error}
-            />
-        );
-    }
+    if (error) return <APIErrorState title="Failed to load settings" error={error} />;
 
     return (
         <div className="mx-auto w-full max-w-full px-1 pt-4 sm:pt-6">
             <ProfileLayout>
                 {() => (
                     <div className="mx-auto w-full max-w-full">
-
-                        {/* ── Page Header ── */}
-                        <div className="mb-6">
-
-                            <div>
-                                <div className="flex items-center gap-3 flex-wrap">
-                                    <h1 className="text-foreground text-xl font-bold tracking-tight">
-                                        SMTP Email Server
-                                    </h1>
-
-                                    {isVerified ? (
-                                        <Badge className="bg-emerald-500 text-white border-transparent flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-bold shadow-sm">
-                                            <CheckCircle className="h-3.5 w-3.5" />
-                                            Verified
-                                        </Badge>
-                                    ) : (
-                                        <Badge
-                                            variant="outline"
-                                            className="text-muted-foreground border-dashed border-muted-foreground/30 flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-bold"
-                                        >
-                                            Not Configured
-                                        </Badge>
-                                    )}
-
-                                    <Badge
-                                        variant="outline"
-                                        className="bg-blue-50/50 text-blue-600 border-blue-100 flex items-center gap-1 py-1 px-2.5 rounded-full text-[10px] font-medium"
-                                    >
-                                        <Key className="h-3 w-3" />
-                                        Password Encrypted
-                                    </Badge>
-                                </div>
-
-                                <p className="text-muted-foreground mt-1 text-sm font-medium">
-                                    Configure a custom SMTP server to send emails from your own domain.
-                                    A test email will be sent to verify the connection.
-                                </p>
-                            </div>
-                        </div>
-
-
-
-                        {/* ── Info Banner (system default active) ── */}
-                        {!isVerified && (
-                            <div className="mb-6 flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800">
-                                <ShieldAlert className="h-5 w-5 mt-0.5 shrink-0 text-amber-600" />
-                                <div>
-                                    <p className="text-sm font-semibold">System SMTP is currently active</p>
-                                    <p className="text-xs mt-0.5 text-amber-700">
-                                        Configure a custom SMTP server below to send emails from your own domain and sender address.
-                                    </p>
-                                </div>
-                            </div>
-                        )}
+                        <SettingsHeader
+                            title="SMTP Email Server"
+                            description="Configure a custom SMTP server to send emails from your own domain. A test email will be sent to verify the connection."
+                            isVerified={isVerified}
+                            providerName={selectedPreset === "Custom" ? "Custom SMTP" : selectedPreset}
+                            icon={Mail}
+                        />
 
                         <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-
-                                {/* Preset Selector */}
                                 <div className="space-y-3">
                                     <h3 className="text-sm font-semibold text-foreground">Quick Provider Presets</h3>
                                     <div className="flex flex-wrap gap-2">
@@ -281,23 +187,8 @@ export function SMTPSettings() {
                                             />
                                         ))}
                                     </div>
-                                    {selectedPreset === "Gmail" && (
-                                        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg">
-                                            <strong>Gmail tip:</strong> Use an{" "}
-                                            <a
-                                                href="https://myaccount.google.com/apppasswords"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="underline font-semibold"
-                                            >
-                                                App Password
-                                            </a>{" "}
-                                            (not your Google account password) and enable 2-Step Verification first.
-                                        </p>
-                                    )}
                                 </div>
 
-                                {/* Server Settings */}
                                 <div className="space-y-4 pt-4 border-t">
                                     <div className="flex items-center gap-2">
                                         <Server className="h-4 w-4 text-muted-foreground" />
@@ -313,7 +204,6 @@ export function SMTPSettings() {
                                                 error={errors.host?.message}
                                                 required
                                                 className="h-12 bg-background border-border rounded-xl font-medium"
-                                                helperText="Your mail provider's SMTP server address"
                                             />
                                         </div>
                                         <div>
@@ -325,39 +215,34 @@ export function SMTPSettings() {
                                                 error={errors.port?.message}
                                                 required
                                                 className="h-12 bg-background border-border rounded-xl font-medium"
-                                                helperText="Usually 587 (TLS) or 465 (SSL)"
                                             />
                                         </div>
-
-                                        {/* SSL/TLS Toggle */}
                                         <div className="flex flex-col space-y-2">
-                                            <label className="text-sm font-medium text-foreground">
-                                                Secure Connection (SSL/TLS)
-                                            </label>
+                                            <label className="text-sm font-medium text-foreground">Security</label>
                                             <div className="flex items-center gap-4 h-12 px-4 bg-background border border-border rounded-xl">
-                                                {[
-                                                    { label: "TLS (port 587)", value: false },
-                                                    { label: "SSL (port 465)", value: true },
-                                                ].map(({ label, value }) => (
-                                                    <label key={label} className="flex items-center gap-2 cursor-pointer">
-                                                        <input
-                                                            type="radio"
-                                                            checked={watch("secure") === value}
-                                                            onChange={() => setValue("secure", value, { shouldDirty: true })}
-                                                            className="accent-primary"
-                                                        />
-                                                        <span className="text-sm">{label}</span>
-                                                    </label>
-                                                ))}
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        checked={!watch("secure")}
+                                                        onChange={() => setValue("secure", false, { shouldDirty: true })}
+                                                        className="accent-[#3882a5]"
+                                                    />
+                                                    <span className="text-sm font-medium">TLS (587)</span>
+                                                </label>
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        checked={watch("secure")}
+                                                        onChange={() => setValue("secure", true, { shouldDirty: true })}
+                                                        className="accent-[#3882a5]"
+                                                    />
+                                                    <span className="text-sm font-medium">SSL (465)</span>
+                                                </label>
                                             </div>
-                                            {errors.secure && (
-                                                <p className="text-xs text-destructive">{errors.secure.message}</p>
-                                            )}
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Authentication */}
                                 <div className="space-y-4 pt-4 border-t">
                                     <div className="flex items-center gap-2">
                                         <Key className="h-4 w-4 text-muted-foreground" />
@@ -373,22 +258,18 @@ export function SMTPSettings() {
                                             error={errors.user?.message}
                                             required
                                             className="h-12 bg-background border-border rounded-xl font-medium"
-                                            helperText="Usually your email address"
                                         />
-                                        <InputField
-                                            label="SMTP Password / App Password"
-                                            type="password"
-                                            placeholder={isVerified ? MASKED : "Enter password or app password"}
+                                        <MaskedInputField
+                                            label="SMTP Password"
+                                            placeholder={isVerified ? MASKED_DISPLAY_VALUE : "Enter password"}
                                             {...register("pass")}
                                             error={errors.pass?.message}
                                             required
                                             className="h-12 bg-background border-border rounded-xl font-medium"
-                                            helperText={isVerified ? "Leave masked to keep current password" : "Stored encrypted at rest"}
                                         />
                                     </div>
                                 </div>
 
-                                {/* Sender Identity */}
                                 <div className="space-y-4 pt-4 border-t">
                                     <div className="flex items-center gap-2">
                                         <Mail className="h-4 w-4 text-muted-foreground" />
@@ -403,60 +284,51 @@ export function SMTPSettings() {
                                             error={errors.fromName?.message}
                                             required
                                             className="h-12 bg-background border-border rounded-xl font-medium"
-                                            helperText="Name recipients will see in their inbox"
                                         />
                                         <InputField
-                                            label="Sender Email Address"
+                                            label="Sender Email"
                                             type="email"
                                             placeholder="no-reply@yourdomain.com"
                                             {...register("fromEmail")}
                                             error={errors.fromEmail?.message}
                                             required
                                             className="h-12 bg-background border-border rounded-xl font-medium"
-                                            helperText="Must be authorised by your SMTP provider"
                                         />
                                     </div>
                                 </div>
 
-                                {/* Footer Actions */}
-                                <div className="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-between border-t border-border/50">
-                                    <div />
-
-                                    <div className="flex flex-col-reverse gap-3 sm:flex-row">
-                                        <ActionButton
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => router.back()}
-                                            size="xl"
-                                            className="w-full px-8 sm:w-auto"
-                                        >
-                                            Cancel
-                                        </ActionButton>
-
-                                        <ActionButton
-                                            type="submit"
-                                            disabled={isSaving}
-                                            variant="primary"
-                                            size="xl"
-                                            className="w-full min-w-[200px] px-8 sm:w-auto shadow-lg shadow-[#3882a5]/20 transition-all active:scale-[0.98]"
-                                        >
-                                            {isSaving ? (
-                                                <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    <span>Testing &amp; Saving...</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Save className="mr-2 h-4 w-4" />
-                                                    <span>Verify &amp; Save</span>
-                                                </>
-                                            )}
-                                        </ActionButton>
-                                    </div>
+                                <div className="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end border-t border-border/50">
+                                    <ActionButton
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => router.back()}
+                                        size="xl"
+                                        className="px-8"
+                                    >
+                                        Cancel
+                                    </ActionButton>
+                                    <ActionButton
+                                        type="submit"
+                                        disabled={isSaving}
+                                        variant="primary"
+                                        size="xl"
+                                        className="min-w-[200px] shadow-lg shadow-[#3882a5]/20"
+                                    >
+                                        {isSaving ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                <span>Saving...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="mr-2 h-4 w-4" />
+                                                <span>Verify & Save</span>
+                                            </>
+                                        )}
+                                    </ActionButton>
                                 </div>
                             </form>
                         </FormContainer>
-
                     </div>
                 )}
             </ProfileLayout>

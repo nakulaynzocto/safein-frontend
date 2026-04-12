@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type LegacyRef } from "react";
 import { createPortal } from "react-dom";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -61,14 +61,14 @@ function CameraCapturePortal({
             <div className="relative flex min-h-[100dvh] w-full max-w-full flex-col items-center justify-center gap-4 overflow-y-auto bg-[#0b1320]/92 px-4 py-6 shadow-2xl sm:min-h-0 sm:max-h-[min(100dvh,52rem)] sm:max-w-3xl sm:rounded-3xl sm:bg-[#0b1320]/90 sm:p-8">
                 <div className="relative h-[min(78vmin,26rem)] w-[min(78vmin,26rem)] shrink-0 overflow-hidden rounded-full border-4 border-white/20 shadow-2xl sm:h-[min(72vmin,22rem)] sm:w-[min(72vmin,22rem)] md:h-[min(70vmin,24rem)] md:w-[min(70vmin,24rem)]">
                     <video
-                        ref={videoRef}
+                        ref={videoRef as LegacyRef<HTMLVideoElement>}
                         className="h-full w-full object-cover"
                         autoPlay
                         playsInline
                         muted
                     />
                 </div>
-                <canvas ref={canvasRef} className="hidden" />
+                <canvas ref={canvasRef as LegacyRef<HTMLCanvasElement>} className="hidden" />
 
                 <div
                     className="absolute right-3 sm:right-5"
