@@ -45,6 +45,7 @@ function CompactBar({ children, className }: { children: ReactNode; className?: 
  * Single compact row on all breakpoints.
  */
 export function DeliverySetupWarning({ className }: DeliverySetupWarningProps) {
+    return null;
     const { 
         smtpOk, 
         whatsappOk, 

@@ -188,14 +188,24 @@ export default function BookAppointmentPage() {
 
     const errorConfig = useMemo(() => {
         const messageStr = String(errorMessage || "");
+        const err = linkError as any;
+        const isOutOfService = messageStr.toLowerCase().includes("out of service") || err?.status === 402 || errorMessage.toLowerCase().includes("subscription");
         const isExpired = /expired|used|created|isbooked/i.test(messageStr);
+        
+        if (isOutOfService) {
+            return {
+                title: "Service Unavailable",
+                message: "This company's visitor portal is currently out of service. Please contact their reception desk directly or try again later.",
+            };
+        }
+        
         return {
             title: isExpired ? "Link Expired" : "Invalid Link",
             message: isExpired 
                 ? "This appointment link has expired or has already been used. Please contact the person who sent you this link."
                 : "This appointment link is invalid. Please contact the person who sent you this link.",
         };
-    }, [errorMessage]);
+    }, [errorMessage, linkError]);
 
     if (step === "loading" || isLoadingLink) {
         return (

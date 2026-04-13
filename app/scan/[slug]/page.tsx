@@ -296,12 +296,17 @@ export default function QRScanPage() {
     }
 
     if (step === "error") {
+        const isOutOfService = errorMessage.toLowerCase().includes("out of service");
         return (
             <StatusPage
                 type="error"
-                title="Invalid Scan"
+                title={isOutOfService ? "Out of Service" : "Invalid Scan"}
                 message={errorMessage}
-                description="This QR code might be expired or the company is no longer active. Please contact the front desk."
+                description={
+                    isOutOfService
+                        ? "The QR check-in feature for this company is currently disabled. Please contact the management or visit the reception desk."
+                        : "This QR code might be expired or the company is no longer active. Please contact the front desk."
+                }
                 showHomeButton={true}
             />
         );

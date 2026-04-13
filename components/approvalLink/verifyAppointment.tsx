@@ -131,21 +131,34 @@ export function VerifyAppointment() {
     }
 
     if (error || (data && !data.success)) {
-        const errorMessage = (error as any)?.data?.message || data?.message || "Invalid or expired link";
+        const err = error as any;
+        const errorMessage = err?.data?.message || data?.message || "Invalid or expired link";
         const isExpired = errorMessage.includes("expired") || errorMessage.includes("already used");
+        const isOutOfService = err?.status === 402 || errorMessage.toLowerCase().includes("out of service") || errorMessage.toLowerCase().includes("subscription");
 
         return (
             <div className="flex min-h-screen items-center justify-center p-4">
-                <Card className="w-full max-w-md border-0 bg-white shadow-2xl backdrop-blur-xl dark:bg-slate-900/80">
+                <Card className="w-full max-w-md border-0 bg-white shadow-2xl dark:bg-slate-900/80">
                     <CardContent className="flex flex-col items-center justify-center py-12 text-center animate-in zoom-in-95 duration-300">
-                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 p-4 dark:bg-amber-900/20">
-                            <XCircle className="h-10 w-10 text-amber-600" />
+                        <div className={cn(
+                            "mb-6 flex h-20 w-20 items-center justify-center rounded-full p-4",
+                            isOutOfService ? "bg-amber-100 dark:bg-amber-900/20" : "bg-red-100 dark:bg-red-900/20"
+                        )}>
+                            {isOutOfService ? (
+                                <ShieldCheck className="h-10 w-10 text-amber-600" />
+                            ) : (
+                                <XCircle className="h-10 w-10 text-red-600" />
+                            )}
                         </div>
                         <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">
-                            {isExpired ? "Link Expired" : "Invalid Link"}
+                            {isOutOfService ? "Service Unavailable" : isExpired ? "Link Expired" : "Invalid Link"}
                         </h2>
                         <p className="text-slate-500 dark:text-slate-400">
-                            {isExpired ? "This verification link has expired or has already been used." : errorMessage}
+                            {isOutOfService 
+                                ? "This company's service is currently suspended due to an expired subscription. Please contact administration." 
+                                : isExpired 
+                                    ? "This verification link has expired or has already been used." 
+                                    : errorMessage}
                         </p>
                         <Button className="mt-8" variant="outline" onClick={() => (window.location.href = "/")}>
                             Go to Homepage
