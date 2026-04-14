@@ -9,6 +9,7 @@ export interface SpecialBooking {
         _id: string;
         name: string;
         email: string;
+        phone?: string;
         department?: string;
     };
     purpose: string;

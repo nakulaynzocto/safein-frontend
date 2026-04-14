@@ -78,15 +78,15 @@ const baseNavigation: Array<{
             roles: ["admin", "employee"], // Both admin and employee
         },
         {
-            name: "QR Check-in",
-            href: routes.privateroute.SETTINGS_QR_CHECKIN,
-            icon: QrCode,
-            roles: ["admin"], // Only admin
-        },
-        {
             name: "Spot Pass",
             href: routes.privateroute.SPOT_PASS,
             icon: ClipboardList,
+            roles: ["admin"], // Only admin
+        },
+        {
+            name: "QR Check-in",
+            href: routes.privateroute.SETTINGS_QR_CHECKIN,
+            icon: QrCode,
             roles: ["admin"], // Only admin
         },
         {

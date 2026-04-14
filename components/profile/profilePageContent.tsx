@@ -149,9 +149,6 @@ export function ProfilePageContent() {
                             {activeTab === "profile" && (
                                 <ProfileForm profile={profile} onSubmit={handleProfileUpdate} onCancel={handleCancelEdit} />
                             )}
-                            {activeTab === "subscription" && (
-                                <ProfileSubscription />
-                            )}
                         </>
                     )}
                 </ProfileLayout>
@@ -162,6 +159,5 @@ export function ProfilePageContent() {
 
 // Wrapper to handle dynamic import or just standard import
 import { ProfileLayout } from "./profileLayout";
-import { ProfileSubscription } from "./profileSubscription";
 
 

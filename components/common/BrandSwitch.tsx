@@ -8,22 +8,26 @@ interface BrandSwitchProps {
     onCheckedChange: () => void;
     variant?: "default" | "large";
     className?: string;
+    disabled?: boolean;
 }
 
 export function BrandSwitch({ 
     checked, 
     onCheckedChange, 
     variant = "default",
-    className
+    className,
+    disabled
 }: BrandSwitchProps) {
     return (
         <button
-            onClick={onCheckedChange}
+            onClick={() => !disabled && onCheckedChange()}
+            disabled={disabled}
             type="button"
             className={cn(
                 "relative inline-flex flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-200 ease-in-out focus:outline-none",
                 variant === "large" ? "h-7 w-12" : "h-5 w-9",
                 checked ? "bg-[#3882a5]" : "bg-gray-200 dark:bg-gray-700",
+                disabled && "opacity-50 cursor-not-allowed",
                 className
             )}
         >

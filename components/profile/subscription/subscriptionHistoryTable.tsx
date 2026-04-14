@@ -26,15 +26,33 @@ import {
 import { SubscriptionInvoiceTemplate } from "./subscriptionInvoiceTemplate";
 import { useReactToPrint } from "react-to-print";
 
+/** Stable React list key when _id is missing or duplicated from API */
+function subscriptionHistoryRowKey(
+    item: {
+        _id?: string;
+        subscriptionId?: string;
+        purchaseDate?: string;
+        startDate?: string;
+        endDate?: string;
+    },
+    index: number,
+): string {
+    if (item._id != null && String(item._id).trim() !== "") {
+        return String(item._id);
+    }
+    return `hist-${index}-${String(item.subscriptionId ?? "")}-${String(item.purchaseDate ?? "")}-${String(item.startDate ?? "")}-${String(item.endDate ?? "")}`;
+}
+
 interface SubscriptionItem {
-    _id: string;
+    _id?: string;
     planId: { name: string } | null;
     planType: string;
     planName?: string;
     amount: number;
     startDate: string;
     endDate: string;
-    paymentStatus: "succeeded" | "pending" | "failed";
+    paymentStatus?: "succeeded" | "pending" | "failed" | "cancelled";
+    invoiceNumber?: string;
     source: string;
     taxAmount?: number;
     taxPercentage?: number;
@@ -73,7 +91,9 @@ export const SubscriptionHistoryTable = ({
 
     const handlePrint = useReactToPrint({
         contentRef: invoiceRef,
-        documentTitle: selectedInvoice ? `Invoice-${selectedInvoice._id}` : "Invoice",
+        documentTitle: selectedInvoice
+            ? `Invoice-${selectedInvoice._id ?? selectedInvoice.invoiceNumber ?? selectedInvoice.purchaseDate ?? "preview"}`
+            : "Invoice",
     });
 
     const handleViewInvoice = (item: SubscriptionItem) => {
@@ -158,10 +178,12 @@ export const SubscriptionHistoryTable = ({
                                 ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
                                 : item.paymentStatus === "pending"
                                     ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
-                                    : "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]",
+                                    : item.paymentStatus === "cancelled"
+                                        ? "bg-slate-500"
+                                        : "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]",
                         )}
                     />
-                    {item.paymentStatus}
+                    {item.paymentStatus || "—"}
                 </span>
             ),
         },
@@ -192,15 +214,14 @@ export const SubscriptionHistoryTable = ({
             className: "px-2 py-3 text-center align-top w-[11%]",
             cell: (item: SubscriptionItem) => (
                 <div className="flex items-center justify-center">
-                    {item.paymentStatus === "succeeded" && (
-                        <button
-                            onClick={() => handleViewInvoice(item)}
-                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
-                            title="View Invoice"
-                        >
-                            <Eye size={16} />
-                        </button>
-                    )}
+                    <button
+                        type="button"
+                        onClick={() => handleViewInvoice(item)}
+                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
+                        title="View invoice / receipt"
+                    >
+                        <Eye size={16} />
+                    </button>
                 </div>
             ),
         },
@@ -227,9 +248,9 @@ export const SubscriptionHistoryTable = ({
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 bg-white">
-                                {data.map((item) => (
+                                {data.map((item, rowIndex) => (
                                     <tr
-                                        key={item._id}
+                                        key={subscriptionHistoryRowKey(item, rowIndex)}
                                         className="hover:bg-gray-50 transition-colors group"
                                     >
                                         {columns.map((col, index) => (

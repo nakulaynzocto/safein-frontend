@@ -5,7 +5,7 @@ import { formatCurrency } from "@/utils/helpers";
 import { formatAddress, formatRegisteredAddress } from "@/utils/formatAddress";
 
 interface ExtendedSubscriptionItem {
-    _id: string;
+    _id?: string;
     planId: { name: string } | null | string;
     planType: string;
     amount: number;
@@ -101,7 +101,7 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                                 Invoice
                             </h1>
                             <div className="text-xs opacity-90 font-medium">
-                                <p>Invoice No: {subscription.invoiceNumber || `INV-${subscription._id.substring(0, 8).toUpperCase()}`}</p>
+                                <p>Invoice No: {subscription.invoiceNumber || `INV-${subscription._id?.substring(0, 8).toUpperCase() || 'NA'}`}</p>
                                 <p>Date: {formatDate(subscription.startDate)}</p>
                                 <p>Status: {subscription.paymentStatus}</p>
                             </div>
@@ -164,7 +164,7 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                                 <p className="text-[11px]">{user?.email}</p>
                                 <p className="text-[11px]">{user?.mobileNumber}</p>
                                 <p className="mt-1 text-[9px] font-bold text-slate-400 uppercase">
-                                    Place of Supply: {user.address.state} ({subscription.placeOfSupplyCode || "N/A"})
+                                    Place of Supply: {user?.address?.state || "N/A"} ({subscription.placeOfSupplyCode || "N/A"})
                                 </p>
                             </div>
                         </div>

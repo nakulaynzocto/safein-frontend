@@ -11,7 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle, AlertCircle, Info } from "lucide-react";
+import { AlertCircle, AlertTriangle, Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ConfirmationDialogProps {
@@ -58,11 +58,11 @@ export function ConfirmationDialog({
     const getIcon = () => {
         switch (variant) {
             case "destructive":
-                return <AlertCircle className="h-8 w-8 text-red-500" />;
+                return <AlertCircle className="h-6 w-6 text-red-500" />;
             case "warning":
-                return <AlertTriangle className="h-8 w-8 text-red-500" />;
+                return <AlertTriangle className="h-6 w-6 text-red-500" />;
             default:
-                return <Info className="h-8 w-8 text-blue-500" />;
+                return <Info className="h-6 w-6 text-[#3882a5]" />;
         }
     };
 
@@ -72,40 +72,50 @@ export function ConfirmationDialog({
             case "warning":
                 return "bg-red-50";
             default:
-                return "bg-blue-50";
+                return "bg-[#3882a5]/10";
         }
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[400px] rounded-3xl border-none shadow-2xl bg-white p-0 overflow-hidden">
-                <div className="p-6 text-center">
+            <DialogContent className="sm:max-w-[380px] rounded-3xl border-none shadow-2xl bg-white p-0 gap-0 overflow-hidden">
+                <div className="relative p-5 text-center">
+                    <button 
+                        onClick={handleCancel}
+                        className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <X size={18} />
+                    </button>
+
                     <div className={cn(
-                        "mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4",
+                        "mx-auto w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-transform duration-300 scale-100 hover:scale-110",
                         getIconBg()
                     )}>
                         {getIcon()}
                     </div>
-                    <DialogHeader>
-                        <DialogTitle className="text-xl font-bold text-gray-900 text-center">
+                    
+                    <DialogHeader className="space-y-1">
+                        <DialogTitle className="text-lg font-black text-gray-900 text-center tracking-tight">
                             {title}
                         </DialogTitle>
-                        <DialogDescription className="text-gray-500 text-center mt-2">
+                        <DialogDescription className="text-gray-500 text-center text-[13px] leading-relaxed px-2">
                             {description}
                         </DialogDescription>
                     </DialogHeader>
+
                     {disabled && disabledMessage && (
-                        <div className="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800 text-left">
+                        <div className="mt-3 rounded-xl border border-yellow-100 bg-yellow-50/50 p-2.5 text-[11px] text-yellow-800 text-center font-medium">
                             {disabledMessage}
                         </div>
                     )}
-                    {children && <div className="mt-4">{children}</div>}
+                    {children && <div className="mt-3">{children}</div>}
                 </div>
-                <DialogFooter className="flex flex-col sm:flex-row gap-2 p-6 bg-gray-50/50 border-t border-gray-100">
+
+                <DialogFooter className="flex flex-row gap-2.5 p-4 bg-gray-50/80 border-t border-gray-100/50">
                     <Button 
-                        variant="outline" 
+                        variant="ghost" 
                         onClick={handleCancel} 
-                        className="w-full sm:flex-1 h-11 rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-semibold transition-colors"
+                        className="flex-1 h-10 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 font-bold transition-all text-sm"
                     >
                         {cancelText}
                     </Button>
@@ -113,7 +123,7 @@ export function ConfirmationDialog({
                         onClick={handleConfirm}
                         disabled={disabled}
                         className={cn(
-                            "w-full sm:flex-1 h-12 rounded-xl text-white font-semibold shadow-lg transition-all active:scale-[0.98]",
+                            "flex-1 h-10 rounded-xl text-white font-bold shadow-md transition-all active:scale-95 text-sm",
                             variant === "destructive" || variant === "warning" 
                                 ? "bg-red-500 hover:bg-red-600 shadow-red-500/20" 
                                 : "bg-[#3882a5] hover:bg-[#2d6a87] shadow-[#3882a5]/20"

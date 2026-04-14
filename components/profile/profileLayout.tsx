@@ -34,6 +34,8 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
             setActiveTab("notification");
         } else if (pathname === routes.privateroute.PROFILE) {
             setActiveTab("profile");
+        } else if (pathname === routes.privateroute.SETTINGS_SUBSCRIPTION) {
+            setActiveTab("subscription");
         }
     }, [pathname]);
 
@@ -50,7 +52,7 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
             label: "Subscription",
             icon: CreditCard,
             roles: ["admin"],
-            href: routes.privateroute.PROFILE, // Subscription is currently a tab in Profile
+            href: routes.privateroute.SETTINGS_SUBSCRIPTION,
         },
         {
             id: "notification" as const,
@@ -86,7 +88,7 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
     const tabs = baseTabs.filter(tab => tab.roles.includes(user?.role || 'admin'));
 
     const handleTabClick = (tabId: TabType, href?: string) => {
-        if (tabId === "profile" || tabId === "subscription") {
+        if (tabId === "profile") {
             setActiveTab(tabId);
             if (pathname !== routes.privateroute.PROFILE) {
                 router.push(routes.privateroute.PROFILE);

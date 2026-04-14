@@ -40,6 +40,7 @@ import {
     Send,
     UserPlus,
     Car,
+    ArrowUp,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -671,29 +672,28 @@ function AppointmentLinksContent() {
 
             {/* Table Section */}
             <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="flex w-full flex-row flex-nowrap items-center gap-2 sm:gap-3">
-                    <div className="min-w-0 flex-1">
-                        <SearchInput
-                            placeholder="Search by visitor..."
-                            value={search}
-                            onChange={setSearch}
-                            debounceDelay={500}
-                            className="w-full"
-                        />
-                    </div>
+                <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
+                    <SearchInput
+                        placeholder="Search by visitor..."
+                        value={search}
+                        onChange={setSearch}
+                        debounceDelay={500}
+                        className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none"
+                    />
                     <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
                         <Button
                             variant="outline"
                             size="icon"
                             onClick={refetchAll}
                             disabled={isLoading}
-                            className="shrink-0 h-9 w-9 sm:h-10 sm:w-10 border-gray-200 hover:bg-gray-50 bg-white shadow-sm transition-all active:scale-95"
+                            className="shrink-0 h-10 w-10 sm:h-12 sm:w-12 border-gray-200 hover:bg-gray-50 bg-white shadow-sm transition-all active:scale-95 rounded-xl"
                             title="Refresh Table"
                         >
                             <RefreshCw className={`h-4 w-4 text-gray-500 ${isLoading ? 'animate-spin' : ''}`} />
                         </Button>
-                        <div className="shrink-0">
+                        <div className="shrink-0 flex items-center">
                             <SubscriptionActionButtons
+                                isEmployee={isEmployee}
                                 isExpired={isExpired}
                                 hasReachedLimit={hasReachedAppointmentLimit}
                                 limitType="appointment"
@@ -701,13 +701,13 @@ function AppointmentLinksContent() {
                                 openUpgradeModal={openUpgradeModal}
                                 closeUpgradeModal={closeUpgradeModal}
                                 upgradeLabel="Upgrade Plan"
-                                icon={UserPlus}
-                                className="flex h-9 w-9 items-center justify-center gap-2 rounded-lg text-xs whitespace-nowrap sm:h-auto sm:w-auto sm:px-6 sm:min-w-[150px] sm:text-sm text-white"
+                                icon={ArrowUp}
+                                className="h-10 sm:h-12 rounded-xl px-4 sm:px-6 shadow-sm"
                             >
                                 <ActionButton
                                     variant="outline-primary"
                                     size="xl"
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg p-0 text-xs whitespace-nowrap sm:h-auto sm:w-auto sm:gap-2 sm:p-3 sm:text-sm"
+                                    className="flex h-10 sm:h-12 items-center justify-center rounded-xl gap-2 px-3 sm:px-6 text-xs sm:text-sm"
                                     onClick={() => {
                                         if (filterType === "special") {
                                             router.push(routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING_CREATE);
@@ -720,11 +720,13 @@ function AppointmentLinksContent() {
                                         <>
                                             <User className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
                                             <span className="hidden sm:inline">Create Priority Booking</span>
+                                            <span className="sm:hidden">VIP</span>
                                         </>
                                     ) : (
                                         <>
                                             <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
                                             <span className="hidden sm:inline">Create Invite Link</span>
+                                            <span className="sm:hidden">Link</span>
                                         </>
                                     )}
                                 </ActionButton>
