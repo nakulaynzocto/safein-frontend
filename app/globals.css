@@ -927,3 +927,52 @@
 ::-webkit-scrollbar-thumb:hover {
     background-color: #9ca3af;
 }
+
+/* Blog Content Support */
+.blog-content-wrapper {
+  word-break: break-word;
+}
+
+.blog-content-wrapper p {
+  margin-bottom: 2rem;
+  line-height: 1.8;
+}
+
+.blog-content-wrapper h1, 
+.blog-content-wrapper h2, 
+.blog-content-wrapper h3, 
+.blog-content-wrapper h4 {
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  font-weight: 900;
+  color: #074463;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.blog-content-wrapper h1 { font-size: 2.5rem; }
+.blog-content-wrapper h2 { font-size: 2rem; }
+.blog-content-wrapper h3 { font-size: 1.5rem; }
+
+.blog-content-wrapper ul, 
+.blog-content-wrapper ol {
+  margin-bottom: 2rem;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.blog-content-wrapper ol {
+  list-style-type: decimal;
+}
+
+.blog-content-wrapper li {
+  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+}
+
+.blog-content-wrapper img {
+  border-radius: 2.5rem;
+  margin: 3rem 0;
+  box-shadow: 0 25px 50px -12px rgba(7, 68, 99, 0.25);
+  width: 100%;
+}

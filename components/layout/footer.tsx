@@ -34,7 +34,8 @@ const footerSections: FooterSection[] = [
         title: "Company",
         links: [
             { label: "About Aynzo", href: "https://aynzo.com", external: true },
-            { label: "Contact Us", href: "/#contact" },
+            { label: "Blog", href: "/blog" },
+            { label: "Contact Us", href: "/contact" },
             { label: "Privacy Policy", href: "/privacy-policy" },
         ],
     },

@@ -43,9 +43,6 @@ const HowItWorksSection = dynamic<{ routes: any }>(() => import("@/app/_sections
 const PricingSection = dynamic(() => import("@/app/_sections/PricingSection"), {
     loading: () => <SectionSkeleton />
 });
-const ContactSection = dynamic(() => import("@/app/_sections/ContactSection"), {
-    loading: () => <SectionSkeleton />
-});
 const IndustriesSection = dynamic(() => import("@/app/_sections/IndustriesSection"), {
     loading: () => <SectionSkeleton />
 });
@@ -86,50 +83,34 @@ export default function HomePage() {
     const processSteps = useMemo(() => [
         {
             id: 1,
-            title: "Visitor Arrival",
-            description: "Visitor enters their details at the sleek digital kiosk or pre-registers online.",
-            image: "/home/custom/kiosk.png",
-            badge: "Secure Arrival",
+            title: "Premium Visitor Experience",
+            description: "A centralized, intelligent dashboard that commands your entire organization's visitor flow.",
+            image: "/images/hero/premium_showcase.png",
+            badge: "SaaS Ecosystem",
             color: "from-[#074463] to-[#3882a5]"
         },
         {
             id: 2,
-            title: "Digital Registration",
-            description: "Fast, paperless registration via smartphone or reception iPad.",
-            image: "/home/custom/booking.png",
-            badge: "No Paperwork",
+            title: "Touchless QR Scan",
+            description: "Visitors scan a secure gate-side QR code to initiate their own check-in seamlessly.",
+            image: "/images/features/qr_checkin_feature_1776194813535.png",
+            badge: "Safe & Fast",
             color: "from-[#074463] to-[#3882a5]"
         },
         {
             id: 3,
-            title: "Instant Alerts",
-            description: "Hosts receive real-time notifications on WhatsApp and Email.",
+            title: "Instant Smart Alerts",
+            description: "Hosts receive real-time notifications on WhatsApp and Email for every arriving guest.",
             image: "/home/solutions/smart-notifications.png",
-            badge: "Instant Sync",
+            badge: "Real-time Sync",
             color: "from-[#074463] to-[#3882a5]"
         },
         {
             id: 4,
-            title: "Admin Approval",
-            description: "One-click approval from the employee's powerful dashboard.",
-            image: "/home/custom/dashboard.png",
-            badge: "Secure Access",
-            color: "from-[#074463] to-[#3882a5]"
-        },
-        {
-            id: 5,
-            title: "Security Verification",
-            description: "Gatekeeper verifies the 6-digit secure OTP for final check-in.",
+            title: "Verified Gate Check-in",
+            description: "Gatekeepers verify identity with secure OTPs, ensuring only authorized entry.",
             image: "/home/custom/gatekeeper.png",
-            badge: "Verified OTP",
-            color: "from-[#074463] to-[#3882a5]"
-        },
-        {
-            id: 6,
-            title: "Access Granted",
-            description: "Visual analytics track every successful arrival and departure.",
-            image: "/home/custom/dashboard.png",
-            badge: "Welcome In",
+            badge: "High Security",
             color: "from-[#074463] to-[#3882a5]"
         }
     ], []);
@@ -177,11 +158,11 @@ export default function HomePage() {
         },
         {
             id: 6,
-            title: "Instant Badge Printing",
-            description: "Generate professional, high-security visitor badges instantly upon check-in for enhanced on-premise identification.",
-            image: "/home/custom/kiosk.png",
+            title: "Touchless QR Registration",
+            description: "Enable visitors to register themselves instantly by scanning a unique gate-side QR code, ensuring a fast and paperless entry experience.",
+            image: "/images/features/qr_checkin_feature_1776194813535.png",
             color: "from-[#3882a5]/20 to-[#3882a5]/10",
-            icon: <Printer className="h-7 w-7" />
+            icon: <Globe className="h-7 w-7" />
         }
     ], []);
 
@@ -203,7 +184,47 @@ export default function HomePage() {
         return () => clearInterval(featuresTimer);
     }, [coreFeatureSteps.length]);
 
-    const homeStructuredData = generateStructuredData("home");
+
+
+    const faqs = [
+        {
+            question: "What is the best visitor management system for offices in India?",
+            answer: "SafeIn by Aynzo is widely considered the best visitor management system in India. It offers end-to-end security features like OTP verification, touchless QR check-ins, and automated host notifications via WhatsApp—all tailored for the Indian business environment."
+        },
+        {
+            question: "How does the QR-based visitor check-in work?",
+            answer: "Visitors simply scan a unique QR code printed at your reception or gate using their smartphone. This opens a secure registration form where they enter their details. Once submitted, the host is instantly notified, and the visitor receives a secure entry pass."
+        },
+        {
+            question: "Can I manage multiple office locations with SafeIn?",
+            answer: "Yes, SafeIn is designed for multi-tenant and multi-location management. Admins can monitor visitor logs across different branches from a single centralized dashboard, ensuring consistent security compliance nationwide."
+        },
+        {
+            question: "Is SafeIn compliant with data privacy laws like GDPR?",
+            answer: "Absolutely. SafeIn is built with a 'Security-First' philosophy. We follow ISO 27001 standards and are GDPR compliant, ensuring that all visitor and employee data is encrypted and handled with the highest level of privacy."
+        },
+        {
+            question: "Does SafeIn support WhatsApp and SMS notifications?",
+            answer: "Yes, SafeIn integrates with premier communication gateways to send instant arrival alerts via WhatsApp, SMS, and Email. This ensures that hosts are notified immediately, even if they aren't at their desks."
+        }
+    ];
+
+    const homeStructuredData = useMemo(() => {
+        const base = generateStructuredData("home");
+        const faqSchema = {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": faqs.map(faq => ({
+                "@type": "Question",
+                "name": faq.question,
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": faq.answer
+                }
+            }))
+        };
+        return { ...base, ...faqSchema };
+    }, [faqs]);
 
     return (
         <>
@@ -228,7 +249,9 @@ export default function HomePage() {
                 <section className="bg-hero-gradient relative overflow-hidden pt-24 pb-16 sm:pt-32 sm:pb-24 lg:pt-40 lg:pb-32">
                     <div className="absolute top-0 right-0 -mr-24 -mt-24 h-[500px] w-[500px] rounded-full bg-brand/10 blur-[120px]"></div>
                     <div className="absolute bottom-0 left-0 -ml-24 -mb-24 h-[400px] w-[400px] rounded-full bg-brand-light/10 blur-[100px]"></div>
-
+                    
+                    {/* ... (rest of hero content) ... */}
+                    {/* (I'll keep the existing content but wrap it in the new structure) */}
                     <div className="relative z-10 container mx-auto px-4 sm:px-6">
                         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
                             {/* Hero Image Area - Dual Device Showcase */}
@@ -241,13 +264,10 @@ export default function HomePage() {
                                     <div className="absolute -left-12 sm:-left-20 top-[45%] -translate-y-1/2 w-[320px] sm:w-[440px] opacity-100 transition-all duration-700"
                                          style={{ transform: 'rotateY(30deg) rotateX(10deg) translateZ(-50px)', transformStyle: 'preserve-3d' }}>
                                         
-                                        {/* Kiosk Stand Neck */}
                                         <div className="absolute -bottom-20 left-1/2 z-0 h-40 w-12 -translate-x-1/2 rounded-xl bg-gradient-to-b from-gray-900 to-black border-x border-white/5 opacity-80 shadow-2xl"></div>
                                         <div className="absolute -bottom-24 left-1/2 z-0 h-8 w-40 -translate-x-1/2 rounded-[50%] bg-black/40 blur-[4px]"></div>
 
-                                        {/* Kiosk Body */}
                                         <div className="relative z-10 w-full aspect-[16/10] overflow-hidden rounded-[2.5rem] border-[12px] border-gray-950 bg-gray-950 shadow-2xl ring-1 ring-white/10">
-                                            {/* Digital Screen Content (Pure Images) */}
                                             <div className="relative w-full h-full bg-gray-950 overflow-hidden">
                                                 {processSteps.map((step, idx) => (
                                                     <div 
@@ -275,15 +295,11 @@ export default function HomePage() {
                                     <div className="relative z-20 ml-auto w-[220px] sm:w-[280px] transition-all duration-500 hover:scale-[1.05]"
                                          style={{ transform: 'rotateY(-30deg) rotateX(8deg) translateZ(80px)', transformStyle: 'preserve-3d' }}>
                                         
-                                        {/* Smartphone Frame (Solid Pro Black) */}
                                         <div className="relative w-full overflow-hidden rounded-[2.8rem] border-[10px] border-gray-950 bg-gray-950 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.1)] ring-[3px] ring-[#3882a5]/30">
-                                            
-                                            {/* Top Speaker/Sensors Notch */}
                                             <div className="absolute top-0 left-1/2 z-40 h-6 w-28 -translate-x-1/2 rounded-b-2xl bg-gray-950 shadow-inner">
                                                 <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-gray-800"></div>
                                             </div>
 
-                                            {/* Digital Screen Content (Pure Images) */}
                                             <div className="relative aspect-[9/18] w-full overflow-hidden rounded-[2.2rem] bg-gray-950 shadow-inner ring-1 ring-white/10">
                                                 <div className="absolute inset-0 z-0">
                                                     {processSteps.map((step, idx) => (
@@ -308,14 +324,11 @@ export default function HomePage() {
                                                 </div>
                                             </div>
                                         </div>
-                                        
-                                        {/* Premium Gloss Reflection */}
                                         <div className="absolute inset-0 z-30 pointer-events-none rounded-[2.8rem] bg-gradient-to-tr from-transparent via-white/5 to-white/15 opacity-70"></div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Hero Content Area */}
                             <div className="text-center lg:text-left order-2 lg:order-1">
                                 <div className="mb-8 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
                                     <div className="badge-glass flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all hover:bg-white/10">
@@ -384,10 +397,9 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* Below the fold sections - Dynamically Loaded */}
                 <FeatureSection />
 
-                {/* Features Section - Interactive Visitor Journey (Better Design & Project Colors) */}
+                {/* Features Section */}
                 <section id="core-features" className="relative overflow-hidden bg-white py-12 sm:py-16">
                     <div className="container relative z-10 mx-auto px-4 sm:px-6">
                         <div className="mb-12 text-center">
@@ -437,8 +449,6 @@ export default function HomePage() {
                             <div className="order-1 flex justify-center lg:order-2">
                                 <div className="relative w-full max-w-[300px] perspective-[1500px]">
                                     <div className="absolute -inset-10 rounded-full transition-all duration-1000 blur-[80px] opacity-10 bg-[#3882a5]"></div>
-                                    
-                                    {/* Smartphone Frame (Solid Pro Black) */}
                                     <div className="relative z-10 w-full overflow-hidden rounded-[2.8rem] border-[12px] border-slate-900 bg-slate-900 shadow-[0_60px_100px_-20px_rgba(7,68,99,0.3)] ring-[4px] ring-[#3882a5]/30 transition-all duration-700 hover:scale-[1.05]">
                                         <div className="relative aspect-[9/18] w-full overflow-hidden rounded-[2.2rem] bg-slate-950 shadow-inner ring-1 ring-white/10">
                                             {coreFeatureSteps.map((step, idx) => (
@@ -459,8 +469,6 @@ export default function HomePage() {
                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
                                                 </div>
                                             ))}
-                                            
-                                            {/* Smartphone Gloss */}
                                             <div className="absolute inset-0 z-20 pointer-events-none bg-gradient-to-tr from-transparent via-white/10 to-white/20 opacity-40"></div>
                                         </div>
                                     </div>
@@ -502,40 +510,45 @@ export default function HomePage() {
                                 })}
                             </div>
                         </div>
+                    </div>
+                </section>
 
-                        {/* CTA at Bottom of Features */}
-                        <div className="mt-20 flex flex-col items-center justify-center gap-6 text-center">
-                            <div className="flex -space-x-3">
-                                {[
-                                    "/home/hero/avatar-1.png",
-                                    "/home/hero/avatar-2.png",
-                                    "/home/hero/avatar-3.png",
-                                    "/home/hero/avatar-custom.png"
-                                ].map((src, i) => (
-                                    <div key={i} className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-white bg-slate-100 shadow-sm transition-transform hover:scale-110 hover:z-10">
-                                        <Image
-                                            src={src}
-                                            alt={`Trusted Client ${i + 1}`}
-                                            fill
-                                            sizes="48px"
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                ))}
-                                <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-[#074463] text-xs font-bold text-white shadow-sm">
-                                    +500
-                                </div>
-                            </div>
-                            <p className="text-sm font-bold text-slate-900 uppercase tracking-widest opacity-60">
-                                Trusted by <span className="font-extrabold">500+ Offices</span> Worldwide
+                <HowItWorksSection routes={routes} />
+
+                {/* FAQ Section with Premium Styling */}
+                <section id="faq" className="bg-slate-50/50 py-12 sm:py-24">
+                    <div className="container mx-auto px-4">
+                        <div className="mb-16 text-center">
+                            <h2 className="mb-4 text-3xl font-black text-slate-900 sm:text-5xl uppercase tracking-tight">
+                                Frequently Asked <span className="text-[#3882a5]">Questions</span>
+                            </h2>
+                            <p className="mx-auto max-w-2xl text-slate-600 text-lg font-medium">
+                                Everything you need to know about India's most advanced visitor management system.
                             </p>
+                        </div>
+
+                        <div className="max-w-4xl mx-auto space-y-4">
+                            {faqs.map((faq, idx) => (
+                                <details key={idx} className="group bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden transition-all duration-500 hover:shadow-xl">
+                                    <summary className="flex items-center justify-between p-8 cursor-pointer list-none">
+                                        <h3 className="text-xl font-black text-[#074463] pr-4 uppercase tracking-tighter transition-colors group-hover:text-[#3882a5]">
+                                            {faq.question}
+                                        </h3>
+                                        <div className="bg-slate-50 rounded-full p-2 transition-transform duration-500 group-open:rotate-180">
+                                            <ChevronRight className="w-6 h-6 text-[#3882a5]" />
+                                        </div>
+                                    </summary>
+                                    <div className="px-8 pb-8 text-slate-600 font-medium leading-relaxed border-t border-slate-50 pt-6">
+                                        {faq.answer}
+                                    </div>
+                                </details>
+                            ))}
                         </div>
                     </div>
                 </section>
-                <HowItWorksSection routes={routes} />
+
                 <PricingSection />
                 <IndustriesSection />
-                <ContactSection />
             </PublicLayout>
         </>
     );

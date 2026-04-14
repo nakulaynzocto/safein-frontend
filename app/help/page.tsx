@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { routes } from "@/utils/routes";
-import { Book, MessageCircle, Phone, ArrowRight, Clock } from "lucide-react";
+import { Book, MessageCircle, Phone, ArrowRight, Clock, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { PublicLayout } from "@/components/layout/publicLayout";
 import { PageSEOHead } from "@/components/seo/pageSEOHead";
@@ -84,58 +84,54 @@ export default function HelpPage() {
                     <section className="px-4 py-20 bg-slate-50/30">
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
-                                <h2 className="heading-main mb-4 text-3xl font-bold md:text-4xl text-brand">Popular Articles</h2>
-                                <p className="text-muted-foreground text-lg">Most frequently viewed help articles</p>
+                                <h2 className="text-3xl font-black text-[#074463] md:text-4xl uppercase tracking-tight">Popular <span className="text-[#3882a5]">Articles</span></h2>
+                                <p className="text-slate-500 font-medium mt-4">Most frequently viewed help articles</p>
                             </div>
 
-                            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
                                 {popularArticles.map((article, index) => (
                                     <div
                                         key={index}
-                                        className="group relative flex flex-col bg-white rounded-3xl border border-slate-100 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-brand/10 hover:-translate-y-2"
+                                        className="bg-white rounded-[2.5rem] shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 flex flex-col overflow-hidden h-full group p-2"
                                     >
-                                        {/* Article Image */}
-                                        <div className="relative h-48 w-full overflow-hidden">
-                                            <img 
-                                                src={article.image || "/images/auth-side.png"} 
-                                                alt={article.title}
-                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                            <Badge
-                                                variant="secondary"
-                                                className="absolute top-4 left-4 bg-white/90 backdrop-blur-md text-brand border-none text-[10px] uppercase tracking-wider font-bold shadow-sm"
-                                            >
-                                                {article.category}
-                                            </Badge>
-                                        </div>
-
-                                        <div className="flex flex-1 flex-col p-8">
-                                            <div className="mb-4 flex items-center text-xs text-slate-400 font-medium">
-                                                <Clock className="mr-1.5 h-3.5 w-3.5" />
-                                                {article.readTime}
+                                        <Link href={`/help/${article.slug}`} className="cursor-pointer block h-full flex flex-col">
+                                            {/* Article Image */}
+                                            <div className="relative h-56 w-full overflow-hidden rounded-[2rem]">
+                                                <img 
+                                                    src={article.image || "/images/auth-side.png"} 
+                                                    alt={article.title}
+                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-[#074463]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="absolute top-4 left-4 bg-white/90 backdrop-blur-md text-[#3882a5] border-none text-[10px] uppercase tracking-widest font-bold shadow-sm px-3 py-1.5 rounded-full"
+                                                >
+                                                    {article.category}
+                                                </Badge>
                                             </div>
-                                            
-                                            <Link href={`/help/${article.slug}`} className="block flex-1">
-                                                <h3 className="text-brand group-hover:text-brand-strong mb-4 text-xl font-bold transition-colors leading-tight">
+
+                                            <div className="flex flex-1 flex-col p-6">
+                                                <div className="mb-4 flex items-center gap-1.5 text-slate-400">
+                                                    <Clock className="w-3.5 h-3.5" />
+                                                    <span className="text-[10px] font-bold uppercase tracking-widest">
+                                                        {article.readTime}
+                                                    </span>
+                                                </div>
+                                                
+                                                <h3 className="font-black text-[#074463] text-xl mb-4 line-clamp-2 group-hover:text-[#3882a5] transition-colors leading-tight uppercase tracking-tight">
                                                     {article.title}
                                                 </h3>
-                                                <p className="text-muted-foreground text-sm line-clamp-2 mb-6">
+                                                <p className="text-slate-500 text-sm flex-1 mb-6 line-clamp-3 leading-relaxed font-medium">
                                                     {article.description}
                                                 </p>
-                                            </Link>
 
-                                            <Button
-                                                variant="link"
-                                                size="sm"
-                                                className="text-brand-strong hover:text-brand group-hover:translate-x-1 transition-transform hover:no-underline mt-auto h-auto justify-start p-0 font-bold text-sm tracking-tight gap-2"
-                                                asChild
-                                            >
-                                                <Link href={`/help/${article.slug}`}>
-                                                    Read Full Article <ArrowRight className="h-4 w-4" />
-                                                </Link>
-                                            </Button>
-                                        </div>
+                                                <div className="flex items-center text-[#3882a5] font-black text-[10px] uppercase tracking-widest group-hover:gap-2 transition-all">
+                                                    Read Full Article
+                                                    <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
+                                                </div>
+                                            </div>
+                                        </Link>
                                     </div>
                                 ))}
                             </div>

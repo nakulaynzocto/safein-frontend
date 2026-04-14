@@ -167,6 +167,18 @@ export const safeInPageSEO = {
         ],
         path: "/help",
     },
+    blog: {
+        title: "SafeIn Blog | Smart Visitor Management & Workplace Insights",
+        description: "Expert perspective on digital transformation and workplace security. Learn how to optimize your reception with SafeIn.",
+        keywords: [
+            "safein blog",
+            "visitor management insights",
+            "workplace security tips",
+            "digital reception guide",
+            "office productivity blog",
+        ],
+        path: "/blog",
+    },
     login: {
         title: "Login - SafeIn Visitor Management India",
         description: "Sign in to your SafeIn account to manage visitors and appointments securely from anywhere in India.",

@@ -13,6 +13,7 @@ import { formatCurrency } from "@/utils/helpers";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 import { useState, useMemo } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PricingSection() {
     const { data: fetchedSubscriptionPlans, isLoading, error } = useGetAllSubscriptionPlansQuery({ isActive: true });
@@ -54,14 +55,36 @@ export default function PricingSection() {
         }
     };
 
-    if (isLoading) return null;
-    if (error || !fetchedSubscriptionPlans) return null;
+    if (isLoading) {
+        return (
+            <section id="pricing" className="bg-white py-24">
+                <div className="container mx-auto px-4">
+                    <div className="mb-10 text-center">
+                        <Skeleton className="h-12 w-64 mx-auto mb-4" />
+                        <Skeleton className="h-6 w-full max-w-2xl mx-auto" />
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-8 px-1">
+                        {[1, 2, 3].map((i) => (
+                            <Skeleton key={i} className="h-[500px] w-[320px] rounded-[2.5rem]" />
+                        ))}
+                    </div>
+                </div>
+            </section>
+        );
+    }
+
+    // Don't show anything if there's an error or no plans found, 
+    // but maybe show a default message in development? 
+    // For now, if no plans, we return null as it's better than an empty section.
+    if (error || !fetchedSubscriptionPlans || plans.length === 0) {
+        return null;
+    }
 
     return (
         <section id="pricing" className="bg-white py-12 sm:py-16">
             <div className="container mx-auto px-4">
                 <div className="mb-10 text-center">
-                    <h2 className="mb-4 text-3xl font-black text-slate-900 sm:text-5xl">
+                    <h2 className="mb-4 text-3xl font-black text-slate-900 sm:text-5xl uppercase tracking-tighter">
                         Pricing <span className="text-[#3882a5]">Plans</span>
                     </h2>
                     <p className="mx-auto max-w-2xl text-slate-600 text-lg sm:text-xl font-medium leading-relaxed max-w-3xl">
@@ -71,7 +94,7 @@ export default function PricingSection() {
                 </div>
 
                 <div className="overflow-x-auto pb-6 pt-6">
-                    <div className="mx-auto flex w-max min-w-full flex-nowrap justify-start gap-8 px-1">
+                    <div className="mx-auto flex w-max min-w-full flex-nowrap justify-start lg:justify-center gap-8 px-1">
                         {plans.map((plan: ISubscriptionPlan) => (
                             <Card
                                 key={plan._id}
@@ -83,18 +106,18 @@ export default function PricingSection() {
                             >
                             {plan.isPopular && (
                                 <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2 transform">
-                                    <Badge className="bg-[#3882a5] px-4 py-1 text-white shadow-md rounded-full border-none">
+                                    <Badge className="bg-[#3882a5] px-4 py-1 text-white shadow-md rounded-full border-none font-black text-[10px] uppercase tracking-widest">
                                         Most Popular
                                     </Badge>
                                 </div>
                             )}
                             <CardHeader className="pb-8 text-center pt-10 px-6">
-                                <CardTitle className="text-slate-900 text-2xl font-black">
+                                <CardTitle className="text-slate-900 text-2xl font-black uppercase tracking-tight">
                                     {plan.name}
                                 </CardTitle>
                                 <div className="mt-4 flex flex-col items-center">
                                     {plan.name === 'Enterprise' ? (
-                                        <span className="text-slate-900 text-3xl font-black">Contact Sales</span>
+                                        <span className="text-slate-900 text-3xl font-black uppercase">Contact Sales</span>
                                     ) : (
                                         <>
                                             <div className="flex items-baseline gap-1">
@@ -106,7 +129,7 @@ export default function PricingSection() {
                                                 </span>
                                             </div>
                                             {!!plan.discountPercentage && plan.discountPercentage > 0 && (
-                                                <Badge className="mt-2 bg-green-500/10 text-green-600 text-[10px] font-bold border-none">
+                                                <Badge className="mt-2 bg-green-500/10 text-green-600 text-[10px] font-bold border-none uppercase tracking-widest">
                                                     SAVE {plan.discountPercentage}%
                                                 </Badge>
                                             )}
@@ -119,7 +142,7 @@ export default function PricingSection() {
                             </CardHeader>
                             <CardContent className="flex flex-col flex-1 px-8 pb-10">
                                 <Button
-                                    className="mb-8 w-full bg-[#074463] hover:bg-[#074463]/90 text-white h-14 rounded-2xl text-lg font-bold transition-all hover:scale-[1.02]"
+                                    className="mb-8 w-full bg-[#074463] hover:bg-[#074463]/90 text-white h-14 rounded-2xl text-lg font-black transition-all hover:scale-[1.02] uppercase tracking-wider"
                                     onClick={() => handleGoToSubscriptionPlan(plan)}
                                 >
                                     {plan.name === "Enterprise" 

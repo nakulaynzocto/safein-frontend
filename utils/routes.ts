@@ -7,6 +7,8 @@ export const routes = {
         CONTACT: "/contact",
         HELP: "/help",
         PRIVACY_POLICY: "/privacy-policy",
+        BLOG: "/blog",
+        BLOG_DETAIL: "/blog/[slug]",
 
         // Authentication
         LOGIN: "/login",

@@ -123,6 +123,7 @@ export const baseApi = createApi({
         "Chat",
         "DashboardStats",
         "QRSetup",
+        "Blog",
     ],
     endpoints: () => ({}),
     refetchOnMountOrArgChange: false,

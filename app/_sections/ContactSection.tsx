@@ -181,23 +181,6 @@ export default function ContactSection() {
                     </Card>
                 </div>
 
-                {/* Direct PWA Install Option */}
-                <div className="mt-24 flex flex-col items-center justify-center border-t border-slate-100 pt-16 text-center">
-                    <p className="mb-8 text-sm font-black uppercase tracking-[0.2em] text-slate-400">
-                        Get the <span className="text-slate-900">App Experience</span>
-                    </p>
-                    <div className="flex justify-center w-full">
-                        <Button className="h-16 min-w-[240px] rounded-2xl bg-slate-900 px-10 text-white transition-all hover:bg-slate-800 hover:shadow-xl active:scale-95 flex items-center gap-3">
-                            <Zap className="h-6 w-6 text-[#3882a5]" />
-                            <div className="flex flex-col items-start leading-tight">
-                                <span className="text-[10px] font-bold opacity-60 uppercase tracking-wider">Instant Setup</span>
-                                <span className="text-xl font-black">Install SafeIn PWA</span>
-                            </div>
-                        </Button>
-                    </div>
-                </div>
-
-
             </div>
         </section>
     );

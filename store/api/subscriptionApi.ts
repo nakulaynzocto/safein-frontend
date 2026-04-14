@@ -1,3 +1,4 @@
+import { API_URL } from "@/lib/api-config";
 import { baseApi } from "./baseApi";
 
 export interface ISubscriptionPlan {
@@ -69,7 +70,7 @@ export const subscriptionApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         getAllSubscriptionPlans: builder.query<GetAllSubscriptionPlansResponse, GetAllSubscriptionPlansQueryArgs>({
             query: ({ isActive }) => ({
-                url: `/subscription-plans${isActive ? "?isActive=true" : ""}`,
+                url: `${API_URL}/subscription-plans${isActive ? "?isActive=true" : ""}`,
                 method: "GET",
             }),
             transformResponse: (response: any) => {
