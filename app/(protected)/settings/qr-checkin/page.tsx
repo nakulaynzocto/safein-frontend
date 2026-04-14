@@ -30,6 +30,9 @@ const OUT_W = 1400;
 const OUT_H = 1900;
 const FONT_STACK = "'Plus Jakarta Sans', Arial, sans-serif";
 
+import { AppointmentLinksSubNav } from "@/components/layout/AppointmentLinksSubNav";
+import { MOBILE_APPOINTMENT_LINKS_SUB_NAV_HEIGHT_PX } from "@/utils/appointmentLinksLayout";
+
 function sanitizeFilename(name: string) {
     return name.replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").slice(0, 80) || "company";
 }
@@ -220,7 +223,7 @@ export default function QrCheckinSettingsPage() {
                             <p className="text-sm text-muted-foreground">Reception Check-in Station</p>
                         </div>
 
-                        <div className="hidden grid-cols-2 gap-3 sm:grid">
+                        <div className="grid grid-cols-2 gap-3">
                             <Button
                                 className="w-full border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/5"
                                 variant="outline"
@@ -239,7 +242,7 @@ export default function QrCheckinSettingsPage() {
                                 Download
                             </Button>
                         </div>
-                        <p className="text-[10px] text-muted-foreground">High-resolution PNG for printing and display</p>
+                        <p className="text-[10px] text-muted-foreground italic">High-resolution PNG for printing and display</p>
                     </CardContent>
                 </Card>
 
@@ -346,23 +349,8 @@ export default function QrCheckinSettingsPage() {
                 </Card>
             </div>
 
-            {/* Mobile Actions Overlay */}
-            <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-white/80 p-4 backdrop-blur-md sm:hidden">
-                <div className="mx-auto flex max-w-md gap-3">
-                    <Button
-                        variant="outline"
-                        className="flex-1 h-12 border-slate-200"
-                        onClick={() => window.open(scanUrl, "_blank")}
-                    >
-                        <ExternalLink className="mr-2 h-4 w-4" />
-                        Preview
-                    </Button>
-                    <Button className="flex-1 h-12 bg-[#3882a5]" onClick={handleDownload}>
-                        <Download className="mr-2 h-4 w-4" />
-                        Download
-                    </Button>
-                </div>
-            </div>
+            <AppointmentLinksSubNav />
+            <div className="shrink-0 md:hidden" style={{ height: MOBILE_APPOINTMENT_LINKS_SUB_NAV_HEIGHT_PX }} aria-hidden />
 
             <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
                 <AlertDialogContent>

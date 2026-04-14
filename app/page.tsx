@@ -26,6 +26,7 @@ import {
     MessageSquare,
     BarChart3,
     Printer,
+    QrCode,
 } from "lucide-react";
 import Link from "next/link";
 import { PageSEOHead } from "@/components/seo/pageSEOHead";
@@ -118,51 +119,54 @@ export default function HomePage() {
     const coreFeatureSteps = useMemo(() => [
         {
             id: 1,
-            title: "Smart Pre-Booking",
-            description: "Empower visitors to book slots in advance with automated calendar sync for a prioritized and professional arrival experience.",
+            title: "Priority Booking",
+            description: "Pre-book VIP guests with priority slots and automated QR code invites for a seamless, executive-level arrival experience.",
             image: "/home/custom/booking.png",
             color: "from-[#3882a5]/20 to-[#3882a5]/10",
-            icon: <User className="h-7 w-7" />
+            icon: <User className="h-7 w-7" />,
+            hasQrBadge: true
         },
         {
             id: 2,
-            title: "Instant Spot Pass",
-            description: "Manage walk-in visitors effortlessly with quick gate-side registrations and instant notifications sent directly to the hosts.",
-            image: "/home/custom/kiosk.png",
+            title: "Smart Invite Link",
+            description: "Send personalized invitation links that generate secure QR entry passes instantly, removing friction from the visitor journey.",
+            image: "/images/features/qr_checkin_feature_1776194813535.png",
             color: "from-[#3882a5]/20 to-[#3882a5]/10",
-            icon: <Bell className="h-7 w-7" />
+            icon: <QrCode className="h-7 w-7" />,
+            hasQrBadge: true
         },
         {
             id: 3,
+            title: "Instant QR Spot Pass",
+            description: "Generate digital spot passes with QR codes for walk-in visitors, enabling instant host alerts and automated security logging.",
+            image: "/home/custom/kiosk.png",
+            color: "from-[#3882a5]/20 to-[#3882a5]/10",
+            icon: <QrCode className="h-7 w-7" />,
+            hasQrBadge: true
+        },
+        {
+            id: 4,
             title: "Secured OTP Verification",
-            description: "Enhance office safety with secure 6-digit OTP codes and real-time gatekeeper verification for every checked-in visitor.",
+            description: "Double-check safety with secure 6-digit OTP codes alongside QR verification for high-security environments.",
             image: "/home/custom/gatekeeper.png",
             color: "from-[#3882a5]/20 to-[#3882a5]/10",
             icon: <Shield className="h-7 w-7" />
         },
         {
-            id: 4,
+            id: 5,
             title: "Real-time Messaging",
-            description: "Enable secure and instant communication between hosts and visitors through our built-in premium messaging platform.",
+            description: "Host-visitor communication hub with instant status updates and gate-side arrival confirmations via chat.",
             image: "/home/custom/dashboard.png",
             color: "from-[#3882a5]/20 to-[#3882a5]/10",
             icon: <MessageSquare className="h-7 w-7" />
         },
         {
-            id: 5,
-            title: "Insightful Dashboard",
-            description: "Visualize visitor footprints, peak hours, and security compliance with our powerful analytics dashboard.",
+            id: 6,
+            title: "Insightful Analytics",
+            description: "Monitor visitor peaks, security bottlenecks, and compliance logs with our data-driven executive dashboard.",
             image: "/home/custom/dashboard.png",
             color: "from-[#3882a5]/20 to-[#3882a5]/10",
             icon: <BarChart3 className="h-7 w-7" />
-        },
-        {
-            id: 6,
-            title: "Touchless QR Registration",
-            description: "Enable visitors to register themselves instantly by scanning a unique gate-side QR code, ensuring a fast and paperless entry experience.",
-            image: "/images/features/qr_checkin_feature_1776194813535.png",
-            color: "from-[#3882a5]/20 to-[#3882a5]/10",
-            icon: <Globe className="h-7 w-7" />
         }
     ], []);
 
@@ -425,10 +429,16 @@ export default function HomePage() {
                                         )}
                                     >
                                         <div className={cn(
-                                            "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-all duration-500",
+                                            "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-all duration-500 relative",
                                             featuresActiveStep === idx ? "bg-[#3882a5] text-white shadow-lg" : "bg-slate-100 text-[#3882a5]"
                                         )}>
                                             {step.icon}
+                                            {/* QR Badge for Mobile focus */}
+                                            {step.hasQrBadge && (
+                                                <div className="absolute -top-1 -right-1 bg-emerald-500 rounded-full p-1 border-2 border-white shadow-md lg:hidden z-10">
+                                                    <QrCode className="w-3 h-3 text-white" />
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="flex flex-col">
                                             <h3 className={cn(
@@ -489,10 +499,16 @@ export default function HomePage() {
                                             )}
                                         >
                                             <div className={cn(
-                                                "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-all duration-500",
+                                                "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-all duration-500 relative",
                                                 featuresActiveStep === actualIdx ? "bg-[#3882a5] text-white shadow-lg" : "bg-slate-100 text-[#3882a5]"
                                             )}>
                                                 {step.icon}
+                                                {/* QR Badge for Mobile focus */}
+                                                {step.hasQrBadge && (
+                                                    <div className="absolute -top-1 -right-1 bg-emerald-500 rounded-full p-1 border-2 border-white shadow-md lg:hidden z-10">
+                                                        <QrCode className="w-3 h-3 text-white" />
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="flex flex-col">
                                                 <h3 className={cn(
@@ -530,15 +546,15 @@ export default function HomePage() {
                         <div className="max-w-4xl mx-auto space-y-4">
                             {faqs.map((faq, idx) => (
                                 <details key={idx} className="group bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden transition-all duration-500 hover:shadow-xl">
-                                    <summary className="flex items-center justify-between p-8 cursor-pointer list-none">
-                                        <h3 className="text-xl font-black text-[#074463] pr-4 uppercase tracking-tighter transition-colors group-hover:text-[#3882a5]">
+                                    <summary className="flex items-center justify-between p-6 sm:p-8 cursor-pointer list-none">
+                                        <h3 className="text-lg sm:text-xl font-black text-[#074463] pr-4 uppercase tracking-tighter transition-colors group-hover:text-[#3882a5]">
                                             {faq.question}
                                         </h3>
                                         <div className="bg-slate-50 rounded-full p-2 transition-transform duration-500 group-open:rotate-180">
                                             <ChevronRight className="w-6 h-6 text-[#3882a5]" />
                                         </div>
                                     </summary>
-                                    <div className="px-8 pb-8 text-slate-600 font-medium leading-relaxed border-t border-slate-50 pt-6">
+                                    <div className="px-6 pb-6 sm:px-8 sm:pb-8 text-slate-600 font-medium leading-relaxed border-t border-slate-50 pt-6">
                                         {faq.answer}
                                     </div>
                                 </details>

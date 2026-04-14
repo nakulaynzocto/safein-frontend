@@ -5,11 +5,11 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { routes } from "@/utils/routes";
 import { MOBILE_APPOINTMENT_LINKS_SUB_NAV_HEIGHT_PX } from "@/utils/appointmentLinksLayout";
-import { Link2, Zap } from "lucide-react";
+import { Link2, Zap, QrCode } from "lucide-react";
 
 const tabs = [
     {
-        name: "Invite link",
+        name: "Smart link",
         href: routes.privateroute.APPOINTMENT_LINKS_SEND_LINK,
         icon: Link2,
         isActive: (pathname: string) =>
@@ -18,13 +18,20 @@ const tabs = [
             pathname === routes.privateroute.APPOINTMENT_LINKS_CREATE,
     },
     {
-        name: "Priority invite",
+        name: "Priority booking",
         href: routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING,
         icon: Zap,
         isActive: (pathname: string) =>
             pathname === routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING ||
             pathname === routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING_CREATE ||
             pathname.startsWith(`${routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING}/`),
+    },
+    {
+        name: "Gate QR",
+        href: routes.privateroute.SETTINGS_QR_CHECKIN,
+        icon: QrCode,
+        isActive: (pathname: string) =>
+            pathname === routes.privateroute.SETTINGS_QR_CHECKIN,
     },
 ];
 

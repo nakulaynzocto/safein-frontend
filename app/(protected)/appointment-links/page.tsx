@@ -441,7 +441,7 @@ function AppointmentLinksContent() {
                             <div className="min-w-0 flex-1">
                                 <div className="truncate text-sm font-medium sm:text-base flex items-center gap-1">
                                     {formattedName}
-                                    {isSpecial && <span className="text-[10px] bg-purple-100/50 text-purple-700 border border-purple-200 px-1.5 py-0.5 rounded-md uppercase font-bold tracking-wider shadow-sm">VIP</span>}
+                                    {isSpecial && <span className="text-[10px] bg-[#3882a5]/10 text-[#3882a5] border border-[#3882a5]/20 px-1.5 py-0.5 rounded-md uppercase font-bold tracking-wider shadow-sm">PRIORITY</span>}
                                 </div>
                                 <div className="flex items-center gap-1 truncate text-xs text-gray-500">
                                     <Phone className="h-3 w-3 shrink-0" />
@@ -720,13 +720,13 @@ function AppointmentLinksContent() {
                                         <>
                                             <User className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
                                             <span className="hidden sm:inline">Create Priority Booking</span>
-                                            <span className="sm:hidden">VIP</span>
+                                            <span className="sm:hidden">Priority</span>
                                         </>
                                     ) : (
                                         <>
                                             <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                            <span className="hidden sm:inline">Create Invite Link</span>
-                                            <span className="sm:hidden">Link</span>
+                                            <span className="hidden sm:inline">Create Smart Link</span>
+                                            <span className="sm:hidden">Smart</span>
                                         </>
                                     )}
                                 </ActionButton>
