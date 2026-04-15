@@ -189,19 +189,16 @@ export default function QrCheckinSettingsPage() {
 
             <div className="grid gap-6 lg:grid-cols-12">
                 {/* QR Preview Card */}
-                <Card className="order-1 overflow-hidden border-none shadow-xl lg:col-span-5">
-                    <CardHeader className="bg-slate-50/50 pb-4">
-                        <CardTitle className="flex items-center gap-2 text-lg font-semibold text-[#074463]">
-                            <div className="rounded-lg bg-[#3882a5]/10 p-2 text-[#3882a5]">
-                                <QrCode className="h-5 w-5" />
-                            </div>
+                <Card className="order-1 lg:col-span-5 shadow-sm">
+                    <CardHeader className="pb-4">
+                        <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                            <QrCode className="h-5 w-5 text-muted-foreground" />
                             QR Identity Card
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6 pt-6 text-center">
-                        <div className="group relative mx-auto w-fit">
-                            <div className="absolute inset-0 -m-1 rounded-2xl bg-gradient-to-tr from-[#3882a5] to-blue-300 opacity-20 blur-sm transition-opacity group-hover:opacity-40" />
-                            <div className="relative rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
+                    <CardContent className="space-y-6 pt-2 text-center">
+                        <div className="mx-auto w-fit">
+                            <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
                                 <QRCodeCanvas
                                     id={QR_CANVAS_ID}
                                     value={scanUrl}
@@ -225,7 +222,7 @@ export default function QrCheckinSettingsPage() {
 
                         <div className="grid grid-cols-2 gap-3">
                             <Button
-                                className="w-full border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/5"
+                                className="w-full"
                                 variant="outline"
                                 type="button"
                                 onClick={() => window.open(scanUrl, "_blank")}
@@ -234,7 +231,7 @@ export default function QrCheckinSettingsPage() {
                                 Preview
                             </Button>
                             <Button
-                                className="w-full bg-[#3882a5] shadow-md hover:bg-[#2d6a87]"
+                                className="w-full"
                                 type="button"
                                 onClick={handleDownload}
                             >
@@ -247,20 +244,20 @@ export default function QrCheckinSettingsPage() {
                 </Card>
 
                 {/* Configuration & Links Card */}
-                <Card className="order-2 overflow-hidden border-none shadow-xl lg:col-span-7">
-                    <CardHeader className="bg-slate-50/50 pb-4">
-                        <CardTitle className="text-lg font-semibold text-[#074463]">Deployment & Settings</CardTitle>
+                <Card className="order-2 lg:col-span-7 shadow-sm">
+                    <CardHeader className="pb-4">
+                        <CardTitle className="text-lg font-semibold">Deployment & Settings</CardTitle>
                         <CardDescription>Manage how visitors access your check-in portal</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-8 pt-6">
+                    <CardContent className="space-y-8 pt-2">
                         {/* URL Management */}
                         <div className="space-y-4">
-                            <Label className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+                            <Label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                                 Public Scan Link
                             </Label>
                             <div className="relative group">
-                                <div className="flex overflow-hidden rounded-xl border-2 border-slate-100 bg-slate-50/50 transition-all focus-within:border-[#3882a5]/30 focus-within:bg-white group-hover:border-slate-200">
-                                    <div className="flex items-center bg-slate-100/80 px-4 text-slate-500">
+                                <div className="flex overflow-hidden rounded-xl border transition-all focus-within:ring-1 focus-within:ring-ring bg-background">
+                                    <div className="flex items-center border-r bg-muted/30 px-4 text-muted-foreground">
                                         <ExternalLink className="h-4 w-4" />
                                     </div>
                                     <Input
@@ -270,7 +267,7 @@ export default function QrCheckinSettingsPage() {
                                     />
                                     <Button
                                         variant="ghost"
-                                        className="h-auto rounded-none border-l bg-white px-4 text-[#3882a5] hover:bg-slate-50"
+                                        className="h-auto rounded-none border-l bg-muted/10 px-4 hover:bg-muted/30 text-primary"
                                         type="button"
                                         onClick={handleCopy}
                                     >
@@ -282,16 +279,16 @@ export default function QrCheckinSettingsPage() {
                                     </Button>
                                 </div>
                             </div>
-                            <div className="rounded-lg bg-blue-50/50 p-3 text-xs leading-relaxed text-[#3882a5]">
-                                <strong>Pro-Tip:</strong> Print the QR code and place it at your reception desk or
+                            <div className="rounded-lg bg-muted/50 p-3 text-xs leading-relaxed text-muted-foreground">
+                                <strong className="text-foreground">Pro-Tip:</strong> Print the QR code and place it at your reception desk or
                                 gate entrance for easy visitor self-check-in.
                             </div>
                         </div>
 
                         {/* Slug Configuration */}
-                        <div className="rounded-2xl border border-slate-100 bg-slate-50/30 p-5 space-y-4">
+                        <div className="rounded-2xl border bg-card p-5 space-y-4 shadow-sm">
                             <div className="flex items-center justify-between">
-                                <Label className="text-sm font-semibold text-slate-700">QR Slug (Identifier)</Label>
+                                <Label className="text-sm font-semibold text-foreground">QR Slug (Identifier)</Label>
                                 {editing && (
                                     <Button
                                         variant="ghost"
@@ -306,13 +303,13 @@ export default function QrCheckinSettingsPage() {
 
                             {!editing ? (
                                 <div className="flex items-center justify-between gap-4 rounded-xl border bg-white p-3">
-                                    <code className="bg-slate-100 px-2 py-1 rounded text-sm font-bold text-[#074463]">
+                                    <code className="bg-muted px-2 py-1 rounded text-sm font-bold text-foreground">
                                         {currentSlug}
                                     </code>
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        className="h-9 border-dashed text-[#3882a5] hover:bg-[#3882a5]/5"
+                                        className="h-9"
                                         onClick={startEditing}
                                     >
                                         <RefreshCw className="mr-2 h-3 w-3" />

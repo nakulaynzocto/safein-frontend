@@ -14,15 +14,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination";
+import { CompactPagination } from "@/components/common/pagination";
 import { SubscriptionInvoiceTemplate } from "./subscriptionInvoiceTemplate";
 import { useReactToPrint } from "react-to-print";
 
@@ -70,8 +62,9 @@ interface SubscriptionHistoryTableProps {
     isLoading: boolean;
     currentPage: number;
     onPageChange: (page: number) => void;
-    // Assuming we can get total pages from API or parent logic, default to 1 if not
     totalPages?: number;
+    totalItems: number;
+    pageSize: number;
     user?: any;
     businessProfile?: any;
 }
@@ -82,6 +75,8 @@ export const SubscriptionHistoryTable = ({
     currentPage,
     onPageChange,
     totalPages = 1,
+    totalItems,
+    pageSize,
     user,
     businessProfile,
 }: SubscriptionHistoryTableProps) => {
@@ -265,78 +260,19 @@ export const SubscriptionHistoryTable = ({
                     </div>
 
                     {/* Pagination Controls */}
-                    <div className="border-t border-gray-200 pt-4">
-                        <Pagination>
-                            <PaginationContent>
-                                <PaginationItem>
-                                    <PaginationPrevious
-                                        href="#"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            if (currentPage > 1) onPageChange(currentPage - 1);
-                                        }}
-                                        className={
-                                            currentPage === 1
-                                                ? "pointer-events-none opacity-50"
-                                                : "cursor-pointer"
-                                        }
-                                    />
-                                </PaginationItem>
-
-                                {[...Array(totalPages)].map((_, i) => {
-                                    const page = i + 1;
-                                    if (
-                                        totalPages > 7 &&
-                                        Math.abs(page - currentPage) > 2 &&
-                                        page !== 1 &&
-                                        page !== totalPages
-                                    ) {
-                                        if (Math.abs(page - currentPage) === 3) {
-                                            return (
-                                                <PaginationItem key={page}>
-                                                    <PaginationEllipsis />
-                                                </PaginationItem>
-                                            );
-                                        }
-                                        return null;
-                                    }
-
-                                    return (
-                                        <PaginationItem key={page}>
-                                            <PaginationLink
-                                                href="#"
-                                                isActive={page === currentPage}
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    onPageChange(page);
-                                                }}
-                                            >
-                                                {page}
-                                            </PaginationLink>
-                                        </PaginationItem>
-                                    );
-                                })}
-
-                                <PaginationItem>
-                                    <PaginationNext
-                                        href="#"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            if (currentPage < totalPages) onPageChange(currentPage + 1);
-                                        }}
-                                        className={
-                                            currentPage === totalPages
-                                                ? "pointer-events-none opacity-50"
-                                                : "cursor-pointer"
-                                        }
-                                    />
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
-                        <div className="text-center text-xs text-gray-500 mt-2">
-                            Page {currentPage} of {totalPages}
+                    {totalPages && totalPages > 1 ? (
+                        <div className="border-t border-gray-200 pt-4 px-2">
+                            <CompactPagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                totalItems={totalItems}
+                                pageSize={pageSize}
+                                hasNextPage={currentPage < totalPages}
+                                hasPrevPage={currentPage > 1}
+                                onPageChange={onPageChange}
+                            />
                         </div>
-                    </div>
+                    ) : null}
                 </div>
             </div>
 

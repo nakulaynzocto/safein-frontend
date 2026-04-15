@@ -41,7 +41,7 @@ export default function SubscriptionSettingsPage() {
     }
 
     return (
-        <div className="mx-auto w-full max-w-full px-1 py-4 sm:px-4 sm:py-6">
+        <div className="mx-auto w-full max-w-full px-1 pt-4 sm:pt-6">
             <ProfileLayout>
                 {() => <ProfileSubscription />}
             </ProfileLayout>

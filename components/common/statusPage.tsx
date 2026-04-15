@@ -120,27 +120,29 @@ export function StatusPage({
                     {description && <p className="text-center text-sm leading-relaxed text-gray-600">{description}</p>}
 
                     {/* Actions */}
-                    <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+                    <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:flex-wrap sm:justify-center">
                         {primaryAction && renderButton(primaryAction, "default")}
                         {secondaryAction && renderButton(secondaryAction, "outline")}
                         {showHomeButton && (
-                            <Link href={routes.publicroute.HOME}>
-                                <ActionButton variant="outline" size="xl" className="w-full sm:w-auto">
+                            <Link href={routes.publicroute.HOME} className="w-full sm:w-auto">
+                                <ActionButton variant="outline" size="xl" className="w-full">
                                     <Home className="mr-2 h-4 w-4" />
                                     Go Home
                                 </ActionButton>
                             </Link>
                         )}
                         {showBackButton && (
-                            <ActionButton
-                                variant="outline"
-                                onClick={() => window.history.back()}
-                                size="xl"
-                                className="w-full sm:w-auto"
-                            >
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Go Back
-                            </ActionButton>
+                            <div className="w-full sm:w-auto">
+                                <ActionButton
+                                    variant="outline"
+                                    onClick={() => window.history.back()}
+                                    size="xl"
+                                    className="w-full"
+                                >
+                                    <ArrowLeft className="mr-2 h-4 w-4" />
+                                    Go Back
+                                </ActionButton>
+                            </div>
                         )}
                     </div>
                 </CardContent>

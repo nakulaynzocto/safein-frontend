@@ -18,6 +18,7 @@ export interface INotificationType {
     email: boolean;
     whatsapp: boolean;
     sms: boolean;
+    voice: boolean;
 }
 
 export interface Settings {
@@ -30,6 +31,12 @@ export interface Settings {
         visitor: INotificationType;
         employee: INotificationType;
         appointment: INotificationType;
+    };
+    voiceCall: {
+        enabled: boolean;
+        backupEnabled: boolean;
+        backupNumber?: string;
+        maxRetries: number;
     };
     smtp?: SmtpConfig;
     sms?: {
@@ -78,6 +85,19 @@ export interface UpdateSettingsRequest {
         phoneNumberId?: string;
         accessToken?: string;
     };
+    voiceCall?: {
+        enabled?: boolean;
+        backupEnabled?: boolean;
+        backupNumber?: string;
+        maxRetries?: number;
+    };
+}
+
+export interface SaveVoiceConfigRequest {
+    enabled: boolean;
+    backupEnabled: boolean;
+    backupNumber?: string;
+    maxRetries: number;
 }
 
 export interface SaveSmtpRequest {
@@ -149,6 +169,11 @@ export const settingsApi = baseApi.injectEndpoints({
             transformResponse: (res: any) => res?.data ?? res,
             invalidatesTags: ["Settings"],
         }),
+        saveVoiceConfig: builder.mutation<Settings, SaveVoiceConfigRequest>({
+            query: (body) => ({ url: "/settings/voice-call", method: "POST", body }),
+            transformResponse: (res: any) => res?.data ?? res,
+            invalidatesTags: ["Settings"],
+        }),
     }),
 });
 
@@ -160,4 +185,5 @@ export const {
     useSaveSMTPConfigMutation,
     useSaveSMSConfigMutation,
     useRemoveSMSConfigMutation,
+    useSaveVoiceConfigMutation,
 } = settingsApi;

@@ -11,7 +11,8 @@ import {
     BellRing, 
     Settings2,
     Loader2, 
-    Save 
+    Save,
+    PhoneCall
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ActionButton } from "@/components/common/actionButton";
@@ -122,9 +123,10 @@ export function NotificationSettings() {
         emailEnabled: true,
         whatsappEnabled: false,
         smsEnabled: false,
-        visitor: { email: true, whatsapp: false, sms: false },
-        employee: { email: true, whatsapp: false, sms: false },
-        appointment: { email: true, whatsapp: false, sms: false },
+        voiceCallEnabled: false,
+        visitor: { email: true, whatsapp: false, sms: false, voice: false },
+        employee: { email: true, whatsapp: false, sms: false, voice: false },
+        appointment: { email: true, whatsapp: false, sms: false, voice: false },
     });
 
     const [modal, setModal] = useState({ isOpen: false, path: "" });
@@ -135,20 +137,24 @@ export function NotificationSettings() {
                 emailEnabled: settings.notifications.emailEnabled ?? true,
                 whatsappEnabled: settings.notifications.whatsappEnabled ?? false,
                 smsEnabled: settings.notifications.smsEnabled ?? false,
+                voiceCallEnabled: settings.voiceCall?.enabled ?? false,
                 visitor: {
                     email: settings.notifications.visitor?.email ?? true,
                     whatsapp: settings.notifications.visitor?.whatsapp ?? false,
                     sms: settings.notifications.visitor?.sms ?? false,
+                    voice: settings.notifications.visitor?.voice ?? false,
                 },
                 employee: {
                     email: settings.notifications.employee?.email ?? true,
                     whatsapp: settings.notifications.employee?.whatsapp ?? false,
                     sms: settings.notifications.employee?.sms ?? false,
+                    voice: settings.notifications.employee?.voice ?? false,
                 },
                 appointment: {
                     email: settings.notifications.appointment?.email ?? true,
                     whatsapp: settings.notifications.appointment?.whatsapp ?? false,
                     sms: settings.notifications.appointment?.sms ?? false,
+                    voice: settings.notifications.appointment?.voice ?? false,
                 },
             });
         }

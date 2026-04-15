@@ -48,6 +48,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { cn } from "@/lib/utils";
+import { CreditBalancePill } from "@/components/dashboard/CreditBalancePill";
 
 interface NavbarProps {
     forcePublic?: boolean;
@@ -259,14 +260,13 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 >
                                     <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-gray-200 bg-white">
                                         <Image
-                                            src="/safein-logo.svg"
-                                            alt="SafeIn Logo"
+                                            src={user?.profilePicture && user.profilePicture.trim() !== "" ? user.profilePicture : "/safein-logo.svg"}
+                                            alt={user?.companyName || "Company Logo"}
                                             width={40}
                                             height={40}
                                             priority
                                             className="h-full w-full object-contain"
                                             onError={(e) => {
-                                                // Fallback if logo fails to load
                                                 const target = e.currentTarget as HTMLImageElement;
                                                 target.src = "/safein-identity.png";
                                             }}
@@ -280,7 +280,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                             className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white"
                                                 }`}
                                         >
-                                            Visitor Management System
+                                            {formatName(user?.companyName || "Visitor Management System")}
                                         </div>
                                     </div>
                                 )}
@@ -295,8 +295,8 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 >
                                     <div className="group relative flex h-10 w-10 lg:h-14 lg:w-14 items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:scale-105 shadow-sm">
                                         <Image
-                                            src="/safein-logo.svg"
-                                            alt="SafeIn Logo"
+                                            src={user?.profilePicture && user.profilePicture.trim() !== "" ? user.profilePicture : "/safein-logo.svg"}
+                                            alt={user?.companyName || "Company Logo"}
                                             width={56}
                                             height={56}
                                             priority
@@ -316,7 +316,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                             className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white"
                                                 }`}
                                         >
-                                            Visitor Management System
+                                            {formatName(user?.companyName || "Visitor Management System")}
                                         </div>
                                     </div>
                                 )}
@@ -373,76 +373,11 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                         {/* Authenticated users - Show company info or user profile, notifications, and sidebar toggle */}
                         {isActuallyAuthenticated && !isSubscriptionPage && (
                             <div className="flex items-center gap-3">
-                                {/* Company Name with Logo - For admins */}
-                                {user?.companyName && !isEmployee && (
-                                    <div
-                                        className={`hidden items-center gap-2 rounded-lg px-3 py-2 transition-all duration-200 sm:flex ${shouldShowWhiteNavbar
-                                            ? "bg-gray-50 text-gray-900"
-                                            : "bg-white/10 text-white"
-                                            }`}
-                                    >
-                                        {user?.profilePicture && user.profilePicture.trim() !== "" ? (
-                                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden bg-white">
-                                                <Image
-                                                    src={`${user.profilePicture}${user.profilePicture.includes("?") ? "&" : "?"}v=${user.profilePicture.length}`}
-                                                    alt={user?.companyName || "Company Logo"}
-                                                    width={40}
-                                                    height={40}
-                                                    className="h-full w-full object-contain scale-125"
-                                                    onError={(e) => {
-                                                        const target = e.currentTarget as HTMLImageElement;
-                                                        target.src = "/safein-identity.png";
-                                                        target.className = "h-full w-full object-contain p-1";
-                                                    }}
-                                                />
-                                            </div>
-                                        ) : (
-                                            <Building2
-                                                className={`h-5 w-5 flex-shrink-0 ${shouldShowWhiteNavbar ? "text-gray-600" : "text-white"}`}
-                                            />
-                                        )}
-                                        <span className="text-sm font-semibold whitespace-nowrap">
-                                            {formatName(user.companyName)}
-                                        </span>
-                                    </div>
-                                )}
-                                {/* Company Logo - Company Name (Employee Name) - For employees (plain text, no button) */}
-                                {isEmployee && (user?.companyName || user?.name || user?.email) && (
-                                    <div
-                                        className={`hidden items-center gap-2 rounded-lg px-3 py-2 transition-all duration-200 sm:flex ${shouldShowWhiteNavbar
-                                            ? "bg-gray-50 text-gray-900"
-                                            : "bg-white/10 text-white"
-                                            }`}
-                                    >
-                                        {/* Company Logo - Use company profile picture or Building2 icon */}
-                                        {user?.profilePicture && user.profilePicture.trim() !== "" ? (
-                                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden bg-white rounded-full">
-                                                <Image
-                                                    src={`${user.profilePicture}${user.profilePicture.includes("?") ? "&" : "?"}v=${user.profilePicture.length}`}
-                                                    alt={user?.companyName || "Company Logo"}
-                                                    width={40}
-                                                    height={40}
-                                                    className="h-full w-full object-contain scale-125"
-                                                    onError={(e) => {
-                                                        const target = e.currentTarget as HTMLImageElement;
-                                                        target.src = "/safein-identity.png";
-                                                        target.className = "h-full w-full object-contain p-1";
-                                                    }}
-                                                />
-                                            </div>
-                                        ) : (
-                                            <Building2
-                                                className={`h-5 w-5 flex-shrink-0 ${shouldShowWhiteNavbar ? "text-gray-600" : "text-white"}`}
-                                            />
-                                        )}
-                                        <span className="text-sm font-semibold whitespace-nowrap">
-                                            {user?.companyName && employeeName
-                                                ? `${formatName(user.companyName)} (${employeeName})`
-                                                : formatName(user?.companyName || "") || employeeName || "Employee"}
-                                        </span>
-                                    </div>
-                                )}
-
+                                 {!isEmployee && (
+                                     <div className="flex">
+                                         <CreditBalancePill />
+                                     </div>
+                                 )}
 
                                  {/* Messages Icon */}
                                 <Link

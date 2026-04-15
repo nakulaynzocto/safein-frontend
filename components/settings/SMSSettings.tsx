@@ -213,51 +213,41 @@ export function SMSSettings() {
                             icon={MessageSquare}
                         />
 
-                        {!isVerified && (
-                            <div className="mb-6 flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800">
-                                <ShieldAlert className="h-5 w-5 mt-0.5 shrink-0 text-amber-600" />
-                                <div>
-                                    <p className="text-sm font-semibold">Profile mobile required</p>
-                                    <p className="text-xs mt-0.5 text-amber-700">
-                                        Make sure to add a valid mobile number under your Profile before verification.
-                                    </p>
-                                </div>
-                            </div>
-                        )}
+
 
                         <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                                 <div className="space-y-6 pt-2">
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-2">
-                                            <MessageSquare className="h-4 w-4 text-[#3882a5]" />
-                                            <h3 className="text-sm font-bold text-foreground tracking-tight">Select Provider</h3>
-                                        </div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div className="space-y-3">
+                                        <h3 className="text-sm font-semibold text-foreground">Select Provider</h3>
+                                        <div className="flex flex-wrap gap-2">
                                             {[
-                                                { id: "twilio", name: "Twilio", desc: "Global Standard" },
-                                                { id: "msg91", name: "Msg91", desc: "Popular in India" },
-                                                { id: "fast2sms", name: "Fast2SMS", desc: "Quick & Easy (India)" },
+                                                { id: "twilio", name: "Twilio" },
+                                                { id: "msg91", name: "Msg91" },
+                                                { id: "fast2sms", name: "Fast2SMS" },
                                             ].map((p) => (
-                                                <div
+                                                <button
                                                     key={p.id}
+                                                    type="button"
                                                     onClick={() => setValue("provider", p.id as any, { shouldDirty: true })}
-                                                    className={`cursor-pointer p-4 rounded-2xl border-2 transition-all duration-200 ${
+                                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                                                         selectedProvider === p.id
-                                                            ? "border-[#3882a5] bg-[#3882a5]/5 shadow-sm"
-                                                            : "border-border bg-background hover:border-border/60"
+                                                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                                                            : "bg-background border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                                                     }`}
                                                 >
-                                                    <div className="flex flex-col gap-1">
-                                                        <span className="font-bold text-sm tracking-tight">{p.name}</span>
-                                                        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{p.desc}</span>
-                                                    </div>
-                                                </div>
+                                                    {p.name}
+                                                </button>
                                             ))}
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 gap-6 bg-muted/20 p-6 rounded-2xl border border-dashed">
+                                    <div className="space-y-4 pt-4 border-t">
+                                        <div className="flex items-center gap-2">
+                                            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                                            <h3 className="text-sm font-semibold text-foreground">Gateway Credentials</h3>
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-6 bg-muted/20 p-6 rounded-2xl border border-dashed">
                                         {selectedProvider === "twilio" && (
                                             <>
                                                 <InputField
@@ -266,14 +256,14 @@ export function SMSSettings() {
                                                     {...register("accountSid")}
                                                     error={errors.accountSid?.message}
                                                     required
-                                                    className="bg-background border-border rounded-xl font-medium"
+                                                    className="h-12 bg-background border-border rounded-xl font-medium"
                                                 />
                                                 <MaskedInputField
                                                     label="Auth Token"
                                                     placeholder={isVerified && currentProvider === "twilio" ? MASKED_DISPLAY_VALUE : "Your auth token"}
                                                     {...register("authToken")}
                                                     error={errors.authToken?.message}
-                                                    className="bg-background border-border rounded-xl font-medium"
+                                                    className="h-12 bg-background border-border rounded-xl font-medium"
                                                 />
                                                 <InputField
                                                     label="From (Twilio number)"
@@ -281,7 +271,7 @@ export function SMSSettings() {
                                                     {...register("fromNumber")}
                                                     error={errors.fromNumber?.message}
                                                     required
-                                                    className="bg-background border-border rounded-xl font-medium"
+                                                    className="h-12 bg-background border-border rounded-xl font-medium"
                                                     helperText="Use E.164 format"
                                                 />
                                             </>
@@ -295,7 +285,7 @@ export function SMSSettings() {
                                                     {...register("authKey")}
                                                     error={errors.authKey?.message}
                                                     required
-                                                    className="bg-background border-border rounded-xl font-medium"
+                                                    className="h-12 bg-background border-border rounded-xl font-medium"
                                                 />
                                                 <InputField
                                                     label="Sender ID"
@@ -303,7 +293,7 @@ export function SMSSettings() {
                                                     {...register("senderId")}
                                                     error={errors.senderId?.message}
                                                     required
-                                                    className="bg-background border-border rounded-xl font-medium"
+                                                    className="h-12 bg-background border-border rounded-xl font-medium"
                                                     helperText="6-character Sender ID (for India DLT)"
                                                 />
                                                 <InputField
@@ -312,7 +302,7 @@ export function SMSSettings() {
                                                     {...register("templateId")}
                                                     error={errors.templateId?.message}
                                                     required
-                                                    className="bg-background border-border rounded-xl font-medium"
+                                                    className="h-12 bg-background border-border rounded-xl font-medium"
                                                     helperText="Enter the Flow ID from your Msg91 Dashboard"
                                                 />
                                             </>
@@ -325,10 +315,11 @@ export function SMSSettings() {
                                                 {...register("apiKey")}
                                                 error={errors.apiKey?.message}
                                                 required
-                                                className="bg-background border-border rounded-xl font-medium"
+                                                className="h-12 bg-background border-border rounded-xl font-medium"
                                             />
                                         )}
                                     </div>
+                                </div>
                                 </div>
 
                                 <div className="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-between border-t border-border/50">
@@ -356,7 +347,7 @@ export function SMSSettings() {
                                             variant="outline"
                                             onClick={() => router.back()}
                                             size="xl"
-                                            className="w-full px-8 sm:w-auto"
+                                            className="px-8"
                                         >
                                             Cancel
                                         </ActionButton>
@@ -365,7 +356,7 @@ export function SMSSettings() {
                                             disabled={isSaving}
                                             variant="primary"
                                             size="xl"
-                                            className="w-full min-w-[200px] px-8 sm:w-auto shadow-lg shadow-[#3882a5]/20 transition-all active:scale-[0.98]"
+                                            className="min-w-[200px] shadow-lg shadow-primary/20"
                                         >
                                             {isSaving ? (
                                                 <>

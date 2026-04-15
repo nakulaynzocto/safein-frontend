@@ -2,18 +2,29 @@
 
 import { ReactNode } from "react";
 import { LoadingSpinner } from "./loadingSpinner";
+import { cn } from "@/lib/utils";
 
 interface FormContainerProps {
     children: ReactNode;
     isPage?: boolean;
     isLoading?: boolean;
     isEditMode?: boolean;
+    className?: string;
 }
 
-export function FormContainer({ children, isPage = false, isLoading = false, isEditMode = false }: FormContainerProps) {
+export function FormContainer({ 
+    children, 
+    isPage = false, 
+    isLoading = false, 
+    isEditMode = false,
+    className 
+}: FormContainerProps) {
     const containerContent = (
         <div
-            className={`${isPage ? "bg-card rounded-xl border px-8 pt-4 pb-8 shadow-sm sm:px-10 sm:pt-4 sm:pb-10" : ""}`}
+            className={cn(
+                isPage ? "bg-card rounded-xl border px-3 py-4 shadow-sm sm:px-5 sm:py-5" : "",
+                className
+            )}
         >
             {isEditMode && isLoading ? (
                 <div className="flex h-32 items-center justify-center">
