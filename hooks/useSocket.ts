@@ -306,27 +306,6 @@ export function useSocket(options: UseSocketOptions = {}) {
     // Handle appointment updated
     const handleAppointmentUpdated = useCallback(
         (data: any) => {
-            const { payload } = data;
-            const status = payload?.status;
-            const appointmentId = normalizeAppointmentIdFromPayload(payload);
-
-            // If it's a critical status change, show toast for admins who might not be the creator
-            const isAdmin = user?.role === 'admin' || (user as any)?.roles?.includes('admin');
-            
-            if (isAdmin && (status === "approved" || status === "rejected")) {
-                const { employeeName, visitorName } = extractNames(payload);
-                const config = getNotificationConfig(status, employeeName, visitorName);
-                
-                if (showToasts && !isPublicActionContext()) {
-                    showToast(
-                        config,
-                        () => router.push(routes.privateroute.APPOINTMENTLIST),
-                        `global-update-${appointmentId}-${status}`
-                    );
-                    playVoiceAlert();
-                }
-            }
-
             invalidateAppointments();
             invalidateNotifications();
             onAppointmentUpdated?.(data);

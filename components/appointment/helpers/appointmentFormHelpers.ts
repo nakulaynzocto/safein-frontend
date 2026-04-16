@@ -55,7 +55,7 @@ export const createUpdateAppointmentPayload = (data: AppointmentFormData, existi
  * Format employee label for select option
  */
 export const formatEmployeeLabel = (emp: any): string => {
-    return `${emp.name} (${emp.email})`;
+    return `${emp.name} (${emp.department || "No Department"})`;
 };
 
 /**
