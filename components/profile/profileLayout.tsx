@@ -86,7 +86,7 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
         },
         {
             id: "voice" as const,
-            label: "Voice Calls",
+            label: "Voice Call Alerts",
             icon: Phone,
             roles: ["admin"],
             href: routes.privateroute.SETTINGS_VOICE,

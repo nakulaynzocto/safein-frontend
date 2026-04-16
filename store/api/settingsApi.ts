@@ -37,6 +37,12 @@ export interface Settings {
         backupEnabled: boolean;
         backupNumber?: string;
         maxRetries: number;
+        language?: "en-US" | "hi-IN";
+        callScript?: string;
+        callScripts?: Record<string, string>;
+        callOnLinkInvite?: boolean;
+        callOnAdminEntry?: boolean;
+        callOnQrCheckin?: boolean;
     };
     smtp?: SmtpConfig;
     sms?: {
@@ -90,6 +96,12 @@ export interface UpdateSettingsRequest {
         backupEnabled?: boolean;
         backupNumber?: string;
         maxRetries?: number;
+        language?: "en-US" | "hi-IN";
+        callScript?: string;
+        callScripts?: Record<string, string>;
+        callOnLinkInvite?: boolean;
+        callOnAdminEntry?: boolean;
+        callOnQrCheckin?: boolean;
     };
 }
 
@@ -98,6 +110,12 @@ export interface SaveVoiceConfigRequest {
     backupEnabled: boolean;
     backupNumber?: string;
     maxRetries: number;
+    language: "en-US" | "hi-IN";
+    callScript: string;
+    callScripts?: Record<string, string>;
+    callOnLinkInvite: boolean;
+    callOnAdminEntry: boolean;
+    callOnQrCheckin: boolean;
 }
 
 export interface SaveSmtpRequest {
@@ -174,6 +192,10 @@ export const settingsApi = baseApi.injectEndpoints({
             transformResponse: (res: any) => res?.data ?? res,
             invalidatesTags: ["Settings"],
         }),
+        getVoiceDefaults: builder.query<{ scripts: Record<string, string> }, void>({
+            query: () => "/settings/voice-call/defaults",
+            transformResponse: (res: any) => res?.data ?? res,
+        }),
     }),
 });
 
@@ -186,4 +208,5 @@ export const {
     useSaveSMSConfigMutation,
     useRemoveSMSConfigMutation,
     useSaveVoiceConfigMutation,
+    useGetVoiceDefaultsQuery,
 } = settingsApi;

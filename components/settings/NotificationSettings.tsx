@@ -123,10 +123,15 @@ export function NotificationSettings() {
         emailEnabled: true,
         whatsappEnabled: false,
         smsEnabled: false,
-        voiceCallEnabled: false,
-        visitor: { email: true, whatsapp: false, sms: false, voice: false },
-        employee: { email: true, whatsapp: false, sms: false, voice: false },
-        appointment: { email: true, whatsapp: false, sms: false, voice: false },
+        voiceCall: {
+            enabled: false,
+            callOnLinkInvite: false,
+            callOnAdminEntry: false,
+            callOnQrCheckin: false
+        },
+        visitor: { email: true, whatsapp: false, sms: false },
+        employee: { email: true, whatsapp: false, sms: false },
+        appointment: { email: true, whatsapp: false, sms: false },
     });
 
     const [modal, setModal] = useState({ isOpen: false, path: "" });
@@ -137,24 +142,26 @@ export function NotificationSettings() {
                 emailEnabled: settings.notifications.emailEnabled ?? true,
                 whatsappEnabled: settings.notifications.whatsappEnabled ?? false,
                 smsEnabled: settings.notifications.smsEnabled ?? false,
-                voiceCallEnabled: settings.voiceCall?.enabled ?? false,
+                voiceCall: {
+                    enabled: settings.voiceCall?.enabled ?? false,
+                    callOnLinkInvite: settings.voiceCall?.callOnLinkInvite ?? true,
+                    callOnAdminEntry: settings.voiceCall?.callOnAdminEntry ?? true,
+                    callOnQrCheckin: settings.voiceCall?.callOnQrCheckin ?? true
+                },
                 visitor: {
                     email: settings.notifications.visitor?.email ?? true,
                     whatsapp: settings.notifications.visitor?.whatsapp ?? false,
                     sms: settings.notifications.visitor?.sms ?? false,
-                    voice: settings.notifications.visitor?.voice ?? false,
                 },
                 employee: {
                     email: settings.notifications.employee?.email ?? true,
                     whatsapp: settings.notifications.employee?.whatsapp ?? false,
                     sms: settings.notifications.employee?.sms ?? false,
-                    voice: settings.notifications.employee?.voice ?? false,
                 },
                 appointment: {
                     email: settings.notifications.appointment?.email ?? true,
                     whatsapp: settings.notifications.appointment?.whatsapp ?? false,
                     sms: settings.notifications.appointment?.sms ?? false,
-                    voice: settings.notifications.appointment?.voice ?? false,
                 },
             });
         }
@@ -175,6 +182,12 @@ export function NotificationSettings() {
         const keys = path.split(".");
         setConfig((prev: any) => {
             if (keys.length === 1) return { ...prev, [keys[0]]: !prev[keys[0]] };
+            if (keys[0] === 'voiceCall') {
+                return {
+                    ...prev,
+                    voiceCall: { ...prev.voiceCall, [keys[1]]: !prev.voiceCall[keys[1]] }
+                };
+            }
             return {
                 ...prev,
                 [keys[0]]: { ...prev[keys[0]], [keys[1]]: !prev[keys[0]][keys[1]] }
@@ -184,7 +197,11 @@ export function NotificationSettings() {
 
     const handleSave = async () => {
         try {
-            await updateSettings({ notifications: config }).unwrap();
+            const { voiceCall, ...notificationsConfig } = config;
+            await updateSettings({ 
+                notifications: notificationsConfig,
+                voiceCall: voiceCall
+            }).unwrap();
             toast.success("Notification settings updated successfully");
         } catch (err: any) {
             toast.error(err?.data?.message || "Failed to update notification settings");
@@ -240,6 +257,63 @@ export function NotificationSettings() {
                                 onToggleMaster={handleToggle}
                                 onToggleCategory={handleToggle}
                             />
+
+                            {/* Voice Call Section (Shifted from VoiceCallSettings) */}
+                            <div className={cn(
+                                "rounded-2xl border transition-all duration-500 overflow-hidden",
+                                config.voiceCall.enabled 
+                                ? "bg-[#3882a5]/[0.02] border-[#3882a5]/20 shadow-sm" 
+                                : "bg-gray-50 dark:bg-gray-800/10 border-gray-200 dark:border-gray-800 opacity-80"
+                            )}>
+                                <Collapsible open={config.voiceCall.enabled}>
+                                    <div className="p-5 flex items-center justify-between gap-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className={cn(
+                                            "h-12 w-12 rounded-xl flex items-center justify-center transition-all duration-300",
+                                            config.voiceCall.enabled ? "bg-[#3882a5] text-white shadow-lg" : "bg-gray-200 dark:bg-gray-700 text-gray-400"
+                                            )}>
+                                            <PhoneCall size={24} />
+                                            </div>
+                                            <div>
+                                            <h3 className="font-bold text-gray-900 dark:text-gray-100 text-lg">Voice Call Alerts</h3>
+                                            <p className="text-xs text-gray-500">Automated IVR calls for real-time approvals</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <BrandSwitch 
+                                                checked={config.voiceCall.enabled} 
+                                                onCheckedChange={() => handleToggle("voiceCall.enabled")} 
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <CollapsibleContent>
+                                        <div className="px-5 pb-5 pt-2 grid grid-cols-1 sm:grid-cols-3 gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            <SubSettingItem 
+                                                label="Link Bookings" 
+                                                subLabel="Visitor books via link" 
+                                                checked={config.voiceCall.callOnLinkInvite} 
+                                                onChange={() => handleToggle(`voiceCall.callOnLinkInvite`)}
+                                                disabled={!config.voiceCall.enabled}
+                                            />
+                                            <SubSettingItem 
+                                                label="Admin Entries" 
+                                                subLabel="Host creates entry" 
+                                                checked={config.voiceCall.callOnAdminEntry} 
+                                                onChange={() => handleToggle(`voiceCall.callOnAdminEntry`)}
+                                                disabled={!config.voiceCall.enabled}
+                                            />
+                                            <SubSettingItem 
+                                                label="QR Check-ins" 
+                                                subLabel="Visitor scans QR" 
+                                                checked={config.voiceCall.callOnQrCheckin} 
+                                                onChange={() => handleToggle(`voiceCall.callOnQrCheckin`)}
+                                                disabled={!config.voiceCall.enabled}
+                                            />
+                                        </div>
+                                    </CollapsibleContent>
+                                </Collapsible>
+                            </div>
                         </div>
 
                         <div className="flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/30 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 mt-8">
