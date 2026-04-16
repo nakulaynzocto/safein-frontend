@@ -216,6 +216,19 @@ export const appointmentApi = baseApi.injectEndpoints({
             },
             transformResponse: (response: any) => {
                 if (response.success && response.data) {
+                    // Check if it's a paginated response from ResponseUtil.paginate
+                    if (response.data.data && response.data.pagination) {
+                        return {
+                            appointments: response.data.data,
+                            pagination: {
+                                currentPage: response.data.pagination.page,
+                                totalPages: response.data.pagination.pages,
+                                totalAppointments: response.data.pagination.total,
+                                hasNextPage: response.data.pagination.page < response.data.pagination.pages,
+                                hasPrevPage: response.data.pagination.page > 1,
+                            },
+                        };
+                    }
                     return response.data;
                 }
                 return response;

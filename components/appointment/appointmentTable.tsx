@@ -14,7 +14,8 @@ import { Pagination } from "@/components/common/pagination";
 import { StatusBadge } from "@/components/common/statusBadge";
 import { format } from "date-fns";
 import {
-    formatDateTime,
+    formatDate,
+    formatTime,
     formatName,
     getInitials,
     getAppointmentStatus,
@@ -351,14 +352,26 @@ export function AppointmentTable({
                 key: "appointmentDate",
                 header: "Date & Time",
                 render: (appointment: Appointment) => {
-                    const dateTime = formatDateTime(
-                        appointment.appointmentDetails?.scheduledDate || "",
-                        appointment.appointmentDetails?.scheduledTime,
-                    );
+                    const date = formatDate(appointment.appointmentDetails?.scheduledDate || "");
+                    const time = appointment.appointmentDetails?.scheduledTime
+                        ? formatTime(appointment.appointmentDetails.scheduledTime)
+                        : "";
+
                     return (
-                        <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="text-muted-foreground h-3 w-3 shrink-0" />
-                            <span>{dateTime || "N/A"}</span>
+                        <div className="flex items-start gap-2 text-sm group/date">
+                            <div className="mt-1 bg-muted/50 p-1 rounded-md text-muted-foreground group-hover/date:text-primary transition-colors">
+                                <Calendar className="h-3.5 w-3.5 shrink-0" />
+                            </div>
+                            <div className="flex flex-col leading-tight">
+                                <span className="font-semibold text-foreground/90 tabular-nums">
+                                    {date || "N/A"}
+                                </span>
+                                {time && (
+                                    <span className="text-[11px] text-muted-foreground font-medium tabular-nums">
+                                        {time}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     );
                 },
