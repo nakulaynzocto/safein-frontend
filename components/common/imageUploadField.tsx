@@ -18,6 +18,7 @@ interface ImageUploadFieldProps {
     initialUrl?: string;
     enableImageCapture?: boolean;
     appointmentToken?: string; // Token for public upload endpoint
+    qrSlug?: string; // Company slug for QR scan public upload
     onUploadStatusChange?: (isUploading: boolean) => void;
     variant?: "default" | "avatar";
     autoOpenCamera?: boolean;
@@ -123,6 +124,7 @@ export function ImageUploadField({
     initialUrl,
     enableImageCapture = false,
     appointmentToken,
+    qrSlug,
     onUploadStatusChange,
     variant = "default",
     autoOpenCamera = false,
@@ -178,7 +180,13 @@ export function ImageUploadField({
 
             validateFile(file);
 
-            const result = await uploadFile({ file, token: appointmentToken }).unwrap();
+
+            const result = await uploadFile({ 
+                file, 
+                token: appointmentToken,
+                slug: qrSlug 
+            }).unwrap();
+
 
             const uploadedUrl = result?.url;
             if (!uploadedUrl) {

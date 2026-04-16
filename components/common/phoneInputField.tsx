@@ -358,7 +358,7 @@ export function PhoneInputField({
                     onChange={handlePhoneChange}
                     placeholder={placeholder}
                     disabled={disabled}
-                    autoComplete="tel"
+                    autoComplete="off"
                     autoFocus={autoFocus}
                     className="flex-1 min-w-0 h-full bg-transparent border-none pl-1.5 pr-3 text-sm font-medium focus:outline-none placeholder:text-muted-foreground"
                 />

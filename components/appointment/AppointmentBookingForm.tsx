@@ -338,6 +338,7 @@ export function AppointmentBookingForm({
                                 min={0}
                                 max={20}
                                 step={1}
+                                autoComplete="off"
                                 placeholder="Number of people (e.g., 0, 1, 2)"
                                 {...register("accompanyingCount")}
                                 className={`h-12 rounded-xl bg-background font-medium ${errors.accompanyingCount ? "border-destructive" : ""}`}

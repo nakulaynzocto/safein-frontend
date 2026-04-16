@@ -120,9 +120,20 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
         });
     }, [settings?.voiceCall, reset, scripts, isDirty]);
 
-    const onSubmit = async (data: VoiceFormValues) => {
+    const onSubmit = async (formData: VoiceFormValues) => {
         try {
-            await saveVoice(data).unwrap();
+            // Ensure the scripts map reflects the latest text for the current language
+            const updatedScripts = {
+                ...formData.callScripts,
+                [formData.language]: formData.callScript
+            };
+            
+            const finalData = {
+                ...formData,
+                callScripts: updatedScripts
+            };
+
+            await saveVoice(finalData).unwrap();
             toast.success("Voice settings updated successfully");
         } catch (error: any) {
             toast.error(error?.data?.message || "Failed to update voice settings");

@@ -264,7 +264,7 @@ export function BookingVisitorForm({
                     <InputField
                         id="email"
                         type="email"
-                        autoComplete="email"
+                        autoComplete="off"
                         label="Email"
                         {...register("email")}
                         placeholder="name@example.com"
@@ -423,6 +423,7 @@ export function BookingVisitorForm({
                                 </Label>
                                 <Input
                                     id="idProofNumber"
+                                    autoComplete="off"
                                     {...register("idProof.number")}
                                     placeholder="e.g. Aadhar / DL Number"
                                     className={`h-12 w-full rounded-xl border ${errors.idProof?.number ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus-visible:ring-1 focus-visible:ring-[#3882a5]"} bg-background text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium transition-all`}

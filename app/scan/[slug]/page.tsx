@@ -667,6 +667,7 @@ export default function QRScanPage() {
                                                 initialUrl={watchPhoto("photo")}
                                                 label="Capture visitor face photo"
                                                 enableImageCapture={true}
+                                                qrSlug={slug}
                                                 onUploadStatusChange={setIsPhotoUploading}
                                                 variant="default"
                                                 autoOpenCamera={true}
