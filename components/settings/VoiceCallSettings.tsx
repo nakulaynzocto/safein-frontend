@@ -157,8 +157,6 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                             title="Voice Call Alerts"
                             description="Configure automated voice calls for immediate appointment approvals. When enabled, the system will call host numbers directly."
                             icon={PhoneCall}
-                            isVerified={watch("enabled")}
-                            providerName="SafeIn IVR"
                         />
 
                         <div className="space-y-4">

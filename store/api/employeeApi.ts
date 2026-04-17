@@ -19,6 +19,14 @@ export interface Employee {
     isEmailVerified?: boolean;
     /** When true, phone must not be edited (linked user verified mobile) */
     isPhoneVerified?: boolean;
+    canDelete?: boolean;
+    appointmentCount?: number;
+    notificationSettings: {
+        email: boolean;
+        whatsapp: boolean;
+        sms: boolean;
+        call: boolean;
+    };
 }
 
 export interface CreateEmployeeRequest {
@@ -40,6 +48,12 @@ export interface UpdateEmployeeRequest {
     designation?: string;
     photo?: string;
     status?: "Active" | "Inactive";
+    notificationSettings?: {
+        email?: boolean;
+        whatsapp?: boolean;
+        sms?: boolean;
+        call?: boolean;
+    };
 }
 
 export interface GetEmployeesQuery {
@@ -200,18 +214,19 @@ export const employeeApi = baseApi.injectEndpoints({
             invalidatesTags: [{ type: "Employee", id: "LIST" }, { type: "Chat" }, { type: "Subscription" }],
         }),
 
-        employeeSendOtp: builder.mutation<void, string>({
-            query: (id) => ({
+        employeeSendOtp: builder.mutation<void, { id: string; type: "email" | "phone" }>({
+            query: ({ id, type }) => ({
                 url: `/employees/${id}/send-otp`,
                 method: "POST",
+                body: { type },
             }),
         }),
 
-        employeeVerifyOtp: builder.mutation<void, { id: string; otp: string }>({
-            query: ({ id, otp }) => ({
+        employeeVerifyOtp: builder.mutation<void, { id: string; otp: string; type: "email" | "phone" }>({
+            query: ({ id, otp, type }) => ({
                 url: `/employees/${id}/verify-otp`,
                 method: "POST",
-                body: { otp },
+                body: { otp, type },
             }),
             invalidatesTags: (result, error, { id }) => [
                 { type: "Employee", id },

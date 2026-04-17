@@ -46,20 +46,20 @@ export interface Settings {
     };
     smtp?: SmtpConfig;
     sms?: {
-        provider?: "twilio" | "msg91" | "fast2sms";
-        // Twilio
-        accountSid?: string;
-        authToken?: string;
-        fromNumber?: string;
-        // Msg91
-        authKey?: string;
-        senderId?: string;
-        templateId?: string;
-        // Fast2SMS
-        apiKey?: string;
-        
-        verified?: boolean;
-        verifiedAt?: string;
+        templates?: {
+            newRequest?: string;
+            approvedVisitor?: string;
+            approvedEmployee?: string;
+            rejectedVisitor?: string;
+            visitorCheckedIn?: string;
+        };
+        enabledTemplates?: {
+            newRequest?: boolean;
+            approvedVisitor?: boolean;
+            approvedEmployee?: boolean;
+            rejectedVisitor?: boolean;
+            visitorCheckedIn?: boolean;
+        };
     };
     whatsapp: {
         activeProvider: "meta";
@@ -129,17 +129,20 @@ export interface SaveSmtpRequest {
 }
 
 export interface SaveSmsRequest {
-    provider: "twilio" | "msg91" | "fast2sms";
-    // Twilio
-    accountSid?: string;
-    authToken?: string;
-    fromNumber?: string;
-    // Msg91
-    authKey?: string;
-    senderId?: string;
-    templateId?: string;
-    // Fast2SMS
-    apiKey?: string;
+    templates: {
+        newRequest: string;
+        approvedVisitor: string;
+        approvedEmployee: string;
+        rejectedVisitor: string;
+        visitorCheckedIn: string;
+    };
+    enabledTemplates: {
+        newRequest: boolean;
+        approvedVisitor: boolean;
+        approvedEmployee: boolean;
+        rejectedVisitor: boolean;
+        visitorCheckedIn: boolean;
+    };
 }
 
 // ─── API Slice ────────────────────────────────────────────────────────────────

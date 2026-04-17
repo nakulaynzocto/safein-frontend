@@ -10,7 +10,7 @@ import { DataTable } from "@/components/common/dataTable";
 import { ConfirmationDialog } from "@/components/common/confirmationDialog";
 import { Pagination } from "@/components/common/pagination";
 import { StatusBadge } from "@/components/common/statusBadge";
-import { Edit, Trash2, Eye, MoreVertical, Plus, Phone, Mail, Building, User } from "lucide-react";
+import { Edit, Trash2, Eye, MoreVertical, Plus, Phone, Mail, Building, User, Settings } from "lucide-react";
 import { Employee } from "@/store/api/employeeApi";
 import { SearchInput } from "@/components/common/searchInput";
 import { EmployeeDetailsDialog } from "./employeeDetailsDialog";
@@ -150,6 +150,10 @@ export function EmployeeTable({
         setShowVerifyDialog(true);
     };
 
+    const handleSettings = (employee: Employee) => {
+        router.push(routes.privateroute.EMPLOYEESETTINGS.replace("[id]", employee._id));
+    };
+
     const handleEditEmployee = (employee: Employee) => {
         router.push(routes.privateroute.EMPLOYEEEDIT.replace("[id]", employee._id));
     };
@@ -245,7 +249,16 @@ export function EmployeeTable({
             header: "Actions",
             render: (employee: Employee) => (
                 <div className="flex justify-center">
-                    <DropdownMenu>
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 px-3 rounded-lg gap-1.5 font-medium border-primary/20 bg-primary/5 hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-sm"
+                        onClick={() => handleSettings(employee)}
+                    >
+                        <Settings className="h-4 w-4" />
+                        Settings
+                    </Button>
+                    {/*
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                                 <MoreVertical className="h-4 w-4" />
@@ -258,6 +271,10 @@ export function EmployeeTable({
                                     View Details
                                 </DropdownMenuItem>
                             )}
+                            <DropdownMenuItem onClick={() => handleSettings(employee)}>
+                                <Settings className="mr-2 h-4 w-4" />
+                                Settings
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleEditEmployee(employee)}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
@@ -291,7 +308,7 @@ export function EmployeeTable({
                                 </>
                             )}
                         </DropdownMenuContent>
-                    </DropdownMenu>
+                    */}
                 </div>
             ),
         });

@@ -40,6 +40,7 @@ export const routes = {
         EMPLOYEELIST: "/employee/list",
         EMPLOYEECREATE: "/employee/create",
         EMPLOYEEEDIT: "/employee/[id]",
+        EMPLOYEESETTINGS: "/employee/[id]/settings",
 
         // Visitor Routes
         VISITORLIST: "/visitor/list",

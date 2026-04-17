@@ -24,6 +24,8 @@ interface EmployeeVerificationModalProps {
     employeeId: string;
     employeeName: string;
     email: string;
+    phone: string;
+    type: 'email' | 'phone';
     onSuccess: () => void;
 }
 
@@ -33,6 +35,8 @@ export function EmployeeVerificationModal({
     employeeId,
     employeeName,
     email,
+    phone,
+    type,
     onSuccess,
 }: EmployeeVerificationModalProps) {
     const [otp, setOtp] = useState("");
@@ -47,8 +51,8 @@ export function EmployeeVerificationModal({
         if (!finalOtp || finalOtp.length < 6) return;
 
         try {
-            await verifyOtp({ id: employeeId, otp: finalOtp }).unwrap();
-            showSuccessToast("Employee verified successfully! Credentials sent.");
+            await verifyOtp({ id: employeeId, otp: finalOtp, type }).unwrap();
+            showSuccessToast(`Employee ${type} verified successfully!`);
             onSuccess();
             onOpenChange(false);
         } catch (error: any) {
@@ -64,8 +68,9 @@ export function EmployeeVerificationModal({
 
     const handleSendOtp = async () => {
         try {
-            await sendOtp(employeeId).unwrap();
-            showSuccessToast(`OTP sent to ${email}`);
+            await sendOtp({ id: employeeId, type }).unwrap();
+            const destination = type === 'email' ? email : phone;
+            showSuccessToast(`OTP sent to ${destination}`);
             setOtpSent(true);
         } catch (error: any) {
             showErrorToast(error?.data?.message || "Failed to send OTP");
@@ -85,9 +90,9 @@ export function EmployeeVerificationModal({
             <Dialog open={open} onOpenChange={onOpenChange}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Verify Employee - {employeeName}</DialogTitle>
+                        <DialogTitle>Verify Employee {type === 'phone' ? 'Mobile' : 'Email'}</DialogTitle>
                         <DialogDescription>
-                            To verify this employee, we need to send a One-Time Password (OTP) to <strong>{email}</strong>.
+                            To verify this employee, we need to send a One-Time Password (OTP) to <strong>{type === 'phone' ? phone : email}</strong>.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -101,7 +106,7 @@ export function EmployeeVerificationModal({
                     ) : (
                         <div className="grid gap-4 py-4">
                             <div className="space-y-2">
-                                <p className="text-sm text-gray-500 text-center">Enter the 6-digit code sent to the email.</p>
+                                <p className="text-sm text-gray-500 text-center">Enter the 6-digit code sent to your {type === 'phone' ? 'mobile' : 'email'}.</p>
                                 <div className="flex justify-center py-2">
                                     <InputOTP
                                         id="otp"
