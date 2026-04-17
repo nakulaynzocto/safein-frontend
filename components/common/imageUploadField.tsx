@@ -8,6 +8,7 @@ import { showErrorToast, showSuccessToast } from "@/utils/toast";
 import { Image as ImageIcon, X, CheckCircle, Camera, RotateCw, Upload, Loader2 } from "lucide-react";
 import { useUploadFileMutation } from "@/store/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 interface ImageUploadFieldProps {
     name: string;
@@ -59,55 +60,73 @@ function CameraCapturePortal({
                 paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
             }}
         >
-            <div className="relative flex min-h-[100dvh] w-full max-w-full flex-col items-center justify-center gap-4 overflow-y-auto bg-[#0b1320]/92 px-4 py-6 shadow-2xl sm:min-h-0 sm:max-h-[min(100dvh,52rem)] sm:max-w-3xl sm:rounded-3xl sm:bg-[#0b1320]/90 sm:p-8">
-                <div className="relative h-[min(78vmin,26rem)] w-[min(78vmin,26rem)] shrink-0 overflow-hidden rounded-full border-4 border-white/20 shadow-2xl sm:h-[min(72vmin,22rem)] sm:w-[min(72vmin,22rem)] md:h-[min(70vmin,24rem)] md:w-[min(70vmin,24rem)]">
-                    <video
-                        ref={videoRef as LegacyRef<HTMLVideoElement>}
-                        className="h-full w-full object-cover"
-                        autoPlay
-                        playsInline
-                        muted
-                    />
+            <div className="relative flex min-h-[100dvh] w-full max-w-full flex-col items-center justify-center gap-6 overflow-hidden bg-[#0b1320] px-4 py-8 shadow-2xl sm:min-h-0 sm:max-h-[min(100dvh,52rem)] sm:max-w-3xl sm:rounded-[3rem] sm:p-10">
+                {/* Header Guidance */}
+                <div className="absolute top-0 left-0 right-0 p-6 text-center animate-in fade-in slide-in-from-top-4 duration-500">
+                    <p className="text-sm font-medium tracking-wide text-white/70 uppercase">
+                        {facingMode === "user" ? "Selfie Mode" : "Rear Camera"}
+                    </p>
+                    <p className="text-lg font-bold text-white mt-1">
+                        Position face inside the circle
+                    </p>
                 </div>
+
+                {/* Camera Feedback Circle */}
+                <div className="relative flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full border-[6px] border-[#3882a5]/30 animate-pulse" />
+                    <div className="relative h-[min(82vmin,28rem)] w-[min(82vmin,28rem)] shrink-0 overflow-hidden rounded-full border-4 border-white/90 shadow-[0_0_50px_rgba(56,130,165,0.4)] sm:h-[min(72vmin,24rem)] sm:w-[min(72vmin,24rem)]">
+                        <video
+                            ref={videoRef as LegacyRef<HTMLVideoElement>}
+                            className={cn(
+                                "h-full w-full object-cover transition-transform duration-500",
+                                facingMode === "user" ? "-scale-x-100" : ""
+                            )}
+                            autoPlay
+                            playsInline
+                            muted
+                        />
+                    </div>
+                </div>
+                
                 <canvas ref={canvasRef as LegacyRef<HTMLCanvasElement>} className="hidden" />
 
-                <div
-                    className="absolute right-3 sm:right-5"
-                    style={{ top: "max(0.75rem, env(safe-area-inset-top))" }}
-                >
-                    <Button
-                        type="button"
-                        onClick={onSwitchCamera}
-                        className="rounded-full bg-white p-2 text-black shadow-lg hover:bg-gray-100 sm:p-3"
-                        title={`Switch to ${facingMode === "environment" ? "Front" : "Back"} Camera`}
-                    >
-                        <RotateCw className="h-4 w-4 sm:h-5 sm:w-5" />
-                    </Button>
-                </div>
+                {/* Bottom Controls Container */}
+                <div className="relative mt-4 flex w-full items-center justify-center gap-8 sm:mt-2">
+                    {/* Ghost spacer for balance */}
+                    <div className="w-12 sm:w-14" />
 
-                <div className="mt-2 flex w-full shrink-0 flex-wrap justify-center gap-2 sm:mt-1 sm:gap-4">
-                    <Button
+                    {/* Main Capture Button */}
+                    <button
                         type="button"
                         onClick={onCapture}
-                        className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm text-black shadow-lg hover:bg-gray-200 sm:px-6 sm:py-3 sm:text-base"
+                        className="group relative flex h-20 w-20 items-center justify-center rounded-full bg-white transition-all hover:scale-110 active:scale-90 shadow-2xl"
                     >
-                        <Camera className="h-4 w-4 sm:h-5 sm:w-5" />
-                        {compactCaptureLabel ? (
-                            <>
-                                <span className="hidden sm:inline">Capture Photo</span>
-                                <span className="sm:hidden">Capture</span>
-                            </>
-                        ) : (
-                            <span>Capture Photo</span>
-                        )}
-                    </Button>
-                    <Button
+                        <div className="absolute inset-1 rounded-full border-4 border-black/5" />
+                        <div className="h-14 w-14 rounded-full border-2 border-black/10 flex items-center justify-center group-hover:bg-slate-50">
+                            <Camera className="h-7 w-7 text-black" />
+                        </div>
+                    </button>
+
+                    {/* Camera Switch Button - Better position for thumb access */}
+                    <button
+                        type="button"
+                        onClick={onSwitchCamera}
+                        className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-90"
+                        title={`Switch to ${facingMode === "environment" ? "Front" : "Back"} Camera`}
+                    >
+                        <RotateCw className="h-6 w-6" />
+                    </button>
+                </div>
+
+                {/* Cancel Action */}
+                <div className="mt-4">
+                    <button
                         type="button"
                         onClick={onCancel}
-                        className="rounded-full bg-red-500 px-4 py-2 text-sm text-white shadow-lg hover:bg-red-600 sm:px-6 sm:py-3 sm:text-base"
+                        className="text-sm font-bold text-white/50 uppercase tracking-widest transition-colors hover:text-red-400"
                     >
                         Cancel
-                    </Button>
+                    </button>
                 </div>
             </div>
         </div>,
@@ -136,7 +155,7 @@ export function ImageUploadField({
     const [imageError, setImageError] = useState(false);
     const [showCaptureOptions, setShowCaptureOptions] = useState(false);
     const [isCapturing, setIsCapturing] = useState(false);
-    const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
+    const [facingMode, setFacingMode] = useState<"environment" | "user">("user");
     const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation();
 
     const fileInputRef = useRef<HTMLInputElement>(null);

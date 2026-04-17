@@ -18,12 +18,17 @@ import {
     ArrowRight,
     Camera,
     User,
+    Briefcase,
     Building2,
     CalendarClock,
     FileText,
     Home,
     MessageCircle,
     Clock,
+    Mail,
+    MapPin,
+    Phone,
+    User2,
 } from "lucide-react";
 import { StatusPage } from "@/components/common/statusPage";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,6 +36,7 @@ import { Button } from "@/components/ui/button";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { extractIdString, isValidId } from "@/utils/idExtractor";
 import { cn } from "@/lib/utils";
+import { SuccessState } from "@/components/common/SuccessState";
 import { ImageUploadField } from "@/components/common/imageUploadField";
 import { Label } from "@/components/ui/label";
 import { PhoneInputField } from "@/components/common/phoneInputField";
@@ -270,11 +276,11 @@ export default function QRScanPage() {
 
     const company = companyInfo?.company;
     const steps = [
-        { key: "verify_phone", label: "Verify phone" },
-        { key: "details", label: "Your Details" },
-        { key: "photo", label: "Capture Photo" },
-        { key: "appointment", label: "Book" },
-        { key: "review", label: "Review" },
+        { key: "verify_phone", label: "Verify phone", mobileLabel: "Phone" },
+        { key: "details", label: "Your Details", mobileLabel: "Details" },
+        { key: "photo", label: "Capture Photo", mobileLabel: "Photo" },
+        { key: "appointment", label: "Book", mobileLabel: "Book" },
+        { key: "review", label: "Review", mobileLabel: "Review" },
     ] as const;
     const activeStepIndex = steps.findIndex((s) => s.key === step);
     const selectedEmployee = (companyInfo?.employees || []).find((emp: any) => emp._id === appointmentDraft?.employeeId);
@@ -314,53 +320,14 @@ export default function QRScanPage() {
 
     if (step === "success") {
         return (
-            <div className="min-h-screen bg-[#f7fafc] px-4 py-10">
-                <div className="mx-auto w-full max-w-2xl">
-                    <Card className="overflow-hidden border border-emerald-200 bg-white shadow-[0_10px_30px_rgba(16,185,129,0.08)]">
-                        <div className="bg-gradient-to-r from-emerald-50 to-white px-6 py-6 text-center">
-                            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-                                <CheckCircle2 className="h-8 w-8 text-emerald-600" />
-                            </div>
-                            <h2 className="text-3xl font-extrabold tracking-tight text-emerald-700">Request Sent!</h2>
-                            <p className="mt-2 text-sm text-slate-600">Your visit request has been submitted successfully for approval.</p>
-                        </div>
-
-                        <CardContent className="space-y-5 p-6">
-                            <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
-                                <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Visitor</p>
-                                    <p className="text-sm font-semibold text-slate-900">{visitorDraft?.name || "-"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Host</p>
-                                    <p className="text-sm font-semibold text-slate-900">{selectedEmployee?.name || "-"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Date & Time</p>
-                                    <p className="text-sm font-semibold text-slate-900">
-                                        {appointmentDraft?.appointmentDetails?.scheduledDate || "-"} {appointmentDraft?.appointmentDetails?.scheduledTime || ""}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Reference</p>
-                                    <p className="text-sm font-semibold text-slate-900">{submittedAppointmentId || "Generated"}</p>
-                                </div>
-                            </div>
-
-                            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-center">
-                                <p className="text-sm font-semibold text-emerald-700">Please wait at reception. You will be notified once approved.</p>
-                            </div>
-
-                            <div className="flex justify-center">
-                                <Button type="button" variant="outline" onClick={restartQrBookingFlow}>
-                                    <Home className="mr-2 h-4 w-4" />
-                                    Check in again
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+            <SuccessState
+                companyName={company?.companyName}
+                visitorName={visitorDraft?.name}
+                hostName={selectedEmployee?.name}
+                referenceId={submittedAppointmentId || undefined}
+                onAction={restartQrBookingFlow}
+                actionLabel="New Registration"
+            />
         );
     }
 
@@ -378,11 +345,11 @@ export default function QRScanPage() {
                                 {company?.companyName?.charAt(0).toUpperCase()}
                             </div>
                         )}
-                        <div className="min-w-0">
-                            <h1 className="truncate text-2xl font-extrabold tracking-tight text-[#0f172a] sm:text-4xl">
-                                Welcome to {company?.companyName}
+                        <div className="min-w-0 flex-1">
+                            <h1 className="text-xl font-extrabold tracking-tight text-[#0f172a] sm:text-4xl leading-tight">
+                                Welcome to <span className="block sm:inline text-[#3882a5] truncate" title={company?.companyName}>{company?.companyName}</span>
                             </h1>
-                            <p className="mt-1 text-sm font-medium text-slate-500">Complete all 5 steps for fast visitor approval</p>
+                            <p className="mt-1 text-xs font-medium text-slate-500 sm:text-sm">Complete all 5 steps for fast visitor approval</p>
                         </div>
                     </div>
                 </div>
@@ -418,20 +385,30 @@ export default function QRScanPage() {
                             })}
                         </div>
 
-                        <div className="flex gap-2 overflow-x-auto pb-1 sm:hidden">
-                            {steps.map((item, idx) => {
+                        <div className="flex items-center justify-between px-1 sm:hidden">
+                            {steps.map((item: any, idx) => {
                                 const isDone = idx < activeStepIndex;
                                 const isActive = idx === activeStepIndex;
                                 return (
-                                    <div
-                                        key={item.key}
-                                        className={cn(
-                                            "min-w-[110px] shrink-0 rounded-xl border px-2 py-2 text-center",
-                                            isActive ? "border-[#3882a5] bg-[#3882a5]/10" : "border-slate-200 bg-white"
-                                        )}
-                                    >
-                                        <p className="text-xs font-bold text-slate-700">{idx + 1}. {item.label}</p>
-                                        {isDone && <p className="mt-0.5 text-[10px] font-semibold text-emerald-600">Completed</p>}
+                                    <div key={item.key} className="flex flex-1 flex-col items-center gap-1.5 px-0.5">
+                                        <div 
+                                            className={cn(
+                                                "flex h-8 w-8 items-center justify-center rounded-full border text-[11px] font-bold transition-all",
+                                                isActive && "border-[#3882a5] bg-[#3882a5] text-white shadow-md ring-2 ring-[#3882a5]/20 scale-110",
+                                                isDone && "border-emerald-500 bg-emerald-500 text-white",
+                                                !isDone && !isActive && "border-slate-300 bg-white text-slate-400"
+                                            )}
+                                        >
+                                            {isDone ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
+                                        </div>
+                                        <span 
+                                            className={cn(
+                                                "text-[9px] font-bold uppercase tracking-tighter text-center line-clamp-1",
+                                                isActive ? "text-[#1f4f67]" : isDone ? "text-emerald-700" : "text-slate-400"
+                                            )}
+                                        >
+                                            {item.mobileLabel}
+                                        </span>
                                     </div>
                                 );
                             })}
@@ -603,22 +580,13 @@ export default function QRScanPage() {
                                     initialValues={visitorDraft || undefined}
                                     initialPhone={verifiedPhone || undefined}
                                     lockedPhoneHelperText="This number is verified and cannot be changed."
-                                />
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className="mt-4 text-slate-500 hover:text-[#3882a5]"
-                                    onClick={() => {
+                                    onBack={() => {
                                         setVerifiedPhone(null);
                                         setOtpSent(false);
                                         setVisitorDraft(null);
                                         setStep("verify_phone");
                                     }}
-                                >
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Change mobile number
-                                </Button>
+                                />
                             </div>
                         )}
 
@@ -677,12 +645,21 @@ export default function QRScanPage() {
                                         </div>
                                         {photoErrors.photo && <p className="text-xs font-medium text-red-500">{photoErrors.photo.message}</p>}
                                     </div>
-                                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
-                                        <Button type="button" variant="outline" onClick={() => setStep("details")}>
+                                    <div className="flex items-center gap-3 sm:gap-4">
+                                        <Button 
+                                            type="button" 
+                                            variant="outline" 
+                                            onClick={() => setStep("details")}
+                                            className="h-12 flex-1 rounded-xl border-border font-medium"
+                                        >
                                             <ArrowLeft className="mr-2 h-4 w-4" /> Back
                                         </Button>
-                                        <Button type="submit" disabled={!watchPhoto("photo") || isPhotoUploading || isCreatingVisitor}>
-                                            Continue to Appointment <ArrowRight className="ml-2 h-4 w-4" />
+                                        <Button 
+                                            type="submit" 
+                                            disabled={!watchPhoto("photo") || isPhotoUploading || isCreatingVisitor}
+                                            className="h-12 flex-1 rounded-xl bg-[#3882a5] text-white hover:bg-[#2d6a87] font-medium shadow-md"
+                                        >
+                                            Continue <ArrowRight className="ml-2 h-4 w-4" />
                                         </Button>
                                     </div>
                                 </form>
@@ -711,103 +688,154 @@ export default function QRScanPage() {
                                     isLoading={isCreatingAppointment}
                                     isQRBooking={true}
                                     submitLabel="Review Details"
+                                    onBack={() => setStep("photo")}
                                 />
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="mt-4 text-slate-500 hover:text-[#3882a5]"
-                                    onClick={() => setStep("photo")}
-                                >
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back to photo
-                                </Button>
                             </div>
                         )}
 
                         {step === "review" && (
-                            <div className="animate-in fade-in slide-in-from-right-4 duration-500 space-y-4">
-                                <div className="flex items-start gap-3 rounded-2xl border border-[#3882a5]/20 bg-[#3882a5]/5 p-3 sm:p-4">
-                                    <div className="rounded-lg bg-[#3882a5]/15 p-2 text-[#3882a5]"><CalendarClock className="h-4 w-4" /></div>
+                            <div className="animate-in fade-in slide-in-from-right-4 duration-500 space-y-5">
+                                <div className="flex items-center gap-4 rounded-2xl border border-[#3882a5]/20 bg-gradient-to-r from-[#3882a5]/10 to-transparent p-4 shadow-sm">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#3882a5] text-white shadow-lg shadow-[#3882a5]/20">
+                                        <ShieldCheck className="h-6 w-6" />
+                                    </div>
                                     <div>
-                                        <h3 className="text-base font-bold text-slate-800 sm:text-lg">Step 5: Review & Submit</h3>
-                                        <p className="text-sm text-slate-500">Review everything, then submit your request.</p>
+                                        <h3 className="text-lg font-bold text-slate-800">Step 5: Review & Submit</h3>
+                                        <p className="text-xs font-medium text-slate-500">Double-check your details before final submission.</p>
                                     </div>
                                 </div>
-                                <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-                                    <div className="mb-4 flex items-center justify-between">
-                                        <p className="text-sm font-bold text-[#1f4f67]">Final Preview</p>
-                                        <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-700">Ready to submit</span>
+
+                                <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/50">
+                                    <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                            <span className="text-xs font-bold uppercase tracking-widest text-[#1f4f67]">Final Summary</span>
+                                        </div>
+                                        <span className="rounded-lg bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-tight text-emerald-700 ring-1 ring-emerald-200/50">SafeIn Verified</span>
                                     </div>
 
-                                    <div className="grid gap-4 sm:grid-cols-2">
-                                        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-                                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Visitor Details</p>
-                                            <div className="mt-3 flex items-start gap-3">
+                                    <div className="grid gap-5 sm:grid-cols-2">
+                                        {/* Visitor Information Card */}
+                                        <div className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/40 p-5 transition-all hover:border-[#3882a5]/30 hover:bg-white hover:shadow-md">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Visitor Profile</span>
+                                                <User2 className="h-3.5 w-3.5 text-slate-300" />
+                                            </div>
+                                            
+                                            <div className="mt-5 flex flex-col items-center gap-5 sm:flex-row sm:items-start">
                                                 {visitorDraft?.photo ? (
-                                                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border bg-white">
-                                                        <img src={visitorDraft.photo} alt="Visitor" className="h-full w-full object-cover" />
+                                                    <div className="relative group/photo h-28 w-28 shrink-0">
+                                                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#3882a5] to-[#2d6a87] blur shadow-lg opacity-40 group-hover/photo:opacity-60 transition-opacity" />
+                                                        <div className="relative h-full w-full overflow-hidden rounded-3xl border-4 border-white bg-white shadow-inner">
+                                                            <img src={visitorDraft.photo} alt="Visitor" className="h-full w-full object-cover transition-transform duration-500 group-hover/photo:scale-110" />
+                                                        </div>
                                                     </div>
                                                 ) : null}
-                                                <div className="grid w-full gap-2">
+                                                
+                                                <div className="flex w-full flex-col gap-3.5 text-center sm:text-left">
                                                     <div>
-                                                        <p className="text-[11px] font-semibold uppercase text-slate-500">Full Name</p>
-                                                        <p className="text-sm font-medium text-slate-800">{visitorDraft?.name || "-"}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[11px] font-semibold uppercase text-slate-500">Email</p>
-                                                        <p className="text-sm font-medium text-slate-800">{visitorDraft?.email || "-"}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[11px] font-semibold uppercase text-slate-500">Phone</p>
-                                                        <p className="text-sm font-medium text-slate-800">{visitorDraft?.phone || "-"}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[11px] font-semibold uppercase text-slate-500">Address</p>
-                                                        <p className="text-sm font-medium text-slate-800">{visitorDraft?.address?.street || "-"}</p>
+                                                        <p className="text-base font-bold text-slate-900">{visitorDraft?.name || "-"}</p>
+                                                        <div className="mt-1 flex flex-col gap-1.5">
+                                                            <div className="flex items-center justify-center gap-2 text-slate-500 sm:justify-start">
+                                                                <Mail className="h-3 w-3 text-[#3882a5]" />
+                                                                <span className="text-[12px] font-medium truncate max-w-full">{visitorDraft?.email || "-"}</span>
+                                                            </div>
+                                                            <div className="flex items-center justify-center gap-2 text-slate-500 sm:justify-start">
+                                                                <Phone className="h-3 w-3 text-[#3882a5]" />
+                                                                <span className="text-[12px] font-medium">{visitorDraft?.phone || "-"}</span>
+                                                            </div>
+                                                            <div className="flex items-start justify-center gap-2 text-slate-500 sm:justify-start">
+                                                                <MapPin className="mt-0.5 h-3 w-3 text-[#3882a5] shrink-0" />
+                                                                <span className="text-[12px] font-medium leading-relaxed">{visitorDraft?.address?.street || "-"}</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-                                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Host & Schedule</p>
-                                            <div className="mt-3 grid gap-2">
-                                                <div>
-                                                    <p className="text-[11px] font-semibold uppercase text-slate-500">Host</p>
-                                                    <p className="text-sm font-medium text-slate-800">{selectedEmployee?.name || "Selected Employee"}</p>
+                                        {/* Host & Schedule Card */}
+                                        <div className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/40 p-5 transition-all hover:border-[#3882a5]/30 hover:bg-white hover:shadow-md">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Meeting Details</span>
+                                                <CalendarClock className="h-3.5 w-3.5 text-slate-300" />
+                                            </div>
+
+                                            <div className="mt-5 space-y-4">
+                                                <div className="flex items-center gap-3 rounded-xl bg-white/50 p-3 ring-1 ring-slate-100 group-hover:bg-white group-hover:ring-[#3882a5]/10">
+                                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
+                                                        <User className="h-5 w-5" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-[10px] font-bold uppercase tracking-tight text-slate-400">Host / Employee</p>
+                                                        <p className="truncate text-sm font-bold text-slate-800">{selectedEmployee?.name || "Selected Employee"}</p>
+                                                        <p className="truncate text-[11px] text-slate-500 font-medium">{selectedEmployee?.department || "-"}</p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="text-[11px] font-semibold uppercase text-slate-500">Department</p>
-                                                    <p className="text-sm font-medium text-slate-800">{selectedEmployee?.department || "-"}</p>
-                                                </div>
+
                                                 <div className="grid grid-cols-2 gap-3">
-                                                    <div>
-                                                        <p className="text-[11px] font-semibold uppercase text-slate-500">Date</p>
-                                                        <p className="text-sm font-medium text-slate-800">{appointmentDraft?.appointmentDetails?.scheduledDate || "-"}</p>
+                                                    <div className="rounded-xl border border-slate-200/60 bg-white/40 p-3">
+                                                        <div className="flex items-center gap-1.5 text-[#3882a5] mb-1">
+                                                            <Clock className="h-3 w-3" />
+                                                            <span className="text-[9px] font-bold uppercase tracking-wider">Date</span>
+                                                        </div>
+                                                        <p className="text-xs font-bold text-slate-700">{appointmentDraft?.appointmentDetails?.scheduledDate || "-"}</p>
                                                     </div>
-                                                    <div>
-                                                        <p className="text-[11px] font-semibold uppercase text-slate-500">Time</p>
-                                                        <p className="text-sm font-medium text-slate-800">{appointmentDraft?.appointmentDetails?.scheduledTime || "-"}</p>
+                                                    <div className="rounded-xl border border-slate-200/60 bg-white/40 p-3">
+                                                        <div className="flex items-center gap-1.5 text-[#3882a5] mb-1">
+                                                            <Clock className="h-3 w-3" />
+                                                            <span className="text-[9px] font-bold uppercase tracking-wider">Time</span>
+                                                        </div>
+                                                        <p className="text-xs font-bold text-slate-700">{appointmentDraft?.appointmentDetails?.scheduledTime || "-"}</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-                                        <p className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                            <FileText className="h-3.5 w-3.5" /> Purpose of Visit
-                                        </p>
-                                        <p className="mt-2 text-sm font-medium text-slate-800">{appointmentDraft?.appointmentDetails?.purpose || "-"}</p>
+                                    {/* Purpose Banner */}
+                                    <div className="relative mt-2 overflow-hidden rounded-2xl border border-[#3882a5]/10 bg-[#3882a5]/5 p-4 transition-all hover:bg-[#3882a5]/10">
+                                        <div className="flex items-start gap-3">
+                                            <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-md bg-[#3882a5]/20 text-[#3882a5]">
+                                                <MessageCircle className="h-3.5 w-3.5" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-[10px] font-bold uppercase tracking-wider text-[#3882a5]">Purpose of Visit</p>
+                                                <p className="mt-1 text-sm font-medium leading-relaxed text-slate-700 italic">
+                                                    "{appointmentDraft?.appointmentDetails?.purpose || "-"}"
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
-                                    <Button variant="outline" onClick={() => setStep("appointment")}>
-                                        <ArrowLeft className="mr-2 h-4 w-4" /> Edit appointment
-                                    </Button>
-                                    <Button onClick={handleFinalSubmit} disabled={isCreatingAppointment}>
-                                        {isCreatingAppointment ? "Submitting..." : "Submit Request"}
-                                    </Button>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex items-center gap-3 pt-4 sm:gap-4 sm:pt-6">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => setStep("appointment")}
+                                            className="h-14 flex-1 rounded-2xl border-slate-200 font-bold tracking-tight text-slate-600 transition-all hover:bg-slate-50 hover:text-[#3882a5] active:scale-95"
+                                        >
+                                            <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
+                                        </Button>
+                                        <Button
+                                            onClick={handleFinalSubmit}
+                                            disabled={isCreatingVisitor || isCreatingAppointment}
+                                            className="h-14 flex-[1.5] rounded-2xl bg-[#3882a5] font-extrabold text-white shadow-lg shadow-[#3882a5]/20 transition-all hover:bg-[#2d6a87] hover:shadow-[#3882a5]/30 active:scale-95"
+                                        >
+                                            {isCreatingVisitor || isCreatingAppointment ? (
+                                                <div className="flex items-center gap-2">
+                                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                                    <span>Submitting...</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-2">
+                                                    <span>Confirm & Submit</span>
+                                                    <ArrowRight className="h-4 w-4 animate-bounce-x" />
+                                                </div>
+                                            )}
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         )}

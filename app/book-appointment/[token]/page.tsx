@@ -19,6 +19,7 @@ import {
 import { StatusPage } from "@/components/common/statusPage";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { SuccessState } from "@/components/common/SuccessState";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { extractIdString, isValidId } from "@/utils/idExtractor";
 import { cn } from "@/lib/utils";
@@ -244,90 +245,30 @@ export default function BookAppointmentPage() {
 
     if (step === "success") {
         return (
-            <div className="min-h-screen bg-[#f7fafc] px-4 py-10">
-                <div className="mx-auto w-full max-w-2xl">
-                    <Card className="overflow-hidden border border-emerald-200 bg-white shadow-[0_10px_30px_rgba(16,185,129,0.08)]">
-                        <div className="bg-gradient-to-r from-emerald-50 to-white px-6 py-6 text-center">
-                            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-                                <CheckCircle2 className="h-8 w-8 text-emerald-600" />
-                            </div>
-                            <h2 className="text-3xl font-extrabold tracking-tight text-emerald-700">Appointment Booked!</h2>
-                            <p className="mt-2 text-sm text-slate-600">Your visit request has been submitted successfully for approval.</p>
-                        </div>
-
-                        <CardContent className="space-y-5 p-6">
-                            <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
-                                <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Visitor</p>
-                                    <p className="text-sm font-semibold text-slate-900">{visitorData?.name || "-"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Host</p>
-                                    <p className="text-sm font-semibold text-slate-900">{employee?.name || "-"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Date & Time</p>
-                                    <p className="text-sm font-semibold text-slate-900">
-                                        {submittedAppointmentId ? "Scheduled" : "Submitted"}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Reference</p>
-                                    <p className="text-sm font-semibold text-slate-900">{submittedAppointmentId || "Generated"}</p>
-                                </div>
-                            </div>
-
-                            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-center">
-                                <p className="text-sm font-semibold text-emerald-700">Please wait at reception. You will be notified once approved.</p>
-                            </div>
-
-                            <div className="flex justify-center">
-                                <Button variant="outline" onClick={() => window.location.assign("/")}>
-                                    <Home className="mr-2 h-4 w-4" /> Go Home
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+            <SuccessState
+                title="Appointment Booked!"
+                companyName={appointmentLinkData?.createdBy?.companyName}
+                visitorName={visitorData?.name}
+                hostName={employee?.name}
+                referenceId={submittedAppointmentId || undefined}
+                onAction={() => window.location.assign("/")}
+                actionLabel="Go Home"
+            />
         );
     }
 
     if (step === "already_booked") {
         return (
-            <div className="min-h-screen bg-[#f7fafc] px-4 py-10">
-                <div className="mx-auto w-full max-w-2xl">
-                    <Card className="overflow-hidden border border-[#3882a5]/25 bg-white shadow-[0_10px_30px_rgba(56,130,165,0.12)]">
-                        <div className="bg-gradient-to-r from-[#3882a5]/10 to-white px-6 py-6 text-center">
-                            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[#3882a5]/15">
-                                <CheckCircle2 className="h-8 w-8 text-[#3882a5]" />
-                            </div>
-                            <h2 className="text-3xl font-extrabold tracking-tight text-[#074463]">Already Booked</h2>
-                            <p className="mt-2 text-sm text-slate-600">You have already booked this appointment link.</p>
-                        </div>
-                        <CardContent className="space-y-5 p-6">
-                            <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
-                                <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Visitor</p>
-                                    <p className="text-sm font-semibold text-slate-900">{visitorData?.name || "Existing Visitor"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Meeting With</p>
-                                    <p className="text-sm font-semibold text-slate-900">{employee?.name || "-"}</p>
-                                </div>
-                            </div>
-                            <div className="rounded-xl border border-[#3882a5]/25 bg-[#3882a5]/8 p-4 text-center">
-                                <p className="text-sm font-semibold text-[#1f4f67]">No action needed. Your previous booking is already submitted.</p>
-                            </div>
-                            <div className="flex justify-center">
-                                <Button variant="outline" onClick={() => window.location.assign("/")}>
-                                    <Home className="mr-2 h-4 w-4" /> Go Home
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+            <SuccessState
+                title="Already Booked"
+                message={`You have already booked your appointment with ${appointmentLinkData?.createdBy?.companyName}.`}
+                companyName={appointmentLinkData?.createdBy?.companyName}
+                visitorName={visitorData?.name || "Existing Visitor"}
+                hostName={employee?.name}
+                onAction={() => window.location.assign("/")}
+                actionLabel="Go Home"
+                customFooterMessage="No further action is required. Your previous booking is currently under review."
+            />
         );
     }
 

@@ -5,8 +5,9 @@ import { useForm, Controller, FormProvider, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { User } from "lucide-react";
+import { User, ArrowLeft } from "lucide-react";
 import { InputField } from "@/components/common/inputField";
 import { EnhancedDatePicker } from "@/components/common/enhancedDatePicker";
 import { EnhancedTimePicker } from "@/components/common/enhancedTimePicker";
@@ -45,6 +46,7 @@ interface AppointmentBookingFormProps {
     submitLabel?: string;
     initialValues?: Partial<AppointmentFormData>;
     onDraftChange?: (data: Partial<AppointmentFormData>) => void;
+    onBack?: () => void;
 }
 
 export function AppointmentBookingForm({
@@ -61,6 +63,7 @@ export function AppointmentBookingForm({
     submitLabel = "Book Appointment",
     initialValues,
     onDraftChange,
+    onBack,
 }: AppointmentBookingFormProps & { appointmentToken?: string }) {
     const normalizedVisitorId = extractIdString(visitorId);
     const normalizedEmployeeId = employeeId ? extractIdString(employeeId) : "";
@@ -192,14 +195,16 @@ export function AppointmentBookingForm({
                     </div>
                     
                     <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Meeting With</Label>
+                        <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Meeting With <span className="text-red-500 ml-1">*</span>
+                        </Label>
                         {isQRBooking && employees.length > 0 ? (
                             <Controller
                                 control={control}
                                 name="employeeId"
                                 render={({ field }) => (
                                     <div className="space-y-2">
-                                        <Select onValueChange={field.onChange} value={field.value}>
+                                        <Select onValueChange={field.onChange} value={field.value || undefined}>
                                             <SelectTrigger
                                                 className={cn(
                                                     "h-12 w-full rounded-lg border-slate-100 bg-white px-3 py-0 text-left shadow-sm focus:ring-[#3882a5]",
@@ -375,18 +380,31 @@ export function AppointmentBookingForm({
                     onUploadStatusChange={setIsFileUploading}
                 />
 
-                <div className="flex justify-end gap-4 border-t pt-4">
+                <div className="flex items-center gap-3 border-t pt-4 sm:gap-4 sm:pt-6">
+                    {onBack && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={onBack}
+                            disabled={isLoading}
+                            className="h-12 flex-1 rounded-xl border-border px-4 font-medium"
+                        >
+                            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                        </Button>
+                    )}
                     <ActionButton
                         type="submit"
                         disabled={isLoading || isFileUploading}
-                        className="bg-[#3882a5] text-white hover:bg-[#2d6a87] font-medium text-base px-8"
-                        size="xl"
-                        variant="default"
+                        className={cn(
+                            "h-12 rounded-xl bg-[#3882a5] px-4 text-white hover:bg-[#2d6a87] font-medium transition-all shadow-md",
+                            onBack ? "flex-1" : "hover:shadow-lg"
+                        )}
+                        size="lg"
                     >
                         {isLoading ? (
                             <>
                                 <LoadingSpinner size="sm" className="mr-2" />
-                                Booking Appointment...
+                                Processing...
                             </>
                         ) : (
                             submitLabel

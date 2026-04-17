@@ -86,12 +86,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     const [useMenuPortal, setUseMenuPortal] = useState(false);
     useEffect(() => {
         setIsMounted(true);
-        const updatePortalMode = () => {
-            setUseMenuPortal(window.innerWidth >= 640);
-        };
-        updatePortalMode();
-        window.addEventListener("resize", updatePortalMode);
-        return () => window.removeEventListener("resize", updatePortalMode);
+        setUseMenuPortal(true);
     }, []);
 
     // Convert options to react-select format
@@ -203,8 +198,8 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 ...base,
                 backgroundColor: "var(--popover, #ffffff)",
                 border: "1px solid var(--border, #e5e7eb)",
-                borderRadius: 8,
-                boxShadow: "0 10px 40px rgba(0, 0, 0, 0.2)",
+                borderRadius: 12,
+                boxShadow: "0 10px 40px rgba(0, 0, 0, 0.25)",
                 marginTop: 4,
                 overflow: "hidden",
                 zIndex: 9999,
@@ -215,7 +210,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
             menuList: (base) => ({
                 ...base,
                 padding: 4,
-                maxHeight: 250,
+                maxHeight: typeof window !== 'undefined' && window.innerHeight < 600 ? 150 : 250,
             }),
             menuPortal: (base) => ({
                 ...base,
@@ -306,8 +301,8 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 classNamePrefix="rs"
                 aria-invalid={!!error}
                 aria-describedby={describedBy}
-                menuPortalTarget={isMounted && useMenuPortal ? document.body : null}
-                menuPosition={useMenuPortal ? "fixed" : "absolute"}
+                menuPortalTarget={isMounted ? document.body : null}
+                menuPosition="fixed"
                 menuPlacement="auto"
                 closeMenuOnSelect={true}
                 blurInputOnSelect={false}

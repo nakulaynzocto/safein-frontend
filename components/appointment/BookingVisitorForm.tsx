@@ -18,6 +18,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FileText, Camera, Fingerprint } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useUserCountry } from "@/hooks/useUserCountry";
+import { cn } from "@/lib/utils";
 
 const createBookingVisitorSchema = (collectPhotoInForm: boolean) =>
     yup.object({
@@ -95,6 +96,7 @@ interface BookingVisitorFormProps {
     isLoading?: boolean;
     appointmentToken?: string; // Token for public upload endpoint
     collectPhotoInForm?: boolean;
+    onBack?: () => void;
 }
 
 export function BookingVisitorForm({
@@ -107,6 +109,7 @@ export function BookingVisitorForm({
     isLoading = false,
     appointmentToken,
     collectPhotoInForm = true,
+    onBack,
 }: BookingVisitorFormProps) {
     const userCountry = useUserCountry();
     const bookingVisitorSchema = useMemo(() => createBookingVisitorSchema(collectPhotoInForm), [collectPhotoInForm]);
@@ -437,36 +440,38 @@ export function BookingVisitorForm({
                 )}
             </div>}
 
-            <div className="flex flex-col-reverse justify-end gap-3 border-t pt-4 sm:flex-row sm:gap-4 sm:pt-6">
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                        // Assuming this is used in context where cancel action is needed
-                        // Perhaps pass onCancel prop?
-                    }}
-                    className="h-12 w-full rounded-xl border-border px-8 font-medium sm:w-auto"
-                    disabled={isLoading}
-                >
-                    Cancel
-                </Button>
+            <div className="flex items-center gap-3 border-t pt-4 sm:gap-4 sm:pt-6">
+                {onBack && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onBack}
+                        disabled={isLoading}
+                        className="h-12 flex-1 rounded-xl border-border px-4 font-medium"
+                    >
+                        Back
+                    </Button>
+                )}
                 <Button
                     type="submit"
                     disabled={isLoading || isFileUploading}
-                    className="h-12 w-full rounded-xl bg-[#3882a5] px-8 text-white hover:bg-[#2d6a87] font-medium sm:w-auto"
+                    className={cn(
+                        "h-12 rounded-xl bg-[#3882a5] px-4 text-white hover:bg-[#2d6a87] font-medium transition-all shadow-md",
+                        onBack ? "flex-1" : "w-full"
+                    )}
                 >
                     {isLoading ? (
                         <>
                             <LoadingSpinner size="sm" className="mr-2" />
-                            Creating...
+                            {onBack ? "Saving..." : "Creating..."}
                         </>
                     ) : isFileUploading ? (
                         <>
                             <LoadingSpinner size="sm" className="mr-2" />
-                            Uploading Image...
+                            Uploading...
                         </>
                     ) : (
-                        "Continue to Appointment"
+                        "Continue"
                     )}
                 </Button>
             </div>
