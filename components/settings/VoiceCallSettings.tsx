@@ -36,8 +36,8 @@ import { SettingsMasterBanner } from "./SettingsMasterBanner";
 import { useCollapsibleSections } from "@/hooks/useCollapsibleSections";
 
 const FRONTEND_VOICE_DEFAULTS = {
-    "en-US": "Hello {employeeName}, you have a new appointment request from {visitorName} for {purpose} scheduled at {time} on {date}. Press 1 to Accept, or 2 to Reject.",
-    "hi-IN": "नमस्ते {employeeName}, आपके पास {visitorName} द्वारा {purpose} के लिए {date} को {time} बजे एक नया अपॉइंटमेंट अनुरोध आया है। स्वीकार करने के लिए 1 दबाएं, या अस्वीकार करने के लिए 2 दबाएं।"
+    "en-US": "Hello {employeeName}, you have a new appointment request from {visitorName} for {purpose} scheduled at {time} on {date}. Press 1 to Accept, 2 to Reject, or 3 to Repeat.",
+    "hi-IN": "नमस्ते {employeeName}, आपके पास {visitorName} द्वारा {purpose} के लिए {date} को {time} बजे एक नया अपॉइंटमेंट अनुरोध आया है। स्वीकार करने के लिए 1, अस्वीकार करने के लिए 2, या संदेश फिर से सुनने के लिए 3 दबाएं।"
 };
 
 const voiceSchema = yup.object().shape({
