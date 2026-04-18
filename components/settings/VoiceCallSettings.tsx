@@ -20,8 +20,8 @@ import { toast } from "sonner";
 
 import {
     useGetSettingsQuery,
-    useSaveVoiceConfigMutation,
     useUpdateSettingsMutation,
+    useSaveVoiceConfigMutation,
     useGetVoiceDefaultsQuery,
 } from "@/store/api/settingsApi";
 import { SettingsHeader } from "./SettingsHeader";
@@ -246,16 +246,21 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                                                 <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('triggers') && "rotate-90")} />
                                             </div>
                                             <CollapsibleContent>
-                                                <div className="p-4 pt-0 grid grid-cols-1 sm:grid-cols-3 gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <div className="p-4 pt-0 grid grid-cols-1 gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
                                                     {[
                                                         { id: "callOnLinkInvite", label: "Link Bookings", sub: "Visitor books via link", icon: Calendar },
                                                         { id: "callOnAdminEntry", label: "Admin Entries", sub: "Host creates entry", icon: User },
                                                         { id: "callOnQrCheckin", label: "QR Check-ins", sub: "Visitor scans QR", icon: QrCode },
                                                     ].map(trigger => (
-                                                        <div key={trigger.id} className="p-3 rounded-xl border border-border/50 bg-muted/5 flex items-center justify-between gap-3">
-                                                            <div className="min-w-0">
-                                                                <p className="text-[11px] font-bold text-[#074463] truncate">{trigger.label}</p>
-                                                                <p className="text-[9px] text-muted-foreground truncate">{trigger.sub}</p>
+                                                        <div key={trigger.id} className="p-4 rounded-xl border border-border/50 bg-muted/5 flex items-center justify-between gap-4 transition-all hover:bg-muted/10">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="h-10 w-10 bg-white rounded-lg flex items-center justify-center border border-border/30 shadow-sm">
+                                                                    <trigger.icon size={18} className="text-[#3882a5]" />
+                                                                </div>
+                                                                <div className="min-w-0">
+                                                                    <p className="text-sm font-bold text-[#074463]">{trigger.label}</p>
+                                                                    <p className="text-xs text-muted-foreground">{trigger.sub}</p>
+                                                                </div>
                                                             </div>
                                                             <BrandSwitch 
                                                                 checked={settings?.voiceCall?.[trigger.id as keyof typeof settings.voiceCall] as boolean ?? true} 
@@ -268,7 +273,6 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                                                                         toast.error(`Failed to update ${trigger.label} status`);
                                                                     }
                                                                 }}
-                                                                className="scale-75" 
                                                             />
                                                         </div>
                                                     ))}

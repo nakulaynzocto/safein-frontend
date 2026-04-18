@@ -188,6 +188,37 @@ export const settingsApi = baseApi.injectEndpoints({
         updateSettings: builder.mutation<Settings, UpdateSettingsRequest>({
             query: (body) => ({ url: "/settings", method: "PUT", body }),
             transformResponse: (res: any) => res?.data ?? res,
+            onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+                // Optimistic Update
+                const patchResult = dispatch(
+                    settingsApi.util.updateQueryData("getSettings", undefined, (draft) => {
+                        if (arg.notifications) {
+                            if (arg.notifications.emailEnabled !== undefined) draft.notifications.emailEnabled = arg.notifications.emailEnabled;
+                            if (arg.notifications.whatsappEnabled !== undefined) draft.notifications.whatsappEnabled = arg.notifications.whatsappEnabled;
+                            if (arg.notifications.smsEnabled !== undefined) draft.notifications.smsEnabled = arg.notifications.smsEnabled;
+                            
+                            // Merge categories
+                            const cats = ['visitor', 'employee', 'appointment'] as const;
+                            cats.forEach(cat => {
+                                if (arg.notifications?.[cat]) {
+                                    Object.assign(draft.notifications[cat], arg.notifications[cat]);
+                                }
+                            });
+                        }
+                        if (arg.voiceCall) {
+                            Object.assign(draft.voiceCall, arg.voiceCall);
+                        }
+                        if (arg.whatsapp) {
+                            Object.assign(draft.whatsapp, arg.whatsapp);
+                        }
+                    })
+                );
+                try {
+                    await queryFulfilled;
+                } catch {
+                    patchResult.undo();
+                }
+            },
             invalidatesTags: ["Settings"],
         }),
 

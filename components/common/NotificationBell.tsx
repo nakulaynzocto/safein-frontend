@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useGetUnreadCountQuery } from "@/store/api/notificationApi";
+import { useGetUnreadCountQuery, useMarkAllAsReadMutation } from "@/store/api/notificationApi";
 import { NotificationModal } from "./NotificationModal";
 import { cn } from "@/lib/utils";
 
@@ -17,8 +17,16 @@ export function NotificationBell({ className, iconClassName }: NotificationBellP
 
     // Fetch unread count for badge
     const { data: unreadCountData, isLoading: isLoadingCount } = useGetUnreadCountQuery();
+    const [markAllAsRead] = useMarkAllAsReadMutation();
 
     const unreadCount = unreadCountData?.unreadCount || 0;
+
+    const handleBellClick = () => {
+        setIsModalOpen(true);
+        if (unreadCount > 0) {
+            markAllAsRead();
+        }
+    };
 
     return (
         <>
@@ -29,7 +37,7 @@ export function NotificationBell({ className, iconClassName }: NotificationBellP
                     "relative h-10 w-10 rounded-full transition-all duration-200 hover:scale-105",
                     className,
                 )}
-                onClick={() => setIsModalOpen(true)}
+                onClick={handleBellClick}
             >
                 <Bell className={cn("h-5 w-5", iconClassName)} />
 
