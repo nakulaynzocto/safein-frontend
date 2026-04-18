@@ -99,7 +99,7 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
                 }
                 return { data: null };
             },
-            providesTags: ["User"],
+            providesTags: ["Subscription"],
         }),
 
         /**
@@ -127,7 +127,7 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
                     },
                 };
             },
-            providesTags: ["User", "Subscription"],
+            providesTags: ["Subscription"],
         }),
 
         /**
@@ -145,7 +145,7 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
                 }
                 return { data: [] };
             },
-            providesTags: ["User", "Subscription"],
+            providesTags: ["Subscription"],
         }),
 
         /**
@@ -185,7 +185,7 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
                 method: "POST",
                 body: data,
             }),
-            invalidatesTags: ["User", "Subscription"],
+            invalidatesTags: ["Subscription"],
         }),
     }),
 });

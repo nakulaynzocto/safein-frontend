@@ -48,7 +48,7 @@ export const safeinProfileApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         getSafeinProfile: builder.query<ISafeinProfileResponse, void>({
             query: () => "/safein-profile",
-            providesTags: ["Settings"],
+            providesTags: ["SafeinProfile"],
         }),
     }),
 });

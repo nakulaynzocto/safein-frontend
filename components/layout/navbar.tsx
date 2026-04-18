@@ -91,8 +91,6 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
 
     const { data: profileUser, refetch: refetchProfile } = useGetProfileQuery(undefined, {
         skip: !isAuthenticated,
-        refetchOnMountOrArgChange: true,
-        refetchOnFocus: true,
     });
 
     const user = profileUser || authUser;

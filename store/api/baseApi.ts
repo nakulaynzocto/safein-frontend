@@ -124,6 +124,8 @@ export const baseApi = createApi({
         "DashboardStats",
         "QRSetup",
         "Blog",
+        "Wallet",
+        "SafeinProfile",
     ],
     endpoints: () => ({}),
     refetchOnMountOrArgChange: false,

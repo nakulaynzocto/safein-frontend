@@ -37,7 +37,7 @@ export const walletApi = baseApi.injectEndpoints({
         getWalletBalance: builder.query<WalletBalance, void>({
             query: () => "/communication-wallet/balance",
             transformResponse: (res: any) => res?.data ?? res,
-            providesTags: ["Settings"],
+            providesTags: ["Wallet"],
         }),
         getWalletTransactions: builder.query<TransactionsResponse, { page?: number; limit?: number; type?: string } | void>({
             query: (params) => ({
@@ -45,7 +45,7 @@ export const walletApi = baseApi.injectEndpoints({
                 params: params || { page: 1, limit: 10 },
             }),
             transformResponse: (res: any) => res?.data ?? res,
-            providesTags: ["Settings"],
+            providesTags: ["Wallet"],
         }),
         createCheckoutOrder: builder.mutation<{ orderId: string; amount: number; currency: string; keyId: string; userEmail: string }, { amount: number }>({
             query: (data) => ({
@@ -62,7 +62,7 @@ export const walletApi = baseApi.injectEndpoints({
                 body: data,
             }),
             transformResponse: (res: any) => res.data,
-            invalidatesTags: ["Settings"],
+            invalidatesTags: ["Wallet"],
         }),
     }),
 });
