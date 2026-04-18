@@ -23,7 +23,7 @@ export function CreditBalancePill({ forceShow = false }: { forceShow?: boolean }
     if (!forceShow && !isVoiceEnabled) return null;
 
     const balance = walletData?.balance ?? 0;
-    const isLow = balance < 50;
+    const isLow = !isLoading && balance < 50;
 
     return (
         <>
@@ -50,14 +50,14 @@ export function CreditBalancePill({ forceShow = false }: { forceShow?: boolean }
                             )}>
                                 <Zap className={cn(
                                     "size-3.5 fill-current transition-transform duration-500 group-hover:scale-110",
-                                    !isLow && "animate-pulse-slow"
+                                    !isLow && !isLoading && "animate-pulse-slow"
                                 )} />
                             </div>
 
                             {/* Balance Info */}
                             <div className="flex items-baseline gap-1.5 ml-2.5">
                                 {isLoading ? (
-                                    <Loader2 className="size-3 animate-spin text-slate-400" />
+                                    <Loader2 className="size-3 animate-spin text-[#3882a5]" />
                                 ) : (
                                     <span className={cn(
                                         "text-[14px] font-bold tabular-nums tracking-tight transition-colors duration-300",
@@ -100,7 +100,11 @@ export function CreditBalancePill({ forceShow = false }: { forceShow?: boolean }
                                 </div>
                                 <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
                                     <span className="text-slate-500">Cost per call</span>
-                                    <span className="font-medium text-slate-700 dark:text-slate-300 text-right">5 credits</span>
+                                    <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.callCostPerAttempt || 5} credits</span>
+                                </div>
+                                <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
+                                    <span className="text-slate-500">Cost per message</span>
+                                    <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.smsCostPerMessage || 1} credits</span>
                                 </div>
                             </div>
 
