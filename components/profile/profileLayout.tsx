@@ -9,7 +9,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { routes } from "@/utils/routes";
 import Link from "next/link";
 
-type TabType = "profile" | "notification" | "subscription" | "whatsapp" | "smtp" | "sms" | "voice";
+type TabType = "profile" | "subscription" | "whatsapp" | "smtp" | "sms" | "voice";
 
 interface ProfileLayoutProps {
     children: (activeTab: TabType) => ReactNode;
@@ -30,8 +30,6 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
             setActiveTab("smtp");
         } else if (pathname === routes.privateroute.SETTINGS_SMS) {
             setActiveTab("sms");
-        } else if (pathname === routes.privateroute.SETTINGS_NOTIFICATION) {
-            setActiveTab("notification");
         } else if (pathname === routes.privateroute.PROFILE) {
             setActiveTab("profile");
         } else if (pathname === routes.privateroute.SETTINGS_SUBSCRIPTION) {
@@ -55,13 +53,6 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
             icon: CreditCard,
             roles: ["admin"],
             href: routes.privateroute.SETTINGS_SUBSCRIPTION,
-        },
-        {
-            id: "notification" as const,
-            label: "Notifications",
-            icon: Bell,
-            roles: ["admin"],
-            href: routes.privateroute.SETTINGS_NOTIFICATION,
         },
         {
             id: "whatsapp" as const,

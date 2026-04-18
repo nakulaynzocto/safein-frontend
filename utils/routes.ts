@@ -61,7 +61,6 @@ export const routes = {
         // Settings Routes
         SETTINGS: "/settings",
         PROFILE: "/settings/profile",
-        SETTINGS_NOTIFICATION: "/settings/notification",
         SETTINGS_WHATSAPP: "/settings/whatsapp",
         SETTINGS_SMTP: "/settings/smtp",
         SETTINGS_SMS: "/settings/sms",

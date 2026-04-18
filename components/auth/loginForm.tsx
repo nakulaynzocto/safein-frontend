@@ -52,6 +52,11 @@ export function LoginForm() {
             window.location.href = target;
         }
     }, [isInitialized, isAuthenticated, token, searchParams]);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const generateCaptcha = useCallback(() => {
         const n1 = Math.floor(Math.random() * 10) + 1;
@@ -128,7 +133,20 @@ export function LoginForm() {
         onError: () => setErrorMessage("Google login failed"),
     });
 
-    if (!isInitialized) return null;
+    if (!isMounted || !isInitialized) {
+        return (
+            <div className="w-full space-y-8 animate-pulse">
+                <div className="space-y-3">
+                    <div className="h-10 w-32 bg-slate-200 rounded-md" />
+                    <div className="h-4 w-64 bg-slate-100 rounded-md" />
+                </div>
+                <div className="space-y-6">
+                    <div className="h-12 w-full bg-slate-100 rounded-xl" />
+                    <div className="h-40 w-full bg-slate-50 rounded-xl" />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-700">

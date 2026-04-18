@@ -1,20 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-    useGetSettingsQuery, 
-    useSaveSMTPConfigMutation, 
-    useUpdateSettingsMutation 
-} from "@/store/api/settingsApi";
+import { useGetSettingsQuery, useSaveSMTPConfigMutation } from "@/store/api/settingsApi";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import {
-    Mail,
-    Save,
-    Server,
-    Key,
-    Loader2,
-} from "lucide-react";
+import { Mail, Save, Server, Key, Palette, Settings2 } from "lucide-react";
 import { SettingsHeader } from "./SettingsHeader";
 import { InputField } from "@/components/common/inputField";
 import { MaskedInputField, MASKED_DISPLAY_VALUE } from "@/components/common/MaskedInputField";
@@ -26,6 +16,9 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ProfileLayout } from "@/components/profile/profileLayout";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmailTemplateSettings } from "./EmailTemplateSettings";
+import { Card } from "@/components/ui/card";
 
 const schema = yup.object().shape({
     host: yup.string().required("SMTP host is required"),
@@ -78,9 +71,14 @@ export function SMTPSettings() {
     const router = useRouter();
     const { data: settings, isLoading, error } = useGetSettingsQuery();
     const [saveSMTP, { isLoading: isSaving }] = useSaveSMTPConfigMutation();
-    const [selectedPreset, setSelectedPreset] = useState<string>("Custom");
+
+    const [selectedPreset, setSelectedPreset] = useState("Custom");
 
     const isVerified = !!settings?.smtp?.verified;
+
+
+
+
 
     const {
         register,
@@ -167,168 +165,188 @@ export function SMTPSettings() {
                     <div className="mx-auto w-full max-w-full">
                         <SettingsHeader
                             title="SMTP Email Server"
-                            description="Configure a custom SMTP server to send emails from your own domain. A test email will be sent to verify the connection."
+                            description="Configure SMTP connection, which events send email, and branding & templates for professional communication."
                             isVerified={isVerified}
                             providerName={selectedPreset === "Custom" ? "Custom SMTP" : selectedPreset}
                             icon={Mail}
                         />
 
-                        <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
-                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                                <div className="space-y-3">
-                                    <h3 className="text-sm font-semibold text-foreground">Quick Provider Presets</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {PRESETS.map((preset) => (
-                                            <PresetButton
-                                                key={preset.label}
-                                                label={preset.label}
-                                                isSelected={selectedPreset === preset.label}
-                                                onClick={() => applyPreset(preset)}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
+                        <Tabs defaultValue="connection" className="w-full">
+                            <TabsList className="mb-8 flex w-full flex-wrap gap-1 bg-muted/30 p-1 border border-border/50 rounded-xl min-h-11 items-stretch">
+                                <TabsTrigger 
+                                    value="connection" 
+                                    className="flex-1 min-w-[140px] px-4 py-2.5 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all"
+                                >
+                                    <Settings2 className="h-4 w-4 mr-2 shrink-0" />
+                                    Connection Config
+                                </TabsTrigger>
+                                <TabsTrigger 
+                                    value="templates" 
+                                    className="flex-1 min-w-[140px] px-4 py-2.5 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all"
+                                >
+                                    <Palette className="h-4 w-4 mr-2 shrink-0" />
+                                    Branding & Templates
+                                </TabsTrigger>
+                            </TabsList>
 
-                                <div className="space-y-4 pt-4 border-t">
-                                    <div className="flex items-center gap-2">
-                                        <Server className="h-4 w-4 text-muted-foreground" />
-                                        <h3 className="text-sm font-semibold text-foreground">Server Settings</h3>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 bg-muted/20 p-6 rounded-2xl border border-dashed">
-                                        <div className="lg:col-span-2">
-                                            <InputField
-                                                label="SMTP Host"
-                                                placeholder="smtp.gmail.com"
-                                                {...register("host")}
-                                                error={errors.host?.message}
-                                                required
-                                                className="h-12 bg-background border-border rounded-xl font-medium"
-                                            />
-                                        </div>
-                                        <div>
-                                            <InputField
-                                                label="Port"
-                                                type="number"
-                                                placeholder="587"
-                                                {...register("port")}
-                                                error={errors.port?.message}
-                                                required
-                                                className="h-12 bg-background border-border rounded-xl font-medium"
-                                            />
-                                        </div>
-                                        <div className="flex flex-col space-y-2">
-                                            <label className="text-sm font-medium text-foreground">Security</label>
-                                            <div className="flex items-center gap-4 h-12 px-4 bg-background border border-border rounded-xl">
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        checked={!watch("secure")}
-                                                        onChange={() => setValue("secure", false, { shouldDirty: true })}
-                                                        className="accent-[#3882a5]"
+                            <TabsContent value="connection" className="animate-in fade-in slide-in-from-left-4 duration-300">
+                                <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
+                                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                                        <div className="space-y-3">
+                                            <h3 className="text-sm font-semibold text-foreground">Quick Provider Presets</h3>
+                                            <div className="flex flex-wrap gap-2">
+                                                {PRESETS.map((preset) => (
+                                                    <PresetButton
+                                                        key={preset.label}
+                                                        label={preset.label}
+                                                        isSelected={selectedPreset === preset.label}
+                                                        onClick={() => applyPreset(preset)}
                                                     />
-                                                    <span className="text-sm font-medium">TLS (587)</span>
-                                                </label>
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        checked={watch("secure")}
-                                                        onChange={() => setValue("secure", true, { shouldDirty: true })}
-                                                        className="accent-[#3882a5]"
-                                                    />
-                                                    <span className="text-sm font-medium">SSL (465)</span>
-                                                </label>
+                                                ))}
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
 
-                                <div className="space-y-4 pt-4 border-t">
-                                    <div className="flex items-center gap-2">
-                                        <Key className="h-4 w-4 text-muted-foreground" />
-                                        <h3 className="text-sm font-semibold text-foreground">Authentication</h3>
-                                    </div>
+                                        <div className="space-y-4 pt-4 border-t">
+                                            <div className="flex items-center gap-2">
+                                                <Server className="h-4 w-4 text-muted-foreground" />
+                                                <h3 className="text-sm font-semibold text-foreground">Server Settings</h3>
+                                            </div>
 
-                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 bg-muted/20 p-6 rounded-2xl border border-dashed">
-                                        <InputField
-                                            label="SMTP Username"
-                                            placeholder="your@email.com"
-                                            type="email"
-                                            {...register("user")}
-                                            error={errors.user?.message}
-                                            required
-                                            className="h-12 bg-background border-border rounded-xl font-medium"
-                                        />
-                                        <MaskedInputField
-                                            label="SMTP Password"
-                                            placeholder={isVerified ? MASKED_DISPLAY_VALUE : "Enter password"}
-                                            {...register("pass")}
-                                            error={errors.pass?.message}
-                                            required
-                                            className="h-12 bg-background border-border rounded-xl font-medium"
-                                        />
-                                    </div>
-                                </div>
+                                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 bg-muted/20 p-6 rounded-2xl border border-dashed">
+                                                <div className="lg:col-span-2">
+                                                    <InputField
+                                                        label="SMTP Host"
+                                                        placeholder="smtp.gmail.com"
+                                                        {...register("host")}
+                                                        error={errors.host?.message}
+                                                        required
+                                                        className="h-12 bg-background border-border rounded-xl font-medium"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <InputField
+                                                        label="Port"
+                                                        type="number"
+                                                        placeholder="587"
+                                                        {...register("port")}
+                                                        error={errors.port?.message}
+                                                        required
+                                                        className="h-12 bg-background border-border rounded-xl font-medium"
+                                                    />
+                                                </div>
+                                                <div className="flex flex-col space-y-2">
+                                                    <label className="text-sm font-medium text-foreground">Security</label>
+                                                    <div className="flex items-center gap-4 h-12 px-4 bg-background border border-border rounded-xl">
+                                                        <label className="flex items-center gap-2 cursor-pointer">
+                                                            <input
+                                                                type="radio"
+                                                                checked={!watch("secure")}
+                                                                onChange={() => setValue("secure", false, { shouldDirty: true })}
+                                                                className="accent-[#3882a5]"
+                                                            />
+                                                            <span className="text-sm font-medium">TLS (587)</span>
+                                                        </label>
+                                                        <label className="flex items-center gap-2 cursor-pointer">
+                                                            <input
+                                                                type="radio"
+                                                                checked={watch("secure")}
+                                                                onChange={() => setValue("secure", true, { shouldDirty: true })}
+                                                                className="accent-[#3882a5]"
+                                                            />
+                                                            <span className="text-sm font-medium">SSL (465)</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                <div className="space-y-4 pt-4 border-t">
-                                    <div className="flex items-center gap-2">
-                                        <Mail className="h-4 w-4 text-muted-foreground" />
-                                        <h3 className="text-sm font-semibold text-foreground">Sender Identity</h3>
-                                    </div>
+                                        <div className="space-y-4 pt-4 border-t">
+                                            <div className="flex items-center gap-2">
+                                                <Key className="h-4 w-4 text-muted-foreground" />
+                                                <h3 className="text-sm font-semibold text-foreground">Authentication</h3>
+                                            </div>
 
-                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 bg-muted/20 p-6 rounded-2xl border border-dashed">
-                                        <InputField
-                                            label="Sender Name"
-                                            placeholder="Gatekeeper Security"
-                                            {...register("fromName")}
-                                            error={errors.fromName?.message}
-                                            required
-                                            className="h-12 bg-background border-border rounded-xl font-medium"
-                                        />
-                                        <InputField
-                                            label="Sender Email"
-                                            type="email"
-                                            placeholder="no-reply@yourdomain.com"
-                                            {...register("fromEmail")}
-                                            error={errors.fromEmail?.message}
-                                            required
-                                            className="h-12 bg-background border-border rounded-xl font-medium"
-                                        />
-                                    </div>
-                                </div>
+                                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 bg-muted/20 p-6 rounded-2xl border border-dashed">
+                                                <InputField
+                                                    label="SMTP Username"
+                                                    placeholder="your@email.com"
+                                                    type="email"
+                                                    {...register("user")}
+                                                    error={errors.user?.message}
+                                                    required
+                                                    className="h-12 bg-background border-border rounded-xl font-medium"
+                                                />
+                                                <MaskedInputField
+                                                    label="SMTP Password"
+                                                    placeholder={isVerified ? MASKED_DISPLAY_VALUE : "Enter password"}
+                                                    {...register("pass")}
+                                                    error={errors.pass?.message}
+                                                    required
+                                                    className="h-12 bg-background border-border rounded-xl font-medium"
+                                                />
+                                            </div>
+                                        </div>
 
-                                <div className="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end border-t border-border/50">
-                                    <ActionButton
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => router.back()}
-                                        size="xl"
-                                        className="px-8"
-                                    >
-                                        Cancel
-                                    </ActionButton>
-                                    <ActionButton
-                                        type="submit"
-                                        disabled={isSaving}
-                                        variant="primary"
-                                        size="xl"
-                                        className="min-w-[200px] shadow-lg shadow-[#3882a5]/20"
-                                    >
-                                        {isSaving ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                <span>Saving...</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Save className="mr-2 h-4 w-4" />
-                                                <span>Verify & Save</span>
-                                            </>
-                                        )}
-                                    </ActionButton>
-                                </div>
-                            </form>
-                        </FormContainer>
+                                        <div className="space-y-4 pt-4 border-t">
+                                            <div className="flex items-center gap-2">
+                                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                                <h3 className="text-sm font-semibold text-foreground">Sender Identity</h3>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 bg-muted/20 p-6 rounded-2xl border border-dashed">
+                                                <InputField
+                                                    label="Sender Name"
+                                                    placeholder="Gatekeeper Security"
+                                                    {...register("fromName")}
+                                                    error={errors.fromName?.message}
+                                                    required
+                                                    className="h-12 bg-background border-border rounded-xl font-medium"
+                                                />
+                                                <InputField
+                                                    label="Sender Email"
+                                                    type="email"
+                                                    placeholder="no-reply@yourdomain.com"
+                                                    {...register("fromEmail")}
+                                                    error={errors.fromEmail?.message}
+                                                    required
+                                                    className="h-12 bg-background border-border rounded-xl font-medium"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end border-t border-border/50">
+                                            <ActionButton
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => router.back()}
+                                                size="xl"
+                                                className="px-8"
+                                            >
+                                                Cancel
+                                            </ActionButton>
+                                            <ActionButton
+                                                type="submit"
+                                                isLoading={isSaving}
+                                                loadingLabel="Saving..."
+                                                variant="primary"
+                                                size="xl"
+                                                className="min-w-[200px] shadow-lg shadow-[#3882a5]/20"
+                                                icon={Save}
+                                                label="Verify & Save"
+                                            />
+                                        </div>
+                                    </form>
+                                </FormContainer>
+                            </TabsContent>
+
+                            <TabsContent value="templates" className="animate-in fade-in slide-in-from-right-4 duration-300">
+                                <Card className="p-8 border-border/50 bg-background shadow-sm rounded-2xl">
+                                    <EmailTemplateSettings />
+                                </Card>
+                            </TabsContent>
+                        </Tabs>
+
+
                     </div>
                 )}
             </ProfileLayout>

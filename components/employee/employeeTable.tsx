@@ -436,6 +436,8 @@ export function EmployeeTable({
                     employeeId={selectedEmployee._id}
                     employeeName={selectedEmployee.name}
                     email={selectedEmployee.email}
+                    phone={selectedEmployee.phone}
+                    type="email"
                     onSuccess={() => {
                         // Optional: Refresh list logic is usually handled by cache invalidation
                     }}

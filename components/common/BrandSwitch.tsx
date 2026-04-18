@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 interface BrandSwitchProps {
     checked: boolean;
-    onCheckedChange: () => void;
+    onCheckedChange: (checked: boolean) => void;
     variant?: "default" | "large";
     className?: string;
     disabled?: boolean;
@@ -20,7 +20,7 @@ export function BrandSwitch({
 }: BrandSwitchProps) {
     return (
         <button
-            onClick={() => !disabled && onCheckedChange()}
+            onClick={() => !disabled && onCheckedChange(!checked)}
             disabled={disabled}
             type="button"
             className={cn(

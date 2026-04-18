@@ -21,9 +21,34 @@ export interface INotificationType {
     voice: boolean;
 }
 
+export interface EmailTemplate {
+    subject: string;
+    body: string;
+}
+
+export interface EmailTemplates {
+    globalStyles: {
+        primaryColor: string;
+        textColor: string;
+        headerBg: string;
+        footerBg: string;
+        footerText: string;
+        logoUrl?: string;
+    };
+    templates: {
+        appointmentApproval?: EmailTemplate;
+        appointmentRejection?: EmailTemplate;
+        newAppointmentRequest?: EmailTemplate;
+        appointmentConfirmation?: EmailTemplate;
+        appointmentLink?: EmailTemplate;
+    };
+    enabledTemplates?: Record<string, boolean>;
+}
+
 export interface Settings {
     _id: string;
     userId: string;
+    companyName?: string;
     notifications: {
         emailEnabled: boolean;
         whatsappEnabled: boolean;
@@ -70,7 +95,9 @@ export interface Settings {
         verified: boolean;
         metaVerified: boolean;
         verifiedAt?: string;
+        enabledTemplates?: Record<string, boolean>;
     };
+    emailTemplates?: EmailTemplates;
     createdAt: string;
     updatedAt: string;
 }
@@ -90,6 +117,7 @@ export interface UpdateSettingsRequest {
         testNumber?: string;
         phoneNumberId?: string;
         accessToken?: string;
+        enabledTemplates?: Record<string, boolean>;
     };
     voiceCall?: {
         enabled?: boolean;
@@ -103,6 +131,7 @@ export interface UpdateSettingsRequest {
         callOnAdminEntry?: boolean;
         callOnQrCheckin?: boolean;
     };
+    emailTemplates?: Partial<EmailTemplates>;
 }
 
 export interface SaveVoiceConfigRequest {
@@ -199,6 +228,15 @@ export const settingsApi = baseApi.injectEndpoints({
             query: () => "/settings/voice-call/defaults",
             transformResponse: (res: any) => res?.data ?? res,
         }),
+        saveEmailTemplates: builder.mutation<Settings, EmailTemplates>({
+            query: (body) => ({ url: "/settings/email-templates", method: "POST", body }),
+            transformResponse: (res: any) => res?.data ?? res,
+            invalidatesTags: ["Settings"],
+        }),
+        getEmailTemplateDefaults: builder.query<{ templates: Record<string, EmailTemplate>; globalStyles: any }, void>({
+            query: () => "/settings/email-templates/defaults",
+            transformResponse: (res: any) => res?.data ?? res,
+        }),
     }),
 });
 
@@ -212,4 +250,6 @@ export const {
     useRemoveSMSConfigMutation,
     useSaveVoiceConfigMutation,
     useGetVoiceDefaultsQuery,
+    useSaveEmailTemplatesMutation,
+    useGetEmailTemplateDefaultsQuery,
 } = settingsApi;
