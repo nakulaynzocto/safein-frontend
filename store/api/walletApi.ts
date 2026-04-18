@@ -44,7 +44,15 @@ export const walletApi = baseApi.injectEndpoints({
                 url: "/communication-wallet/transactions",
                 params: params || { page: 1, limit: 10 },
             }),
-            transformResponse: (res: any) => res?.data ?? res,
+            transformResponse: (res: any) => {
+                const data = res?.data ?? res;
+                // Backend uses ResponseUtil.paginate which returns { data, pagination }
+                // We need to map 'data' to 'transactions' matches the interface
+                return {
+                    transactions: data.data || [],
+                    pagination: data.pagination
+                };
+            },
             providesTags: ["Wallet"],
         }),
         createCheckoutOrder: builder.mutation<{ orderId: string; amount: number; currency: string; keyId: string; userEmail: string }, { amount: number }>({

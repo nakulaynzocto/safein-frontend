@@ -5,7 +5,7 @@ import { History, Zap, ArrowDownLeft, ArrowUpRight, Filter } from "lucide-react"
 import { formatCurrency } from "@/utils/helpers";
 import { formatDate, cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CompactPagination } from "@/components/common/pagination";
+import { Pagination } from "@/components/common/pagination";
 import { WalletTransaction } from "@/store/api/walletApi";
 
 interface CreditTransactionsTableProps {
@@ -166,7 +166,7 @@ export const CreditTransactionsTable = ({
 
                 {totalPages > 1 && (
                     <div className="border-t border-gray-200 pt-4 px-2">
-                        <CompactPagination
+                        <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}
                             totalItems={totalItems}
