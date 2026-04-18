@@ -236,19 +236,19 @@ export function EmailTemplateSettings() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="p-6 border border-border/50 bg-muted/5 rounded-xl space-y-4">
                                             <h3 className="text-sm font-bold text-[#074463]">Color Palette</h3>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                <div className="space-y-1.5">
+                                            <div className="grid grid-cols-1 gap-4">
+                                                <div className="space-y-1.5 w-full">
                                                     <Label className="text-[11px] font-bold text-muted-foreground uppercase">Primary Color</Label>
-                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border">
-                                                        <input type="color" value={globalStyles.primaryColor} onChange={(e) => updateGlobalStyle("primaryColor", e.target.value)} className="w-6 h-6 rounded cursor-pointer border-none" />
-                                                        <span className="text-xs font-mono font-bold">{globalStyles.primaryColor}</span>
+                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border w-full">
+                                                        <input type="color" value={globalStyles.primaryColor} onChange={(e) => updateGlobalStyle("primaryColor", e.target.value)} className="w-6 h-6 rounded cursor-pointer border-none shrink-0" />
+                                                        <span className="text-xs font-mono font-bold truncate">{globalStyles.primaryColor}</span>
                                                     </div>
                                                 </div>
-                                                <div className="space-y-1.5">
+                                                <div className="space-y-1.5 w-full">
                                                     <Label className="text-[11px] font-bold text-muted-foreground uppercase">Text Color</Label>
-                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border">
-                                                        <input type="color" value={globalStyles.textColor} onChange={(e) => updateGlobalStyle("textColor", e.target.value)} className="w-6 h-6 rounded cursor-pointer border-none" />
-                                                        <span className="text-xs font-mono font-bold">{globalStyles.textColor}</span>
+                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border w-full">
+                                                        <input type="color" value={globalStyles.textColor} onChange={(e) => updateGlobalStyle("textColor", e.target.value)} className="w-6 h-6 rounded cursor-pointer border-none shrink-0" />
+                                                        <span className="text-xs font-mono font-bold truncate">{globalStyles.textColor}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -256,19 +256,19 @@ export function EmailTemplateSettings() {
 
                                         <div className="p-6 border border-border/50 bg-muted/5 rounded-xl space-y-4">
                                             <h3 className="text-sm font-bold text-[#074463]">Email Layout</h3>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                <div className="space-y-1.5">
+                                            <div className="grid grid-cols-1 gap-4">
+                                                <div className="space-y-1.5 w-full">
                                                     <Label className="text-[11px] font-bold text-muted-foreground uppercase">Header Bg</Label>
-                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border">
-                                                        <input type="color" value={globalStyles.headerBg} onChange={(e) => updateGlobalStyle("headerBg", e.target.value)} className="w-6 h-6 rounded cursor-pointer border-none" />
-                                                        <span className="text-xs font-mono font-bold">{globalStyles.headerBg}</span>
+                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border w-full">
+                                                        <input type="color" value={globalStyles.headerBg} onChange={(e) => updateGlobalStyle("headerBg", e.target.value)} className="w-6 h-6 rounded cursor-pointer border-none shrink-0" />
+                                                        <span className="text-xs font-mono font-bold truncate">{globalStyles.headerBg}</span>
                                                     </div>
                                                 </div>
-                                                <div className="space-y-1.5">
+                                                <div className="space-y-1.5 w-full">
                                                     <Label className="text-[11px] font-bold text-muted-foreground uppercase">Footer Bg</Label>
-                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border">
-                                                        <input type="color" value={globalStyles.footerBg} onChange={(e) => updateGlobalStyle("footerBg", e.target.value)} className="w-6 h-6 rounded cursor-pointer border-none" />
-                                                        <span className="text-xs font-mono font-bold">{globalStyles.footerBg}</span>
+                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border w-full">
+                                                        <input type="color" value={globalStyles.footerBg} onChange={(e) => updateGlobalStyle("footerBg", e.target.value)} className="w-6 h-6 rounded cursor-pointer border-none shrink-0" />
+                                                        <span className="text-xs font-mono font-bold truncate">{globalStyles.footerBg}</span>
                                                     </div>
                                                 </div>
                                             </div>
