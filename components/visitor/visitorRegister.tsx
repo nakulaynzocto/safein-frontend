@@ -12,23 +12,33 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { CreateVisitorRequest, useCreateVisitorMutation } from "@/store/api/visitorApi";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, CalendarClock } from "lucide-react";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { VisitorFormFields } from "./visitorFormFields";
 import { visitorSchema, VisitorFormData } from "./visitorSchema";
 import { useUserCountry } from "@/hooks/useUserCountry";
+import { useVisitorExistenceCheck } from "@/hooks/useVisitorExistenceCheck";
+import { ConfirmationDialog } from "@/components/common/confirmationDialog";
+import { useRouter } from "next/navigation";
+import { routes } from "@/utils/routes";
 
 interface VisitorRegisterProps {
     onComplete?: (data: CreateVisitorRequest, visitorId?: string) => void;
     initialData?: CreateVisitorRequest | null;
     standalone?: boolean;
+    visitorId?: string;
 }
 
-export function VisitorRegister({ onComplete, initialData, standalone = false }: VisitorRegisterProps) {
+export function VisitorRegister({ onComplete, initialData, standalone = false, visitorId: existingVisitorId }: VisitorRegisterProps) {
+    const router = useRouter();
     const [createVisitor, { isLoading, isSuccess }] = useCreateVisitorMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
     const [isFileUploading, setIsFileUploading] = useState(false);
     const defaultCountry = useUserCountry();
+
+    // --- Existence Check ---
+    const [showExistenceModal, setShowExistenceModal] = useState(false);
+    const [dismissedVisitorId, setDismissedVisitorId] = useState<string | null>(null);
 
     // Separate states for ID Verification and Security sections
     const hasIdVerificationData =
@@ -84,7 +94,34 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
         },
     });
 
+    const watchedPhone = watch("phone");
+    const { phoneExists, foundVisitor } = useVisitorExistenceCheck(watchedPhone, existingVisitorId);
 
+    // Auto-trigger existence modal
+    useEffect(() => {
+        if (phoneExists && foundVisitor) {
+            // Only show if we haven't already shown/dismissed for THIS specific visitor ID
+            if (foundVisitor._id !== dismissedVisitorId) {
+                setShowExistenceModal(true);
+            }
+        } else if (!phoneExists) {
+            // Reset dismissal if no match is found, so it can re-trigger if a new match appears later
+            setDismissedVisitorId(null);
+        }
+    }, [phoneExists, foundVisitor, dismissedVisitorId]);
+
+    const handleDismissModal = () => {
+        if (foundVisitor) {
+            setDismissedVisitorId(foundVisitor._id);
+        }
+        setShowExistenceModal(false);
+    };
+
+    const handleBookAppointment = () => {
+        if (foundVisitor) {
+            router.push(`${routes.privateroute.APPOINTMENTCREATE}?visitorId=${foundVisitor._id}`);
+        }
+    };
 
     const clearGeneralError = () => {
         if (generalError) {
@@ -232,6 +269,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
                 onToggleSecurityFields={handleToggleSecurity}
                 setIsFileUploading={setIsFileUploading}
                 initialData={initialData}
+                phoneExists={phoneExists}
             />
 
             {/* Submit Button */}
@@ -274,6 +312,31 @@ export function VisitorRegister({ onComplete, initialData, standalone = false }:
             <FormContainer isPage={true} isLoading={false} isEditMode={false}>
                 {formContent}
             </FormContainer>
+
+            {/* Visitor Already Exists Modal */}
+            <ConfirmationDialog
+                open={showExistenceModal}
+                onOpenChange={(open) => {
+                    if (!open) handleDismissModal();
+                }}
+                title="Visitor Already Exists"
+                description={
+                    <div className="space-y-3">
+                        <p>
+                            A visitor named <span className="font-bold text-[#3882a5]">{foundVisitor?.name}</span> with phone number {watchedPhone} is already in the system.
+                        </p>
+                        <Alert className="bg-[#3882a5]/5 border-[#3882a5]/20 py-2">
+                            <AlertDescription className="text-[11px] font-medium text-[#074463]">
+                                You can book a new appointment for this visitor directly.
+                            </AlertDescription>
+                        </Alert>
+                    </div>
+                }
+                confirmText="Book Appointment"
+                cancelText="Stay Here"
+                onConfirm={handleBookAppointment}
+                onCancel={handleDismissModal}
+            />
         </div>
     );
 }

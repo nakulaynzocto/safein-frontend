@@ -29,6 +29,7 @@ interface VisitorFormFieldsProps {
     setIsFileUploading: (isUploading: boolean) => void;
     visitorId?: string;
     initialData?: any;
+    phoneExists?: boolean;
 }
 
 export function VisitorFormFields({
@@ -44,11 +45,9 @@ export function VisitorFormFields({
     setIsFileUploading,
     visitorId,
     initialData,
+    phoneExists = false,
 }: VisitorFormFieldsProps) {
-    const watchedPhone = watch("phone");
     const defaultCountry = useUserCountry();
-
-    const { phoneExists } = useVisitorExistenceCheck(watchedPhone, visitorId);
 
     return (
         <div className="space-y-6">

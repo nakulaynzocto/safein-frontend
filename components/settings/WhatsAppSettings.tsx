@@ -16,8 +16,6 @@ import {
     MessageSquare,
     Save,
     Key,
-    Info,
-    ListOrdered,
     Cloud,
     ChevronRight,
     Settings2,
@@ -25,6 +23,9 @@ import {
     CheckCircle2,
     XCircle,
     Hash,
+    ListOrdered,
+    Info,
+    AlertTriangle
 } from "lucide-react";
 import { SettingsHeader } from "./SettingsHeader";
 import {
@@ -234,6 +235,7 @@ export function WhatsAppSettings() {
                             icon={Cloud}
                         />
 
+
                         <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 pb-12">
                                 <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
@@ -357,9 +359,10 @@ export function WhatsAppSettings() {
                                                                                         onClick={(e) => e.stopPropagation()}
                                                                                         onPointerDown={(e) => e.stopPropagation()}
                                                                                     >
-                                                                                        <BrandSwitch
+                                                                                         <BrandSwitch
                                                                                             checked={localEnabledTemplates[t.name] !== false}
                                                                                             onCheckedChange={() => handleTemplateToggle(t.name)}
+                                                                                            disabled={isUpdating}
                                                                                             className="scale-[0.85]"
                                                                                         />
                                                                                     </div>

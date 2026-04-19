@@ -3,141 +3,52 @@
 import { useState, useEffect } from "react";
 import { 
     useGetSettingsQuery, 
-    useSaveSMSConfigMutation,
-    useUpdateSettingsMutation
+    useUpdateSettingsMutation,
 } from "@/store/api/settingsApi";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { 
     MessageSquare, 
-    Save, 
     Calendar,
     User,
     CheckCircle2,
     XCircle,
     MapPin,
     ChevronRight,
-    Settings2,
     Eye,
-    Palette,
-    Phone,
-    Mail
+    Loader2
 } from "lucide-react";
 import { SettingsHeader } from "./SettingsHeader";
-import { ActionButton } from "@/components/common/actionButton";
 import { FormContainer } from "@/components/common/formContainer";
 import { APIErrorState } from "@/components/common/APIErrorState";
-import { useForm, Controller, type Path } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { ProfileLayout } from "@/components/profile/profileLayout";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { BrandSwitch } from "@/components/common/BrandSwitch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { SettingsMasterBanner } from "./SettingsMasterBanner";
 import { useCollapsibleSections } from "@/hooks/useCollapsibleSections";
 
-const schema = yup.object().shape({
-    templates: yup.object().shape({
-        newRequest: yup.string().required("Template is required"),
-        approvedVisitor: yup.string().required("Template is required"),
-        approvedEmployee: yup.string().required("Template is required"),
-        rejectedVisitor: yup.string().required("Template is required"),
-        visitorCheckedIn: yup.string().required("Template is required"),
-    }),
-    enabledTemplates: yup.object().shape({
-        newRequest: yup.boolean(),
-        approvedVisitor: yup.boolean(),
-        approvedEmployee: yup.boolean(),
-        rejectedVisitor: yup.boolean(),
-        visitorCheckedIn: yup.boolean(),
-    }),
-});
-
-interface FormValues {
-    templates: {
-        newRequest: string;
-        approvedVisitor: string;
-        approvedEmployee: string;
-        rejectedVisitor: string;
-        visitorCheckedIn: string;
-    };
-    enabledTemplates: {
-        newRequest: boolean;
-        approvedVisitor: boolean;
-        approvedEmployee: boolean;
-        rejectedVisitor: boolean;
-        visitorCheckedIn: boolean;
-    };
-}
-
 export function SMSSettings() {
-    const router = useRouter();
     const { data: settings, isLoading, error } = useGetSettingsQuery();
-    const [saveSMS, { isLoading: isSaving }] = useSaveSMSConfigMutation();
-
-    const [updateSettings] = useUpdateSettingsMutation();
+    const [updateSettings, { isLoading: isUpdating }] = useUpdateSettingsMutation();
 
     const { expandedSections, toggleSection } = useCollapsibleSections(["templates"]);
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>("newRequest");
 
-    const {
-        register,
-        handleSubmit,
-        reset,
-        control,
-        watch,
-        formState: { errors, isDirty },
-    } = useForm<FormValues>({
-        resolver: yupResolver(schema) as any,
-        defaultValues: {
-            templates: {
-                newRequest: "",
-                approvedVisitor: "",
-                approvedEmployee: "",
-                rejectedVisitor: "",
-                visitorCheckedIn: "",
-            },
-            enabledTemplates: {
-                newRequest: true,
-                approvedVisitor: true,
-                approvedEmployee: true,
-                rejectedVisitor: true,
-                visitorCheckedIn: true,
-            }
-        },
-    });
-
-    useEffect(() => {
-        if (!settings?.sms || isDirty) return;
-        const sms = settings.sms;
-        reset({
-            templates: {
-                newRequest: sms.templates?.newRequest || "",
-                approvedVisitor: sms.templates?.approvedVisitor || "",
-                approvedEmployee: sms.templates?.approvedEmployee || "",
-                rejectedVisitor: sms.templates?.rejectedVisitor || "",
-                visitorCheckedIn: sms.templates?.visitorCheckedIn || "",
-            },
-            enabledTemplates: {
-                newRequest: sms.enabledTemplates?.newRequest ?? true,
-                approvedVisitor: sms.enabledTemplates?.approvedVisitor ?? true,
-                approvedEmployee: sms.enabledTemplates?.approvedEmployee ?? true,
-                rejectedVisitor: sms.enabledTemplates?.rejectedVisitor ?? true,
-                visitorCheckedIn: sms.enabledTemplates?.visitorCheckedIn ?? true,
-            }
-        });
-    }, [settings, reset, isDirty]);
-
-    const onSubmit = async (data: FormValues) => {
+    const handleToggle = async (templateId: string, enabled: boolean) => {
         try {
-            await saveSMS(data).unwrap();
-            toast.success("SMS templates saved successfully!");
+            const currentEnabledTemplates = settings?.sms?.enabledTemplates || {};
+            await updateSettings({
+                sms: {
+                    enabledTemplates: {
+                        ...currentEnabledTemplates,
+                        [templateId]: enabled
+                    }
+                }
+            }).unwrap();
+            toast.success(`${enabled ? 'Enabled' : 'Disabled'} notification successfully.`);
         } catch (err: any) {
-            toast.error(err?.data?.message || "Failed to save templates.");
+            toast.error(err?.data?.message || "Failed to update status");
         }
     };
 
@@ -185,24 +96,9 @@ export function SMSSettings() {
                             icon={MessageSquare}
                         />
 
-                        <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
-                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 text-foreground pb-12">
-                                
-                                <SettingsMasterBanner
-                                    title="All SMS Notifications"
-                                    description="Enable or disable all outgoing SMS notifications"
-                                    icon={MessageSquare}
-                                    checked={settings?.notifications?.smsEnabled ?? false}
-                                    onCheckedChange={async (checked) => {
-                                        try {
-                                            await updateSettings({
-                                                notifications: { smsEnabled: checked },
-                                            }).unwrap();
-                                        } catch {
-                                            toast.error("Failed to update SMS status");
-                                        }
-                                    }}
-                                />
+
+                                <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
+                                    <form className="space-y-8 text-foreground pb-12">
                                 
                                 <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
                                     <Collapsible open={expandedSections.includes('templates')} onOpenChange={() => toggleSection('templates')}>
@@ -238,37 +134,13 @@ export function SMSSettings() {
                                                                     <h4 className="font-bold text-[#074463]">{template.label}</h4>
                                                                 </div>
                                                                 
-                                                                <div className="flex items-center gap-6">
-                                                                    <div className="flex items-center gap-2">
+                                                                 <div className="flex items-center gap-6">
+                                                                    <div className="flex items-center gap-3">
                                                                         <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-tight">Status</span>
-                                                                        <Controller
-                                                                            name={`enabledTemplates.${template.id}` as Path<FormValues>}
-                                                                            control={control}
-                                                                            render={({ field }) => (
-                                                                                <BrandSwitch
-                                                                                    checked={Boolean(field.value)}
-                                                                                    onCheckedChange={async (checked: boolean) => {
-                                                                                        // Update form state directly
-                                                                                        field.onChange(checked);
-                                                                                        
-                                                                                        // Immediate save to backend
-                                                                                        try {
-                                                                                            const currentFormValues = watch();
-                                                                                            await saveSMS({
-                                                                                                templates: currentFormValues.templates,
-                                                                                                enabledTemplates: {
-                                                                                                    ...currentFormValues.enabledTemplates,
-                                                                                                    [template.id]: checked
-                                                                                                }
-                                                                                            }).unwrap();
-                                                                                        } catch (err: any) {
-                                                                                            // Rollback form state if save fails
-                                                                                            field.onChange(!checked);
-                                                                                            console.error("Failed to update status:", err);
-                                                                                        }
-                                                                                    }}
-                                                                                />
-                                                                            )}
+                                                                        <Switch 
+                                                                            checked={(settings?.sms?.enabledTemplates as any)?.[template.id] !== false}
+                                                                            onCheckedChange={(checked) => handleToggle(template.id, checked)}
+                                                                            disabled={isUpdating}
                                                                         />
                                                                     </div>
                                                                     <button 
@@ -279,7 +151,7 @@ export function SMSSettings() {
                                                                             selectedTemplate === template.id ? 'bg-[#074463] text-white border-[#074463]' : 'bg-background text-gray-400 hover:text-[#3882a5]'
                                                                         )}
                                                                     >
-                                                                        <Settings2 size={16} />
+                                                                        <Eye size={16} />
                                                                     </button>
                                                                 </div>
                                                             </div>
@@ -288,15 +160,10 @@ export function SMSSettings() {
                                                                 <div className="p-6 border-t border-dashed border-border/50 bg-white/40 animate-in fade-in duration-300">
                                                                     <div className="space-y-4">
                                                                         <div className="space-y-2">
-                                                                            <Label className="text-xs font-bold text-gray-700">SMS message text content</Label>
-                                                                            <Textarea
-                                                                                {...register(`templates.${template.id}` as Path<FormValues>)}
-                                                                                className="min-h-[120px] rounded-lg p-4 font-medium text-sm border-border bg-background resize-none" 
-                                                                                placeholder="Enter SMS template..."
-                                                                            />
-                                                                            {errors.templates?.[template.id as keyof FormValues['templates']] && (
-                                                                                <p className="text-xs text-destructive font-semibold">{(errors.templates as any)[template.id]?.message}</p>
-                                                                            )}
+                                                                            <Label className="text-xs font-bold text-[#3882a5] uppercase tracking-wider">SMS message text content</Label>
+                                                                            <div className="min-h-[100px] rounded-xl p-5 font-medium text-sm border border-border/50 bg-background/50 text-gray-800 shadow-inner leading-relaxed">
+                                                                                {(settings?.sms?.templates as any)?.[template.id] || "No template content configured."}
+                                                                            </div>
                                                                         </div>
                                                                         <div className="flex flex-wrap gap-2 pt-2">
                                                                             <span className="text-[10px] font-bold text-muted-foreground uppercase mr-1">Available Variables:</span>
@@ -315,27 +182,10 @@ export function SMSSettings() {
                                     </Collapsible>
                                 </div>
 
-                                <div className="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end border-t border-border/50 items-center">
-                                    <p className="text-sm font-semibold text-muted-foreground tracking-tight hidden sm:block mr-auto">Templates will be matched with system triggers automatically</p>
-                                    <ActionButton
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => router.back()}
-                                        size="xl"
-                                        className="px-8"
-                                    >
-                                        Cancel
-                                    </ActionButton>
-                                    <ActionButton
-                                        type="submit"
-                                        isLoading={isSaving}
-                                        loadingLabel="Saving..."
-                                        variant="primary"
-                                        size="xl"
-                                        className="min-w-[200px] shadow-lg shadow-[#3882a5]/20 font-black tracking-widest px-10"
-                                        icon={Save}
-                                        label="APPLY ALL TEMPLATES"
-                                    />
+                                <div className="flex justify-end pt-6 border-t border-border/50 items-center">
+                                    <p className="text-sm font-bold text-muted-foreground italic tracking-tight">
+                                        * Note: Message templates are locked and can only be modified by the system administrator.
+                                    </p>
                                 </div>
                             </form>
                         </FormContainer>

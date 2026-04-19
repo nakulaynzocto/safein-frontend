@@ -7,8 +7,8 @@ import {
     useGetEmailTemplateDefaultsQuery,
     useUpdateSettingsMutation
 } from "@/store/api/settingsApi";
-import { useGetSafeinProfileQuery } from "@/store/api/safeinProfileApi";
 import { useGetProfileQuery } from "@/store/api/authApi";
+import { useGetSafeinProfileQuery } from "@/store/api/safeinProfileApi";
 import { useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
 import {
@@ -19,7 +19,7 @@ import {
     CheckCircle2,
     Link,
     Mail,
-    ChevronRight,
+    ChevronRight
 } from "lucide-react";
 
 import { ActionButton } from "@/components/common/actionButton";
@@ -240,7 +240,12 @@ export function EmailTemplateSettings() {
                                                 <div className="space-y-1.5 w-full">
                                                     <Label className="text-[11px] font-bold text-muted-foreground uppercase">Primary Color</Label>
                                                     <div className="flex items-center gap-3 p-2 bg-background rounded-lg border w-full">
-                                                        <input type="color" value={globalStyles.primaryColor} onChange={(e) => updateGlobalStyle("primaryColor", e.target.value)} className="w-6 h-6 rounded cursor-pointer border-none shrink-0" />
+                                                        <input 
+                                                            type="color" 
+                                                            value={globalStyles.primaryColor} 
+                                                            onChange={(e) => updateGlobalStyle("primaryColor", e.target.value)} 
+                                                            className="w-6 h-6 rounded cursor-pointer border-none shrink-0" 
+                                                        />
                                                         <span className="text-xs font-mono font-bold truncate">{globalStyles.primaryColor}</span>
                                                     </div>
                                                 </div>
@@ -460,6 +465,7 @@ export function EmailTemplateSettings() {
                     isLoading={isSaving || isLoading} 
                     variant="primary"
                     size="xl"
+                    disabled={isSaving}
                     className="font-black tracking-widest px-10"
                     icon={Save}
                     label="APPLY ALL SETTINGS"

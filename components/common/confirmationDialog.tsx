@@ -98,8 +98,8 @@ export function ConfirmationDialog({
                         <DialogTitle className="text-lg font-black text-gray-900 text-center tracking-tight">
                             {title}
                         </DialogTitle>
-                        <DialogDescription className="text-gray-500 text-center text-[13px] leading-relaxed px-2">
-                            {description}
+                        <DialogDescription asChild className="text-gray-500 text-center text-[13px] leading-relaxed px-2">
+                            <div>{description}</div>
                         </DialogDescription>
                     </DialogHeader>
 

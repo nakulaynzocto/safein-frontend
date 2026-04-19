@@ -37,6 +37,12 @@ export interface ISafeinProfile {
         branchName?: string;
         upiId?: string;
     };
+    features?: {
+        enableEmail: boolean;
+        enableSms: boolean;
+        enableWhatsApp: boolean;
+        enableVoice: boolean;
+    };
 }
 
 export interface ISafeinProfileResponse {

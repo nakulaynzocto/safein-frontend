@@ -14,7 +14,7 @@ import {
     QrCode,
     RefreshCw,
     Languages,
-    PhoneForwarded,
+    PhoneForwarded
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -199,7 +199,7 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                             icon={PhoneCall}
                         />
 
-                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 text-foreground pb-12">
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 text-foreground pb-12">
                             {/* Wallet Info Banner */}
                             <div className="bg-gradient-to-r from-amber-500/[0.05] to-transparent p-5 rounded-2xl border border-amber-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
@@ -300,27 +300,49 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                                                         <button type="button" onClick={() => switchLanguage("hi-IN")} className={cn("px-4 py-1.5 text-[10px] font-bold rounded-md transition-all", currentLang === "hi-IN" ? "bg-white text-[#3882a5] shadow-sm" : "text-muted-foreground hover:text-foreground")}>Hindi</button>
                                                     </div>
 
-                                                    <div className="space-y-2">
+                                                    <div className="space-y-4">
                                                         <div className="flex items-center justify-between">
-                                                            <Label className="text-[11px] font-bold text-muted-foreground uppercase">Voice Script Message</Label>
-                                                            <button type="button" onClick={handleResetToDefault} className="text-[10px] font-bold text-[#3882a5] flex items-center gap-1 hover:underline">
+                                                            <Label className="text-[11px] font-bold text-[#3882a5] uppercase tracking-wider">Voice Script Message</Label>
+                                                            <button 
+                                                                type="button" 
+                                                                onClick={handleResetToDefault} 
+                                                                className="text-[10px] font-bold text-[#3882a5] flex items-center gap-1 hover:underline active:scale-95 transition-all"
+                                                            >
                                                                 <RefreshCw size={10} /> Reset to Default
                                                             </button>
                                                         </div>
+                                                        
                                                         <Controller
                                                             name="callScript"
                                                             control={control}
                                                             render={({ field }) => (
-                                                                <textarea {...field} className="w-full min-h-[100px] p-4 rounded-xl border border-border/50 bg-background text-sm font-medium focus:outline-none focus:border-[#3882a5] transition-all resize-none shadow-inner" />
+                                                                <textarea 
+                                                                    {...field} 
+                                                                    placeholder="Enter your voice script..."
+                                                                    className="w-full min-h-[120px] p-4 rounded-xl border border-border/50 bg-background text-sm font-medium focus:outline-none focus:border-[#3882a5] focus:ring-4 focus:ring-[#3882a5]/10 transition-all resize-none shadow-inner" 
+                                                                />
                                                             )}
                                                         />
-                                                        <div className="flex flex-wrap gap-2 mt-2">
-                                                            {["{visitorName}", "{employeeName}", "{purpose}", "{date}", "{time}"].map(tag => (
-                                                                <code key={tag} className="px-1.5 py-0.5 bg-[#3882a5]/5 border border-[#3882a5]/10 rounded text-[9px] text-[#3882a5] font-mono font-bold cursor-pointer hover:bg-[#3882a5]/10 transition-colors" onClick={() => {
-                                                                    const currentVal = watch("callScript");
-                                                                    setValue("callScript", currentVal + " " + tag, { shouldDirty: true });
-                                                                }}>{tag}</code>
-                                                            ))}
+
+                                                        <div className="flex flex-col gap-3 p-4 bg-muted/5 rounded-xl border border-border/30">
+                                                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Personalization Tags (Click to add)</p>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {["{visitorName}", "{employeeName}", "{purpose}", "{date}", "{time}"].map(tag => (
+                                                                    <code 
+                                                                        key={tag} 
+                                                                        className="px-2 py-1 bg-white border border-border/50 rounded-lg text-[10px] text-[#3882a5] font-mono font-bold cursor-pointer hover:bg-[#3882a5]/10 hover:border-[#3882a5]/30 transition-all active:scale-95 shadow-sm"
+                                                                        onClick={() => {
+                                                                            const currentVal = watch("callScript");
+                                                                            setValue("callScript", currentVal + " " + tag, { shouldDirty: true });
+                                                                        }}
+                                                                    >
+                                                                        {tag}
+                                                                    </code>
+                                                                ))}
+                                                            </div>
+                                                            <p className="text-[9px] text-muted-foreground italic leading-relaxed">
+                                                                * Note: These tags will be automatically replaced with real-time data during the automated call.
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </div>
