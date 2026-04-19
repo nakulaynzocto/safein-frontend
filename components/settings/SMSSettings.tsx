@@ -28,6 +28,8 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useCollapsibleSections } from "@/hooks/useCollapsibleSections";
 
+import { SettingsMasterBanner } from "./SettingsMasterBanner";
+
 export function SMSSettings() {
     const { data: settings, isLoading, error } = useGetSettingsQuery();
     const [updateSettings, { isLoading: isUpdating }] = useUpdateSettingsMutation();
@@ -46,7 +48,6 @@ export function SMSSettings() {
                     }
                 }
             }).unwrap();
-            toast.success(`${enabled ? 'Enabled' : 'Disabled'} notification successfully.`);
         } catch (err: any) {
             toast.error(err?.data?.message || "Failed to update status");
         }
@@ -100,7 +101,23 @@ export function SMSSettings() {
                                 <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
                                     <form className="space-y-8 text-foreground pb-12">
                                 
-                                <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
+                                <SettingsMasterBanner
+                                    title="All SMS Notifications"
+                                    description="Enable or disable the entire SMS notification system for your account"
+                                    icon={MessageSquare}
+                                    checked={settings?.notifications?.smsEnabled ?? false}
+                                    onCheckedChange={async (checked) => {
+                                        try {
+                                            await updateSettings({
+                                                notifications: { smsEnabled: checked }
+                                            }).unwrap();
+                                        } catch {
+                                            toast.error("Failed to update SMS status");
+                                        }
+                                    }}
+                                />
+                                
+                                 <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
                                     <Collapsible open={expandedSections.includes('templates')} onOpenChange={() => toggleSection('templates')}>
                                         <div className="p-5 flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('templates')}>
                                             <div className="flex items-center gap-4">
@@ -109,7 +126,7 @@ export function SMSSettings() {
                                                 </div>
                                                 <div>
                                                     <h3 className="font-bold text-gray-900 text-lg">Message Template Controls</h3>
-                                                    <p className="text-xs text-gray-500">Enable and customize SMS content for specific events</p>
+                                                    <p className="text-xs text-gray-500">Enable or disable SMS notifications for specific events</p>
                                                 </div>
                                             </div>
                                             <ChevronRight className={cn("w-5 h-5 text-gray-400 transition-transform duration-300", expandedSections.includes('templates') && "rotate-90")} />
@@ -125,10 +142,10 @@ export function SMSSettings() {
                                                         { id: "approvedEmployee", label: "Appointment Approved (Employee)", icon: User, placeholders: ["companyName", "visitorName", "employeeName", "date", "time"] },
                                                         { id: "rejectedVisitor", label: "Appointment Rejected (Visitor)", icon: XCircle, placeholders: ["companyName", "visitorName", "date"] },
                                                     ].map((template) => (
-                                                        <div key={template.id} className="border border-border/50 rounded-xl bg-muted/5 transition-all overflow-hidden shadow-[0_1px_3px_rgb(0,0,0,0.02)]">
+                                                        <div key={template.id} className="border border-border/50 rounded-xl bg-background transition-all overflow-hidden">
                                                             <div className="flex items-center justify-between p-4 px-5">
                                                                 <div className="flex items-center gap-4">
-                                                                    <div className="p-2.5 rounded-lg bg-background border border-border/50 text-[#3882a5]">
+                                                                    <div className="p-2.5 rounded-lg bg-muted text-[#3882a5]">
                                                                         <template.icon size={18} />
                                                                     </div>
                                                                     <h4 className="font-bold text-[#074463]">{template.label}</h4>
@@ -138,7 +155,7 @@ export function SMSSettings() {
                                                                     <div className="flex items-center gap-3">
                                                                         <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-tight">Status</span>
                                                                         <Switch 
-                                                                            checked={(settings?.sms?.enabledTemplates as any)?.[template.id] !== false}
+                                                                            checked={settings?.sms?.enabledTemplates?.[template.id] !== false}
                                                                             onCheckedChange={(checked) => handleToggle(template.id, checked)}
                                                                             disabled={isUpdating}
                                                                         />
@@ -157,18 +174,18 @@ export function SMSSettings() {
                                                             </div>
 
                                                             {selectedTemplate === template.id && (
-                                                                <div className="p-6 border-t border-dashed border-border/50 bg-white/40 animate-in fade-in duration-300">
+                                                                <div className="p-6 border-t border-dashed border-border/50 bg-muted/10 animate-in fade-in duration-300">
                                                                     <div className="space-y-4">
                                                                         <div className="space-y-2">
-                                                                            <Label className="text-xs font-bold text-[#3882a5] uppercase tracking-wider">SMS message text content</Label>
-                                                                            <div className="min-h-[100px] rounded-xl p-5 font-medium text-sm border border-border/50 bg-background/50 text-gray-800 shadow-inner leading-relaxed">
-                                                                                {(settings?.sms?.templates as any)?.[template.id] || "No template content configured."}
+                                                                            <Label className="text-xs font-bold text-[#3882a5] uppercase tracking-wider">SMS message preview</Label>
+                                                                            <div className="min-h-[60px] rounded-xl p-4 font-medium text-sm border border-border/50 bg-background text-gray-800 shadow-inner leading-relaxed">
+                                                                                {settings?.sms?.templates?.[template.id] || "No template content configured."}
                                                                             </div>
                                                                         </div>
-                                                                        <div className="flex flex-wrap gap-2 pt-2">
-                                                                            <span className="text-[10px] font-bold text-muted-foreground uppercase mr-1">Available Variables:</span>
+                                                                        <div className="flex flex-wrap gap-2 pt-1">
+                                                                            <span className="text-[10px] font-bold text-muted-foreground uppercase mr-1 text-[9px]">Variables used:</span>
                                                                             {template.placeholders.map(p => (
-                                                                                <code key={p} className="px-2 py-1 rounded bg-[#3882a5]/5 text-[10px] font-bold text-[#3882a5] border border-[#3882a5]/10">{"{"}{p}{"}"}</code>
+                                                                                <code key={p} className="px-2 py-0.5 rounded bg-blue-50 text-[9px] font-bold text-blue-600 border border-blue-100">{"{"}{p}{"}"}</code>
                                                                             ))}
                                                                         </div>
                                                                     </div>
@@ -180,12 +197,6 @@ export function SMSSettings() {
                                             </div>
                                         </CollapsibleContent>
                                     </Collapsible>
-                                </div>
-
-                                <div className="flex justify-end pt-6 border-t border-border/50 items-center">
-                                    <p className="text-sm font-bold text-muted-foreground italic tracking-tight">
-                                        * Note: Message templates are locked and can only be modified by the system administrator.
-                                    </p>
                                 </div>
                             </form>
                         </FormContainer>
