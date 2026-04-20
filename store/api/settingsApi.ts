@@ -21,6 +21,13 @@ export interface INotificationType {
     voice: boolean;
 }
 
+export interface Holiday {
+    date: string;
+    reason?: string;
+    message?: string;
+    blockPortal?: boolean;
+}
+
 export interface EmailTemplate {
     subject: string;
     body: string;
@@ -105,6 +112,7 @@ export interface Settings {
     };
     emailTemplates?: EmailTemplates;
     featureToggles?: Record<string, boolean>;
+    holidays?: Holiday[];
     createdAt: string;
     updatedAt: string;
 }
@@ -148,6 +156,7 @@ export interface UpdateSettingsRequest {
     sms?: {
         enabledTemplates?: Record<string, boolean>;
     };
+    holidays?: Holiday[];
 }
 
 export interface SaveVoiceConfigRequest {

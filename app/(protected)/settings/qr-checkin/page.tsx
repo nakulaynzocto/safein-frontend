@@ -23,6 +23,7 @@ import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
 import { cn } from "@/lib/utils";
 import { DeliverySetupWarning } from "@/components/common/DeliverySetupWarning";
+import { HolidaySettings } from "@/components/settings/HolidaySettings";
 
 const QR_CANVAS_ID = "tenant-qr-canvas";
 const COPY_FEEDBACK_MS = 1500;
@@ -345,6 +346,8 @@ export default function QrCheckinSettingsPage() {
                     </CardContent>
                 </Card>
             </div>
+
+            <HolidaySettings />
 
             <AppointmentLinksSubNav />
             <div className="shrink-0 md:hidden" style={{ height: MOBILE_APPOINTMENT_LINKS_SUB_NAV_HEIGHT_PX }} aria-hidden />

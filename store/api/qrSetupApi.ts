@@ -28,6 +28,12 @@ export interface CompanyPublicInfo {
         designation?: string;
         photo?: string;
     }>;
+    holiday?: {
+        isHoliday: boolean;
+        reason?: string;
+        message?: string;
+        blockPortal?: boolean;
+    };
 }
 
 export const qrSetupApi = baseApi.injectEndpoints({

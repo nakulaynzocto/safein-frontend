@@ -368,14 +368,14 @@ export function AppointmentBookingForm({
                     onUploadStatusChange={setIsFileUploading}
                 />
 
-                <div className="flex items-center gap-3 border-t pt-4 sm:gap-4 sm:pt-6">
+                <div className="flex items-center justify-end gap-3 border-t pt-4 sm:gap-4 sm:pt-6">
                     {onBack && (
                         <Button
                             type="button"
                             variant="outline"
                             onClick={onBack}
                             disabled={isLoading}
-                            className="h-12 flex-1 rounded-xl border-border px-4 font-medium"
+                            className="h-12 w-full sm:w-auto min-w-[120px] rounded-xl border-border px-8 font-medium transition-all"
                         >
                             <ArrowLeft className="mr-2 h-4 w-4" /> Back
                         </Button>
@@ -385,8 +385,8 @@ export function AppointmentBookingForm({
                         variant="primary"
                         disabled={isLoading || isFileUploading}
                         className={cn(
-                            "h-12 rounded-xl px-4 font-medium transition-all shadow-md",
-                            onBack ? "flex-1" : "hover:shadow-lg w-full min-w-[160px] sm:w-auto sm:min-w-[200px]"
+                            "h-12 rounded-xl px-8 font-medium transition-all shadow-md hover:shadow-lg",
+                            "w-full sm:w-auto min-w-[160px] sm:min-w-[200px]"
                         )}
                         size="lg"
                     >

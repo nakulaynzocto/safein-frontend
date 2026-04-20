@@ -164,6 +164,11 @@ export default function QRScanPage() {
         }
 
         if (companyInfo) {
+            if (companyInfo.holiday?.blockPortal) {
+                setErrorMessage(companyInfo.holiday.message || `Today is an official holiday (${companyInfo.holiday.reason}). Check-ins are currently disabled.`);
+                setStep("error");
+                return;
+            }
             setStep((s) => (s === "loading" ? "verify_phone" : s));
         }
     }, [companyInfo, infoError, slug]);
@@ -334,15 +339,19 @@ export default function QRScanPage() {
 
     if (step === "error") {
         const isOutOfService = errorMessage.toLowerCase().includes("out of service");
+        const isHolidayBlock = companyInfo?.holiday?.blockPortal;
+
         return (
             <StatusPage
                 type="error"
-                title={isOutOfService ? "Out of Service" : "Invalid Scan"}
+                title={isHolidayBlock ? "Office Closed" : (isOutOfService ? "Out of Service" : "Invalid Scan")}
                 message={errorMessage}
                 description={
-                    isOutOfService
-                        ? "The QR check-in feature for this company is currently disabled. Please contact the management or visit the reception desk."
-                        : "This QR code might be expired or the company is no longer active. Please contact the front desk."
+                    isHolidayBlock 
+                        ? "Office is currently closed due to an official holiday. Please visit during regular working hours."
+                        : (isOutOfService
+                            ? "The QR check-in feature for this company is currently disabled. Please contact the management or visit the reception desk."
+                            : "This QR code might be expired or the company is no longer active. Please contact the front desk.")
                 }
                 showHomeButton={true}
             />
@@ -384,6 +393,30 @@ export default function QRScanPage() {
                         </div>
                     </div>
                 </div>
+
+                {companyInfo?.holiday?.isHoliday && (
+                    <div className="mt-4 animate-in fade-in slide-in-from-top-4 duration-500 sm:mt-6">
+                        <div className="relative overflow-hidden rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-4 shadow-sm sm:p-6">
+                            <div className="relative z-10 flex gap-4">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+                                    <Clock className="h-6 w-6" />
+                                </div>
+                                <div className="space-y-1">
+                                    <h3 className="text-lg font-bold text-amber-900">Important: Holiday Alert</h3>
+                                    <p className="text-sm font-medium text-amber-800/80 leading-relaxed">
+                                        {companyInfo.holiday.message}
+                                    </p>
+                                    <div className="pt-1">
+                                        <span className="inline-flex items-center rounded-lg bg-amber-100/50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-tight text-amber-700 ring-1 ring-amber-200">
+                                            {companyInfo.holiday.reason}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-100/20 blur-2xl" />
+                        </div>
+                    </div>
+                )}
 
                 <Card className="mt-4 overflow-hidden border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.06)] sm:mt-6">
                     <div className="border-b border-slate-100 bg-gradient-to-r from-[#3882a5]/10 via-[#3882a5]/5 to-transparent px-3 py-4 sm:px-6">
