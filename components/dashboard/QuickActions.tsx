@@ -91,22 +91,22 @@ export function QuickActions() {
                     >
                         {isEmployee ? (
                             <Button
-                                className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm w-full text-brand-strong hover:text-brand"
-                                variant="outline"
+                                className="h-16 flex-col p-2 text-xs sm:h-20 sm:text-sm w-full transition-all"
+                                variant="primary"
                                 onClick={() => router.push(routes.privateroute.APPOINTMENT_LINKS)}
                             >
                                 <Send className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                <span className="line-clamp-2 text-center font-medium">Visitor Invites</span>
+                                <span className="line-clamp-2 text-center font-bold">Visitor Invites</span>
                             </Button>
                         ) : (
                             <Button
-                                className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm w-full text-brand-strong hover:text-brand"
-                                variant="outline"
+                                className="h-16 flex-col p-2 text-xs sm:h-20 sm:text-sm w-full transition-all"
+                                variant="primary"
                                 asChild
                             >
                                 <Link href={routes.privateroute.APPOINTMENTCREATE} prefetch>
                                     <CalendarPlus className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                    <span className="line-clamp-2 text-center font-medium">Create Appointment</span>
+                                    <span className="line-clamp-2 text-center font-bold">Create Appointment</span>
                                 </Link>
                             </Button>
                         )}
@@ -115,13 +115,13 @@ export function QuickActions() {
                     {quickActions.map((action) => (
                         <Button
                             key={action.href}
-                            className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm text-brand-strong hover:text-brand"
-                            variant="outline"
+                            className="h-16 flex-col p-2 text-xs sm:h-20 sm:text-sm w-full transition-all"
+                            variant="primary"
                             asChild
                         >
                             <Link href={action.href} prefetch={true}>
                                 <action.icon className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                <span className="line-clamp-2 text-center font-medium">{action.label}</span>
+                                <span className="line-clamp-2 text-center font-bold">{action.label}</span>
                             </Link>
                         </Button>
                     ))}

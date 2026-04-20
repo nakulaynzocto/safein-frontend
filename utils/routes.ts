@@ -47,6 +47,7 @@ export const routes = {
         VISITORLIST: "/visitor/list",
         VISITORREGISTRATION: "/visitor/register",
         VISITOREDIT: "/visitor/[id]",
+        VISITORSETTINGS: "/visitor/[id]/settings",
 
         // Appointment Routes
         APPOINTMENTLIST: "/appointment/list",

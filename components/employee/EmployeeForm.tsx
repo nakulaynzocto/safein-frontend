@@ -440,10 +440,10 @@ export function NewEmployeeModal({
                 >
                     <ActionButton
                         type="submit"
-                        variant="outline-primary"
+                        variant="primary"
                         disabled={isLoading || isLoadingEmployee || isFileUploading}
                         size="xl"
-                        className="w-full min-w-[160px] px-6 sm:w-auto"
+                        className="w-full min-w-[170px] px-8 sm:w-auto font-bold transition-all shadow-md active:scale-95 hover:scale-105"
                     >
                         {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : isFileUploading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
                         {isFileUploading ? "Uploading Photo..." : isEditMode ? "Update Employee" : "Create Employee"}

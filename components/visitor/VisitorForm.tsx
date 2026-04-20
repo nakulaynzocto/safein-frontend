@@ -314,10 +314,10 @@ export function NewVisitorModal({
                 >
                     <ActionButton
                         type="submit"
-                        variant="outline-primary"
+                        variant="primary"
                         disabled={isLoading || isFileUploading}
                         size="xl"
-                        className="w-full min-w-[200px] px-8 sm:w-auto"
+                        className="w-full min-w-[220px] px-8 sm:w-auto font-bold transition-all shadow-md active:scale-95 hover:scale-105"
                     >
                         {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
                         <CheckCircle className="mr-2 h-4 w-4" />

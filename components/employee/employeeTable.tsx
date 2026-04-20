@@ -215,9 +215,9 @@ export function EmployeeTable({
                 <div className="flex flex-col gap-1 items-start">
                     {!employee.isVerified ? (
                         <Button
-                            variant="secondary"
+                            variant="primary"
                             size="sm"
-                            className="h-8 rounded-full px-4 bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-200/50 font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-sm"
+                            className="h-8 rounded-full px-4 bg-amber-500 text-white hover:bg-amber-600 border-none font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-md"
                             onClick={() => handleVerify(employee)}
                         >
                             <ShieldCheck className="h-3.5 w-3.5" />
@@ -250,9 +250,9 @@ export function EmployeeTable({
             render: (employee: Employee) => (
                 <div className="flex justify-center">
                     <Button 
-                        variant="outline" 
+                        variant="primary" 
                         size="sm" 
-                        className="h-8 px-3 rounded-lg gap-1.5 font-medium border-primary/20 bg-primary/5 hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-sm"
+                        className="h-8 px-4 rounded-lg gap-1.5 font-bold transition-all duration-300 shadow-md hover:scale-105 active:scale-95"
                         onClick={() => handleSettings(employee)}
                     >
                         <Settings className="h-4 w-4" />

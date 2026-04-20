@@ -382,10 +382,11 @@ export function AppointmentBookingForm({
                     )}
                     <ActionButton
                         type="submit"
+                        variant="primary"
                         disabled={isLoading || isFileUploading}
                         className={cn(
-                            "h-12 rounded-xl bg-[#3882a5] px-4 text-white hover:bg-[#2d6a87] font-medium transition-all shadow-md",
-                            onBack ? "flex-1" : "hover:shadow-lg"
+                            "h-12 rounded-xl px-4 font-medium transition-all shadow-md",
+                            onBack ? "flex-1" : "hover:shadow-lg w-full min-w-[160px] sm:w-auto sm:min-w-[200px]"
                         )}
                         size="lg"
                     >

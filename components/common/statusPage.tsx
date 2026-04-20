@@ -84,14 +84,14 @@ export function StatusPage({
         if (action.href) {
             return (
                 <Link href={action.href}>
-                    <ActionButton variant={variant} size="xl" className="w-full sm:w-auto">
+                    <ActionButton variant={variant === "default" ? "primary" : variant} size="xl" className="w-full sm:w-auto font-bold transition-all shadow-md active:scale-95 hover:scale-105">
                         {action.label}
                     </ActionButton>
                 </Link>
             );
         }
         return (
-            <ActionButton variant={variant} onClick={action.onClick} size="xl" className="w-full sm:w-auto">
+            <ActionButton variant={variant === "default" ? "primary" : variant} onClick={action.onClick} size="xl" className="w-full sm:w-auto font-bold transition-all shadow-md active:scale-95 hover:scale-105">
                 {action.label}
             </ActionButton>
         );
@@ -125,7 +125,7 @@ export function StatusPage({
                         {secondaryAction && renderButton(secondaryAction, "outline")}
                         {showHomeButton && (
                             <Link href={routes.publicroute.HOME} className="w-full sm:w-auto">
-                                <ActionButton variant="outline" size="xl" className="w-full">
+                                <ActionButton variant="outline" size="xl" className="w-full font-bold transition-all shadow-sm active:scale-95 hover:scale-105">
                                     <Home className="mr-2 h-4 w-4" />
                                     Go Home
                                 </ActionButton>
@@ -137,7 +137,7 @@ export function StatusPage({
                                     variant="outline"
                                     onClick={() => window.history.back()}
                                     size="xl"
-                                    className="w-full"
+                                    className="w-full font-bold transition-all shadow-sm active:scale-95 hover:scale-105"
                                 >
                                     <ArrowLeft className="mr-2 h-4 w-4" />
                                     Go Back

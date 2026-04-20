@@ -8,42 +8,26 @@ import { SearchInput } from "@/components/common/searchInput";
 import { Pagination } from "@/components/common/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ConfirmationDialog } from "@/components/common/confirmationDialog";
 import {
     Plus,
-    Eye,
-    Edit,
-    Trash2,
     Phone,
     Mail,
     MapPin,
     Calendar,
-    MoreVertical,
-    RefreshCw,
     Maximize2,
-    Users,
     UserPlus,
-    Ban,
-    ShieldCheck,
+    Settings,
 } from "lucide-react";
 import {
     useGetVisitorsQuery,
     useDeleteVisitorMutation,
-    useCheckVisitorHasAppointmentsQuery,
     useUpdateVisitorMutation,
     Visitor,
     GetVisitorsQuery,
 } from "@/store/api/visitorApi";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdownMenu";
+
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useRouter } from "next/navigation";
-import { Textarea } from "@/components/ui/textarea";
 
 import { formatDate, formatName, getInitials } from "@/utils/helpers";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
@@ -53,7 +37,6 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { DataTable } from "@/components/common/dataTable";
-import { VisitorDetailsDialog } from "./visitorDetailsDialog";
 import { APIErrorState } from "@/components/common/APIErrorState";
 
 // ─── Main VisitorList ────────────────────────────────────────────────────────
@@ -62,11 +45,6 @@ export function VisitorList() {
     const dispatch = useAppDispatch();
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [showViewDialog, setShowViewDialog] = useState(false);
-    const [showBlacklistDialog, setShowBlacklistDialog] = useState(false);
-    const [blacklistReason, setBlacklistReason] = useState("");
-    const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null);
     const { hasReachedVisitorLimit, isExpired } = useSubscriptionStatus();
     const {
         showUpgradeModal,
@@ -93,76 +71,7 @@ export function VisitorList() {
     const [deleteVisitor, { isLoading: isDeleting }] = useDeleteVisitorMutation();
     const [updateVisitor, { isLoading: isUpdating }] = useUpdateVisitorMutation();
 
-    const visitorId = selectedVisitor?._id || "";
-    const shouldCheckAppointments = Boolean(selectedVisitor && showDeleteDialog);
 
-    const { data: appointmentCheck } = useCheckVisitorHasAppointmentsQuery(visitorId, {
-        skip: !shouldCheckAppointments,
-    });
-
-    const disabledMessage = useMemo(() => {
-        if (!appointmentCheck?.hasAppointments) return undefined;
-        return `Cannot delete visitor. ${appointmentCheck.count} appointment(s) have been created with this visitor. Please delete or reassign the appointments first.`;
-    }, [appointmentCheck]);
-
-    const handleDeleteClick = (visitor: Visitor) => {
-        setShowViewDialog(false);
-        setShowBlacklistDialog(false);
-        setSelectedVisitor(visitor);
-        setShowDeleteDialog(true);
-    };
-
-    const handleBlacklistClick = (visitor: Visitor) => {
-        setShowDeleteDialog(false);
-        setShowViewDialog(false);
-        setSelectedVisitor(visitor);
-        setBlacklistReason(visitor.blacklistReason || "");
-        setShowBlacklistDialog(true);
-    };
-
-    const handleDeleteVisitor = async () => {
-        if (!selectedVisitor) return;
-        try {
-            await deleteVisitor(selectedVisitor._id).unwrap();
-            showSuccessToast("Visitor deleted successfully!");
-            setShowDeleteDialog(false);
-            setSelectedVisitor(null);
-            refetch();
-        } catch (error: any) {
-            showErrorToast(error?.data?.message || "Failed to delete visitor");
-        }
-    };
-
-    const handleToggleBlacklist = async () => {
-        if (!selectedVisitor) return;
-        try {
-            const isBlocking = !selectedVisitor.blacklisted;
-            await updateVisitor({
-                id: selectedVisitor._id,
-                blacklisted: isBlocking,
-                blacklistReason: isBlocking ? blacklistReason : "",
-            }).unwrap();
-            
-            showSuccessToast(`Visitor ${isBlocking ? "blocked" : "unblocked"} successfully!`);
-            setShowBlacklistDialog(false);
-            setSelectedVisitor(null);
-            setBlacklistReason("");
-            refetch();
-        } catch (error: any) {
-            showErrorToast(error?.data?.message || `Failed to ${selectedVisitor.blacklisted ? "unblock" : "block"} visitor`);
-        }
-    };
-
-    const handleEditVisitor = (visitor: Visitor) => {
-        router.push(routes.privateroute.VISITOREDIT.replace("[id]", visitor._id));
-    };
-
-    const handleViewVisitor = (visitor: Visitor) => {
-        setShowDeleteDialog(false);
-        setShowBlacklistDialog(false);
-        setSelectedVisitor(visitor);
-        setShowViewDialog(true);
-    };
 
     const visitors = visitorsData?.visitors || [];
     const pagination = visitorsData?.pagination;
@@ -289,44 +198,17 @@ export function VisitorList() {
                 header: "Actions",
                 className: "text-right",
                 render: (visitor: Visitor) => (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg group-hover:opacity-100 transition-opacity">
-                                <MoreVertical className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuItem onClick={() => handleViewVisitor(visitor)}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditVisitor(visitor)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                                className={visitor.blacklisted ? "text-emerald-600" : "text-orange-600"}
-                                onClick={() => handleBlacklistClick(visitor)}
-                            >
-                                {visitor.blacklisted ? (
-                                    <>
-                                        <ShieldCheck className="mr-2 h-4 w-4" />
-                                        Unblock Visitor
-                                    </>
-                                ) : (
-                                    <>
-                                        <Ban className="mr-2 h-4 w-4" />
-                                        Block Visitor
-                                    </>
-                                )}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteClick(visitor)}>
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex justify-center">
+                        <Button 
+                            variant="primary" 
+                            size="sm" 
+                            className="h-8 px-4 rounded-lg gap-1.5 font-bold transition-all duration-300 shadow-md hover:scale-105 active:scale-95"
+                            onClick={() => router.push(routes.privateroute.VISITORSETTINGS.replace("[id]", visitor._id))}
+                        >
+                            <Settings className="h-4 w-4" />
+                            Settings
+                        </Button>
+                    </div>
                 ),
             },
         ];
@@ -345,15 +227,15 @@ export function VisitorList() {
     return (
         <div className="space-y-4">
             <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="flex w-full items-center justify-between gap-1.5 sm:gap-4">
+                <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
                     <SearchInput
                         placeholder="Search visitors..."
                         value={searchTerm}
                         onChange={setSearchTerm}
                         debounceDelay={500}
-                        className="flex-1 min-w-0 sm:min-w-[200px] sm:max-w-[300px]"
+                        className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none"
                     />
-                    <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+                    <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-3">
                         <SubscriptionActionButtons
                             isExpired={isExpired}
                             hasReachedLimit={hasReachedVisitorLimit}
@@ -364,15 +246,14 @@ export function VisitorList() {
                             upgradeLabel="Upgrade Plan"
                             icon={UserPlus}
                             isEmployee={isEmployee}
-                            className="h-12 w-12 sm:w-auto sm:px-6 rounded-xl"
                         >
                             <Button
-                                variant="outline"
-                                className="flex h-12 w-12 sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white sm:px-6 sm:min-w-[160px] transition-all"
+                                variant="primary"
+                                className="flex h-11 sm:h-12 w-11 sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl sm:px-8 font-bold transition-all shadow-md active:scale-95 hover:scale-105"
                                 onClick={() => router.push(routes.privateroute.VISITORREGISTRATION)}
                             >
                                 <Plus className="h-5 w-5 shrink-0" />
-                                <span className="hidden sm:inline font-medium">Add Visitor</span>
+                                <span className="hidden sm:inline">Add Visitor</span>
                             </Button>
                         </SubscriptionActionButtons>
                     </div>
@@ -410,52 +291,7 @@ export function VisitorList() {
                 </div>
             )}
 
-            <ConfirmationDialog
-                open={showDeleteDialog}
-                onOpenChange={setShowDeleteDialog}
-                title="Delete Visitor"
-                description={`Are you sure you want to delete ${selectedVisitor?.name}?`}
-                onConfirm={handleDeleteVisitor}
-                confirmText={isDeleting ? "Deleting..." : "Delete"}
-                variant="destructive"
-                disabled={appointmentCheck?.hasAppointments || false}
-                disabledMessage={disabledMessage}
-            />
 
-            <ConfirmationDialog
-                open={showBlacklistDialog}
-                onOpenChange={setShowBlacklistDialog}
-                title={selectedVisitor?.blacklisted ? "Unblock Visitor" : "Block Visitor"}
-                description={
-                    selectedVisitor?.blacklisted 
-                        ? `Are you sure you want to unblock ${selectedVisitor?.name}? They will be able to book appointments again.`
-                        : `Are you sure you want to block ${selectedVisitor?.name}? They will not be able to book any further appointments.`
-                }
-                onConfirm={handleToggleBlacklist}
-                confirmText={isUpdating ? "Processing..." : selectedVisitor?.blacklisted ? "Unblock" : "Block Now"}
-                variant={selectedVisitor?.blacklisted ? "warning" : "destructive"}
-            >
-                {!selectedVisitor?.blacklisted && (
-                    <div className="space-y-3">
-                         <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-none">Reason (Optional)</p>
-                         <Textarea 
-                            placeholder="Enter reason for blocking..."
-                            value={blacklistReason}
-                            onChange={(e) => setBlacklistReason(e.target.value)}
-                            className="bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl min-h-[100px]"
-                         />
-                    </div>
-                )}
-            </ConfirmationDialog>
-
-            <VisitorDetailsDialog
-                visitor={selectedVisitor}
-                open={showViewDialog}
-                onClose={() => {
-                    setShowViewDialog(false);
-                    setSelectedVisitor(null);
-                }}
-            />
         </div>
     );
 }

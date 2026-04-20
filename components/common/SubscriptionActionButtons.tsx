@@ -93,5 +93,5 @@ export function SubscriptionActionButtons({
     }
 
     // Otherwise, render the children (default actions)
-    return <>{children}</>;
+    return className ? <div className={className}>{children}</div> : <>{children}</>;
 }

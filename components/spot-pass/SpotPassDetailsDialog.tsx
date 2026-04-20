@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,7 +15,7 @@ import {
     FileText,
     Clock,
     CheckCircle2,
-    LogOut
+    X
 } from "lucide-react";
 
 interface SpotPassDetailsDialogProps {
@@ -36,137 +36,97 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
                 }
             }}
         >
-            <DialogContent className="max-w-3xl bg-white dark:bg-gray-900 border-none shadow-2xl rounded-2xl">
-                <DialogHeader className="border-b pb-4">
-                    <DialogTitle className="text-xl font-bold text-[#3882a5]">Spot Pass Details</DialogTitle>
-                </DialogHeader>
-
-                <div className="space-y-6 max-h-[80vh] overflow-y-auto px-1 pt-4">
-                    {/* Header Section */}
-                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6 border-b border-dashed">
-                        {/* Profile Photo */}
-                        <div className="group relative shrink-0">
-                            <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-[#3882a5]/10 shadow-lg">
+            <DialogContent showCloseButton={false} className="max-w-lg bg-white dark:bg-gray-950 border-none shadow-2xl rounded-3xl p-0 overflow-hidden">
+                <DialogTitle className="sr-only">Spot Pass Details</DialogTitle>
+                <DialogDescription className="sr-only">
+                    View detailed information about this spot pass.
+                </DialogDescription>
+                <div className="relative h-16 bg-gradient-to-r from-[#074463] to-[#3882a5]">
+                    <button 
+                        onClick={onClose}
+                        className="absolute right-3 top-3 h-7 w-7 flex items-center justify-center rounded-lg bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-all active:scale-95 z-10"
+                    >
+                        <X className="h-3.5 w-3.5" />
+                    </button>
+                    <div className="absolute -bottom-8 left-6 flex items-end gap-4">
+                        <div className="group relative">
+                            <Avatar className="h-20 w-20 border-4 border-white dark:border-gray-950 shadow-xl">
                                 <AvatarImage src={spotPass.photo} alt={spotPass.name} className="object-cover" />
-                                <AvatarFallback className="text-3xl font-bold bg-[#3882a5]/5 text-[#3882a5] flex items-center justify-center leading-none">
-                                    {getInitials(spotPass.name, 2)}
+                                <AvatarFallback className="text-2xl font-bold bg-[#f1f5f9] text-[#074463] flex items-center justify-center leading-none">
+                                    {getInitials(spotPass.name, 1)}
                                 </AvatarFallback>
                             </Avatar>
-                            {spotPass.photo && (
-                                <button
-                                    onClick={() => window.open(spotPass.photo, "_blank")}
-                                    className="absolute right-0 bottom-0 rounded-full bg-[#3882a5] p-2 text-white shadow-xl transition-all hover:scale-110 active:scale-95"
-                                    title="View full image"
-                                >
-                                    <Maximize2 className="h-4 w-4" />
-                                </button>
-                            )}
                         </div>
+                    </div>
+                </div>
 
-                        {/* Basic Info */}
-                        <div className="flex-1 space-y-4 text-center sm:text-left">
-                            <div>
-                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{formatName(spotPass.name)}</h3>
-                                <div className="mt-3 flex flex-wrap justify-center sm:justify-start gap-3">
-                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                                        <Phone className="h-3.5 w-3.5 text-[#3882a5]" />
-                                        <span className="text-sm font-medium">{spotPass.phone}</span>
-                                    </div>
-                                    <Badge variant={spotPass.status === 'checked-in' ? 'default' : 'secondary'} className={`px-3 py-1 text-xs capitalize ${spotPass.status === 'checked-in' ? 'bg-[#3882a5] hover:bg-[#2d6a87]' : ''}`}>
-                                        {spotPass.status === 'checked-in' ? (
-                                            <Clock className="mr-1.5 h-3 w-3 inline" />
-                                        ) : (
-                                            <CheckCircle2 className="mr-1.5 h-3 w-3 inline" />
-                                        )}
-                                        {spotPass.status === 'checked-in' ? 'Checked In' : 'Checked Out'}
-                                    </Badge>
+                <div className="px-6 pt-9 pb-4 space-y-3 max-h-[85vh] overflow-y-auto custom-scrollbar">
+                    {/* Header Info */}
+                    <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-2">
+                        <div className="text-center sm:text-left">
+                            <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">{formatName(spotPass.name)}</h3>
+                            <div className="mt-0.5 flex items-center justify-center sm:justify-start gap-2">
+                                <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-md border border-gray-200/50">
+                                    <Phone className="h-2.5 w-2.5 text-[#3882a5]" />
+                                    <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">{spotPass.phone}</span>
+                                </div>
+                                <div className={`flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-[8px] uppercase tracking-wider ${
+                                    spotPass.status === 'checked-in' 
+                                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' 
+                                    : 'bg-blue-100 text-blue-700 border border-blue-200'
+                                }`}>
+                                    {spotPass.status === 'checked-in' ? <Clock className="h-2.5 w-2.5" /> : <CheckCircle2 className="h-2.5 w-2.5" />}
+                                    {spotPass.status === 'checked-in' ? 'In' : 'Out'}
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Content Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Left Column: Personal Info */}
-                        <div className="space-y-6">
-                            <h4 className="text-xs font-bold uppercase tracking-widest text-gray-400">Visitor Information</h4>
-
-                            <div className="space-y-4">
-                                <div className="flex items-start gap-4">
-                                    <div className="mt-1 p-2 rounded-lg bg-[#3882a5]/5 text-[#3882a5]">
-                                        <User className="h-4 w-4" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {/* Info Block 1 */}
+                        <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 space-y-2 shadow-sm">
+                            <h4 className="text-[9px] font-black uppercase tracking-[0.15em] text-[#3882a5]">Visitor Info</h4>
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <div className="h-7 w-7 shrink-0 flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 text-[#3882a5]">
+                                        <User className="h-3.5 w-3.5" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-gray-500 font-medium">Gender</p>
-                                        <p className="text-sm font-semibold capitalize">{spotPass.gender}</p>
+                                        <p className="text-[8px] text-gray-400 font-black uppercase">Gender</p>
+                                        <p className="text-[11px] font-bold capitalize">{spotPass.gender}</p>
                                     </div>
                                 </div>
-
-                                <div className="flex items-start gap-4">
-                                    <div className="mt-1 p-2 rounded-lg bg-[#3882a5]/5 text-[#3882a5]">
-                                        <MapPin className="h-4 w-4" />
+                                <div className="flex items-center gap-2">
+                                    <div className="h-7 w-7 shrink-0 flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 text-[#3882a5]">
+                                        <MapPin className="h-3.5 w-3.5" />
                                     </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 font-medium">Address</p>
-                                        <p className="text-sm font-semibold">{spotPass.address || "N/A"}</p>
+                                    <div className="min-w-0">
+                                        <p className="text-[8px] text-gray-400 font-black uppercase">Address</p>
+                                        <p className="text-[11px] font-bold truncate">{spotPass.address || "N/A"}</p>
                                     </div>
                                 </div>
-
-                                {spotPass.employeeId && (
-                                    <div className="flex items-center gap-4">
-                                        <div className="shrink-0">
-                                            {typeof spotPass.employeeId === 'object' ? (
-                                                <Avatar className="h-10 w-10 border border-gray-200 shadow-sm">
-                                                    <AvatarImage src={spotPass.employeeId.photo} alt={spotPass.employeeId.name} className="object-cover" />
-                                                    <AvatarFallback className="bg-[#3882a5]/10 text-[#3882a5] text-xs font-bold flex items-center justify-center leading-none">
-                                                        {getInitials(spotPass.employeeId.name)}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                            ) : (
-                                                <div className="p-2 rounded-lg bg-[#3882a5]/5 text-[#3882a5]">
-                                                    <Briefcase className="h-5 w-5" />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-gray-500 font-medium mb-0.5">Meet To</p>
-                                            <p className="text-sm font-semibold capitalize text-gray-900 dark:text-gray-100">
-                                                {typeof spotPass.employeeId === 'object' ? formatName(spotPass.employeeId.name) : "N/A"}
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
 
-                        {/* Right Column: Entry Log */}
-                        <div className="space-y-6">
-                            <h4 className="text-xs font-bold uppercase tracking-widest text-gray-400">Activity Log</h4>
-
-                            <div className="space-y-4">
-                                <div className="flex items-start gap-4">
-                                    <div className="mt-1 p-2 rounded-lg bg-emerald-500/5 text-emerald-600">
-                                        <LogOut className="h-4 w-4 rotate-180" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 font-medium">Check-in Time</p>
-                                        <p className="text-sm font-semibold">
-                                            {format(new Date(spotPass.checkInTime), "dd/MM/yyyy hh:mm a")}
-                                        </p>
-                                    </div>
+                        {/* Info Block 2 */}
+                        <div className="p-3 rounded-xl bg-[#074463]/[0.02] dark:bg-gray-900 border border-gray-100 dark:border-gray-800 space-y-2 shadow-sm">
+                            <h4 className="text-[9px] font-black uppercase tracking-[0.15em] text-[#3882a5]">Log</h4>
+                            <div className="space-y-3">
+                                <div className="relative pl-4 border-l-2 border-emerald-500/20 py-0.5">
+                                    <div className="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.5)]" />
+                                    <p className="text-[8px] text-gray-400 font-black uppercase mb-0.5">Check-in</p>
+                                    <p className="text-[10px] font-black text-gray-900 dark:text-white leading-tight">
+                                        {format(new Date(spotPass.checkInTime), "dd MMM")} · <span className="text-emerald-600 font-bold">{format(new Date(spotPass.checkInTime), "hh:mm a")}</span>
+                                    </p>
                                 </div>
-
                                 {spotPass.checkOutTime && (
-                                    <div className="flex items-start gap-4">
-                                        <div className="mt-1 p-2 rounded-lg bg-blue-500/5 text-blue-600">
-                                            <LogOut className="h-4 w-4" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-gray-500 font-medium">Check-out Time</p>
-                                            <p className="text-sm font-semibold">
-                                                {format(new Date(spotPass.checkOutTime), "dd/MM/yyyy hh:mm a")}
-                                            </p>
-                                        </div>
+                                    <div className="relative pl-4 border-l-2 border-blue-500/20 py-0.5">
+                                        <div className="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_4px_rgba(59,130,246,0.5)]" />
+                                        <p className="text-[8px] text-gray-400 font-black uppercase mb-0.5">Check-out</p>
+                                        <p className="text-[10px] font-black text-gray-900 dark:text-white leading-tight">
+                                            {format(new Date(spotPass.checkOutTime), "dd MMM")} · <span className="text-blue-600 font-bold">{format(new Date(spotPass.checkOutTime), "hh:mm a")}</span>
+                                        </p>
                                     </div>
                                 )}
                             </div>
@@ -174,22 +134,26 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
 
                         {/* Full Width Row: Notes */}
                         {spotPass.notes && (
-                            <div className="md:col-span-2 space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-                                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400">
-                                    <FileText className="h-3.5 w-3.5" />
-                                    Internal Notes
+                            <div className="md:col-span-2 p-3 rounded-xl bg-[#3882a5]/5 border border-[#3882a5]/10 space-y-1">
+                                <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.15em] text-[#3882a5]">
+                                    <FileText className="h-3 w-3" />
+                                    Notes
                                 </div>
-                                <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 text-sm text-gray-600 dark:text-gray-400 italic">
+                                <p className="text-[11px] font-medium italic opacity-80 truncate">
                                     "{spotPass.notes}"
-                                </div>
+                                </p>
                             </div>
                         )}
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex justify-end pt-6 border-t mt-4">
-                        <Button type="button" onClick={onClose} variant="outline" className="px-10 h-11 font-semibold rounded-xl border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10">
-                            Close
+                    {/* Footer Actions */}
+                    <div className="flex justify-end pt-0.5">
+                        <Button 
+                            onClick={onClose} 
+                            variant="primary" 
+                            className="px-8 h-9 text-[10px] font-black text-white rounded-xl shadow-lg transition-all active:scale-95 hover:scale-105"
+                        >
+                            Got it
                         </Button>
                     </div>
                 </div>

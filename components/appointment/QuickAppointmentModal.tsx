@@ -494,7 +494,7 @@ export function QuickAppointmentModal({
                     >
                         <ActionButton
                             type="submit"
-                            variant="outline-primary"
+                            variant="primary"
                             disabled={
                                 isSubmitting ||
                                 isFileUploading ||

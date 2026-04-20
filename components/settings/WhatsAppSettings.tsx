@@ -368,16 +368,20 @@ export function WhatsAppSettings() {
                                             <p className="text-xs text-gray-500">Manual verification is required for credential changes.</p>
                                         </div>
                                     </div>
-                                    <Button
+                                    <ActionButton
                                         type="submit"
                                         disabled={isUpdating || isInitiatingVerify || !isDirty}
+                                        isLoading={isUpdating || isInitiatingVerify}
+                                        loadingLabel="Saving..."
+                                        variant="primary"
+                                        size="xl"
                                         className={cn(
-                                            "min-w-[200px] h-12 rounded-xl font-bold transition-all shadow-lg active:scale-95",
-                                            isDirty ? "bg-[#3882a5] hover:bg-[#2c6985] text-white" : "bg-muted text-muted-foreground shadow-none"
+                                            "min-w-[220px] font-bold transition-all shadow-lg active:scale-95",
+                                            !isDirty && "opacity-50 grayscale pointer-events-none"
                                         )}
-                                    >
-                                        {isUpdating || isInitiatingVerify ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="mr-2 h-4 w-4" /> {needsVerification ? "Verify & Save" : "Update Configuration"}</>}
-                                    </Button>
+                                        icon={Save}
+                                        label={needsVerification ? "Verify & Save" : "Update Configuration"}
+                                    />
                                 </div>
                             </form>
                         </FormContainer>

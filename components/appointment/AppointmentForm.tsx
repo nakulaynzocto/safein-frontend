@@ -473,7 +473,7 @@ export function NewAppointmentModal({
                     >
                         <ActionButton
                             type="submit"
-                            variant="outline-primary"
+                            variant="primary"
                             disabled={isLoading || isFileUploading}
                             size="xl"
                             className="w-full min-w-[180px] px-6 sm:w-auto"

@@ -82,7 +82,7 @@ export function SuccessState({
                         {onAction && (
                             <Button 
                                 onClick={onAction}
-                                className="h-14 w-full rounded-2xl bg-[#3882a5] text-base font-bold text-white shadow-xl shadow-[#3882a5]/20 transition-all hover:bg-[#2d6a87] hover:-translate-y-1 active:scale-95"
+                                className="h-14 w-full rounded-2xl bg-[#3882a5] text-base font-bold text-white shadow-xl shadow-[#3882a5]/20 transition-all hover:bg-[#2d6a87] hover:scale-105 active:scale-95"
                             >
                                 <Home className="mr-2 h-4 w-4" /> {actionLabel}
                             </Button>

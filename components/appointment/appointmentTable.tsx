@@ -558,12 +558,12 @@ export function AppointmentTable({
                         >
                             {!isEmployee && (
                                 <Button
-                                    variant="outline"
-                                    className="flex w-full sm:w-auto h-11 sm:h-12 shrink-0 items-center justify-center gap-2 rounded-xl border-accent text-accent hover:bg-accent/10 bg-white sm:px-6 transition-all font-bold shadow-sm"
+                                    variant="primary"
+                                    className="flex w-full sm:w-auto h-11 sm:h-12 shrink-0 items-center justify-center gap-2 rounded-xl sm:px-8 transition-all font-bold shadow-md hover:scale-105 active:scale-95"
                                     onClick={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
                                 >
                                     <Plus className="h-5 w-5 shrink-0" />
-                                    <span className="sm:inline font-bold">Schedule Appointment</span>
+                                    <span className="inline font-bold">Schedule Appointment</span>
                                 </Button>
                             )}
                         </SubscriptionActionButtons>

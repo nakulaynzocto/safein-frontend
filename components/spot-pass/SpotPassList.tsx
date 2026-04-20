@@ -15,7 +15,8 @@ import {
     Trash2,
     MoreVertical,
     Eye,
-    Maximize2
+    Maximize2,
+    Settings,
 } from "lucide-react";
 import { getInitials, formatName } from "@/utils/helpers";
 import { StatusBadge } from "@/components/common/statusBadge";
@@ -232,8 +233,8 @@ export function SpotPassList() {
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-[#3882a5]/10 hover:text-[#3882a5] rounded-full transition-colors">
-                                <MoreVertical className="h-4 w-4" />
+                            <Button variant="ghost" size="sm" className="h-9 w-9 p-0 hover:bg-gray-100 rounded-full transition-colors">
+                                <MoreVertical className="h-4 w-4 text-gray-500" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 border-none shadow-xl rounded-xl p-1.5 bg-white dark:bg-gray-900">
@@ -274,15 +275,15 @@ export function SpotPassList() {
     return (
         <div className="space-y-4">
             <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="flex w-full items-center justify-between gap-1.5 sm:gap-4">
+                <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
                     <SearchInput
                         placeholder="Search by name or phone..."
                         value={searchQuery}
                         onChange={(val: string) => setSearchQuery(val)}
                         debounceDelay={500}
-                        className="flex-1 min-w-0 sm:min-w-[200px] sm:max-w-[300px]"
+                        className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none"
                     />
-                    <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+                    <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-3">
                         <SubscriptionActionButtons
                             isExpired={isExpired}
                             hasReachedLimit={hasReachedSpotPassLimit}
@@ -292,15 +293,14 @@ export function SpotPassList() {
                             closeUpgradeModal={closeUpgradeModal}
                             upgradeLabel="Upgrade"
                             icon={Plus}
-                            className="h-12 w-12 sm:w-auto sm:px-6 rounded-xl"
                         >
                             <Button
-                                variant="outline"
-                                className="flex h-12 w-12 sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white sm:px-6 sm:min-w-[160px] transition-all"
+                                variant="primary"
+                                className="flex h-11 sm:h-12 w-11 sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl sm:px-8 font-bold transition-all shadow-md active:scale-95 hover:scale-105"
                                 onClick={() => router.push(routes.privateroute.SPOT_PASS_CREATE)}
                             >
                                 <Plus className="h-5 w-5 shrink-0" />
-                                <span className="hidden sm:inline font-medium">New Spot Pass</span>
+                                <span className="hidden sm:inline">New Spot Pass</span>
                             </Button>
                         </SubscriptionActionButtons>
                     </div>

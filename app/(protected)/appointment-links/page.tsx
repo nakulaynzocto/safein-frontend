@@ -25,7 +25,7 @@ import {
     Plus,
     Trash2,
     RefreshCw,
-    MoreHorizontal,
+    MoreVertical,
     Copy,
     Check,
     Link2,
@@ -144,9 +144,9 @@ const AppointmentActionCell = ({
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 rounded-xl hover:bg-gray-100 text-gray-500"
+                        className="h-9 w-9 rounded-full hover:bg-gray-100 text-gray-500"
                     >
-                        <MoreHorizontal className="h-5 w-5" />
+                        <MoreVertical className="h-5 w-5" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-xl border-gray-100">
@@ -702,12 +702,11 @@ function AppointmentLinksContent() {
                                 closeUpgradeModal={closeUpgradeModal}
                                 upgradeLabel="Upgrade Plan"
                                 icon={ArrowUp}
-                                className="h-10 sm:h-12 rounded-xl px-4 sm:px-6 shadow-sm"
                             >
                                 <ActionButton
-                                    variant="outline-primary"
+                                    variant="primary"
                                     size="xl"
-                                    className="flex h-10 sm:h-12 items-center justify-center rounded-xl gap-2 px-3 sm:px-6 text-xs sm:text-sm"
+                                    className="flex h-10 sm:h-12 items-center justify-center rounded-xl gap-2 px-4 sm:px-6 text-xs sm:text-sm font-bold shadow-md transition-all active:scale-95"
                                     onClick={() => {
                                         if (filterType === "special") {
                                             router.push(routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING_CREATE);
@@ -718,15 +717,13 @@ function AppointmentLinksContent() {
                                 >
                                     {filterType === "special" ? (
                                         <>
-                                            <User className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                            <span className="hidden sm:inline">Create Priority Booking</span>
-                                            <span className="sm:hidden">Priority</span>
+                                            <UserPlus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                            <span className="inline-flex">Create Priority Booking</span>
                                         </>
                                     ) : (
                                         <>
                                             <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                            <span className="hidden sm:inline">Create Smart Link</span>
-                                            <span className="sm:hidden">Smart</span>
+                                            <span className="inline-flex">Create Smart Link</span>
                                         </>
                                     )}
                                 </ActionButton>

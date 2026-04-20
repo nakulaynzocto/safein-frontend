@@ -247,10 +247,10 @@ export function SpotPassCreateForm() {
                         >
                             <ActionButton
                                 type="submit"
-                                variant="outline-primary"
+                                variant="primary"
                                 disabled={isLoading || isFileUploading}
                                 size="xl"
-                                className="w-full min-w-[180px] px-6 sm:w-auto"
+                                className="w-full min-w-[200px] px-8 sm:w-auto font-bold transition-all shadow-md active:scale-95 hover:scale-105"
                             >
                                 {isLoading ? (
                                     <>Generating...</>

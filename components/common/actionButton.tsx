@@ -18,7 +18,7 @@ export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProp
             label,
             className,
             children,
-            variant = "outline-primary",
+            variant = "primary",
             size = "default",
             isLoading,
             loadingLabel,

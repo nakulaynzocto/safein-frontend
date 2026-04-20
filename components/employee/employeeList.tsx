@@ -144,23 +144,23 @@ export function EmployeeList() {
                         <div className="flex gap-2">
                             <ActionButton
                                 asChild
-                                variant="outline-primary"
+                                variant="primary"
                                 size="xl"
                                 className="shrink-0"
                             >
                                 <Link href={routes.privateroute.EMPLOYEECREATE} prefetch className="flex items-center gap-2">
                                     <UserPlus className="h-5 w-5 shrink-0" />
-                                    <span className="hidden sm:inline">Add Employee</span>
+                                    <span className="inline">Add Employee</span>
                                 </Link>
                             </ActionButton>
                             <ActionButton
-                                variant="outline-primary"
+                                variant="primary"
                                 size="xl"
                                 onClick={() => setShowBulkImportModal(true)}
                                 className="shrink-0"
                             >
                                 <FileSpreadsheet className="h-5 w-5 shrink-0" />
-                                <span className="hidden sm:inline">Bulk Import</span>
+                                <span className="inline">Bulk Import</span>
                             </ActionButton>
                         </div>
                     </SubscriptionActionButtons>

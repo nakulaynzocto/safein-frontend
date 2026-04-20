@@ -498,9 +498,9 @@ export default function QRScanPage() {
                                                 ) : null}
                                                 <Button
                                                     type="button"
-                                                    variant="outline-primary"
+                                                    variant="primary"
                                                     size="xl"
-                                                    className="w-full font-semibold shadow-sm"
+                                                    className="w-full font-bold shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
                                                     disabled={isSendingOtp || !watchVerifyPhone("phone")?.trim()}
                                                     onClick={onSendOtp}
                                                 >
@@ -508,12 +508,12 @@ export default function QRScanPage() {
                                                         "Sending…"
                                                     ) : otpSent ? (
                                                         <>
-                                                            <MessageCircle className="h-4 w-4" />
+                                                            <MessageCircle className="h-4 w-4 mr-2" />
                                                             Resend code
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <MessageCircle className="h-4 w-4" />
+                                                            <MessageCircle className="h-4 w-4 mr-2" />
                                                             Send verification code
                                                         </>
                                                     )}
@@ -528,7 +528,7 @@ export default function QRScanPage() {
                                                         <div className="w-full border-t border-slate-200" />
                                                     </div>
                                                     <div className="relative flex justify-center">
-                                                        <span className="bg-card px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                                                        <span className="bg-white px-3 text-xs font-bold uppercase tracking-wider text-slate-400">
                                                             Then enter code
                                                         </span>
                                                     </div>
@@ -544,7 +544,7 @@ export default function QRScanPage() {
                                                     </div>
                                                     <div className="min-w-0 flex-1 space-y-4">
                                                         <div>
-                                                            <p className="text-sm font-semibold text-[#0f172a]">Enter the WhatsApp code</p>
+                                                            <p className="text-sm font-bold text-[#0f172a]">Enter the WhatsApp code</p>
                                                             <p className="text-xs text-slate-500">
                                                                 Type the code you received below.
                                                             </p>
@@ -552,7 +552,7 @@ export default function QRScanPage() {
                                                         <div className="space-y-2">
                                                             <Label
                                                                 htmlFor="qr-verify-otp"
-                                                                className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+                                                                className="text-[10px] font-bold uppercase tracking-widest text-[#3882a5]"
                                                             >
                                                                 Verification code
                                                             </Label>
@@ -567,8 +567,8 @@ export default function QRScanPage() {
                                                                     />
                                                                 )}
                                                             />
-                                                            <p className="flex items-center gap-1.5 text-xs text-slate-500">
-                                                                <Clock className="h-3.5 w-3.5 shrink-0 text-[#3882a5]" />
+                                                            <p className="flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
+                                                                <Clock className="h-3 w-3 shrink-0 text-[#3882a5]" />
                                                                 Enter 6 digits only. Code is valid for 10 minutes.
                                                             </p>
                                                         </div>
@@ -576,7 +576,7 @@ export default function QRScanPage() {
                                                             type="submit"
                                                             variant="primary"
                                                             size="xl"
-                                                            className="w-full font-semibold shadow-md shadow-[#3882a5]/20"
+                                                            className="w-full font-bold shadow-lg shadow-[#3882a5]/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                                             disabled={
                                                                 isVerifyingOtp ||
                                                                 (watchVerifyPhone("otp")?.replace(/\D/g, "")?.length ?? 0) !== 6
@@ -681,14 +681,14 @@ export default function QRScanPage() {
                                             type="button" 
                                             variant="outline" 
                                             onClick={() => setStep("details")}
-                                            className="h-12 flex-1 rounded-xl border-border font-medium"
+                                            className="h-12 flex-1 rounded-xl border-slate-200 font-bold text-slate-600 active:scale-[0.98] transition-all"
                                         >
                                             <ArrowLeft className="mr-2 h-4 w-4" /> Back
                                         </Button>
                                         <Button 
                                             type="submit" 
                                             disabled={!watchPhoto("photo") || isPhotoUploading || isCreatingVisitor}
-                                            className="h-12 flex-1 rounded-xl bg-[#3882a5] text-white hover:bg-[#2d6a87] font-medium shadow-md"
+                                            className="h-12 flex-1 rounded-xl bg-[#3882a5] text-white hover:bg-[#2d6a87] font-bold shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
                                         >
                                             Continue <ArrowRight className="ml-2 h-4 w-4" />
                                         </Button>
@@ -845,14 +845,14 @@ export default function QRScanPage() {
                                             type="button"
                                             variant="outline"
                                             onClick={() => setStep("appointment")}
-                                            className="h-14 flex-1 rounded-2xl border-slate-200 font-bold tracking-tight text-slate-600 transition-all hover:bg-slate-50 hover:text-[#3882a5] active:scale-95"
+                                            className="h-14 flex-1 rounded-2xl border-slate-200 font-bold tracking-tight text-slate-600 transition-all hover:bg-slate-50 hover:text-[#3882a5] active:scale-[0.98]"
                                         >
                                             <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
                                         </Button>
                                         <Button
                                             onClick={handleFinalSubmit}
                                             disabled={isCreatingVisitor || isCreatingAppointment}
-                                            className="h-14 flex-[1.5] rounded-2xl bg-[#3882a5] font-extrabold text-white shadow-lg shadow-[#3882a5]/20 transition-all hover:bg-[#2d6a87] hover:shadow-[#3882a5]/30 active:scale-95"
+                                            className="h-14 flex-[1.5] rounded-2xl bg-[#3882a5] font-extrabold text-white shadow-lg shadow-[#3882a5]/20 transition-all hover:bg-[#2d6a87] hover:shadow-[#3882a5]/30 hover:scale-[1.02] active:scale-[0.98]"
                                         >
                                             {isCreatingVisitor || isCreatingAppointment ? (
                                                 <div className="flex items-center gap-2">
