@@ -95,10 +95,6 @@ export function CreditBalancePill({ forceShow = false }: { forceShow?: boolean }
                             
                             <div className="space-y-2">
                                 <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
-                                    <span className="text-slate-500">Current Balance</span>
-                                    <span className="font-bold text-[#3882a5]">{balance.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
                                     <span className="text-slate-500">Cost per call</span>
                                     <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.callCostPerAttempt || 5} credits</span>
                                 </div>

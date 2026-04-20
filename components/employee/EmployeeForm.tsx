@@ -11,6 +11,7 @@ import { ActionButton } from "@/components/common/actionButton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle } from "lucide-react";
 import { ImageUploadField } from "@/components/common/imageUploadField";
@@ -58,6 +59,7 @@ const employeeSchema = yup.object({
         .max(100, "Position cannot exceed 100 characters"),
     status: yup.string().oneOf(["Active", "Inactive"]).default("Active"),
     photo: yup.string().default(""),
+    isPublic: yup.boolean().default(true),
 });
 
 type EmployeeFormData = {
@@ -68,6 +70,7 @@ type EmployeeFormData = {
     designation: string;
     status: "Active" | "Inactive";
     photo: string;
+    isPublic: boolean;
 };
 
 const statusOptions = [
@@ -141,6 +144,7 @@ export function NewEmployeeModal({
             designation: "",
             status: "Active",
             photo: "",
+            isPublic: true,
         },
     });
 
@@ -154,6 +158,7 @@ export function NewEmployeeModal({
                 designation: employeeData.designation || "",
                 status: employeeData.status,
                 photo: employeeData.photo || "",
+                isPublic: employeeData.isPublic !== undefined ? employeeData.isPublic : true,
             });
         }
     }, [isEditMode, employeeData, reset]);
@@ -387,6 +392,27 @@ export function NewEmployeeModal({
                             />
                         )}
                     </div>
+                    
+                    <Controller
+                        name="isPublic"
+                        control={control}
+                        render={({ field }) => (
+                            <div className="flex items-center justify-between p-4 border border-border rounded-xl bg-muted/20 mt-4 h-20 shadow-sm border-dashed">
+                                <div className="space-y-1">
+                                    <Label className="text-sm font-bold text-foreground">Public Directory Visibility</Label>
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                        Show employee in the QR code visitor check-in list
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    disabled={isLoading}
+                                    className="data-[state=checked]:bg-primary"
+                                />
+                            </div>
+                        )}
+                    />
                 </div>
             </div>
 

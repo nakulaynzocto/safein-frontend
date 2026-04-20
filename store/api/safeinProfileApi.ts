@@ -42,6 +42,12 @@ export interface ISafeinProfile {
         enableSms: boolean;
         enableWhatsApp: boolean;
         enableVoice: boolean;
+        enableAutoApproval: boolean;
+        enableVisitorImageCapture: boolean;
+        enableVerification: boolean;
+        enableMaintenanceMode: boolean;
+        enableRegistration: boolean;
+        enableFeedbackSystem: boolean;
     };
 }
 

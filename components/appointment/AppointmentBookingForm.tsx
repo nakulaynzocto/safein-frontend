@@ -158,18 +158,6 @@ export function AppointmentBookingForm({
                 vehicleNumber: data.vehicleNumber || "",
                 vehiclePhoto: data.vehiclePhoto || "",
             },
-            securityDetails: {
-                badgeIssued: false,
-                badgeNumber: "",
-                securityClearance: false,
-                securityNotes: "",
-            },
-            notifications: {
-                smsSent: false,
-                emailSent: false,
-                whatsappSent: false,
-                reminderSent: false,
-            },
         };
         onSubmit(payload);
     };

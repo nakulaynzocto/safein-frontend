@@ -12,27 +12,18 @@ export const appointmentSchema = yup.object({
         .required("Appointment date is required")
         .test("future-date", "Scheduled date cannot be in the past", function (value) {
             if (!value) return false;
-
             try {
-                // Handle different date formats (YYYY-MM-DD or DD/MM/YYYY)
-                let dateStr = value;
-                if (dateStr.includes("/")) {
-                    // Convert DD/MM/YYYY to YYYY-MM-DD
-                    const parts = dateStr.split("/");
-                    if (parts.length === 3) {
-                        dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                    }
+                let dStr = value;
+                if (value.includes("/")) {
+                    const [d, m, y] = value.split("/");
+                    dStr = `${y}-${m}-${d}`;
                 }
-
-                const selectedDate = new Date(dateStr + "T00:00:00");
-                if (isNaN(selectedDate.getTime())) {
-                    return false;
-                }
+                const selectedDate = new Date(dStr + "T00:00:00");
+                if (isNaN(selectedDate.getTime())) return false;
 
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 selectedDate.setHours(0, 0, 0, 0);
-
                 return selectedDate >= today;
             } catch (error) {
                 return false;
@@ -47,35 +38,26 @@ export const appointmentSchema = yup.object({
             if (!appointmentDate) return true;
 
             try {
-                // Handle different date formats
-                let dateStr = appointmentDate;
-                if (dateStr.includes("/")) {
-                    const parts = dateStr.split("/");
-                    if (parts.length === 3) {
-                        dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                    }
+                let dStr = appointmentDate;
+                if (appointmentDate.includes("/")) {
+                    const [d, m, y] = appointmentDate.split("/");
+                    dStr = `${y}-${m}-${d}`;
                 }
-
-                const selectedDateTime = new Date(`${dateStr}T${value}`);
-                if (isNaN(selectedDateTime.getTime())) {
-                    return true; // If date parsing fails, skip time validation
-                }
+                const selectedDateTime = new Date(`${dStr}T${value}`);
+                if (isNaN(selectedDateTime.getTime())) return true;
 
                 const now = new Date();
-
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
-                const selectedDate = new Date(dateStr + "T00:00:00");
+                const selectedDate = new Date(dStr + "T00:00:00");
                 selectedDate.setHours(0, 0, 0, 0);
 
-                // Only validate time if the date is today
                 if (selectedDate.getTime() === today.getTime()) {
                     return selectedDateTime > now;
                 }
-
                 return true;
             } catch (error) {
-                return true; // If validation fails, allow it (date validation will catch it)
+                return true;
             }
         }),
     accompanyingCount: yup

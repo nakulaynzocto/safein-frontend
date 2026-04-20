@@ -26,6 +26,8 @@ import {
 } from "@/store/api/appointmentApi";
 import { useGetEmployeesQuery, useGetEmployeeQuery } from "@/store/api/employeeApi";
 import { useGetVisitorsQuery, useGetVisitorQuery, Visitor } from "@/store/api/visitorApi";
+import { useGetSafeinProfileQuery } from "@/store/api/safeinProfileApi";
+import { useGetSettingsQuery } from "@/store/api/settingsApi";
 import { showSuccessToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
 import { Calendar, Car, Info, UserPlus } from "lucide-react";
@@ -96,6 +98,8 @@ export function NewAppointmentModal({
 
     const [createAppointment, { isLoading: isCreating }] = useCreateAppointmentMutation();
     const [updateAppointment, { isLoading: isUpdating }] = useUpdateAppointmentMutation();
+    const { data: profileData } = useGetSafeinProfileQuery();
+    const { data: settings } = useGetSettingsQuery();
 
     const isLoading = isCreating || isUpdating;
     const {
@@ -253,7 +257,9 @@ export function NewAppointmentModal({
                 showSuccessToast("Appointment created successfully");
                 if (!isPage) setOpen(false);
 
-                if (result.approvalLink) {
+                const isAutoApproveOn = settings?.features?.enableAutoApproval === true;
+
+                if (result.approvalLink && !isAutoApproveOn) {
                     setApprovalLink(result.approvalLink);
                     setShowApprovalLinkModal(true);
                 } else {

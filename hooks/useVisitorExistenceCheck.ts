@@ -1,24 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { useLazyGetVisitorsQuery, Visitor } from "@/store/api/visitorApi";
+import { useLazyCheckVisitorByPhoneQuery, Visitor } from "@/store/api/visitorApi";
 
 const cleanDigits = (val: string) => val?.replace(/\D/g, "") || "";
-
-const isPhoneMatch = (v: Visitor, searchDigits: string) => {
-    if (!v.phone || !searchDigits) return false;
-    const vDigits = v.phone.replace(/\D/g, "");
-    if (vDigits === searchDigits) return true;
-    
-    // Fallback to last 10 digits match for international/local variations
-    if (vDigits.length >= 10 && searchDigits.length >= 10) {
-        return vDigits.slice(-10) === searchDigits.slice(-10);
-    }
-    return false;
-};
 
 export function useVisitorExistenceCheck(watchedPhone: string | undefined, visitorId?: string) {
     const [phoneExists, setPhoneExists] = useState(false);
     const [foundVisitor, setFoundVisitor] = useState<Visitor | null>(null);
-    const [triggerSearch] = useLazyGetVisitorsQuery();
+    const [triggerCheck] = useLazyCheckVisitorByPhoneQuery();
     
     const lastCheckedPhone = useRef("");
 
@@ -37,26 +25,25 @@ export function useVisitorExistenceCheck(watchedPhone: string | undefined, visit
         const timer = setTimeout(async () => {
             try {
                 lastCheckedPhone.current = digits;
-                const searchParam = digits.slice(-10);
-                const response = await triggerSearch({ search: searchParam }).unwrap();
-                const visitors = response.visitors || [];
-
-                const match = visitors.find((v) => isPhoneMatch(v, digits) && v._id !== visitorId);
-
-                if (match) {
+                // We send the raw digits, backend handles formatting/normalization
+                const response = await triggerCheck(digits).unwrap();
+                
+                if (response.exists && response.visitor && response.visitor._id !== visitorId) {
                     setPhoneExists(true);
-                    setFoundVisitor(match);
+                    setFoundVisitor(response.visitor);
                 } else {
                     setPhoneExists(false);
                     setFoundVisitor(null);
                 }
             } catch (err) {
                 // Background check failure
+                setPhoneExists(false);
+                setFoundVisitor(null);
             }
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [watchedPhone, triggerSearch, visitorId]);
+    }, [watchedPhone, triggerCheck, visitorId]);
 
     return { phoneExists, foundVisitor };
 }

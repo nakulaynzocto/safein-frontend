@@ -27,6 +27,7 @@ export interface Employee {
         sms: boolean;
         call: boolean;
     };
+    isPublic?: boolean;
 }
 
 export interface CreateEmployeeRequest {
@@ -37,6 +38,7 @@ export interface CreateEmployeeRequest {
     designation?: string;
     photo?: string;
     status?: "Active" | "Inactive";
+    isPublic?: boolean;
 }
 
 export interface UpdateEmployeeRequest {
@@ -54,6 +56,7 @@ export interface UpdateEmployeeRequest {
         sms?: boolean;
         call?: boolean;
     };
+    isPublic?: boolean;
 }
 
 export interface GetEmployeesQuery {

@@ -207,10 +207,32 @@ export default function QRScanPage() {
             return;
         }
         try {
-            await verifyQrOtp({ slug, phone, otp }).unwrap();
+            const response = await verifyQrOtp({ slug, phone, otp }).unwrap();
             setVerifiedPhone(phone);
-            setStep("details");
-            showSuccessToast("Phone verified. Please complete your details.");
+            
+            if (response.visitor) {
+                // Pre-fill existing visitor data
+                const visitorInfo = {
+                    ...response.visitor,
+                    phone: phone, // ensure it uses the verified phone
+                };
+                setVisitorDraft(visitorInfo);
+                setVisitorData(visitorInfo);
+                setPhotoValue("photo", visitorInfo.photo || "");
+
+                const photoEnabled = companyInfo?.features?.enableVisitorImageCapture ?? false;
+                
+                if (photoEnabled) {
+                    setStep("photo");
+                    showSuccessToast(`Welcome back, ${visitorInfo.name}! Please take a fresh photo.`);
+                } else {
+                    setStep("appointment");
+                    showSuccessToast(`Welcome back, ${visitorInfo.name}!`);
+                }
+            } else {
+                setStep("details");
+                showSuccessToast("Phone verified. Please complete your details.");
+            }
         } catch (e: any) {
             const status = e?.status ?? e?.data?.statusCode;
             const msg = e?.data?.message || e?.message || "Verification failed.";
@@ -225,7 +247,13 @@ export default function QRScanPage() {
     const handleVisitorDetailsSubmit = async (data: any) => {
         setVisitorDraft(data);
         setPhotoValue("photo", data?.photo || "");
-        setStep("photo");
+        // Skip photo step if the feature is disabled
+        if (!companyInfo?.features?.enableVisitorImageCapture) {
+            setVisitorData(data);
+            setStep("appointment");
+        } else {
+            setStep("photo");
+        }
     };
 
     const handlePhotoStepSubmit = async (data: { photo: string }) => {
@@ -275,13 +303,16 @@ export default function QRScanPage() {
     };
 
     const company = companyInfo?.company;
-    const steps = [
+    const photoEnabled = companyInfo?.features?.enableVisitorImageCapture ?? false;
+
+    type StepKey = "verify_phone" | "details" | "photo" | "appointment" | "review";
+    const steps: Array<{ key: StepKey; label: string; mobileLabel: string }> = [
         { key: "verify_phone", label: "Verify phone", mobileLabel: "Phone" },
         { key: "details", label: "Your Details", mobileLabel: "Details" },
-        { key: "photo", label: "Capture Photo", mobileLabel: "Photo" },
+        ...(photoEnabled ? [{ key: "photo" as StepKey, label: "Capture Photo", mobileLabel: "Photo" }] : []),
         { key: "appointment", label: "Book", mobileLabel: "Book" },
         { key: "review", label: "Review", mobileLabel: "Review" },
-    ] as const;
+    ];
     const activeStepIndex = steps.findIndex((s) => s.key === step);
     const selectedEmployee = (companyInfo?.employees || []).find((emp: any) => emp._id === appointmentDraft?.employeeId);
 
@@ -349,7 +380,7 @@ export default function QRScanPage() {
                             <h1 className="text-xl font-extrabold tracking-tight text-[#0f172a] sm:text-4xl leading-tight">
                                 Welcome to <span className="block sm:inline text-[#3882a5] truncate" title={company?.companyName}>{company?.companyName}</span>
                             </h1>
-                            <p className="mt-1 text-xs font-medium text-slate-500 sm:text-sm">Complete all 5 steps for fast visitor approval</p>
+                            <p className="mt-1 text-xs font-medium text-slate-500 sm:text-sm">Complete all {steps.length} steps for fast visitor approval</p>
                         </div>
                     </div>
                 </div>
@@ -590,7 +621,7 @@ export default function QRScanPage() {
                             </div>
                         )}
 
-                        {step === "photo" && (
+                        {step === "photo" && photoEnabled && (
                             <div className="animate-in fade-in slide-in-from-right-4 duration-500 space-y-6">
                                 <div className="flex items-start gap-3 rounded-2xl border border-[#3882a5]/20 bg-[#3882a5]/5 p-3 sm:p-4">
                                     <div className="rounded-lg bg-[#3882a5]/15 p-2 text-[#3882a5]"><Camera className="h-4 w-4" /></div>
@@ -688,7 +719,7 @@ export default function QRScanPage() {
                                     isLoading={isCreatingAppointment}
                                     isQRBooking={true}
                                     submitLabel="Review Details"
-                                    onBack={() => setStep("photo")}
+                                    onBack={() => setStep(photoEnabled ? "photo" : "details")}
                                 />
                             </div>
                         )}

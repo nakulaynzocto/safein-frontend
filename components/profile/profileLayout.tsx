@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, ReactNode, useEffect } from "react";
-import { User, CreditCard, Phone, Mail, Bell, MessageSquare } from "lucide-react";
+import { User, CreditCard, Phone, Mail, Bell, MessageSquare, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
@@ -9,7 +9,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { routes } from "@/utils/routes";
 import Link from "next/link";
 
-type TabType = "profile" | "subscription" | "whatsapp" | "smtp" | "sms" | "voice";
+type TabType = "profile" | "subscription" | "whatsapp" | "smtp" | "sms" | "voice" | "controls";
 
 interface ProfileLayoutProps {
     children: (activeTab: TabType) => ReactNode;
@@ -36,6 +36,8 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
             setActiveTab("subscription");
         } else if (pathname === routes.privateroute.SETTINGS_VOICE) {
             setActiveTab("voice");
+        } else if (pathname === routes.privateroute.SETTINGS_CONTROLS) {
+            setActiveTab("controls");
         }
     }, [pathname]);
 
@@ -82,6 +84,13 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
             roles: ["admin"],
             href: routes.privateroute.SETTINGS_VOICE,
         },
+        {
+            id: "controls" as const,
+            label: "Company Controls",
+            icon: ShieldCheck,
+            roles: ["admin"],
+            href: routes.privateroute.SETTINGS_CONTROLS,
+        },
     ];
 
     // Filter tabs based on user role
@@ -99,10 +108,10 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
     };
 
     return (
-        <div className="flex flex-col md:flex-row gap-3">
+        <div className="flex flex-col md:flex-row gap-4 lg:gap-6">
             {/* Sidebar Navigation */}
-            <div className="w-full md:w-[170px] flex-shrink-0 md:sticky md:top-6 md:self-start">
-                <div className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible bg-white/50 p-1.5 rounded-xl border border-gray-200 shadow-sm backdrop-blur-sm">
+            <div className="w-full md:w-[200px] lg:w-[220px] flex-shrink-0 md:sticky md:top-6 md:self-start object-contain overflow-hidden">
+                <div className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible bg-white/50 p-1.5 sm:p-2 rounded-xl border border-gray-200 shadow-sm backdrop-blur-sm no-scrollbar">
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.id;
@@ -111,14 +120,14 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
                                 key={tab.id}
                                 onClick={() => handleTabClick(tab.id, tab.href)}
                                 className={cn(
-                                    "flex items-center gap-2 px-3 py-3 rounded-lg text-sm font-medium transition-all whitespace-nowrap w-full",
+                                    "flex items-center gap-2.5 px-3 py-2.5 sm:py-3 rounded-lg text-[13px] md:text-sm font-medium transition-all w-max md:w-full",
                                     isActive
                                         ? "bg-white text-[#3882a5] shadow-sm border border-gray-100"
                                         : "text-gray-500 hover:text-gray-900 hover:bg-white/50"
                                 )}
                             >
-                                <Icon size={18} className={cn("flex-shrink-0", isActive ? "text-[#3882a5]" : "text-gray-400")} />
-                                <span>{tab.label}</span>
+                                <Icon size={16} className={cn("flex-shrink-0", isActive ? "text-[#3882a5]" : "text-gray-400")} />
+                                <span className="truncate whitespace-nowrap">{tab.label}</span>
                             </button>
                         );
                     })}

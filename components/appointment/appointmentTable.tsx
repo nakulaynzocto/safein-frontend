@@ -78,7 +78,7 @@ export interface AppointmentTableProps {
     onPageChange: (page: number) => void;
     onDelete?: (appointmentId: string) => void;
     onView?: (appointment: Appointment) => void;
-    onCheckIn?: (appointmentId: string, notes?: string) => void;
+    onCheckIn?: (appointmentId: string, notes?: string, visitorPhoto?: string) => void;
     onCheckOut?: (appointmentId: string, notes?: string) => void;
     onApprove?: (appointmentId: string) => void;
     onReject?: (appointmentId: string) => void;
@@ -197,11 +197,11 @@ export function AppointmentTable({
         setSelectedAppointment(null);
     };
 
-    const handleCheckIn = async (appointmentId: string, notes?: string) => {
+    const handleCheckIn = async (appointmentId: string, notes?: string, visitorPhoto?: string) => {
         if (!onCheckIn) return;
         setAppointmentLoading(appointmentId, true);
         try {
-            await onCheckIn(appointmentId, notes);
+            await onCheckIn(appointmentId, notes, visitorPhoto);
             setShowCheckInDialog(false);
             setSelectedAppointment(null);
         } finally {
@@ -519,17 +519,20 @@ export function AppointmentTable({
         <div className="space-y-4 sm:space-y-6">
 
 
-            <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="flex w-full flex-row flex-nowrap items-center justify-between gap-2 sm:gap-4">
-                    <SearchInput
-                        placeholder="Search..."
-                        value={searchTerm}
-                        onChange={onSearchChange}
-                        debounceDelay={500}
-                        className="min-w-0 flex-1 sm:max-w-[300px]"
-                    />
-                    <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
-                        <div className="shrink-0">
+            <div className="flex flex-col gap-4">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div className="flex flex-1 items-center gap-2 sm:gap-4">
+                        <SearchInput
+                            placeholder="Search..."
+                            value={searchTerm}
+                            onChange={onSearchChange}
+                            debounceDelay={500}
+                            className="w-full lg:max-w-[320px]"
+                        />
+                    </div>
+                    
+                    <div className="flex flex-wrap lg:flex-nowrap items-center gap-2 sm:gap-3">
+                        <div className="flex-1 sm:flex-none">
                             <DateRangePicker
                                 onDateRangeChange={(r) => {
                                     onDateFromChange?.(r.startDate || "");
@@ -537,7 +540,7 @@ export function AppointmentTable({
                                     onPageChange?.(1);
                                 }}
                                 initialValue={dateFrom && dateTo ? { startDate: dateFrom, endDate: dateTo } : undefined}
-                                className="w-auto"
+                                className="w-full sm:w-[240px]"
                             />
                         </div>
                         
@@ -551,16 +554,16 @@ export function AppointmentTable({
                             upgradeLabel="Upgrade Plan"
                             icon={UserPlus}
                             isEmployee={isEmployee}
-                            className="h-10 w-10 sm:h-12 sm:w-auto sm:px-6 rounded-xl shrink-0"
+                            className="flex-1 sm:flex-none h-11 sm:h-12 rounded-xl"
                         >
                             {!isEmployee && (
                                 <Button
                                     variant="outline"
-                                    className="flex h-10 w-10 sm:h-12 sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl border-[#3882a5] text-[#3882a5] hover:bg-[#3882a5]/10 bg-white sm:px-6 sm:min-w-[160px] transition-all"
+                                    className="flex w-full sm:w-auto h-11 sm:h-12 shrink-0 items-center justify-center gap-2 rounded-xl border-accent text-accent hover:bg-accent/10 bg-white sm:px-6 transition-all font-bold shadow-sm"
                                     onClick={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
                                 >
                                     <Plus className="h-5 w-5 shrink-0" />
-                                    <span className="hidden sm:inline font-medium">Schedule Appointment</span>
+                                    <span className="sm:inline font-bold">Schedule Appointment</span>
                                 </Button>
                             )}
                         </SubscriptionActionButtons>

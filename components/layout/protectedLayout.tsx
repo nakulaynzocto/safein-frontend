@@ -12,6 +12,7 @@ import { routes } from "@/utils/routes";
 import { clearAuthData } from "@/utils/helpers";
 import { Banner } from "@/components/common/banner";
 import { useChatNotifications } from "@/hooks/useChatNotifications";
+import { APIErrorState } from "@/components/common/APIErrorState";
 import { cn } from "@/lib/utils";
 
 interface ProtectedLayoutProps {
@@ -34,6 +35,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
         shouldShowPrivateNavbar,
         expiryWarning,
         pathname,
+        globalError,
     } = useAuthSubscription();
 
     // Show navbar for all authenticated users
@@ -70,6 +72,30 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     // This is a fail-safe for the global useAuthSubscription redirect
     if (typeof window !== "undefined" && isInitialized && !isLoading && !isAuthenticated && !token) {
         window.location.href = routes.publicroute.LOGIN;
+    }
+
+    // Capture global network failures that corrupt the application shell
+    const globalErr: any = globalError;
+    const isFatalNetworkError = 
+        globalErr && 
+        (globalErr.status === "FETCH_ERROR" || 
+         globalErr.error?.includes("Failed to fetch") || 
+         (typeof window !== "undefined" && !navigator.onLine));
+
+    // If fatal error, bypass the Application Shell (Sidebar & Navbar) entirely
+    // and render a standalone, focused error screen.
+    if (isFatalNetworkError) {
+        return (
+            <div className="flex min-h-[100dvh] w-full flex-col items-center justify-center bg-gray-50/50 p-4">
+                <APIErrorState 
+                    title="Service Unavailable"
+                    message="We're having trouble connecting to our servers. Please verify your internet connection or try again later."
+                    error={globalError}
+                    className="bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-2xl"
+                    onRetry={() => window.location.reload()}
+                />
+            </div>
+        );
     }
 
     return (

@@ -30,6 +30,7 @@ export const routes = {
         // Appointment Booking (Missing previously)
         BOOK_APPOINTMENT: "/book-appointment/[token]",
         QR_SCAN: "/scan/[slug]",
+        MAINTENANCE: "/maintenance",
     },
 
     privateroute: {
@@ -67,6 +68,7 @@ export const routes = {
         SETTINGS_SUBSCRIPTION: "/settings/subscription",
         SETTINGS_QR_CHECKIN: "/settings/qr-checkin",
         SETTINGS_VOICE: "/settings/voice",
+        SETTINGS_CONTROLS: "/settings/controls",
         SPOT_PASS: "/spot-pass",
         SPOT_PASS_CREATE: "/spot-pass/create",
         MESSAGES: "/messages",

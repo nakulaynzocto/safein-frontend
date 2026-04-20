@@ -28,12 +28,11 @@ export const visitorSchema = yup.object({
     idProof: yup.object({
         type: yup.string().trim().optional(),
         number: yup.string().trim().optional(),
-        image: yup.string().trim().optional(),
+        image: yup.mixed().optional(),
     }),
-    photo: yup.string().optional().default(""),
+    photo: yup.mixed().optional(),
     blacklisted: yup.boolean().default(false),
     blacklistReason: yup.string().trim().optional(),
-    tags: yup.string().trim().optional(),
     emergencyContacts: yup
         .array()
         .of(
@@ -75,12 +74,11 @@ export interface VisitorFormData {
     idProof: {
         type?: string;
         number?: string;
-        image?: string;
+        image?: any;
     };
-    photo?: string;
+    photo?: any;
     blacklisted: boolean;
     blacklistReason?: string;
-    tags?: string;
     emergencyContacts?: {
         name?: string | null;
         phone?: string | null;
@@ -109,3 +107,44 @@ export const countryCodeOptions = [
     { value: "+49", label: "+49 (Germany)" },
     { value: "+33", label: "+33 (France)" },
 ];
+
+/**
+ * Transforms VisitorFormData to CreateVisitorRequest
+ * Centralized logic to avoid duplication in multiple forms
+ */
+export const transformToVisitorPayload = (
+    data: VisitorFormData,
+    photoUrl?: string,
+    idProofImageUrl?: string,
+) => {
+    return {
+        name: data.name,
+        email: data.email?.trim() || undefined,
+        phone: data.phone,
+        gender: (data.gender as any) || undefined,
+        address: {
+            street: data.address.street || undefined,
+            city: data.address.city,
+            state: data.address.state,
+            country: data.address.country,
+        },
+        idProof:
+            data.idProof.type || data.idProof.number || idProofImageUrl
+                ? {
+                      type: data.idProof.type || undefined,
+                      number: data.idProof.number || undefined,
+                      image: idProofImageUrl || undefined,
+                  }
+                : undefined,
+        photo: photoUrl || undefined,
+        blacklisted: data.blacklisted,
+        blacklistReason: data.blacklistReason || undefined,
+        emergencyContacts:
+            data.emergencyContacts && data.emergencyContacts.length > 0
+                ? data.emergencyContacts.map((contact) => ({
+                      name: contact.name || "",
+                      phone: contact.phone || "",
+                  }))
+                : undefined,
+    };
+};

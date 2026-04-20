@@ -97,7 +97,14 @@ export interface Settings {
         verifiedAt?: string;
         enabledTemplates?: Record<string, boolean>;
     };
+    features?: {
+        enableAutoApproval: boolean;
+        enableVisitorImageCapture: boolean;
+        enableVerification: boolean;
+        enableFeedbackSystem: boolean;
+    };
     emailTemplates?: EmailTemplates;
+    featureToggles?: Record<string, boolean>;
     createdAt: string;
     updatedAt: string;
 }
@@ -132,6 +139,15 @@ export interface UpdateSettingsRequest {
         callOnQrCheckin?: boolean;
     };
     emailTemplates?: Partial<EmailTemplates>;
+    features?: {
+        enableAutoApproval?: boolean;
+        enableVisitorImageCapture?: boolean;
+        enableVerification?: boolean;
+        enableFeedbackSystem?: boolean;
+    };
+    sms?: {
+        enabledTemplates?: Record<string, boolean>;
+    };
 }
 
 export interface SaveVoiceConfigRequest {
@@ -210,6 +226,17 @@ export const settingsApi = baseApi.injectEndpoints({
                         }
                         if (arg.whatsapp) {
                             Object.assign(draft.whatsapp, arg.whatsapp);
+                        }
+                        if (arg.features) {
+                            if (!draft.features) {
+                                draft.features = {
+                                    enableAutoApproval: false,
+                                    enableVisitorImageCapture: false,
+                                    enableVerification: false,
+                                    enableFeedbackSystem: false,
+                                };
+                            }
+                            Object.assign(draft.features, arg.features);
                         }
                     })
                 );

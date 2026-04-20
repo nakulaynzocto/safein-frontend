@@ -26,6 +26,7 @@ export interface Appointment {
     updatedAt: string;
     approvalLink?: string | null; // One-time approval link
     isTimedOut?: boolean;         // Computed by backend: pending/approved past their scheduled date
+    isVerified?: boolean;
 }
 
 export interface EmployeeDetails {
@@ -45,6 +46,7 @@ export interface VisitorDetails {
     phone: string;
     company: string;
     purposeOfVisit: string;
+    photo?: string;
 }
 
 export interface AccompaniedBy {
@@ -87,8 +89,8 @@ export interface CreateAppointmentRequest {
     accompaniedBy?: AccompaniedBy;
     accompanyingCount?: number;
     appointmentDetails: AppointmentDetails;
-    securityDetails: SecurityDetails;
-    notifications: NotificationPreferences;
+    securityDetails?: SecurityDetails;
+    notifications?: NotificationPreferences;
     checkInTime?: string;
 }
 
@@ -144,6 +146,7 @@ export interface AppointmentListResponse {
 export interface CheckInRequest {
     appointmentId: string;
     notes?: string;
+    visitorPhoto?: string;
 }
 
 export interface CheckOutRequest {
@@ -422,8 +425,24 @@ export const appointmentApi = baseApi.injectEndpoints({
                 url: `/appointments/${id}/resend`,
                 method: "POST",
             }),
-            // Don't invalidate any tags to prevent table re-fetch/blink
             invalidatesTags: [],
+        }),
+        sendCheckInOtp: builder.mutation<any, string>({
+            query: (id) => ({
+                url: `/appointments/${id}/send-checkin-otp`,
+                method: "POST",
+            }),
+        }),
+        verifyCheckInOtp: builder.mutation<any, { id: string; otp: string }>({
+            query: (data) => ({
+                url: `/appointments/${data.id}/verify-checkin-otp`,
+                method: "POST",
+                body: { otp: data.otp },
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: "Appointment", id },
+                { type: "Appointment", id: "LIST" },
+            ],
         }),
     }),
 });
@@ -444,4 +463,6 @@ export const {
     useLazyGetAppointmentsQuery,
     useGetDashboardStatsQuery,
     useResendAppointmentNotificationMutation,
+    useSendCheckInOtpMutation,
+    useVerifyCheckInOtpMutation,
 } = appointmentApi;

@@ -210,22 +210,6 @@ export function VisitorDetailsDialog({ visitor, open, onClose }: VisitorDetailsD
                             </div>
                         )}
 
-                        {/* Tags */}
-                        {visitor.tags && visitor.tags.length > 0 && (
-                            <div className="space-y-1 md:col-span-2">
-                                <div className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
-                                    <Tag className="h-4 w-4" />
-                                    Tags
-                                </div>
-                                <div className="mt-1 flex flex-wrap gap-1.5">
-                                    {visitor.tags.map((tag, idx) => (
-                                        <Badge key={idx} variant="outline" className="bg-muted/30 text-[10px]">
-                                            {tag}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
                     </div>
 
                     {/* Actions */}

@@ -36,6 +36,7 @@ export function useAuthSubscription() {
         isLoading: isSubscriptionLoading,
         isFetching: isSubscriptionFetching,
         refetch: refetchSubscription,
+        error: subscriptionError,
     } = useGetUserActiveSubscriptionQuery(user?.id ?? "", {
         skip: !isAuthenticated || !user?.id,
         refetchOnMountOrArgChange: true,
@@ -229,5 +230,6 @@ export function useAuthSubscription() {
         canAccessDashboard,
         shouldShowContent,
         isLoading,
+        globalError: !activeSubscriptionData ? subscriptionError : undefined,
     };
 }

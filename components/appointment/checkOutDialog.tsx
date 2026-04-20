@@ -76,8 +76,8 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="p-6 text-center">
                         {/* Centered Icon */}
-                        <div className="mx-auto w-16 h-16 rounded-full bg-orange-50 flex items-center justify-center mb-4">
-                            <LogOut className="h-8 w-8 text-orange-600" />
+                        <div className="mx-auto w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
+                            <LogOut className="h-8 w-8 text-accent" />
                         </div>
 
                         <DialogHeader>
@@ -93,7 +93,7 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
                         <div className="mt-6 bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3">
                             <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-sm">
-                                    <User className="h-5 w-5 text-orange-600" />
+                                    <User className="h-5 w-5 text-accent" />
                                 </div>
                                 <div className="text-left">
                                     <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Visitor</div>
@@ -141,20 +141,20 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
                         </div>
                     </div>
 
-                    <DialogFooter className="flex flex-col sm:flex-row gap-2 p-5 bg-slate-50/50 border-t border-slate-100">
+                    <DialogFooter className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 p-5 bg-slate-50/50 border-t border-slate-100">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={handleClose}
                             disabled={isSubmitting || isLoading}
-                            className="w-full sm:flex-1 h-11 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-semibold transition-colors"
+                            className="w-full sm:w-auto h-11 rounded-2xl border-accent text-accent hover:bg-accent/10 font-bold transition-all px-8"
                         >
                             Cancel
                         </Button>
                         <Button
                             type="submit"
                             disabled={isSubmitting || isLoading}
-                            className="w-full sm:flex-1 h-12 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-lg shadow-orange-600/20 transition-all active:scale-[0.98]"
+                            className="w-full sm:w-auto min-w-0 sm:min-w-[140px] h-12 rounded-2xl bg-accent hover:bg-accent/90 text-white font-bold shadow-lg shadow-accent/20 transition-all active:scale-[0.98] px-8"
                         >
                             {isSubmitting || isLoading ? (
                                 <>

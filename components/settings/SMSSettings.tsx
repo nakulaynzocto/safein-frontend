@@ -28,8 +28,6 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useCollapsibleSections } from "@/hooks/useCollapsibleSections";
 
-import { SettingsMasterBanner } from "./SettingsMasterBanner";
-
 export function SMSSettings() {
     const { data: settings, isLoading, error } = useGetSettingsQuery();
     const [updateSettings, { isLoading: isUpdating }] = useUpdateSettingsMutation();
@@ -39,7 +37,7 @@ export function SMSSettings() {
 
     const handleToggle = async (templateId: string, enabled: boolean) => {
         try {
-            const currentEnabledTemplates = settings?.sms?.enabledTemplates || {};
+            const currentEnabledTemplates = (settings?.sms as any)?.enabledTemplates || {};
             await updateSettings({
                 sms: {
                     enabledTemplates: {
@@ -97,27 +95,9 @@ export function SMSSettings() {
                             icon={MessageSquare}
                         />
 
-
-                                <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
-                                    <form className="space-y-8 text-foreground pb-12">
-                                
-                                <SettingsMasterBanner
-                                    title="All SMS Notifications"
-                                    description="Enable or disable the entire SMS notification system for your account"
-                                    icon={MessageSquare}
-                                    checked={settings?.notifications?.smsEnabled ?? false}
-                                    onCheckedChange={async (checked) => {
-                                        try {
-                                            await updateSettings({
-                                                notifications: { smsEnabled: checked }
-                                            }).unwrap();
-                                        } catch {
-                                            toast.error("Failed to update SMS status");
-                                        }
-                                    }}
-                                />
-                                
-                                 <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
+                        <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
+                            <form className="space-y-8 text-foreground pb-12">
+                                <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
                                     <Collapsible open={expandedSections.includes('templates')} onOpenChange={() => toggleSection('templates')}>
                                         <div className="p-5 flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('templates')}>
                                             <div className="flex items-center gap-4">
@@ -155,7 +135,7 @@ export function SMSSettings() {
                                                                     <div className="flex items-center gap-3">
                                                                         <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-tight">Status</span>
                                                                         <Switch 
-                                                                            checked={settings?.sms?.enabledTemplates?.[template.id] !== false}
+                                                                            checked={(settings?.sms?.enabledTemplates as any)?.[template.id] !== false}
                                                                             onCheckedChange={(checked) => handleToggle(template.id, checked)}
                                                                             disabled={isUpdating}
                                                                         />
@@ -170,7 +150,7 @@ export function SMSSettings() {
                                                                     >
                                                                         <Eye size={16} />
                                                                     </button>
-                                                                </div>
+                                                                 </div>
                                                             </div>
 
                                                             {selectedTemplate === template.id && (
@@ -179,7 +159,7 @@ export function SMSSettings() {
                                                                         <div className="space-y-2">
                                                                             <Label className="text-xs font-bold text-[#3882a5] uppercase tracking-wider">SMS message preview</Label>
                                                                             <div className="min-h-[60px] rounded-xl p-4 font-medium text-sm border border-border/50 bg-background text-gray-800 shadow-inner leading-relaxed">
-                                                                                {settings?.sms?.templates?.[template.id] || "No template content configured."}
+                                                                                {(settings?.sms?.templates as any)?.[template.id] || "No template content configured."}
                                                                             </div>
                                                                         </div>
                                                                         <div className="flex flex-wrap gap-2 pt-1">

@@ -14,8 +14,9 @@ import { CheckCircle } from "lucide-react";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { FormContainer } from "@/components/common/formContainer";
 import { VisitorFormFields } from "./visitorFormFields";
-import { visitorSchema, VisitorFormData } from "./visitorSchema";
+import { visitorSchema, VisitorFormData, transformToVisitorPayload } from "./visitorSchema";
 import { useCreateVisitorMutation, useUpdateVisitorMutation, useGetVisitorQuery, type CreateVisitorRequest } from "@/store/api/visitorApi";
+import { useUploadFileMutation } from "@/store/api/uploadApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
@@ -49,6 +50,7 @@ export function NewVisitorModal({
     const setOpen = isPage ? (_: boolean) => { } : onOpenChange || setInternalOpen;
     const [createVisitor, { isLoading: isCreating }] = useCreateVisitorMutation();
     const [updateVisitor, { isLoading: isUpdating }] = useUpdateVisitorMutation();
+    const [uploadFile, { isLoading: isUploadingFile }] = useUploadFileMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
     const [isFileUploading, setIsFileUploading] = useState(false);
     const { hasReachedVisitorLimit, isExpired } = useSubscriptionStatus();
@@ -59,7 +61,7 @@ export function NewVisitorModal({
     } = useSubscriptionActions();
 
     const isEditMode = !!visitorId;
-    const isLoading = isCreating || isUpdating;
+    const isLoading = isCreating || isUpdating || isUploadingFile;
     const defaultCountry = useUserCountry();
 
     const { data: visitorData, isLoading: isLoadingVisitor } = useGetVisitorQuery(visitorId!, {
@@ -75,9 +77,7 @@ export function NewVisitorModal({
             visitorData.photo);
     const hasSecurityData =
         visitorData &&
-        ((visitorData as any).emergencyContacts?.length > 0 ||
-            (visitorData as any).blacklisted ||
-            (visitorData as any).tags);
+        ((visitorData as any).emergencyContacts?.length > 0);
 
     const [showIdVerificationFields, setShowIdVerificationFields] = useState<boolean>(!!hasIdVerificationData);
     const [showSecurityFields, setShowSecurityFields] = useState<boolean>(!!hasSecurityData);
@@ -112,9 +112,6 @@ export function NewVisitorModal({
                 image: "",
             },
             photo: "",
-            blacklisted: false,
-            blacklistReason: "",
-            tags: "",
             emergencyContacts: [],
         },
     });
@@ -142,9 +139,7 @@ export function NewVisitorModal({
                 visitorData.photo
             );
             const hasSecurity = !!(
-                (visitorData as any).emergencyContacts?.length > 0 ||
-                (visitorData as any).blacklisted ||
-                (visitorData as any).tags
+                (visitorData as any).emergencyContacts?.length > 0
             );
             setShowIdVerificationFields(hasIdVerification);
             setShowSecurityFields(hasSecurity);
@@ -168,7 +163,6 @@ export function NewVisitorModal({
                 photo: visitorData.photo || "",
                 blacklisted: (visitorData as any).blacklisted || false,
                 blacklistReason: (visitorData as any).blacklistReason || "",
-                tags: (visitorData as any).tags?.join(", ") || "",
                 emergencyContacts: (visitorData as any).emergencyContacts?.map((c: any) => ({
                     name: c.name,
                     phone: c.phone?.startsWith("+") ? c.phone : `${c.countryCode || ""}${c.phone || ""}`,
@@ -198,7 +192,6 @@ export function NewVisitorModal({
         if (!checked) {
             setValue("blacklisted", false);
             setValue("blacklistReason", "");
-            setValue("tags", "");
             setValue("emergencyContacts", []);
         }
     };
@@ -207,43 +200,25 @@ export function NewVisitorModal({
         try {
             setGeneralError(null);
 
-            const visitorPayload: CreateVisitorRequest = {
-                name: data.name,
-                email: isEditMode
-                    ? (data.email?.trim() ? data.email.trim() : null)
-                    : data.email?.trim() || undefined,
-                phone: data.phone,
-                gender: (data.gender as any) || undefined,
-                address: {
-                    street: data.address.street || undefined,
-                    city: data.address.city,
-                    state: data.address.state,
-                    country: data.address.country,
-                },
-                idProof:
-                    data.idProof.type || data.idProof.number || data.idProof.image
-                        ? {
-                            type: data.idProof.type || undefined,
-                            number: data.idProof.number || undefined,
-                            image: data.idProof.image || undefined,
-                        }
-                        : undefined,
-                photo: data.photo || undefined,
-                blacklisted: data.blacklisted,
-                blacklistReason: data.blacklistReason || undefined,
-                tags: data.tags ? data.tags.split(",").map((t) => t.trim()) : undefined,
-                emergencyContacts: data.emergencyContacts && data.emergencyContacts.length > 0
-                    ? data.emergencyContacts.map((contact) => {
-                        const fullPhone = contact.phone || "";
-                        const parsed = parsePhoneNumberFromString(fullPhone.startsWith("+") ? fullPhone : `+${fullPhone}`);
-                        return {
-                            name: contact.name || "",
-                            countryCode: parsed ? `+${parsed.countryCallingCode}` : "+91",
-                            phone: parsed ? parsed.nationalNumber : fullPhone.replace(/^\+\d+/, ""),
-                        };
-                    })
-                    : undefined,
-            };
+            let finalPhotoUrl = typeof data.photo === "string" ? data.photo : undefined;
+            if (data.photo instanceof File) {
+                const uploadRes = await uploadFile({ file: data.photo }).unwrap();
+                finalPhotoUrl = uploadRes.url;
+            }
+
+            let finalIdProofUrl = typeof data.idProof?.image === "string" ? data.idProof.image : undefined;
+            if (data.idProof && data.idProof.image instanceof File) {
+                const uploadRes = await uploadFile({ file: data.idProof.image }).unwrap();
+                finalIdProofUrl = uploadRes.url;
+            }
+
+            const visitorPayload = transformToVisitorPayload(data, finalPhotoUrl, finalIdProofUrl);
+            
+            // Adjust for edit mode differences if any
+            if (isEditMode) {
+                (visitorPayload as any).email = (data.email?.trim() ? data.email.trim() : null);
+            }
+
 
             if (isEditMode && visitorId) {
                 await updateVisitor({ id: visitorId, ...visitorPayload }).unwrap();
@@ -274,43 +249,8 @@ export function NewVisitorModal({
                 router.push(`${routes.privateroute.APPOINTMENTCREATE}?visitorId=${newVisitorId}`);
             }
         } catch (error: any) {
-            if (error?.data?.message) {
-                const message = error.data.message.toLowerCase();
-                if (message.includes("phone") && message.includes("already exists")) {
-                    setGeneralError("Phone number is already registered");
-                } else if (message.includes("id proof")) {
-                    const friendlyMessage = error.data.message
-                        .replace(/idProof\.type:/gi, "ID Proof Type: ")
-                        .replace(/idProof\.number:/gi, "ID Proof Number: ")
-                        .replace(
-                            /must be at least 2 characters long/gi,
-                            "must be at least 2 characters. Please enter a complete value or leave it empty",
-                        )
-                        .replace(/validation failed:/gi, "")
-                        .trim();
-                    setGeneralError(
-                        friendlyMessage ||
-                        "Please check the ID proof fields. They must be at least 2 characters or left empty.",
-                    );
-                } else if (message.includes("address.street") || message.includes("street address")) {
-                    const friendlyMessage = error.data.message
-                        .replace(/address\.street:/gi, "Company Address: ")
-                        .replace(/street address/gi, "Company Address")
-                        .replace(
-                            /must be at least 2 characters long/gi,
-                            "must be at least 2 characters. Please enter a complete address or leave it empty",
-                        )
-                        .replace(/validation failed:/gi, "")
-                        .trim();
-                    setGeneralError(friendlyMessage || "Company Address must be at least 2 characters or left empty.");
-                } else {
-                    setGeneralError(error.data.message);
-                }
-            } else {
-                const errorMessage =
-                    error?.message || (isEditMode ? "Failed to update visitor" : "Failed to register visitor");
-                setGeneralError(errorMessage);
-            }
+            const errorMessage = error?.data?.message || (error as any)?.message || "An error occurred during registration";
+            setGeneralError(errorMessage);
         }
     };
 
@@ -339,7 +279,6 @@ export function NewVisitorModal({
                 showSecurityFields={showSecurityFields}
                 onToggleSecurityFields={handleToggleSecurity}
                 setIsFileUploading={setIsFileUploading}
-                visitorId={visitorId}
                 initialData={visitorData}
             />
 

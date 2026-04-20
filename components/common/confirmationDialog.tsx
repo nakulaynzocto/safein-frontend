@@ -23,6 +23,8 @@ interface ConfirmationDialogProps {
     cancelText?: string;
     onConfirm: () => void;
     onCancel?: () => void;
+    secondaryActionText?: string;
+    onSecondaryAction?: () => void;
     variant?: "default" | "destructive" | "warning";
     children?: ReactNode;
     disabled?: boolean;
@@ -38,6 +40,8 @@ export function ConfirmationDialog({
     cancelText = "Cancel",
     onConfirm,
     onCancel,
+    secondaryActionText,
+    onSecondaryAction,
     variant = "default",
     children,
     disabled = false,
@@ -62,7 +66,7 @@ export function ConfirmationDialog({
             case "warning":
                 return <AlertTriangle className="h-6 w-6 text-red-500" />;
             default:
-                return <Info className="h-6 w-6 text-[#3882a5]" />;
+                return <Info className="h-6 w-6 text-accent" />;
         }
     };
 
@@ -72,13 +76,13 @@ export function ConfirmationDialog({
             case "warning":
                 return "bg-red-50";
             default:
-                return "bg-[#3882a5]/10";
+                return "bg-accent/10";
         }
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[380px] rounded-3xl border-none shadow-2xl bg-white p-0 gap-0 overflow-hidden">
+            <DialogContent className="sm:max-w-[460px] rounded-3xl border-none shadow-2xl bg-white p-0 gap-0 overflow-hidden">
                 <div className="relative p-5 text-center">
                     <button 
                         onClick={handleCancel}
@@ -111,26 +115,42 @@ export function ConfirmationDialog({
                     {children && <div className="mt-3">{children}</div>}
                 </div>
 
-                <DialogFooter className="flex flex-row gap-2.5 p-4 bg-gray-50/80 border-t border-gray-100/50">
+                <DialogFooter className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 p-5 bg-gray-50/50 border-t border-gray-100/80">
                     <Button 
                         variant="ghost" 
                         onClick={handleCancel} 
-                        className="flex-1 h-10 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 font-bold transition-all text-sm"
+                        className="w-full sm:w-auto h-11 sm:h-10 rounded-2xl text-gray-500 hover:text-gray-700 hover:bg-gray-200/50 font-bold transition-all text-sm px-8"
                     >
                         {cancelText}
                     </Button>
-                    <Button 
-                        onClick={handleConfirm}
-                        disabled={disabled}
-                        className={cn(
-                            "flex-1 h-10 rounded-xl text-white font-bold shadow-md transition-all active:scale-95 text-sm",
-                            variant === "destructive" || variant === "warning" 
-                                ? "bg-red-500 hover:bg-red-600 shadow-red-500/20" 
-                                : "bg-[#3882a5] hover:bg-[#2d6a87] shadow-[#3882a5]/20"
+                    
+                    <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
+                        {secondaryActionText && (
+                            <Button 
+                                variant="outline"
+                                onClick={() => {
+                                    onSecondaryAction?.();
+                                    onOpenChange(false);
+                                }}
+                                className="w-full sm:w-auto h-11 sm:h-10 rounded-2xl border-accent/30 text-accent hover:bg-accent/5 font-bold transition-all text-sm px-8"
+                            >
+                                {secondaryActionText}
+                            </Button>
                         )}
-                    >
-                        {confirmText}
-                    </Button>
+
+                        <Button 
+                            onClick={handleConfirm}
+                            disabled={disabled}
+                            className={cn(
+                                "w-full sm:w-auto min-w-0 sm:min-w-[120px] h-11 sm:h-10 rounded-2xl text-white font-bold shadow-lg transition-all active:scale-95 text-sm px-8",
+                                variant === "destructive" || variant === "warning" 
+                                    ? "bg-destructive hover:bg-destructive/90 shadow-destructive/20" 
+                                    : "bg-accent hover:bg-accent/90 shadow-accent/20"
+                            )}
+                        >
+                            {confirmText}
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

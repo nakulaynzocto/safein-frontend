@@ -32,7 +32,6 @@ import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { BrandSwitch } from "@/components/common/BrandSwitch";
 import { PhoneInputField } from "../common/phoneInputField";
 import { Label } from "@/components/ui/label";
-import { SettingsMasterBanner } from "./SettingsMasterBanner";
 import { useCollapsibleSections } from "@/hooks/useCollapsibleSections";
 
 const FRONTEND_VOICE_DEFAULTS = {
@@ -199,7 +198,7 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                             icon={PhoneCall}
                         />
 
-                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 text-foreground pb-12">
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 text-foreground pb-12">
                             {/* Wallet Info Banner */}
                             <div className="bg-gradient-to-r from-amber-500/[0.05] to-transparent p-5 rounded-2xl border border-amber-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
@@ -217,190 +216,174 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                                 </div>
                             </div>
 
-                            <SettingsMasterBanner
-                                title="All Voice Call Alerts"
-                                description="Enable or disable automated voice call system"
-                                icon={PhoneCall}
-                                checked={settings?.voiceCall?.enabled ?? false}
-                                onCheckedChange={async (checked) => {
-                                    try {
-                                        await updateSettings({
-                                            voiceCall: { enabled: checked },
-                                        }).unwrap();
-                                    } catch {
-                                        toast.error("Failed to update Voice status");
-                                    }
-                                }}
-                            >
-                                <div className="p-2 space-y-2">
-                                    {/* Trigger Events Section */}
-                                    <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mt-3">
-                                        <Collapsible open={expandedSections.includes('triggers')} onOpenChange={() => toggleSection('triggers')}>
-                                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('triggers')}>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
-                                                        <QrCode size={18} />
-                                                    </div>
-                                                    <h4 className="font-bold text-[#074463] text-sm">Automated Triggers</h4>
+                            <div className="p-2 space-y-2">
+                                {/* Trigger Events Section */}
+                                <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mt-3">
+                                    <Collapsible open={expandedSections.includes('triggers')} onOpenChange={() => toggleSection('triggers')}>
+                                        <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('triggers')}>
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
+                                                    <QrCode size={18} />
                                                 </div>
-                                                <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('triggers') && "rotate-90")} />
+                                                <h4 className="font-bold text-[#074463] text-sm">Automated Triggers</h4>
                                             </div>
-                                            <CollapsibleContent>
-                                                <div className="p-4 pt-0 grid grid-cols-1 gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
-                                                    {[
-                                                        { id: "callOnLinkInvite", label: "Link Bookings", sub: "Visitor books via link", icon: Calendar },
-                                                        { id: "callOnAdminEntry", label: "Admin Entries", sub: "Host creates entry", icon: User },
-                                                        { id: "callOnQrCheckin", label: "QR Check-ins", sub: "Visitor scans QR", icon: QrCode },
-                                                    ].map(trigger => (
-                                                        <div key={trigger.id} className="p-4 rounded-xl border border-border/50 bg-muted/5 flex items-center justify-between gap-4 transition-all hover:bg-muted/10">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="h-10 w-10 bg-white rounded-lg flex items-center justify-center border border-border/30 shadow-sm">
-                                                                    <trigger.icon size={18} className="text-[#3882a5]" />
-                                                                </div>
-                                                                <div className="min-w-0">
-                                                                    <p className="text-sm font-bold text-[#074463]">{trigger.label}</p>
-                                                                    <p className="text-xs text-muted-foreground">{trigger.sub}</p>
-                                                                </div>
-                                                            </div>
-                                                            <BrandSwitch 
-                                                                checked={settings?.voiceCall?.[trigger.id as keyof typeof settings.voiceCall] as boolean ?? true} 
-                                                                onCheckedChange={async (checked) => {
-                                                                    try {
-                                                                        await updateSettings({
-                                                                            voiceCall: { [trigger.id]: checked }
-                                                                        }).unwrap();
-                                                                    } catch (err) {
-                                                                        toast.error(`Failed to update ${trigger.label} status`);
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </CollapsibleContent>
-                                        </Collapsible>
-                                    </div>
-
-                                    {/* Voice Script Section */}
-                                    <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3">
-                                        <Collapsible open={expandedSections.includes('script')} onOpenChange={() => toggleSection('script')}>
-                                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('script')}>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
-                                                        <Languages size={18} />
-                                                    </div>
-                                                    <h4 className="font-bold text-[#074463] text-sm">Call Script & Language</h4>
-                                                </div>
-                                                <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('script') && "rotate-90")} />
-                                            </div>
-                                            <CollapsibleContent>
-                                                <div className="p-4 pt-0 space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
-                                                    <div className="flex items-center justify-between bg-muted/30 p-1 rounded-lg border border-border/50 max-w-fit">
-                                                        <button type="button" onClick={() => switchLanguage("en-US")} className={cn("px-4 py-1.5 text-[10px] font-bold rounded-md transition-all", currentLang === "en-US" ? "bg-white text-[#3882a5] shadow-sm" : "text-muted-foreground hover:text-foreground")}>English</button>
-                                                        <button type="button" onClick={() => switchLanguage("hi-IN")} className={cn("px-4 py-1.5 text-[10px] font-bold rounded-md transition-all", currentLang === "hi-IN" ? "bg-white text-[#3882a5] shadow-sm" : "text-muted-foreground hover:text-foreground")}>Hindi</button>
-                                                    </div>
-
-                                                    <div className="space-y-4">
-                                                        <div className="flex items-center justify-between">
-                                                            <Label className="text-[11px] font-bold text-[#3882a5] uppercase tracking-wider">Voice Script Message</Label>
-                                                            <button 
-                                                                type="button" 
-                                                                onClick={handleResetToDefault} 
-                                                                className="text-[10px] font-bold text-[#3882a5] flex items-center gap-1 hover:underline active:scale-95 transition-all"
-                                                            >
-                                                                <RefreshCw size={10} /> Reset to Default
-                                                            </button>
-                                                        </div>
-                                                        
-                                                        <Controller
-                                                            name="callScript"
-                                                            control={control}
-                                                            render={({ field }) => (
-                                                                <textarea 
-                                                                    {...field} 
-                                                                    placeholder="Enter your voice script..."
-                                                                    className="w-full min-h-[120px] p-4 rounded-xl border border-border/50 bg-background text-sm font-medium focus:outline-none focus:border-[#3882a5] focus:ring-4 focus:ring-[#3882a5]/10 transition-all resize-none shadow-inner" 
-                                                                />
-                                                            )}
-                                                        />
-
-                                                        <div className="flex flex-col gap-3 p-4 bg-muted/5 rounded-xl border border-border/30">
-                                                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Personalization Tags (Click to add)</p>
-                                                            <div className="flex flex-wrap gap-2">
-                                                                {["{visitorName}", "{employeeName}", "{purpose}", "{date}", "{time}"].map(tag => (
-                                                                    <code 
-                                                                        key={tag} 
-                                                                        className="px-2 py-1 bg-white border border-border/50 rounded-lg text-[10px] text-[#3882a5] font-mono font-bold cursor-pointer hover:bg-[#3882a5]/10 hover:border-[#3882a5]/30 transition-all active:scale-95 shadow-sm"
-                                                                        onClick={() => {
-                                                                            const currentVal = watch("callScript");
-                                                                            setValue("callScript", currentVal + " " + tag, { shouldDirty: true });
-                                                                        }}
-                                                                    >
-                                                                        {tag}
-                                                                    </code>
-                                                                ))}
-                                                            </div>
-                                                            <p className="text-[9px] text-muted-foreground italic leading-relaxed">
-                                                                * Note: These tags will be automatically replaced with real-time data during the automated call.
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </CollapsibleContent>
-                                        </Collapsible>
-                                    </div>
-
-                                    {/* Advanced Settings Section */}
-                                    <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mb-3">
-                                        <Collapsible open={expandedSections.includes('advanced')} onOpenChange={() => toggleSection('advanced')}>
-                                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('advanced')}>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
-                                                        <PhoneForwarded size={18} />
-                                                    </div>
-                                                    <h4 className="font-bold text-[#074463] text-sm">Routing & Retry Logic</h4>
-                                                </div>
-                                                <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('advanced') && "rotate-90")} />
-                                            </div>
-                                            <CollapsibleContent>
-                                                <div className="p-4 pt-0 space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
-                                                    <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/5">
-                                                        <div className="space-y-0.5">
-                                                            <p className="text-sm font-bold text-[#074463]">Backup Routing</p>
-                                                            <p className="text-[11px] text-muted-foreground">Call backup number if host is unreachable</p>
-                                                        </div>
-                                                        <BrandSwitch checked={isBackupEnabled} onCheckedChange={(checked) => setValue("backupEnabled", checked, { shouldDirty: true })} />
-                                                    </div>
-
-                                                    {isBackupEnabled && (
-                                                        <div className="animate-in slide-in-from-top-2 duration-300">
-                                                            <Controller
-                                                                name="backupNumber"
-                                                                control={control}
-                                                                render={({ field }) => (
-                                                                    <PhoneInputField id="voice-backup-number" label="Global Backup Number" value={field.value} onChange={field.onChange} />
-                                                                )}
-                                                            />
-                                                        </div>
-                                                    )}
-
-                                                    <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/5">
-                                                        <div className="space-y-0.5">
-                                                            <p className="text-sm font-bold text-[#074463]">Maximum Retries</p>
-                                                            <p className="text-[11px] text-muted-foreground">Times to retry before initiating backup call</p>
-                                                        </div>
+                                            <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('triggers') && "rotate-90")} />
+                                        </div>
+                                        <CollapsibleContent>
+                                            <div className="p-4 pt-0 grid grid-cols-1 gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                {[
+                                                    { id: "callOnLinkInvite", label: "Link Bookings", sub: "Visitor books via link", icon: Calendar },
+                                                    { id: "callOnAdminEntry", label: "Admin Entries", sub: "Host creates entry", icon: User },
+                                                    { id: "callOnQrCheckin", label: "QR Check-ins", sub: "Visitor scans QR", icon: QrCode },
+                                                ].map(trigger => (
+                                                    <div key={trigger.id} className="p-4 rounded-xl border border-border/50 bg-muted/5 flex items-center justify-between gap-4 transition-all hover:bg-muted/10">
                                                         <div className="flex items-center gap-3">
-                                                            {[1, 2, 3, 4, 5].map(v => (
-                                                                <button key={v} type="button" onClick={() => setValue("maxRetries", v, { shouldDirty: true })} className={cn("h-8 w-8 rounded-lg border text-xs font-bold transition-all", watch("maxRetries") === v ? "bg-[#074463] text-white border-[#074463]" : "bg-white text-muted-foreground")}>{v}</button>
+                                                            <div className="h-10 w-10 bg-white rounded-lg flex items-center justify-center border border-border/30 shadow-sm">
+                                                                <trigger.icon size={18} className="text-[#3882a5]" />
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <p className="text-sm font-bold text-[#074463]">{trigger.label}</p>
+                                                                <p className="text-xs text-muted-foreground">{trigger.sub}</p>
+                                                            </div>
+                                                        </div>
+                                                        <BrandSwitch 
+                                                            checked={settings?.voiceCall?.[trigger.id as keyof typeof settings.voiceCall] as boolean ?? true} 
+                                                            onCheckedChange={async (checked) => {
+                                                                try {
+                                                                    await updateSettings({
+                                                                        voiceCall: { [trigger.id]: checked }
+                                                                    }).unwrap();
+                                                                } catch (err) {
+                                                                    toast.error(`Failed to update ${trigger.label} status`);
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </CollapsibleContent>
+                                    </Collapsible>
+                                </div>
+
+                                {/* Voice Script Section */}
+                                <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3">
+                                    <Collapsible open={expandedSections.includes('script')} onOpenChange={() => toggleSection('script')}>
+                                        <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('script')}>
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
+                                                    <Languages size={18} />
+                                                </div>
+                                                <h4 className="font-bold text-[#074463] text-sm">Call Script & Language</h4>
+                                            </div>
+                                            <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('script') && "rotate-90")} />
+                                        </div>
+                                        <CollapsibleContent>
+                                            <div className="p-4 pt-0 space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <div className="flex items-center justify-between bg-muted/30 p-1 rounded-lg border border-border/50 max-w-fit">
+                                                    <button type="button" onClick={() => switchLanguage("en-US")} className={cn("px-4 py-1.5 text-[10px] font-bold rounded-md transition-all", currentLang === "en-US" ? "bg-white text-[#3882a5] shadow-sm" : "text-muted-foreground hover:text-foreground")}>English</button>
+                                                    <button type="button" onClick={() => switchLanguage("hi-IN")} className={cn("px-4 py-1.5 text-[10px] font-bold rounded-md transition-all", currentLang === "hi-IN" ? "bg-white text-[#3882a5] shadow-sm" : "text-muted-foreground hover:text-foreground")}>Hindi</button>
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <Label className="text-[11px] font-bold text-[#3882a5] uppercase tracking-wider">Voice Script Message</Label>
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={handleResetToDefault} 
+                                                            className="text-[10px] font-bold text-[#3882a5] flex items-center gap-1 hover:underline active:scale-95 transition-all"
+                                                        >
+                                                            <RefreshCw size={10} /> Reset to Default
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <Controller
+                                                        name="callScript"
+                                                        control={control}
+                                                        render={({ field }) => (
+                                                            <textarea 
+                                                                {...field} 
+                                                                placeholder="Enter your voice script..."
+                                                                className="w-full min-h-[120px] p-4 rounded-xl border border-border/50 bg-background text-sm font-medium focus:outline-none focus:border-[#3882a5] focus:ring-4 focus:ring-[#3882a5]/10 transition-all resize-none shadow-inner" 
+                                                            />
+                                                        )}
+                                                    />
+
+                                                    <div className="flex flex-col gap-3 p-4 bg-muted/5 rounded-xl border border-border/30">
+                                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Personalization Tags (Click to add)</p>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {["{visitorName}", "{employeeName}", "{purpose}", "{date}", "{time}"].map(tag => (
+                                                                <code 
+                                                                    key={tag} 
+                                                                    className="px-2 py-1 bg-white border border-border/50 rounded-lg text-[10px] text-[#3882a5] font-mono font-bold cursor-pointer hover:bg-[#3882a5]/10 hover:border-[#3882a5]/30 transition-all active:scale-95 shadow-sm"
+                                                                    onClick={() => {
+                                                                        const currentVal = watch("callScript");
+                                                                        setValue("callScript", currentVal + " " + tag, { shouldDirty: true });
+                                                                    }}
+                                                                >
+                                                                    {tag}
+                                                                </code>
                                                             ))}
                                                         </div>
+                                                        <p className="text-[9px] text-muted-foreground italic leading-relaxed">
+                                                            * Note: These tags will be automatically replaced with real-time data during the automated call.
+                                                        </p>
                                                     </div>
                                                 </div>
-                                            </CollapsibleContent>
-                                        </Collapsible>
-                                    </div>
+                                            </div>
+                                        </CollapsibleContent>
+                                    </Collapsible>
                                 </div>
-                            </SettingsMasterBanner>
+
+                                {/* Advanced Settings Section */}
+                                <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mb-3">
+                                    <Collapsible open={expandedSections.includes('advanced')} onOpenChange={() => toggleSection('advanced')}>
+                                        <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('advanced')}>
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
+                                                    <PhoneForwarded size={18} />
+                                                </div>
+                                                <h4 className="font-bold text-[#074463] text-sm">Routing & Retry Logic</h4>
+                                            </div>
+                                            <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('advanced') && "rotate-90")} />
+                                        </div>
+                                        <CollapsibleContent>
+                                            <div className="p-4 pt-0 space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/5">
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-sm font-bold text-[#074463]">Backup Routing</p>
+                                                        <p className="text-[11px] text-muted-foreground">Call backup number if host is unreachable</p>
+                                                    </div>
+                                                    <BrandSwitch checked={isBackupEnabled} onCheckedChange={(checked) => setValue("backupEnabled", checked, { shouldDirty: true })} />
+                                                </div>
+
+                                                {isBackupEnabled && (
+                                                    <div className="animate-in slide-in-from-top-2 duration-300">
+                                                        <Controller
+                                                            name="backupNumber"
+                                                            control={control}
+                                                            render={({ field }) => (
+                                                                <PhoneInputField id="voice-backup-number" label="Global Backup Number" value={field.value} onChange={field.onChange} />
+                                                            )}
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/5">
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-sm font-bold text-[#074463]">Maximum Retries</p>
+                                                        <p className="text-[11px] text-muted-foreground">Times to retry before initiating backup call</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        {[1, 2, 3, 4, 5].map(v => (
+                                                            <button key={v} type="button" onClick={() => setValue("maxRetries", v, { shouldDirty: true })} className={cn("h-8 w-8 rounded-lg border text-xs font-bold transition-all", watch("maxRetries") === v ? "bg-[#074463] text-white border-[#074463]" : "bg-white text-muted-foreground")}>{v}</button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </CollapsibleContent>
+                                    </Collapsible>
+                                </div>
+                            </div>
 
                             <div className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border border-dashed border-border mt-8">
                                 <div className="flex items-center gap-3">

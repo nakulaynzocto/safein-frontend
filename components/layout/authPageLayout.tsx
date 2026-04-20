@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { routes } from "@/utils/routes";
 import { useAppSelector } from "@/store/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
 
 interface AuthPageLayoutProps {
     children: React.ReactNode;
@@ -18,6 +19,11 @@ interface AuthPageLayoutProps {
 export function AuthPageLayout({ children }: AuthPageLayoutProps) {
     const router = useRouter();
     const { isInitialized } = useAppSelector((state) => state.auth);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     return (
         <div className="flex min-h-screen bg-white overflow-hidden">
@@ -37,7 +43,7 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
                 </div>
 
                 <div className="mx-auto w-full max-w-md">
-                    {!isInitialized ? (
+                    {!isMounted || !isInitialized ? (
                         <div className="space-y-6">
                             <div className="space-y-2">
                                 <Skeleton className="h-10 w-32" />

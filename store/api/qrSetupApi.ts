@@ -15,6 +15,11 @@ export interface CompanyPublicInfo {
             country?: string;
         };
     };
+    features?: {
+        enableVisitorImageCapture: boolean;
+        enableVerification: boolean;
+        enableAutoApproval: boolean;
+    };
     employees: Array<{
         _id: string;
         name: string;
@@ -43,7 +48,7 @@ export const qrSetupApi = baseApi.injectEndpoints({
         getPublicCompanyInfo: builder.query<CompanyPublicInfo, string>({
             query: (slug) => `/qr-setup/public/${slug}`,
             transformResponse: (response: any) => response?.data || response,
-            keepUnusedDataFor: 3600, // Cache public info for 1 hour
+            keepUnusedDataFor: 60, // Cache public info for 1 minute instead of 1 hour to reflect setting changes quickly
         }),
         sendQrPhoneOtp: builder.mutation<{ sent: boolean }, { slug: string; phone: string }>({
             query: ({ slug, phone }) => ({
@@ -53,7 +58,7 @@ export const qrSetupApi = baseApi.injectEndpoints({
             }),
             transformResponse: (response: any) => response?.data || response,
         }),
-        verifyQrPhoneOtp: builder.mutation<{ verified: boolean }, { slug: string; phone: string; otp: string }>({
+        verifyQrPhoneOtp: builder.mutation<{ verified: boolean; visitor?: any }, { slug: string; phone: string; otp: string }>({
             query: ({ slug, phone, otp }) => ({
                 url: `/qr-setup/public/${encodeURIComponent(slug)}/phone/verify-otp`,
                 method: "POST",

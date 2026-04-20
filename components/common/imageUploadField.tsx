@@ -11,19 +11,26 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 interface ImageUploadFieldProps {
-    name: string;
+    name?: string;
     label?: string;
-    register: any;
-    setValue: any;
+    register?: any;
+    setValue?: any;
     errors?: any;
-    initialUrl?: string;
+    initialUrl?: string | File | null;
     enableImageCapture?: boolean;
-    appointmentToken?: string; // Token for public upload endpoint
-    qrSlug?: string; // Company slug for QR scan public upload
+    appointmentToken?: string;
+    qrSlug?: string;
     onUploadStatusChange?: (isUploading: boolean) => void;
     variant?: "default" | "avatar";
     autoOpenCamera?: boolean;
     directCameraOnly?: boolean;
+    delayedUpload?: boolean;
+    className?: string;
+    value?: string | File | null;
+    onChange?: (val: string | File | null) => void;
+    placeholder?: string;
+    shape?: "circle" | "square";
+    aspectRatio?: "video" | "square" | "portrait";
 }
 
 function CameraCapturePortal({
@@ -54,13 +61,13 @@ function CameraCapturePortal({
 
     return createPortal(
         <div
-            className="fixed inset-0 z-[100] flex items-stretch justify-center bg-black/80 backdrop-blur-sm sm:items-center sm:p-4"
+            className="fixed inset-0 z-[9999] flex items-stretch justify-center bg-black/90 backdrop-blur-md sm:items-center sm:p-4 pointer-events-auto"
             style={{
                 paddingTop: "max(0.5rem, env(safe-area-inset-top))",
                 paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
             }}
         >
-            <div className="relative flex min-h-[100dvh] w-full max-w-full flex-col items-center justify-center gap-6 overflow-hidden bg-[#0b1320] px-4 py-8 shadow-2xl sm:min-h-0 sm:max-h-[min(100dvh,52rem)] sm:max-w-3xl sm:rounded-[3rem] sm:p-10">
+            <div className="relative flex min-h-[100dvh] w-full max-w-full flex-col items-center justify-center gap-6 overflow-hidden bg-[#0b1320] px-4 py-8 shadow-2xl sm:min-h-0 sm:max-h-[min(100dvh,52rem)] sm:max-w-3xl sm:rounded-[3rem] sm:p-10 pointer-events-auto">
                 {/* Header Guidance */}
                 <div className="absolute top-0 left-0 right-0 p-6 text-center animate-in fade-in slide-in-from-top-4 duration-500">
                     <p className="text-sm font-medium tracking-wide text-white/70 uppercase">
@@ -99,7 +106,7 @@ function CameraCapturePortal({
                     <button
                         type="button"
                         onClick={onCapture}
-                        className="group relative flex h-20 w-20 items-center justify-center rounded-full bg-white transition-all hover:scale-110 active:scale-90 shadow-2xl"
+                        className="group relative flex h-20 w-20 items-center justify-center rounded-full bg-white transition-all hover:scale-110 active:scale-90 shadow-2xl cursor-pointer"
                     >
                         <div className="absolute inset-1 rounded-full border-4 border-black/5" />
                         <div className="h-14 w-14 rounded-full border-2 border-black/10 flex items-center justify-center group-hover:bg-slate-50">
@@ -111,7 +118,7 @@ function CameraCapturePortal({
                     <button
                         type="button"
                         onClick={onSwitchCamera}
-                        className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-90"
+                        className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-90 cursor-pointer"
                         title={`Switch to ${facingMode === "environment" ? "Front" : "Back"} Camera`}
                     >
                         <RotateCw className="h-6 w-6" />
@@ -123,7 +130,7 @@ function CameraCapturePortal({
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="text-sm font-bold text-white/50 uppercase tracking-widest transition-colors hover:text-red-400"
+                        className="text-sm font-bold text-white/50 uppercase tracking-widest transition-colors hover:text-red-400 cursor-pointer"
                     >
                         Cancel
                     </button>
@@ -148,8 +155,15 @@ export function ImageUploadField({
     variant = "default",
     autoOpenCamera = false,
     directCameraOnly = false,
+    delayedUpload = false,
+    className,
+    value,
+    onChange,
+    placeholder,
+    shape,
+    aspectRatio,
 }: ImageUploadFieldProps) {
-    const [previewImage, setPreviewImage] = useState<string | null>(initialUrl || null);
+    const [previewImage, setPreviewImage] = useState<string | null>(typeof initialUrl === "string" ? initialUrl : (typeof value === "string" ? value : null));
     const [uploadSuccess, setUploadSuccess] = useState(false);
     const [isImageLoading, setIsImageLoading] = useState(false);
     const [imageError, setImageError] = useState(false);
@@ -199,6 +213,16 @@ export function ImageUploadField({
 
             validateFile(file);
 
+            if (delayedUpload) {
+                const localUrl = URL.createObjectURL(file);
+                setPreviewImage(localUrl);
+                if (setValue && name) setValue(name, file, { shouldValidate: true });
+                if (onChange) onChange(localUrl);
+                setIsImageLoading(false);
+                onUploadStatusChange?.(false);
+                setUploadSuccess(true);
+                return;
+            }
 
             const result = await uploadFile({ 
                 file, 
@@ -206,51 +230,36 @@ export function ImageUploadField({
                 slug: qrSlug 
             }).unwrap();
 
-
             const uploadedUrl = result?.url;
             if (!uploadedUrl) {
                 throw new Error("No URL returned from upload");
             }
 
             setPreviewImage(uploadedUrl);
-
-            setValue(name, uploadedUrl, { shouldValidate: true });
+            if (setValue && name) setValue(name, uploadedUrl, { shouldValidate: true });
+            if (onChange) onChange(uploadedUrl);
 
             setIsImageLoading(false);
             onUploadStatusChange?.(false);
             setUploadSuccess(true);
 
             setTimeout(() => {
-                showSuccessToast("Image uploaded successfully!");
+                showSuccessToast("Image selected successfully!");
             }, 100);
 
             setTimeout(() => setUploadSuccess(false), 3000);
         } catch (error: any) {
-            setValue(name, "", { shouldValidate: true });
+            if (setValue && name) setValue(name, "", { shouldValidate: true });
+            if (onChange) onChange(null);
             setPreviewImage(null);
             setUploadSuccess(false);
             setImageError(true);
             setIsImageLoading(false);
             onUploadStatusChange?.(false);
 
-            let errorMessage = "Failed to upload image";
-
-            if (error?.data?.message) {
-                errorMessage = error.data.message;
-            } else if (error?.data?.error) {
-                errorMessage = error.data.error;
-            } else if (error?.message) {
-                errorMessage = error.message;
-            } else if (error?.data && typeof error.data === "string") {
-                errorMessage = error.data;
-            } else if (error?.error) {
-                errorMessage = error.error;
-            } else if (typeof error === "string") {
-                errorMessage = error;
-            }
-
+            let errorMessage = "Failed to process image";
+            if (error?.message) errorMessage = error.message;
             showErrorToast(errorMessage);
-            return;
         }
     };
 
@@ -340,15 +349,17 @@ export function ImageUploadField({
         setImageError(true);
 
         if (previewImage && previewImage.startsWith("http")) {
-            setValue(name, "", { shouldValidate: true });
+            if (setValue && name) setValue(name, "", { shouldValidate: true });
+            if (onChange) onChange(null);
             setPreviewImage(null);
         }
     };
 
     const handleClearFile = () => {
-        setValue(name, "", { shouldValidate: true });
+        if (setValue && name) setValue(name, "", { shouldValidate: true });
+        if (onChange) onChange(null);
 
-        if (previewImage && previewImage !== initialUrl) {
+        if (previewImage && previewImage !== initialUrl && previewImage !== value) {
             if (previewImage.startsWith("blob:")) {
                 URL.revokeObjectURL(previewImage);
             }
@@ -404,7 +415,7 @@ export function ImageUploadField({
 
     useEffect(() => {
         return () => {
-            if (previewImage && previewImage.startsWith("blob:") && previewImage !== initialUrl) {
+            if (previewImage && typeof previewImage === "string" && previewImage.startsWith("blob:") && previewImage !== initialUrl) {
                 URL.revokeObjectURL(previewImage);
             }
             stopCamera();
@@ -416,7 +427,11 @@ export function ImageUploadField({
     }, [previewImage]);
 
     useEffect(() => {
-        if (initialUrl) {
+        if (initialUrl instanceof File) {
+            const u = URL.createObjectURL(initialUrl);
+            setPreviewImage(u);
+            return () => URL.revokeObjectURL(u);
+        } else if (typeof initialUrl === "string") {
             setPreviewImage(initialUrl);
         }
     }, [initialUrl]);
@@ -485,8 +500,10 @@ export function ImageUploadField({
                     <Avatar className={`h-24 w-24 border-4 ${errors?.message ? "border-red-500" : "border-muted"}`}>
                         <AvatarImage
                             src={
-                                previewImage
-                                    ? previewImage.startsWith("blob:") ? previewImage : `${previewImage}${previewImage.includes("?") ? "&" : "?"}v=${previewImage?.length}`
+                                typeof previewImage === "string"
+                                    ? previewImage.startsWith("blob:") 
+                                        ? previewImage 
+                                        : `${previewImage}${previewImage.includes("?") ? "&" : "?"}v=${previewImage?.length}`
                                     : ""
                             }
                             className="object-cover"
@@ -625,7 +642,7 @@ export function ImageUploadField({
                                     <span className="text-center text-xs font-medium sm:text-sm">Failed to load</span>
                                     <span className="mt-1 text-xs text-gray-500">Tap to retry</span>
                                 </div>
-                            ) : !isUploading && previewImage ? (
+                            ) : !isUploading && typeof previewImage === "string" ? (
                                 <img
                                     key={previewImage}
                                     src={previewImage}

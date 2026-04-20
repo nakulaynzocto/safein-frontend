@@ -196,22 +196,6 @@ export function EmailTemplateSettings() {
 
     return (
         <div className="space-y-8 pb-4">
-            <SettingsMasterBanner
-                title="All Email Notifications"
-                description="Enable or disable all outgoing email notifications"
-                icon={Mail}
-                checked={settings?.notifications?.emailEnabled ?? false}
-                onCheckedChange={async (checked) => {
-                    try {
-                        await updateSettings({
-                            notifications: { emailEnabled: checked },
-                        }).unwrap();
-                    } catch {
-                        toast.error("Failed to update email status");
-                    }
-                }}
-            />
-
             {/* 1. Global Branding Section */}
             <div className="rounded-2xl border border-border/50 bg-background overflow-hidden mb-6 shadow-sm">
                 <Collapsible open={expandedSections.includes('branding')} onOpenChange={() => toggleSection('branding')}>

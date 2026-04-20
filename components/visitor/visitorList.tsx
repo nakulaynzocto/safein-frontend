@@ -23,11 +23,14 @@ import {
     Maximize2,
     Users,
     UserPlus,
+    Ban,
+    ShieldCheck,
 } from "lucide-react";
 import {
     useGetVisitorsQuery,
     useDeleteVisitorMutation,
     useCheckVisitorHasAppointmentsQuery,
+    useUpdateVisitorMutation,
     Visitor,
     GetVisitorsQuery,
 } from "@/store/api/visitorApi";
@@ -40,6 +43,7 @@ import {
 } from "@/components/ui/dropdownMenu";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useRouter } from "next/navigation";
+import { Textarea } from "@/components/ui/textarea";
 
 import { formatDate, formatName, getInitials } from "@/utils/helpers";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
@@ -60,6 +64,8 @@ export function VisitorList() {
     const [currentPage, setCurrentPage] = useState(1);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showViewDialog, setShowViewDialog] = useState(false);
+    const [showBlacklistDialog, setShowBlacklistDialog] = useState(false);
+    const [blacklistReason, setBlacklistReason] = useState("");
     const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null);
     const { hasReachedVisitorLimit, isExpired } = useSubscriptionStatus();
     const {
@@ -85,6 +91,7 @@ export function VisitorList() {
 
     const { data: visitorsData, isLoading, error, refetch } = useGetVisitorsQuery(queryParams);
     const [deleteVisitor, { isLoading: isDeleting }] = useDeleteVisitorMutation();
+    const [updateVisitor, { isLoading: isUpdating }] = useUpdateVisitorMutation();
 
     const visitorId = selectedVisitor?._id || "";
     const shouldCheckAppointments = Boolean(selectedVisitor && showDeleteDialog);
@@ -100,8 +107,17 @@ export function VisitorList() {
 
     const handleDeleteClick = (visitor: Visitor) => {
         setShowViewDialog(false);
+        setShowBlacklistDialog(false);
         setSelectedVisitor(visitor);
         setShowDeleteDialog(true);
+    };
+
+    const handleBlacklistClick = (visitor: Visitor) => {
+        setShowDeleteDialog(false);
+        setShowViewDialog(false);
+        setSelectedVisitor(visitor);
+        setBlacklistReason(visitor.blacklistReason || "");
+        setShowBlacklistDialog(true);
     };
 
     const handleDeleteVisitor = async () => {
@@ -117,12 +133,33 @@ export function VisitorList() {
         }
     };
 
+    const handleToggleBlacklist = async () => {
+        if (!selectedVisitor) return;
+        try {
+            const isBlocking = !selectedVisitor.blacklisted;
+            await updateVisitor({
+                id: selectedVisitor._id,
+                blacklisted: isBlocking,
+                blacklistReason: isBlocking ? blacklistReason : "",
+            }).unwrap();
+            
+            showSuccessToast(`Visitor ${isBlocking ? "blocked" : "unblocked"} successfully!`);
+            setShowBlacklistDialog(false);
+            setSelectedVisitor(null);
+            setBlacklistReason("");
+            refetch();
+        } catch (error: any) {
+            showErrorToast(error?.data?.message || `Failed to ${selectedVisitor.blacklisted ? "unblock" : "block"} visitor`);
+        }
+    };
+
     const handleEditVisitor = (visitor: Visitor) => {
         router.push(routes.privateroute.VISITOREDIT.replace("[id]", visitor._id));
     };
 
     const handleViewVisitor = (visitor: Visitor) => {
         setShowDeleteDialog(false);
+        setShowBlacklistDialog(false);
         setSelectedVisitor(visitor);
         setShowViewDialog(true);
     };
@@ -268,6 +305,22 @@ export function VisitorList() {
                                 Edit
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                                className={visitor.blacklisted ? "text-emerald-600" : "text-orange-600"}
+                                onClick={() => handleBlacklistClick(visitor)}
+                            >
+                                {visitor.blacklisted ? (
+                                    <>
+                                        <ShieldCheck className="mr-2 h-4 w-4" />
+                                        Unblock Visitor
+                                    </>
+                                ) : (
+                                    <>
+                                        <Ban className="mr-2 h-4 w-4" />
+                                        Block Visitor
+                                    </>
+                                )}
+                            </DropdownMenuItem>
                             <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteClick(visitor)}>
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Delete
@@ -368,6 +421,32 @@ export function VisitorList() {
                 disabled={appointmentCheck?.hasAppointments || false}
                 disabledMessage={disabledMessage}
             />
+
+            <ConfirmationDialog
+                open={showBlacklistDialog}
+                onOpenChange={setShowBlacklistDialog}
+                title={selectedVisitor?.blacklisted ? "Unblock Visitor" : "Block Visitor"}
+                description={
+                    selectedVisitor?.blacklisted 
+                        ? `Are you sure you want to unblock ${selectedVisitor?.name}? They will be able to book appointments again.`
+                        : `Are you sure you want to block ${selectedVisitor?.name}? They will not be able to book any further appointments.`
+                }
+                onConfirm={handleToggleBlacklist}
+                confirmText={isUpdating ? "Processing..." : selectedVisitor?.blacklisted ? "Unblock" : "Block Now"}
+                variant={selectedVisitor?.blacklisted ? "warning" : "destructive"}
+            >
+                {!selectedVisitor?.blacklisted && (
+                    <div className="space-y-3">
+                         <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-none">Reason (Optional)</p>
+                         <Textarea 
+                            placeholder="Enter reason for blocking..."
+                            value={blacklistReason}
+                            onChange={(e) => setBlacklistReason(e.target.value)}
+                            className="bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl min-h-[100px]"
+                         />
+                    </div>
+                )}
+            </ConfirmationDialog>
 
             <VisitorDetailsDialog
                 visitor={selectedVisitor}

@@ -25,7 +25,9 @@ import {
     Hash,
     ListOrdered,
     Info,
-    AlertTriangle
+    AlertTriangle,
+    ShieldCheck,
+    MapPin
 } from "lucide-react";
 import { SettingsHeader } from "./SettingsHeader";
 import {
@@ -49,6 +51,7 @@ import { ProfileLayout } from "@/components/profile/profileLayout";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { BrandSwitch } from "@/components/common/BrandSwitch";
 import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
 
 /** API may return a plain object or (rarely) a Map-like payload */
 function normalizeWhatsappEnabledTemplates(raw: unknown): Record<string, boolean> {
@@ -235,148 +238,123 @@ export function WhatsAppSettings() {
                             icon={Cloud}
                         />
 
-
                         <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 pb-12">
-                                <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
-                                    <div className="p-5 border-b border-border/50 bg-muted/5 flex items-center justify-between gap-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-12 w-12 rounded-xl bg-[#3882a5] text-white shadow-lg flex items-center justify-center">
-                                                <MessageSquare size={24} />
-                                            </div>
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <h3 className="font-bold text-gray-900 text-lg">All WhatsApp Notifications</h3>
-                                                    {isVerified && <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 flex items-center gap-1 py-0 px-2 rounded-full text-[9px] font-bold"><Verified size={10} /> VERIFIED</Badge>}
+                                <div className="p-2 space-y-2">
+                                    {/* Credentials Section */}
+                                    <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mt-3">
+                                        <Collapsible open={expandedSections.includes('credentials')} onOpenChange={() => toggleSection('credentials')}>
+                                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('credentials')}>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
+                                                        <Key size={18} />
+                                                    </div>
+                                                    <h4 className="font-bold text-[#074463] text-sm">Meta API Credentials</h4>
                                                 </div>
-                                                <p className="text-xs text-gray-500">Enable or disable Meta Cloud API notifications</p>
+                                                <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('credentials') && "rotate-90")} />
                                             </div>
-                                        </div>
-                                        <Controller
-                                            name="whatsappEnabled"
-                                            control={control}
-                                            render={({ field }) => (
-                                                <BrandSwitch checked={field.value} onCheckedChange={field.onChange} variant="large" />
-                                            )}
-                                        />
+                                            <CollapsibleContent>
+                                                <div className="p-4 pt-0 space-y-6 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-xl bg-muted/30 border border-border/50">
+                                                        <InputField label="Phone Number ID" placeholder="e.g. 10472938.." {...register("phoneNumberId")} error={errors.phoneNumberId?.message} className="h-10 bg-background" />
+                                                        <MaskedInputField label="Permanent Access Token" placeholder={isVerified ? MASKED_DISPLAY_VALUE : "EAAG...."} {...register("accessToken")} error={errors.accessToken?.message} className="h-10 bg-background" />
+                                                    </div>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                        <Controller name="senderNumber" control={control} render={({ field }) => (
+                                                            <PhoneInputField id="whatsapp-sender-number" label="Sender Business Number" value={field.value} onChange={field.onChange} error={errors.senderNumber?.message} defaultCountry={userCountry} />
+                                                        )} />
+                                                        <Controller name="testNumber" control={control} render={({ field }) => (
+                                                            <PhoneInputField id="whatsapp-test-number" label="OTP Recipient Number" value={field.value} onChange={field.onChange} error={errors.testNumber?.message} defaultCountry={userCountry} />
+                                                        )} />
+                                                    </div>
+                                                </div>
+                                            </CollapsibleContent>
+                                        </Collapsible>
                                     </div>
 
-                                    <div className="p-2 space-y-2">
-                                        {/* Credentials Section */}
-                                        <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mt-3">
-                                            <Collapsible open={expandedSections.includes('credentials')} onOpenChange={() => toggleSection('credentials')}>
-                                                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('credentials')}>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
-                                                            <Key size={18} />
-                                                        </div>
-                                                        <h4 className="font-bold text-[#074463] text-sm">Meta API Credentials</h4>
+                                    {/* Template Management Section */}
+                                    <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mb-3">
+                                        <Collapsible open={expandedSections.includes('templates')} onOpenChange={() => toggleSection('templates')}>
+                                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('templates')}>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
+                                                        <ListOrdered size={18} />
                                                     </div>
-                                                    <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('credentials') && "rotate-90")} />
+                                                    <h4 className="font-bold text-[#074463] text-sm">Template Management</h4>
                                                 </div>
-                                                <CollapsibleContent>
-                                                    <div className="p-4 pt-0 space-y-6 animate-in fade-in slide-in-from-top-1 duration-200">
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-xl bg-muted/30 border border-border/50">
-                                                            <InputField label="Phone Number ID" placeholder="e.g. 10472938.." {...register("phoneNumberId")} error={errors.phoneNumberId?.message} className="h-10 bg-background" />
-                                                            <MaskedInputField label="Permanent Access Token" placeholder={isVerified ? MASKED_DISPLAY_VALUE : "EAAG...."} {...register("accessToken")} error={errors.accessToken?.message} className="h-10 bg-background" />
-                                                        </div>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                            <Controller name="senderNumber" control={control} render={({ field }) => (
-                                                                <PhoneInputField id="whatsapp-sender-number" label="Sender Business Number" value={field.value} onChange={field.onChange} error={errors.senderNumber?.message} defaultCountry={userCountry} />
-                                                            )} />
-                                                            <Controller name="testNumber" control={control} render={({ field }) => (
-                                                                <PhoneInputField id="whatsapp-test-number" label="OTP Recipient Number" value={field.value} onChange={field.onChange} error={errors.testNumber?.message} defaultCountry={userCountry} />
-                                                            )} />
-                                                        </div>
+                                                <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('templates') && "rotate-90")} />
+                                            </div>
+                                            <CollapsibleContent>
+                                                <div className="p-4 pt-0 space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                    <div className="flex items-center gap-2 p-3 bg-[#3882a5]/5 rounded-xl border border-[#3882a5]/20 text-[11px] text-[#074463]">
+                                                        <Info className="h-4 w-4 shrink-0 text-[#3882a5]" />
+                                                        <p>Parameters like <span className="font-bold">{"{{1}}"}</span> must be configured in your <strong>Meta Dashboard</strong> in the exact order shown below for messages to deliver successfully.</p>
                                                     </div>
-                                                </CollapsibleContent>
-                                            </Collapsible>
-                                        </div>
 
-                                        {/* Template Management Section */}
-                                        <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mb-3">
-                                            <Collapsible open={expandedSections.includes('templates')} onOpenChange={() => toggleSection('templates')}>
-                                                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('templates')}>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
-                                                            <ListOrdered size={18} />
-                                                        </div>
-                                                        <h4 className="font-bold text-[#074463] text-sm">Template Management</h4>
-                                                    </div>
-                                                    <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('templates') && "rotate-90")} />
-                                                </div>
-                                                <CollapsibleContent>
-                                                    <div className="p-4 pt-0 space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
-                                                        <div className="flex items-center gap-2 p-3 bg-[#3882a5]/5 rounded-xl border border-[#3882a5]/20 text-[11px] text-[#074463]">
-                                                            <Info className="h-4 w-4 shrink-0 text-[#3882a5]" />
-                                                            <p>Parameters like <span className="font-bold">{"{{1}}"}</span> must be configured in your <strong>Meta Dashboard</strong> in the exact order shown below for messages to deliver successfully.</p>
-                                                        </div>
-
-                                                        <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
-                                                            <table className="w-full text-left text-xs border-collapse">
-                                                                <thead className="bg-[#f8fafc] text-[#64748b] uppercase font-bold text-[9px] border-b border-border">
-                                                                    <tr>
-                                                                        <th className="px-5 py-4 w-1/4">Template Details</th>
-                                                                        <th className="px-5 py-4 w-5/12">Variable Mapping Settings</th>
-                                                                        <th className="px-5 py-4 text-center w-1/6">Status</th>
+                                                    <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+                                                        <table className="w-full text-left text-xs border-collapse">
+                                                            <thead className="bg-[#f8fafc] text-[#64748b] uppercase font-bold text-[9px] border-b border-border">
+                                                                <tr>
+                                                                    <th className="px-5 py-4 w-1/4">Template Details</th>
+                                                                    <th className="px-5 py-4 w-5/12">Variable Mapping Settings</th>
+                                                                    <th className="px-5 py-4 text-center w-1/6">Status</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="divide-y divide-border/50">
+                                                                {WHATSAPP_META_TEMPLATES.map(t => (
+                                                                    <tr key={t.name} className="hover:bg-slate-50/50 transition-colors">
+                                                                        <td className="px-5 py-5 vertical-top">
+                                                                            <div className="flex flex-col gap-1.5">
+                                                                                <span className="font-bold text-[#074463] text-[13px]">{t.name}</span>
+                                                                                <span className="text-[10px] text-slate-500 leading-relaxed italic pr-4">{t.usedFor}</span>
+                                                                                <Badge variant="outline" className="w-fit text-[9px] h-5 bg-slate-50 text-slate-400 border-slate-200 font-medium">Lang: {WHATSAPP_META_TEMPLATE_LANGUAGE}</Badge>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td className="px-5 py-5 vertical-top">
+                                                                            <div className="grid grid-cols-1 gap-2.5">
+                                                                                {t.params.map(p => (
+                                                                                    <div key={p.index} className="flex items-center gap-2.5 group">
+                                                                                        <span className="flex items-center justify-center h-6 w-10 shrink-0 bg-[#3882a5]/10 border border-[#3882a5]/20 rounded-md text-[10px] font-mono font-bold text-[#3882a5]">
+                                                                                            {`{{${p.index}}}`}
+                                                                                        </span>
+                                                                                        <span className="text-[11px] text-[#475569] font-medium leading-tight">
+                                                                                            {p.label}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </td>
+                                                                        <td className="px-5 py-5 text-center vertical-middle">
+                                                                            <div className="flex flex-col items-center gap-3">
+                                                                                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border bg-white shadow-sm">
+                                                                                    {localEnabledTemplates[t.name] !== false ? (
+                                                                                        <><div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /><span className="text-[9px] font-bold text-emerald-600">ACTIVE</span></>
+                                                                                    ) : (
+                                                                                        <><div className="h-1.5 w-1.5 rounded-full bg-slate-300" /><span className="text-[9px] font-bold text-slate-400">INACTIVE</span></>
+                                                                                    )}
+                                                                                </div>
+                                                                                <div
+                                                                                    className="inline-flex"
+                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                    onPointerDown={(e) => e.stopPropagation()}
+                                                                                >
+                                                                                     <BrandSwitch
+                                                                                        checked={localEnabledTemplates[t.name] !== false}
+                                                                                        onCheckedChange={() => handleTemplateToggle(t.name)}
+                                                                                        disabled={isUpdating}
+                                                                                        className="scale-[0.85]"
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                        </td>
                                                                     </tr>
-                                                                </thead>
-                                                                <tbody className="divide-y divide-border/50">
-                                                                    {WHATSAPP_META_TEMPLATES.map(t => (
-                                                                        <tr key={t.name} className="hover:bg-slate-50/50 transition-colors">
-                                                                            <td className="px-5 py-5 vertical-top">
-                                                                                <div className="flex flex-col gap-1.5">
-                                                                                    <span className="font-bold text-[#074463] text-[13px]">{t.name}</span>
-                                                                                    <span className="text-[10px] text-slate-500 leading-relaxed italic pr-4">{t.usedFor}</span>
-                                                                                    <Badge variant="outline" className="w-fit text-[9px] h-5 bg-slate-50 text-slate-400 border-slate-200 font-medium">Lang: {WHATSAPP_META_TEMPLATE_LANGUAGE}</Badge>
-                                                                                </div>
-                                                                            </td>
-                                                                            <td className="px-5 py-5 vertical-top">
-                                                                                <div className="grid grid-cols-1 gap-2.5">
-                                                                                    {t.params.map(p => (
-                                                                                        <div key={p.index} className="flex items-center gap-2.5 group">
-                                                                                            <span className="flex items-center justify-center h-6 w-10 shrink-0 bg-[#3882a5]/10 border border-[#3882a5]/20 rounded-md text-[10px] font-mono font-bold text-[#3882a5]">
-                                                                                                {`{{${p.index}}}`}
-                                                                                            </span>
-                                                                                            <span className="text-[11px] text-[#475569] font-medium leading-tight">
-                                                                                                {p.label}
-                                                                                            </span>
-                                                                                        </div>
-                                                                                    ))}
-                                                                                </div>
-                                                                            </td>
-                                                                            <td className="px-5 py-5 text-center vertical-middle">
-                                                                                <div className="flex flex-col items-center gap-3">
-                                                                                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border bg-white shadow-sm">
-                                                                                        {localEnabledTemplates[t.name] !== false ? (
-                                                                                            <><div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /><span className="text-[9px] font-bold text-emerald-600">ACTIVE</span></>
-                                                                                        ) : (
-                                                                                            <><div className="h-1.5 w-1.5 rounded-full bg-slate-300" /><span className="text-[9px] font-bold text-slate-400">INACTIVE</span></>
-                                                                                        )}
-                                                                                    </div>
-                                                                                    <div
-                                                                                        className="inline-flex"
-                                                                                        onClick={(e) => e.stopPropagation()}
-                                                                                        onPointerDown={(e) => e.stopPropagation()}
-                                                                                    >
-                                                                                         <BrandSwitch
-                                                                                            checked={localEnabledTemplates[t.name] !== false}
-                                                                                            onCheckedChange={() => handleTemplateToggle(t.name)}
-                                                                                            disabled={isUpdating}
-                                                                                            className="scale-[0.85]"
-                                                                                        />
-                                                                                    </div>
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                                                    ))}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
                                                     </div>
-                                                </CollapsibleContent>
-                                            </Collapsible>
-                                        </div>
+                                                </div>
+                                            </CollapsibleContent>
+                                        </Collapsible>
                                     </div>
                                 </div>
 
