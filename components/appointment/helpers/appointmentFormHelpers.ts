@@ -27,6 +27,8 @@ export const createAppointmentPayload = (data: AppointmentFormData) => {
  */
 export const createUpdateAppointmentPayload = (data: AppointmentFormData, existingAppointment: any) => {
     return {
+        employeeId: data.employeeId,
+        visitorId: data.visitorId,
         accompanyingCount: data.accompanyingCount ?? 0,
         appointmentDetails: {
             purpose: data.purpose,

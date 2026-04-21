@@ -19,6 +19,7 @@ export interface AppointmentLink {
         companyName: string;
         profilePicture?: string;
     };
+    features?: any;
     secureToken: string;
     isBooked: boolean;
     expiresAt: string;

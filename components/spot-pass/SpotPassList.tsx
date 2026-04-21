@@ -17,6 +17,7 @@ import {
     Eye,
     Maximize2,
     Settings,
+    Printer,
 } from "lucide-react";
 import { getInitials, formatName } from "@/utils/helpers";
 import { StatusBadge } from "@/components/common/statusBadge";
@@ -43,6 +44,9 @@ import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { useAppDispatch } from "@/store/hooks";
 import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
+import { VisitSlip } from "../appointment/VisitSlip";
+import { useReactToPrint } from "react-to-print";
+import { useRef } from "react";
 
 export function SpotPassList() {
     const router = useRouter();
@@ -78,6 +82,37 @@ export function SpotPassList() {
         isOpen: false,
         id: null,
     });
+
+    // Print functionality
+    const printRef = useRef<HTMLDivElement>(null);
+    const [passToPrint, setPassToPrint] = useState<any>(null);
+
+    const handlePrintRequest = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: `SpotPass_${passToPrint?.name || 'Visitor'}`,
+    });
+
+    const handlePrintPass = (pass: SpotPass) => {
+        // Adapt pass data to match VisitSlip expected format
+        const adaptedPass = {
+            _id: pass._id,
+            visitorId: {
+                name: pass.name,
+                phone: pass.phone,
+                photo: pass.photo
+            },
+            employeeId: pass.employeeId,
+            appointmentDetails: {
+                purpose: "Spot Pass Visit",
+                scheduledDate: pass.checkInTime,
+                scheduledTime: format(new Date(pass.checkInTime), "hh:mm a"),
+            }
+        };
+        setPassToPrint(adaptedPass);
+        setTimeout(() => {
+            handlePrintRequest();
+        }, 100);
+    };
 
     const handleViewDetails = (pass: SpotPass) => {
         setSelectedPass(pass);
@@ -217,56 +252,77 @@ export function SpotPassList() {
         {
             header: "Actions",
             key: "actions",
+            className: "text-center min-w-[180px] whitespace-nowrap",
             render: (item: SpotPass) => (
-                <div className="flex items-center justify-center gap-2">
-                    {item.status === "checked-in" && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => handleCheckOut(item._id, e)}
-                            className="h-8 gap-1.5 border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-500 transition-all shadow-sm"
-                        >
-                            <LogOut className="h-3.5 w-3.5" />
-                            <span className="text-xs font-semibold">Check Out</span>
-                        </Button>
-                    )}
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-9 w-9 p-0 hover:bg-gray-100 rounded-full transition-colors">
-                                <MoreVertical className="h-4 w-4 text-gray-500" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 border-none shadow-xl rounded-xl p-1.5 bg-white dark:bg-gray-900">
-                            <DropdownMenuItem
-                                onClick={() => handleViewDetails(item)}
-                                className="rounded-lg gap-2 cursor-pointer transition-colors"
-                            >
-                                <Eye className="h-4 w-4 text-[#3882a5]" />
-                                <span className="font-medium">View Info</span>
-                            </DropdownMenuItem>
-
-                            {item.status === "checked-in" && (
-                                <>
-                                    <DropdownMenuSeparator className="my-1 bg-gray-100 dark:bg-gray-800" />
-                                    <DropdownMenuItem
-                                        onClick={(e) => handleDelete(item._id, e)}
-                                        className="rounded-lg gap-2 cursor-pointer text-red-600 hover:bg-red-50 focus:bg-red-50 focus:text-red-600 transition-colors"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                        <span className="font-medium">Delete Pass</span>
-                                    </DropdownMenuItem>
-                                </>
-                            )}
-
-                            {item.status === "checked-out" && (
-                                <div className="px-2 py-1.5 flex items-center gap-2 text-xs text-muted-foreground bg-gray-50/50 rounded-lg mt-1">
-                                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                                    <span>Visit Completed</span>
+                <div className="mx-auto w-[150px]">
+                    <div className="grid grid-cols-2 gap-2 items-center justify-items-center">
+                        {/* Slot 1: Check Out Button */}
+                        <div className="flex items-center justify-center min-w-[100px]">
+                            {item.status === "checked-in" ? (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={(e) => handleCheckOut(item._id, e)}
+                                    className="h-8 gap-1.5 border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-500 transition-all shadow-sm"
+                                >
+                                    <LogOut className="h-3.5 w-3.5" />
+                                    <span className="text-[10px] sm:text-xs font-semibold">Check Out</span>
+                                </Button>
+                            ) : (
+                                <div className="h-8 w-full flex items-center justify-center text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+                                    {item.status === "checked-out" ? "DONE" : "-"}
                                 </div>
                             )}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                        </div>
+
+                        {/* Slot 2: Action Menu */}
+                        <div className="flex items-center justify-center">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-9 w-9 p-0 hover:bg-gray-100 rounded-full transition-colors">
+                                        <MoreVertical className="h-4 w-4 text-gray-500" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48 border-none shadow-xl rounded-xl p-1.5 bg-white dark:bg-gray-900">
+                                    <DropdownMenuItem
+                                        onClick={() => handleViewDetails(item)}
+                                        className="rounded-lg gap-2 cursor-pointer transition-colors"
+                                    >
+                                        <Eye className="h-4 w-4 text-[#3882a5]" />
+                                        <span className="font-medium">View Info</span>
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuItem
+                                        onClick={() => handlePrintPass(item)}
+                                        className="rounded-lg gap-2 cursor-pointer transition-colors"
+                                    >
+                                        <Printer className="h-4 w-4 text-[#3882a5]" />
+                                        <span className="font-medium">Print Pass</span>
+                                    </DropdownMenuItem>
+        
+                                    {item.status === "checked-in" && (
+                                        <>
+                                            <DropdownMenuSeparator className="my-1 bg-gray-100 dark:bg-gray-800" />
+                                            <DropdownMenuItem
+                                                onClick={(e) => handleDelete(item._id, e)}
+                                                className="rounded-lg gap-2 cursor-pointer text-red-600 hover:bg-red-50 focus:bg-red-50 focus:text-red-600 transition-colors"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                                <span className="font-medium">Delete Pass</span>
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
+        
+                                    {item.status === "checked-out" && (
+                                        <div className="px-2 py-1.5 flex items-center gap-2 text-xs text-muted-foreground bg-gray-50/50 rounded-lg mt-1">
+                                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                                            <span>Visit Completed</span>
+                                        </div>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </div>
                 </div>
             ),
         },
@@ -377,6 +433,8 @@ export function SpotPassList() {
                 onConfirm={confirmDelete}
                 variant="destructive"
             />
+            {/* Hidden Visit Slip for printing */}
+            <VisitSlip ref={printRef} appointment={passToPrint} />
         </div>
     );
 }

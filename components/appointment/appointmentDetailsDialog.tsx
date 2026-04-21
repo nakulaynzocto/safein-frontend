@@ -38,7 +38,7 @@ const getFieldValue = (appointment: Appointment, key: string): any => {
         _id: (appt) => appt._id || "N/A",
         visitorName: (appt) => (appt as any).visitorId?.name || appt.visitor?.name || "N/A",
         visitorPhone: (appt) => (appt as any).visitorId?.phone || appt.visitor?.phone || "N/A",
-        visitorPhoto: (appt) => (appt as any).visitorId?.photo || (appt as any).visitor?.photo || "",
+        visitorPhoto: (appt) => appt.visitorPhoto || (appt as any).visitorId?.photo || (appt as any).visitor?.photo || "",
         employeeName: (appt) => (appt as any).employeeId?.name || appt.employee?.name || "N/A",
         purpose: (appt) => appt.appointmentDetails?.purpose || "N/A",
         appointmentDate: (appt) => appt.appointmentDetails?.scheduledDate || "N/A",

@@ -196,18 +196,20 @@ export function VisitorList() {
             {
                 key: "actions",
                 header: "Actions",
-                className: "text-right",
+                className: "text-center min-w-[150px] whitespace-nowrap",
                 render: (visitor: Visitor) => (
-                    <div className="flex justify-center">
-                        <Button 
-                            variant="primary" 
-                            size="sm" 
-                            className="h-8 px-4 rounded-lg gap-1.5 font-bold transition-all duration-300 shadow-md hover:scale-105 active:scale-95"
-                            onClick={() => router.push(routes.privateroute.VISITORSETTINGS.replace("[id]", visitor._id))}
-                        >
-                            <Settings className="h-4 w-4" />
-                            Settings
-                        </Button>
+                    <div className="mx-auto w-[120px]">
+                        <div className="flex items-center justify-center">
+                            <Button 
+                                variant="primary" 
+                                size="sm" 
+                                className="h-8 px-4 rounded-lg gap-1.5 font-bold transition-all duration-300 shadow-md hover:scale-105 active:scale-95"
+                                onClick={() => router.push(routes.privateroute.VISITORSETTINGS.replace("[id]", visitor._id))}
+                            >
+                                <Settings className="h-4 w-4" />
+                                <span>Settings</span>
+                            </Button>
+                        </div>
                     </div>
                 ),
             },

@@ -36,8 +36,11 @@ import {
     Maximize2,
     Send,
     UserPlus,
+    Printer,
+    Trash2,
 } from "lucide-react";
 import { Appointment, useResendAppointmentNotificationMutation } from "@/store/api/appointmentApi";
+import { useGetSettingsQuery } from "@/store/api/settingsApi";
 import { SearchInput } from "@/components/common/searchInput";
 import DateRangePicker from "@/components/common/dateRangePicker";
 import { AppointmentDetailsDialog } from "./appointmentDetailsDialog";
@@ -47,6 +50,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu";
@@ -59,6 +63,9 @@ import { useCooldown } from "@/hooks/useCooldown";
 import { APIErrorState } from "@/components/common/APIErrorState";
 import { useAppDispatch } from "@/store/hooks";
 import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
+import { VisitSlip } from "./VisitSlip";
+import { useReactToPrint } from "react-to-print";
+import { useRef } from "react";
 
 export interface AppointmentTableProps {
     appointments: Appointment[];
@@ -141,6 +148,7 @@ export function AppointmentTable({
         openUpgradeModal,
         closeUpgradeModal,
     } = useSubscriptionActions();
+    const { data: settings } = useGetSettingsQuery();
 
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showViewDialog, setShowViewDialog] = useState(false);
@@ -155,6 +163,23 @@ export function AppointmentTable({
     // Resend functionality - use cooldown hook
     const [resendNotification] = useResendAppointmentNotificationMutation();
     const { cooldowns, startCooldown, isOnCooldown } = useCooldown();
+
+    // Print functionality
+    const printRef = useRef<HTMLDivElement>(null);
+    const [appointmentToPrint, setAppointmentToPrint] = useState<Appointment | null>(null);
+
+    const handlePrintRequest = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: `VisitPass_${appointmentToPrint?.visitorId?.name || 'Visitor'}`,
+    });
+
+    const handlePrintSlip = (appointment: Appointment) => {
+        setAppointmentToPrint(appointment);
+        // Wait for state update to settle before printing
+        setTimeout(() => {
+            handlePrintRequest();
+        }, 100);
+    };
 
     const setAppointmentLoading = (appointmentId: string, isLoading: boolean) => {
         setLoadingAppointments((prev) => {
@@ -270,6 +295,8 @@ export function AppointmentTable({
         }
     };
 
+
+
     // Using common functions from utils/helpers
     const isAppointmentDatePast = (appointment: Appointment): boolean => {
         const scheduledDateTime = getAppointmentDateTime(appointment);
@@ -288,7 +315,7 @@ export function AppointmentTable({
                     const visitorNameRaw = visitor?.name || "Unknown Visitor";
                     const visitorName = formatName(visitorNameRaw) || visitorNameRaw;
                     const visitorPhone = visitor?.phone || "N/A";
-                    const visitorPhoto = visitor?.photo || (visitor as any)?.profilePicture || "";
+                    const visitorPhoto = (appointment as any).visitorPhoto || visitor?.photo || (visitor as any)?.profilePicture || "";
 
                     return (
                         <div className="flex min-w-0 items-center gap-3">
@@ -394,7 +421,7 @@ export function AppointmentTable({
             {
                 key: "actions",
                 header: "Actions",
-                className: "text-right",
+                className: "text-center min-w-[150px] whitespace-nowrap",
                 render: (appointment: Appointment) => {
                     const status = typeof appointment.status === "string" ? appointment.status : "pending";
                     const isTimedOut = !!appointment.isTimedOut;
@@ -403,36 +430,55 @@ export function AppointmentTable({
                     const isCheckedIn = status === "checked_in";
 
                     return (
-                        <div className="flex items-center gap-1.5 justify-end">
-                            {!isTimedOut && (
-                                <>
-                                    {isPending && (
-                                        <>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="h-7 w-8 p-0 bg-emerald-50/50 border-emerald-500/50 text-emerald-600 hover:bg-emerald-100/50"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSelectedAppointment(appointment);
-                                                    setShowApproveDialog(true);
-                                                }}
-                                            >
-                                                <CheckCircle className="h-4 w-4" />
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="h-7 w-8 p-0 bg-rose-50/50 border-rose-500/50 text-rose-600 hover:bg-rose-100/50"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSelectedAppointment(appointment);
-                                                    setShowRejectDialog(true);
-                                                }}
-                                            >
-                                                <XCircle className="h-4 w-4" />
-                                            </Button>
-                                        </>
+                        <div className="mx-auto w-[120px]">
+                            <div className="grid grid-cols-3 gap-1 items-center justify-items-center">
+                                {/* Slot 1: Primary Action (Approve / Print) */}
+                                <div className="flex items-center justify-center">
+                                    {!isTimedOut && isPending && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-7 w-8 p-0 bg-emerald-50/50 border-emerald-500/50 text-emerald-600 hover:bg-emerald-100/50"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedAppointment(appointment);
+                                                setShowApproveDialog(true);
+                                            }}
+                                        >
+                                            <CheckCircle className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                                    {isCheckedIn && settings?.features?.enableVisitSlip && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-7 w-8 p-0 border-slate-200 text-slate-600 hover:bg-slate-100"
+                                            title="Print Visitor Slip"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handlePrintSlip(appointment);
+                                            }}
+                                        >
+                                            <Printer className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                                </div>
+
+                                {/* Slot 2: Secondary Action (Reject / Check-in / Check-out) */}
+                                <div className="flex items-center justify-center">
+                                    {!isTimedOut && isPending && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-7 w-8 p-0 bg-rose-50/50 border-rose-500/50 text-rose-600 hover:bg-rose-100/50"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedAppointment(appointment);
+                                                setShowRejectDialog(true);
+                                            }}
+                                        >
+                                            <XCircle className="h-4 w-4" />
+                                        </Button>
                                     )}
                                     {isApproved && (
                                         <Button
@@ -462,40 +508,92 @@ export function AppointmentTable({
                                             <LogOut className="h-4 w-4" />
                                         </Button>
                                     )}
-                                </>
-                            )}
+                                </div>
 
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                        <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-48">
-                                    {onView && (
-                                        <DropdownMenuItem onClick={() => handleView(appointment)}>
-                                            <Eye className="mr-2 h-4 w-4" /> View Details
-                                        </DropdownMenuItem>
-                                    )}
-                                    {isPending && (
-                                        <>
-                                            <DropdownMenuSeparator />
-                                            {!isEmployee && (
-                                                <DropdownMenuItem onClick={() => handleEdit(appointment)}>
-                                                    <Edit className="mr-2 h-4 w-4" /> Edit
+                                {/* Slot 3: Actions Menu */}
+                                <div className="flex items-center justify-center">
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="h-8 w-8 p-0"
+                                            >
+                                                <MoreVertical className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl border-slate-100 bg-white/95 backdrop-blur-sm">
+                                            {appointment.status === "Approved" && (
+                                                <DropdownMenuItem 
+                                                    onClick={() => handlePrintSlip(appointment)}
+                                                    className="flex items-center gap-2 p-3 rounded-xl transition-all cursor-pointer focus:bg-slate-50 focus:text-[#3882a5] group"
+                                                >
+                                                    <div className="bg-slate-100 p-1.5 rounded-lg group-focus:bg-[#3882a5]/10 transition-colors">
+                                                        <Printer className="h-4 w-4" />
+                                                    </div>
+                                                    <span className="font-medium text-slate-700">Print Visit Pass</span>
                                                 </DropdownMenuItem>
                                             )}
+                                            
+                                            {onView && (
+                                                <DropdownMenuItem 
+                                                    onClick={() => handleView(appointment)}
+                                                    className="flex items-center gap-2 p-3 rounded-xl transition-all cursor-pointer focus:bg-slate-50 focus:text-[#3882a5] group"
+                                                >
+                                                    <div className="bg-slate-100 p-1.5 rounded-lg group-focus:bg-[#3882a5]/10 transition-colors">
+                                                        <Eye className="h-4 w-4" />
+                                                    </div>
+                                                    <span className="font-medium text-slate-700">View Details</span>
+                                                </DropdownMenuItem>
+                                            )}
+                                            {isPending && (
+                                                <>
+                                                    <DropdownMenuSeparator className="my-1 opacity-50" />
+                                                    {!isEmployee && (
+                                                        <DropdownMenuItem 
+                                                            onClick={() => handleEdit(appointment)}
+                                                            className="flex items-center gap-2 p-3 rounded-xl transition-all cursor-pointer focus:bg-slate-50 focus:text-[#3882a5] group"
+                                                        >
+                                                            <div className="bg-slate-100 p-1.5 rounded-lg group-focus:bg-[#3882a5]/10 transition-colors">
+                                                                <Edit className="h-4 w-4" />
+                                                            </div>
+                                                            <span className="font-medium text-slate-700">Edit Appointment</span>
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleResend(appointment._id)}
+                                                        disabled={!!cooldowns[appointment._id]}
+                                                        className="flex items-center gap-2 p-3 rounded-xl transition-all cursor-pointer focus:bg-slate-50 focus:text-[#3882a5] group disabled:opacity-50"
+                                                    >
+                                                        <div className="bg-slate-100 p-1.5 rounded-lg group-focus:bg-[#3882a5]/10 transition-colors">
+                                                            <Send className="h-4 w-4" />
+                                                        </div>
+                                                        <span className="font-medium text-slate-700">
+                                                            {cooldowns[appointment._id] ? `Resend (${cooldowns[appointment._id]}s)` : 'Resend Mobile Link'}
+                                                        </span>
+                                                    </DropdownMenuItem>
+                                                </>
+                                            )}
+                                            
+                                            <DropdownMenuSeparator className="my-1 opacity-50" />
+                                            
                                             <DropdownMenuItem
-                                                onClick={() => handleResend(appointment._id)}
-                                                disabled={!!cooldowns[appointment._id]}
+                                                className="flex items-center gap-2 p-3 rounded-xl transition-all cursor-pointer text-rose-600 focus:bg-rose-50 focus:text-rose-700 group"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedAppointment(appointment);
+                                                    setShowDeleteDialog(true);
+                                                }}
                                             >
-                                                <Send className="mr-2 h-4 w-4" />
-                                                {cooldowns[appointment._id] ? `Resend (${cooldowns[appointment._id]}s)` : 'Resend'}
+                                                <div className="bg-rose-100 p-1.5 rounded-lg group-focus:bg-rose-200/50 transition-colors">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </div>
+                                                <span className="font-semibold">Delete Appointment</span>
                                             </DropdownMenuItem>
-                                        </>
-                                    )}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+                            </div>
                         </div>
                     );
                 },
@@ -503,7 +601,22 @@ export function AppointmentTable({
         ];
 
         return baseColumns;
-    }, [onView, handleEdit, handleResend, isEmployee, cooldowns, loadingAppointments, router]);
+    }, [
+        onView, 
+        handleEdit, 
+        handleResend, 
+        isEmployee, 
+        cooldowns, 
+        loadingAppointments, 
+        router, 
+        settings, 
+        setSelectedAppointment, 
+        setShowApproveDialog, 
+        setShowRejectDialog, 
+        setShowCheckInDialog, 
+        setShowCheckOutDialog, 
+        setShowDeleteDialog
+    ]);
 
 
     if (error) {
@@ -702,6 +815,9 @@ export function AppointmentTable({
                         : undefined
                 }
             />
+
+            {/* Hidden Visit Slip for printing */}
+            <VisitSlip ref={printRef} appointment={appointmentToPrint} />
         </div >
     );
 }

@@ -109,6 +109,7 @@ export interface Settings {
         enableVisitorImageCapture: boolean;
         enableVerification: boolean;
         enableFeedbackSystem: boolean;
+        enableVisitSlip: boolean;
     };
     emailTemplates?: EmailTemplates;
     featureToggles?: Record<string, boolean>;
@@ -152,6 +153,7 @@ export interface UpdateSettingsRequest {
         enableVisitorImageCapture?: boolean;
         enableVerification?: boolean;
         enableFeedbackSystem?: boolean;
+        enableVisitSlip?: boolean;
     };
     sms?: {
         enabledTemplates?: Record<string, boolean>;
@@ -243,6 +245,7 @@ export const settingsApi = baseApi.injectEndpoints({
                                     enableVisitorImageCapture: false,
                                     enableVerification: false,
                                     enableFeedbackSystem: false,
+                                    enableVisitSlip: false,
                                 };
                             }
                             Object.assign(draft.features, arg.features);

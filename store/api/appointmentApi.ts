@@ -27,6 +27,7 @@ export interface Appointment {
     approvalLink?: string | null; // One-time approval link
     isTimedOut?: boolean;         // Computed by backend: pending/approved past their scheduled date
     isVerified?: boolean;
+    visitorPhoto?: string;
 }
 
 export interface EmployeeDetails {

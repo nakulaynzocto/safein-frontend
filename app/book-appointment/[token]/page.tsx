@@ -253,6 +253,8 @@ export default function BookAppointmentPage() {
                 referenceId={submittedAppointmentId || undefined}
                 onAction={() => window.location.assign("/")}
                 actionLabel="Go Home"
+                enableVisitSlip={appointmentLinkData?.features?.enableVisitSlip}
+                visitorPhone={visitorData?.phone || appointmentLinkData?.visitorPhone}
             />
         );
     }
@@ -268,6 +270,8 @@ export default function BookAppointmentPage() {
                 onAction={() => window.location.assign("/")}
                 actionLabel="Go Home"
                 customFooterMessage="No further action is required. Your previous booking is currently under review."
+                enableVisitSlip={appointmentLinkData?.features?.enableVisitSlip}
+                visitorPhone={visitorData?.phone || appointmentLinkData?.visitorPhone}
             />
         );
     }

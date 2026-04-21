@@ -188,7 +188,10 @@ export function DataTable<T extends Record<string, any>>({
                                 )}
                                 onClick={() => enableSorting && column.sortable && handleSort(column.key as string)}
                             >
-                                <div className="flex items-center gap-1 sm:gap-2">
+                                <div className={cn(
+                                    "flex items-center gap-1 sm:gap-2",
+                                    column.className?.includes("text-center") && "justify-center"
+                                )}>
                                     <span className="truncate">{column.header}</span>
                                     {getSortIcon(column.key as string, column)}
                                 </div>

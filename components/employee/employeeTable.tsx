@@ -247,68 +247,74 @@ export function EmployeeTable({
         baseColumns.push({
             key: "actions",
             header: "Actions",
+            className: "text-center min-w-[200px] whitespace-nowrap",
             render: (employee: Employee) => (
-                <div className="flex justify-center">
-                    <Button 
-                        variant="primary" 
-                        size="sm" 
-                        className="h-8 px-4 rounded-lg gap-1.5 font-bold transition-all duration-300 shadow-md hover:scale-105 active:scale-95"
-                        onClick={() => handleSettings(employee)}
-                    >
-                        <Settings className="h-4 w-4" />
-                        Settings
-                    </Button>
-                    {/*
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreVertical className="h-4 w-4" />
+                <div className="mx-auto w-[160px]">
+                    <div className="grid grid-cols-2 gap-2 items-center justify-items-center">
+                        {/* Slot 1: Settings Button */}
+                        <div className="flex items-center justify-center">
+                            <Button 
+                                variant="primary" 
+                                size="sm" 
+                                className="h-8 px-3 rounded-lg gap-1.5 font-bold transition-all duration-300 shadow-md hover:scale-105 active:scale-95"
+                                onClick={() => handleSettings(employee)}
+                            >
+                                <Settings className="h-4 w-4" />
+                                <span className="hidden sm:inline text-xs">Settings</span>
                             </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                            {onView && (
-                                <DropdownMenuItem onClick={() => handleView(employee)}>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    View Details
-                                </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem onClick={() => handleSettings(employee)}>
-                                <Settings className="mr-2 h-4 w-4" />
-                                Settings
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditEmployee(employee)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                            </DropdownMenuItem>
-                            {!employee.isVerified && (
-                                <DropdownMenuItem onClick={() => handleVerify(employee)}>
-                                    <ShieldCheck className="mr-2 h-4 w-4 text-primary" />
-                                    Verify Employee
-                                </DropdownMenuItem>
-                            )}
-                            {onDelete && (
-                                <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                        onClick={() => {
-                                            if ((employee as any).canDelete !== false) {
-                                                // Close other modals
-                                                setShowViewDialog(false);
-                                                setShowVerifyDialog(false);
+                        </div>
 
-                                                setSelectedEmployee(employee);
-                                                setShowDeleteDialog(true);
-                                            }
-                                        }}
-                                        className="text-destructive"
-                                        disabled={(employee as any).canDelete === false}
-                                    >
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        {(employee as any).canDelete === false ? 'Cannot Delete (Has Appointments)' : 'Delete'}
+                        {/* Slot 2: More Menu */}
+                        <div className="flex items-center justify-center">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-100 rounded-full">
+                                        <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                    {onView && (
+                                        <DropdownMenuItem onClick={() => handleView(employee)}>
+                                            <Eye className="mr-2 h-4 w-4" />
+                                            View Details
+                                        </DropdownMenuItem>
+                                    )}
+                                    <DropdownMenuItem onClick={() => handleEditEmployee(employee)}>
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Edit
                                     </DropdownMenuItem>
-                                </>
-                            )}
-                        </DropdownMenuContent>
-                    */}
+                                    {!employee.isVerified && (
+                                        <DropdownMenuItem onClick={() => handleVerify(employee)}>
+                                            <ShieldCheck className="mr-2 h-4 w-4 text-primary" />
+                                            Verify Employee
+                                        </DropdownMenuItem>
+                                    )}
+                                    {onDelete && (
+                                        <>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem
+                                                onClick={() => {
+                                                    if ((employee as any).canDelete !== false) {
+                                                        // Close other modals
+                                                        setShowViewDialog(false);
+                                                        setShowVerifyDialog(false);
+
+                                                        setSelectedEmployee(employee);
+                                                        setShowDeleteDialog(true);
+                                                    }
+                                                }}
+                                                className="text-destructive font-medium"
+                                                disabled={(employee as any).canDelete === false}
+                                            >
+                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                {(employee as any).canDelete === false ? 'Cannot Delete' : 'Delete Employee'}
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </div>
                 </div>
             ),
         });

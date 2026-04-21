@@ -13,6 +13,14 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogDescription,
+} from "@/components/ui/dialog";
+import {
     AlertDialog,
     AlertDialogAction,
     AlertDialogCancel,
@@ -129,7 +137,7 @@ export function HolidaySettings() {
     return (
         <Card className="shadow-sm border-none bg-gradient-to-br from-white to-slate-50/50 dark:from-gray-900 dark:to-gray-950">
             <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <CardTitle className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                             Office Holidays
@@ -139,29 +147,31 @@ export function HolidaySettings() {
                         </CardDescription>
                     </div>
                     
-                    <Popover open={isAddOpen} onOpenChange={setIsAddOpen}>
-                        <PopoverTrigger asChild>
-                            <Button className="bg-[#3882a5] hover:bg-[#2d6a87] text-white rounded-xl shadow-md transition-all active:scale-95">
+                    <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="bg-[#3882a5] hover:bg-[#2d6a87] text-white rounded-xl shadow-md transition-all active:scale-95 w-full sm:w-auto">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Add Holiday
                             </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80 p-4 rounded-2xl shadow-xl border-none bg-white dark:bg-gray-900" align="end">
-                            <div className="space-y-4">
-                                <h4 className="font-semibold text-slate-800 dark:text-white">Add New Holiday</h4>
-                                
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px] rounded-3xl border-none shadow-2xl p-6 overflow-hidden">
+                            <DialogHeader>
+                                <DialogTitle className="text-2xl font-bold text-slate-800 dark:text-white">Add New Holiday</DialogTitle>
+                                <DialogDescription>Fill in the details to mark an official holiday.</DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-5 py-2">
                                 <div className="space-y-2">
-                                    <Label className="text-xs uppercase tracking-wider text-slate-500">Select Date</Label>
+                                    <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Select Date</Label>
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <Button
                                                 variant={"outline"}
                                                 className={cn(
-                                                    "w-full justify-start text-left font-normal rounded-xl border-slate-200",
+                                                    "w-full h-12 justify-start text-left font-normal rounded-xl border-slate-200 transition-all hover:bg-slate-50",
                                                     !date && "text-muted-foreground"
                                                 )}
                                             >
-                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                <CalendarIcon className="mr-2 h-4 w-4 text-[#3882a5]" />
                                                 {date ? format(date, "PPP") : <span>Pick a date</span>}
                                             </Button>
                                         </PopoverTrigger>
@@ -178,127 +188,123 @@ export function HolidaySettings() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs uppercase tracking-wider text-slate-500">Reason (Internal)</Label>
+                                    <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Reason (Internal)</Label>
                                     <Input
                                         placeholder="e.g. Diwali, Annual Day"
                                         value={reason}
                                         onChange={(e) => setReason(e.target.value)}
-                                        className="rounded-xl border-slate-200 focus:ring-[#3882a5]/20"
+                                        className="h-12 rounded-xl border-slate-200 focus-visible:ring-[#3882a5]/20 focus-visible:border-[#3882a5]"
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs uppercase tracking-wider text-slate-500">Warning Message (For Visitors)</Label>
+                                    <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Warning Message (For Visitors)</Label>
                                     <Input
                                         placeholder="e.g. Office is closed today..."
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
-                                        className="rounded-xl border-slate-200 focus:ring-[#3882a5]/20"
+                                        className="h-12 rounded-xl border-slate-200 focus-visible:ring-[#3882a5]/20 focus-visible:border-[#3882a5]"
                                     />
                                 </div>
 
-                                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/80 border border-slate-100 dark:bg-slate-900/50">
                                     <div className="space-y-0.5">
-                                        <Label className="text-xs font-bold text-slate-800">Block Portal</Label>
-                                        <p className="text-[10px] text-slate-500">Disable check-ins entirely</p>
+                                        <Label className="text-sm font-bold text-slate-800 dark:text-white">Block Portal</Label>
+                                        <p className="text-[11px] text-slate-500 font-medium">Disable check-ins entirely for this day</p>
                                     </div>
                                     <Switch 
                                         checked={blockPortal}
                                         onCheckedChange={setBlockPortal}
                                     />
                                 </div>
-
-                                <Button 
-                                    className="w-full bg-[#3882a5] hover:bg-[#2d6a87] text-white rounded-xl shadow-lg mt-2"
-                                    onClick={handleAddHoliday}
-                                    disabled={!date || isUpdating}
-                                >
-                                    {isUpdating ? <LoadingSpinner size="sm" className="mr-2" /> : <Plus className="mr-2 h-4 w-4" />}
-                                    Save Holiday
-                                </Button>
                             </div>
-                        </PopoverContent>
-                    </Popover>
+                            <Button 
+                                className="w-full h-12 bg-[#3882a5] hover:bg-[#2d6a87] text-white rounded-xl shadow-lg mt-4 transition-all active:scale-[0.98]"
+                                onClick={handleAddHoliday}
+                                disabled={!date || isUpdating}
+                            >
+                                {isUpdating ? <LoadingSpinner size="sm" className="mr-2" /> : <Plus className="mr-2 h-4 w-4" />}
+                                Save Holiday
+                            </Button>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="hidden">
-                    {/* Hidden Edit Popover Trigger */}
-                    <Popover open={isEditOpen} onOpenChange={setIsEditOpen}>
-                        <PopoverTrigger asChild><div /></PopoverTrigger>
-                        <PopoverContent className="w-80 p-4 rounded-2xl shadow-xl border-none bg-white dark:bg-gray-900" align="center">
-                            <div className="space-y-4">
-                                <h4 className="font-semibold text-slate-800 dark:text-white">Edit Holiday</h4>
-                                
-                                <div className="space-y-2">
-                                    <Label className="text-xs uppercase tracking-wider text-slate-500">Select Date</Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                                variant={"outline"}
-                                                className={cn(
-                                                    "w-full justify-start text-left font-normal rounded-xl border-slate-200",
-                                                    !editDate && "text-muted-foreground"
-                                                )}
-                                            >
-                                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                                {editDate ? format(editDate, "PPP") : <span>Pick a date</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-none" align="center">
-                                            <Calendar
-                                                mode="single"
-                                                selected={editDate}
-                                                onSelect={setEditDate}
-                                                initialFocus
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label className="text-xs uppercase tracking-wider text-slate-500">Reason (Internal)</Label>
-                                    <Input
-                                        placeholder="e.g. Diwali, Annual Day"
-                                        value={editReason}
-                                        onChange={(e) => setEditReason(e.target.value)}
-                                        className="rounded-xl border-slate-200 focus:ring-[#3882a5]/20"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label className="text-xs uppercase tracking-wider text-slate-500">Warning Message (For Visitors)</Label>
-                                    <Input
-                                        placeholder="e.g. Office is closed today..."
-                                        value={editMessage}
-                                        onChange={(e) => setEditMessage(e.target.value)}
-                                        className="rounded-xl border-slate-200 focus:ring-[#3882a5]/20"
-                                    />
-                                </div>
-
-                                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                    <div className="space-y-0.5">
-                                        <Label className="text-xs font-bold text-slate-800">Block Portal</Label>
-                                        <p className="text-[10px] text-slate-500">Disable check-ins entirely</p>
-                                    </div>
-                                    <Switch 
-                                        checked={editBlockPortal}
-                                        onCheckedChange={setEditBlockPortal}
-                                    />
-                                </div>
-
-                                <Button 
-                                    className="w-full bg-[#3882a5] hover:bg-[#2d6a87] text-white rounded-xl shadow-lg mt-2"
-                                    onClick={handleEditHoliday}
-                                    disabled={!editDate || isUpdating}
-                                >
-                                    {isUpdating ? <LoadingSpinner size="sm" className="mr-2" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-                                    Update Holiday
-                                </Button>
+                <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                    <DialogContent className="sm:max-w-[425px] rounded-3xl border-none shadow-2xl p-6 overflow-hidden">
+                        <DialogHeader>
+                            <DialogTitle className="text-2xl font-bold text-slate-800 dark:text-white">Edit Holiday</DialogTitle>
+                            <DialogDescription>Update the details for this official holiday.</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-5 py-2">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Select Date</Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant={"outline"}
+                                            className={cn(
+                                                "w-full h-12 justify-start text-left font-normal rounded-xl border-slate-200 transition-all hover:bg-slate-50",
+                                                !editDate && "text-muted-foreground"
+                                            )}
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4 text-[#3882a5]" />
+                                            {editDate ? format(editDate, "PPP") : <span>Pick a date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-none" align="center">
+                                        <Calendar
+                                            mode="single"
+                                            selected={editDate}
+                                            onSelect={setEditDate}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
                             </div>
-                        </PopoverContent>
-                    </Popover>
-                </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Reason (Internal)</Label>
+                                <Input
+                                    placeholder="e.g. Diwali, Annual Day"
+                                    value={editReason}
+                                    onChange={(e) => setEditReason(e.target.value)}
+                                    className="h-12 rounded-xl border-slate-200 focus-visible:ring-[#3882a5]/20 focus-visible:border-[#3882a5]"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Warning Message (For Visitors)</Label>
+                                <Input
+                                    placeholder="e.g. Office is closed today..."
+                                    value={editMessage}
+                                    onChange={(e) => setEditMessage(e.target.value)}
+                                    className="h-12 rounded-xl border-slate-200 focus-visible:ring-[#3882a5]/20 focus-visible:border-[#3882a5]"
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/80 border border-slate-100 dark:bg-slate-900/50">
+                                <div className="space-y-0.5">
+                                    <Label className="text-sm font-bold text-slate-800 dark:text-white">Block Portal</Label>
+                                    <p className="text-[11px] text-slate-500 font-medium">Disable check-ins entirely for this day</p>
+                                </div>
+                                <Switch 
+                                    checked={editBlockPortal}
+                                    onCheckedChange={setEditBlockPortal}
+                                />
+                            </div>
+                        </div>
+                        <Button 
+                            className="w-full h-12 bg-[#3882a5] hover:bg-[#2d6a87] text-white rounded-xl shadow-lg mt-4 transition-all active:scale-[0.98]"
+                            onClick={handleEditHoliday}
+                            disabled={!editDate || isUpdating}
+                        >
+                            {isUpdating ? <LoadingSpinner size="sm" className="mr-2" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+                            Update Holiday
+                        </Button>
+                    </DialogContent>
+                </Dialog>
 
                 {holidays.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50">

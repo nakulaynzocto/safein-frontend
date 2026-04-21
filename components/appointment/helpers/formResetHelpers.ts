@@ -26,9 +26,18 @@ export const getDefaultFormValues = (): AppointmentFormData => {
 export const appointmentToFormValues = (existingAppointment: any): AppointmentFormData => {
     const appointmentDetails = existingAppointment.appointmentDetails;
 
+    // Handle populated objects or string IDs
+    const visitorId = typeof existingAppointment.visitorId === 'object' 
+        ? existingAppointment.visitorId._id 
+        : (existingAppointment.visitorId || "");
+        
+    const employeeId = typeof existingAppointment.employeeId === 'object' 
+        ? existingAppointment.employeeId._id 
+        : (existingAppointment.employeeId || "");
+
     return {
-        visitorId: existingAppointment.visitorId || "",
-        employeeId: existingAppointment.employeeId || "",
+        visitorId,
+        employeeId,
         purpose: appointmentDetails?.purpose || "",
         appointmentDate: appointmentDetails?.scheduledDate
             ? new Date(appointmentDetails.scheduledDate).toISOString().split("T")[0]

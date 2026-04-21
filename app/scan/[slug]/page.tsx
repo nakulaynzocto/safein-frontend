@@ -367,6 +367,9 @@ export default function QRScanPage() {
                 referenceId={submittedAppointmentId || undefined}
                 onAction={restartQrBookingFlow}
                 actionLabel="New Registration"
+                enableVisitSlip={companyInfo?.features?.enableVisitSlip}
+                visitorPhone={verifiedPhone || undefined}
+                visitorPhoto={visitorDraft?.photo}
             />
         );
     }

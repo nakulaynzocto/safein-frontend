@@ -17,7 +17,8 @@ import {
     Zap,
     ChevronRight,
     Settings2,
-    Activity
+    Activity,
+    FileOutput
 } from "lucide-react";
 import { SettingsHeader } from "./SettingsHeader";
 import { FormContainer } from "@/components/common/formContainer";
@@ -128,6 +129,14 @@ export function CompanyControlSettings() {
             icon: MessageSquareQuote,
             color: "bg-[#3882a5]",
             checked: settings?.features?.enableFeedbackSystem ?? false
+        },
+        {
+            id: "enableVisitSlip",
+            title: "Visit Slip Verification",
+            description: "Allow visitors to print or show an entry script as proof of check-in",
+            icon: FileOutput,
+            color: "bg-[#3882a5]",
+            checked: settings?.features?.enableVisitSlip ?? false
         }
     ];
 
