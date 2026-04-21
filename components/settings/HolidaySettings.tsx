@@ -56,6 +56,18 @@ export function HolidaySettings() {
 
     const holidays = settings?.holidays || [];
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 6;
+    
+    const sortedHolidays = [...holidays]
+        .map((h, i) => ({ ...h, originalIndex: i }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        
+    const totalPages = Math.ceil(sortedHolidays.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const paginatedHolidays = sortedHolidays.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
     const handleAddHoliday = async () => {
         if (!date) return;
 
@@ -313,93 +325,126 @@ export function HolidaySettings() {
                         <p className="text-xs text-slate-400 mt-1">Marked holidays will be shown to visitors on QR check-in</p>
                     </div>
                 ) : (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {[...holidays]
-                            .map((h, i) => ({ ...h, originalIndex: i })) // Keep track of original index for sorting
-                            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                            .map((holiday) => (
-                            <div 
-                                key={holiday.originalIndex}
-                                className={cn(
-                                    "group relative overflow-hidden rounded-2xl border bg-white p-5 shadow-sm hover:shadow-lg transition-all duration-300",
-                                    holiday.blockPortal ? "border-red-100 bg-red-50/5 hover:border-red-200" : "border-slate-100 hover:border-[#3882a5]/30 hover:bg-slate-50/30"
-                                )}
-                            >
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className={cn(
-                                        "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm",
-                                        holiday.blockPortal ? "bg-red-500 text-white" : "bg-slate-100 text-slate-700"
-                                    )}>
-                                        <CalendarIcon className="h-3.5 w-3.5" />
-                                        {format(new Date(holiday.date), "MMM dd, yyyy")}
+                    <div className="space-y-6">
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {paginatedHolidays.map((holiday) => (
+                                <div 
+                                    key={holiday.originalIndex}
+                                    className={cn(
+                                        "group relative overflow-hidden rounded-2xl border bg-white p-5 shadow-sm hover:shadow-lg transition-all duration-300",
+                                        holiday.blockPortal ? "border-red-100 bg-red-50/5 hover:border-red-200" : "border-slate-100 hover:border-[#3882a5]/30 hover:bg-slate-50/30"
+                                    )}
+                                >
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className={cn(
+                                            "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm",
+                                            holiday.blockPortal ? "bg-red-500 text-white" : "bg-slate-100 text-slate-700"
+                                        )}>
+                                            <CalendarIcon className="h-3.5 w-3.5" />
+                                            {format(new Date(holiday.date), "MMM dd, yyyy")}
+                                        </div>
+                                        
+                                        <div className="flex items-center gap-1.5">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                onClick={() => startEditing(holiday, holiday.originalIndex)}
+                                                className="h-8 w-8 text-slate-400 hover:text-[#3882a5] hover:bg-[#3882a5]/10 rounded-lg transition-all"
+                                            >
+                                                <Pencil className="h-3.5 w-3.5" />
+                                            </Button>
+
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                    >
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Remove Holiday?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            Are you sure you want to remove this holiday? Visitors will be able to check-in normally on this date.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel className="rounded-xl border-slate-200">Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction 
+                                                            className="bg-red-500 hover:bg-red-600 text-white rounded-xl"
+                                                            onClick={() => handleDeleteHoliday(holiday.originalIndex)}
+                                                        >
+                                                            Remove
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
                                     </div>
                                     
-                                    <div className="flex items-center gap-1.5">
-                                        <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            onClick={() => startEditing(holiday, holiday.originalIndex)}
-                                            className="h-8 w-8 text-slate-400 hover:text-[#3882a5] hover:bg-[#3882a5]/10 rounded-lg transition-all"
-                                        >
-                                            <Pencil className="h-3.5 w-3.5" />
-                                        </Button>
-
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
-                                                    className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                                >
-                                                    <Trash2 className="h-3.5 w-3.5" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Remove Holiday?</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        Are you sure you want to remove this holiday? Visitors will be able to check-in normally on this date.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel className="rounded-xl border-slate-200">Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction 
-                                                        className="bg-red-500 hover:bg-red-600 text-white rounded-xl"
-                                                        onClick={() => handleDeleteHoliday(holiday.originalIndex)}
-                                                    >
-                                                        Remove
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
-                                </div>
-                                
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
-                                        <h5 className={cn(
-                                            "font-bold text-lg line-clamp-1",
-                                            holiday.blockPortal ? "text-red-900" : "text-slate-800"
-                                        )}>{holiday.reason || "Holiday"}</h5>
-                                        {holiday.blockPortal && (
-                                            <Ban className="h-4 w-4 text-red-500" />
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <h5 className={cn(
+                                                "font-bold text-lg line-clamp-1",
+                                                holiday.blockPortal ? "text-red-900" : "text-slate-800"
+                                            )}>{holiday.reason || "Holiday"}</h5>
+                                            {holiday.blockPortal && (
+                                                <Ban className="h-4 w-4 text-red-500" />
+                                            )}
+                                        </div>
+                                        {holiday.message && (
+                                            <p className={cn(
+                                                "text-xs mt-1 line-clamp-2 leading-relaxed opacity-70",
+                                                holiday.blockPortal ? "text-red-700" : "text-slate-500"
+                                            )}>
+                                                "{holiday.message}"
+                                            </p>
                                         )}
                                     </div>
-                                    {holiday.message && (
-                                        <p className={cn(
-                                            "text-xs mt-1 line-clamp-2 leading-relaxed opacity-70",
-                                            holiday.blockPortal ? "text-red-700" : "text-slate-500"
-                                        )}>
-                                            "{holiday.message}"
-                                        </p>
-                                    )}
+                                    
+                                    <div className="absolute -bottom-2 -right-2 p-1 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity">
+                                        {holiday.blockPortal ? <Ban className="h-24 w-24 text-red-500" /> : <AlertCircle className="h-24 w-24 text-[#3882a5]" />}
+                                    </div>
                                 </div>
-                                
-                                <div className="absolute -bottom-2 -right-2 p-1 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity">
-                                    {holiday.blockPortal ? <Ban className="h-24 w-24 text-red-500" /> : <AlertCircle className="h-24 w-24 text-[#3882a5]" />}
+                            ))}
+                        </div>
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                                <p className="text-xs text-slate-500 font-medium whitespace-nowrap">
+                                    Showing <span className="text-slate-900 font-bold">{startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, sortedHolidays.length)}</span> of <span className="text-slate-900 font-bold">{sortedHolidays.length}</span> holidays
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                        disabled={currentPage === 1}
+                                        className="h-9 px-4 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all font-bold text-xs"
+                                    >
+                                        Previous
+                                    </Button>
+                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 rounded-lg">
+                                        <span className="text-xs font-bold text-[#3882a5]">{currentPage}</span>
+                                        <span className="text-xs font-bold text-slate-400">/</span>
+                                        <span className="text-xs font-bold text-slate-500">{totalPages}</span>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className="h-9 px-4 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all font-bold text-xs"
+                                    >
+                                        Next
+                                    </Button>
                                 </div>
                             </div>
-                        ))}
+                        )}
                     </div>
                 )}
             </CardContent>
