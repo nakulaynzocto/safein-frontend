@@ -33,6 +33,7 @@ import { PageSEOHead } from "@/components/seo/pageSEOHead";
 import { generateStructuredData } from "@/lib/seoHelpers";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { InstallAppButton } from "@/components/common/InstallAppButton";
 
 // Dynamically import below-the-fold sections for better performance
 const FeatureSection = dynamic(() => import("@/app/_sections/FeatureSection"), {
@@ -260,17 +261,17 @@ export default function HomePage() {
                         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
                             {/* Hero Image Area - Dual Device Showcase */}
                             <div className="relative order-1 lg:order-2 perspective-[2000px] mb-12 sm:mb-0">
-                                <div className="relative mx-auto max-w-[450px] sm:max-w-[600px] lg:ml-auto select-none py-10 sm:py-20 animate-float-slow">
+                                <div className="relative mx-auto max-w-[300px] xs:max-w-[350px] sm:max-w-[600px] lg:ml-auto select-none py-10 sm:py-20 animate-float-slow">
                                     <div className={`absolute -inset-20 rounded-full bg-gradient-to-br from-[#3882a5]/30 to-[#074463]/20 opacity-30 blur-[140px] transition-all duration-1000`}></div>
                                     <div className={`absolute -inset-10 rounded-full bg-gradient-to-br from-brand/20 to-brand/10 opacity-20 blur-[120px] transition-all duration-1000`}></div>
                                     
-                                    {/* 1. Landscape Kiosk (Background) */}
-                                    <div className="absolute -left-12 sm:-left-20 top-[45%] -translate-y-1/2 w-[320px] sm:w-[440px] opacity-100 transition-all duration-700"
+                                    {/* 1. Landscape Kiosk (Background) - Spread more on Desktop too */}
+                                    <div className="absolute left-[-30px] xs:left-[-40px] sm:left-[-80px] lg:left-[-110px] top-[45%] -translate-y-1/2 w-[240px] xs:w-[280px] sm:w-[440px] opacity-100 transition-all duration-700"
                                          style={{ transform: 'rotateY(30deg) rotateX(10deg) translateZ(-50px)', transformStyle: 'preserve-3d' }}>
                                         
                                         <div className="absolute -bottom-20 left-1/2 z-0 h-40 w-12 -translate-x-1/2 rounded-xl bg-gradient-to-b from-gray-900 to-black border-x border-white/5 opacity-80 shadow-2xl"></div>
                                         <div className="absolute -bottom-24 left-1/2 z-0 h-8 w-40 -translate-x-1/2 rounded-[50%] bg-black/40 blur-[4px]"></div>
-
+ 
                                         <div className="relative z-10 w-full aspect-[16/10] overflow-hidden rounded-[2.5rem] border-[12px] border-gray-950 bg-gray-950 shadow-2xl ring-1 ring-white/10">
                                             <div className="relative w-full h-full bg-gray-950 overflow-hidden">
                                                 {processSteps.map((step, idx) => (
@@ -285,7 +286,7 @@ export default function HomePage() {
                                                             src={step.image}
                                                             alt={step.title}
                                                             fill
-                                                            sizes="(max-width: 768px) 320px, 440px"
+                                                            sizes="(max-width: 768px) 240px, 440px"
                                                             className="object-cover transition-transform duration-[2000ms] ease-linear"
                                                             style={{ transform: idx === heroActiveStep ? 'scale(1.1)' : 'scale(1)' }}
                                                         />
@@ -294,9 +295,9 @@ export default function HomePage() {
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* 2. Modern Smartphone (Main Foreground) */}
-                                    <div className="relative z-20 ml-auto w-[220px] sm:w-[280px] transition-all duration-500 hover:scale-[1.05]"
+ 
+                                    {/* 2. Modern Smartphone (Main Foreground) - Spread more on Desktop too */}
+                                    <div className="relative z-20 ml-auto mr-[-40px] xs:mr-[-20px] sm:mr-[-30px] lg:mr-[-50px] w-[180px] xs:w-[220px] sm:w-[280px] transition-all duration-500 hover:scale-[1.05]"
                                          style={{ transform: 'rotateY(-30deg) rotateX(8deg) translateZ(80px)', transformStyle: 'preserve-3d' }}>
                                         
                                         <div className="relative w-full overflow-hidden rounded-[2.8rem] border-[10px] border-gray-950 bg-gray-950 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.1)] ring-[3px] ring-[#3882a5]/30">
@@ -332,8 +333,7 @@ export default function HomePage() {
                                     </div>
                                 </div>
                             </div>
-
-                            <div className="text-center lg:text-left order-2 lg:order-1">
+                            <div className="flex flex-col items-center lg:items-start text-center lg:text-left order-2 lg:order-1">
                                 <div className="mb-8 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
                                     <div className="badge-glass flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all hover:bg-white/10">
                                         <Star className="h-3.5 w-3.5 fill-current text-[#3882a5]" />
@@ -349,7 +349,7 @@ export default function HomePage() {
                                     <span className="text-white lg:opacity-90">Management for Offices</span>
                                 </h1>
 
-                                <p className="text-accent-light mb-10 max-w-xl px-2 text-base leading-relaxed text-gray-300 sm:text-xl lg:px-0 opacity-90">
+                                <p className="text-accent-light mb-10 max-w-xl px-2 text-base leading-relaxed text-gray-300 sm:text-xl lg:px-0 opacity-90 mx-auto lg:mx-0">
                                     Make your reception digital. Easy check-ins, 
                                     fast visitor alerts, and better office security.
                                 </p>
@@ -386,15 +386,9 @@ export default function HomePage() {
                                     </Button>
                                 </div>
 
-                                <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 opacity-50 grayscale transition-all hover:opacity-100 hover:grayscale-0 lg:justify-start">
-                                    <div className="flex items-center gap-2">
-                                        <ShieldCheck className="h-4 w-4 text-white" />
-                                        <span className="text-[10px] font-bold tracking-widest text-white uppercase italic">ISO 27001 Certified</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Globe className="h-4 w-4 text-white" />
-                                        <span className="text-[10px] font-bold tracking-widest text-white uppercase italic">GDPR Compliant</span>
-                                    </div>
+                                {/* Custom Install App Card (Hero only) */}
+                                <div className="mt-8 w-full max-w-xl mx-auto lg:mx-0">
+                                    <InstallAppButton variant="hero" />
                                 </div>
                             </div>
                         </div>

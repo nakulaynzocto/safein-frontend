@@ -74,12 +74,7 @@ export default function AppointmentRequestsPage() {
     const pendingAppointments = appointmentsData?.appointments || [];
 
     return (
-        <div className="space-y-4 sm:space-y-6">
-            <PageHeader
-                title="Visit Approvals"
-                description="Review and manage incoming visit requests"
-            />
-
+        <div className="space-y-4 sm:space-y-6 pt-4">
             {appointmentsLoading ? (
                 <PageSkeleton type="table" showStats={false} />
             ) : pendingAppointments.length > 0 ? (

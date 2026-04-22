@@ -98,10 +98,7 @@ export default function BlogsPage() {
                     {/* Blog Grid */}
                     <section className="py-24 bg-slate-50/50">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="mb-16 text-center">
-                                <h2 className="text-3xl font-black text-[#074463] md:text-4xl uppercase tracking-tight">Recent <span className="text-[#3882a5]">Articles</span></h2>
-                                <p className="text-slate-500 font-medium mt-4">Browse our latest thoughts and industry updates</p>
-                            </div>
+
 
                             {isLoading ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">

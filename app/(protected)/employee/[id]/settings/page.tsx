@@ -37,13 +37,14 @@ import {
     CheckCircle2,
     Clipboard
 } from "lucide-react";
-import { formatName, getInitials } from "@/utils/helpers";
+import { formatName, getInitials, isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { routes } from "@/utils/routes";
 import { ConfirmationDialog } from "@/components/common/confirmationDialog";
 import { EmployeeDetailsDialog } from "@/components/employee/employeeDetailsDialog";
 import { EmployeeVerificationModal } from "@/components/employee/EmployeeVerificationModal";
+import { useAppSelector } from "@/store/hooks";
 
 export default function EmployeeSettingsPage() {
     const params = useParams();
@@ -53,6 +54,12 @@ export default function EmployeeSettingsPage() {
     const { data: employee, isLoading, isError, refetch } = useGetEmployeeQuery(employeeId);
     const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
     const [deleteEmployee, { isLoading: isDeleting }] = useDeleteEmployeeMutation();
+
+    // Detect if the currently logged-in user is an employee viewing their own settings
+    const { user: authUser } = useAppSelector((state) => state.auth);
+    const isViewerEmployee = checkIsEmployee(authUser);
+    // Employee can only see their own notification settings — admin actions are hidden
+    const isOwnProfile = isViewerEmployee && (authUser?.employeeId === employeeId);
 
     const [settings, setSettings] = useState({
         email: true,
@@ -174,7 +181,7 @@ export default function EmployeeSettingsPage() {
                         variant="outline"
                         size="icon"
                         className="h-10 w-10 shrink-0 rounded-xl bg-background hover:bg-accent/50"
-                        onClick={() => router.push(routes.privateroute.EMPLOYEELIST)}
+                        onClick={() => router.back()}
                     >
                         <ArrowLeft className="h-5 w-5 text-muted-foreground" />
                     </Button>
@@ -197,9 +204,9 @@ export default function EmployeeSettingsPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className={`grid grid-cols-1 gap-6 ${!isOwnProfile ? "lg:grid-cols-3" : ""}`}>
                 {/* Left Column - Profile & Notifications */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className={`space-y-6 ${!isOwnProfile ? "lg:col-span-2" : ""}`}>
                     {/* Profile Card */}
                     <Card className="overflow-hidden border-none bg-background/60 backdrop-blur-md shadow-sm ring-1 ring-border/50 text-foreground">
                         <div className="h-32 bg-gradient-to-br from-primary/10 via-primary/[0.02] to-transparent relative text-foreground">
@@ -332,8 +339,8 @@ export default function EmployeeSettingsPage() {
                         </CardContent>
                     </Card>
 
-                    {/* Deletion Warning if applicable */}
-                    {employee.canDelete === false && (
+                    {/* Deletion Warning - admin only */}
+                    {!isOwnProfile && employee.canDelete === false && (
                         <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-800 rounded-xl">
                             <AlertCircle className="h-4 w-4" />
                             <AlertTitle className="text-sm font-bold">Cannot delete employee</AlertTitle>
@@ -345,7 +352,8 @@ export default function EmployeeSettingsPage() {
                     )}
                 </div>
 
-                {/* Right Column - Quick Actions */}
+                {/* Right Column - Quick Actions (admin only) */}
+                {!isOwnProfile && (
                 <div className="space-y-6">
                     <Card className="border-none bg-background/50 backdrop-blur-sm shadow-sm ring-1 ring-border text-foreground">
                         <CardHeader>
@@ -423,6 +431,7 @@ export default function EmployeeSettingsPage() {
                         </CardContent>
                     </Card>
                 </div>
+                )}
             </div>
 
             {/* Dialogs */}

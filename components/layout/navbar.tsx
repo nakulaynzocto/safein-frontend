@@ -488,6 +488,17 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                                     </div>
                                                 )}
                                             </div>
+                                             {isEmployee && (user?.employeeId || employeeData?._id) && (
+                                                 <DropdownMenuItem asChild className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors">
+                                                     <Link
+                                                         href={`/employee/${user?.employeeId || employeeData?._id}/settings`}
+                                                         className="text-[14px] font-semibold text-[#666666] group-hover:underline flex items-center gap-2"
+                                                         onClick={() => setIsSettingsOpen(false)}
+                                                     >
+                                                         My Settings
+                                                     </Link>
+                                                 </DropdownMenuItem>
+                                             )}
                                              {!isEmployee && (
                                                  <DropdownMenuItem asChild className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors">
                                                     <Link href={routes.privateroute.PROFILE} className="text-[14px] font-semibold text-[#666666] group-hover:underline">
@@ -562,12 +573,13 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                     <Link
                                         href={routes.privateroute.DASHBOARD}
                                         className={cn(
-                                            "rounded-lg px-3 py-1.5 sm:px-6 sm:py-2 text-[12px] sm:text-[14px] font-semibold transition-all duration-300 flex items-center justify-center",
+                                            "rounded-lg px-2 py-1.5 sm:px-6 sm:py-2 text-[11px] sm:text-[14px] font-bold transition-all duration-300 flex items-center justify-center whitespace-nowrap",
                                             ctaBtn
                                         )}
                                         prefetch={true}
                                     >
-                                        My Account
+                                        <span className="xs:hidden">Account</span>
+                                        <span className="hidden xs:inline">My Account</span>
                                     </Link>
                                 )}
                             </>

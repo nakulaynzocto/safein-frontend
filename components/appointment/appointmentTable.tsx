@@ -645,17 +645,14 @@ export function AppointmentTable({
                     </div>
                     
                     <div className="flex flex-wrap lg:flex-nowrap items-center gap-2 sm:gap-3">
-                        <div className="flex-1 sm:flex-none">
-                            <DateRangePicker
-                                onDateRangeChange={(r) => {
-                                    onDateFromChange?.(r.startDate || "");
-                                    onDateToChange?.(r.endDate || "");
-                                    onPageChange?.(1);
-                                }}
-                                initialValue={dateFrom && dateTo ? { startDate: dateFrom, endDate: dateTo } : undefined}
-                                className="w-full sm:w-[240px]"
-                            />
-                        </div>
+                        <DateRangePicker
+                            onDateRangeChange={(r) => {
+                                onDateFromChange?.(r.startDate || "");
+                                onDateToChange?.(r.endDate || "");
+                                onPageChange?.(1);
+                            }}
+                            initialValue={dateFrom && dateTo ? { startDate: dateFrom, endDate: dateTo } : undefined}
+                        />
                         
                         <SubscriptionActionButtons
                             isExpired={isExpired}

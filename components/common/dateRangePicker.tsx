@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear } from "date-fns";
-import { Calendar as CalendarIcon, X as XIcon, Check } from "lucide-react";
+import { format, subDays, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { Calendar as CalendarIcon, X as XIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
@@ -48,7 +48,6 @@ export default function DateRangePicker({
 
     const [isOpen, setIsOpen] = React.useState(false);
 
-    // Sync from props
     React.useEffect(() => {
         if (initialValue?.startDate && initialValue?.endDate) {
             setDate({
@@ -91,7 +90,7 @@ export default function DateRangePicker({
     const handlePresetClick = (preset: string) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         let from: Date | undefined;
         let to: Date | undefined = today;
 
@@ -116,18 +115,17 @@ export default function DateRangePicker({
                 from = startOfMonth(today);
                 to = endOfMonth(today);
                 break;
-            case "lastMonth":
+            case "lastMonth": {
                 const lastMonth = subMonths(today, 1);
                 from = startOfMonth(lastMonth);
                 to = endOfMonth(lastMonth);
                 break;
+            }
             case "lastYear":
                 from = subDays(today, 365);
                 to = today;
                 break;
             case "all":
-                from = undefined;
-                to = undefined;
                 setDate(undefined);
                 onDateRangeChange?.({ startDate: null, endDate: null });
                 setIsOpen(false);
@@ -145,55 +143,45 @@ export default function DateRangePicker({
         }
     };
 
+    /* Compact label for the trigger button */
+    const triggerLabel = React.useMemo(() => {
+        if (!date?.from) return "Date range";
+        if (!date.to) return format(date.from, "dd MMM yy");
+        return `${format(date.from, "dd MMM")} – ${format(date.to, "dd MMM yy")}`;
+    }, [date]);
+
     return (
-        <div className={cn("grid gap-2", className)}>
+        <div className={cn("inline-flex", className)}>
             <Popover open={isOpen} onOpenChange={setIsOpen}>
                 <PopoverTrigger asChild>
                     <Button
                         id="date"
-                        variant={"outline"}
+                        variant="outline"
                         className={cn(
-                            "h-12 flex items-center justify-center font-normal rounded-xl border-border bg-background hover:bg-accent/10 transition-all",
-                            !date && "text-muted-foreground",
-                            date ? "px-2 sm:px-3" : "w-12 sm:w-auto sm:px-4"
+                            "h-9 px-3 flex items-center gap-1.5 font-normal rounded-lg text-[13px]",
+                            "max-w-[160px] w-auto",
+                            "border-border bg-background",
+                            "hover:bg-[#f0f6fa] hover:border-[#3882a5]/50 hover:text-[#3882a5]",
+                            "transition-all duration-150",
+                            date ? "text-foreground" : "text-muted-foreground"
                         )}
                     >
-                        <CalendarIcon className={cn(
-                            "h-4 w-4 shrink-0 text-[#3882a5]",
-                            !date && "sm:mr-2"
-                        )} />
-                        
-                        <span className={cn(
-                            "truncate text-sm hidden sm:inline-flex items-center",
-                            !date && "ml-0"
-                        )}>
-                            {date?.from ? (
-                                date.to ? (
-                                    <>
-                                        {format(date.from, "LLL dd, y")} -{" "}
-                                        {format(date.to, "LLL dd, y")}
-                                    </>
-                                ) : (
-                                    format(date.from, "LLL dd, y")
-                                )
-                            ) : (
-                                "Pick a date range"
-                            )}
-                        </span>
-
+                        <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-[#3882a5]" />
+                        <span className="truncate">{triggerLabel}</span>
                         {date && (
-                            <div 
+                            <div
                                 role="button"
-                                className="ml-1 sm:ml-2 flex h-6 w-6 items-center justify-center rounded-full hover:bg-accent/20 transition-colors"
+                                className="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full hover:bg-[#3882a5]/15 transition-colors"
                                 onClick={handleClear}
                             >
-                                <XIcon className="h-3 w-3 text-muted-foreground" />
+                                <XIcon className="h-2.5 w-2.5 text-muted-foreground" />
                             </div>
                         )}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent 
-                    className="w-auto p-0 rounded-2xl shadow-2xl border-border bg-popover overflow-hidden" 
+
+                <PopoverContent
+                    className="w-auto p-0 rounded-2xl shadow-2xl border-border bg-popover overflow-hidden"
                     align="center"
                     sideOffset={8}
                 >
@@ -205,12 +193,14 @@ export default function DateRangePicker({
                                     key={range.value}
                                     onClick={() => handlePresetClick(range.value)}
                                     className={cn(
-                                        "whitespace-nowrap rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent/80 text-left",
-                                        "md:w-full flex items-center justify-between group relative",
-                                        "hover:pl-4 transition-all duration-200"
+                                        "whitespace-nowrap rounded-lg px-3 py-2 text-sm transition-all text-left",
+                                        "md:w-full flex items-center justify-between group",
+                                        "hover:bg-accent/80 hover:pl-4 duration-200"
                                     )}
                                 >
-                                    <span className="text-gray-600 group-hover:text-[#3882a5] font-medium transition-colors">{range.label}</span>
+                                    <span className="text-gray-600 group-hover:text-[#3882a5] font-medium transition-colors">
+                                        {range.label}
+                                    </span>
                                     <div className="h-1 w-1 rounded-full bg-transparent group-hover:bg-[#3882a5] transition-all ml-2" />
                                 </button>
                             ))}
@@ -236,27 +226,25 @@ export default function DateRangePicker({
                                 numberOfMonths={1}
                                 className="md:hidden"
                             />
-                            
-                            {/* Mobile/Tablet Footer */}
+
+                            {/* Footer */}
                             <div className="flex items-center justify-between gap-4 border-t border-border p-3 mt-1 md:mt-3">
                                 <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-1 max-w-[150px]">
-                                    {date?.from && date?.to ? (
-                                        `${format(date.from, "dd/MM/yy")} - ${format(date.to, "dd/MM/yy")}`
-                                    ) : (
-                                        "Select range"
-                                    )}
+                                    {date?.from && date?.to
+                                        ? `${format(date.from, "dd/MM/yy")} - ${format(date.to, "dd/MM/yy")}`
+                                        : "Select range"}
                                 </p>
                                 <div className="flex gap-2">
-                                    <Button 
-                                        variant="ghost" 
-                                        size="sm" 
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
                                         className="h-8 text-xs px-3 rounded-lg"
                                         onClick={() => setIsOpen(false)}
                                     >
                                         Cancel
                                     </Button>
-                                    <Button 
-                                        size="sm" 
+                                    <Button
+                                        size="sm"
                                         className="h-8 text-xs px-4 rounded-lg bg-[#3882a5] hover:bg-[#2d6a87] text-white"
                                         onClick={handleApply}
                                         disabled={!date?.from || !date?.to}
