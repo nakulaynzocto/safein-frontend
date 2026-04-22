@@ -20,6 +20,7 @@ export enum SocketEvents {
     APPOINTMENT_DELETED = "appointment_deleted",
     APPOINTMENT_STATUS_CHANGED = "appointment_status_changed",
     NEW_NOTIFICATION = "new_notification",
+    WALLET_BALANCE_UPDATED = "wallet_balance_updated",
 
     // Chat Events
     JOIN_CHAT_ROOM = "join_chat_room",
@@ -353,6 +354,11 @@ export function useSocket(options: UseSocketOptions = {}) {
         [invalidateNotifications, router, showToasts, isPublicActionContext],
     );
 
+    // Handle wallet balance update
+    const handleWalletBalanceUpdate = useCallback(() => {
+        dispatch(baseApi.util.invalidateTags(["Wallet"]));
+    }, [dispatch]);
+
     // Fix: Use useRef for stable callbacks to prevent unnecessary re-renders
     const onConnectRef = useRef(onConnect);
     const onDisconnectRef = useRef(onDisconnect);
@@ -414,6 +420,7 @@ export function useSocket(options: UseSocketOptions = {}) {
         socket.on(SocketEvents.APPOINTMENT_UPDATED, handleAppointmentUpdated);
         socket.on(SocketEvents.APPOINTMENT_DELETED, handleAppointmentDeleted);
         socket.on(SocketEvents.NEW_NOTIFICATION, handleNewNotification);
+        socket.on(SocketEvents.WALLET_BALANCE_UPDATED, handleWalletBalanceUpdate);
     }, [
         token,
         resolvedUserId,
@@ -423,6 +430,7 @@ export function useSocket(options: UseSocketOptions = {}) {
         handleAppointmentUpdated,
         handleAppointmentDeleted,
         handleNewNotification,
+        handleWalletBalanceUpdate,
     ]);
 
     const disconnect = useCallback(() => {

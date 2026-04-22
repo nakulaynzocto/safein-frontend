@@ -284,7 +284,11 @@ function AppointmentLinksContent() {
             appointmentDetails: {
                 purpose: item.notes || "VIP Visit",
                 scheduledDate: item.updatedAt || new Date().toISOString(),
-                scheduledTime: formatDateTime(item.updatedAt || new Date()).time,
+                scheduledTime: new Date(item.updatedAt || new Date()).toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit', 
+                    hour12: true 
+                }),
             }
         };
         setPassToPrint(adaptedPass);

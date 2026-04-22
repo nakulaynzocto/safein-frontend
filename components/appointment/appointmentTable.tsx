@@ -170,7 +170,7 @@ export function AppointmentTable({
 
     const handlePrintRequest = useReactToPrint({
         contentRef: printRef,
-        documentTitle: `VisitPass_${appointmentToPrint?.visitorId?.name || 'Visitor'}`,
+        documentTitle: `VisitPass_${(appointmentToPrint as any)?.visitorId?.name || (appointmentToPrint as any)?.visitor?.name || 'Visitor'}`,
     });
 
     const handlePrintSlip = (appointment: Appointment) => {
@@ -311,7 +311,7 @@ export function AppointmentTable({
                 key: "visitorName",
                 header: "Visitor",
                 render: (appointment: Appointment) => {
-                    const visitor = (appointment as any).visitorId || appointment.visitor;
+                    const visitor = appointment.visitor || (typeof appointment.visitorId === 'object' ? appointment.visitorId : null);
                     const visitorNameRaw = visitor?.name || "Unknown Visitor";
                     const visitorName = formatName(visitorNameRaw) || visitorNameRaw;
                     const visitorPhone = visitor?.phone || "N/A";
@@ -340,7 +340,7 @@ export function AppointmentTable({
                 key: "employeeName",
                 header: "Meeting With",
                 render: (appointment: Appointment) => {
-                    const employee = (appointment as any).employeeId || appointment.employee;
+                    const employee = appointment.employee || (typeof appointment.employeeId === 'object' ? appointment.employeeId : null);
                     const employeeNameRaw = employee?.name || "Unknown Employee";
                     const employeeName = formatName(employeeNameRaw) || employeeNameRaw;
                     const employeePhone = employee?.phone || "N/A";
@@ -523,7 +523,7 @@ export function AppointmentTable({
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl border-slate-100 bg-white/95 backdrop-blur-sm">
-                                            {appointment.status === "Approved" && (
+                                            {appointment.status === "approved" && (
                                                 <DropdownMenuItem 
                                                     onClick={() => handlePrintSlip(appointment)}
                                                     className="flex items-center gap-2 p-3 rounded-xl transition-all cursor-pointer focus:bg-slate-50 focus:text-[#3882a5] group"

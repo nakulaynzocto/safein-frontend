@@ -15,7 +15,6 @@ export function CreditBalancePill({ forceShow = false }: { forceShow?: boolean }
     const [isRechargeOpen, setIsRechargeOpen] = useState(false);
     const { data: settings } = useGetSettingsQuery();
     const { data: walletData, isLoading } = useGetWalletBalanceQuery(undefined, {
-        pollingInterval: 60000,
         skip: !forceShow && !settings?.voiceCall?.enabled,
     });
 

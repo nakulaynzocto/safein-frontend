@@ -19,6 +19,7 @@ export interface CompanyPublicInfo {
         enableVisitorImageCapture: boolean;
         enableVerification: boolean;
         enableAutoApproval: boolean;
+        enableVisitSlip?: boolean;
     };
     employees: Array<{
         _id: string;
