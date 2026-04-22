@@ -24,6 +24,7 @@ import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { UserPlus } from "lucide-react";
 import { useUserCountry } from "@/hooks/useUserCountry";
+import { useGetSettingsQuery } from "@/store/api/settingsApi";
 
 interface NewVisitorModalProps {
     visitorId?: string;
@@ -63,6 +64,7 @@ export function NewVisitorModal({
     const isEditMode = !!visitorId;
     const isLoading = isCreating || isUpdating || isUploadingFile;
     const defaultCountry = useUserCountry();
+    const { data: settings } = useGetSettingsQuery();
 
     const { data: visitorData, isLoading: isLoadingVisitor } = useGetVisitorQuery(visitorId!, {
         skip: !isEditMode,
@@ -91,6 +93,7 @@ export function NewVisitorModal({
         setValue,
         clearErrors,
         watch,
+        setError,
     } = useForm<VisitorFormData>({
         resolver: yupResolver(visitorSchema) as any,
         mode: "onSubmit",
@@ -200,6 +203,13 @@ export function NewVisitorModal({
         try {
             setGeneralError(null);
 
+            // Mandatory photo check if enabled
+            if (settings?.features?.enableVisitorImageCapture && !data.photo) {
+                setError("photo", { type: "manual", message: "Visitor photo is required" });
+                showErrorToast("Visitor photo is required");
+                return;
+            }
+
             let finalPhotoUrl = typeof data.photo === "string" ? data.photo : undefined;
             if (data.photo instanceof File) {
                 const uploadRes = await uploadFile({ file: data.photo }).unwrap();
@@ -280,6 +290,7 @@ export function NewVisitorModal({
                 onToggleSecurityFields={handleToggleSecurity}
                 setIsFileUploading={setIsFileUploading}
                 initialData={visitorData}
+                enableVisitorImageCapture={settings?.features?.enableVisitorImageCapture}
             />
 
 

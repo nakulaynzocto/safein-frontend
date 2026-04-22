@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -77,20 +77,13 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
     const steps = useMemo(() => {
         const baseSteps: { key: StepKey; label: string; mobileLabel: string }[] = [
             { key: "details", label: "Basic Details", mobileLabel: "Details" },
-        ];
-
-        // Only include photo step if enabled in settings
-        if (settings?.features?.enableVisitorImageCapture === true) {
-            baseSteps.push({ key: "photo", label: "Visitor Photo", mobileLabel: "Photo" });
-        }
-
-        baseSteps.push(
+            { key: "photo", label: "Visitor Photo", mobileLabel: "Photo" },
             { key: "id_proof", label: "ID & Tags", mobileLabel: "ID" },
             { key: "preview", label: "Review & Save", mobileLabel: "Review" }
-        );
+        ];
 
         return baseSteps;
-    }, [settings?.features?.enableVisitorImageCapture]);
+    }, []);
 
     const activeStepIndex = steps.findIndex((s) => s.key === step);
 
@@ -111,6 +104,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
         reset,
         control,
         trigger,
+        setError,
     } = useForm<VisitorFormData>({
         resolver: yupResolver(visitorSchema) as any,
         defaultValues: {
@@ -153,20 +147,21 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
         }
     }, [phoneExists, foundVisitor, dismissedVisitorId]);
 
-    const handleDismissModal = () => {
+    const handleBookAppointment = useCallback(() => {
+        if (foundVisitor) {
+            router.push(`${routes.privateroute.APPOINTMENTCREATE}?visitorId=${foundVisitor._id}`);
+            setShowExistenceModal(false);
+        }
+    }, [foundVisitor, router]);
+
+    const handleDismissModal = useCallback(() => {
         if (foundVisitor) {
             setDismissedVisitorId(foundVisitor._id);
         }
         setShowExistenceModal(false);
-    };
+    }, [foundVisitor]);
 
-    const handleBookAppointment = () => {
-        if (foundVisitor) {
-            router.push(`${routes.privateroute.APPOINTMENTCREATE}?visitorId=${foundVisitor._id}`);
-        }
-    };
-
-    const handleAutoFill = () => {
+    const handleAutoFill = useCallback(() => {
         if (foundVisitor) {
             reset({
                 name: foundVisitor.name,
@@ -204,7 +199,11 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
             setDismissedVisitorId(foundVisitor._id);
             showSuccessToast("Details auto-filled from your previous visit!");
         }
-    };
+    }, [foundVisitor, reset, defaultCountry, showSuccessToast]);
+
+    const handleDismissExistenceModal = useCallback(() => {
+        handleDismissModal();
+    }, [handleDismissModal]);
 
     const clearGeneralError = () => {
         if (generalError) {
@@ -225,6 +224,15 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
             : true;
 
         if (isValid) {
+            // Extra check for photo if enabled in settings
+            if (step === "photo" && settings?.features?.enableVisitorImageCapture) {
+                const photo = watch("photo");
+                if (!photo) {
+                    setError("photo", { type: "manual", message: "Visitor photo is required" });
+                    return;
+                }
+            }
+
             const nextStep = steps[activeStepIndex + 1]?.key;
             if (nextStep) {
                 setStep(nextStep as any);
@@ -446,7 +454,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
                             {/* Top row: Profile & Bio */}
                             <div className="space-y-6">
                                 <div className="flex items-center gap-4">
-                                    {settings?.features?.enableVisitorImageCapture === true && (
+                                    {(settings?.features?.enableVisitorImageCapture === true || watch("photo")) && (
                                         <div className="h-20 w-20 rounded-2xl border-2 border-white shadow-md overflow-hidden bg-white shrink-0">
                                             <ImagePreview 
                                                 src={watch("photo")} 
@@ -569,7 +577,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
             <ConfirmationDialog
                 open={showExistenceModal}
                 onOpenChange={(open) => {
-                    if (!open) handleDismissModal();
+                    if (!open) handleDismissExistenceModal();
                 }}
                 title="Visitor Already Exists"
                 description={
@@ -590,7 +598,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
                 cancelText="Stay Here"
                 onConfirm={handleBookAppointment}
                 onSecondaryAction={handleAutoFill}
-                onCancel={handleDismissModal}
+                onCancel={handleDismissExistenceModal}
             />
         </div>
     );

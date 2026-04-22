@@ -150,11 +150,13 @@ export function VisitorFormFields({
 
 
             {/* Photo Section */}
-            {(!step || step === "photo") && enableVisitorImageCapture && (
+            {(!step || step === "photo") && (
                 <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
                         <div className="text-center mb-6">
-                            <h4 className="text-lg font-bold text-[#1f4f67]">Visitor Photograph</h4>
+                            <h4 className="text-lg font-bold text-[#1f4f67]">
+                                Visitor Photograph {enableVisitorImageCapture && <span className="text-red-500 ml-1 truncate">*</span>}
+                            </h4>
                             <p className="text-sm text-slate-500 max-w-xs mx-auto">Upload a clear face photo of the visitor for system records.</p>
                         </div>
                         
@@ -166,7 +168,7 @@ export function VisitorFormFields({
                             setValue={setValue}
                             errors={errors.photo}
                             initialUrl={watch("photo")}
-                            enableImageCapture={true}
+                            enableImageCapture={enableVisitorImageCapture}
                             variant="avatar"
                             className="scale-110"
                             delayedUpload={true}
