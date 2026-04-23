@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
+import { routes } from "@/utils/routes";
 
 interface CreditWalletCardProps {
   balance: number;
@@ -36,7 +37,7 @@ export function CreditWalletCard({
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => router.push("/subscription-plans")}
+            onClick={() => router.push(routes.publicroute.PRICING)}
             className="gap-1"
           >
             <ArrowUpRight className="h-4 w-4" />

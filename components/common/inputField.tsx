@@ -43,7 +43,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                         autoComplete={autoComplete}
                         className={cn(
                             "flex h-12 w-full px-4 py-2 rounded-xl transition-all duration-300 font-medium text-sm",
-                            "bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800",
+                            "bg-slate-50/50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700",
                             "placeholder:text-slate-400/60 dark:placeholder:text-slate-600",
                             "focus:bg-white dark:focus:bg-slate-950 focus:border-[#3882a5] focus:ring-4 focus:ring-[#3882a5]/5 focus:outline-none",
                             "disabled:cursor-not-allowed disabled:opacity-50",

@@ -29,6 +29,7 @@ import { SubscriptionActionButtons } from "@/components/common/SubscriptionActio
 import { UpgradePlanModal } from "../common/upgradePlanModal";
 import { ActionButton } from "@/components/common/actionButton";
 import { PhoneInputField } from "@/components/common/phoneInputField";
+import { InputField } from "@/components/common/inputField";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -449,33 +450,22 @@ export function CreateAppointmentLinkModal({
 
                             {inviteChannel === "email" ? (
                                 <div className="space-y-1.5 pt-1">
-                                    <Label htmlFor="visitorEmail" className="text-xs font-medium text-muted-foreground">
-                                        Visitor email <span className="text-red-500">*</span>
-                                    </Label>
                                     <Controller
                                         name="visitorEmail"
                                         control={control}
                                         render={({ field }) => (
-                                            <Input
+                                            <InputField
                                                 {...field}
                                                 id="visitorEmail"
                                                 type="email"
-                                                autoComplete="email"
-                                                inputMode="email"
+                                                label="Visitor email"
                                                 placeholder="name@company.com"
-                                                className={cn(
-                                                    "h-11 rounded-xl border bg-background px-3",
-                                                    errors.visitorEmail && "border-red-500",
-                                                )}
+                                                error={errors.visitorEmail?.message}
+                                                required
+                                                helperText="The booking link is sent to this address when email notifications are enabled."
                                             />
                                         )}
                                     />
-                                    {errors.visitorEmail && (
-                                        <p className="text-xs text-red-500">{errors.visitorEmail.message}</p>
-                                    )}
-                                    <p className="text-[11px] text-muted-foreground">
-                                        The booking link is sent to this address when email notifications are enabled.
-                                    </p>
                                 </div>
                             ) : (
                                 <div className="space-y-1.5 pt-1">

@@ -137,20 +137,24 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         () => ({
             control: (base, state) => ({
                 ...base,
-                backgroundColor: "var(--background)",
+                backgroundColor: "rgb(248 250 252 / 0.5)", // bg-slate-50/50
                 minHeight: 48,
                 height: 48,
                 borderRadius: 12,
-                borderColor: error ? "var(--destructive)" : state.isFocused ? "var(--accent)" : "var(--border)",
+                borderWidth: 1,
+                borderColor: error 
+                    ? "var(--destructive)" 
+                    : state.isFocused 
+                        ? "#3882a5" 
+                        : "rgb(203 213 225)", // border-slate-300
+                transition: "all 0.3s ease",
                 boxShadow: state.isFocused
-                    ? error
-                        ? "0 0 0 2px var(--destructive-ring)"
-                        : "0 0 0 2px var(--ring)"
+                    ? "0 0 0 4px rgb(56 130 165 / 0.05)"
                     : "none",
                 cursor: isFieldDisabled ? "not-allowed" : "pointer",
                 opacity: isFieldDisabled ? 0.6 : 1,
                 "&:hover": {
-                    borderColor: state.isFocused ? (error ? "var(--destructive)" : "var(--accent)") : "var(--border)",
+                    borderColor: state.isFocused ? "#3882a5" : "rgb(148 163 184)", // border-slate-400 on hover
                 },
             }),
             valueContainer: (base) => ({
@@ -271,14 +275,15 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     return (
         <div className={cn("space-y-1.5 relative", error ? "z-20" : "z-10", className)}>
             {label && (
-                <label htmlFor={controlId} className="text-foreground text-sm font-medium">
-                    {label}
-                    {required ? (
-                        <span className="ml-1 text-red-500 font-bold">*</span>
-                    ) : (
-                        <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                <div className="flex items-center justify-between">
+                    <label htmlFor={controlId} className="text-[11px] text-muted-foreground uppercase font-bold tracking-[0.1em]">
+                        {label}
+                        {required && <span className="ml-1 text-red-500">*</span>}
+                    </label>
+                    {!required && !error && (
+                        <span className="text-[9px] text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
                     )}
-                </label>
+                </div>
             )}
 
             <Select<RSOption, false, GroupBase<RSOption>>

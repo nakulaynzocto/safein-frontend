@@ -108,7 +108,7 @@ export function getTaxSplit(
     if (!isUserInIndia || !isCompanyInIndia) {
         return {
             components: [
-                { label: 'IGST', rate: taxPercentage, amount: Math.round(taxAmount) }
+                { label: 'IGST', rate: taxPercentage, amount: taxAmount }
             ],
             type: 'International Transaction (GST/Export)',
             isIntraState: false
@@ -136,8 +136,8 @@ export function getTaxSplit(
 
         return {
             components: [
-                { label: 'CGST', rate: taxPercentage / 2, amount: Math.round(taxAmount / 2) },
-                { label: stateTaxLabel, rate: taxPercentage / 2, amount: Math.round(taxAmount / 2) }
+                { label: 'CGST', rate: taxPercentage / 2, amount: taxAmount / 2 },
+                { label: stateTaxLabel, rate: taxPercentage / 2, amount: taxAmount / 2 }
             ],
             type: `Intra-state (CGST + ${stateTaxLabel})`,
             isIntraState: true
@@ -145,7 +145,7 @@ export function getTaxSplit(
     } else {
         return {
             components: [
-                { label: 'IGST', rate: taxPercentage, amount: Math.round(taxAmount) }
+                { label: 'IGST', rate: taxPercentage, amount: taxAmount }
             ],
             type: 'Inter-state (IGST)',
             isIntraState: false

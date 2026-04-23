@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Car } from "lucide-react";
 import { ImageUploadField } from "@/components/common/imageUploadField";
+import { InputField } from "@/components/common/inputField";
 
 interface VehicleInfoSectionProps {
     appointmentToken?: string;
@@ -91,10 +92,12 @@ export function VehicleInfoSection({
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
                         {/* Vehicle Photo */}
                         <div className="flex flex-col space-y-2">
-                            <Label className="text-foreground text-sm font-medium">
-                                Vehicle Photo <span className="text-muted-foreground font-normal">(optional)</span>
-                            </Label>
-                            <div className="flex justify-start">
+                            <div className="flex items-center justify-between mb-2 px-1">
+                                <label className="text-[11px] text-muted-foreground uppercase font-bold tracking-[0.1em] w-full text-center">
+                                    Vehicle Photo
+                                </label>
+                            </div>
+                            <div className="flex justify-center">
                                 <ImageUploadField
                                     name="vehiclePhoto"
                                     label=""
@@ -114,19 +117,12 @@ export function VehicleInfoSection({
                         </div>
 
                         {/* Vehicle Number */}
-                        <div className="flex flex-col space-y-2">
-                            <Label className="text-foreground text-sm font-medium">
-                                Vehicle Number <span className="text-muted-foreground font-normal">(optional)</span>
-                            </Label>
-                            <Input
-                                {...register("vehicleNumber")}
-                                placeholder="e.g., DL01AB1234"
-                                className={`h-12 rounded-xl bg-background font-medium ${errors.vehicleNumber ? "border-destructive" : ""}`}
-                            />
-                            {errors.vehicleNumber && (
-                                <p className="text-xs text-red-500 mt-1">{errors.vehicleNumber.message as string}</p>
-                            )}
-                        </div>
+                        <InputField
+                            label="Vehicle Number"
+                            placeholder="e.g., DL01AB1234"
+                            error={errors.vehicleNumber?.message as string}
+                            {...register("vehicleNumber")}
+                        />
                     </div>
                 </div>
             )}

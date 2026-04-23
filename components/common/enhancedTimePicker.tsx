@@ -131,28 +131,31 @@ export function EnhancedTimePicker({
     return (
         <div className={cn("space-y-1.5", className)}>
             {label && (
-                <label className="text-foreground text-sm font-medium">
-                    {label}
-                    {required ? (
-                        <span className="ml-1 text-red-500 font-bold">*</span>
-                    ) : (
-                        <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                <div className="flex items-center justify-between">
+                    <label className="text-[11px] text-muted-foreground uppercase font-bold tracking-[0.1em]">
+                        {label}
+                        {required && <span className="ml-1 text-red-500">*</span>}
+                    </label>
+                    {!required && !error && (
+                        <span className="text-[9px] text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
                     )}
-                </label>
+                </div>
             )}
             <Popover open={open} onOpenChange={setOpen} modal={true}>
                 <PopoverTrigger asChild>
                     <Button
                         variant="outline"
                         className={cn(
-                            "group h-12 w-full justify-start text-left font-medium rounded-xl bg-background pl-4 border-border", // Updated styles
-                            !value && "text-muted-foreground hover:bg-[#3882a5] hover:text-white",
-                            error && "border-destructive focus:ring-destructive",
+                            "group h-12 w-full justify-start text-left font-medium rounded-xl pl-4 transition-all duration-300",
+                            "bg-slate-50/50 border-slate-300 dark:bg-slate-900/50 dark:border-slate-800",
+                            "hover:bg-white dark:hover:bg-slate-950 hover:border-slate-400 focus:border-[#3882a5]",
+                            !value && "text-muted-foreground",
+                            error && "border-rose-500 focus:ring-rose-500/5",
                         )}
                     >
                         <Clock className="mr-2 h-4 w-4" />
                         {displayValue || (
-                            <span className="text-muted-foreground group-hover:text-white">Select time</span>
+                            <span className="text-muted-foreground">Select time</span>
                         )}
                     </Button>
                 </PopoverTrigger>

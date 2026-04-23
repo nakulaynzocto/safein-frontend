@@ -275,7 +275,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {shouldShowPrivateNavbar && (
                                     <div className={`hidden items-center lg:flex`}>
                                         <div
-                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white"
+                                            className={`text-lg lg:text-xl font-black tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white"
                                                 }`}
                                         >
                                             {formatName(user?.companyName || "Visitor Management System")}
@@ -311,7 +311,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {shouldShowPrivateNavbar && (
                                     <div className={`hidden items-center lg:flex`}>
                                         <div
-                                            className={`text-base font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white"
+                                            className={`text-lg lg:text-xl font-black tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white"
                                                 }`}
                                         >
                                             {formatName(user?.companyName || "Visitor Management System")}

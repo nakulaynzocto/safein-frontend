@@ -8,11 +8,14 @@ import {
     Bar,
     BarChart,
     CartesianGrid,
+    Pie,
+    PieChart,
     ResponsiveContainer,
     Tooltip,
     XAxis,
     YAxis,
     Cell,
+    Legend,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Users, Clock, TrendingUp, Activity, TimerOff, CalendarX, LogIn } from "lucide-react";
@@ -113,10 +116,15 @@ export const DashboardCharts = memo(function DashboardCharts({
             };
         });
 
-        // Prepare structure for hourly (8 AM to 7 PM)
-        const hourly = Array.from({ length: 12 }, (_, i) => {
-            const h = 8 + i;
-            return { value: 0, label: h < 12 ? `${h} AM` : h === 12 ? "12 PM" : `${h - 12} PM`, hour: h };
+        // Prepare structure for hourly (Full 24 Hours)
+        const hourly = Array.from({ length: 24 }, (_, i) => {
+            const h = i;
+            let label = "";
+            if (h === 0) label = "12 AM";
+            else if (h < 12) label = `${h} AM`;
+            else if (h === 12) label = "12 PM";
+            else label = `${h - 12} PM`;
+            return { value: 0, label, hour: h };
         });
 
         // Single pass for all trend calculations
@@ -188,38 +196,44 @@ export const DashboardCharts = memo(function DashboardCharts({
                         </p>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                        <div className="h-[200px] w-full mt-2 sm:h-[250px] sm:mt-4">
+                        <div className="h-[280px] w-full mt-2 sm:h-[350px] sm:mt-4 relative">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={todayStats.statusData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                                    <XAxis
-                                        dataKey="label"
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{ fill: "#6B7280", fontSize: 12 }}
-                                        dy={10}
-                                    />
-                                    <YAxis
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{ fill: "#6B7280", fontSize: 12 }}
-                                        allowDecimals={false}
-                                    />
+                                <PieChart>
+                                    <Pie
+                                        data={todayStats.statusData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={85}
+                                        outerRadius={115}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                        nameKey="label"
+                                        animationBegin={0}
+                                        animationDuration={1500}
+                                    >
+                                        {todayStats.statusData.map((entry, index) => (
+                                            <Cell 
+                                                key={`cell-${index}`} 
+                                                fill={entry.color} 
+                                                stroke="transparent"
+                                                className="hover:opacity-80 transition-opacity cursor-pointer focus:outline-none"
+                                            />
+                                        ))}
+                                    </Pie>
                                     <Tooltip
-                                        cursor={{ fill: "transparent" }}
                                         content={({ active, payload }) => {
                                             if (active && payload && payload.length) {
+                                                const data = payload[0].payload;
                                                 return (
-                                                    <div className="rounded-lg border bg-background p-2 shadow-sm">
-                                                        <div className="grid grid-cols-2 gap-2">
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                                                    {payload[0].payload.label}
-                                                                </span>
-                                                                <span className="font-bold text-muted-foreground">
-                                                                    {payload[0].value}
-                                                                </span>
-                                                            </div>
+                                                    <div className="rounded-xl border border-white/20 bg-background/80 backdrop-blur-md p-3 shadow-xl transform transition-all scale-105">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="h-3 w-3 rounded-full" style={{ backgroundColor: data.color }} />
+                                                            <span className="text-xs font-bold uppercase text-muted-foreground">
+                                                                {data.label}
+                                                            </span>
+                                                        </div>
+                                                        <div className="mt-1 text-lg font-extrabold text-foreground">
+                                                            {data.value}
                                                         </div>
                                                     </div>
                                                 );
@@ -227,13 +241,36 @@ export const DashboardCharts = memo(function DashboardCharts({
                                             return null;
                                         }}
                                     />
-                                    <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={40}>
-                                        {todayStats.statusData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color || "#3B82F6"} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
+                                    <Legend 
+                                        verticalAlign="bottom" 
+                                        height={36}
+                                        content={({ payload }) => (
+                                            <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-4">
+                                                {payload?.map((entry: any, index: number) => (
+                                                    <div key={`item-${index}`} className="flex items-center gap-2 group cursor-pointer">
+                                                        <div 
+                                                            className="h-2.5 w-2.5 rounded-full shadow-sm transition-transform group-hover:scale-125" 
+                                                            style={{ backgroundColor: entry.color }} 
+                                                        />
+                                                        <span className="text-[12px] font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
+                                                            {entry.payload.label}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    />
+                                </PieChart>
                             </ResponsiveContainer>
+                            {/* Center Text for Doughnut */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none pb-12 sm:pb-14">
+                                <div className="text-3xl font-black sm:text-4xl leading-none tracking-tight text-foreground">
+                                    {todayStats.todaysAppointmentsCount}
+                                </div>
+                                <div className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest mt-1">
+                                    Total
+                                </div>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -276,16 +313,14 @@ export const DashboardCharts = memo(function DashboardCharts({
                                         content={({ active, payload }) => {
                                             if (active && payload && payload.length) {
                                                 return (
-                                                    <div className="rounded-lg border bg-background p-2 shadow-sm">
-                                                        <div className="grid grid-cols-2 gap-2">
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                                                    {payload[0].payload.label}
-                                                                </span>
-                                                                <span className="font-bold text-muted-foreground">
-                                                                    {payload[0].value}
-                                                                </span>
-                                                            </div>
+                                                    <div className="rounded-xl border border-white/20 bg-background/80 backdrop-blur-md p-3 shadow-xl transform transition-all scale-105">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[0.70rem] uppercase font-bold text-muted-foreground tracking-wider">
+                                                                {payload[0].payload.label}
+                                                            </span>
+                                                            <span className="text-lg font-extrabold text-foreground mt-1">
+                                                                {payload[0].value} <span className="text-xs font-normal text-muted-foreground">Appts</span>
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 );
@@ -297,9 +332,12 @@ export const DashboardCharts = memo(function DashboardCharts({
                                         type="monotone"
                                         dataKey="value"
                                         stroke="#10B981"
-                                        strokeWidth={2}
+                                        strokeWidth={3}
+                                        dot={{ r: 4, strokeWidth: 2, fill: "#fff", stroke: "#10B981" }}
+                                        activeDot={{ r: 6, strokeWidth: 0, fill: "#10B981" }}
                                         fillOpacity={1}
                                         fill="url(#colorDailyAppts)"
+                                        animationDuration={2000}
                                     />
                                 </AreaChart>
                             </ResponsiveContainer>
@@ -334,9 +372,9 @@ export const DashboardCharts = memo(function DashboardCharts({
                                         dataKey="label"
                                         axisLine={false}
                                         tickLine={false}
-                                        tick={{ fill: "#6B7280", fontSize: 12 }}
+                                        tick={{ fill: "#6B7280", fontSize: 8 }}
                                         dy={10}
-                                        interval="preserveStartEnd"
+                                        interval={0}
                                     />
                                     <YAxis
                                         axisLine={false}
@@ -348,16 +386,14 @@ export const DashboardCharts = memo(function DashboardCharts({
                                         content={({ active, payload }) => {
                                             if (active && payload && payload.length) {
                                                 return (
-                                                    <div className="rounded-lg border bg-background p-2 shadow-sm">
-                                                        <div className="grid grid-cols-2 gap-2">
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                                                    {payload[0].payload.label}
-                                                                </span>
-                                                                <span className="font-bold text-muted-foreground">
-                                                                    {payload[0].value}
-                                                                </span>
-                                                            </div>
+                                                    <div className="rounded-xl border border-white/20 bg-background/80 backdrop-blur-md p-3 shadow-xl transform transition-all scale-105">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[0.70rem] uppercase font-bold text-muted-foreground tracking-wider">
+                                                                {payload[0].payload.label}
+                                                            </span>
+                                                            <span className="text-lg font-extrabold text-foreground mt-1">
+                                                                {payload[0].value} <span className="text-xs font-normal text-muted-foreground">Visitors</span>
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 );
@@ -369,9 +405,12 @@ export const DashboardCharts = memo(function DashboardCharts({
                                         type="monotone"
                                         dataKey="value"
                                         stroke="#A855F7"
-                                        strokeWidth={2}
+                                        strokeWidth={3}
+                                        dot={{ r: 3, strokeWidth: 2, fill: "#fff", stroke: "#A855F7" }}
+                                        activeDot={{ r: 5, strokeWidth: 0, fill: "#A855F7" }}
                                         fillOpacity={1}
                                         fill="url(#colorMonthlyVisitors)"
+                                        animationDuration={2500}
                                     />
                                 </AreaChart>
                             </ResponsiveContainer>
@@ -398,31 +437,29 @@ export const DashboardCharts = memo(function DashboardCharts({
                                         dataKey="label"
                                         axisLine={false}
                                         tickLine={false}
-                                        tick={{ fill: "#6B7280", fontSize: 12 }}
+                                        tick={{ fill: "#9CA3AF", fontSize: 10 }}
                                         dy={10}
                                         interval={2}
                                     />
                                     <YAxis
                                         axisLine={false}
                                         tickLine={false}
-                                        tick={{ fill: "#6B7280", fontSize: 12 }}
+                                        tick={{ fill: "#9CA3AF", fontSize: 10 }}
                                         allowDecimals={false}
                                     />
                                     <Tooltip
-                                        cursor={{ fill: "transparent" }}
+                                        cursor={{ fill: "rgba(0,0,0,0.05)" }}
                                         content={({ active, payload }) => {
                                             if (active && payload && payload.length) {
                                                 return (
-                                                    <div className="rounded-lg border bg-background p-2 shadow-sm">
-                                                        <div className="grid grid-cols-2 gap-2">
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                                                    {payload[0].payload.label}
-                                                                </span>
-                                                                <span className="font-bold text-muted-foreground">
-                                                                    {payload[0].value}
-                                                                </span>
-                                                            </div>
+                                                    <div className="rounded-xl border border-white/20 bg-white/70 dark:bg-black/70 backdrop-blur-md p-3 shadow-xl">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[0.65rem] uppercase font-bold text-muted-foreground">
+                                                                Time: {payload[0].payload.label}
+                                                            </span>
+                                                            <span className="text-base font-extrabold text-foreground">
+                                                                {payload[0].value} <span className="text-[10px] font-normal">Entries</span>
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 );
@@ -430,7 +467,24 @@ export const DashboardCharts = memo(function DashboardCharts({
                                             return null;
                                         }}
                                     />
-                                    <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={20} fill="#22C55E" />
+                                    <Bar 
+                                        dataKey="value" 
+                                        radius={[4, 4, 0, 0]} 
+                                        barSize={12}
+                                        animationDuration={1500}
+                                    >
+                                        {hourlyDistributionData.map((entry, index) => {
+                                            // Find peak hour to highlight
+                                            const isPeak = entry.value === Math.max(...hourlyDistributionData.map(d => d.value)) && entry.value > 0;
+                                            return (
+                                                <Cell 
+                                                    key={`cell-${index}`} 
+                                                    fill={isPeak ? "#06B6D4" : "#22C55E"} 
+                                                    fillOpacity={isPeak ? 1 : 0.7}
+                                                />
+                                            );
+                                        })}
+                                    </Bar>
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>

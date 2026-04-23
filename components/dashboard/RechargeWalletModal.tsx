@@ -102,6 +102,11 @@ export function RechargeWalletModal({ isOpen, onClose, currentBalance, creditRat
             };
 
             const rzp = new window.Razorpay(options);
+            
+            // Close this modal before opening Razorpay to prevent overlay conflicts
+            onClose();
+            setIsProcessing(false);
+            
             rzp.open();
         } catch (error: any) {
             toast.error(error?.data?.message || "Failed to initiate recharge");

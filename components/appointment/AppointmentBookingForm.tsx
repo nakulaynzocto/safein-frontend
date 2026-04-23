@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { User, ArrowLeft } from "lucide-react";
 import { InputField } from "@/components/common/inputField";
+import { TextareaField } from "@/components/common/textareaField";
 import { EnhancedDatePicker } from "@/components/common/enhancedDatePicker";
 import { EnhancedTimePicker } from "@/components/common/enhancedTimePicker";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
@@ -169,7 +170,7 @@ export function AppointmentBookingForm({
                 {!isQRBooking && <input type="hidden" {...register("employeeId")} />}
 
                 {/* Visitor and Employee Info Display */}
-                <div className="grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-slate-50/50 p-6 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 rounded-xl border border-slate-300 bg-slate-50/50 p-6 md:grid-cols-2">
                     <div className="space-y-2">
                         <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Visitor</Label>
                         <div className="flex h-12 items-center gap-3 rounded-lg border border-slate-100 bg-white px-3 shadow-sm">
@@ -321,44 +322,27 @@ export function AppointmentBookingForm({
                             required
                         />
 
-                        <div className="space-y-1.5">
-                            <Label className="text-sm font-medium">
-                                Additional Visitors
-                                <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
-                            </Label>
-                            <Input
-                                type="number"
-                                min={0}
-                                max={20}
-                                step={1}
-                                autoComplete="off"
-                                placeholder="Number of people (e.g., 0, 1, 2)"
-                                {...register("accompanyingCount")}
-                                className={`h-12 rounded-xl bg-background font-medium ${errors.accompanyingCount ? "border-destructive" : ""}`}
-                            />
-                            {errors.accompanyingCount && (
-                                <span className="text-destructive text-xs">{errors.accompanyingCount.message}</span>
-                            )}
-                        </div>
+                        <InputField
+                            label="Additional Visitors"
+                            type="number"
+                            placeholder="Number of people (e.g., 0, 1, 2)"
+                            error={errors.accompanyingCount?.message}
+                            {...register("accompanyingCount")}
+                            min={0}
+                            max={20}
+                        />
                     </div>
                 </div>
 
                 {/* Visit Information Section */}
                 <div className="space-y-4 pt-4">
-                    <div className="space-y-1.5">
-                        <Label htmlFor="notes" className="text-sm font-medium">
-                            Notes
-                            <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
-                        </Label>
-                        <Textarea
-                            id="notes"
-                            {...register("notes")}
-                            placeholder="Any additional information or special requirements"
-                            className={errors.notes ? "border-destructive" : ""}
-                            rows={4}
-                        />
-                        {errors.notes && <span className="text-destructive text-xs">{errors.notes.message}</span>}
-                    </div>
+                    <TextareaField
+                        label="Notes"
+                        placeholder="Any additional information or special requirements"
+                        error={errors.notes?.message}
+                        {...register("notes")}
+                        rows={4}
+                    />
                 </div>
 
                 {/* Vehicle Fields Section */}

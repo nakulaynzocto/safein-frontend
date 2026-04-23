@@ -2,8 +2,8 @@ export const routes = {
     publicroute: {
         // Main Pages
         HOME: "/",
-        FEATURES: "/features",
-        PRICING: "/pricing",
+        FEATURES: "/#features",
+        PRICING: "/#pricing",
         CONTACT: "/contact",
         HELP: "/help",
         PRIVACY_POLICY: "/privacy-policy",

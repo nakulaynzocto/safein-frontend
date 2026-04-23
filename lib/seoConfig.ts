@@ -141,7 +141,7 @@ export const safeInPageSEO = {
             "affordable visitor system india",
             "gatekeeper app pricing",
         ],
-        path: "/pricing",
+        path: "/#pricing",
     },
     features: {
         title: "SafeIn Features - Smart Visitor Management & Security India",
@@ -154,7 +154,7 @@ export const safeInPageSEO = {
             "visitor analytics india",
             "smart security notifications",
         ],
-        path: "/features",
+        path: "/#features",
     },
     help: {
         title: "SafeIn Help Center - Guide to Visitor Management",

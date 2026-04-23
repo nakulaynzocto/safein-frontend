@@ -17,17 +17,24 @@ const TextareaField = forwardRef<HTMLTextAreaElement, TextareaFieldProps>(
         return (
             <div className="space-y-2">
                 {label && (
-                    <label className="text-foreground text-sm font-medium">
-                        {label}
-                        {required ? (
-                            <span className="ml-1 text-red-500 font-bold">*</span>
-                        ) : (
-                            <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                    <div className="flex items-center justify-between">
+                        <label className="text-[11px] text-muted-foreground uppercase font-bold tracking-[0.1em]">
+                            {label}
+                            {required && <span className="ml-1 text-red-500">*</span>}
+                        </label>
+                        {!required && !error && (
+                            <span className="text-[9px] text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
                         )}
-                    </label>
+                    </div>
                 )}
                 <Textarea
-                    className={cn(error && "border-destructive focus-visible:ring-destructive", className)}
+                    className={cn(
+                        "rounded-xl transition-all duration-300 font-medium text-sm",
+                        "bg-slate-50/50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-800",
+                        "hover:border-slate-400 focus:bg-white dark:focus:bg-slate-950 focus:border-[#3882a5] focus-visible:ring-4 focus-visible:ring-[#3882a5]/5 focus:outline-none",
+                        error && "border-rose-500 focus-visible:ring-rose-500/5",
+                        className
+                    )}
                     ref={ref}
                     {...props}
                 />

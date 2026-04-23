@@ -305,24 +305,24 @@ export function PhoneInputField({
     return (
         <div className={cn("space-y-1.5 w-full", className)}>
             {label && (
-                <label htmlFor={id} className="text-foreground text-sm font-medium">
-                    {label}
-                    {required ? (
-                        <span className="ml-1 text-red-500 font-bold">*</span>
-                    ) : (
-                        <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                <div className="flex items-center justify-between">
+                    <label htmlFor={id} className="text-[11px] text-muted-foreground uppercase font-bold tracking-[0.1em]">
+                        {label}
+                        {required && <span className="ml-1 text-red-500">*</span>}
+                    </label>
+                    {!required && !error && (
+                        <span className="text-[9px] text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
                     )}
-                </label>
+                </div>
             )}
             <div
                 className={cn(
-                    "phone-unified-input-field flex flex-row items-center overflow-hidden rounded-xl border transition-all duration-200 bg-background",
+                    "phone-unified-input-field flex flex-row items-center overflow-hidden rounded-xl border transition-all duration-300",
                     "h-12 w-full",
-                    error
-                        ? "border-destructive ring-2 ring-destructive/20"
-                        : isFocused
-                            ? "border-accent ring-2 ring-[var(--ring)]"
-                            : "border-border hover:border-border-hover",
+                    "bg-slate-50/50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-800",
+                    "hover:border-slate-400",
+                    isFocused && "bg-white dark:focus:bg-slate-950 border-[#3882a5] ring-4 ring-[#3882a5]/5",
+                    error && "border-rose-500 ring-rose-500/5",
                     disabled ? "opacity-50 cursor-not-allowed" : ""
                 )}
                 onFocus={() => !disabled && setIsFocused(true)}

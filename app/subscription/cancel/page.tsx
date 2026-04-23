@@ -25,10 +25,10 @@ export default function SubscriptionCancelPage() {
                 <XCircle className="mb-6 h-12 w-12 text-red-500" />
                 <h1 className="mb-3 text-3xl font-bold text-gray-800">Payment Canceled</h1>
                 <p className="mb-8 max-w-md text-center text-lg text-gray-600">
-                    Your payment was not completed. You will be redirected to the pricing page shortly.
+                    Your payment was not completed. You will be redirected to the pricing section shortly.
                 </p>
                 <Button asChild>
-                    <Link href={routes.publicroute.PRICING}>Go to Pricing Page</Link>
+                    <Link href={routes.publicroute.PRICING}>Go to Pricing Section</Link>
                 </Button>
             </div>
         </PublicLayout>
