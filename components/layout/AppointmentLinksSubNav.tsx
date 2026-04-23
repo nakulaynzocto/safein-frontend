@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { routes } from "@/utils/routes";
 import { MOBILE_APPOINTMENT_LINKS_SUB_NAV_HEIGHT_PX } from "@/utils/appointmentLinksLayout";
 import { Link2, Zap, QrCode } from "lucide-react";
+import { useAppSelector } from "@/store/hooks";
+import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 
 const tabs = [
     {
@@ -41,6 +43,10 @@ const tabs = [
  */
 export function AppointmentLinksSubNav() {
     const pathname = usePathname() || "";
+    const { user } = useAppSelector((state) => state.auth);
+    const isEmployee = checkIsEmployee(user);
+
+    const filteredTabs = tabs;
 
     return (
         <nav
@@ -53,7 +59,7 @@ export function AppointmentLinksSubNav() {
                 style={{ height: MOBILE_APPOINTMENT_LINKS_SUB_NAV_HEIGHT_PX }}
             >
                 <div className="flex flex-row items-stretch justify-center gap-0">
-                    {tabs.map((tab) => {
+                    {filteredTabs.map((tab) => {
                         const active = tab.isActive(pathname);
                         const Icon = tab.icon;
 

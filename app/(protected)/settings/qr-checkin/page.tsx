@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/alertDialog";
 import { useGetQRConfigQuery, useRegenerateQRSlugMutation } from "@/store/api/qrSetupApi";
 import { useGetProfileQuery } from "@/store/api/authApi";
+import { useAppSelector } from "@/store/hooks";
+import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
 import { cn } from "@/lib/utils";
@@ -97,6 +99,8 @@ function buildBrandedQrDataUrl(sourceCanvas: HTMLCanvasElement, companyName: str
 export default function QrCheckinSettingsPage() {
     const { data: config, isLoading } = useGetQRConfigQuery();
     const { data: profile } = useGetProfileQuery();
+    const { user } = useAppSelector((state) => state.auth);
+    const isEmployee = checkIsEmployee(user);
     const [regenerate, { isLoading: isUpdating }] = useRegenerateQRSlugMutation();
     const [customSlug, setCustomSlug] = useState("");
     const [editing, setEditing] = useState(false);
@@ -186,7 +190,7 @@ export default function QrCheckinSettingsPage() {
 
     return (
         <div className="space-y-8 pb-24 sm:pb-8">
-            <DeliverySetupWarning />
+            {!isEmployee && <DeliverySetupWarning />}
 
             <div className="grid gap-6 lg:grid-cols-12">
                 {/* QR Preview Card */}
@@ -286,68 +290,70 @@ export default function QrCheckinSettingsPage() {
                             </div>
                         </div>
 
-                        {/* Slug Configuration */}
-                        <div className="rounded-2xl border bg-card p-5 space-y-4 shadow-sm">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-sm font-semibold text-foreground">QR Slug (Identifier)</Label>
-                                {editing && (
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-8 text-slate-500 hover:text-slate-700"
-                                        onClick={cancelEditing}
-                                    >
-                                        Cancel
-                                    </Button>
+                        {/* Slug Configuration - Hidden for employees */}
+                        {!isEmployee && (
+                            <div className="rounded-2xl border bg-card p-5 space-y-4 shadow-sm">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-sm font-semibold text-foreground">QR Slug (Identifier)</Label>
+                                    {editing && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 text-slate-500 hover:text-slate-700"
+                                            onClick={cancelEditing}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    )}
+                                </div>
+
+                                {!editing ? (
+                                    <div className="flex items-center justify-between gap-4 rounded-xl border bg-white p-3">
+                                        <code className="bg-muted px-2 py-1 rounded text-sm font-bold text-foreground">
+                                            {currentSlug}
+                                        </code>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-9"
+                                            onClick={startEditing}
+                                        >
+                                            <RefreshCw className="mr-2 h-3 w-3" />
+                                            Customize
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Input
+                                                value={customSlug}
+                                                onChange={(e) => setCustomSlug(e.target.value)}
+                                                placeholder={currentSlug}
+                                                className="h-11 rounded-xl border-2 focus-visible:ring-[#3882a5]/20"
+                                                autoComplete="off"
+                                            />
+                                            <p className="text-[11px] text-muted-foreground italic">
+                                                Characters allowed: a-z, 0-9, and hyphens.
+                                            </p>
+                                        </div>
+                                        <Button
+                                            className="w-full bg-[#3882a5] hover:bg-[#2d6a87] rounded-xl h-11"
+                                            type="button"
+                                            onClick={() => setIsConfirmOpen(true)}
+                                            disabled={!canSaveSlug}
+                                        >
+                                            {isUpdating ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+                                            {isUpdating ? "Updating Profile..." : "Apply New Slug"}
+                                        </Button>
+                                    </div>
                                 )}
                             </div>
-
-                            {!editing ? (
-                                <div className="flex items-center justify-between gap-4 rounded-xl border bg-white p-3">
-                                    <code className="bg-muted px-2 py-1 rounded text-sm font-bold text-foreground">
-                                        {currentSlug}
-                                    </code>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="h-9"
-                                        onClick={startEditing}
-                                    >
-                                        <RefreshCw className="mr-2 h-3 w-3" />
-                                        Customize
-                                    </Button>
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Input
-                                            value={customSlug}
-                                            onChange={(e) => setCustomSlug(e.target.value)}
-                                            placeholder={currentSlug}
-                                            className="h-11 rounded-xl border-2 focus-visible:ring-[#3882a5]/20"
-                                            autoComplete="off"
-                                        />
-                                        <p className="text-[11px] text-muted-foreground italic">
-                                            Characters allowed: a-z, 0-9, and hyphens.
-                                        </p>
-                                    </div>
-                                    <Button
-                                        className="w-full bg-[#3882a5] hover:bg-[#2d6a87] rounded-xl h-11"
-                                        type="button"
-                                        onClick={() => setIsConfirmOpen(true)}
-                                        disabled={!canSaveSlug}
-                                    >
-                                        {isUpdating ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-                                        {isUpdating ? "Updating Profile..." : "Apply New Slug"}
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>
 
-            <HolidaySettings />
+            {!isEmployee && <HolidaySettings />}
 
             <AppointmentLinksSubNav />
             <div className="shrink-0 md:hidden" style={{ height: MOBILE_APPOINTMENT_LINKS_SUB_NAV_HEIGHT_PX }} aria-hidden />

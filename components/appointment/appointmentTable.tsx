@@ -633,8 +633,8 @@ export function AppointmentTable({
 
 
             <div className="flex flex-col gap-4">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div className="flex flex-1 items-center gap-2 sm:gap-4">
+                <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">
+                    <div className="flex flex-1 items-center min-w-0">
                         <SearchInput
                             placeholder="Search..."
                             value={searchTerm}
@@ -644,7 +644,7 @@ export function AppointmentTable({
                         />
                     </div>
                     
-                    <div className="flex flex-wrap lg:flex-nowrap items-center gap-2 sm:gap-3">
+                    <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
                         <DateRangePicker
                             onDateRangeChange={(r) => {
                                 onDateFromChange?.(r.startDate || "");
@@ -664,16 +664,16 @@ export function AppointmentTable({
                             upgradeLabel="Upgrade Plan"
                             icon={UserPlus}
                             isEmployee={isEmployee}
-                            className="flex-1 sm:flex-none h-11 sm:h-12 rounded-xl"
+                            className="h-10 sm:h-12 rounded-xl"
                         >
                             {!isEmployee && (
                                 <Button
                                     variant="primary"
-                                    className="flex w-full sm:w-auto h-11 sm:h-12 shrink-0 items-center justify-center gap-2 rounded-xl sm:px-8 transition-all font-bold shadow-md hover:scale-105 active:scale-95"
+                                    className="flex w-auto h-10 sm:h-12 shrink-0 items-center justify-center gap-2 rounded-xl px-3 sm:px-8 transition-all font-bold shadow-md hover:scale-105 active:scale-95"
                                     onClick={() => router.push(routes.privateroute.APPOINTMENTCREATE)}
                                 >
                                     <Plus className="h-5 w-5 shrink-0" />
-                                    <span className="inline font-bold">Schedule Appointment</span>
+                                    <span className="hidden sm:inline font-bold">Schedule Appointment</span>
                                 </Button>
                             )}
                         </SubscriptionActionButtons>

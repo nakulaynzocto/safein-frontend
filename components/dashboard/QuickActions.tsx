@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, CalendarPlus, UserPlus, Users, Send, ClipboardList, IdCard, Contact } from "lucide-react";
+import { Calendar, CalendarPlus, UserPlus, Users, Send, ClipboardList, IdCard, Contact, QrCode } from "lucide-react";
 import { routes } from "@/utils/routes";
 
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
@@ -36,6 +36,11 @@ const adminQuickActions: QuickAction[] = [
         icon: IdCard,
         label: "Spot Pass",
     },
+    {
+        href: routes.privateroute.SETTINGS_QR_CHECKIN,
+        icon: QrCode,
+        label: "QR Check-in",
+    },
 ];
 
 const employeeQuickActions: QuickAction[] = [
@@ -53,6 +58,11 @@ const employeeQuickActions: QuickAction[] = [
         href: routes.privateroute.SPOT_PASS,
         icon: IdCard,
         label: "Spot Pass",
+    },
+    {
+        href: routes.privateroute.SETTINGS_QR_CHECKIN,
+        icon: QrCode,
+        label: "QR Check-in",
     },
 ];
 

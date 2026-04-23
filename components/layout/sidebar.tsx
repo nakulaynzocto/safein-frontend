@@ -87,7 +87,7 @@ const baseNavigation: Array<{
             name: "QR Check-in",
             href: routes.privateroute.SETTINGS_QR_CHECKIN,
             icon: QrCode,
-            roles: ["admin"], // Only admin
+            roles: ["admin", "employee"], // Both admin and employee
         },
         {
             name: "Visit Approvals",
