@@ -688,6 +688,7 @@ export function AppointmentTable({
                             title: emptyTitle,
                             description: "Get started by scheduling your first appointment.",
                             primaryActionLabel: emptyPrimaryLabel,
+                            icon: Calendar
                         }}
                         onPrimaryAction={() => {
                             if (isEmployee) {

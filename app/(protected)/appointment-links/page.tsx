@@ -807,6 +807,7 @@ function AppointmentLinksContent() {
                             title: "No appointment links found",
                             description: "Create your first appointment link to get started.",
                             primaryActionLabel: isExpired ? "Upgrade Plan" : (hasReachedAppointmentLimit ? "Support Chat" : (filterType === "special" ? "Create Priority Booking" : "Create Invite Link")),
+                            icon: filterType === "special" ? UserPlus : Link2
                         }}
                         onPrimaryAction={() => {
                             if (isExpired) {

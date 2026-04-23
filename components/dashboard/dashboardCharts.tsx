@@ -196,81 +196,95 @@ export const DashboardCharts = memo(function DashboardCharts({
                         </p>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                        <div className="h-[280px] w-full mt-2 sm:h-[350px] sm:mt-4 relative">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={todayStats.statusData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={85}
-                                        outerRadius={115}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                        nameKey="label"
-                                        animationBegin={0}
-                                        animationDuration={1500}
-                                    >
-                                        {todayStats.statusData.map((entry, index) => (
-                                            <Cell 
-                                                key={`cell-${index}`} 
-                                                fill={entry.color} 
-                                                stroke="transparent"
-                                                className="hover:opacity-80 transition-opacity cursor-pointer focus:outline-none"
-                                            />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        content={({ active, payload }) => {
-                                            if (active && payload && payload.length) {
-                                                const data = payload[0].payload;
-                                                return (
-                                                    <div className="rounded-xl border border-white/20 bg-background/80 backdrop-blur-md p-3 shadow-xl transform transition-all scale-105">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="h-3 w-3 rounded-full" style={{ backgroundColor: data.color }} />
-                                                            <span className="text-xs font-bold uppercase text-muted-foreground">
-                                                                {data.label}
-                                                            </span>
-                                                        </div>
-                                                        <div className="mt-1 text-lg font-extrabold text-foreground">
-                                                            {data.value}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            }
-                                            return null;
-                                        }}
-                                    />
-                                    <Legend 
-                                        verticalAlign="bottom" 
-                                        height={36}
-                                        content={({ payload }) => (
-                                            <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-4">
-                                                {payload?.map((entry: any, index: number) => (
-                                                    <div key={`item-${index}`} className="flex items-center gap-2 group cursor-pointer">
-                                                        <div 
-                                                            className="h-2.5 w-2.5 rounded-full shadow-sm transition-transform group-hover:scale-125" 
-                                                            style={{ backgroundColor: entry.color }} 
-                                                        />
-                                                        <span className="text-[12px] font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
-                                                            {entry.payload.label}
-                                                        </span>
-                                                    </div>
+                        <div className="h-[280px] w-full mt-2 sm:h-[350px] sm:mt-4 relative flex flex-col items-center justify-center">
+                            {todayStats.todaysAppointmentsCount > 0 ? (
+                                <>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={todayStats.statusData}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={85}
+                                                outerRadius={115}
+                                                paddingAngle={5}
+                                                dataKey="value"
+                                                nameKey="label"
+                                                animationBegin={0}
+                                                animationDuration={1500}
+                                            >
+                                                {todayStats.statusData.map((entry, index) => (
+                                                    <Cell 
+                                                        key={`cell-${index}`} 
+                                                        fill={entry.color} 
+                                                        stroke="transparent"
+                                                        className="hover:opacity-80 transition-opacity cursor-pointer focus:outline-none"
+                                                    />
                                                 ))}
-                                            </div>
-                                        )}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                            {/* Center Text for Doughnut */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none pb-12 sm:pb-14">
-                                <div className="text-3xl font-black sm:text-4xl leading-none tracking-tight text-foreground">
-                                    {todayStats.todaysAppointmentsCount}
+                                            </Pie>
+                                            <Tooltip
+                                                content={({ active, payload }) => {
+                                                    if (active && payload && payload.length) {
+                                                        const data = payload[0].payload;
+                                                        return (
+                                                            <div className="rounded-xl border border-white/20 bg-background/80 backdrop-blur-md p-3 shadow-xl transform transition-all scale-105">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: data.color }} />
+                                                                    <span className="text-xs font-bold uppercase text-muted-foreground">
+                                                                        {data.label}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="mt-1 text-lg font-extrabold text-foreground">
+                                                                    {data.value}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                }}
+                                            />
+                                            <Legend 
+                                                verticalAlign="bottom" 
+                                                height={36}
+                                                content={({ payload }) => (
+                                                    <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-4">
+                                                        {payload?.map((entry: any, index: number) => (
+                                                            <div key={`item-${index}`} className="flex items-center gap-2 group cursor-pointer">
+                                                                <div 
+                                                                    className="h-2.5 w-2.5 rounded-full shadow-sm transition-transform group-hover:scale-125" 
+                                                                    style={{ backgroundColor: entry.color }} 
+                                                                />
+                                                                <span className="text-[12px] font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
+                                                                    {entry.payload.label}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    {/* Center Text for Doughnut */}
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none pb-12 sm:pb-14">
+                                        <div className="text-3xl font-black sm:text-4xl leading-none tracking-tight text-foreground">
+                                            {todayStats.todaysAppointmentsCount}
+                                        </div>
+                                        <div className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest mt-1">
+                                            Total
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center text-center p-6 bg-muted/20 rounded-3xl border-2 border-dashed border-muted w-full h-[80%]">
+                                    <div className="h-16 w-16 mb-4 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 animate-pulse">
+                                        <Calendar className="h-8 w-8" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-foreground mb-1">No Appointments Today</h3>
+                                    <p className="text-muted-foreground text-sm max-w-[200px]">
+                                        Your schedule is clear. Sit back and relax!
+                                    </p>
                                 </div>
-                                <div className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest mt-1">
-                                    Total
-                                </div>
-                            </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

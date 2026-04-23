@@ -17,6 +17,7 @@ import {
     Maximize2,
     UserPlus,
     Settings,
+    User,
 } from "lucide-react";
 import {
     useGetVisitorsQuery,
@@ -270,6 +271,7 @@ export function VisitorList() {
                             title: "No visitors yet",
                             description: "Register your first visitor to get started.",
                             primaryActionLabel: emptyPrimaryLabel,
+                            icon: User
                         }}
                         onPrimaryAction={handlePrimaryAction}
                         showCard={false}

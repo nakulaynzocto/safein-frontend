@@ -18,6 +18,7 @@ import {
     Maximize2,
     Settings,
     Printer,
+    UserPlus,
 } from "lucide-react";
 import { getInitials, formatName } from "@/utils/helpers";
 import { StatusBadge } from "@/components/common/statusBadge";
@@ -375,6 +376,7 @@ export function SpotPassList() {
                                 ? "We couldn't find any spot passes matching your search."
                                 : "Give instant entry to walk-in visitors by creating a spot pass.",
                             primaryActionLabel: isExpired ? "Upgrade Plan" : (hasReachedSpotPassLimit ? "Support Chat" : "New Spot Pass"),
+                            icon: UserPlus
                         }}
                         onPrimaryAction={() => {
                             if (isExpired) {

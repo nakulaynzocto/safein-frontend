@@ -141,14 +141,36 @@ export function DataTable<T extends Record<string, any>>({
             </Button>
         ) : null;
 
+        const emptyStateContent = (
+            <div 
+                className="flex flex-col items-center justify-center" 
+                style={{ minHeight: minHeight }}
+            >
+                <EmptyState
+                    title={emptyData?.title || emptyMessage}
+                    description={emptyData?.description || description}
+                    beforeAction={emptyData?.beforePrimaryAction}
+                    action={action}
+                    icon={emptyData?.icon}
+                    className="border-none bg-transparent shadow-none"
+                />
+            </div>
+        );
+
+        if (showCard) {
+            return (
+                <div className="bg-card border-border overflow-hidden rounded-2xl border shadow-sm">
+                    <CardContent className="p-0">
+                        {emptyStateContent}
+                    </CardContent>
+                </div>
+            );
+        }
+
         return (
-            <EmptyState
-                title={emptyData?.title || emptyMessage}
-                description={emptyData?.description || description}
-                beforeAction={emptyData?.beforePrimaryAction}
-                action={action}
-                icon={emptyData?.icon}
-            />
+            <div className="bg-card border-border overflow-hidden rounded-2xl border shadow-sm">
+                {emptyStateContent}
+            </div>
         );
     }
 
