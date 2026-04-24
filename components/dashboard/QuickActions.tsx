@@ -36,11 +36,6 @@ const adminQuickActions: QuickAction[] = [
         icon: IdCard,
         label: "Spot Pass",
     },
-    {
-        href: routes.privateroute.SETTINGS_QR_CHECKIN,
-        icon: QrCode,
-        label: "QR Check-in",
-    },
 ];
 
 const employeeQuickActions: QuickAction[] = [
@@ -58,11 +53,6 @@ const employeeQuickActions: QuickAction[] = [
         href: routes.privateroute.SPOT_PASS,
         icon: IdCard,
         label: "Spot Pass",
-    },
-    {
-        href: routes.privateroute.SETTINGS_QR_CHECKIN,
-        icon: QrCode,
-        label: "QR Check-in",
     },
 ];
 
