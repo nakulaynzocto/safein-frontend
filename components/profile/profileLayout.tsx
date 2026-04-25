@@ -72,7 +72,7 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
         },
         {
             id: "sms" as const,
-            label: "SMS (Twilio)",
+            label: "SMS outreach",
             icon: MessageSquare,
             roles: ["admin"],
             href: routes.privateroute.SETTINGS_SMS,

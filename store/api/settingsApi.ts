@@ -3,6 +3,9 @@ import { baseApi } from "./baseApi";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface SmtpConfig {
+    deliveryMode?: 'shared' | 'custom';
+    provider?: 'smtp' | 'brevo' | 'sendgrid' | 'mailgun';
+    apiKey?: string;
     host?: string;
     port?: number;
     secure?: boolean;
@@ -175,13 +178,16 @@ export interface SaveVoiceConfigRequest {
 }
 
 export interface SaveSmtpRequest {
-    host: string;
-    port: number;
-    secure: boolean;
-    user: string;
-    pass: string;
-    fromName: string;
-    fromEmail: string;
+    deliveryMode?: 'shared' | 'custom';
+    provider?: 'smtp' | 'brevo' | 'sendgrid' | 'mailgun';
+    apiKey?: string;
+    host?: string;
+    port?: number;
+    secure?: boolean;
+    user?: string;
+    pass?: string;
+    fromName?: string;
+    fromEmail?: string;
 }
 
 export interface SaveSmsRequest {

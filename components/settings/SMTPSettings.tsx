@@ -20,139 +20,89 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmailTemplateSettings } from "./EmailTemplateSettings";
 import { Card } from "@/components/ui/card";
 
+// Dynamic Schema: Validates only if mode is 'custom'
 const schema = yup.object().shape({
-    host: yup.string().required("SMTP host is required"),
-    port: yup.number().typeError("Port must be a number").min(1).max(65535).required("Port is required"),
-    secure: yup.boolean().required(),
-    user: yup.string().email("Must be a valid email").required("SMTP username (email) is required"),
-    pass: yup.string().required("SMTP password is required"),
-    fromName: yup.string().required("Sender name is required"),
-    fromEmail: yup.string().email("Must be a valid email").required("Sender email is required"),
+    deliveryMode: yup.string().oneOf(['shared', 'custom']).required(),
+    provider: yup.string().oneOf(['smtp', 'brevo', 'sendgrid', 'mailgun']).required(),
+    apiKey: yup.string().when('deliveryMode', {
+        is: 'custom',
+        then: (s) => s.when('provider', {
+            is: (p: string) => p !== 'smtp',
+            then: (s2) => s2.required("API Key is required"),
+            otherwise: (s2) => s2.notRequired()
+        }),
+        otherwise: (s) => s.notRequired()
+    }),
+    fromName: yup.string().when('deliveryMode', {
+        is: 'custom',
+        then: (s) => s.required("Sender name is required"),
+        otherwise: (s) => s.notRequired()
+    }),
+    fromEmail: yup.string().when('deliveryMode', {
+        is: 'custom',
+        then: (s) => s.email("Must be a valid email").required("Sender email is required"),
+        otherwise: (s) => s.notRequired()
+    }),
+    // Host is only required for SMTP or Mailgun (domain)
+    host: yup.string().when(['deliveryMode', 'provider'], ([mode, prov], s) => {
+        if (mode === 'custom' && (prov === 'smtp' || prov === 'mailgun')) return s.required();
+        return s.notRequired();
+    })
 });
 
-interface FormValues {
-    host: string;
-    port: number;
-    secure: boolean;
-    user: string;
-    pass: string;
-    fromName: string;
-    fromEmail: string;
-}
-
 const PRESETS = [
-    { label: "Gmail", host: "smtp.gmail.com", port: 587, secure: false },
-    { label: "Outlook", host: "smtp.office365.com", port: 587, secure: false },
-    { label: "Yahoo", host: "smtp.mail.yahoo.com", port: 587, secure: false },
-    { label: "Brevo", host: "smtp-relay.brevo.com", port: 587, secure: false },
-    { label: "Mailgun", host: "smtp.mailgun.org", port: 587, secure: false },
-    { label: "SendGrid", host: "smtp.sendgrid.net", port: 587, secure: false },
-    { label: "Custom", host: "", port: 587, secure: false },
+    { label: "Brevo API", provider: "brevo" },
+    { label: "SendGrid API", provider: "sendgrid" },
+    { label: "Mailgun API", provider: "mailgun" },
 ];
-
-function PresetButton({ label, isSelected, onClick }: { label: string; isSelected: boolean; onClick: () => void }) {
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all",
-                isSelected
-                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                    : "bg-background border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
-            )}
-        >
-            {label}
-        </button>
-    );
-}
 
 export function SMTPSettings() {
     const router = useRouter();
     const { data: settings, isLoading, error } = useGetSettingsQuery();
     const [saveSMTP, { isLoading: isSaving }] = useSaveSMTPConfigMutation();
+    const [selectedPreset, setSelectedPreset] = useState("Brevo API");
 
-    const [selectedPreset, setSelectedPreset] = useState("Custom");
-
-    const isVerified = !!settings?.smtp?.verified;
-
-
-
-
-
-    const {
-        register,
-        handleSubmit,
-        setValue,
-        watch,
-        reset,
-        formState: { errors, isDirty },
-    } = useForm<FormValues>({
+    const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm({
         resolver: yupResolver(schema) as any,
-        mode: "onBlur",
         defaultValues: {
-            host: "",
-            port: 587,
-            secure: false,
-            user: "",
-            pass: "",
+            deliveryMode: 'shared',
+            provider: 'brevo',
+            apiKey: "",
             fromName: "",
             fromEmail: "",
+            host: ""
         },
     });
 
+    const deliveryMode = watch("deliveryMode");
+    const provider = watch("provider");
+
+    // Sync form with backend data
     useEffect(() => {
-        if (!settings?.smtp || isDirty) return;
-        const smtp = settings.smtp;
-        const matchedPreset = PRESETS.find((p) => p.host === smtp.host)?.label ?? "Custom";
-        setSelectedPreset(matchedPreset);
+        if (!settings?.smtp) return;
+        const s = settings.smtp;
         reset({
-            host: smtp.host || "",
-            port: smtp.port || 587,
-            secure: smtp.secure ?? false,
-            user: smtp.user || "",
-            pass: smtp.pass || "",
-            fromName: smtp.fromName || "",
-            fromEmail: smtp.fromEmail || "",
+            deliveryMode: s.deliveryMode || 'shared',
+            provider: s.provider || 'brevo',
+            apiKey: s.apiKey ? MASKED_DISPLAY_VALUE : "",
+            fromName: s.fromName || "",
+            fromEmail: s.fromEmail || "",
+            host: s.host || ""
         });
-    }, [settings, reset, isDirty]);
+        setSelectedPreset(PRESETS.find(p => p.provider === s.provider)?.label || "Brevo API");
+    }, [settings, reset]);
 
-    const applyPreset = (preset: typeof PRESETS[0]) => {
-        setSelectedPreset(preset.label);
-        if (preset.host) {
-            setValue("host", preset.host, { shouldDirty: true });
-            setValue("port", preset.port, { shouldDirty: true });
-            setValue("secure", preset.secure, { shouldDirty: true });
-        }
-    };
-
-    const onSubmit = async (data: FormValues) => {
+    const onSubmit = async (data: any) => {
         const payload = {
             ...data,
-            pass: data.pass === MASKED_DISPLAY_VALUE ? "" : data.pass,
+            apiKey: data.apiKey === MASKED_DISPLAY_VALUE ? "" : data.apiKey,
         };
 
-        if (!payload.pass && !isVerified) {
-            toast.error("Please enter your SMTP password.");
-            return;
-        }
-
         try {
-            const result = await saveSMTP(payload as any).unwrap();
-            toast.success("SMTP configuration verified and saved!");
-            if (result.smtp) {
-                reset({
-                    host: result.smtp.host || "",
-                    port: result.smtp.port || 587,
-                    secure: result.smtp.secure ?? false,
-                    user: result.smtp.user || "",
-                    pass: MASKED_DISPLAY_VALUE,
-                    fromName: result.smtp.fromName || "",
-                    fromEmail: result.smtp.fromEmail || "",
-                });
-            }
+            await saveSMTP(payload).unwrap();
+            toast.success(data.deliveryMode === 'custom' ? "Custom configuration verified!" : "Switched to Standard Relay");
         } catch (err: any) {
-            toast.error(err?.data?.message || "SMTP connection failed. Please check your credentials.");
+            toast.error(err?.data?.message || "Operation failed.");
         }
     };
 
@@ -164,189 +114,112 @@ export function SMTPSettings() {
                 {() => (
                     <div className="mx-auto w-full max-w-full">
                         <SettingsHeader
-                            title="SMTP Email Server"
-                            description="Configure SMTP connection, which events send email, and branding & templates for professional communication."
-                            isVerified={isVerified}
-                            providerName={selectedPreset === "Custom" ? "Custom SMTP" : selectedPreset}
+                            title="Email Delivery Settings"
+                            description="Configure how official notifications are delivered to your visitors and employees."
+                            isVerified={!!settings?.smtp?.verified}
+                            providerName={deliveryMode === 'shared' ? "Aynzo Relay" : selectedPreset}
                             icon={Mail}
                         />
 
                         <Tabs defaultValue="connection" className="w-full">
-                            <TabsList className="mb-8 flex w-full flex-wrap gap-1 bg-muted/30 p-1 border border-border/50 rounded-xl min-h-11 items-stretch">
-                                <TabsTrigger 
-                                    value="connection" 
-                                    className="flex-1 min-w-[140px] px-4 py-2.5 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all"
-                                >
-                                    <Settings2 className="h-4 w-4 mr-2 shrink-0" />
-                                    Connection Config
+                            <TabsList className="mb-8 flex w-full flex-wrap gap-1 bg-muted/30 p-1 border border-border/50 rounded-xl">
+                                <TabsTrigger value="connection" className="flex-1 min-w-[140px] py-2.5 font-semibold transition-all">
+                                    <Settings2 className="h-4 w-4 mr-2 shrink-0" /> Connection Config
                                 </TabsTrigger>
-                                <TabsTrigger 
-                                    value="templates" 
-                                    className="flex-1 min-w-[140px] px-4 py-2.5 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all"
-                                >
-                                    <Palette className="h-4 w-4 mr-2 shrink-0" />
-                                    Branding & Templates
+                                <TabsTrigger value="templates" className="flex-1 min-w-[140px] py-2.5 font-semibold transition-all">
+                                    <Palette className="h-4 w-4 mr-2 shrink-0" /> Branding & Templates
                                 </TabsTrigger>
                             </TabsList>
 
-                            <TabsContent value="connection" className="animate-in fade-in slide-in-from-left-4 duration-300">
-                                <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
+                            <TabsContent value="connection">
+                                <FormContainer isPage isLoading={isLoading}>
                                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                                        <div className="space-y-3">
-                                            <h3 className="text-sm font-semibold text-foreground">Quick Provider Presets</h3>
-                                            <div className="flex flex-wrap gap-2">
-                                                {PRESETS.map((preset) => (
-                                                    <PresetButton
-                                                        key={preset.label}
-                                                        label={preset.label}
-                                                        isSelected={selectedPreset === preset.label}
-                                                        onClick={() => applyPreset(preset)}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-4 pt-4 border-t">
-                                            <div className="flex items-center gap-2">
-                                                <Server className="h-4 w-4 text-muted-foreground" />
-                                                <h3 className="text-sm font-semibold text-foreground">Server Settings</h3>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 bg-muted/20 p-6 rounded-2xl border border-dashed">
-                                                <div className="lg:col-span-2">
-                                                    <InputField
-                                                        label="SMTP Host"
-                                                        placeholder="smtp.gmail.com"
-                                                        {...register("host")}
-                                                        error={errors.host?.message}
-                                                        required
-                                                        className="h-12 bg-background border-border rounded-xl font-medium"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <InputField
-                                                        label="Port"
-                                                        type="number"
-                                                        placeholder="587"
-                                                        {...register("port")}
-                                                        error={errors.port?.message}
-                                                        required
-                                                        className="h-12 bg-background border-border rounded-xl font-medium"
-                                                    />
-                                                </div>
-                                                <div className="flex flex-col space-y-2">
-                                                    <label className="text-sm font-medium text-foreground">Security</label>
-                                                    <div className="flex items-center gap-4 h-12 px-4 bg-background border border-border rounded-xl">
-                                                        <label className="flex items-center gap-2 cursor-pointer">
-                                                            <input
-                                                                type="radio"
-                                                                checked={!watch("secure")}
-                                                                onChange={() => setValue("secure", false, { shouldDirty: true })}
-                                                                className="accent-[#3882a5]"
-                                                            />
-                                                            <span className="text-sm font-medium">TLS (587)</span>
-                                                        </label>
-                                                        <label className="flex items-center gap-2 cursor-pointer">
-                                                            <input
-                                                                type="radio"
-                                                                checked={watch("secure")}
-                                                                onChange={() => setValue("secure", true, { shouldDirty: true })}
-                                                                className="accent-[#3882a5]"
-                                                            />
-                                                            <span className="text-sm font-medium">SSL (465)</span>
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-4 pt-4 border-t">
-                                            <div className="flex items-center gap-2">
-                                                <Key className="h-4 w-4 text-muted-foreground" />
-                                                <h3 className="text-sm font-semibold text-foreground">Authentication</h3>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 bg-muted/20 p-6 rounded-2xl border border-dashed">
-                                                <InputField
-                                                    label="SMTP Username"
-                                                    placeholder="your@email.com"
-                                                    type="email"
-                                                    {...register("user")}
-                                                    error={errors.user?.message}
-                                                    required
-                                                    className="h-12 bg-background border-border rounded-xl font-medium"
-                                                />
-                                                <MaskedInputField
-                                                    label="SMTP Password"
-                                                    placeholder={isVerified ? MASKED_DISPLAY_VALUE : "Enter password"}
-                                                    {...register("pass")}
-                                                    error={errors.pass?.message}
-                                                    required
-                                                    className="h-12 bg-background border-border rounded-xl font-medium"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-4 pt-4 border-t">
-                                            <div className="flex items-center gap-2">
-                                                <Mail className="h-4 w-4 text-muted-foreground" />
-                                                <h3 className="text-sm font-semibold text-foreground">Sender Identity</h3>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 bg-muted/20 p-6 rounded-2xl border border-dashed">
-                                                <InputField
-                                                    label="Sender Name"
-                                                    placeholder="Gatekeeper Security"
-                                                    {...register("fromName")}
-                                                    error={errors.fromName?.message}
-                                                    required
-                                                    className="h-12 bg-background border-border rounded-xl font-medium"
-                                                />
-                                                <InputField
-                                                    label="Sender Email"
-                                                    type="email"
-                                                    placeholder="no-reply@yourdomain.com"
-                                                    {...register("fromEmail")}
-                                                    error={errors.fromEmail?.message}
-                                                    required
-                                                    className="h-12 bg-background border-border rounded-xl font-medium"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end border-t border-border/50">
-                                            <ActionButton
-                                                type="button"
-                                                variant="outline"
-                                                onClick={() => router.back()}
-                                                size="xl"
-                                                className="px-8"
+                                        
+                                        {/* Strategy Selection */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <Card 
+                                                className={cn("p-4 cursor-pointer border-2 transition-all", 
+                                                    deliveryMode === 'shared' ? "border-[#3882a5] bg-[#3882a5]/5" : "hover:border-border")}
+                                                onClick={() => { setValue("deliveryMode", 'shared'); handleSubmit(onSubmit)(); }}
                                             >
-                                                Cancel
-                                            </ActionButton>
-                                            <ActionButton
-                                                type="submit"
-                                                isLoading={isSaving}
-                                                loadingLabel="Saving..."
-                                                variant="primary"
-                                                size="xl"
-                                                className="min-w-[200px] shadow-lg shadow-[#3882a5]/20"
-                                                icon={Save}
-                                                label="Verify & Save"
-                                            />
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <Server className="h-5 w-5 text-[#3882a5]" />
+                                                    <div className={cn("h-4 w-4 rounded-full border-2", deliveryMode === 'shared' ? "bg-[#3882a5]" : "")} />
+                                                </div>
+                                                <p className="text-sm font-bold">Standard Relay</p>
+                                                <p className="text-[10px] text-muted-foreground">Premium infrastructure handled by Aynzo.</p>
+                                            </Card>
+
+                                            <Card 
+                                                className={cn("p-4 cursor-pointer border-2 transition-all", 
+                                                    deliveryMode === 'custom' ? "border-primary bg-primary/5" : "hover:border-border")}
+                                                onClick={() => setValue("deliveryMode", 'custom')}
+                                            >
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <Palette className="h-5 w-5 text-primary" />
+                                                    <div className={cn("h-4 w-4 rounded-full border-2", deliveryMode === 'custom' ? "bg-primary" : "")} />
+                                                </div>
+                                                <p className="text-sm font-bold">Custom Branding</p>
+                                                <p className="text-[10px] text-muted-foreground">Use your own API Key and sender email.</p>
+                                            </Card>
+                                        </div>
+
+                                        {deliveryMode === 'shared' ? (
+                                            <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 flex items-start gap-3">
+                                                <Server className="h-5 w-5 text-emerald-600" />
+                                                <div>
+                                                    <p className="text-xs font-bold text-emerald-900">Shared Relay Active</p>
+                                                    <p className="text-[10px] text-emerald-700">All notifications pass through our verified channels. No extra setup needed.</p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-8 animate-in fade-in zoom-in-95 duration-300">
+                                                {/* Provider Presets */}
+                                                <div className="flex flex-wrap gap-2">
+                                                    {PRESETS.map((p) => (
+                                                        <button 
+                                                            key={p.label} type="button"
+                                                            onClick={() => { setValue("provider", p.provider); setSelectedPreset(p.label); }}
+                                                            className={cn("px-4 py-2 rounded-lg text-xs font-bold border", 
+                                                                provider === p.provider ? "bg-primary text-white" : "bg-background")}
+                                                        >
+                                                            {p.label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+
+                                                {/* API Input */}
+                                                <div className="grid grid-cols-1 gap-6 bg-muted/20 p-6 rounded-2xl border-dashed border">
+                                                    <MaskedInputField
+                                                        label="API Key / Token"
+                                                        {...register("apiKey")}
+                                                        error={errors.apiKey?.message as any}
+                                                        required
+                                                    />
+                                                    {provider === 'mailgun' && (
+                                                        <InputField label="Mailgun Domain" {...register("host")} error={errors.host?.message as any} required />
+                                                    )}
+                                                </div>
+
+                                                {/* Branding */}
+                                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 bg-muted/20 p-6 rounded-2xl border-dashed border">
+                                                    <InputField label="Sender Name" {...register("fromName")} error={errors.fromName?.message as any} required />
+                                                    <InputField label="Sender Email" {...register("fromEmail")} error={errors.fromEmail?.message as any} required />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="flex justify-end gap-3 pt-6 border-t">
+                                            <ActionButton type="submit" isLoading={isSaving} variant="primary" size="xl" className="min-w-[200px]" label="Verify & Save" icon={Save} />
                                         </div>
                                     </form>
                                 </FormContainer>
                             </TabsContent>
 
-                            <TabsContent value="templates" className="animate-in fade-in slide-in-from-right-4 duration-300">
-                                <Card className="p-8 border-border/50 bg-background shadow-sm rounded-2xl">
-                                    <EmailTemplateSettings />
-                                </Card>
+                            <TabsContent value="templates">
+                                <Card className="p-8"><EmailTemplateSettings /></Card>
                             </TabsContent>
                         </Tabs>
-
-
                     </div>
                 )}
             </ProfileLayout>

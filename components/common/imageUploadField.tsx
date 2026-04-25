@@ -188,6 +188,62 @@ export function ImageUploadField({
             throw new Error("Only image files are allowed");
         }
     };
+    
+    /**
+     * Efficient client-side image compression
+     * Resizes image to max 800px and reduces quality to 0.7
+     */
+    const compressImage = async (file: File): Promise<File> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    let width = img.width;
+                    let height = img.height;
+                    const max_size = 800; // Limit resolution for web/visitor photos
+
+                    if (width > height) {
+                        if (width > max_size) {
+                            height *= max_size / width;
+                            width = max_size;
+                        }
+                    } else {
+                        if (height > max_size) {
+                            width *= max_size / height;
+                            height = max_size;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext("2d");
+                    ctx?.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob(
+                        (blob) => {
+                            if (blob) {
+                                const compressedFile = new File([blob], file.name, {
+                                    type: "image/jpeg",
+                                    lastModified: Date.now(),
+                                });
+                                resolve(compressedFile);
+                            } else {
+                                resolve(file); // Fallback to original
+                            }
+                        },
+                        "image/jpeg",
+                        0.7 // Compression quality (0.7 is good balance of size vs quality)
+                    );
+                };
+                img.onerror = () => resolve(file);
+            };
+            reader.onerror = () => resolve(file);
+        });
+    };
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         event.preventDefault();
@@ -212,11 +268,15 @@ export function ImageUploadField({
             setPreviewImage(null);
 
             validateFile(file);
+            
+            // Apply compression before processing/uploading
+            const compressedFile = await compressImage(file);
+            const fileToProcess = compressedFile;
 
             if (delayedUpload) {
-                const localUrl = URL.createObjectURL(file);
+                const localUrl = URL.createObjectURL(fileToProcess);
                 setPreviewImage(localUrl);
-                if (setValue && name) setValue(name, file, { shouldValidate: true });
+                if (setValue && name) setValue(name, fileToProcess, { shouldValidate: true });
                 if (onChange) onChange(localUrl);
                 setIsImageLoading(false);
                 onUploadStatusChange?.(false);
@@ -225,7 +285,7 @@ export function ImageUploadField({
             }
 
             const result = await uploadFile({ 
-                file, 
+                file: fileToProcess, 
                 token: appointmentToken,
                 slug: qrSlug 
             }).unwrap();
