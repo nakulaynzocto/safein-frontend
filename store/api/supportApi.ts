@@ -1,9 +1,9 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { RootState } from '../store';
 
-const SUPPORT_API_BASE_URL = process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL
-    ? `${process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL}/support`
-    : "http://localhost:4011/api/support";
+import { API_URL } from '@/lib/api-config';
+
+const SUPPORT_API_BASE_URL = `${API_URL}/support`;
 
 
 export const supportApi = createApi({

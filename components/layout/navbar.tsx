@@ -235,10 +235,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                 "top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out",
                 variant === "dashboard" ? "sticky" : "fixed",
                 shouldShowWhiteNavbar
-                    ? cn(
-                        "border-b border-gray-200/50 bg-white shadow-sm py-0",
-                        variant === "dashboard" ? "shadow-sm" : "shadow-md"
-                    )
+                    ? "bg-white/80 backdrop-blur-xl py-0"
                     : "bg-transparent border-transparent shadow-none py-2"
             )}
         >
@@ -304,7 +301,6 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                                 target.src = "/safein-identity.png";
                                             }}
                                         />
-                                        <div className="animate-shimmer absolute inset-0 opacity-10"></div>
                                     </div>
                                 </Link>
                                 {/* Visitor Management System Text - Show for authenticated users */}
@@ -649,7 +645,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                 <UpgradePlanModal isOpen={isUpgradeModalOpen} onClose={handleCloseUpgradeModal} />
 
                 {isMobileMenuOpen && !isActuallyAuthenticated && (
-                    <div className="absolute top-20 left-0 right-0 border-b border-gray-200/30 bg-white/95 shadow-2xl backdrop-blur-xl lg:hidden animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="absolute top-20 left-0 right-0 bg-white/95 shadow-2xl backdrop-blur-xl lg:hidden animate-in fade-in slide-in-from-top-4 duration-300">
                         <div className="space-y-1 px-4 pt-4 pb-8">
                             {[
                                 { label: "Home", href: routes.publicroute.HOME, icon: <UserCircle className="h-5 w-5" /> },

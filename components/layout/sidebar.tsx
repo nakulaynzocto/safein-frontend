@@ -212,14 +212,14 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
                                 href={item.href}
                                 prefetch={true}
                                 className={cn(
-                                    "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 relative",
+                                    "flex items-center gap-4 rounded-xl px-4 py-4 text-[16px] font-bold transition-all duration-200 relative",
                                     isActive(item.href)
                                         ? "bg-primary/10 text-primary shadow-sm"
                                         : "text-gray-700 hover:bg-gray-100 active:bg-gray-200",
                                 )}
                                 onClick={onLinkClick}
                             >
-                                <item.icon className="h-5 w-5 shrink-0" />
+                                <item.icon className="h-6 w-6 shrink-0" />
                                 <span className="truncate">{item.name}</span>
                             </Link>
                         );

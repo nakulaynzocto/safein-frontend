@@ -1,5 +1,5 @@
 import { baseApi } from "./baseApi";
-import { SUPER_ADMIN_API_URL, BLOG_CATEGORY } from "@/lib/api-config";
+import { API_URL } from "@/lib/api-config";
 
 export interface Blog {
     _id: string;
@@ -34,7 +34,6 @@ export interface PaginatedBlogsResponse {
 export interface GetBlogsQueryArgs {
     page?: number;
     limit?: number;
-    category?: string;
     status?: string;
 }
 
@@ -42,9 +41,8 @@ export const blogApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         getPublicBlogs: builder.query<PaginatedBlogsResponse, GetBlogsQueryArgs | void>({
             query: (args) => ({
-                url: `${SUPER_ADMIN_API_URL}/blogs`,
+                url: `${API_URL}/blogs`,
                 params: {
-                    category: BLOG_CATEGORY,
                     status: 'PUBLISHED',
                     page: args?.page || 1,
                     limit: args?.limit || 9,
@@ -63,7 +61,7 @@ export const blogApi = baseApi.injectEndpoints({
                     : [{ type: "Blog", id: "LIST" }],
         }),
         getPublicBlogBySlug: builder.query<Blog, string>({
-            query: (slug) => `${SUPER_ADMIN_API_URL}/blogs/slug/${slug}`,
+            query: (slug) => `${API_URL}/blogs/slug/${slug}`,
             transformResponse: (response: any) => response.data || null,
             providesTags: (result, error, slug) => [{ type: "Blog", id: slug }],
         }),

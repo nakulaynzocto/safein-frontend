@@ -10,17 +10,17 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 default:
-                    "border border-accent bg-background text-primary shadow-sm hover:bg-accent hover:text-white dark:border-accent/60 dark:bg-secondary dark:text-foreground dark:hover:bg-accent/80 dark:hover:text-white",
+                    "bg-accent text-white shadow-sm hover:bg-accent/90",
                 destructive:
-                    "bg-destructive text-white shadow-xs hover:bg-destructive/90 hover:text-white focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+                    "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
                 outline:
-                    "border border-border bg-background shadow-xs hover:bg-primary hover:text-white dark:bg-transparent dark:border-border dark:hover:bg-primary/50",
+                    "border border-border bg-background shadow-xs hover:bg-accent/5 hover:text-accent text-foreground dark:bg-transparent dark:border-border dark:hover:bg-accent/50",
                 "outline-primary":
-                    "border border-accent text-accent bg-background shadow-xs hover:bg-accent hover:text-white dark:border-accent dark:text-accent dark:hover:bg-accent/20",
-                primary: "bg-accent text-white shadow-xs hover:bg-accent/90 hover:text-white focus-visible:ring-accent/20",
-                secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-primary hover:text-white",
-                ghost: "hover:bg-accent hover:text-white dark:hover:bg-accent/50",
-                link: "text-primary underline-offset-4 hover:underline",
+                    "border border-accent text-accent bg-background shadow-xs hover:bg-accent/5 hover:text-accent/80 dark:border-accent dark:text-accent dark:hover:bg-accent/20",
+                primary: "bg-accent text-white shadow-xs hover:bg-accent/90 focus-visible:ring-accent/20",
+                secondary: "bg-accent/10 text-accent shadow-xs hover:bg-accent/20",
+                ghost: "hover:bg-accent/5 text-accent transition-colors",
+                link: "text-accent underline-offset-4 hover:underline",
             },
             size: {
                 default: "h-9 px-4 py-2 has-[>svg]:px-3",

@@ -41,6 +41,7 @@ import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { routes } from "@/utils/routes";
 import { ConfirmationDialog } from "@/components/common/confirmationDialog";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 export default function VisitorSettingsPage() {
     const params = useParams();
@@ -275,75 +276,105 @@ export default function VisitorSettingsPage() {
 
                 {/* Right Column - Quick Actions */}
                 <div className="space-y-6">
-                    <Card className="border-none bg-background/50 backdrop-blur-sm shadow-sm ring-1 ring-border text-foreground">
-                        <CardHeader>
-                            <CardTitle className="text-lg">Quick Actions</CardTitle>
-                            <CardDescription>Manage visitor status</CardDescription>
+                    <Card className="border-none bg-white shadow-xl shadow-gray-100 rounded-[28px] overflow-hidden flex flex-col text-foreground">
+                        <CardHeader className="pb-4 pt-8 px-8">
+                            <div className="flex items-center gap-3 mb-1">
+                                <div className="h-8 w-8 bg-blue-50 rounded-lg flex items-center justify-center text-[#3882a5]">
+                                    <Clock className="h-4 w-4" />
+                                </div>
+                                <CardTitle className="text-lg font-black uppercase tracking-tight">Quick Actions</CardTitle>
+                            </div>
+                            <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-11">Manage visitor status</CardDescription>
                         </CardHeader>
-                        <CardContent className="grid gap-3">
+                        <CardContent className="grid gap-3 p-8 pt-2">
                             <Button 
                                 variant="outline" 
-                                className="justify-start h-12 rounded-xl group"
+                                className="justify-start h-14 rounded-2xl group border-gray-100 bg-gray-50/30 hover:bg-white hover:border-[#3882a5]/30 transition-all duration-300"
                                 onClick={() => router.push(routes.privateroute.VISITOREDIT.replace("[id]", visitor._id))}
                             >
-                                <Edit className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
-                                Update Profile
+                                <div className="h-8 w-8 rounded-xl bg-white border border-gray-100 flex items-center justify-center mr-3 shadow-sm group-hover:scale-110 transition-transform">
+                                    <Edit className="h-4 w-4 text-gray-400 group-hover:text-[#3882a5]" />
+                                </div>
+                                <span className="text-[11px] font-black uppercase tracking-widest text-gray-700">Update Profile</span>
                             </Button>
 
                             {visitor.blacklisted ? (
                                 <Button 
                                     variant="outline" 
-                                    className="justify-start h-12 rounded-xl group border-green-200/50 bg-green-50/50 hover:bg-green-100/50 hover:border-green-300 text-green-700 transition-all"
+                                    className="justify-start h-14 rounded-2xl group border-emerald-100/50 bg-emerald-50/30 hover:bg-emerald-50 hover:border-emerald-200 transition-all duration-300"
                                     onClick={() => setShowStatusDialog(true)}
                                 >
-                                    <UserCheck className="mr-3 h-4 w-4 transition-transform group-hover:scale-110" />
-                                    Unblock Visitor
+                                    <div className="h-8 w-8 rounded-xl bg-white border border-emerald-100 flex items-center justify-center mr-3 shadow-sm group-hover:scale-110 transition-transform">
+                                        <UserCheck className="h-4 w-4 text-emerald-500" />
+                                    </div>
+                                    <span className="text-[11px] font-black uppercase tracking-widest text-emerald-700">Unblock Visitor</span>
                                 </Button>
                             ) : (
                                 <Button 
                                     variant="outline" 
-                                    className="justify-start h-12 rounded-xl group border-orange-200/50 bg-orange-50/50 hover:bg-orange-100/50 hover:border-orange-300 text-orange-700 transition-all"
+                                    className="justify-start h-14 rounded-2xl group border-orange-100/50 bg-orange-50/30 hover:bg-orange-50 hover:border-orange-200 transition-all duration-300"
                                     onClick={() => setShowStatusDialog(true)}
                                 >
-                                    <UserMinus className="mr-3 h-4 w-4 transition-transform group-hover:scale-110" />
-                                    Block Visitor
+                                    <div className="h-8 w-8 rounded-xl bg-white border border-orange-100 flex items-center justify-center mr-3 shadow-sm group-hover:scale-110 transition-transform">
+                                        <UserMinus className="h-4 w-4 text-orange-500" />
+                                    </div>
+                                    <span className="text-[11px] font-black uppercase tracking-widest text-orange-700">Block Visitor</span>
                                 </Button>
                             )}
                             
                             <div className="pt-2">
                                 <Button 
                                     variant="destructive" 
-                                    className="w-full justify-start h-12 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-200/50"
+                                    className={cn(
+                                        "w-full justify-start h-14 rounded-2xl transition-all duration-300",
+                                        appointmentCheck?.hasAppointments 
+                                            ? "bg-red-50 text-red-400 border border-red-100 cursor-not-allowed opacity-100" 
+                                            : "bg-red-500/10 hover:bg-red-500 text-red-600 hover:text-white border border-red-200/50"
+                                    )}
                                     onClick={() => setShowDeleteDialog(true)}
                                     disabled={appointmentCheck?.hasAppointments}
                                 >
-                                    <Trash2 className="mr-3 h-4 w-4" />
-                                    {appointmentCheck?.hasAppointments ? 'Deletion Restricted' : 'Delete Record'}
+                                    <div className={cn(
+                                        "h-8 w-8 rounded-xl bg-white flex items-center justify-center mr-3 shadow-sm",
+                                        appointmentCheck?.hasAppointments ? "opacity-50" : "group-hover:scale-110 transition-transform"
+                                    )}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </div>
+                                    <span className="text-[11px] font-black uppercase tracking-widest">
+                                        {appointmentCheck?.hasAppointments ? 'Deletion Restricted' : 'Delete Record'}
+                                    </span>
                                 </Button>
                                 {appointmentCheck?.hasAppointments && (
-                                    <p className="text-[10px] text-muted-foreground mt-2 px-1 italic">
-                                        * Cannot delete visitors with active appointment history.
-                                    </p>
+                                    <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.05em] flex items-start gap-2">
+                                            <AlertCircle size={12} className="shrink-0 mt-0.5 opacity-50 text-red-500" />
+                                            Physical records identified. Permanent deletion is locked due to active appointment lineage.
+                                        </p>
+                                    </div>
                                 )}
                             </div>
                         </CardContent>
                     </Card>
 
-                    {/* Metadata Card */}
-                    <Card className="border-none bg-muted/30 shadow-none ring-1 ring-border/50 text-foreground">
-                        <CardContent className="pt-6 space-y-4 text-foreground">
-                            <div className="flex items-center gap-3 text-sm">
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
+                    {/* Metadata Hub */}
+                    <Card className="border-none bg-blue-50/30 overflow-hidden shadow-none rounded-[28px] text-foreground">
+                        <CardContent className="p-8 space-y-6 text-foreground">
+                            <div className="flex items-center gap-4 text-sm group">
+                                <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center shadow-sm border border-blue-50 group-hover:rotate-6 transition-transform">
+                                    <Calendar className="h-4 w-4 text-[#3882a5]" />
+                                </div>
                                 <div className="space-y-0.5">
-                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Registered On</p>
-                                    <p className="font-medium">{formatDate(visitor.createdAt)}</p>
+                                    <p className="text-[9px] text-[#3882a5] uppercase font-black tracking-widest leading-none mb-1">Registration Index</p>
+                                    <p className="font-black text-gray-900 tracking-tight">{formatDate(visitor.createdAt)}</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3 text-sm">
-                                <Clock className="h-4 w-4 text-muted-foreground" />
+                            <div className="flex items-center gap-4 text-sm group">
+                                <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center shadow-sm border border-blue-50 group-hover:rotate-6 transition-transform">
+                                    <ShieldCheck className="h-4 w-4 text-[#3882a5]" />
+                                </div>
                                 <div className="space-y-0.5 text-foreground">
-                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Last Profile Update</p>
-                                    <p className="font-medium">{formatDate(visitor.updatedAt)}</p>
+                                    <p className="text-[9px] text-[#3882a5] uppercase font-black tracking-widest leading-none mb-1">Activity Heartbeat</p>
+                                    <p className="font-black text-gray-900 tracking-tight">{formatDate(visitor.updatedAt)}</p>
                                 </div>
                             </div>
                         </CardContent>

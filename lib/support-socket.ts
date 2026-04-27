@@ -1,8 +1,8 @@
 import { io, Socket } from 'socket.io-client';
 
-const BASE_SUPER_ADMIN_URL = process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL
-    ? process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL.replace(/\/api$/, '')
-    : 'http://localhost:4011';
+import { API_URL } from './api-config';
+
+const BASE_SUPER_ADMIN_URL = API_URL.replace(/\/api\/v1$/, '').replace(/\/api$/, '');
 
 const SUPPORT_URL = `${BASE_SUPER_ADMIN_URL}/support`;
 

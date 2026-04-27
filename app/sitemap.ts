@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 import { safeInSEOConfig, safeInPageSEO } from '../lib/seoConfig';
-import { BLOG_BASE_URL, BLOG_CATEGORY } from '../lib/api-config';
+import { BLOG_BASE_URL } from '../lib/api-config';
 import { helpArticles } from './help/data';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -19,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 2. Fetch Blog Posts from API
     let blogRoutes: MetadataRoute.Sitemap = [];
     try {
-        const response = await fetch(`${BLOG_BASE_URL}?category=${BLOG_CATEGORY}&status=PUBLISHED&limit=100`, {
+        const response = await fetch(`${BLOG_BASE_URL}?status=PUBLISHED&limit=100`, {
             next: { revalidate: 3600 } // Cache for 1 hour
         });
         const data = await response.json();

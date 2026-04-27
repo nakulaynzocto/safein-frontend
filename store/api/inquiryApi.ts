@@ -1,10 +1,11 @@
 import { baseApi } from "./baseApi";
+import { API_URL } from "@/lib/api-config";
 
 export const inquiryApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         submitInquiry: builder.mutation<any, any>({
             query: (body) => ({
-                url: `${process.env.NEXT_PUBLIC_SUPER_ADMIN_API_URL}/inquiries/contact`,
+                url: `${API_URL}/inquiries/contact`,
                 method: "POST",
                 body: { ...body, source: "safein" },
             }),
