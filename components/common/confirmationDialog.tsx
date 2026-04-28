@@ -157,11 +157,11 @@ export function ConfirmationDialog({
                                 disabled={disabled}
                                 className={cn(
                                     "w-full h-9 rounded-lg text-[13px] font-medium text-white transition-all",
-                                    variant === "destructive" || variant === "warning"
+                                    variant === "destructive"
                                         ? "bg-destructive hover:bg-destructive/90"
                                         : "hover:opacity-90"
                                 )}
-                                style={variant === "default" ? { backgroundColor: "#074463" } : undefined}
+                                style={variant === "default" || variant === "warning" ? { backgroundColor: "#074463" } : undefined}
                             >
                                 {confirmText}
                             </Button>
@@ -209,11 +209,11 @@ export function ConfirmationDialog({
                                 disabled={disabled}
                                 className={cn(
                                     "h-9 rounded-lg text-[13px] font-medium text-white px-5 transition-all",
-                                    variant === "destructive" || variant === "warning"
+                                    variant === "destructive"
                                         ? "bg-destructive hover:bg-destructive/90"
                                         : "hover:opacity-90"
                                 )}
-                                style={variant === "default" ? { backgroundColor: "#074463" } : undefined}
+                                style={variant === "default" || variant === "warning" ? { backgroundColor: "#074463" } : undefined}
                             >
                                 {confirmText}
                             </Button>

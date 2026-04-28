@@ -13,7 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, UserPlus, AlertCircle, Mail, Phone, Info } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { ImageUploadField } from "@/components/common/imageUploadField";
 import { SelectField } from "@/components/common/selectField";
 import { PhoneInputField } from "@/components/common/phoneInputField";
@@ -27,8 +28,9 @@ import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { InputField } from "../common/inputField";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
-import { UserPlus } from "lucide-react";
 import { useUserCountry } from "@/hooks/useUserCountry";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ConfirmationDialog } from "@/components/common/confirmationDialog";
 
 const employeeSchema = yup.object({
     name: yup
@@ -105,6 +107,9 @@ export function NewEmployeeModal({
     const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
     const [isFileUploading, setIsFileUploading] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [isTermsAgreed, setIsTermsAgreed] = useState(false);
+    const [pendingFormData, setPendingFormData] = useState<EmployeeFormData | null>(null);
     const userCountry = useUserCountry();
 
     const { hasReachedEmployeeLimit, isExpired } = useSubscriptionStatus();
@@ -123,6 +128,10 @@ export function NewEmployeeModal({
 
     const isEmailLocked = isEditMode && !!employeeData?.isEmailVerified;
     const isPhoneLocked = isEditMode && !!employeeData?.isPhoneVerified;
+
+    useEffect(() => {
+        router.prefetch(routes.privateroute.EMPLOYEELIST);
+    }, [router]);
 
     const {
         register,
@@ -190,6 +199,12 @@ export function NewEmployeeModal({
 
     const onSubmit = async (data: EmployeeFormData) => {
         try {
+            if (!isEditMode && !showConfirmDialog && !pendingFormData) {
+                setPendingFormData(data);
+                setShowConfirmDialog(true);
+                return;
+            }
+
             setGeneralError(null);
 
             const payload = { ...data };
@@ -209,6 +224,10 @@ export function NewEmployeeModal({
                 if (!isPage) {
                     setOpen(false);
                 }
+                
+                setPendingFormData(null);
+                setShowConfirmDialog(false);
+                setIsTermsAgreed(false);
                 reset();
 
                 if (onSuccess) {
@@ -219,11 +238,17 @@ export function NewEmployeeModal({
             } else {
                 await createEmployee(payload).unwrap();
                 showSuccessToast("Employee created successfully");
+                
+                // Important: Clean up state before redirect
+                setPendingFormData(null);
+                setShowConfirmDialog(false);
+                setIsTermsAgreed(false);
                 reset();
 
                 if (onSuccess) {
                     onSuccess();
                 } else {
+                    console.log("Redirecting to employee list...");
                     router.push(routes.privateroute.EMPLOYEELIST);
                 }
 
@@ -233,6 +258,9 @@ export function NewEmployeeModal({
             }
 
         } catch (error: any) {
+            setPendingFormData(null);
+            setShowConfirmDialog(false);
+            setIsTermsAgreed(false);
             if (error?.data?.errors && Array.isArray(error.data.errors)) {
                 error.data.errors.forEach((fieldError: any) => {
                     if (fieldError.field && fieldError.message) {
@@ -460,16 +488,78 @@ export function NewEmployeeModal({
         </form>
     );
 
+    const confirmationDialog = (
+        <ConfirmationDialog
+            open={showConfirmDialog}
+            onOpenChange={(open) => {
+                setShowConfirmDialog(open);
+                if (!open) {
+                    setPendingFormData(null);
+                    setIsTermsAgreed(false);
+                }
+            }}
+            title="Confirm Contact Details"
+            variant="warning"
+            description={
+                <div className="space-y-4 pr-2">
+                    <div className="text-sm leading-relaxed text-slate-600">
+                        Please verify that <strong>{pendingFormData?.email}</strong> and <strong>{pendingFormData?.phone}</strong> are correct. 
+                        Incoming alerts and calls depend on this information.
+                        <p className="mt-2 text-[11px] italic text-amber-700 font-medium">
+                            (Email aur number sahi hona chahiye taki messages receive ho sakein.)
+                        </p>
+                    </div>
+
+                    <div 
+                        className={cn(
+                            "flex items-center space-x-3 p-4 rounded-xl border-2 transition-all cursor-pointer shadow-sm",
+                            isTermsAgreed 
+                                ? "bg-amber-50 border-amber-500 scale-[1.01]" 
+                                : "bg-white border-slate-300 hover:border-amber-400"
+                        )}
+                        onClick={() => setIsTermsAgreed(!isTermsAgreed)}
+                    >
+                        <div className="relative flex items-center justify-center">
+                            <Checkbox 
+                                id="confirmation_checkbox" 
+                                checked={isTermsAgreed} 
+                                onCheckedChange={(checked) => setIsTermsAgreed(!!checked)}
+                                className="h-6 w-6 border-slate-400 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600 transition-all stroke-[3]"
+                            />
+                        </div>
+                        <label
+                            htmlFor="confirmation_checkbox"
+                            className="text-[14px] font-extrabold leading-none cursor-pointer select-none text-slate-900"
+                        >
+                            I confirm details are 100% correct
+                        </label>
+                    </div>
+                </div>
+            }
+            confirmText={isCreating ? "Creating..." : "Confirm & Create"}
+            onConfirm={() => {
+                if (isTermsAgreed && pendingFormData) {
+                    onSubmit(pendingFormData);
+                }
+            }}
+            disabled={!isTermsAgreed || isCreating}
+        />
+    );
+
     if (isPage) {
         return (
-            <FormContainer isPage={true} isLoading={isLoadingEmployee} isEditMode={isEditMode}>
-                {formContent}
-            </FormContainer>
+            <>
+                <FormContainer isPage={true} isLoading={isLoadingEmployee} isEditMode={isEditMode}>
+                    {formContent}
+                </FormContainer>
+                {confirmationDialog}
+            </>
         );
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <>
+            <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
 
             <DialogContent className="max-h-[90vh] overflow-hidden bg-white p-4 sm:max-w-2xl sm:p-6 dark:bg-gray-900">
@@ -483,7 +573,10 @@ export function NewEmployeeModal({
                     {formContent}
                 </FormContainer>
             </DialogContent>
-        </Dialog>
+            </Dialog>
+
+            {confirmationDialog}
+        </>
     );
 }
 

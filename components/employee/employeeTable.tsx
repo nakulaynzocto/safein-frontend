@@ -10,7 +10,7 @@ import { DataTable } from "@/components/common/dataTable";
 import { ConfirmationDialog } from "@/components/common/confirmationDialog";
 import { Pagination } from "@/components/common/pagination";
 import { StatusBadge } from "@/components/common/statusBadge";
-import { Edit, Trash2, Eye, MoreVertical, Plus, Phone, Mail, Building, User, Settings } from "lucide-react";
+import { Settings, Plus, Phone, Mail, Building, User, ShieldCheck } from "lucide-react";
 import { Employee } from "@/store/api/employeeApi";
 import { SearchInput } from "@/components/common/searchInput";
 import { EmployeeDetailsDialog } from "./employeeDetailsDialog";
@@ -25,7 +25,6 @@ import { routes } from "@/utils/routes";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { formatName, getInitials } from "@/utils/helpers";
 import { EmployeeVerificationModal } from "./EmployeeVerificationModal";
-import { ShieldCheck } from "lucide-react";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
@@ -249,72 +248,16 @@ export function EmployeeTable({
             header: "Actions",
             className: "text-center min-w-[200px] whitespace-nowrap",
             render: (employee: Employee) => (
-                <div className="mx-auto w-[160px]">
-                    <div className="grid grid-cols-2 gap-2 items-center justify-items-center">
-                        {/* Slot 1: Settings Button */}
-                        <div className="flex items-center justify-center">
-                            <Button 
-                                variant="primary" 
-                                size="sm" 
-                                className="h-8 px-3 rounded-lg gap-1.5 font-bold transition-all duration-300 shadow-md hover:scale-105 active:scale-95"
-                                onClick={() => handleSettings(employee)}
-                            >
-                                <Settings className="h-4 w-4" />
-                                <span className="hidden sm:inline text-xs">Settings</span>
-                            </Button>
-                        </div>
-
-                        {/* Slot 2: More Menu */}
-                        <div className="flex items-center justify-center">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-100 rounded-full">
-                                        <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-48">
-                                    {onView && (
-                                        <DropdownMenuItem onClick={() => handleView(employee)}>
-                                            <Eye className="mr-2 h-4 w-4" />
-                                            View Details
-                                        </DropdownMenuItem>
-                                    )}
-                                    <DropdownMenuItem onClick={() => handleEditEmployee(employee)}>
-                                        <Edit className="mr-2 h-4 w-4" />
-                                        Edit
-                                    </DropdownMenuItem>
-                                    {!employee.isVerified && (
-                                        <DropdownMenuItem onClick={() => handleVerify(employee)}>
-                                            <ShieldCheck className="mr-2 h-4 w-4 text-primary" />
-                                            Verify Employee
-                                        </DropdownMenuItem>
-                                    )}
-                                    {onDelete && (
-                                        <>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem
-                                                onClick={() => {
-                                                    if ((employee as any).canDelete !== false) {
-                                                        // Close other modals
-                                                        setShowViewDialog(false);
-                                                        setShowVerifyDialog(false);
-
-                                                        setSelectedEmployee(employee);
-                                                        setShowDeleteDialog(true);
-                                                    }
-                                                }}
-                                                className="text-destructive font-medium"
-                                                disabled={(employee as any).canDelete === false}
-                                            >
-                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                {(employee as any).canDelete === false ? 'Cannot Delete' : 'Delete Employee'}
-                                            </DropdownMenuItem>
-                                        </>
-                                    )}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                    </div>
+                <div className="flex justify-center">
+                    <Button 
+                        variant="primary" 
+                        size="sm" 
+                        className="h-8 px-4 rounded-lg gap-1.5 font-bold transition-all duration-300 shadow-md hover:scale-105 active:scale-95"
+                        onClick={() => handleSettings(employee)}
+                    >
+                        <Settings className="h-4 w-4" />
+                        <span className="text-[12px]">Settings</span>
+                    </Button>
                 </div>
             ),
         });
