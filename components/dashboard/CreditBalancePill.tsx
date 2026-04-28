@@ -101,6 +101,10 @@ export function CreditBalancePill({ forceShow = false }: { forceShow?: boolean }
                                     <span className="text-slate-500">Cost per message</span>
                                     <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.smsCostPerMessage || 1} credits</span>
                                 </div>
+                                <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
+                                    <span className="text-slate-500">Cost per whatsapp</span>
+                                    <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.whatsappCostPerMessage || 1} credits</span>
+                                </div>
                             </div>
 
                             <button 

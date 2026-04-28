@@ -12,6 +12,8 @@ interface CreditWalletCardProps {
   balance: number;
   creditRate: number;
   callCost: number;
+  smsCost: number;
+  whatsappCost: number;
   currency?: string;
 }
 
@@ -19,6 +21,8 @@ export function CreditWalletCard({
   balance = 0, 
   creditRate = 1, 
   callCost = 5,
+  smsCost = 1,
+  whatsappCost = 1.5,
   currency = "INR" 
 }: CreditWalletCardProps) {
   const router = useRouter();
@@ -73,10 +77,10 @@ export function CreditWalletCard({
           <div className="bg-muted/50 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <Phone className="h-4 w-4 text-blue-500" />
-              <span className="text-sm font-medium">Voice Calls</span>
+              <span className="text-sm font-medium">Communication Cap</span>
             </div>
             <p className="text-2xl font-bold">{callsPossible}</p>
-            <p className="text-xs text-muted-foreground">calls possible</p>
+            <p className="text-xs text-muted-foreground">max calls possible</p>
           </div>
           
           <div className="bg-muted/50 rounded-lg p-4">
@@ -95,24 +99,20 @@ export function CreditWalletCard({
         <div className="space-y-3">
           <h4 className="text-sm font-medium flex items-center gap-2">
             <Info className="h-4 w-4" />
-            Voice Call Pricing
+            Communication Pricing
           </h4>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Cost per call attempt</span>
+              <span className="text-muted-foreground">Voice call</span>
               <Badge variant="secondary">{callCost} credits</Badge>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Primary call</span>
-              <span className="font-medium">{callCost} credits</span>
+              <span className="text-muted-foreground">SMS message</span>
+              <Badge variant="secondary">{smsCost} credits</Badge>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Backup call</span>
-              <span className="font-medium">{callCost} credits</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Manual retry</span>
-              <span className="font-medium">{callCost} credits</span>
+              <span className="text-muted-foreground">WhatsApp message</span>
+              <Badge variant="secondary">{whatsappCost} credits</Badge>
             </div>
           </div>
         </div>
