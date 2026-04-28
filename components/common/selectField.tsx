@@ -45,6 +45,7 @@ export interface SelectFieldProps {
     className?: string;
     formatOptionLabel?: (option: Option) => ReactNode;
     showDropdownIndicator?: boolean;
+    noOptionsMessage?: (obj: { inputValue: string }) => ReactNode;
 }
 
 const MENU_PORTAL_Z_INDEX = 9999;
@@ -72,6 +73,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         menuZIndex,
         formatOptionLabel,
         showDropdownIndicator = true,
+        noOptionsMessage,
     },
     ref,
 ) {
@@ -260,14 +262,14 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
 
     const defaultFormatOptionLabel = (option: RSOption) => (
         <div className="flex items-center gap-3">
-            {option.image ? (
-                <Avatar className="h-8 w-8 border border-border">
+            <Avatar className="h-8 w-8 border border-border shrink-0">
+                {option.image ? (
                     <AvatarImage src={option.image} alt={option.label} className="object-cover" />
-                    <AvatarFallback className="text-xs font-medium leading-none bg-secondary text-secondary-foreground flex items-center justify-center">
-                        {getInitials(option.label)}
-                    </AvatarFallback>
-                </Avatar>
-            ) : null}
+                ) : null}
+                <AvatarFallback className="text-[10px] font-bold bg-slate-100 text-slate-600 flex items-center justify-center">
+                    {getInitials(option.label)}
+                </AvatarFallback>
+            </Avatar>
             <span className="truncate">{option.label}</span>
         </div>
     );
@@ -317,6 +319,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 backspaceRemovesValue={true}
                 menuShouldScrollIntoView={false}
                 formatOptionLabel={formatOptionLabel ? (opt) => formatOptionLabel(opt.data) : defaultFormatOptionLabel}
+                noOptionsMessage={noOptionsMessage}
             />
 
             {error && (

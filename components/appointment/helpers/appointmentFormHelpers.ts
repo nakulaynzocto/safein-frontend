@@ -45,14 +45,14 @@ export const createUpdateAppointmentPayload = (data: AppointmentFormData, existi
  * Format employee label for select option
  */
 export const formatEmployeeLabel = (emp: any): string => {
-    return `${emp.name} (${emp.department || "No Department"})`;
+    return `${emp.name} (${emp.department || "Staff"})`;
 };
 
 /**
  * Format employee search keywords
  */
 export const formatEmployeeSearchKeywords = (emp: any): string => {
-    return `${emp.name} ${emp.email ?? ""} ${emp.phone ?? ""} ${emp.department ?? ""} ${emp.designation ?? ""}`.trim();
+    return `${emp.name} ${emp.phone ?? ""} ${emp.department ?? ""} ${emp.designation ?? ""} ${emp.email ?? ""}`.toLowerCase().trim();
 };
 
 /**

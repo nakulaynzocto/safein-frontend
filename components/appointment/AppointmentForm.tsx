@@ -62,6 +62,74 @@ interface NewAppointmentModalProps {
     layout?: "modal" | "page";
 }
 
+/**
+ * Sub-component for field headers with an "Add New" action
+ */
+const FieldHeader = ({
+    label,
+    onAction,
+    actionLabel
+}: {
+    label: string;
+    onAction: () => void;
+    actionLabel: string;
+}) => (
+    <div className="flex items-center justify-between h-5">
+        <label className="text-[11px] text-muted-foreground uppercase font-bold tracking-[0.1em]">
+            {label} <span className="ml-1 text-red-500">*</span>
+        </label>
+        <button
+            type="button"
+            onClick={onAction}
+            className="group flex items-center gap-1.5 text-[10px] text-[#3882a5] font-black hover:text-[#074463] uppercase tracking-wider transition-all duration-200 cursor-pointer select-none"
+        >
+            <UserPlus className="h-4 w-4 transition-transform duration-200 group-hover:scale-125 group-hover:rotate-6 text-[#3882a5] group-hover:text-[#074463]" />
+            <span className="group-hover:underline underline-offset-4 decoration-2 transition-all">
+                {actionLabel}
+            </span>
+        </button>
+    </div>
+);
+
+/**
+ * Sub-component for custom "No Options" state in SelectField
+ */
+const NoResultsFound = ({
+    inputValue,
+    type,
+    onAction
+}: {
+    inputValue: string;
+    type: 'visitor' | 'employee';
+    onAction: () => void;
+}) => (
+    <div className="flex flex-col items-center justify-center py-6 px-4 text-center">
+        <div className="bg-primary/5 p-3 rounded-full mb-3">
+            <UserPlus className="h-6 w-6 text-primary/40" />
+        </div>
+        <p className="text-sm font-medium text-foreground mb-1">
+            No {type} found "{inputValue}"
+        </p>
+        <p className="text-xs text-muted-foreground mb-4 max-w-[200px]">
+            We couldn't find any {type} with those details.
+        </p>
+        <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            className="w-full gap-2 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer h-10"
+            onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onAction();
+            }}
+        >
+            <UserPlus className="h-4 w-4" />
+            <span>Add New {type === 'visitor' ? 'Visitor' : 'Employee'}</span>
+        </Button>
+    </div>
+);
+
 export function NewAppointmentModal({
     appointmentId,
     initialVisitorId,
@@ -108,7 +176,7 @@ export function NewAppointmentModal({
         error: employeesError,
     } = useGetEmployeesQuery({
         page: 1,
-        limit: 10,
+        limit: 50,
         search: debouncedEmployeeSearch || undefined,
         status: "Active" as const,
     });
@@ -293,53 +361,79 @@ export function NewAppointmentModal({
 
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                        <Controller
-                            name="visitorId"
-                            control={control}
-                            render={({ field }) => (
-                                <SelectField
-                                    label="Visitor"
-                                    placeholder="Select visitor"
-                                    options={visitorOptions}
-                                    value={field.value}
-                                    onChange={(val) => {
-                                        field.onChange(val ?? "");
-                                        handleVisitorSelect(val);
-                                    }}
-                                    onInputChange={handleVisitorSearchChange}
-                                    error={
-                                        errors.visitorId?.message || (visitorsError ? "Failed to load visitors" : undefined)
-                                    }
-                                    isLoading={isLoadingVisitors}
-                                    isClearable={false}
-                                    required
-                                />
-                            )}
-                        />
+                        <div className="flex flex-col gap-1.5 min-w-0">
+                            <FieldHeader
+                                label="Visitor"
+                                actionLabel="New Visitor"
+                                onAction={() => router.push(routes.privateroute.VISITORREGISTRATION)}
+                            />
+                            <Controller
+                                name="visitorId"
+                                control={control}
+                                render={({ field }) => (
+                                    <SelectField
+                                        placeholder="Select visitor"
+                                        options={visitorOptions}
+                                        value={field.value}
+                                        onChange={(val) => {
+                                            field.onChange(val ?? "");
+                                            handleVisitorSelect(val);
+                                        }}
+                                        onInputChange={handleVisitorSearchChange}
+                                        error={
+                                            errors.visitorId?.message || (visitorsError ? "Failed to load visitors" : undefined)
+                                        }
+                                        isLoading={isLoadingVisitors}
+                                        isClearable={false}
+                                        className="h-12"
+                                        noOptionsMessage={({ inputValue }) => (
+                                            <NoResultsFound
+                                                type="visitor"
+                                                inputValue={inputValue}
+                                                onAction={() => router.push(routes.privateroute.VISITORREGISTRATION)}
+                                            />
+                                        )}
+                                    />
+                                )}
+                            />
+                        </div>
 
-                        <Controller
-                            name="employeeId"
-                            control={control}
-                            render={({ field }) => (
-                                <SelectField
-                                    label="Employee to Meet"
-                                    placeholder="Select employee"
-                                    options={employeeOptions}
-                                    value={field.value}
-                                    onChange={(val) => {
-                                        field.onChange(val ?? "");
-                                    }}
-                                    onInputChange={handleEmployeeSearchChange}
-                                    error={
-                                        errors.employeeId?.message ||
-                                        (employeesError ? "Failed to load employees" : undefined)
-                                    }
-                                    isLoading={isLoadingEmployees}
-                                    isClearable={false}
-                                    required
-                                />
-                            )}
-                        />
+                        <div className="flex flex-col gap-1.5 min-w-0">
+                            <FieldHeader
+                                label="Employee to Meet"
+                                actionLabel="New Employee"
+                                onAction={() => router.push(routes.privateroute.EMPLOYEECREATE)}
+                            />
+                            <Controller
+                                name="employeeId"
+                                control={control}
+                                render={({ field }) => (
+                                    <SelectField
+                                        placeholder="Select employee"
+                                        options={employeeOptions}
+                                        value={field.value}
+                                        onChange={(val) => {
+                                            field.onChange(val ?? "");
+                                        }}
+                                        onInputChange={handleEmployeeSearchChange}
+                                        error={
+                                            errors.employeeId?.message ||
+                                            (employeesError ? "Failed to load employees" : undefined)
+                                        }
+                                        isLoading={isLoadingEmployees}
+                                        isClearable={false}
+                                        className="h-12"
+                                        noOptionsMessage={({ inputValue }) => (
+                                            <NoResultsFound
+                                                type="employee"
+                                                inputValue={inputValue}
+                                                onAction={() => router.push(routes.privateroute.EMPLOYEECREATE)}
+                                            />
+                                        )}
+                                    />
+                                )}
+                            />
+                        </div>
 
                         <div className="md:col-span-1">
                             <InputField
