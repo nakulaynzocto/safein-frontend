@@ -153,7 +153,7 @@ export function EmployeeList() {
                                     <span className="inline">Add Employee</span>
                                 </Link>
                             </ActionButton>
-                            <ActionButton
+{/* <ActionButton
                                 variant="primary"
                                 size="xl"
                                 onClick={() => setShowBulkImportModal(true)}
@@ -161,7 +161,7 @@ export function EmployeeList() {
                             >
                                 <FileSpreadsheet className="h-5 w-5 shrink-0" />
                                 <span className="inline">Bulk Import</span>
-                            </ActionButton>
+                            </ActionButton> */}
                         </div>
                     </SubscriptionActionButtons>
                 }
