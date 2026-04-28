@@ -7,11 +7,13 @@ import { WhatsAppSettings } from "@/components/settings/WhatsAppSettings";
 import { routes } from "@/utils/routes";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { useGetWalletBalanceQuery } from "@/store/api/walletApi";
 
 export default function WhatsAppConfigPage() {
     const router = useRouter();
     const { user, isAuthenticated } = useAppSelector((state) => state.auth);
     const [isChecking, setIsChecking] = useState(true);
+    const { data: walletData } = useGetWalletBalanceQuery();
 
     // Check if user is employee
     const isEmployee = checkIsEmployee(user);
@@ -53,5 +55,5 @@ export default function WhatsAppConfigPage() {
     }
 
     // Only admins can access WhatsApp config
-    return <WhatsAppSettings />;
+    return <WhatsAppSettings walletData={walletData} />;
 }

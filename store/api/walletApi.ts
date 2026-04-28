@@ -6,7 +6,8 @@ export interface WalletBalance {
     equivalentAmount?: number;
     creditRate: number; // Ensuring this is always present from backend
     callCostPerAttempt: number; // Added to make it dynamic
-    smsCostPerMessage: number; // Dynamic SMS/WhatsApp cost
+    smsCostPerMessage: number; // Dynamic SMS cost
+    whatsappCostPerMessage?: number; // Dynamic WhatsApp cost
 }
 
 export interface WalletTransaction {

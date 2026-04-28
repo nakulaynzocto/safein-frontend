@@ -25,8 +25,12 @@ export function NotificationHandler() {
                     try {
                         await updateFCMToken({ fcmToken: token }).unwrap();
                         hasRequested.current = true;
-                    } catch (err) {
-                        console.error("FCM update failed:", err);
+                    } catch (err: any) {
+                        console.error("FCM update failed:", JSON.stringify(err, null, 2) || err);
+                        // If it's an RTK Query error, log the nested data
+                        if (err?.data) {
+                            console.error("FCM update error data:", JSON.stringify(err.data, null, 2) || err.data);
+                        }
                     }
                 }
             };

@@ -29,7 +29,8 @@ import {
     ShieldCheck,
     MapPin,
     Server,
-    Palette
+    Palette,
+    Wallet
 } from "lucide-react";
 import { SettingsHeader } from "./SettingsHeader";
 import {
@@ -111,7 +112,7 @@ interface FormValues {
     accessToken: string;
 }
 
-export function WhatsAppSettings() {
+export function WhatsAppSettings({ walletData }: { walletData?: any }) {
     const router = useRouter();
     const { data: settings, isLoading, error } = useGetSettingsQuery();
     const [updateSettingsMutation, { isLoading: isUpdating }] = useUpdateSettingsMutation();
@@ -146,6 +147,7 @@ export function WhatsAppSettings() {
     const currentAccessToken = watch("accessToken");
     const deliveryMode = watch("deliveryMode");
     const [isMutationInProgress, setIsMutationInProgress] = useState(false);
+    const whatsappCost = walletData?.whatsappCostPerMessage ?? 1.5;
 
     // Form fields only — do not tie template toggles to `isMutationInProgress` (avoids stale overwrite after template save)
     useEffect(() => {
@@ -314,15 +316,34 @@ export function WhatsAppSettings() {
                                     </div>
 
                                     {deliveryMode === 'shared' ? (
-                                        <div className="mx-3 p-5 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-start gap-4 animate-in fade-in slide-in-from-top-1 duration-300">
-                                            <div className="p-2 bg-emerald-500 rounded-lg text-white">
-                                                <ShieldCheck className="h-5 w-5" />
+                                        <div className="space-y-4 animate-in fade-in slide-in-from-top-1 duration-300">
+                                            {/* Wallet Info Banner */}
+                                            <div className="mx-3 bg-gradient-to-r from-amber-500/[0.05] to-transparent p-5 rounded-2xl border border-amber-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="h-10 w-10 bg-amber-500/10 rounded-xl flex items-center justify-center">
+                                                        <Wallet className="h-5 w-5 text-amber-600" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-amber-900">WhatsApp API Billing</p>
+                                                        <p className="text-xs text-amber-700/70">Relayed messages deduct <span className="font-bold underline">{whatsappCost} credits</span> per delivery.</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2 px-4 py-2 bg-white/50 backdrop-blur-sm rounded-xl border border-amber-500/10">
+                                                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                                    <span className="text-xs font-bold text-[#074463]">BALANCE: {Number(walletData?.balance || 0).toLocaleString()}</span>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="text-sm font-black text-emerald-900 uppercase tracking-wide">Shared Relay Active</p>
-                                                <p className="text-[11px] text-emerald-700 font-bold mt-0.5 leading-relaxed">
-                                                    All notifications are routed through our enterprise-grade Meta gateway. This ensures 100% delivery without monthly Meta developer maintenance for your team.
-                                                </p>
+
+                                            <div className="mx-3 p-5 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-start gap-4">
+                                                <div className="p-2 bg-emerald-500 rounded-lg text-white">
+                                                    <ShieldCheck className="h-5 w-5" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-black text-emerald-900 uppercase tracking-wide">Shared Relay Active</p>
+                                                    <p className="text-[11px] text-emerald-700 font-bold mt-0.5 leading-relaxed">
+                                                        All notifications are routed through our enterprise-grade Meta gateway. This ensures 100% delivery without monthly Meta developer maintenance for your team.
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     ) : (
