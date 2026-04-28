@@ -98,6 +98,7 @@ export interface Settings {
     };
     whatsapp: {
         activeProvider: "meta";
+        deliveryMode: 'shared' | 'custom';
         senderNumber: string;
         testNumber?: string;
         phoneNumberId?: string;
@@ -132,6 +133,7 @@ export interface UpdateSettingsRequest {
     };
     whatsapp?: {
         activeProvider?: "meta";
+        deliveryMode?: 'shared' | 'custom';
         senderNumber?: string;
         testNumber?: string;
         phoneNumberId?: string;

@@ -27,7 +27,9 @@ import {
     Info,
     AlertTriangle,
     ShieldCheck,
-    MapPin
+    MapPin,
+    Server,
+    Palette
 } from "lucide-react";
 import { SettingsHeader } from "./SettingsHeader";
 import {
@@ -67,24 +69,42 @@ function normalizeWhatsappEnabledTemplates(raw: unknown): Record<string, boolean
 
 const schema = yup.object().shape({
     whatsappEnabled: yup.boolean().default(false),
-    senderNumber: yup
-        .string()
-        .required("Sender phone number is required")
-        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
-            validatePhone(value)
-        ),
-    testNumber: yup
-        .string()
-        .required("Verification number is required")
-        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
-            validatePhone(value)
-        ),
-    phoneNumberId: yup.string().required("Phone Number ID is required"),
-    accessToken: yup.string().required("Access Token is required"),
+    deliveryMode: yup.string().oneOf(['shared', 'custom']).required(),
+    senderNumber: yup.string().when('deliveryMode', (modeArr, schema) => {
+        const mode = modeArr[0];
+        if (mode === 'custom') {
+            return schema.required("Sender phone number is required")
+                .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+                    validatePhone(value)
+                );
+        }
+        return schema.notRequired();
+    }),
+    testNumber: yup.string().when('deliveryMode', (modeArr, schema) => {
+        const mode = modeArr[0];
+        if (mode === 'custom') {
+            return schema.required("Verification number is required")
+                .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
+                    validatePhone(value)
+                );
+        }
+        return schema.notRequired();
+    }),
+    phoneNumberId: yup.string().when('deliveryMode', (modeArr, schema) => {
+        const mode = modeArr[0];
+        if (mode === 'custom') return schema.required("Phone Number ID is required");
+        return schema.notRequired();
+    }),
+    accessToken: yup.string().when('deliveryMode', (modeArr, schema) => {
+        const mode = modeArr[0];
+        if (mode === 'custom') return schema.required("Access Token is required");
+        return schema.notRequired();
+    }),
 });
 
 interface FormValues {
     whatsappEnabled: boolean;
+    deliveryMode: 'shared' | 'custom';
     senderNumber: string;
     testNumber: string;
     phoneNumberId: string;
@@ -115,6 +135,7 @@ export function WhatsAppSettings() {
         mode: "onBlur",
         defaultValues: {
             whatsappEnabled: false,
+            deliveryMode: 'shared',
             senderNumber: "",
             testNumber: "",
             phoneNumberId: "",
@@ -123,6 +144,7 @@ export function WhatsAppSettings() {
     });
 
     const currentAccessToken = watch("accessToken");
+    const deliveryMode = watch("deliveryMode");
     const [isMutationInProgress, setIsMutationInProgress] = useState(false);
 
     // Form fields only — do not tie template toggles to `isMutationInProgress` (avoids stale overwrite after template save)
@@ -131,6 +153,7 @@ export function WhatsAppSettings() {
         if (!isDirty) {
             reset({
                 whatsappEnabled: settings.notifications?.whatsappEnabled ?? false,
+                deliveryMode: settings.whatsapp?.deliveryMode || 'shared',
                 senderNumber: settings.whatsapp?.senderNumber || "",
                 testNumber: settings.whatsapp?.testNumber || "",
                 phoneNumberId: settings.whatsapp?.phoneNumberId || "",
@@ -150,16 +173,17 @@ export function WhatsAppSettings() {
         setLocalEnabledTemplates(merged);
     }, [settings]);
 
-    const isVerified = !!settings?.whatsapp?.metaVerified || !!settings?.whatsapp?.verified;
+    const isVerified = settings?.whatsapp?.deliveryMode === 'shared' || !!settings?.whatsapp?.metaVerified || !!settings?.whatsapp?.verified;
     const credentialsChanged =
         watch("phoneNumberId") !== (settings?.whatsapp?.phoneNumberId || "") ||
         (currentAccessToken !== MASKED_DISPLAY_VALUE && currentAccessToken !== (settings?.whatsapp?.accessToken || ""));
-    const needsVerification = credentialsChanged && (!!currentAccessToken && currentAccessToken !== MASKED_DISPLAY_VALUE);
+    const needsVerification = deliveryMode === 'custom' && credentialsChanged && (!!currentAccessToken && currentAccessToken !== MASKED_DISPLAY_VALUE);
 
     const onSubmit = async (data: FormValues) => {
-        if (needsVerification) {
+        if (data.deliveryMode === 'custom' && needsVerification) {
             try {
                 const whatsappConfig = {
+                    deliveryMode: 'custom',
                     activeProvider: 'meta',
                     senderNumber: data.senderNumber,
                     testNumber: data.testNumber,
@@ -177,18 +201,29 @@ export function WhatsAppSettings() {
 
         setIsMutationInProgress(true);
         try {
-            await updateSettingsMutation({
+            const payload: any = {
                 notifications: {
                     whatsappEnabled: data.whatsappEnabled,
                 },
                 whatsapp: {
+                    ...settings?.whatsapp,
+                    deliveryMode: data.deliveryMode,
                     activeProvider: 'meta',
-                    senderNumber: data.senderNumber,
-                    testNumber: data.testNumber,
                     enabledTemplates: localEnabledTemplates
                 },
-            }).unwrap();
-            toast.success("Settings updated successfully!");
+            };
+
+            if (data.deliveryMode === 'custom') {
+                payload.whatsapp.senderNumber = data.senderNumber;
+                payload.whatsapp.testNumber = data.testNumber;
+                payload.whatsapp.phoneNumberId = data.phoneNumberId;
+                if (data.accessToken !== MASKED_DISPLAY_VALUE) {
+                    payload.whatsapp.accessToken = data.accessToken;
+                }
+            }
+
+            await updateSettingsMutation(payload).unwrap();
+            toast.success(data.deliveryMode === 'shared' ? "Switched to Standard Relay" : "Settings updated successfully!");
         } catch (err: any) {
             toast.error(err?.data?.message || "Failed to update settings.");
         } finally {
@@ -240,37 +275,87 @@ export function WhatsAppSettings() {
 
                         <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 pb-12">
-                                <div className="p-2 space-y-2">
-                                    {/* Credentials Section */}
-                                    <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mt-3">
-                                        <Collapsible open={expandedSections.includes('credentials')} onOpenChange={() => toggleSection('credentials')}>
-                                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('credentials')}>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
-                                                        <Key size={18} />
-                                                    </div>
-                                                    <h4 className="font-bold text-[#074463] text-sm">Meta API Credentials</h4>
+                                <div className="p-2 space-y-6">
+                                    {/* Strategy Selection */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-3">
+                                        <div 
+                                            className={cn("p-6 cursor-pointer border-2 rounded-2xl transition-all relative overflow-hidden", 
+                                                deliveryMode === 'shared' ? "border-[#3882a5] bg-[#3882a5]/5" : "hover:border-border bg-white shadow-sm")}
+                                            onClick={() => { reset({ ...watch(), deliveryMode: 'shared' }, { keepDirty: true }); }}
+                                        >
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div className={cn("p-3 rounded-xl bg-[#3882a5]/10 text-[#3882a5]")}>
+                                                    <Server className="h-6 w-6" />
                                                 </div>
-                                                <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('credentials') && "rotate-90")} />
+                                                <div className={cn("h-5 w-5 rounded-full border-2 flex items-center justify-center", deliveryMode === 'shared' ? "border-[#3882a5] bg-[#3882a5]" : "border-gray-200")}>
+                                                    {deliveryMode === 'shared' && <div className="h-2 w-2 rounded-full bg-white" />}
+                                                </div>
                                             </div>
-                                            <CollapsibleContent>
-                                                <div className="p-4 pt-0 space-y-6 animate-in fade-in slide-in-from-top-1 duration-200">
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-xl bg-muted/30 border border-border/50">
-                                                        <InputField label="Phone Number ID" placeholder="e.g. 10472938.." {...register("phoneNumberId")} error={errors.phoneNumberId?.message} className="h-10 bg-background" />
-                                                        <MaskedInputField label="Permanent Access Token" placeholder={isVerified ? MASKED_DISPLAY_VALUE : "EAAG...."} {...register("accessToken")} error={errors.accessToken?.message} className="h-10 bg-background" />
-                                                    </div>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                        <Controller name="senderNumber" control={control} render={({ field }) => (
-                                                            <PhoneInputField id="whatsapp-sender-number" label="Sender Business Number" value={field.value} onChange={field.onChange} error={errors.senderNumber?.message} defaultCountry={userCountry} />
-                                                        )} />
-                                                        <Controller name="testNumber" control={control} render={({ field }) => (
-                                                            <PhoneInputField id="whatsapp-test-number" label="OTP Recipient Number" value={field.value} onChange={field.onChange} error={errors.testNumber?.message} defaultCountry={userCountry} />
-                                                        )} />
-                                                    </div>
+                                            <p className="text-[14px] font-black uppercase tracking-wider text-[#074463]">Standard Relay</p>
+                                            <p className="text-[11px] text-gray-500 font-bold mt-1 leading-relaxed">Premium infrastructure handled by SafeIn. No configuration required.</p>
+                                        </div>
+
+                                        <div 
+                                            className={cn("p-6 cursor-pointer border-2 rounded-2xl transition-all relative overflow-hidden", 
+                                                deliveryMode === 'custom' ? "border-[#3882a5] bg-[#3882a5]/5" : "hover:border-border bg-white shadow-sm")}
+                                            onClick={() => reset({ ...watch(), deliveryMode: 'custom' }, { keepDirty: true })}
+                                        >
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div className={cn("p-3 rounded-xl bg-[#3882a5]/10 text-[#3882a5]")}>
+                                                    <Palette className="h-6 w-6" />
                                                 </div>
-                                            </CollapsibleContent>
-                                        </Collapsible>
+                                                <div className={cn("h-5 w-5 rounded-full border-2 flex items-center justify-center", deliveryMode === 'custom' ? "border-[#3882a5] bg-[#3882a5]" : "border-gray-200")}>
+                                                    {deliveryMode === 'custom' && <div className="h-2 w-2 rounded-full bg-white" />}
+                                                </div>
+                                            </div>
+                                            <p className="text-[14px] font-black uppercase tracking-wider text-[#074463]">Custom Branding</p>
+                                            <p className="text-[11px] text-gray-500 font-bold mt-1 leading-relaxed">Connect your own Meta API credentials for branded delivery.</p>
+                                        </div>
                                     </div>
+
+                                    {deliveryMode === 'shared' ? (
+                                        <div className="mx-3 p-5 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-start gap-4 animate-in fade-in slide-in-from-top-1 duration-300">
+                                            <div className="p-2 bg-emerald-500 rounded-lg text-white">
+                                                <ShieldCheck className="h-5 w-5" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-black text-emerald-900 uppercase tracking-wide">Shared Relay Active</p>
+                                                <p className="text-[11px] text-emerald-700 font-bold mt-0.5 leading-relaxed">
+                                                    All notifications are routed through our enterprise-grade Meta gateway. This ensures 100% delivery without monthly Meta developer maintenance for your team.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mt-3 animate-in fade-in slide-in-from-top-2 duration-400">
+                                            <Collapsible open={expandedSections.includes('credentials')} onOpenChange={() => toggleSection('credentials')}>
+                                                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('credentials')}>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
+                                                            <Key size={18} />
+                                                        </div>
+                                                        <h4 className="font-bold text-[#074463] text-sm">Meta API Credentials</h4>
+                                                    </div>
+                                                    <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('credentials') && "rotate-90")} />
+                                                </div>
+                                                <CollapsibleContent>
+                                                    <div className="p-4 pt-0 space-y-6 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-xl bg-muted/30 border border-border/50">
+                                                            <InputField label="Phone Number ID" placeholder="e.g. 10472938.." {...register("phoneNumberId")} error={errors.phoneNumberId?.message} className="h-10 bg-background" />
+                                                            <MaskedInputField label="Permanent Access Token" placeholder={isVerified ? MASKED_DISPLAY_VALUE : "EAAG...."} {...register("accessToken")} error={errors.accessToken?.message} className="h-10 bg-background" />
+                                                        </div>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                            <Controller name="senderNumber" control={control} render={({ field }) => (
+                                                                <PhoneInputField id="whatsapp-sender-number" label="Sender Business Number" value={field.value} onChange={field.onChange} error={errors.senderNumber?.message} defaultCountry={userCountry} />
+                                                            )} />
+                                                            <Controller name="testNumber" control={control} render={({ field }) => (
+                                                                <PhoneInputField id="whatsapp-test-number" label="OTP Recipient Number" value={field.value} onChange={field.onChange} error={errors.testNumber?.message} defaultCountry={userCountry} />
+                                                            )} />
+                                                        </div>
+                                                    </div>
+                                                </CollapsibleContent>
+                                            </Collapsible>
+                                        </div>
+                                    )}
 
                                     {/* Template Management Section */}
                                     <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mb-3">
