@@ -111,7 +111,7 @@ export interface Settings {
     features?: {
         enableAutoApproval: boolean;
         enableVisitorImageCapture: boolean;
-        enableVerification: boolean;
+
         enableFeedbackSystem: boolean;
         enableVisitSlip: boolean;
     };
@@ -156,7 +156,7 @@ export interface UpdateSettingsRequest {
     features?: {
         enableAutoApproval?: boolean;
         enableVisitorImageCapture?: boolean;
-        enableVerification?: boolean;
+
         enableFeedbackSystem?: boolean;
         enableVisitSlip?: boolean;
     };
@@ -251,7 +251,7 @@ export const settingsApi = baseApi.injectEndpoints({
                                 draft.features = {
                                     enableAutoApproval: false,
                                     enableVisitorImageCapture: false,
-                                    enableVerification: false,
+
                                     enableFeedbackSystem: false,
                                     enableVisitSlip: false,
                                 };

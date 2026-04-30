@@ -253,12 +253,12 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                     className="flex-shrink-0"
                                     prefetch={true}
                                 >
-                                    <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-gray-200 bg-white">
+                                    <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl border-2 border-gray-200 bg-white">
                                         <Image
                                             src={user?.profilePicture && user.profilePicture.trim() !== "" ? user.profilePicture : "/safein-logo.svg"}
                                             alt={user?.companyName || "Company Logo"}
-                                            width={40}
-                                            height={40}
+                                            width={56}
+                                            height={56}
                                             priority
                                             className="h-full w-full object-contain"
                                             onError={(e) => {
@@ -288,7 +288,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                     className="flex-shrink-0"
                                     prefetch={true}
                                 >
-                                    <div className="group relative flex h-10 w-10 lg:h-14 lg:w-14 items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:scale-105 shadow-sm">
+                                    <div className="group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-300 hover:scale-105 shadow-sm">
                                         <Image
                                             src={user?.profilePicture && user.profilePicture.trim() !== "" ? user.profilePicture : "/safein-logo.svg"}
                                             alt={user?.companyName || "Company Logo"}

@@ -44,7 +44,7 @@ export interface ISafeinProfile {
         enableVoice: boolean;
         enableAutoApproval: boolean;
         enableVisitorImageCapture: boolean;
-        enableVerification: boolean;
+
         enableMaintenanceMode: boolean;
         enableRegistration: boolean;
         enableFeedbackSystem: boolean;

@@ -17,7 +17,7 @@ export interface CompanyPublicInfo {
     };
     features?: {
         enableVisitorImageCapture: boolean;
-        enableVerification: boolean;
+
         enableAutoApproval: boolean;
         enableVisitSlip?: boolean;
     };

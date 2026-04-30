@@ -7,6 +7,7 @@ interface ExtendedSubscriptionItem {
     _id?: string;
     planId: { name: string } | null | string;
     planType: string;
+    planName?: string;
     amount: number;
     startDate: string;
     endDate: string;

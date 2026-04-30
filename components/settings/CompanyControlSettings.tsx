@@ -114,14 +114,7 @@ export function CompanyControlSettings() {
             color: "bg-[#3882a5]",
             checked: settings?.features?.enableVisitorImageCapture ?? false
         },
-        {
-            id: "enableVerification",
-            title: "Entry Verification (OTP)",
-            description: "Require an OTP verification for visitors at the time of entry",
-            icon: Key,
-            color: "bg-[#3882a5]",
-            checked: settings?.features?.enableVerification ?? false
-        },
+
         {
             id: "enableFeedbackSystem",
             title: "Feedback System",

@@ -428,23 +428,7 @@ export const appointmentApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [],
         }),
-        sendCheckInOtp: builder.mutation<any, string>({
-            query: (id) => ({
-                url: `/appointments/${id}/send-checkin-otp`,
-                method: "POST",
-            }),
-        }),
-        verifyCheckInOtp: builder.mutation<any, { id: string; otp: string }>({
-            query: (data) => ({
-                url: `/appointments/${data.id}/verify-checkin-otp`,
-                method: "POST",
-                body: { otp: data.otp },
-            }),
-            invalidatesTags: (result, error, { id }) => [
-                { type: "Appointment", id },
-                { type: "Appointment", id: "LIST" },
-            ],
-        }),
+
     }),
 });
 
@@ -464,6 +448,5 @@ export const {
     useLazyGetAppointmentsQuery,
     useGetDashboardStatsQuery,
     useResendAppointmentNotificationMutation,
-    useSendCheckInOtpMutation,
-    useVerifyCheckInOtpMutation,
+
 } = appointmentApi;
