@@ -15,8 +15,8 @@ import {
 import examples from "libphonenumber-js/mobile/examples";
 
 interface PhoneInputFieldProps {
-    id: string;
-    label: string;
+    id?: string;
+    label?: string;
     value: string;
     onChange: (value: string) => void;
     error?: string;
@@ -39,7 +39,7 @@ type CountryOption = {
 };
 
 export function PhoneInputField({
-    id,
+    id = "phone-input",
     label,
     value = "",
     onChange,

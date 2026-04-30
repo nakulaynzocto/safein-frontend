@@ -4,7 +4,7 @@
 import * as yup from "yup";
 
 export const appointmentSchema = yup.object({
-    visitorId: yup.string().trim().required("Please select a visitor"),
+    visitorId: yup.string().trim().optional().default(""),
     employeeId: yup.string().trim().required("Please select an employee"),
     purpose: yup.string().trim().required("Purpose of visit is required").min(5, "Purpose must be at least 5 characters"),
     appointmentDate: yup

@@ -30,8 +30,6 @@ export function EnhancedTimePicker({
     const timeSlots = React.useMemo(() => {
         const slots: string[] = [];
         const now = new Date();
-        const today = now.toISOString().split("T")[0];
-
         let normalizedSelectedDate = selectedDate;
         if (selectedDate && selectedDate.includes("/")) {
             const parts = selectedDate.split("/");
@@ -40,6 +38,7 @@ export function EnhancedTimePicker({
             }
         }
 
+        const today = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")}`;
         const isToday = normalizedSelectedDate === today;
 
         let startHour = 0;

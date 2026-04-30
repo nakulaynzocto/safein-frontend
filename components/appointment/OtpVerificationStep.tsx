@@ -6,7 +6,7 @@ import { PhoneInputField } from "@/components/common/phoneInputField";
 import { useSendVisitorOtpMutation, useVerifyVisitorOtpMutation } from "@/store/api/appointmentLinkApi";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
-import { CheckCircle2, MessageSquare, Phone, Timer } from "lucide-react";
+import { ShieldCheck, MessageSquare, Phone, Timer, CheckCircle2 } from "lucide-react";
 import { useUserCountry } from "@/hooks/useUserCountry";
 import { validatePhone } from "@/utils/phoneUtils";
 import { OtpDigitBoxes } from "@/components/common/otpDigitBoxes";
@@ -53,11 +53,11 @@ export function OtpVerificationStep({
 
         try {
             await sendOtp({ phone, token }).unwrap();
-            showSuccessToast(`OTP sent to WhatsApp: ${phone}`);
+            showSuccessToast(`Verification code sent to ${phone}`);
             setIsOtpSent(true);
             setTimer(60); // 60 seconds resend timer
         } catch (error: any) {
-            showErrorToast(error?.data?.message || "Failed to send OTP. Please check the number.");
+            showErrorToast(error?.data?.message || "Failed to send verification code. Please check the number.");
         }
     };
 
@@ -68,7 +68,7 @@ export function OtpVerificationStep({
         }
 
         try {
-            await verifyOtp({ phone, otp }).unwrap();
+            await verifyOtp({ phone, otp, token }).unwrap();
             showSuccessToast("Phone verified successfully");
             onVerified(phone);
         } catch (error: any) {
@@ -84,48 +84,56 @@ export function OtpVerificationStep({
     }, [otp, isOtpSent]);
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-            <div className="rounded-2xl border border-[#3882a5]/20 bg-[#3882a5]/5 p-4 text-center sm:text-left">
-                <h3 className="text-lg font-bold text-[#1f4f67] flex items-center justify-center sm:justify-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-[#3882a5]" />
-                    Step 1: Verify Mobile Number
-                </h3>
-                <p className="mt-1 text-sm text-slate-600">
-                    Security ke liye apka mobile number verify kiya jayega.
-                </p>
+        <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+            <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#3882a5] text-white font-bold text-sm">
+                    1
+                </div>
+                <div>
+                    <h3 className="text-lg font-bold text-slate-900 leading-tight">
+                        Enter your number
+                    </h3>
+                    <p className="text-sm text-slate-500">
+                        Include your country code.
+                    </p>
+                </div>
             </div>
 
-            <div className="space-y-5 rounded-2xl border border-slate-100 bg-white p-2 sm:p-6 shadow-sm">
+            <div className="space-y-6">
                 {!isOtpSent ? (
-                    <div className="space-y-4">
-                        <div className="space-y-2">
+                    <div className="flex flex-col gap-6">
+                        <div className="space-y-2.5">
+                            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                                MOBILE NUMBER <span className="text-red-500 font-bold">*</span>
+                            </label>
                             <PhoneInputField
                                 id="phone"
-                                label="Mobile Number"
+                                label="MOBILE NUMBER"
                                 value={phone}
                                 onChange={setPhone}
                                 defaultCountry={userCountry}
-                                placeholder="Enter mobile number"
-                                className="h-12 text-lg font-medium"
+                                placeholder="Enter mobile with country code"
+                                className="h-14 text-lg font-medium bg-white border-slate-200 rounded-xl"
                             />
                         </div>
                         <Button 
                             onClick={handleSendOtp} 
-                            disabled={isSending || !phone}
-                            className="h-12 w-full bg-[#3882a5] hover:bg-[#2d6a87] text-white rounded-xl text-md font-bold shadow-md"
+                            disabled={isSending || !validatePhone(phone)}
+                            className={`h-14 w-full rounded-xl text-base sm:text-lg font-bold transition-all duration-300 ${
+                                (!validatePhone(phone) || isSending) 
+                                ? "bg-[#3882a5]/40 text-white cursor-not-allowed shadow-none" 
+                                : "bg-[#3882a5] hover:bg-[#2d6a87] text-white shadow-lg shadow-[#3882a5]/20 active:scale-[0.98]"
+                            }`}
                         >
-                            {isSending ? <LoadingSpinner size="sm" className="mr-2" /> : <Phone className="mr-2 h-4 w-4" />}
-                            Send OTP via WhatsApp
+                            {isSending ? <LoadingSpinner size="sm" className="mr-2" /> : <MessageSquare className="mr-2 h-5 w-5 shrink-0" />}
+                            <span className="truncate">Send verification code</span>
                         </Button>
-                        <p className="text-[11px] text-center text-slate-400 font-medium italic">
-                            OTP will be sent to your WhatsApp number for verification.
-                        </p>
                     </div>
                 ) : (
-                    <div className="space-y-6">
+                    <div className="space-y-6 rounded-3xl border border-slate-100 bg-white p-6 sm:p-8 shadow-sm">
                         <div className="text-center">
                             <div className="inline-flex items-center justify-center p-3 bg-emerald-50 rounded-full mb-3">
-                                <MessageSquare className="h-6 w-6 text-emerald-600" />
+                                <ShieldCheck className="h-6 w-6 text-emerald-600" />
                             </div>
                             <h4 className="font-bold text-slate-900">Enter OTP</h4>
                             <p className="text-sm text-slate-500">We've sent a 6-digit code to <span className="font-bold text-slate-700">{phone}</span></p>

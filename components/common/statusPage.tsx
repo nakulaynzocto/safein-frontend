@@ -25,6 +25,7 @@ interface StatusPageProps {
     };
     showHomeButton?: boolean;
     showBackButton?: boolean;
+    appointmentId?: string | null;
     className?: string;
 }
 
@@ -72,6 +73,7 @@ export function StatusPage({
     secondaryAction,
     showHomeButton = false,
     showBackButton = false,
+    appointmentId = null,
     className = "",
 }: StatusPageProps) {
     const config = statusConfig[type];
@@ -115,6 +117,14 @@ export function StatusPage({
                             {message}
                         </p>
                     </div>
+                    
+                    {/* Appointment ID Display */}
+                    {appointmentId && (
+                        <div className="rounded-xl border border-[#3882a5]/10 bg-slate-50/50 p-3 text-center">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Appointment Reference</p>
+                            <p className="mt-1 font-mono text-sm font-bold text-[#3882a5]">{appointmentId}</p>
+                        </div>
+                    )}
 
                     {/* Description */}
                     {description && <p className="text-center text-sm leading-relaxed text-gray-600">{description}</p>}

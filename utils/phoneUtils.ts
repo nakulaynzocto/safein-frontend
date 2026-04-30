@@ -8,20 +8,24 @@ import { isValidPhoneNumber, parsePhoneNumberFromString } from "libphonenumber-j
  */
 export const validatePhone = (phone: string | undefined | null): boolean => {
     if (!phone) return false;
-    const cleanPhone = phone.trim().replace(/\s/g, "");
     
-    // If it starts with '+', validate as is
-    if (cleanPhone.startsWith("+")) {
-        return isValidPhoneNumber(cleanPhone);
+    // 1. Format the phone for submission to ensure it has '+' and correct code
+    const formatted = formatPhoneForSubmission(phone);
+    if (!formatted) return false;
+
+    // 2. Parse using libphonenumber-js
+    const parsed = parsePhoneNumberFromString(formatted);
+    if (!parsed) return false;
+
+    // 3. Basic validity check
+    if (!parsed.isValid()) return false;
+
+    // 4. Strict check for India: Mobile numbers must be 10 digits
+    if (parsed.country === "IN") {
+        return parsed.nationalNumber.length === 10;
     }
-    
-    // If length is 10, try with +91
-    if (cleanPhone.length === 10) {
-        return isValidPhoneNumber(`+91${cleanPhone}`);
-    }
-    
-    // Fallback: try with '+' prefix
-    return isValidPhoneNumber(`+${cleanPhone}`);
+
+    return true;
 };
 
 /**

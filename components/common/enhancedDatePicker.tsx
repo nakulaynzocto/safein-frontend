@@ -128,11 +128,6 @@ export function EnhancedDatePicker({
                         disabled={(date) => date < minDateValue}
                         initialFocus
                         className="rounded-md border-0"
-                        classNames={{
-                            day_selected:
-                                "bg-[#3882a5] text-white hover:bg-[#2d6a87] hover:text-white focus:bg-[#3882a5] focus:text-white",
-                            day_today: "bg-gray-100 text-gray-900 font-semibold",
-                        }}
                     />
                 </PopoverContent>
             </Popover>

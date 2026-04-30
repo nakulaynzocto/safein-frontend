@@ -27,9 +27,17 @@ export const VisitSlip = React.forwardRef<HTMLDivElement, VisitSlipProps>(({ app
             <style dangerouslySetInnerHTML={{
                 __html: `
                 @media print {
-                    @page { margin: 0; size: 80mm auto; }
-                    body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; }
-                    .print-only { display: block !important; width: 80mm; padding: 15px; box-sizing: border-box; background: white; }
+                    @page { margin: 10mm; size: auto; }
+                    body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    .print-only { 
+                        display: block !important; 
+                        width: 100%; 
+                        max-width: 80mm; 
+                        margin: 0 auto;
+                        padding: 15px; 
+                        box-sizing: border-box; 
+                        background: white; 
+                    }
                     .no-print { display: none !important; }
                 }
                 .print-only { display: none; }

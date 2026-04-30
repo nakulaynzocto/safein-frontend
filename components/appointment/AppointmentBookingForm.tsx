@@ -64,8 +64,9 @@ export function AppointmentBookingForm({
     submitLabel = "Book Appointment",
     initialValues,
     onDraftChange,
+    showVehicleDetails = true,
     onBack,
-}: AppointmentBookingFormProps & { appointmentToken?: string }) {
+}: AppointmentBookingFormProps & { appointmentToken?: string; showVehicleDetails?: boolean }) {
     const normalizedVisitorId = extractIdString(visitorId);
     const normalizedEmployeeId = employeeId ? extractIdString(employeeId) : "";
     const [isFileUploading, setIsFileUploading] = useState(false);
@@ -135,7 +136,10 @@ export function AppointmentBookingForm({
     };
 
     const handleFormSubmit = (data: AppointmentFormData) => {
-        if (!isValidId(normalizedVisitorId)) {
+        // Only validate visitorId if it was explicitly provided.
+        // For booking link flow, visitor is created during final submission.
+        // Only validate visitorId if it's not a QR booking and we have an ID
+        if (!isQRBooking && visitorId && !isValidId(normalizedVisitorId)) {
             showErrorToast("Invalid visitor ID. Please refresh the page and try again.");
             return;
         }
@@ -149,7 +153,7 @@ export function AppointmentBookingForm({
 
         const payload = {
             employeeId: currentEmployeeId,
-            visitorId: normalizedVisitorId,
+            visitorId: normalizedVisitorId || undefined,
             accompanyingCount: data.accompanyingCount ?? 0,
             appointmentDetails: {
                 purpose: data.purpose,
@@ -187,45 +191,55 @@ export function AppointmentBookingForm({
                         <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">
                             Meeting With <span className="text-red-500 ml-1">*</span>
                         </Label>
-                        {isQRBooking && employees.length > 0 ? (
+                        {isQRBooking ? (
                             <Controller
                                 control={control}
                                 name="employeeId"
                                 render={({ field }) => (
                                     <div className="space-y-2">
-                                        <Select onValueChange={field.onChange} value={field.value || undefined}>
+                                        <Select 
+                                            onValueChange={field.onChange} 
+                                            value={field.value || undefined}
+                                            disabled={employees.length === 0}
+                                        >
                                             <SelectTrigger
                                                 className={cn(
                                                     "h-12 w-full rounded-lg border-slate-100 bg-white px-3 py-0 text-left shadow-sm focus:ring-[#3882a5]",
                                                     "data-[size=default]:!h-12 data-[size=default]:!min-h-0",
                                                     "[&_[data-slot=select-value]]:line-clamp-1 [&_[data-slot=select-value]]:min-w-0",
+                                                    errors.employeeId ? "border-red-500" : "border-slate-100"
                                                 )}
                                             >
                                                 <div className="flex h-full min-w-0 flex-1 items-center gap-3 text-slate-700">
                                                     <Briefcase className="h-4 w-4 shrink-0 text-[#3882a5]" />
-                                                    <SelectValue placeholder="Select an employee" />
+                                                    <SelectValue placeholder={employees.length > 0 ? "Search or select employee" : "No employees available"} />
                                                 </div>
                                             </SelectTrigger>
-                                            <SelectContent className="max-h-[300px]">
-                                            {employees.map((emp) => (
-                                                <SelectItem
-                                                    key={emp._id}
-                                                    value={emp._id}
-                                                    textValue={`${emp.name} ${emp.department} ${emp.designation ?? ""}`}
-                                                    className="rounded-md px-2 py-2 data-[highlighted]:bg-[#3882a5] data-[highlighted]:text-white"
-                                                >
-                                                    <span className="block min-w-0 max-w-full truncate text-left font-semibold">
-                                                        {emp.name}
-                                                        <span className="ml-1 text-[10px] font-normal opacity-90">
-                                                            · {emp.department}
-                                                            {emp.designation ? ` · ${emp.designation}` : ""}
-                                                        </span>
-                                                    </span>
-                                                </SelectItem>
-                                            ))}
+                                            <SelectContent className="max-h-[300px] z-[9999]">
+                                                {employees.length > 0 ? (
+                                                    employees.map((emp) => (
+                                                        <SelectItem
+                                                            key={emp._id}
+                                                            value={emp._id}
+                                                            textValue={emp.name}
+                                                            className="rounded-md px-2 py-2 data-[highlighted]:bg-[#3882a5] data-[highlighted]:text-white"
+                                                        >
+                                                            <div className="flex flex-col text-left">
+                                                                <span className="text-sm font-bold truncate">{emp.name}</span>
+                                                                <span className="text-[10px] opacity-70 truncate">
+                                                                    {emp.department} {emp.designation ? `· ${emp.designation}` : ""}
+                                                                </span>
+                                                            </div>
+                                                        </SelectItem>
+                                                    ))
+                                                ) : (
+                                                    <div className="p-4 text-center text-xs text-slate-500 font-medium">
+                                                        No active employees found for this company.
+                                                    </div>
+                                                )}
                                             </SelectContent>
                                         </Select>
-                                        <p className="px-1 text-[11px] text-slate-500">Choose the employee who will approve this visit.</p>
+                                        {employees.length > 0 && <p className="px-1 text-[10px] font-medium text-slate-400">Choose the person you are here to meet.</p>}
                                     </div>
                                 )}
                             />
@@ -238,7 +252,7 @@ export function AppointmentBookingForm({
                             </div>
                         )}
                         {errors.employeeId && (
-                            <span className="text-[10px] font-bold text-destructive uppercase tracking-wide px-1">
+                            <span className="text-[10px] font-bold text-destructive uppercase tracking-wide px-1 block mt-1">
                                 {errors.employeeId.message}
                             </span>
                         )}
@@ -346,11 +360,13 @@ export function AppointmentBookingForm({
                 </div>
 
                 {/* Vehicle Fields Section */}
-                <VehicleInfoSection
-                    appointmentToken={appointmentToken}
-                    variant="button"
-                    onUploadStatusChange={setIsFileUploading}
-                />
+                {showVehicleDetails && (
+                    <VehicleInfoSection
+                        appointmentToken={appointmentToken}
+                        variant="button"
+                        onUploadStatusChange={setIsFileUploading}
+                    />
+                )}
 
                 <div className="flex items-center justify-end gap-3 border-t pt-4 sm:gap-4 sm:pt-6">
                     {onBack && (

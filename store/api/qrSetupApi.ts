@@ -73,19 +73,11 @@ export const qrSetupApi = baseApi.injectEndpoints({
             }),
             transformResponse: (response: any) => response?.data || response,
         }),
-        createVisitorThroughQR: builder.mutation<any, { slug: string; visitorData: any }>({
-            query: ({ slug, visitorData }) => ({
-                url: `/qr-setup/public/${slug}/visitor`,
+        submitUnifiedQRCheckin: builder.mutation<any, { slug: string; payload: { visitorData: any; appointmentData: any } }>({
+            query: ({ slug, payload }) => ({
+                url: `/qr-setup/public/${slug}/submit-unified`,
                 method: "POST",
-                body: visitorData,
-            }),
-            transformResponse: (response: any) => response?.data || response,
-        }),
-        createAppointmentThroughQR: builder.mutation<any, { slug: string; appointmentData: any }>({
-            query: ({ slug, appointmentData }) => ({
-                url: `/qr-setup/public/${slug}/appointment`,
-                method: "POST",
-                body: appointmentData,
+                body: payload,
             }),
             transformResponse: (response: any) => response?.data || response,
         }),
@@ -98,6 +90,5 @@ export const {
     useGetPublicCompanyInfoQuery,
     useSendQrPhoneOtpMutation,
     useVerifyQrPhoneOtpMutation,
-    useCreateVisitorThroughQRMutation,
-    useCreateAppointmentThroughQRMutation,
+    useSubmitUnifiedQRCheckinMutation,
 } = qrSetupApi;
