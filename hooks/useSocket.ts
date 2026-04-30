@@ -21,6 +21,8 @@ export enum SocketEvents {
     APPOINTMENT_STATUS_CHANGED = "appointment_status_changed",
     NEW_NOTIFICATION = "new_notification",
     WALLET_BALANCE_UPDATED = "wallet_balance_updated",
+    SPOTPASS_CREATED = "spotpass_created",
+    SPOTPASS_UPDATED = "spotpass_updated",
 
     // Chat Events
     JOIN_CHAT_ROOM = "join_chat_room",
@@ -359,6 +361,30 @@ export function useSocket(options: UseSocketOptions = {}) {
         dispatch(baseApi.util.invalidateTags(["Wallet"]));
     }, [dispatch]);
 
+    // Handle spot pass events
+    const handleSpotPassCreated = useCallback((data: any) => {
+        const { payload } = data;
+        dispatch(baseApi.util.invalidateTags(["SpotPass"]));
+        invalidateNotifications();
+
+        if (showToasts && !isPublicActionContext()) {
+            const config: NotificationConfig = {
+                type: "appointment_created",
+                title: "New Spot Pass Created 🎟️",
+                message: `A new spot pass has been created for ${payload.name || "a visitor"}.`,
+                toastType: "success",
+            };
+            showToast(config, () => {
+                router.push(routes.privateroute.APPOINTMENTLIST + "?tab=spotpass");
+            });
+            playVoiceAlert();
+        }
+    }, [dispatch, invalidateNotifications, showToasts, isPublicActionContext, router]);
+
+    const handleSpotPassUpdated = useCallback(() => {
+        dispatch(baseApi.util.invalidateTags(["SpotPass"]));
+    }, [dispatch]);
+
     // Fix: Use useRef for stable callbacks to prevent unnecessary re-renders
     const onConnectRef = useRef(onConnect);
     const onDisconnectRef = useRef(onDisconnect);
@@ -421,6 +447,8 @@ export function useSocket(options: UseSocketOptions = {}) {
         socket.on(SocketEvents.APPOINTMENT_DELETED, handleAppointmentDeleted);
         socket.on(SocketEvents.NEW_NOTIFICATION, handleNewNotification);
         socket.on(SocketEvents.WALLET_BALANCE_UPDATED, handleWalletBalanceUpdate);
+        socket.on(SocketEvents.SPOTPASS_CREATED, handleSpotPassCreated);
+        socket.on(SocketEvents.SPOTPASS_UPDATED, handleSpotPassUpdated);
     }, [
         token,
         resolvedUserId,
@@ -431,6 +459,8 @@ export function useSocket(options: UseSocketOptions = {}) {
         handleAppointmentDeleted,
         handleNewNotification,
         handleWalletBalanceUpdate,
+        handleSpotPassCreated,
+        handleSpotPassUpdated,
     ]);
 
     const disconnect = useCallback(() => {
