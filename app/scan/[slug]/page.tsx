@@ -57,6 +57,7 @@ export default function QRScanPage() {
     const [appointmentDraft, setAppointmentDraft] = useState<any>(null);
     const [isPhotoUploading, setIsPhotoUploading] = useState(false);
     const [phoneStepNotice, setPhoneStepNotice] = useState("");
+    const [submissionResult, setSubmissionResult] = useState<any>(null);
     const defaultCountry = useUserCountry();
 
     const { control: verifyControl, handleSubmit: handleVerifySubmit, watch: watchVerify, setValue: setVerifyValue } = useForm({
@@ -130,13 +131,14 @@ export default function QRScanPage() {
 
     const handleFinalSubmit = async () => {
         try {
-            await submitUnifiedQR({
+            const res = await submitUnifiedQR({
                 slug,
                 payload: {
                     visitorData: visitorDraft,
                     appointmentData: appointmentDraft
                 }
             }).unwrap();
+            setSubmissionResult(res);
             setStep("success");
             localStorage.removeItem(PERSIST_KEY);
         } catch (e: any) { showErrorToast(e?.data?.message || "Submit failed"); }
@@ -155,7 +157,21 @@ export default function QRScanPage() {
 
     if (step === "loading" || isLoadingInfo) return <div className="min-h-screen flex items-center justify-center"><FormSkeleton /></div>;
     if (step === "error") return <StatusPage type="error" title="Notice" message={errorMessage} showHomeButton />;
-    if (step === "success") return <SuccessState companyName={company?.companyName} visitorName={visitorDraft?.name} onAction={() => window.location.reload()} />;
+    
+    if (step === "success") {
+        const host = submissionResult?.appointment?.employeeId;
+        const hostName = typeof host === 'object' ? host?.name : (companyInfo?.employees || []).find((e: any) => e._id === appointmentDraft?.employeeId)?.name;
+        
+        return (
+            <SuccessState 
+                companyName={company?.companyName} 
+                visitorName={submissionResult?.visitor?.name || visitorDraft?.name} 
+                hostName={hostName}
+                referenceId={submissionResult?.appointment?._id}
+                onAction={() => window.location.reload()} 
+            />
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#f7fafc] px-3 py-6 sm:px-6 sm:py-10">
