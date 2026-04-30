@@ -139,7 +139,7 @@ export function ProfilePageContent() {
     }
 
     return (
-        <div className="mx-auto w-full max-w-full px-1">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
 
 
             <div className="mt-4 sm:mt-6">

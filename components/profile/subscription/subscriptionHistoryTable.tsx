@@ -278,35 +278,38 @@ export const SubscriptionHistoryTable = ({
 
             <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
                 <DialogContent
-                    className="sm:max-w-[900px] w-[98vw] max-h-[95vh] overflow-y-auto p-0 gap-0"
+                    className="sm:max-w-[950px] w-[98vw] max-h-[98vh] overflow-y-auto p-0 gap-0 rounded-[32px] border-none shadow-2xl"
                     showCloseButton={false}
                 >
-                    <DialogHeader className="p-4 border-b border-gray-200 sticky top-0 bg-white z-50 flex flex-row items-center justify-between shadow-sm">
-                        <DialogTitle className="text-xl font-bold">Invoice Preview</DialogTitle>
+                    <DialogHeader className="p-6 border-b border-gray-100 sticky top-0 bg-white/80 backdrop-blur-md z-50 flex flex-row items-center justify-between shadow-sm">
+                        <div className="flex flex-col">
+                            <DialogTitle className="text-xl font-black text-gray-900 uppercase tracking-tighter">Tax Invoice</DialogTitle>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">Electronic Document System</p>
+                        </div>
                         <div className="flex items-center gap-3">
                             <Button
                                 onClick={handlePrint}
                                 variant="outline"
                                 size="sm"
-                                className="gap-2 text-[#3882a5] border-[#3882a5] hover:bg-[#3882a5]/10 hover:text-[#3882a5]"
+                                className="gap-2 text-[#3882a5] border-gray-200 hover:bg-[#3882a5]/5 hover:text-[#3882a5] hover:border-[#3882a5]/30 h-10 px-6 rounded-xl font-bold text-xs uppercase tracking-widest transition-all"
                             >
                                 <Printer size={16} />
-                                Print / Download
+                                Render Print
                             </Button>
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => setIsViewOpen(false)}
-                                className="h-8 w-8 rounded-full hover:bg-gray-100"
+                                className="h-10 w-10 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-900 transition-all"
                                 aria-label="Close"
                             >
-                                <X size={18} />
+                                <X size={20} />
                             </Button>
                         </div>
                     </DialogHeader>
 
-                    <div className="p-2 bg-gray-100/50 flex justify-center min-h-[600px] overflow-x-auto">
-                        <div className="shadow-2xl border border-gray-200/50 bg-white">
+                    <div className="p-4 sm:p-12 bg-slate-50/50 flex justify-center items-start min-h-[calc(98vh-88px)] overflow-x-auto">
+                        <div className="shadow-2xl border border-gray-200/50 bg-white rounded-[10px] overflow-hidden transform transition-transform duration-500 hover:scale-[1.01]">
                             <SubscriptionInvoiceTemplate
                                 ref={invoiceRef}
                                 subscription={selectedInvoice}

@@ -300,7 +300,7 @@ export default function BookAppointmentPage() {
                                         photo: visitorDraft?.photo
                                     }}
                                     appointment={{
-                                        hostName: appointmentLinkData?.employeeName || "Host",
+                                        hostName: (appointmentLinkData?.employeeId as any)?.name || (appointmentLinkData as any)?.employee?.name || "Host",
                                         date: appointmentData?.appointmentDetails?.scheduledDate || appointmentData?.appointmentDate,
                                         time: appointmentData?.appointmentDetails?.scheduledTime || appointmentData?.appointmentTime,
                                         purpose: appointmentData?.appointmentDetails?.purpose || appointmentData?.purpose
