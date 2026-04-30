@@ -31,9 +31,103 @@ interface ImageUploadFieldProps {
     placeholder?: string;
     shape?: "circle" | "square";
     aspectRatio?: "video" | "square" | "portrait";
+    onCameraStart?: () => void;
+    onCameraStop?: () => void;
 }
 
-// --- Internal Portal Component ---
+
+// --- Shared Camera View (used inline inside dialogs/modals) ---
+export function InlineCameraView({
+    videoRef,
+    canvasRef,
+    facingMode,
+    cameraError,
+    onSwitchCamera,
+    onCapture,
+    onCancel,
+    onFallbackToGallery,
+}: {
+    videoRef: React.RefObject<HTMLVideoElement | null>;
+    canvasRef: React.RefObject<HTMLCanvasElement | null>;
+    facingMode: "environment" | "user";
+    cameraError?: string | null;
+    onSwitchCamera: () => void;
+    onCapture: () => void;
+    onCancel: () => void;
+    onFallbackToGallery?: () => void;
+}) {
+    return (
+        <div className="flex flex-col h-full min-h-[420px] bg-black">
+            {/* Toolbar */}
+            <div className="flex items-center justify-between px-4 py-3 bg-black/80">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="p-2 rounded-full hover:bg-white/10 text-white transition-colors"
+                >
+                    <X className="h-5 w-5" />
+                </button>
+                <span className="text-white text-sm font-bold uppercase tracking-widest">Capture Photo</span>
+                <button
+                    type="button"
+                    onClick={onSwitchCamera}
+                    className="p-2 rounded-full hover:bg-white/10 text-white transition-colors"
+                >
+                    <RotateCw className="h-5 w-5" />
+                </button>
+            </div>
+
+            {/* Video / Error area */}
+            <div className="relative flex-1 flex items-center justify-center overflow-hidden bg-slate-900">
+                {cameraError ? (
+                    <div className="flex flex-col items-center justify-center p-6 text-center">
+                        <div className="mb-4 rounded-full bg-red-500/20 p-4">
+                            <Camera className="h-8 w-8 text-red-400" />
+                        </div>
+                        <h4 className="mb-2 text-base font-bold text-white">Camera Error</h4>
+                        <p className="text-sm text-slate-300 mb-6 max-w-xs">{cameraError}</p>
+                        <button
+                            type="button"
+                            onClick={() => { onCancel(); onFallbackToGallery?.(); }}
+                            className="rounded-full px-8 py-2.5 bg-white text-slate-800 text-sm font-bold hover:bg-slate-100 transition-colors"
+                        >
+                            Use Gallery Instead
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <video
+                            ref={videoRef as LegacyRef<HTMLVideoElement>}
+                            autoPlay
+                            playsInline
+                            muted
+                            className={cn("h-full w-full object-cover", facingMode === "user" && "-scale-x-100")}
+                        />
+                        {/* Circular guide */}
+                        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                            <div className="w-[72vw] h-[72vw] max-w-[300px] max-h-[300px] rounded-full border-4 border-white/70 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]" />
+                        </div>
+                    </>
+                )}
+            </div>
+
+            <canvas ref={canvasRef as LegacyRef<HTMLCanvasElement>} className="hidden" />
+
+            {/* Capture button */}
+            {!cameraError && (
+                <div className="flex justify-center items-center py-6 bg-black">
+                    <button
+                        type="button"
+                        onClick={onCapture}
+                        className="h-16 w-16 rounded-full bg-white border-4 border-slate-400 hover:scale-105 active:scale-95 transition-all shadow-lg"
+                    />
+                </div>
+            )}
+        </div>
+    );
+}
+
+// --- Internal Portal Component (wraps InlineCameraView in a fullscreen portal) ---
 function CameraCapturePortal({
     open,
     videoRef,
@@ -42,6 +136,7 @@ function CameraCapturePortal({
     onSwitchCamera,
     onCapture,
     onCancel,
+    onFallbackToGallery,
     cameraError,
 }: {
     open: boolean;
@@ -51,6 +146,7 @@ function CameraCapturePortal({
     onSwitchCamera: (e?: React.MouseEvent) => void;
     onCapture: (e?: React.MouseEvent) => void;
     onCancel: (e?: React.MouseEvent) => void;
+    onFallbackToGallery?: () => void;
     cameraError?: string | null;
 }) {
     const [mounted, setMounted] = useState(false);
@@ -59,32 +155,16 @@ function CameraCapturePortal({
 
     return createPortal(
         <div className="fixed inset-0 z-[999] flex flex-col bg-black">
-            <div className="flex items-center justify-between p-4 text-white">
-                <button onClick={onCancel} className="p-2 hover:bg-white/10 rounded-full"><X className="h-6 w-6" /></button>
-                <div className="text-sm font-bold uppercase tracking-widest">Capture Photo</div>
-                <button onClick={onSwitchCamera} className="p-2 hover:bg-white/10 rounded-full"><RotateCw className="h-6 w-6" /></button>
-            </div>
-
-            <div className="flex-1 relative flex items-center justify-center overflow-hidden bg-slate-900">
-                <video ref={videoRef as LegacyRef<HTMLVideoElement>} autoPlay playsInline muted className={cn("h-full w-full object-cover", facingMode === "user" ? "-scale-x-100" : "")} />
-                
-                {/* Circular Mask Overlay - Solid Black outside */}
-                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                    <div className="w-[85vw] h-[85vw] max-w-[380px] max-h-[380px] rounded-full border-[4px] border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,1)]" />
-                </div>
-
-                {cameraError && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 p-6 text-center animate-in fade-in">
-                        <div className="mb-4 rounded-full bg-red-500/20 p-4"><Camera className="h-8 w-8 text-red-500" /></div>
-                        <h4 className="mb-2 text-lg font-bold text-white">Camera Blocked</h4>
-                        <p className="mb-6 text-sm text-slate-300 max-w-xs">{cameraError}</p>
-                        <Button variant="secondary" onClick={onCancel} className="rounded-full px-8">Use Gallery Instead</Button>
-                    </div>
-                )}
-            </div>
-            
-            <canvas ref={canvasRef as LegacyRef<HTMLCanvasElement>} className="hidden" />
-            {!cameraError && <div className="p-8 flex justify-center bg-black"><button type="button" onClick={onCapture} className="h-20 w-20 rounded-full bg-white border-4 border-slate-800 hover:scale-105 active:scale-95 transition-all" /></div>}
+            <InlineCameraView
+                videoRef={videoRef}
+                canvasRef={canvasRef}
+                facingMode={facingMode}
+                cameraError={cameraError}
+                onSwitchCamera={onSwitchCamera}
+                onCapture={onCapture}
+                onCancel={onCancel}
+                onFallbackToGallery={onFallbackToGallery}
+            />
         </div>,
         document.body
     );
@@ -93,7 +173,7 @@ function CameraCapturePortal({
 // --- Main Component ---
 export function ImageUploadField({
     name, label, setValue, initialUrl, enableImageCapture = false, appointmentToken, qrSlug, onUploadStatusChange,
-    variant = "default", autoOpenCamera = false, directCameraOnly = false, delayedUpload = false, value, onChange, errors
+    variant = "default", autoOpenCamera = false, directCameraOnly = false, delayedUpload = false, value, onChange, errors, onCameraStart, onCameraStop
 }: ImageUploadFieldProps) {
     const [previewImage, setPreviewImage] = useState<string | null>(typeof initialUrl === "string" ? initialUrl : (typeof value === "string" ? value : null));
     const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -141,15 +221,20 @@ export function ImageUploadField({
     };
 
     const processFile = async (file: File) => {
+        let tempUrl: string | null = null;
         try {
             setIsImageLoading(true); onUploadStatusChange?.(true); setUploadSuccess(false);
             const compressed = await compressImage(file);
+            
             if (delayedUpload) {
-                const url = URL.createObjectURL(compressed);
-                setPreviewImage(url);
+                tempUrl = URL.createObjectURL(compressed);
+                setPreviewImage(tempUrl);
                 if (setValue && name) setValue(name, compressed, { shouldValidate: true });
-                if (onChange) onChange(url);
+                if (onChange) onChange(tempUrl);
             } else {
+                tempUrl = URL.createObjectURL(compressed);
+                setPreviewImage(tempUrl); // Show immediately
+                
                 const res = await uploadFile({ file: compressed, token: appointmentToken, slug: qrSlug }).unwrap();
                 if (res?.url) {
                     setPreviewImage(res.url);
@@ -159,13 +244,22 @@ export function ImageUploadField({
                     setTimeout(() => setUploadSuccess(false), 3000);
                 }
             }
-        } catch (e: any) { showErrorToast(e?.message || "Upload failed"); }
-        finally { setIsImageLoading(false); onUploadStatusChange?.(false); }
+        } catch (e: any) { 
+            showErrorToast(e?.message || "Upload failed"); 
+            if (!delayedUpload && tempUrl) {
+                setPreviewImage(typeof initialUrl === "string" ? initialUrl : (typeof value === "string" ? value : null));
+            }
+        }
+        finally { 
+            setIsImageLoading(false); 
+            onUploadStatusChange?.(false); 
+        }
     };
 
     const startCamera = async (facing: "environment" | "user" = facingMode) => {
         try {
             setIsCapturing(true); setShowCaptureOptions(false); setCameraError(null);
+            onCameraStart?.();
             if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } } });
             streamRef.current = stream; setFacingMode(facing);
@@ -182,11 +276,16 @@ export function ImageUploadField({
     const stopCamera = () => {
         if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
         streamRef.current = null; setIsCapturing(false); setCameraError(null);
+        onCameraStop?.();
     };
 
     const capturePhoto = () => {
         if (videoRef.current && canvasRef.current) {
             const v = videoRef.current, c = canvasRef.current;
+            if (!v.videoWidth || !v.videoHeight) {
+                showErrorToast("Camera not ready. Please wait a moment.");
+                return;
+            }
             c.width = v.videoWidth; c.height = v.videoHeight;
             c.getContext("2d")?.drawImage(v, 0, 0, c.width, c.height);
             c.toBlob(async (b) => { if (b) { stopCamera(); await processFile(new File([b], "capture.jpg", { type: "image/jpeg" })); } }, "image/jpeg", 0.9);
@@ -195,7 +294,7 @@ export function ImageUploadField({
 
     const commonModals = (
         <>
-            <CameraCapturePortal open={isCapturing} videoRef={videoRef} canvasRef={canvasRef} facingMode={facingMode} onSwitchCamera={() => startCamera(facingMode === "environment" ? "user" : "environment")} onCapture={capturePhoto} onCancel={stopCamera} cameraError={cameraError} />
+            <CameraCapturePortal open={isCapturing} videoRef={videoRef} canvasRef={canvasRef} facingMode={facingMode} onSwitchCamera={() => startCamera(facingMode === "environment" ? "user" : "environment")} onCapture={capturePhoto} onCancel={stopCamera} onFallbackToGallery={() => fileInputRef.current?.click()} cameraError={cameraError} />
             {showCaptureOptions && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                     <div className="w-full max-w-xs bg-white rounded-3xl p-6 shadow-2xl animate-in zoom-in-95">
