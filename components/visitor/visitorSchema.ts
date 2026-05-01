@@ -86,6 +86,12 @@ export interface VisitorFormData {
     }[];
 }
 
+export const genderOptions = [
+    { value: "male", label: "Male" },
+    { value: "female", label: "Female" },
+    { value: "other", label: "Other" },
+];
+
 export const idProofTypes = [
     { value: "aadhaar", label: "Aadhaar Card" },
     { value: "pan", label: "PAN Card" },

@@ -19,7 +19,10 @@ import {
     CheckCircle2,
     Link,
     Mail,
-    ChevronRight
+    ChevronRight,
+    LogOut,
+    Star,
+    Clock
 } from "lucide-react";
 
 import { ActionButton } from "@/components/common/actionButton";
@@ -55,6 +58,12 @@ export const TEMPLATE_TYPES = [
     { id: "newAppointmentRequest", label: "New Request Notification", icon: Mail, placeholders: ["visitorName", "employeeName", "date", "time", "purpose", "approvalToken", "companyName"] },
     { id: "appointmentConfirmation", label: "Confirmation Notification", icon: CheckCircle2, placeholders: ["visitorName", "employeeName", "date", "time", "companyName"] },
     { id: "appointmentLink", label: "Invite Link Notification", icon: Link, placeholders: ["employeeName", "bookingUrl", "companyName"] },
+    { id: "visitorCheckedIn", label: "Visitor Checked-In Notification", icon: Mail, placeholders: ["visitorName", "employeeName", "companyName"] },
+    { id: "visitorCheckedOut", label: "Visitor Checked-Out Notification", icon: LogOut, placeholders: ["visitorName", "companyName"] },
+    { id: "feedbackRequest", label: "Feedback Request Notification", icon: Star, placeholders: ["visitorName", "feedbackLink", "companyName"] },
+    { id: "hostDelayed", label: "Host Delayed Notification", icon: Clock, placeholders: ["visitorName", "employeeName", "delayTime", "companyName"] },
+    { id: "welcome", label: "Welcome Notification", icon: Mail, placeholders: ["user_name", "companyName"] },
+    { id: "employeeSetup", label: "Employee Setup Invite", icon: Link, placeholders: ["signUpLink", "companyName"] },
 ];
 
 export function EmailTemplateSettings() {
@@ -81,6 +90,12 @@ export function EmailTemplateSettings() {
         newAppointmentRequest: { subject: "", body: "" },
         appointmentConfirmation: { subject: "", body: "" },
         appointmentLink: { subject: "", body: "" },
+        visitorCheckedIn: { subject: "", body: "" },
+        visitorCheckedOut: { subject: "", body: "" },
+        feedbackRequest: { subject: "", body: "" },
+        hostDelayed: { subject: "", body: "" },
+        welcome: { subject: "", body: "" },
+        employeeSetup: { subject: "", body: "" },
     });
 
     const [enabledTemplates, setEnabledTemplates] = useState<Record<string, boolean>>({});
@@ -99,7 +114,15 @@ export function EmailTemplateSettings() {
                     logoUrl: gs.logoUrl || ""
                 });
             }
-            if (settings.emailTemplates.enabledTemplates) setEnabledTemplates(settings.emailTemplates.enabledTemplates);
+            if (settings.emailTemplates.enabledTemplates) {
+                const et = settings.emailTemplates.enabledTemplates as Record<string, boolean>;
+                const coreEmailTemplates = ["appointmentApproval", "appointmentRejection", "newAppointmentRequest", "appointmentConfirmation", "appointmentLink", "visitorCheckedIn", "employeeSetup"];
+                const normalized: Record<string, boolean> = {};
+                TEMPLATE_TYPES.forEach(t => {
+                    normalized[t.id] = et[t.id] !== undefined ? et[t.id] : coreEmailTemplates.includes(t.id);
+                });
+                setEnabledTemplates(normalized);
+            }
         }
     }, [settings]);
     const { data: safeinProfileResponse } = useGetSafeinProfileQuery(undefined, {
@@ -358,7 +381,7 @@ export function EmailTemplateSettings() {
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-tight">Status</span>
                                                     <BrandSwitch 
-                                                        checked={enabledTemplates[template.id] ?? true}
+                                                        checked={enabledTemplates[template.id]}
                                                         onCheckedChange={async (checked: boolean) => {
                                                             // Optimistic update
                                                             setEnabledTemplates(prev => ({ ...prev, [template.id]: checked }));

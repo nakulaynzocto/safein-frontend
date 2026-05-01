@@ -9,7 +9,7 @@ import { TextareaField } from "@/components/common/textareaField";
 import { ImageUploadField } from "@/components/common/imageUploadField";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { VisitorFormData, idProofTypes } from "./visitorSchema";
+import { VisitorFormData, idProofTypes, genderOptions } from "./visitorSchema";
 import { EmergencyContactsField } from "./EmergencyContactsField";
 import { useUserCountry } from "@/hooks/useUserCountry";
 
@@ -28,6 +28,7 @@ interface VisitorFormFieldsProps {
     phoneExists?: boolean;
     step?: "details" | "photo" | "id_proof" | "preview";
     enableVisitorImageCapture?: boolean;
+    onBookAppointment?: () => void;
 }
 
 export function VisitorFormFields({
@@ -45,6 +46,7 @@ export function VisitorFormFields({
     phoneExists = false,
     enableVisitorImageCapture = true,
     step,
+    onBookAppointment,
 }: VisitorFormFieldsProps) {
     const defaultCountry = useUserCountry();
 
@@ -65,6 +67,18 @@ export function VisitorFormFields({
                                     value={field.value}
                                     onChange={(value) => field.onChange(value)}
                                     error={errors.phone?.message || (phoneExists ? "This phone number is already registered" : undefined)}
+                                    errorAction={phoneExists && onBookAppointment && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                onBookAppointment();
+                                            }}
+                                            className="text-[10px] font-black uppercase tracking-widest text-[#3882a5] hover:text-[#2d6a87] transition-colors border-b-2 border-[#3882a5]/20 hover:border-[#3882a5] pb-0.5"
+                                        >
+                                            Book Appointment
+                                        </button>
+                                    )}
                                     required
                                     placeholder="Enter phone number"
                                     defaultCountry={watch("address.country") || defaultCountry}
@@ -97,14 +111,11 @@ export function VisitorFormFields({
                                 <SelectField
                                     label="Gender"
                                     placeholder="Select gender"
-                                    options={[
-                                        { value: "male", label: "Male" },
-                                        { value: "female", label: "Female" },
-                                        { value: "other", label: "Other" },
-                                    ]}
+                                    options={genderOptions}
                                     value={field.value || ""}
                                     onChange={(val) => field.onChange(val)}
                                     error={errors.gender?.message}
+                                    name={field.name}
                                     required
                                 />
                             )}

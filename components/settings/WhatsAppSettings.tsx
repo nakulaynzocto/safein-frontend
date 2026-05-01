@@ -169,8 +169,10 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
         if (!settings?.whatsapp) return;
         const normalized = normalizeWhatsappEnabledTemplates(settings.whatsapp.enabledTemplates);
         const merged: Record<string, boolean> = {};
+        const coreTemplates = ["system_config_update", "new_appointment", "appointment_confirmed", "visit_status_update", "visitor_invitation", "visitor_entry_pass", "visitor_checked_in"];
         WHATSAPP_META_TEMPLATES.forEach((t) => {
-            merged[t.name] = normalized[t.name] !== undefined ? normalized[t.name] : true;
+            const isCore = coreTemplates.includes(t.name);
+            merged[t.name] = normalized[t.name] !== undefined ? normalized[t.name] : isCore;
         });
         setLocalEnabledTemplates(merged);
     }, [settings]);

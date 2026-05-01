@@ -15,7 +15,11 @@ import {
     MapPin,
     ChevronRight,
     Eye,
-    Loader2
+    Loader2,
+    LogOut,
+    Star,
+    Clock,
+    Link
 } from "lucide-react";
 import { SettingsHeader } from "./SettingsHeader";
 import { FormContainer } from "@/components/common/formContainer";
@@ -35,6 +39,9 @@ export function SMSSettings() {
     const { expandedSections, toggleSection } = useCollapsibleSections(["templates"]);
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>("newRequest");
 
+    const coreSmsTemplates = ["newRequest", "visitorCheckedIn", "approvedVisitor", "approvedEmployee", "rejectedVisitor", "appointmentLink"];
+    const normalizedEnabledTemplates = (settings?.sms as any)?.enabledTemplates || {};
+    
     const handleToggle = async (templateId: string, enabled: boolean) => {
         try {
             const currentEnabledTemplates = (settings?.sms as any)?.enabledTemplates || {};
@@ -119,8 +126,12 @@ export function SMSSettings() {
                                                         { id: "newRequest", label: "New Appointment Request", icon: Calendar, placeholders: ["companyName", "visitorName", "employeeName", "date", "time", "approvalLink"] },
                                                         { id: "visitorCheckedIn", label: "Visitor Checked-in / Arrived", icon: MapPin, placeholders: ["companyName", "visitorName", "employeeName"] },
                                                         { id: "approvedVisitor", label: "Appointment Approved (Visitor)", icon: CheckCircle2, placeholders: ["companyName", "visitorName", "employeeName", "date", "time"] },
-                                                        { id: "approvedEmployee", label: "Appointment Approved (Employee)", icon: User, placeholders: ["companyName", "visitorName", "employeeName", "date", "time"] },
-                                                        { id: "rejectedVisitor", label: "Appointment Rejected (Visitor)", icon: XCircle, placeholders: ["companyName", "visitorName", "date"] },
+                                                        { id: "approvedEmployee", label: "Appointment Approved (Employee)", icon: User, placeholders: ["visitorName", "employeeName", "date", "time", "companyName"] },
+                                                        { id: "rejectedVisitor", label: "Appointment Rejected (Visitor)", icon: XCircle, placeholders: ["visitorName", "date", "companyName"] },
+                                                        { id: "appointmentLink", label: "Invite Link Notification", icon: Link, placeholders: ["employeeName", "bookingUrl", "companyName"] },
+                                                        { id: "visitorCheckedOut", label: "Visitor Checked-Out", icon: LogOut, placeholders: ["companyName", "visitorName"] },
+                                                        { id: "feedbackRequest", label: "Feedback Request", icon: Star, placeholders: ["companyName", "visitorName", "feedbackLink"] },
+                                                        { id: "hostDelayed", label: "Host Delayed Notification", icon: Clock, placeholders: ["companyName", "visitorName", "employeeName", "delayTime"] },
                                                     ].map((template) => (
                                                         <div key={template.id} className="border border-border/50 rounded-xl bg-background transition-all overflow-hidden">
                                                             <div className="flex items-center justify-between p-4 px-5">
@@ -135,7 +146,7 @@ export function SMSSettings() {
                                                                     <div className="flex items-center gap-3">
                                                                         <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-tight">Status</span>
                                                                         <Switch 
-                                                                            checked={(settings?.sms?.enabledTemplates as any)?.[template.id] !== false}
+                                                                            checked={normalizedEnabledTemplates[template.id] !== undefined ? normalizedEnabledTemplates[template.id] : coreSmsTemplates.includes(template.id)}
                                                                             onCheckedChange={(checked) => handleToggle(template.id, checked)}
                                                                             disabled={isUpdating}
                                                                         />

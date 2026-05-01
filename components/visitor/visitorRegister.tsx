@@ -111,7 +111,10 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
             name: initialData?.name || "",
             email: initialData?.email || "",
             phone: initialData?.phone || "",
-            gender: (initialData as any)?.gender?.trim().toLowerCase() || ("" as any),
+            gender: ((initialData as any)?.gender || (initialData as any)?.Gender || "")
+                .toString()
+                .trim()
+                .toLowerCase() || ("" as any),
             address: {
                 street: initialData?.address?.street || "",
                 city: initialData?.address?.city || "",
@@ -167,7 +170,10 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
                 name: foundVisitor.name,
                 email: foundVisitor.email || "",
                 phone: foundVisitor.phone,
-                gender: (foundVisitor as any).gender || "",
+                gender: ((foundVisitor as any).gender || (foundVisitor as any).Gender || "")
+                    .toString()
+                    .trim()
+                    .toLowerCase() || "",
                 address: {
                     street: foundVisitor.address?.street || "",
                     city: foundVisitor.address?.city || "",
@@ -194,7 +200,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
                  setShowSecurityFields(true);
             }
 
-            setStep("preview");
+            setStep("details");
             setShowExistenceModal(false);
             setDismissedVisitorId(foundVisitor._id);
             showSuccessToast("Details auto-filled from your previous visit!");
@@ -394,6 +400,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
                         setIsFileUploading={setIsFileUploading}
                         initialData={initialData}
                         phoneExists={phoneExists}
+                        onBookAppointment={handleBookAppointment}
                         step={step}
                         enableVisitorImageCapture={settings?.features?.enableVisitorImageCapture}
                     />
@@ -415,6 +422,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
                         onToggleSecurityFields={() => {}}
                         setIsFileUploading={setIsFileUploading}
                         initialData={initialData}
+                        onBookAppointment={handleBookAppointment}
                         step={step}
                         enableVisitorImageCapture={settings?.features?.enableVisitorImageCapture}
                     />
@@ -436,6 +444,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
                         onToggleSecurityFields={() => {}}
                         setIsFileUploading={setIsFileUploading}
                         initialData={initialData}
+                        onBookAppointment={handleBookAppointment}
                         step={step}
                         enableVisitorImageCapture={settings?.features?.enableVisitorImageCapture}
                     />

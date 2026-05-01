@@ -27,6 +27,7 @@ interface PhoneInputFieldProps {
     defaultCountry?: string;
     className?: string;
     autoFocus?: boolean;
+    errorAction?: React.ReactNode;
 }
 
 type CountryOption = {
@@ -51,6 +52,7 @@ export function PhoneInputField({
     defaultCountry = "IN",
     className,
     autoFocus = false,
+    errorAction,
 }: PhoneInputFieldProps) {
     // 1. Prepare country options
     const countryOptions = useMemo<CountryOption[]>(() => {
@@ -364,7 +366,14 @@ export function PhoneInputField({
                 />
             </div>
 
-            {error && <p className="text-destructive text-xs">{error}</p>}
+            {error && (
+                <div className="flex items-center justify-between gap-2 min-h-[20px]">
+                    <p className="text-destructive text-xs font-medium animate-in fade-in slide-in-from-top-1 duration-300">
+                        {error}
+                    </p>
+                    {errorAction}
+                </div>
+            )}
             {helperText && !error && <p className="text-muted-foreground text-xs">{helperText}</p>}
 
             <style jsx global>{`
