@@ -23,6 +23,7 @@ export enum SocketEvents {
     WALLET_BALANCE_UPDATED = "wallet_balance_updated",
     SPOTPASS_CREATED = "spotpass_created",
     SPOTPASS_UPDATED = "spotpass_updated",
+    SUBSCRIPTION_UPDATED = "subscription_updated",
 
     // Chat Events
     JOIN_CHAT_ROOM = "join_chat_room",
@@ -42,6 +43,7 @@ interface UseSocketOptions {
     onAppointmentStatusChanged?: (data: any) => void;
     onConnect?: () => void;
     onDisconnect?: (reason: string) => void;
+    onSubscriptionUpdated?: (data: any) => void;
     showToasts?: boolean;
 }
 
@@ -173,7 +175,7 @@ const showToast = (config: NotificationConfig, onClick?: () => void, toastId?: s
 
 
 export function useSocket(options: UseSocketOptions = {}) {
-    const { onAppointmentUpdated, onAppointmentStatusChanged, onConnect, onDisconnect, showToasts = true } = options;
+    const { onAppointmentUpdated, onAppointmentStatusChanged, onSubscriptionUpdated, onConnect, onDisconnect, showToasts = true } = options;
 
     const router = useRouter();
     const socketRef = useRef<Socket | null>(null);
@@ -385,6 +387,11 @@ export function useSocket(options: UseSocketOptions = {}) {
         dispatch(baseApi.util.invalidateTags(["SpotPass"]));
     }, [dispatch]);
 
+    const handleSubscriptionUpdated = useCallback((data: any) => {
+        dispatch(baseApi.util.invalidateTags(["Subscription", "User"]));
+        onSubscriptionUpdated?.(data);
+    }, [dispatch, onSubscriptionUpdated]);
+
     // Fix: Use useRef for stable callbacks to prevent unnecessary re-renders
     const onConnectRef = useRef(onConnect);
     const onDisconnectRef = useRef(onDisconnect);
@@ -449,6 +456,7 @@ export function useSocket(options: UseSocketOptions = {}) {
         socket.on(SocketEvents.WALLET_BALANCE_UPDATED, handleWalletBalanceUpdate);
         socket.on(SocketEvents.SPOTPASS_CREATED, handleSpotPassCreated);
         socket.on(SocketEvents.SPOTPASS_UPDATED, handleSpotPassUpdated);
+        socket.on(SocketEvents.SUBSCRIPTION_UPDATED, handleSubscriptionUpdated);
     }, [
         token,
         resolvedUserId,
@@ -461,6 +469,7 @@ export function useSocket(options: UseSocketOptions = {}) {
         handleWalletBalanceUpdate,
         handleSpotPassCreated,
         handleSpotPassUpdated,
+        handleSubscriptionUpdated,
     ]);
 
     const disconnect = useCallback(() => {

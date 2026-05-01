@@ -23,9 +23,6 @@ import {
 export default function MessagesPage() {
     const { user, subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
 
-    // Check module access
-    // If limits are loaded, check boolean. If loading, wait.
-    const canAccessMessages = subscriptionLimits?.modules?.message;
 
     // Broad Admin Check
     const isAdmin =
@@ -274,15 +271,8 @@ export default function MessagesPage() {
         );
     }
 
-    if (canAccessMessages === false) {
-        return (
-            <ModuleAccessDenied
-                title="Messaging Not Available"
-                description="Your current subscription plan does not include the Messaging module. Please upgrade your plan to access this feature."
-                containerHeight="h-[60vh]"
-            />
-        );
-    }
+    // Access always granted as per request
+    const canAccessMessages = true;
 
     return (
         <div className="flex-1 w-full h-full relative flex flex-col overflow-hidden">

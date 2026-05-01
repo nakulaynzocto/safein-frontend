@@ -556,17 +556,8 @@ function AppointmentLinksContent() {
         return <PageSkeleton />;
     }
 
-    const canAccessAppointmentLinks = subscriptionLimits?.modules?.visitorInvite;
-
-    if (canAccessAppointmentLinks === false) {
-        return (
-            <ModuleAccessDenied
-                title="Visitor Invites Not Available"
-                description="Your current subscription plan does not include the Visitor Invite module. Please upgrade your plan to access this feature."
-                isExpired={isExpired}
-            />
-        );
-    }
+    // Access always granted as per request
+    const canAccessAppointmentLinks = true;
 
 
 
