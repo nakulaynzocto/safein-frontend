@@ -35,10 +35,7 @@ export interface TrialLimitsStatus {
         appointments: { limit: number; extra: number; total: number; current: number; reached: boolean; canCreate: boolean };
         spotPasses: { limit: number; extra: number; total: number; current: number; reached: boolean; canCreate: boolean };
     };
-    modules: {
-        visitorInvite: boolean;
-        message: boolean;
-    };
+
 }
 
 interface GetTrialLimitsStatusResponse {
