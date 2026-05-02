@@ -8,6 +8,7 @@ import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { useRouter, usePathname } from "next/navigation";
 import { routes } from "@/utils/routes";
 import Link from "next/link";
+import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionApi";
 
 type TabType = "profile" | "subscription" | "whatsapp" | "smtp" | "sms" | "voice" | "controls";
 
@@ -21,6 +22,8 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
     const router = useRouter();
     const pathname = usePathname();
     const [activeTab, setActiveTab] = useState<TabType>("profile");
+    const { data: subscriptionData } = useGetUserActiveSubscriptionQuery(user?.id as string, { skip: !user?.id });
+    const modules = subscriptionData?.data?.modules;
 
     // Sync active tab with pathname for external pages
     useEffect(() => {
@@ -62,6 +65,7 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
             icon: Phone,
             roles: ["admin"],
             href: routes.privateroute.SETTINGS_WHATSAPP,
+            requiredModule: "enableWhatsApp",
         },
         {
             id: "smtp" as const,
@@ -69,6 +73,7 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
             icon: Mail,
             roles: ["admin"],
             href: routes.privateroute.SETTINGS_SMTP,
+            requiredModule: "enableEmail",
         },
         {
             id: "sms" as const,
@@ -76,6 +81,7 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
             icon: MessageSquare,
             roles: ["admin"],
             href: routes.privateroute.SETTINGS_SMS,
+            requiredModule: "enableSms",
         },
         {
             id: "voice" as const,
@@ -83,6 +89,7 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
             icon: Phone,
             roles: ["admin"],
             href: routes.privateroute.SETTINGS_VOICE,
+            requiredModule: "enableVoice",
         },
         {
             id: "controls" as const,
@@ -93,8 +100,18 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
         },
     ];
 
-    // Filter tabs based on user role
-    const tabs = baseTabs.filter(tab => tab.roles.includes(user?.role || 'admin'));
+    // Filter tabs based on user role and subscription modules
+    const tabs = baseTabs.filter(tab => {
+        // Check Role
+        if (!tab.roles.includes(user?.role || 'admin')) return false;
+
+        // Check Subscription Module
+        if ((tab as any).requiredModule && modules) {
+            if (!(modules as any)[(tab as any).requiredModule]) return false;
+        }
+
+        return true;
+    });
 
     const handleTabClick = (tabId: TabType, href?: string) => {
         if (tabId === "profile") {

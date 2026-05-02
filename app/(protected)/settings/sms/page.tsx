@@ -1,38 +1,14 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/store/hooks";
+ 
+import { useModuleGating } from "@/hooks/useModuleGating";
 import { SMSSettings } from "@/components/settings/SMSSettings";
-import { routes } from "@/utils/routes";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
-import { isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { ModuleAccessDenied } from "@/components/common/moduleAccessDenied";
 
 export default function SMSSettingsPage() {
-    const router = useRouter();
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
-    const [isChecking, setIsChecking] = useState(true);
+    const { isChecking, modules, isEmployee, isAuthenticated } = useModuleGating('enableSms');
 
-    const isEmployee = checkIsEmployee(user);
-
-    useEffect(() => {
-        if (!isAuthenticated) {
-            router.replace(routes.publicroute.LOGIN);
-            return;
-        }
-
-        if (isEmployee) {
-            router.replace(routes.privateroute.DASHBOARD);
-            return;
-        }
-
-        setIsChecking(false);
-    }, [user, isAuthenticated, router, isEmployee]);
-
-    if (isEmployee) {
-        if (typeof window !== "undefined" && isAuthenticated) {
-            router.replace(routes.privateroute.DASHBOARD);
-        }
+    if (isChecking || !isAuthenticated) {
         return (
             <div className="container mx-auto max-w-full">
                 <PageSkeleton type="form" />
@@ -40,11 +16,12 @@ export default function SMSSettingsPage() {
         );
     }
 
-    if (!isAuthenticated || isChecking) {
+    if (isEmployee || (modules && !modules.enableSms)) {
         return (
-            <div className="container mx-auto max-w-full">
-                <PageSkeleton type="form" />
-            </div>
+            <ModuleAccessDenied 
+                title="SMS Access Restricted"
+                description="Your current plan does not include SMS notification capabilities. Please upgrade to send automated alerts and invites via SMS."
+            />
         );
     }
 

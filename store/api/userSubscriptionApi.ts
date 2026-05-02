@@ -16,6 +16,24 @@ export interface IUserSubscription {
     canAccessDashboard?: boolean;
     hasActiveSubscription?: boolean;
     subscriptionStatus?: "active" | "inactive" | "cancelled" | "expired";
+    modules?: {
+        enableSms: boolean;
+        enableWhatsApp: boolean;
+        enableVoice: boolean;
+        enableEmail: boolean;
+        enableQrCode: boolean;
+        enableInvites: boolean;
+        enableChat: boolean;
+        enablePriorityBooking: boolean;
+        enableSpotPass: boolean;
+    };
+    limits?: {
+        employees: number;
+        visitors: number;
+        appointments: number;
+        spotPasses: number;
+        credits: number;
+    };
 }
 
 interface GetUserActiveSubscriptionResponse {

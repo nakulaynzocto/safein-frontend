@@ -132,7 +132,7 @@ function AppointmentLinksContent() {
     const router = useRouter();
     const pathname = usePathname();
     const dispatch = useAppDispatch();
-    const { user: authUser, isAuthenticated, subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
+    const { user: authUser, isAuthenticated, activeSubscriptionData, isLoading: isAuthLoading } = useAuthSubscription();
     const user = authUser; // Maintain compatibility with existing code
     const [isChecking, setIsChecking] = useState(true);
     const isEmployee = checkIsEmployee(user);
@@ -544,22 +544,36 @@ function AppointmentLinksContent() {
     }, [user, isAuthenticated, router]);
 
     // Show loading state - ALL HOOKS HAVE BEEN CALLED ABOVE
-    if (!isAuthenticated || isChecking) {
+    if (isAuthLoading || isChecking || !isAuthenticated) {
+        return <PageSkeleton type="table" />;
+    }
+
+    // Subscription-based gating logic
+    const modules = activeSubscriptionData?.modules;
+    const isPriorityPage = pathname === routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING;
+    
+    // Check if the specific module is enabled
+    const canAccess = isPriorityPage 
+        ? !!modules?.enablePriorityBooking 
+        : !!modules?.enableInvites;
+
+    if (!canAccess) {
         return (
-            <div className="flex min-h-[60vh] items-center justify-center">
-                <LoadingSpinner />
-            </div>
+            <ModuleAccessDenied 
+                title={isPriorityPage ? "Priority Booking Restricted" : "Smart Invites Restricted"}
+                description={isPriorityPage 
+                    ? "The Priority Booking module is not included in your current subscription plan. Please upgrade to allow high-priority visitor entries."
+                    : "The Smart Invites module is not included in your current subscription plan. Please upgrade to start sending digital invitations to your visitors."
+                }
+                icon={isPriorityPage ? User : Link2}
+            />
         );
     }
 
-    if (isLoading || isAuthLoading) {
-        return <PageSkeleton />;
+    // If access granted, show loading skeleton for data
+    if (isLoading) {
+        return <PageSkeleton type="table" />;
     }
-
-    // Access always granted as per request
-    const canAccessAppointmentLinks = true;
-
-
 
     return (
         <div className="space-y-4 sm:space-y-6">

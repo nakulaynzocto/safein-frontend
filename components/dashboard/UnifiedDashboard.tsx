@@ -23,11 +23,13 @@ import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { getErrorMessage } from "@/utils/errorUtils";
 import { APIErrorState } from "@/components/common/APIErrorState";
 import { useAppDispatch } from "@/store/hooks";
+import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 
 export function UnifiedDashboard() {
     const router = useRouter();
     const dispatch = useAppDispatch();
+    const { activeSubscriptionData } = useAuthSubscription();
     const { hasReachedEmployeeLimit, hasReachedAppointmentLimit, isExpired, refetch: refetchSubscriptionStatus } = useSubscriptionStatus();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [limitType, setLimitType] = useState<'employees' | 'appointments' | 'visitors' | 'spotPasses' | null>(null);
@@ -144,7 +146,11 @@ export function UnifiedDashboard() {
 
     const handleScheduleAppointment = useCallback(() => {
         if (isEmployee) {
-            router.push(routes.privateroute.APPOINTMENT_LINKS);
+            if (activeSubscriptionData?.modules?.enableInvites) {
+                router.push(routes.privateroute.APPOINTMENT_LINKS);
+            } else {
+                router.push(routes.privateroute.APPOINTMENTCREATE);
+            }
         } else if (isExpired) {
             setLimitType("appointments");
             setShowUpgradeModal(true);
@@ -154,7 +160,7 @@ export function UnifiedDashboard() {
         } else {
             router.push(routes.privateroute.APPOINTMENTCREATE);
         }
-    }, [isEmployee, isExpired, hasReachedAppointmentLimit, router, dispatch]);
+    }, [isEmployee, isExpired, hasReachedAppointmentLimit, router, dispatch, activeSubscriptionData?.modules?.enableInvites]);
 
     const hasError = useMemo(
         () => appointmentsError || employeesError || visitorsError,
@@ -220,16 +226,10 @@ export function UnifiedDashboard() {
                     title: "No recent appointments",
                     description: "No recent appointment activities found.",
                     primaryActionLabel: isEmployee
-                        ? "Visitor Invites"
+                        ? (activeSubscriptionData?.modules?.enableInvites ? "Visitor Invites" : "Schedule Appointment")
                         : (isExpired || hasReachedAppointmentLimit ? "Upgrade Plan" : "Schedule Appointment"),
                 }}
-                onPrimaryAction={
-                    isEmployee
-                        ? handleScheduleAppointment
-                        : (isExpired || hasReachedAppointmentLimit
-                            ? () => { setLimitType("appointments"); setShowUpgradeModal(true); }
-                            : handleScheduleAppointment)
-                }
+                onPrimaryAction={handleScheduleAppointment}
             />
 
             <QuickActions />

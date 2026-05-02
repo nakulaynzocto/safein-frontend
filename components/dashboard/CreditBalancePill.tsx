@@ -3,7 +3,7 @@
 import { Zap, Plus, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGetWalletBalanceQuery } from "@/store/api/walletApi";
-import { useGetSettingsQuery } from "@/store/api/settingsApi";
+import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { routes } from "@/utils/routes";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -13,13 +13,20 @@ import { RechargeWalletModal } from "./RechargeWalletModal";
 export function CreditBalancePill({ forceShow = false }: { forceShow?: boolean }) {
     const router = useRouter();
     const [isRechargeOpen, setIsRechargeOpen] = useState(false);
-    const { data: settings } = useGetSettingsQuery();
+    const { activeSubscriptionData } = useAuthSubscription();
+    
+    // Check if any messaging module is enabled in the billing plan
+    const modules = activeSubscriptionData?.modules;
+    const isAnyMessagingEnabled = 
+        modules?.enableSms || 
+        modules?.enableWhatsApp || 
+        modules?.enableVoice;
+
     const { data: walletData, isLoading } = useGetWalletBalanceQuery(undefined, {
-        skip: !forceShow && !settings?.voiceCall?.enabled,
+        skip: !forceShow && !isAnyMessagingEnabled,
     });
 
-    const isVoiceEnabled = settings?.voiceCall?.enabled ?? false;
-    if (!forceShow && !isVoiceEnabled) return null;
+    if (!forceShow && !isAnyMessagingEnabled) return null;
 
     const balance = walletData?.balance ?? 0;
     const isLow = !isLoading && balance < 50;
@@ -87,24 +94,30 @@ export function CreditBalancePill({ forceShow = false }: { forceShow?: boolean }
                                     <Zap className="size-4 fill-current" />
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">Voice Credits</h4>
+                                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">Communication Credits</h4>
                                     <p className="text-[10px] text-slate-500">Wallet balance for notifications</p>
                                 </div>
                             </div>
                             
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
-                                    <span className="text-slate-500">Cost per call</span>
-                                    <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.callCostPerAttempt || 5} credits</span>
-                                </div>
-                                <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
-                                    <span className="text-slate-500">Cost per message</span>
-                                    <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.smsCostPerMessage || 1} credits</span>
-                                </div>
-                                <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
-                                    <span className="text-slate-500">Cost per whatsapp</span>
-                                    <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.whatsappCostPerMessage || 1} credits</span>
-                                </div>
+                            <div className="space-y-0.5">
+                                {modules?.enableVoice && (
+                                    <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
+                                        <span className="text-slate-500">Cost per call</span>
+                                        <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.callCostPerAttempt || 5} credits</span>
+                                    </div>
+                                )}
+                                {modules?.enableSms && (
+                                    <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
+                                        <span className="text-slate-500">Cost per message</span>
+                                        <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.smsCostPerMessage || 1} credits</span>
+                                    </div>
+                                )}
+                                {modules?.enableWhatsApp && (
+                                    <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
+                                        <span className="text-slate-500">Cost per whatsapp</span>
+                                        <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.whatsappCostPerMessage || 1} credits</span>
+                                    </div>
+                                )}
                             </div>
 
                             <button 

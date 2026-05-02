@@ -10,6 +10,7 @@ import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { useAppSelector } from "@/store/hooks";
 // Import Chat Query
 import { useGetChatsQuery } from "@/store/api/chatApi";
+import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionApi";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -40,6 +41,7 @@ const baseNavigation: Array<{
     href: string | ((role: string) => string);
     icon: any;
     roles: string[];
+    requiredModule?: "enableInvites" | "enablePriorityBooking" | "enableQrCode" | "enableChat" | "enableSpotPass";
 }> = [
         {
             name: "Dashboard",
@@ -70,24 +72,28 @@ const baseNavigation: Array<{
             href: routes.privateroute.APPOINTMENT_LINKS_SEND_LINK,
             icon: LinkIcon,
             roles: ["admin", "employee"], // Both admin and employee
+            requiredModule: "enableInvites",
         },
         {
             name: "Priority Bookings",
             href: routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING,
             icon: UserCircle,
             roles: ["admin", "employee"], // Both admin and employee
+            requiredModule: "enablePriorityBooking",
         },
         {
             name: "Spot Pass",
             href: routes.privateroute.SPOT_PASS,
             icon: ClipboardList,
             roles: ["admin"], // Only admin
+            requiredModule: "enableSpotPass",
         },
         {
             name: "QR Check-in",
             href: routes.privateroute.SETTINGS_QR_CHECKIN,
             icon: QrCode,
             roles: ["admin", "employee"], // Both admin and employee
+            requiredModule: "enableQrCode",
         },
         {
             name: "Visit Approvals",
@@ -103,6 +109,8 @@ const baseNavigation: Array<{
 export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () => void; isMobile?: boolean }) => {
     const pathname = usePathname();
     const { user } = useAppSelector((state) => state.auth);
+    const { data: subscriptionData } = useGetUserActiveSubscriptionQuery(user?.id as string, { skip: !user?.id });
+    const modules = subscriptionData?.data?.modules;
 
     // Check if user is employee
     const isEmployee = checkIsEmployee(user);
@@ -120,9 +128,19 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
         userRole = '';
     }
 
-    // Filter navigation items based on role and set correct href
+    // Filter navigation items based on role, subscription modules, and set correct href
     const navigation = baseNavigation
-        .filter(item => userRole && item.roles.includes(userRole as any))
+        .filter(item => {
+            // Check Role
+            if (!userRole || !item.roles.includes(userRole as any)) return false;
+
+            // Check Subscription Module
+            if (item.requiredModule) {
+                if (!modules || !modules[item.requiredModule]) return false;
+            }
+
+            return true;
+        })
         .map(item => ({
             ...item,
             href: typeof item.href === 'function' ? item.href(userRole) : item.href

@@ -21,7 +21,13 @@ import {
 } from "@/lib/chat-utils";
 
 export default function MessagesPage() {
-    const { user, subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
+    const { 
+        user, 
+        subscriptionLimits, 
+        isLoading: isAuthLoading,
+        activeSubscriptionData 
+    } = useAuthSubscription();
+    const modules = activeSubscriptionData?.modules;
 
 
     // Broad Admin Check
@@ -271,8 +277,19 @@ export default function MessagesPage() {
         );
     }
 
-    // Access always granted as per request
-    const canAccessMessages = true;
+    // Subscription-based gating
+    const canAccessMessages = !!modules?.enableChat;
+
+    if (!canAccessMessages && !isAuthLoading) {
+        return (
+            <div className="h-full w-full flex items-center justify-center p-4">
+                <ModuleAccessDenied 
+                    title="Employee Chat Restricted"
+                    description="The Employee Chat module is not included in your current subscription plan. Please upgrade to enable real-time messaging between your team."
+                />
+            </div>
+        );
+    }
 
     return (
         <div className="flex-1 w-full h-full relative flex flex-col overflow-hidden">

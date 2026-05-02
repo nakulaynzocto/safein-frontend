@@ -10,6 +10,7 @@ import { Employee, useUpdateEmployeeMutation } from "@/store/api/employeeApi";
 import { User, Mail, Phone, Building, MessageSquare, PhoneCall, Bell, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { formatName, getInitials } from "@/utils/helpers";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
+import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 
 interface EmployeeSettingsDialogProps {
@@ -19,6 +20,8 @@ interface EmployeeSettingsDialogProps {
 }
 
 export function EmployeeSettingsDialog({ employee, open, onOpenChange }: EmployeeSettingsDialogProps) {
+    const { activeSubscriptionData } = useAuthSubscription();
+    const modules = activeSubscriptionData?.modules;
     const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
     const [settings, setSettings] = useState({
         email: true,
@@ -64,6 +67,7 @@ export function EmployeeSettingsDialog({ employee, open, onOpenChange }: Employe
             description: "Receive visitor arrival alerts via email",
             icon: <Mail className="h-5 w-5 text-blue-500" />,
             enabled: settings.email,
+            visible: !!modules?.enableEmail
         },
         {
             id: "whatsapp",
@@ -71,6 +75,7 @@ export function EmployeeSettingsDialog({ employee, open, onOpenChange }: Employe
             description: "Real-time updates delivered to your WhatsApp",
             icon: <MessageSquare className="h-5 w-5 text-green-500" />,
             enabled: settings.whatsapp,
+            visible: !!modules?.enableWhatsApp
         },
         {
             id: "sms",
@@ -78,6 +83,7 @@ export function EmployeeSettingsDialog({ employee, open, onOpenChange }: Employe
             description: "Traditional text messages for instant alerts",
             icon: <Phone className="h-5 w-5 text-amber-500" />,
             enabled: settings.sms,
+            visible: !!modules?.enableSms
         },
         {
             id: "call",
@@ -85,8 +91,9 @@ export function EmployeeSettingsDialog({ employee, open, onOpenChange }: Employe
             description: "Automated call when a visitor arrives",
             icon: <PhoneCall className="h-5 w-5 text-purple-500" />,
             enabled: settings.call,
+            visible: !!modules?.enableVoice
         },
-    ];
+    ].filter(option => option.visible !== false);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

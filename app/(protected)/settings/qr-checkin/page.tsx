@@ -26,6 +26,9 @@ import { showErrorToast, showSuccessToast } from "@/utils/toast";
 import { cn } from "@/lib/utils";
 import { DeliverySetupWarning } from "@/components/common/DeliverySetupWarning";
 import { HolidaySettings } from "@/components/settings/HolidaySettings";
+import { useModuleGating } from "@/hooks/useModuleGating";
+import { ModuleAccessDenied } from "@/components/common/moduleAccessDenied";
+import { PageSkeleton } from "@/components/common/pageSkeleton";
 
 const QR_CANVAS_ID = "tenant-qr-canvas";
 const COPY_FEEDBACK_MS = 1500;
@@ -100,6 +103,7 @@ export default function QrCheckinSettingsPage() {
     const { data: config, isLoading } = useGetQRConfigQuery();
     const { data: profile } = useGetProfileQuery();
     const { user } = useAppSelector((state) => state.auth);
+    const { isChecking, modules } = useModuleGating('enableQrCode');
     const isEmployee = checkIsEmployee(user);
     const [regenerate, { isLoading: isUpdating }] = useRegenerateQRSlugMutation();
     const [customSlug, setCustomSlug] = useState("");
@@ -179,6 +183,23 @@ export default function QrCheckinSettingsPage() {
         setEditing(false);
         setCustomSlug("");
     }, []);
+
+    if (isChecking) {
+        return (
+            <div className="container mx-auto p-4 lg:p-8">
+                <PageSkeleton type="form" />
+            </div>
+        );
+    }
+
+    if (modules && !modules.enableQrCode) {
+        return (
+            <ModuleAccessDenied 
+                title="QR Code Access Restricted"
+                description="Your current plan does not include QR-based visitor check-in capabilities. Please upgrade to enable touchless entry for your premises."
+            />
+        );
+    }
 
     if (isLoading) {
         return (
