@@ -101,9 +101,11 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
     ];
 
     // Filter tabs based on user role and subscription modules
+    const userRoles = user?.roles || (user?.role ? [user.role] : ['admin']);
     const tabs = baseTabs.filter(tab => {
-        // Check Role
-        if (!tab.roles.includes(user?.role || 'admin')) return false;
+        // Check if any of the user's roles match the tab's allowed roles
+        const hasRequiredRole = tab.roles.some(role => userRoles.includes(role));
+        if (!hasRequiredRole) return false;
 
         // Check Subscription Module
         if ((tab as any).requiredModule && modules) {

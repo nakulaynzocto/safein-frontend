@@ -33,8 +33,8 @@ export default function MessagesPage() {
     // Broad Admin Check
     const isAdmin =
         user?.role === "admin" ||
-        user?.role === "super_admin" ||
-        (Array.isArray(user?.roles) && (user?.roles.includes("admin") || user?.roles.includes("super_admin")));
+        user?.role === "superadmin" ||
+        (Array.isArray(user?.roles) && (user?.roles.includes("admin") || user?.roles.includes("superadmin")));
 
 
 

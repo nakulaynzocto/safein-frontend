@@ -112,27 +112,16 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
     const { data: subscriptionData } = useGetUserActiveSubscriptionQuery(user?.id as string, { skip: !user?.id });
     const modules = subscriptionData?.data?.modules;
 
-    // Check if user is employee
+    // Determine user roles
+    const userRoles = user?.roles || (user?.role ? [user.role] : []);
     const isEmployee = checkIsEmployee(user);
-
-    // Determine user role - if user is not loaded, default to empty to hide menus
-    let userRole = 'admin';
-    if (user) {
-        if (checkIsEmployee(user)) {
-            userRole = 'employee';
-        } else if (user.role) {
-            userRole = user.role;
-        }
-    } else {
-        // If user is not loaded yet, don't show admin menus
-        userRole = '';
-    }
 
     // Filter navigation items based on role, subscription modules, and set correct href
     const navigation = baseNavigation
         .filter(item => {
-            // Check Role
-            if (!userRole || !item.roles.includes(userRole as any)) return false;
+            // Check if any of the user's roles match the item's allowed roles
+            const hasRequiredRole = item.roles.some(role => userRoles.includes(role));
+            if (!hasRequiredRole) return false;
 
             // Check Subscription Module
             if (item.requiredModule) {
@@ -143,7 +132,7 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
         })
         .map(item => ({
             ...item,
-            href: typeof item.href === 'function' ? item.href(userRole) : item.href
+            href: typeof item.href === 'function' ? item.href(userRoles[0] || 'admin') : item.href
         }));
 
     const prevPathnameRef = useRef(pathname);
