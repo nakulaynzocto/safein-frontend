@@ -146,7 +146,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                 >
                     <div className={cn(
                         "w-full max-w-full",
-                        pathname === routes.privateroute.MESSAGES ? "flex-1 min-h-0 p-0 md:p-4 h-full overflow-hidden flex flex-col" : "container mx-auto px-2 py-4 sm:px-3 sm:py-4 md:px-4 md:py-6 lg:px-6 lg:py-8 pb-32 md:pb-24"
+                        pathname === routes.privateroute.MESSAGES ? "flex-1 min-h-0 p-0 md:p-4 h-full overflow-hidden flex flex-col" : "w-full mx-auto px-2 py-4 sm:px-3 sm:py-4 md:px-4 md:py-6 lg:px-6 lg:py-8 pb-32 md:pb-24"
                     )}>
                         {isLoading ? (
                             <PageSkeleton 
