@@ -17,6 +17,11 @@ export default function SubscriptionSuccessPage() {
     const { user, isAuthenticated, token, isInitialized } = useAppSelector((state) => state.auth);
 
     const [isRedirecting, setIsRedirecting] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Replace polling with Socket
     useSocket({
@@ -67,9 +72,9 @@ export default function SubscriptionSuccessPage() {
         }
     }, [subscriptionIsActive, router, user?.id, dispatch, refetchSubscription, isRedirecting]);
 
-    if (!isInitialized) {
+    if (!mounted || !isInitialized) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] dark:bg-slate-950 p-4">
+            <div className="flex min-h-screen items-center justify-center p-4 bg-[#f8fafc] dark:bg-slate-950">
                 <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#3882a5] border-t-transparent"></div>
             </div>
         );
