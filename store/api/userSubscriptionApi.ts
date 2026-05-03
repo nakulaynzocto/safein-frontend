@@ -12,6 +12,11 @@ export interface IUserSubscription {
     isTrialing: boolean;
     createdAt: string;
     updatedAt: string;
+    planId?: {
+        _id: string;
+        name: string;
+        tier: number;
+    } | any;
     // Backend-provided permission flags (preferred over frontend calculation)
     canAccessDashboard?: boolean;
     hasActiveSubscription?: boolean;

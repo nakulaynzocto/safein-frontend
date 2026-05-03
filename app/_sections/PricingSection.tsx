@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, Star } from "lucide-react";
 import { routes } from "@/utils/routes";
 import { useGetAllSubscriptionPlansQuery, ISubscriptionPlan } from "@/store/api/subscriptionApi";
+import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionApi";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
@@ -19,16 +20,19 @@ export default function PricingSection() {
     const { data: fetchedSubscriptionPlans, isLoading, error } = useGetAllSubscriptionPlansQuery({ isActive: true });
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const { isAuthenticated, token } = useAppSelector((state) => state.auth);
+    const { isAuthenticated, token, user } = useAppSelector((state) => state.auth);
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
 
+    const { data: activeSubData } = useGetUserActiveSubscriptionQuery(user?.id ?? "", {
+        skip: !isAuthenticated || !user?.id,
+    });
+
+    const activeSub = activeSubData?.data;
+    const currentPlanId = activeSub?.planId?._id || activeSub?.planId;
+
     const allPlans = fetchedSubscriptionPlans?.data?.plans || [];
-    const plans = useMemo(() => {
-        return (isAuthenticated && token)
-            ? allPlans.filter((plan: ISubscriptionPlan) => plan.planType !== "free")
-            : allPlans;
-    }, [allPlans, isAuthenticated, token]);
+    const plans = allPlans; // Logic moved to backend API via userId query param
 
     const handleGoToSubscriptionPlan = (plan: ISubscriptionPlan) => {
         if (plan.name === "Enterprise") {
@@ -112,31 +116,43 @@ export default function PricingSection() {
                                 </div>
                             )}
                             <CardHeader className="pb-8 text-center pt-10 px-6">
-                                <CardTitle className="text-slate-900 text-2xl font-black uppercase tracking-tight">
+                                <CardTitle className="text-xl font-black uppercase tracking-tight text-slate-900 flex items-center justify-center">
                                     {plan.name}
+                                    {String(plan._id) === String(currentPlanId) && (
+                                        <Badge className="ml-2 bg-emerald-500/10 text-emerald-600 text-[9px] font-bold border-none uppercase tracking-widest px-2">
+                                            Current
+                                        </Badge>
+                                    )}
                                 </CardTitle>
-                                <div className="mt-4 flex flex-col items-center">
+                                <div className="mt-4 flex flex-col items-center min-h-[110px] justify-center">
                                     {plan.name === 'Enterprise' ? (
                                         <span className="text-slate-900 text-3xl font-black uppercase">Contact Sales</span>
                                     ) : (
                                         <>
-                                            <div className="flex items-baseline gap-1">
-                                                <span className="text-slate-900 text-5xl font-black">
-                                                    {formatCurrency(plan.amount, plan.currency)}
-                                                </span>
-                                                <span className="text-slate-400 font-bold text-sm">
-                                                    /{plan.planType.replace("ly", "")}
-                                                </span>
+                                            <div className="flex flex-col items-center">
+                                                {plan.discountPercentage && plan.discountPercentage > 0 ? (
+                                                    <span className="text-slate-400 text-lg sm:text-xl font-bold line-through opacity-60 mb-[-4px]">
+                                                        {formatCurrency(plan.amount, plan.currency)}
+                                                    </span>
+                                                ) : null}
+                                                <div className="flex items-baseline gap-1">
+                                                    <span className="text-slate-900 text-4xl sm:text-5xl font-black tracking-tight">
+                                                        {formatCurrency(plan.amount - (plan.amount * (plan.discountPercentage || 0) / 100), plan.currency)}
+                                                    </span>
+                                                    <span className="text-slate-400 font-bold text-xs sm:text-sm whitespace-nowrap">
+                                                        /{plan.planType.replace("ly", "")}
+                                                    </span>
+                                                </div>
                                             </div>
                                             {!!plan.discountPercentage && plan.discountPercentage > 0 && (
-                                                <Badge className="mt-2 bg-green-500/10 text-green-600 text-[10px] font-bold border-none uppercase tracking-widest">
+                                                <Badge className="mt-3 bg-green-500/10 text-green-600 text-[9px] sm:text-[10px] font-bold border-none uppercase tracking-widest px-3">
                                                     SAVE {plan.discountPercentage}%
                                                 </Badge>
                                             )}
                                         </>
                                     )}
                                 </div>
-                                <CardDescription className="text-slate-500 mt-4 font-medium px-4 line-clamp-2 min-h-[40px]">
+                                <CardDescription className="text-slate-500 mt-4 font-medium px-4 line-clamp-2 min-h-[48px] flex items-center justify-center">
                                     {plan.description}
                                 </CardDescription>
                             </CardHeader>
@@ -145,9 +161,11 @@ export default function PricingSection() {
                                     className="mb-8 w-full bg-[#074463] hover:bg-[#074463]/90 text-white h-14 rounded-2xl text-lg font-black transition-all hover:scale-[1.02] uppercase tracking-wider"
                                     onClick={() => handleGoToSubscriptionPlan(plan)}
                                 >
-                                    {plan.name === "Enterprise" 
-                                        ? "Contact Us" 
-                                        : (plan.planType === "free" ? "Start Free Trial" : "Get Started")}
+                                    {String(plan._id) === String(currentPlanId)
+                                        ? "Extend Plan"
+                                        : (plan.name === "Enterprise" 
+                                            ? "Contact Us" 
+                                            : (plan.planType === "free" ? "Start Free Trial" : "Get Started"))}
                                     <ArrowRight className="ml-2 h-5 w-5" />
                                 </Button>
 

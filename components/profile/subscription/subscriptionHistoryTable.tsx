@@ -55,6 +55,8 @@ interface SubscriptionItem {
     razorpayOrderId?: string;
     razorpayPaymentId?: string;
     subscriptionId: string;
+    discountPercentage?: number;
+    discountAmount?: number;
 }
 
 interface SubscriptionHistoryTableProps {
@@ -192,6 +194,15 @@ export const SubscriptionHistoryTable = ({
                             ? formatCurrency(item.amount)
                             : "Free"
                         : "-"}
+                </span>
+            ),
+        },
+        {
+            header: "Disc",
+            className: "px-2 py-3 text-right align-top whitespace-nowrap w-[10%]",
+            cell: (item: SubscriptionItem) => (
+                <span className="font-medium text-emerald-600 text-xs">
+                    {item.discountAmount && item.discountAmount > 0 ? `-${formatCurrency(item.discountAmount)}` : "-"}
                 </span>
             ),
         },

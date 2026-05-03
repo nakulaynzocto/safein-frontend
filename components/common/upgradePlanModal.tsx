@@ -12,6 +12,7 @@ import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { ShieldAlert } from "lucide-react";
 import { getTaxSplit } from "@/utils/invoiceHelpers";
 import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
+import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionApi";
 
 declare global {
     interface Window {
@@ -52,18 +53,18 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
     const [createCheckoutSession, { isLoading: isCreating }] = useCreateCheckoutSessionMutation();
     const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation();
 
+    const { data: activeSubData } = useGetUserActiveSubscriptionQuery(user?.id ?? "", {
+        skip: !isAuthenticated || !user?.id,
+    });
+
+    const activeSub = activeSubData?.data;
+    const currentPlanId = activeSub?.planId?._id || activeSub?.planId;
+
     const companyDetails = safeinProfile?.data?.companyDetails;
 
     const plans: ISubscriptionPlan[] = data?.data?.plans || [];
     
-    const availablePlans = useMemo(() => {
-        return plans.filter((plan) => {
-            if (!plan.isPublic) return false;
-            // Hide free plan for logged-in users
-            if ((isAuthenticated || token) && plan.planType === 'free') return false;
-            return true;
-        });
-    }, [plans, isAuthenticated, token]);
+    const availablePlans = plans; // Logic moved to backend API via userId query param
     
     // Selected plan in the modal. Start with no selection, then auto-select first public plan when data loads.
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
@@ -241,6 +242,11 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
                                                                     Popular
                                                                 </span>
                                                             )}
+                                                            {String(plan._id) === String(currentPlanId) && (
+                                                                <span className="bg-emerald-100 text-emerald-700 ml-2 rounded-full px-2 py-0.5 text-[10px] tracking-wide uppercase font-bold">
+                                                                    Current Plan
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="text-slate-700">
@@ -249,12 +255,21 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
                                                         ) : (
                                                             <>
                                                                 {plan.amount > 0 ? (
-                                                                    <>
-                                                                        {formatCurrency(plan.totalAmount || plan.amount, plan.currency)}{" "}
-                                                                        <span className="text-[11px] text-slate-500">
+                                                                    <div className="flex flex-col items-end">
+                                                                        <div className="flex items-center gap-1.5">
+                                                                            {plan.discountPercentage && plan.discountPercentage > 0 ? (
+                                                                                <span className="text-[10px] text-slate-400 line-through">
+                                                                                    {formatCurrency(plan.amount + (plan.amount * (plan.taxPercentage || 0) / 100), plan.currency)}
+                                                                                </span>
+                                                                            ) : null}
+                                                                            <span className="font-bold">
+                                                                                {formatCurrency(plan.totalAmount || plan.amount, plan.currency)}
+                                                                            </span>
+                                                                        </div>
+                                                                        <span className="text-[10px] text-slate-500">
                                                                             / {plan.planType.replace("ly", "")}
                                                                         </span>
-                                                                    </>
+                                                                    </div>
                                                                 ) : (
                                                                     <span className="text-[11px] text-slate-500 italic">Free Plan</span>
                                                                 )}
@@ -273,14 +288,9 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
 
                                         const baseAmount = selectedPlan.amount;
                                         const totalAmount = selectedPlan.totalAmount || selectedPlan.amount;
-                                        const gstAmount = totalAmount - baseAmount;
-                                        const taxSplit = getTaxSplit(
-                                            gstAmount,
-                                            selectedPlan.taxPercentage || 0,
-                                            user?.address,
-                                            companyDetails?.state,
-                                            companyDetails?.country
-                                        );
+                                        const taxSplit = selectedPlan.taxSplit;
+
+                                        if (!taxSplit) return null;
 
                                         return (
                                             <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-3 space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -288,7 +298,13 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
                                                     <span>Base Price:</span>
                                                     <span>{formatCurrency(baseAmount, selectedPlan.currency)}</span>
                                                 </div>
-                                                {taxSplit.components.map((comp, idx) => (
+                                                {selectedPlan.discountPercentage && selectedPlan.discountPercentage > 0 ? (
+                                                    <div className="flex justify-between text-[11px] text-emerald-600 font-medium">
+                                                        <span>Discount ({selectedPlan.discountPercentage}%):</span>
+                                                        <span>- {formatCurrency((baseAmount * selectedPlan.discountPercentage) / 100, selectedPlan.currency)}</span>
+                                                    </div>
+                                                ) : null}
+                                                {taxSplit.components.map((comp: any, idx: number) => (
                                                     <div key={idx} className="flex justify-between text-[11px] text-slate-600">
                                                         <span>{comp.label} ({comp.rate}%):</span>
                                                         <span>+ {formatCurrency(comp.amount, selectedPlan.currency)}</span>
@@ -320,8 +336,17 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
                                     <Button variant="outline" onClick={onClose} disabled={isCreating} className="h-12 rounded-xl px-6">
                                         Cancel
                                     </Button>
-                                    <Button onClick={handleUpgradeClick} variant="primary" disabled={isCreating || !selectedPlanId} className="h-12 rounded-xl px-8">
-                                        {isCreating ? "Processing..." : (availablePlans.find(p => p._id === selectedPlanId)?.name === 'Enterprise' ? "Contact Sales Team" : "Upgrade Now")}
+                                    <Button 
+                                        onClick={handleUpgradeClick} 
+                                        variant="primary" 
+                                        disabled={isCreating || !selectedPlanId} 
+                                        className="h-12 rounded-xl px-8"
+                                    >
+                                        {isCreating 
+                                            ? "Processing..." 
+                                            : (availablePlans.find(p => p._id === selectedPlanId)?.name === 'Enterprise' 
+                                                ? "Contact Sales Team" 
+                                                : (String(selectedPlanId) === String(currentPlanId) ? "Extend Plan" : "Upgrade Now"))}
                                     </Button>
                                 </div>
                             </div>

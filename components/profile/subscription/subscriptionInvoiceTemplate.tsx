@@ -17,10 +17,12 @@ interface ExtendedSubscriptionItem {
     paymentStatus?: string;
     razorpayOrderId?: string;
     razorpayPaymentId?: string;
-    purchaseDate: string;
     remainingDaysFromPrevious?: number;
     source?: string;
     invoiceNumber?: string;
+    discountPercentage?: number;
+    discountAmount?: number;
+    taxAmount?: number;
     taxSplit?: {
         components: { label: string; rate: number; amount: number }[];
         type: string;
@@ -48,8 +50,9 @@ export const SubscriptionInvoiceTemplate = forwardRef<
         const profile = subscription?.billingDetails;
         const companyDetails = profile?.companyDetails || businessProfile?.companyDetails || {};
         const amount = subscription.amount || 0;
+        const discountAmount = subscription.discountAmount || 0;
         const taxAmount = subscription.taxAmount || 0;
-        const totalAmount = amount + taxAmount;
+        const totalAmount = (amount - discountAmount) + taxAmount;
 
         const taxSplit = subscription.taxSplit || { components: [], isIntraState: false, type: "" };
 
@@ -242,6 +245,13 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                                             <td className="py-2 text-center text-slate-500">-</td>
                                             <td className="py-2 text-right text-slate-900 font-bold">{formatCurrency(amount)}</td>
                                         </tr>
+                                        {subscription.discountPercentage && subscription.discountPercentage > 0 ? (
+                                            <tr className="border-b border-dashed border-slate-100 text-emerald-600">
+                                                <td className="py-2 font-bold italic">Discount ({subscription.discountPercentage}%):</td>
+                                                <td className="py-2 text-center">-</td>
+                                                <td className="py-2 text-right font-bold">- {formatCurrency(discountAmount)}</td>
+                                            </tr>
+                                        ) : null}
                                         {taxSplit.components.map((comp: any, idx: number) => (
                                             <tr key={idx}>
                                                 <td className="py-2 text-slate-600 font-semibold uppercase text-[10px]">{comp.label}</td>
