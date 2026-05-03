@@ -19,6 +19,8 @@ export interface ISubscriptionPlan {
     totalAmount?: number;
     taxPercentage?: number;
     isPublic?: boolean;
+    tier?: number;
+    taxSplit?: any;
 }
 
 interface GetAllSubscriptionPlansResponse {
