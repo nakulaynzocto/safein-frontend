@@ -139,20 +139,16 @@ export function ProfilePageContent() {
     }
 
     return (
-        <div className="mx-auto w-full px-4 sm:px-6">
-
-
-            <div className="mt-4 sm:mt-6">
-                <ProfileLayout>
-                    {(activeTab) => (
-                        <>
-                            {activeTab === "profile" && (
-                                <ProfileForm profile={profile} onSubmit={handleProfileUpdate} onCancel={handleCancelEdit} />
-                            )}
-                        </>
-                    )}
-                </ProfileLayout>
-            </div>
+        <div className="mx-auto w-full max-w-full px-1 pt-4 sm:pt-6">
+            <ProfileLayout>
+                {(activeTab) => (
+                    <>
+                        {activeTab === "profile" && (
+                            <ProfileForm profile={profile} onSubmit={handleProfileUpdate} onCancel={handleCancelEdit} />
+                        )}
+                    </>
+                )}
+            </ProfileLayout>
         </div>
     );
 }
