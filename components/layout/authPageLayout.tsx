@@ -27,43 +27,7 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
 
     return (
         <div className="flex min-h-screen bg-white overflow-hidden">
-            {/* Left Side: Form */}
-            <div className="flex w-full flex-col lg:w-1/2 px-4 py-6 sm:px-8 sm:py-8 lg:px-12 xl:px-24">
-                {/* Back to Home — in normal flow, never overlaps form */}
-                <div className="mb-6 sm:mb-8">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push(routes.publicroute.HOME)}
-                        className="text-muted-foreground hover:bg-[#3882a5] hover:text-white rounded-lg px-3 flex items-center gap-2 -ml-2"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        <span className="font-medium text-sm">Back to Home</span>
-                    </Button>
-                </div>
-
-                <div className="mx-auto w-full max-w-md">
-                    {!isMounted || !isInitialized ? (
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <Skeleton className="h-10 w-32" />
-                                <Skeleton className="h-4 w-64" />
-                            </div>
-                            <div className="space-y-4 pt-4">
-                                <Skeleton className="h-12 w-full rounded-xl" />
-                                <Skeleton className="h-12 w-full rounded-xl" />
-                                <Skeleton className="h-12 w-full rounded-xl" />
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="animate-in fade-in duration-500">
-                            {children}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Right Side: Image & Branding (Desktop Only) */}
+            {/* Left Side: Image & Branding (Desktop Only) */}
             <div className="hidden lg:flex lg:w-1/2 relative bg-[#3882a5] flex-col items-center justify-center p-12 overflow-hidden">
                 {/* Background decorative elements */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full -mr-48 -mt-48 transition-all" />
@@ -101,6 +65,42 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
                 {/* Footer Link (Optional) */}
                 <div className="absolute bottom-12 left-0 right-0 text-center text-white/40 text-sm">
                     &copy; {new Date().getFullYear()} Aynzo Global Private Limited. All rights reserved.
+                </div>
+            </div>
+
+            {/* Right Side: Form */}
+            <div className="flex w-full flex-col lg:w-1/2 px-4 py-6 sm:px-8 sm:py-8 lg:px-12 xl:px-24">
+                {/* Back to Home — in normal flow, never overlaps form */}
+                <div className="mb-6 sm:mb-8">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => router.push(routes.publicroute.HOME)}
+                        className="text-muted-foreground hover:bg-[#3882a5] hover:text-white rounded-lg px-3 flex items-center gap-2 -ml-2"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        <span className="font-medium text-sm">Back to Home</span>
+                    </Button>
+                </div>
+
+                <div className="mx-auto w-full max-w-md">
+                    {!isMounted || !isInitialized ? (
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <Skeleton className="h-10 w-32" />
+                                <Skeleton className="h-4 w-64" />
+                            </div>
+                            <div className="space-y-4 pt-4">
+                                <Skeleton className="h-12 w-full rounded-xl" />
+                                <Skeleton className="h-12 w-full rounded-xl" />
+                                <Skeleton className="h-12 w-full rounded-xl" />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="animate-in fade-in duration-500">
+                            {children}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

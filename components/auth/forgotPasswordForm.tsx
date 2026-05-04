@@ -93,11 +93,6 @@ export function ForgotPasswordForm() {
     return (
         <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="mb-8 ">
-                <div className="mb-6 flex">
-                    <div className="bg-[#3882a5]/10 flex h-14 w-14 items-center justify-center rounded-2xl shadow-inner border border-[#3882a5]/5 text-[#3882a5]">
-                        <Sparkles className="h-7 w-7" />
-                    </div>
-                </div>
                 <div className="space-y-2">
                     <h1 className="text-3xl font-black text-[#074463] tracking-tight">Forgot Password?</h1>
                     <p className="text-slate-500 font-medium text-sm sm:text-base">
