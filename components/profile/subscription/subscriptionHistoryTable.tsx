@@ -200,11 +200,24 @@ export const SubscriptionHistoryTable = ({
         {
             header: "Disc",
             className: "px-2 py-3 text-right align-top whitespace-nowrap w-[10%]",
-            cell: (item: SubscriptionItem) => (
-                <span className="font-medium text-emerald-600 text-xs">
-                    {item.discountAmount && item.discountAmount > 0 ? `-${formatCurrency(item.discountAmount)}` : "-"}
-                </span>
-            ),
+            cell: (item: SubscriptionItem) => {
+                let discAmt = item.discountAmount || (item.discountPercentage ? (item.amount * item.discountPercentage / 100) : 0);
+                
+                // Smart Fallback for past records where discount is missing but tax implies a discount
+                if (!discAmt && item.taxAmount && item.taxAmount > 0 && item.amount > 0) {
+                    const impliedTaxableBase = item.taxAmount / 0.18; // Standard GST is 18%
+                    const impliedDiscount = item.amount - impliedTaxableBase;
+                    if (impliedDiscount > 5) { // Threshold to ignore rounding differences
+                        discAmt = impliedDiscount;
+                    }
+                }
+
+                return (
+                    <span className="font-medium text-emerald-600 text-xs">
+                        {discAmt > 0 ? `-${formatCurrency(discAmt)}` : "-"}
+                    </span>
+                );
+            },
         },
         {
             header: "Tax",
