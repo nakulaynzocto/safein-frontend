@@ -402,7 +402,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
                         phoneExists={phoneExists}
                         onBookAppointment={handleBookAppointment}
                         step={step}
-                        enableVisitorImageCapture={settings?.features?.enableVisitorImageCapture}
+                        enableVisitorImageCapture={settings?.features?.enableVisitorImageCapture ?? true}
                     />
                 </div>
             )}

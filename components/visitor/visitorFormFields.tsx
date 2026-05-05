@@ -178,7 +178,7 @@ export function VisitorFormFields({
                             setValue={setValue}
                             errors={errors.photo}
                             initialUrl={watch("photo")}
-                            enableImageCapture={enableVisitorImageCapture}
+                            enableImageCapture={true}
                             variant="avatar"
                             className="scale-110"
                             delayedUpload={true}
@@ -196,18 +196,9 @@ export function VisitorFormFields({
                     <div className="space-y-6">
                         <div className="flex items-center justify-between border-b pb-2">
                             <h4 className="text-xs font-bold uppercase tracking-widest text-[#3882a5]">Identification Proof</h4>
-                            <div className="flex items-center space-x-2">
-                                <Switch
-                                    id="id-verification"
-                                    checked={showIdVerificationFields}
-                                    onCheckedChange={onToggleIdVerificationFields}
-                                />
-                                <Label htmlFor="id-verification" className="text-xs text-slate-500 font-medium">Enable ID Upload</Label>
-                            </div>
                         </div>
                         
-                        {showIdVerificationFields && (
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 items-start pt-2">
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 items-start pt-2">
                                 <div className="flex flex-col space-y-2">
                                     <Label className="text-foreground text-sm font-semibold mb-1">ID Proof Image</Label>
                                     <ImageUploadField
@@ -249,32 +240,21 @@ export function VisitorFormFields({
                                     />
                                 </div>
                             </div>
-                        )}
                     </div>
                     
                     {/* Additional Security Section */}
                     <div className="space-y-6 border-t pt-8">
                         <div className="flex items-center justify-between border-b pb-2">
                             <h4 className="text-xs font-bold uppercase tracking-widest text-[#3882a5]">Additional Security</h4>
-                            <div className="flex items-center space-x-2">
-                                <Switch
-                                    id="security-fields"
-                                    checked={showSecurityFields}
-                                    onCheckedChange={onToggleSecurityFields}
-                                />
-                                <Label htmlFor="security-fields" className="text-xs text-slate-500 font-medium">Enable Security Checks</Label>
-                            </div>
                         </div>
                         
-                        {showSecurityFields && (
-                            <div className="grid grid-cols-1 gap-6 pt-2">
+                        <div className="grid grid-cols-1 gap-6 pt-2">
                                 <EmergencyContactsField
                                     control={control}
                                     register={register}
                                     errors={errors}
                                 />
                             </div>
-                        )}
                     </div>
                 </div>
             )}

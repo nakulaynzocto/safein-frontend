@@ -67,7 +67,10 @@ export function InlineCameraView({
                 >
                     <X className="h-5 w-5" />
                 </button>
-                <span className="text-white text-sm font-bold uppercase tracking-widest">Capture Photo</span>
+                <div className="flex flex-col items-center">
+                    <span className="text-white text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Photo Mode</span>
+                    <span className="text-white text-sm font-bold uppercase tracking-widest">Capture Image</span>
+                </div>
                 <button
                     type="button"
                     onClick={onSwitchCamera}
@@ -105,7 +108,7 @@ export function InlineCameraView({
                         />
                         {/* Circular guide */}
                         <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                            <div className="w-[72vw] h-[72vw] max-w-[300px] max-h-[300px] rounded-full border-4 border-white/70 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]" />
+                            <div className="w-[92vw] h-[92vw] max-w-[750px] max-h-[750px] rounded-full border-2 border-white/50 shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]" />
                         </div>
                     </>
                 )}
@@ -115,12 +118,34 @@ export function InlineCameraView({
 
             {/* Capture button */}
             {!cameraError && (
-                <div className="flex justify-center items-center py-6 bg-black">
+                <div className="flex justify-around items-center py-8 bg-black">
+                    <button
+                        type="button"
+                        onClick={() => { onCancel(); onFallbackToGallery?.(); }}
+                        className="flex flex-col items-center gap-1 p-2 text-white/70 hover:text-white transition-colors"
+                    >
+                        <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center">
+                            <ImageIcon className="h-5 w-5" />
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Gallery</span>
+                    </button>
+
                     <button
                         type="button"
                         onClick={onCapture}
-                        className="h-16 w-16 rounded-full bg-white border-4 border-slate-400 hover:scale-105 active:scale-95 transition-all shadow-lg"
+                        className="h-20 w-20 rounded-full bg-white border-[6px] border-white/20 hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)]"
                     />
+
+                    <button
+                        type="button"
+                        onClick={onSwitchCamera}
+                        className="flex flex-col items-center gap-1 p-2 text-white/70 hover:text-white transition-colors"
+                    >
+                        <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center">
+                            <RotateCw className="h-5 w-5" />
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Flip</span>
+                    </button>
                 </div>
             )}
         </div>
@@ -313,8 +338,14 @@ export function ImageUploadField({
     const trigger = (e: any) => {
         e.preventDefault();
         if (isUploading) return;
-        if (enableImageCapture) directCameraOnly ? startCamera() : setShowCaptureOptions(true);
-        else fileInputRef.current?.click();
+        
+        // If capture is enabled, open camera directly. 
+        // Inside the camera view, there is a "Gallery" button to switch.
+        if (enableImageCapture) {
+            startCamera();
+        } else {
+            fileInputRef.current?.click();
+        }
     };
 
     return (
