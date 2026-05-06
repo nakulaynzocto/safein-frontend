@@ -213,36 +213,36 @@ export function VerifyAppointment() {
             <div className="flex min-h-screen items-center justify-center p-4">
                 <Card className="w-full max-w-lg overflow-hidden border-0 bg-white shadow-2xl dark:bg-slate-900 animate-in zoom-in-95 duration-500">
                     <div className={cn(
-                        "h-2",
+                        "h-1.5",
                         displayStatus === "approved" ? "bg-green-500" : "bg-red-500"
                     )} />
-                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                    <CardContent className="flex flex-col items-center justify-center py-8 text-center">
                         <div className={cn(
-                            "mb-6 flex h-20 w-20 items-center justify-center rounded-full p-4",
+                            "mb-4 flex h-16 w-16 items-center justify-center rounded-full p-3",
                             displayStatus === "approved" ? "bg-green-100 dark:bg-green-900/20" : "bg-red-100 dark:bg-red-900/20"
                         )}>
                             {displayStatus === "approved" ? (
-                                <CheckCircle2 className="h-10 w-10 text-green-600" />
+                                <CheckCircle2 className="h-8 w-8 text-green-600" />
                             ) : (
-                                <XCircle className="h-10 w-10 text-red-600" />
+                                <XCircle className="h-8 w-8 text-red-600" />
                             )}
                         </div>
-                        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white capitalize">
+                        <h2 className="mb-1 text-xl font-bold text-slate-900 dark:text-white capitalize">
                             Appointment {displayStatus}
                         </h2>
-                        <p className="text-slate-500 dark:text-slate-400">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
                             {actionCompleted
                                 ? `The appointment has been ${displayStatus} successfully.`
                                 : `This appointment was already ${displayStatus}.`
                             }
                         </p>
-                        <div className="mt-8 flex w-full flex-col gap-3">
-                            <div className="rounded-xl border border-dashed border-slate-200 p-4 text-left dark:border-slate-800">
-                                <p className="mb-3 text-xs font-medium uppercase tracking-wider text-slate-400">Visitor Details</p>
+                        <div className="mt-6 flex w-full flex-col gap-3 max-w-[340px]">
+                            <div className="rounded-xl border border-dashed border-slate-200 p-3 text-left dark:border-slate-800 bg-slate-50/20">
+                                <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Visitor Details</p>
                                 <div className="flex items-center gap-3">
-                                    <Avatar className="h-14 w-14 border border-slate-200 dark:border-slate-700">
+                                    <Avatar className="h-12 w-12 border border-white shadow-sm">
                                         <AvatarImage src={appointment.visitor?.photo} alt={appointment.visitor?.name || "Visitor"} className="object-cover" />
-                                        <AvatarFallback className="bg-slate-100 text-sm font-bold text-[#3882a5] dark:bg-slate-800">
+                                        <AvatarFallback className="bg-slate-100 text-xs font-bold text-[#3882a5]">
                                             {(appointment.visitor?.name || "V")
                                                 .split(" ")
                                                 .map((n: string) => n[0])
@@ -251,24 +251,24 @@ export function VerifyAppointment() {
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="min-w-0">
-                                        <p className="truncate text-sm font-semibold">{appointment.visitor?.name || "-"}</p>
-                                        <p className="text-xs text-slate-500">{appointment.visitor?.phone || "-"}</p>
+                                        <p className="truncate text-xs font-bold text-slate-800">{appointment.visitor?.name || "-"}</p>
+                                        <p className="text-[10px] font-medium text-slate-500">{appointment.visitor?.phone || "-"}</p>
                                     </div>
                                 </div>
                                 <div className="mt-3 grid grid-cols-2 gap-2">
-                                    <div className="rounded-lg bg-slate-50 p-2 dark:bg-slate-800/60">
-                                        <p className="text-[10px] uppercase text-slate-500">Date</p>
-                                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">{formattedDate}</p>
+                                    <div className="rounded-lg bg-white border border-slate-100 p-2 dark:bg-slate-800/60">
+                                        <p className="text-[9px] font-bold uppercase text-slate-400">Date</p>
+                                        <p className="text-[10px] font-bold text-slate-700">{formattedDate}</p>
                                     </div>
-                                    <div className="rounded-lg bg-slate-50 p-2 dark:bg-slate-800/60">
-                                        <p className="text-[10px] uppercase text-slate-500">Time</p>
-                                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                                    <div className="rounded-lg bg-white border border-slate-100 p-2 dark:bg-slate-800/60">
+                                        <p className="text-[9px] font-bold uppercase text-slate-400">Time</p>
+                                        <p className="text-[10px] font-bold text-slate-700">
                                             {formatTime(appointment?.appointmentDetails?.scheduledTime)}
                                         </p>
                                     </div>
                                 </div>
                             </div>
-                            <Button className="w-full" variant="outline" onClick={() => (window.location.href = "/")}>
+                            <Button className="w-full font-bold text-xs h-11 uppercase tracking-wider" variant="outline" onClick={() => (window.location.href = "/")}>
                                 Back to Portal
                             </Button>
                         </div>

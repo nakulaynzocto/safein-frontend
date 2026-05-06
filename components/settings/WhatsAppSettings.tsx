@@ -130,6 +130,7 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
         watch,
         reset,
         control,
+        setValue,
         formState: { errors, isDirty },
     } = useForm<FormValues>({
         resolver: yupResolver(schema) as any,
@@ -177,11 +178,14 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
         setLocalEnabledTemplates(merged);
     }, [settings]);
 
-    const isVerified = settings?.whatsapp?.deliveryMode === 'shared' || !!settings?.whatsapp?.metaVerified || !!settings?.whatsapp?.verified;
+    const isVerified = settings?.whatsapp?.deliveryMode === 'custom' && (!!settings?.whatsapp?.metaVerified || !!settings?.whatsapp?.verified);
     const credentialsChanged =
         watch("phoneNumberId") !== (settings?.whatsapp?.phoneNumberId || "") ||
         (currentAccessToken !== MASKED_DISPLAY_VALUE && currentAccessToken !== (settings?.whatsapp?.accessToken || ""));
-    const needsVerification = deliveryMode === 'custom' && credentialsChanged && (!!currentAccessToken && currentAccessToken !== MASKED_DISPLAY_VALUE);
+    const hasValidToken = currentAccessToken !== "" && (currentAccessToken !== MASKED_DISPLAY_VALUE || !!settings?.whatsapp?.accessToken);
+    const modeChanged = deliveryMode === 'custom' && (settings?.whatsapp?.deliveryMode !== 'custom');
+
+    const needsVerification = deliveryMode === 'custom' && (credentialsChanged || modeChanged || !isVerified) && hasValidToken;
 
     const onSubmit = async (data: FormValues) => {
         if (data.deliveryMode === 'custom' && needsVerification) {
@@ -285,7 +289,7 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                         <div 
                                             className={cn("p-6 cursor-pointer border-2 rounded-2xl transition-all relative overflow-hidden", 
                                                 deliveryMode === 'shared' ? "border-[#3882a5] bg-[#3882a5]/5" : "hover:border-border bg-white shadow-sm")}
-                                            onClick={() => { reset({ ...watch(), deliveryMode: 'shared' }, { keepDirty: true }); }}
+                                            onClick={() => { setValue('deliveryMode', 'shared', { shouldDirty: true }); }}
                                         >
                                             <div className="flex items-center justify-between mb-4">
                                                 <div className={cn("p-3 rounded-xl bg-[#3882a5]/10 text-[#3882a5]")}>
@@ -302,7 +306,7 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                         <div 
                                             className={cn("p-6 cursor-pointer border-2 rounded-2xl transition-all relative overflow-hidden", 
                                                 deliveryMode === 'custom' ? "border-[#3882a5] bg-[#3882a5]/5" : "hover:border-border bg-white shadow-sm")}
-                                            onClick={() => reset({ ...watch(), deliveryMode: 'custom' }, { keepDirty: true })}
+                                            onClick={() => setValue('deliveryMode', 'custom', { shouldDirty: true })}
                                         >
                                             <div className="flex items-center justify-between mb-4">
                                                 <div className={cn("p-3 rounded-xl bg-[#3882a5]/10 text-[#3882a5]")}>
