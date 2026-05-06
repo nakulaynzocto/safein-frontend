@@ -50,6 +50,10 @@ export interface VerifyTokenResponse {
                     image?: string;
                 };
             };
+            company?: {
+                companyName: string;
+                profilePicture?: string;
+            };
             accompaniedBy?: {
                 name: string;
                 phone: string;

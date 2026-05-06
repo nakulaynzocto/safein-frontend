@@ -230,6 +230,9 @@ export function VerifyAppointment() {
                         <h2 className="mb-1 text-xl font-bold text-slate-900 dark:text-white capitalize">
                             Appointment {displayStatus}
                         </h2>
+                        <p className="text-xs font-bold text-[#3882a5] uppercase tracking-widest mb-1">
+                            {appointment.company?.companyName}
+                        </p>
                         <p className="text-sm text-slate-500 dark:text-slate-400">
                             {actionCompleted
                                 ? `The appointment has been ${displayStatus} successfully.`
@@ -282,16 +285,28 @@ export function VerifyAppointment() {
         <div className="flex min-h-screen items-center justify-center px-4 py-8 sm:py-12">
             <div className="w-full max-w-3xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 {/* Brand Logo or Header */}
-                <div className="flex flex-col items-center gap-2 text-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#3882a5] shadow-lg shadow-[#3882a5]/20">
-                        <ShieldCheck className="h-7 w-7 text-white" />
+                <div className="flex flex-col items-center gap-3 text-center">
+                    <div className="relative group">
+                        <div className="absolute -inset-1 rounded-[24px] bg-gradient-to-tr from-[#3882a5] to-[#98c7dd] opacity-20 blur group-hover:opacity-40 transition duration-500" />
+                        <Avatar className="h-20 w-20 rounded-[24px] border-4 border-white shadow-xl dark:border-slate-900 bg-white p-1">
+                            <AvatarImage 
+                                src={appointment.company?.profilePicture} 
+                                alt={appointment.company?.companyName || "Company Logo"} 
+                                className="object-contain rounded-[20px]" 
+                            />
+                            <AvatarFallback className="bg-[#3882a5] rounded-[20px] text-white">
+                                <ShieldCheck className="h-10 w-10" />
+                            </AvatarFallback>
+                        </Avatar>
                     </div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-                        SafeIn Verification
-                    </h1>
-                    <p className="max-w-md text-slate-500 dark:text-slate-400">
-                        Please review the meeting details carefully before making a decision.
-                    </p>
+                    <div className="space-y-1">
+                        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                            {appointment.company?.companyName || "Verification Request"}
+                        </h1>
+                        <p className="max-w-md text-sm font-medium text-slate-500 dark:text-slate-400">
+                            Please review the meeting details carefully before making a decision.
+                        </p>
+                    </div>
                 </div>
 
                 <Card className="overflow-hidden border-0 bg-white/70 shadow-2xl backdrop-blur-xl ring-1 ring-slate-200 dark:bg-slate-900/70 dark:ring-slate-800">
