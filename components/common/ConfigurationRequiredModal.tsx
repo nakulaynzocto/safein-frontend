@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/utils/routes";
+import { useGetSettingsQuery } from "@/store/api/settingsApi";
 
 interface ConfigurationRequiredModalProps {
     isOpen: boolean;
@@ -23,36 +24,45 @@ export function ConfigurationRequiredModal({
     onClose,
     type,
 }: ConfigurationRequiredModalProps) {
+    const { data: settings } = useGetSettingsQuery();
+    
     if (!type) return null;
+
+    const emailDisabled = settings?.notifications?.emailEnabled === false;
+    const whatsappDisabled = settings?.notifications?.whatsappEnabled === false;
+
+    const getTitle = () => {
+        if (type === "both") return "Delivery channels restricted";
+        if (type === "smtp") return "Email channel disabled";
+        if (type === "whatsapp") return "WhatsApp channel disabled";
+        return "Configuration required";
+    };
+
+    const getDescription = () => {
+        if (type === "smtp") {
+            return "Email notifications have been restricted for your workspace. Please contact your system administrator or enable this channel in settings to proceed.";
+        }
+        if (type === "whatsapp") {
+            return "WhatsApp notifications have been restricted for your workspace. Please contact your system administrator or enable this channel in settings to proceed.";
+        }
+        return "At least one delivery channel (Email or WhatsApp) must be enabled before you can proceed. Please check your workspace notification settings.";
+    };
+
+    const getPrimaryAction = () => {
+        return { label: "General Settings", href: routes.privateroute.SETTINGS_CONTROLS };
+    };
+
+    const action = getPrimaryAction();
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-[440px]">
                 <DialogHeader>
                     <DialogTitle className="text-lg">
-                        {type === "both" ? "Configure email or WhatsApp" : "Configuration required"}
+                        {getTitle()}
                     </DialogTitle>
                     <DialogDescription className="text-left text-sm leading-relaxed">
-                        {type === "smtp" && (
-                            <>
-                                Custom <strong className="text-foreground">SMTP</strong> is not configured. Email
-                                invites will not be delivered until you verify your mail server settings.
-                            </>
-                        )}
-                        {type === "whatsapp" && (
-                            <>
-                                <strong className="text-foreground">WhatsApp (Meta Cloud API)</strong> is not
-                                verified for your workspace. Mobile invites are sent via WhatsApp — complete setup
-                                first.
-                            </>
-                        )}
-                        {type === "both" && (
-                            <>
-                                At least one delivery channel must be set up before you can proceed. Configure{" "}
-                                <strong className="text-foreground">SMTP</strong> (email) and/or{" "}
-                                <strong className="text-foreground">WhatsApp</strong> (Meta Cloud API).
-                            </>
-                        )}
+                        {getDescription()}
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
@@ -64,46 +74,16 @@ export function ConfigurationRequiredModal({
                     >
                         Close
                     </Button>
-                    {type === "both" ? (
-                        <>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                asChild
-                                className="w-full sm:w-auto"
-                            >
-                                <Link href={routes.privateroute.SETTINGS_SMTP} onClick={onClose}>
-                                    SMTP settings
-                                </Link>
-                            </Button>
-                            <Button
-                                type="button"
-                                className="w-full bg-[#3882a5] text-white hover:bg-[#2d6a87] sm:w-auto"
-                                asChild
-                            >
-                                <Link href={routes.privateroute.SETTINGS_WHATSAPP} onClick={onClose}>
-                                    WhatsApp settings
-                                </Link>
-                            </Button>
-                        </>
-                    ) : (
-                        <Button
-                            type="button"
-                            asChild
-                            className="w-full bg-[#3882a5] text-white hover:bg-[#2d6a87] sm:w-auto"
-                        >
-                            <Link
-                                href={
-                                    type === "smtp"
-                                        ? routes.privateroute.SETTINGS_SMTP
-                                        : routes.privateroute.SETTINGS_WHATSAPP
-                                }
-                                onClick={onClose}
-                            >
-                                Open {type === "smtp" ? "SMTP" : "WhatsApp"} settings
-                            </Link>
-                        </Button>
-                    )}
+                    
+                    <Button
+                        type="button"
+                        asChild
+                        className="w-full bg-[#3882a5] text-white hover:bg-[#2d6a87] sm:w-auto"
+                    >
+                        <Link href={action.href} onClick={onClose}>
+                            {action.label}
+                        </Link>
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

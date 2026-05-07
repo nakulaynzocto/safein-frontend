@@ -15,8 +15,14 @@ export function useConfigurationModal() {
 
     const [configWarning, setConfigWarning] = useState<ConfigWarningType>(null);
 
-    const smtpOk = useMemo(() => Boolean(settings?.smtp?.verified), [settings]);
-    const whatsappOk = useMemo(() => Boolean(settings?.whatsapp?.verified || settings?.whatsapp?.metaVerified), [settings]);
+    const smtpOk = useMemo(() => {
+        return settings?.notifications?.emailEnabled !== false;
+    }, [settings]);
+
+    const whatsappOk = useMemo(() => {
+        return settings?.notifications?.whatsappEnabled !== false;
+    }, [settings]);
+
     const hasAnyDeliveryChannel = smtpOk || whatsappOk;
 
     const openConfigModal = useCallback((type: ConfigWarningType) => {
