@@ -106,17 +106,18 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
     return (
         <Dialog open={isOpen}>
             <DialogContent
-                className="sm:max-w-[700px] overflow-y-auto max-h-[90vh]"
+                className="sm:max-w-[700px] p-0"
                 onPointerDownOutside={(e) => e.preventDefault()}
                 onEscapeKeyDown={(e) => e.preventDefault()}
                 showCloseButton={false}
             >
-                <DialogHeader>
-                    <DialogTitle className="text-2xl text-center">Complete Company Profile</DialogTitle>
-                    <DialogDescription className="text-center">
-                        Please provide your company's contact and address details to continue to the dashboard.
-                    </DialogDescription>
-                </DialogHeader>
+                <div className="overflow-y-auto max-h-[90vh] p-6 sm:p-8">
+                    <DialogHeader className="mb-6">
+                        <DialogTitle className="text-2xl text-center">Complete Company Profile</DialogTitle>
+                        <DialogDescription className="text-center">
+                            Please provide your company's contact and address details to continue to the dashboard.
+                        </DialogDescription>
+                    </DialogHeader>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -209,6 +210,7 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                         )}
                     </Button>
                 </form>
+                </div>
             </DialogContent>
         </Dialog>
     );

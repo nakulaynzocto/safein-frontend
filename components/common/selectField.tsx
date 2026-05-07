@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, useId, useMemo, useState, useEffect, useCallback, type ReactNode } from "react";
-import Select, { type GroupBase, type StylesConfig, type SingleValue } from "react-select";
+import Select, { components, type GroupBase, type StylesConfig, type SingleValue, type MenuProps } from "react-select";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/utils/helpers";
@@ -50,6 +50,14 @@ export interface SelectFieldProps {
 
 const MENU_PORTAL_Z_INDEX = 9999;
 
+const Menu = (props: MenuProps<RSOption, false, GroupBase<RSOption>>) => {
+    return (
+        <components.Menu {...props}>
+            <div onWheel={(e) => e.stopPropagation()}>{props.children}</div>
+        </components.Menu>
+    );
+};
+
 const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     {
         className,
@@ -85,10 +93,8 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
 
     // Track if component is mounted (for SSR safety)
     const [isMounted, setIsMounted] = useState(false);
-    const [useMenuPortal, setUseMenuPortal] = useState(false);
     useEffect(() => {
         setIsMounted(true);
-        setUseMenuPortal(true);
     }, []);
 
     // Convert options to react-select format
@@ -217,10 +223,13 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 ...base,
                 padding: 4,
                 maxHeight: typeof window !== 'undefined' && window.innerHeight < 600 ? 150 : 250,
+                WebkitOverflowScrolling: "touch",
+                overscrollBehavior: "contain",
             }),
             menuPortal: (base) => ({
                 ...base,
                 zIndex: menuZIndex ?? MENU_PORTAL_Z_INDEX,
+                pointerEvents: "auto",
             }),
             option: (base, { isDisabled: optDisabled, isFocused, isSelected }) => ({
                 ...base,
@@ -317,7 +326,9 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 tabSelectsValue={true}
                 escapeClearsValue={false}
                 backspaceRemovesValue={true}
-                menuShouldScrollIntoView={false}
+                menuShouldScrollIntoView={true}
+                captureMenuScroll={false}
+                components={{ Menu }}
                 formatOptionLabel={formatOptionLabel ? (opt) => formatOptionLabel(opt.data) : defaultFormatOptionLabel}
                 noOptionsMessage={noOptionsMessage}
             />

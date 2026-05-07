@@ -270,6 +270,8 @@ export function PhoneInputField({
             ...base,
             padding: 4,
             maxHeight: 250,
+            WebkitOverflowScrolling: "touch",
+            overscrollBehavior: "contain",
         }),
         menuPortal: (base) => ({
             ...base,
@@ -345,6 +347,7 @@ export function PhoneInputField({
                         menuPortalTarget={isMounted ? document.body : undefined}
                         menuPosition="fixed"
                         menuPlacement="auto"
+                        captureMenuScroll={false}
                         classNamePrefix="phone-rs"
                     />
                 </div>
