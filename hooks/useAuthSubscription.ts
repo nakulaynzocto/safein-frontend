@@ -30,15 +30,23 @@ export function useAuthSubscription() {
         return () => clearTimeout(t);
     }, [dispatch]);
 
-    // Fetch active subscription (only if authenticated and user exists)
+    // Fetch active subscription
+    // For employees, we MUST fetch the subscription of their Admin (createdBy)
+    const subscriptionOwnerId = useMemo(() => {
+        if (!user) return "";
+        const roles = user.roles || (user.role ? [user.role] : []);
+        const isEmployee = roles.includes("employee");
+        return isEmployee ? user.createdBy : user.id;
+    }, [user]);
+
     const {
         data: activeSubscriptionData,
         isLoading: isSubscriptionLoading,
         isFetching: isSubscriptionFetching,
         refetch: refetchSubscription,
         error: subscriptionError,
-    } = useGetUserActiveSubscriptionQuery(user?.id ?? "", {
-        skip: !isAuthenticated || !user?.id,
+    } = useGetUserActiveSubscriptionQuery(subscriptionOwnerId ?? "", {
+        skip: !isAuthenticated || !subscriptionOwnerId,
         refetchOnMountOrArgChange: true,
         refetchOnFocus: true,
     });

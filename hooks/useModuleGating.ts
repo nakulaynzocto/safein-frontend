@@ -29,9 +29,10 @@ export function useModuleGating(requiredModule: string, redirectTo: string = rou
         }
 
         // Feature gating logic:
-        // 1. Employee restriction (most settings pages are admin only)
-        // 2. Subscription module check (strict boolean check)
-        const hasAccess = !isEmployee && !!modules?.[requiredModule as keyof typeof modules];
+        // Check if the required module is enabled in the subscription.
+        // We removed the hardcoded !isEmployee check to allow employees to access 
+        // features like QR Check-in that are enabled for their organization.
+        const hasAccess = !!modules?.[requiredModule as keyof typeof modules];
 
         if (!hasAccess) {
             // Only redirect if authentication is confirmed and modules data is loaded
