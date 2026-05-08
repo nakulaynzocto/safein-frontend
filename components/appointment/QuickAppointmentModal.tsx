@@ -114,7 +114,7 @@ export function QuickAppointmentModal({
         openConfigModal,
         closeConfigModal,
         smtpOk,
-        whatsappOk,
+        smsOk,
         hasAnyDeliveryChannel,
         settingsReady,
         settingsFetching,
@@ -525,12 +525,12 @@ export function QuickAppointmentModal({
                     </span>
                 </li>
             )}
-            {whatsappOk && (
+            {smsOk && (
                 <li className="flex gap-2 rounded-lg border border-border/80 bg-muted/30 px-3 py-2">
                     <Phone className="mt-0.5 h-4 w-4 shrink-0 text-[#3882a5]" aria-hidden />
                     <span>
-                        <span className="font-semibold text-foreground">WhatsApp</span> — Meta Cloud API is verified. The
-                        visitor entry code is sent to the <strong className="text-foreground">WhatsApp</strong> number
+                        <span className="font-semibold text-foreground">SMS</span> — SMS channel is enabled. The
+                        visitor entry code is sent as a text message to the <strong className="text-foreground">phone</strong> number
                         you entered.
                     </span>
                 </li>
@@ -573,14 +573,14 @@ export function QuickAppointmentModal({
                             <strong className="text-foreground">Confirm &amp; book</strong> to continue.
                         </p>
                         {deliverySummary}
-                        {smtpOk && !whatsappOk && (
+                        {smtpOk && !smsOk && (
                             <p className="rounded-lg border border-amber-200/80 bg-amber-50 px-3 py-2 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
-                                <strong className="font-semibold">Note:</strong> The entry code is normally sent on{" "}
-                                <strong>WhatsApp</strong>. WhatsApp is not verified — configure it in Settings for reliable
+                                <strong className="font-semibold">Note:</strong> The entry code is normally sent via{" "}
+                                <strong>SMS</strong>. The SMS channel is currently disabled — enable it in Settings for reliable
                                 delivery to the visitor&apos;s phone.
                             </p>
                         )}
-                        {!smtpOk && whatsappOk && (
+                        {!smtpOk && smsOk && (
                             <p className="rounded-lg border border-border/80 bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
                                 Custom <strong className="text-foreground">SMTP</strong> is not configured. Email-based
                                 alerts from your domain may be limited until SMTP is set up.

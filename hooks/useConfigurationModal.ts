@@ -3,7 +3,7 @@ import { useGetSettingsQuery } from "@/store/api/settingsApi";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 
-export type ConfigWarningType = "smtp" | "whatsapp" | "both" | null;
+export type ConfigWarningType = "smtp" | "sms" | "both" | null;
 
 export function useConfigurationModal() {
     const { user } = useAppSelector((state) => state.auth);
@@ -19,11 +19,11 @@ export function useConfigurationModal() {
         return settings?.notifications?.emailEnabled !== false;
     }, [settings]);
 
-    const whatsappOk = useMemo(() => {
-        return settings?.notifications?.whatsappEnabled !== false;
+    const smsOk = useMemo(() => {
+        return settings?.notifications?.smsEnabled !== false;
     }, [settings]);
 
-    const hasAnyDeliveryChannel = smtpOk || whatsappOk;
+    const hasAnyDeliveryChannel = smtpOk || smsOk;
 
     const openConfigModal = useCallback((type: ConfigWarningType) => {
         setConfigWarning(type);
@@ -45,12 +45,12 @@ export function useConfigurationModal() {
             openConfigModal("smtp");
             return false;
         }
-        if (channel === "phone" && !whatsappOk) {
-            openConfigModal("whatsapp");
+        if (channel === "phone" && !smsOk) {
+            openConfigModal("sms");
             return false;
         }
         return true;
-    }, [isEmployee, settingsReady, hasAnyDeliveryChannel, smtpOk, whatsappOk, openConfigModal]);
+    }, [isEmployee, settingsReady, hasAnyDeliveryChannel, smtpOk, smsOk, openConfigModal]);
 
     return {
         configWarning,
@@ -58,7 +58,7 @@ export function useConfigurationModal() {
         closeConfigModal,
         isOpen: configWarning !== null,
         smtpOk,
-        whatsappOk,
+        smsOk,
         hasAnyDeliveryChannel,
         settingsReady,
         settingsFetching,

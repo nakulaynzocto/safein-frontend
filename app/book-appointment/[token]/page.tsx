@@ -225,7 +225,7 @@ export default function BookAppointmentPage() {
                                     <div className="p-8 bg-[#3882a5]/5 rounded-[28px] border border-[#3882a5]/10 space-y-6 animate-in slide-in-from-top-4 duration-500">
                                         <div className="text-center space-y-1">
                                             <h3 className="text-lg font-bold text-[#3882a5]">Enter Secure Code</h3>
-                                            <p className="text-xs text-slate-500">Check your WhatsApp for the 6-digit code</p>
+                                            <p className="text-xs text-slate-500">Check your phone for the 6-digit code</p>
                                         </div>
                                         <Controller name="otp" control={verifyControl} render={({ field }) => <OtpDigitBoxes value={field.value} onChange={field.onChange} />} />
                                         <Button type="submit" variant="primary" size="lg" className="w-full h-14 rounded-2xl font-bold" disabled={isVerifying}>Verify Identity & Continue</Button>

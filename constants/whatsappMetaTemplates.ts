@@ -123,4 +123,4 @@ export const WHATSAPP_META_TEMPLATES: WhatsAppMetaTemplateRow[] = [
   },
 ];
 
-export const WHATSAPP_PLAIN_TEXT_NOTE = "QR visitor check-in OTP is sent as a plain text message (not a named template).";
+export const WHATSAPP_PLAIN_TEXT_NOTE = "QR visitor check-in OTP is sent as a plain text SMS message.";

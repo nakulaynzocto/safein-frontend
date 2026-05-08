@@ -705,7 +705,7 @@ function AppointmentLinksContent() {
                     isLoading={isVerifying}
                     length={6}
                     title="Verify VIP Booking"
-                    description="Enter the 6-digit code sent to the visitor's WhatsApp number to authorize this priority entry."
+                    description="Enter the 6-digit code sent to the visitor's phone number to authorize this priority entry."
                 />
 
                 {/* Note Viewer Modal */}

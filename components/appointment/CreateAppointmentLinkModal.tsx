@@ -139,7 +139,7 @@ export function CreateAppointmentLinkModal({
         configWarning,
         openConfigModal,
         closeConfigModal,
-        whatsappOk,
+        smsOk,
         settingsReady,
         checkConfiguration,
     } = useConfigurationModal();
@@ -297,7 +297,7 @@ export function CreateAppointmentLinkModal({
             openUpgradeModal,
             inviteChannel,
             settingsReady,
-            whatsappOk,
+            smsOk,
             checkConfiguration,
         ],
     );
@@ -367,7 +367,7 @@ export function CreateAppointmentLinkModal({
                     Create Appointment Link
                 </h2>
                 <p className="text-muted-foreground text-sm">
-                    Send a secure booking link by email (default) or WhatsApp to the visitor&apos;s mobile. Expiry is
+                    Send a secure booking link by email (default) or SMS to the visitor&apos;s mobile. Expiry is
                     based on your selected duration.
                 </p>
             </div>
@@ -497,7 +497,7 @@ export function CreateAppointmentLinkModal({
                                         />
                                     )}
                                     <p className="text-[11px] text-muted-foreground">
-                                        The link is shared on WhatsApp when it is enabled for your workspace.
+                                        The link is shared on SMS when it is enabled for your workspace.
                                     </p>
                                 </div>
                             )}

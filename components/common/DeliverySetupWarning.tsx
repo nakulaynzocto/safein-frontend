@@ -45,10 +45,9 @@ function CompactBar({ children, className }: { children: ReactNode; className?: 
  * Single compact row on all breakpoints.
  */
 export function DeliverySetupWarning({ className }: DeliverySetupWarningProps) {
-    return null;
     const { 
         smtpOk, 
-        whatsappOk, 
+        smsOk, 
         settingsReady, 
         hasAnyDeliveryChannel 
     } = useConfigurationModal();
@@ -73,9 +72,9 @@ export function DeliverySetupWarning({ className }: DeliverySetupWarningProps) {
     if (!settingsReady) return null;
 
     const smtpMissing = !smtpOk;
-    const whatsappMissing = !whatsappOk;
+    const smsMissing = !smsOk;
 
-    if (!smtpMissing && !whatsappMissing && !mobileMissing) return null;
+    if (!smtpMissing && !smsMissing && !mobileMissing) return null;
 
     return (
         <CompactBar className={className}>
@@ -85,17 +84,17 @@ export function DeliverySetupWarning({ className }: DeliverySetupWarningProps) {
                     Configure SMTP
                 </Link>
             )}
-            {(smtpMissing && (whatsappMissing || mobileMissing)) && (
+            {(smtpMissing && (smsMissing || mobileMissing)) && (
                 <span className="shrink-0 text-amber-600/80 dark:text-amber-400/80" aria-hidden>
                     ·
                 </span>
             )}
-            {whatsappMissing && (
-                <Link href={routes.privateroute.SETTINGS_WHATSAPP} className={cn(linkClass, "shrink-0")}>
-                    Verify WhatsApp
+            {smsMissing && (
+                <Link href={routes.privateroute.SETTINGS_CONTROLS} className={cn(linkClass, "shrink-0")}>
+                    Enable SMS
                 </Link>
             )}
-            {(whatsappMissing && mobileMissing) && (
+            {(smsMissing && mobileMissing) && (
                 <span className="shrink-0 text-amber-600/80 dark:text-amber-400/80" aria-hidden>
                     ·
                 </span>

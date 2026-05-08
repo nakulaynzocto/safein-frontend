@@ -16,7 +16,7 @@ import { useGetSettingsQuery } from "@/store/api/settingsApi";
 interface ConfigurationRequiredModalProps {
     isOpen: boolean;
     onClose: () => void;
-    type: "smtp" | "whatsapp" | "both" | null;
+    type: "smtp" | "sms" | "both" | null;
 }
 
 export function ConfigurationRequiredModal({
@@ -29,12 +29,12 @@ export function ConfigurationRequiredModal({
     if (!type) return null;
 
     const emailDisabled = settings?.notifications?.emailEnabled === false;
-    const whatsappDisabled = settings?.notifications?.whatsappEnabled === false;
+    const smsDisabled = settings?.notifications?.smsEnabled === false;
 
     const getTitle = () => {
         if (type === "both") return "Delivery channels restricted";
         if (type === "smtp") return "Email channel disabled";
-        if (type === "whatsapp") return "WhatsApp channel disabled";
+        if (type === "sms") return "SMS channel disabled";
         return "Configuration required";
     };
 
@@ -42,10 +42,10 @@ export function ConfigurationRequiredModal({
         if (type === "smtp") {
             return "Email notifications have been restricted for your workspace. Please contact your system administrator or enable this channel in settings to proceed.";
         }
-        if (type === "whatsapp") {
-            return "WhatsApp notifications have been restricted for your workspace. Please contact your system administrator or enable this channel in settings to proceed.";
+        if (type === "sms") {
+            return "SMS notifications have been restricted for your workspace. Please contact your system administrator or enable this channel in settings to proceed.";
         }
-        return "At least one delivery channel (Email or WhatsApp) must be enabled before you can proceed. Please check your workspace notification settings.";
+        return "At least one delivery channel (Email or SMS) must be enabled before you can proceed. Please check your workspace notification settings.";
     };
 
     const getPrimaryAction = () => {
