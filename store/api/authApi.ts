@@ -32,6 +32,7 @@ export interface User {
         twitter?: string;
         website?: string;
     };
+    createdBy?: string;
 }
 
 export interface LoginRequest {

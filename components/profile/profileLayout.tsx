@@ -93,7 +93,7 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
         },
         {
             id: "controls" as const,
-            label: "Company Controls",
+            label: "Organization Settings",
             icon: ShieldCheck,
             roles: ["admin"],
             href: routes.privateroute.SETTINGS_CONTROLS,

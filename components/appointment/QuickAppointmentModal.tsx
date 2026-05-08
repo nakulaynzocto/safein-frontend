@@ -271,7 +271,8 @@ export function QuickAppointmentModal({
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-1">
                 <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-4">
                     {/* Visitor photo — tight column so gap to fields stays small */}
-                    <div className="flex w-full max-w-[200px] shrink-0 flex-col space-y-3">
+                    {/* Visitor photo - Commented out as requested */}
+                    {/* <div className="flex w-full max-w-[200px] shrink-0 flex-col space-y-3">
                         <Label className="flex items-center gap-2 text-sm font-semibold text-foreground">
                             <Camera className="h-4 w-4 shrink-0 text-accent" />
                             Visitor Photo{" "}
@@ -296,7 +297,7 @@ export function QuickAppointmentModal({
                         {errors.visitorPhoto && (
                             <p className="text-xs font-medium text-red-500">{errors.visitorPhoto.message as string}</p>
                         )}
-                    </div>
+                    </div> */}
 
                     <div className="min-w-0 flex-1 space-y-8">
                         <div className="space-y-4">

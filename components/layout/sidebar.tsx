@@ -109,12 +109,15 @@ const baseNavigation: Array<{
 export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () => void; isMobile?: boolean }) => {
     const pathname = usePathname();
     const { user } = useAppSelector((state) => state.auth);
-    const { data: subscriptionData } = useGetUserActiveSubscriptionQuery(user?.id as string, { skip: !user?.id });
-    const modules = subscriptionData?.data?.modules;
-
-    // Determine user roles
+    
+    // Determine user roles and type first
     const userRoles = user?.roles || (user?.role ? [user.role] : []);
     const isEmployee = checkIsEmployee(user);
+
+    // For employees, we need to fetch the subscription of their Admin (createdBy)
+    const subscriptionOwnerId = isEmployee ? user?.createdBy : user?.id;
+    const { data: subscriptionData } = useGetUserActiveSubscriptionQuery(subscriptionOwnerId as string, { skip: !subscriptionOwnerId });
+    const modules = subscriptionData?.data?.modules;
 
     // Filter navigation items based on role, subscription modules, and set correct href
     const navigation = baseNavigation

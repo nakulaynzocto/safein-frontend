@@ -186,7 +186,7 @@ export function CompanyControlSettings() {
                 {() => (
                     <div className="mx-auto w-full max-w-full">
                         <SettingsHeader
-                            title="Company Controls"
+                            title="Organization Settings"
                             description="Manage platform features and communication preferences tailored for your organization's workflow."
                             icon={ShieldCheck}
                         />
