@@ -184,7 +184,7 @@ export function VerifyAppointment() {
 
     const currentStatus = completedStatus || appointment.status;
     const isProcessed = actionCompleted || ["approved", "rejected"].includes(currentStatus);
-    const shouldShowExpiredState = isUsedLink && !isProcessed && (isExpiredByTime || currentStatus === "pending");
+    const shouldShowExpiredState = isUsedLink && !isProcessed;
 
     if (shouldShowExpiredState) {
         return (
@@ -194,9 +194,9 @@ export function VerifyAppointment() {
                         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 p-4 dark:bg-amber-900/20">
                             <XCircle className="h-10 w-10 text-amber-600" />
                         </div>
-                        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Link Expired</h2>
+                        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Link Inactive</h2>
                         <p className="text-slate-500 dark:text-slate-400">
-                            This verification link is no longer active.
+                            This verification link has already been used or has expired.
                         </p>
                         <Button className="mt-8" variant="outline" onClick={() => (window.location.href = "/")}>
                             Go to Homepage
