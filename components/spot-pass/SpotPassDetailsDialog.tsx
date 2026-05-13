@@ -64,11 +64,11 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
                     {/* Header Info */}
                     <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-2">
                         <div className="text-center sm:text-left">
-                            <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">{formatName(spotPass.name)}</h3>
+                            <h3 className="text-xl font-semibold text-gray-800 dark:text-white tracking-tight">{formatName(spotPass.name)}</h3>
                             <div className="mt-0.5 flex items-center justify-center sm:justify-start gap-2">
                                 <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-md border border-gray-200/50">
                                     <Phone className="h-2.5 w-2.5 text-[#3882a5]" />
-                                    <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">{spotPass.phone}</span>
+                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{spotPass.phone}</span>
                                 </div>
                                 <div className={`flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-[8px] uppercase tracking-wider ${
                                     spotPass.status === 'checked-in' 
@@ -86,15 +86,15 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {/* Info Block 1 */}
                         <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 space-y-2 shadow-sm">
-                            <h4 className="text-[9px] font-black uppercase tracking-[0.15em] text-[#3882a5]">Visitor Info</h4>
+                            <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#3882a5]">Visitor Info</h4>
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
                                     <div className="h-7 w-7 shrink-0 flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 text-[#3882a5]">
                                         <User className="h-3.5 w-3.5" />
                                     </div>
                                     <div>
-                                        <p className="text-[8px] text-gray-400 font-black uppercase">Gender</p>
-                                        <p className="text-[11px] font-bold capitalize">{spotPass.gender}</p>
+                                        <p className="text-[8px] text-gray-400 font-semibold uppercase">Gender</p>
+                                        <p className="text-xs font-bold capitalize">{spotPass.gender}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -102,8 +102,8 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
                                         <MapPin className="h-3.5 w-3.5" />
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-[8px] text-gray-400 font-black uppercase">Address</p>
-                                        <p className="text-[11px] font-bold truncate">{spotPass.address || "N/A"}</p>
+                                        <p className="text-[8px] text-gray-400 font-semibold uppercase">Address</p>
+                                        <p className="text-xs font-bold truncate">{spotPass.address || "N/A"}</p>
                                     </div>
                                 </div>
                             </div>
@@ -111,20 +111,20 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
 
                         {/* Info Block 2 */}
                         <div className="p-3 rounded-xl bg-[#074463]/[0.02] dark:bg-gray-900 border border-gray-100 dark:border-gray-800 space-y-2 shadow-sm">
-                            <h4 className="text-[9px] font-black uppercase tracking-[0.15em] text-[#3882a5]">Log</h4>
+                            <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#3882a5]">Log</h4>
                             <div className="space-y-3">
                                 <div className="relative pl-4 border-l-2 border-emerald-500/20 py-0.5">
                                     <div className="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.5)]" />
-                                    <p className="text-[8px] text-gray-400 font-black uppercase mb-0.5">Check-in</p>
-                                    <p className="text-[10px] font-black text-gray-900 dark:text-white leading-tight">
+                                    <p className="text-[8px] text-gray-400 font-semibold uppercase mb-0.5">Check-in</p>
+                                    <p className="text-xs font-semibold text-gray-800 dark:text-white leading-tight">
                                         {format(new Date(spotPass.checkInTime), "dd MMM")} · <span className="text-emerald-600 font-bold">{format(new Date(spotPass.checkInTime), "hh:mm a")}</span>
                                     </p>
                                 </div>
                                 {spotPass.checkOutTime && (
                                     <div className="relative pl-4 border-l-2 border-blue-500/20 py-0.5">
                                         <div className="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_4px_rgba(59,130,246,0.5)]" />
-                                        <p className="text-[8px] text-gray-400 font-black uppercase mb-0.5">Check-out</p>
-                                        <p className="text-[10px] font-black text-gray-900 dark:text-white leading-tight">
+                                        <p className="text-[8px] text-gray-400 font-semibold uppercase mb-0.5">Check-out</p>
+                                        <p className="text-xs font-semibold text-gray-800 dark:text-white leading-tight">
                                             {format(new Date(spotPass.checkOutTime), "dd MMM")} · <span className="text-blue-600 font-bold">{format(new Date(spotPass.checkOutTime), "hh:mm a")}</span>
                                         </p>
                                     </div>
@@ -135,11 +135,11 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
                         {/* Full Width Row: Notes */}
                         {spotPass.notes && (
                             <div className="md:col-span-2 p-3 rounded-xl bg-[#3882a5]/5 border border-[#3882a5]/10 space-y-1">
-                                <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.15em] text-[#3882a5]">
+                                <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-[#3882a5]">
                                     <FileText className="h-3 w-3" />
                                     Notes
                                 </div>
-                                <p className="text-[11px] font-medium italic opacity-80 truncate">
+                                <p className="text-xs font-medium italic opacity-80 truncate">
                                     "{spotPass.notes}"
                                 </p>
                             </div>
@@ -151,7 +151,7 @@ export function SpotPassDetailsDialog({ spotPass, open, onClose }: SpotPassDetai
                         <Button 
                             onClick={onClose} 
                             variant="primary" 
-                            className="px-8 h-9 text-[10px] font-black text-white rounded-xl shadow-lg transition-all active:scale-95 hover:scale-105"
+                            className="px-8 h-9 text-xs font-semibold text-white rounded-xl shadow-lg transition-all active:scale-95 hover:scale-105"
                         >
                             Got it
                         </Button>

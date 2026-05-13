@@ -131,7 +131,7 @@ export function VisitorList() {
                                 {formatName(visitor.name)}
                             </p>
                             {visitor.blacklisted && (
-                                <Badge variant="destructive" className="mt-0.5 text-[9px] px-1.5 py-0 h-4">
+                                <Badge variant="destructive" className="mt-0.5 text-xs px-1.5 py-0 h-4">
                                     Blacklisted
                                 </Badge>
                             )}
@@ -178,7 +178,7 @@ export function VisitorList() {
                 header: "ID Proof",
                 render: (visitor: Visitor) => (
                     visitor.idProof?.type ? (
-                        <Badge variant="outline" className="text-[10px]">
+                        <Badge variant="outline" className="text-xs">
                             {visitor.idProof.type.replace("_", " ").toUpperCase()}
                         </Badge>
                     ) : <span className="text-xs text-muted-foreground">—</span>

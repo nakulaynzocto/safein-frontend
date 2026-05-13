@@ -93,7 +93,7 @@ export function AppointmentLinksSubNav() {
 
                                 <span
                                     className={cn(
-                                        "max-w-[100px] truncate px-0.5 text-center text-[10px] font-medium leading-tight tracking-tight sm:max-w-none sm:text-[11px]",
+                                        "max-w-[100px] truncate px-0.5 text-center text-xs font-medium leading-tight tracking-tight sm:max-w-none sm:text-xs",
                                         active ? "opacity-100" : "opacity-60"
                                     )}
                                 >

@@ -265,7 +265,7 @@ export default function QrCheckinSettingsPage() {
                                 Download
                             </Button>
                         </div>
-                        <p className="text-[10px] text-muted-foreground italic">High-resolution PNG for printing and display</p>
+                        <p className="text-xs text-muted-foreground italic">High-resolution PNG for printing and display</p>
                     </CardContent>
                 </Card>
 
@@ -353,7 +353,7 @@ export default function QrCheckinSettingsPage() {
                                                 className="h-11 rounded-xl border-2 focus-visible:ring-[#3882a5]/20"
                                                 autoComplete="off"
                                             />
-                                            <p className="text-[11px] text-muted-foreground italic">
+                                            <p className="text-xs text-muted-foreground italic">
                                                 Characters allowed: a-z, 0-9, and hyphens.
                                             </p>
                                         </div>

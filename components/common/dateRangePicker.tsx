@@ -229,7 +229,7 @@ export default function DateRangePicker({
 
                             {/* Footer */}
                             <div className="flex items-center justify-between gap-4 border-t border-border p-3 mt-1 md:mt-3">
-                                <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-1 max-w-[150px]">
+                                <p className="text-xs sm:text-xs text-muted-foreground line-clamp-1 max-w-[150px]">
                                     {date?.from && date?.to
                                         ? `${format(date.from, "dd/MM/yy")} - ${format(date.to, "dd/MM/yy")}`
                                         : "Select range"}

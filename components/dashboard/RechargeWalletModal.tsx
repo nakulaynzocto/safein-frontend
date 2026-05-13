@@ -123,15 +123,15 @@ export function RechargeWalletModal({ isOpen, onClose, currentBalance, creditRat
                             <Wallet className="size-4" />
                             Recharge Voice Wallet
                         </DialogTitle>
-                        <DialogDescription className="text-white/80 text-[10px]">
+                        <DialogDescription className="text-white/80 text-xs">
                             Add credits for automated voice notifications.
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="mt-4 flex items-center justify-between bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/20">
                         <div className="space-y-0">
-                            <p className="text-[9px] uppercase tracking-wider font-bold text-white/60">Current Balance</p>
-                            <p className="text-xl font-black tabular-nums">{currentBalance.toLocaleString()}</p>
+                            <p className="text-xs uppercase tracking-wider font-bold text-white/60">Current Balance</p>
+                            <p className="text-xl font-semibold tabular-nums">{currentBalance.toLocaleString()}</p>
                         </div>
                         <div className="size-8 rounded-lg bg-white/20 flex items-center justify-center">
                             <Zap className="size-5 fill-white" />
@@ -161,7 +161,7 @@ export function RechargeWalletModal({ isOpen, onClose, currentBalance, creditRat
                                     type="button"
                                     onClick={() => setAmount(preset.toString())}
                                     className={cn(
-                                        "py-1.5 rounded-lg text-[10px] font-bold transition-all border",
+                                        "py-1.5 rounded-lg text-xs font-bold transition-all border",
                                         numericAmount === preset 
                                             ? "bg-[#3882a5] border-[#3882a5] text-white shadow-md shadow-[#3882a5]/20" 
                                             : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-[#3882a5] hover:text-[#3882a5]"
@@ -176,14 +176,14 @@ export function RechargeWalletModal({ isOpen, onClose, currentBalance, creditRat
                             <div className="rounded-xl bg-[#3882a5]/5 dark:bg-[#3882a5]/10 border border-[#3882a5]/10 p-3 animate-in fade-in zoom-in duration-300">
                                 <div className="flex items-center justify-between">
                                     <div className="flex flex-col">
-                                        <span className="text-[9px] font-bold text-[#3882a5]/60 uppercase tracking-widest">You will receive</span>
+                                        <span className="text-xs font-bold text-[#3882a5]/60 uppercase tracking-widest">You will receive</span>
                                         <div className="flex items-center gap-1.5 mt-0.5 text-[#3882a5]">
                                             <Zap className="size-3.5 fill-current" />
-                                            <span className="text-lg font-black">{creditsToReceive.toLocaleString()} Credits</span>
+                                            <span className="text-lg font-semibold">{creditsToReceive.toLocaleString()} Credits</span>
                                         </div>
                                     </div>
                                     <div className="bg-white dark:bg-slate-950 px-2.5 py-0.5 rounded-full border border-[#3882a5]/10 shadow-sm">
-                                        <span className="text-[9px] font-bold text-[#3882a5]">Rate: ₹{safeCreditRate} / Credit</span>
+                                        <span className="text-xs font-bold text-[#3882a5]">Rate: ₹{safeCreditRate} / Credit</span>
                                     </div>
                                 </div>
                             </div>
@@ -209,7 +209,7 @@ export function RechargeWalletModal({ isOpen, onClose, currentBalance, creditRat
                                 </>
                             )}
                         </Button>
-                        <p className="text-center text-[9px] text-slate-400">
+                        <p className="text-center text-xs text-slate-400">
                             Secure payment via Razorpay.
                         </p>
                     </div>

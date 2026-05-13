@@ -67,12 +67,12 @@ export function CreditBalancePill({ forceShow = false }: { forceShow?: boolean }
                                 ) : (
                                     <span className={cn(
                                         "text-[14px] font-bold tabular-nums tracking-tight transition-colors duration-300",
-                                        isLow ? "text-amber-600 dark:text-amber-500" : "text-slate-900 dark:text-slate-100"
+                                        isLow ? "text-amber-600 dark:text-amber-500" : "text-slate-800 dark:text-slate-100"
                                     )}>
                                         {balance.toLocaleString()}
                                     </span>
                                 )}
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hidden xs:block">
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest hidden xs:block">
                                     Credits
                                 </span>
                             </div>
@@ -94,26 +94,26 @@ export function CreditBalancePill({ forceShow = false }: { forceShow?: boolean }
                                     <Zap className="size-4 fill-current" />
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">Communication Credits</h4>
-                                    <p className="text-[10px] text-slate-500">Wallet balance for notifications</p>
+                                    <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100">Communication Credits</h4>
+                                    <p className="text-xs text-slate-500">Wallet balance for notifications</p>
                                 </div>
                             </div>
                             
                             <div className="space-y-0.5">
                                 {modules?.enableVoice && (
-                                    <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
+                                    <div className="flex justify-between text-xs py-1.5 border-t border-slate-100 dark:border-slate-900">
                                         <span className="text-slate-500">Cost per call</span>
                                         <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.callCostPerAttempt || 5} credits</span>
                                     </div>
                                 )}
                                 {modules?.enableSms && (
-                                    <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
+                                    <div className="flex justify-between text-xs py-1.5 border-t border-slate-100 dark:border-slate-900">
                                         <span className="text-slate-500">Cost per message</span>
                                         <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.smsCostPerMessage || 1} credits</span>
                                     </div>
                                 )}
                                 {modules?.enableWhatsApp && (
-                                    <div className="flex justify-between text-[11px] py-1.5 border-t border-slate-100 dark:border-slate-900">
+                                    <div className="flex justify-between text-xs py-1.5 border-t border-slate-100 dark:border-slate-900">
                                         <span className="text-slate-500">Cost per whatsapp</span>
                                         <span className="font-medium text-slate-700 dark:text-slate-300 text-right">{walletData?.whatsappCostPerMessage || 1.5} credits</span>
                                     </div>
@@ -125,7 +125,7 @@ export function CreditBalancePill({ forceShow = false }: { forceShow?: boolean }
                                 onClick={() => {
                                     setIsRechargeOpen(true);
                                 }}
-                                className="w-full mt-3 py-2 px-4 bg-[#3882a5] hover:bg-[#2d6a88] text-white text-[11px] font-bold rounded-lg transition-colors shadow-lg shadow-[#3882a5]/20 active:scale-95"
+                                className="w-full mt-3 py-2 px-4 bg-[#3882a5] hover:bg-[#2d6a88] text-white text-xs font-bold rounded-lg transition-colors shadow-lg shadow-[#3882a5]/20 active:scale-95"
                             >
                                 Recharge Wallet
                             </button>

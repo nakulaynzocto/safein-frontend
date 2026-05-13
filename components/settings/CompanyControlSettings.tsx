@@ -203,7 +203,7 @@ export function CompanyControlSettings() {
                                                     <Settings2 size={24} />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-bold text-gray-900 text-lg">Feature Management</h3>
+                                                    <h3 className="font-bold text-gray-800 text-lg">Feature Management</h3>
                                                     <p className="text-xs text-gray-500">Enable or disable core system behaviors</p>
                                                 </div>
                                             </div>
@@ -227,7 +227,7 @@ export function CompanyControlSettings() {
                                                                 </div>
                                                                 <div>
                                                                     <h4 className="font-bold text-gray-800 text-sm">{item.title}</h4>
-                                                                    <p className="text-[11px] text-gray-500 max-w-md">{item.description}</p>
+                                                                    <p className="text-xs text-gray-500 max-w-md">{item.description}</p>
                                                                 </div>
                                                             </div>
                                                             <BrandSwitch 
@@ -253,7 +253,7 @@ export function CompanyControlSettings() {
                                                         <Activity size={24} />
                                                     </div>
                                                     <div>
-                                                        <h3 className="font-bold text-gray-900 text-lg">Communication Channels</h3>
+                                                        <h3 className="font-bold text-gray-800 text-lg">Communication Channels</h3>
                                                         <p className="text-xs text-gray-500">Manage master toggles for all notification types</p>
                                                     </div>
                                                 </div>
@@ -277,7 +277,7 @@ export function CompanyControlSettings() {
                                                                     </div>
                                                                     <div>
                                                                         <h4 className="font-bold text-gray-800 text-sm">{item.title}</h4>
-                                                                        <p className="text-[11px] text-gray-500 leading-tight">{item.description}</p>
+                                                                        <p className="text-xs text-gray-500 leading-tight">{item.description}</p>
                                                                     </div>
                                                                 </div>
                                                                 <BrandSwitch 

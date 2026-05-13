@@ -275,7 +275,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 {option.image ? (
                     <AvatarImage src={option.image} alt={option.label} className="object-cover" />
                 ) : null}
-                <AvatarFallback className="text-[10px] font-bold bg-slate-100 text-slate-600 flex items-center justify-center">
+                <AvatarFallback className="text-xs font-bold bg-slate-100 text-slate-600 flex items-center justify-center">
                     {getInitials(option.label)}
                 </AvatarFallback>
             </Avatar>
@@ -287,12 +287,12 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         <div className={cn("space-y-1.5 relative", error ? "z-20" : "z-10", className)}>
             {label && (
                 <div className="flex items-center justify-between">
-                    <label htmlFor={controlId} className="text-[11px] text-muted-foreground uppercase font-bold tracking-[0.1em]">
+                    <label htmlFor={controlId} className="text-xs text-muted-foreground uppercase font-bold tracking-[0.1em]">
                         {label}
                         {required && <span className="ml-1 text-red-500">*</span>}
                     </label>
                     {!required && !error && (
-                        <span className="text-[9px] text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
+                        <span className="text-xs text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
                     )}
                 </div>
             )}

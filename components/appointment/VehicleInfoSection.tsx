@@ -93,7 +93,7 @@ export function VehicleInfoSection({
                         {/* Vehicle Photo */}
                         <div className="flex flex-col space-y-2">
                             <div className="flex items-center justify-between mb-2 px-1">
-                                <label className="text-[11px] text-muted-foreground uppercase font-bold tracking-[0.1em] w-full text-center">
+                                <label className="text-xs text-muted-foreground uppercase font-bold tracking-[0.1em] w-full text-center">
                                     Vehicle Photo
                                 </label>
                             </div>

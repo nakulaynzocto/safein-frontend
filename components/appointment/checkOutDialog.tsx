@@ -81,7 +81,7 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
                         </div>
 
                         <DialogHeader>
-                            <DialogTitle className="text-xl font-bold text-gray-900 text-center">
+                            <DialogTitle className="text-xl font-bold text-gray-800 text-center">
                                 Check Out Visitor
                             </DialogTitle>
                             <p className="text-gray-500 text-center text-sm mt-1">
@@ -96,22 +96,22 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
                                     <User className="h-5 w-5 text-accent" />
                                 </div>
                                 <div className="text-left">
-                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Visitor</div>
+                                    <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Visitor</div>
                                     <div className="font-bold text-slate-700 truncate">{getVisitorName()}</div>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-200/60">
                                 <div className="space-y-1 text-left">
-                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Scheduled Date</div>
-                                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-600">
+                                    <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Scheduled Date</div>
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
                                         <Calendar className="h-3 w-3 text-slate-400" />
                                         {formatDate(appointment.appointmentDetails?.scheduledDate || "")}
                                     </div>
                                 </div>
                                 <div className="space-y-1 text-left">
-                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Check-in Time</div>
-                                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-600">
+                                    <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Check-in Time</div>
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
                                         <Clock className="h-3 w-3 text-slate-400" />
                                         {formatDate(appointment.checkInTime || "")}
                                     </div>
@@ -121,7 +121,7 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
 
                         {/* Notes Field */}
                         <div className="mt-4 text-left space-y-1.5">
-                            <Label htmlFor="notes" className="text-[10px] font-bold text-slate-500 uppercase tracking-wide ml-1">
+                            <Label htmlFor="notes" className="text-xs font-bold text-slate-500 uppercase tracking-wide ml-1">
                                 Check-out Notes (Optional)
                             </Label>
                             <Textarea
@@ -132,7 +132,7 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
                             />
                             <div className="flex justify-end pr-1">
                                 <span className={cn(
-                                    "text-[10px] font-medium",
+                                    "text-xs font-medium",
                                     (notes?.length || 0) > 450 ? "text-rose-500" : "text-slate-400"
                                 )}>
                                     {notes?.length || 0}/500

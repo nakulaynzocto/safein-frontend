@@ -217,7 +217,7 @@ export function useNavbarScrollStyle(options: UseNavbarScrollStyleOptions): UseN
 
     // Link text color based on navbar style
     const linkText = useMemo(() => {
-        return shouldShowWhiteNavbar ? "text-gray-900" : "text-white";
+        return shouldShowWhiteNavbar ? "text-gray-800" : "text-white";
     }, [shouldShowWhiteNavbar]);
 
     // Link hover background based on navbar style

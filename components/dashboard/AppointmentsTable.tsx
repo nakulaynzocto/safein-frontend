@@ -75,7 +75,7 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                             </div>
                             <div className="min-w-0 flex-1">
                                 <div className="text-xs sm:text-sm font-medium truncate">{visitorName}</div>
-                                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500">
+                                <div className="flex items-center gap-1 text-xs sm:text-xs text-gray-500">
                                     <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
                                     <span className="truncate">{visitorPhone}</span>
                                 </div>
@@ -106,7 +106,7 @@ export const AppointmentsTable = memo(function AppointmentsTable({
                             </Avatar>
                             <div className="min-w-0 flex-1">
                                 <div className="text-xs sm:text-sm font-medium truncate">{employeeName}</div>
-                                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500">
+                                <div className="flex items-center gap-1 text-xs sm:text-xs text-gray-500">
                                     <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
                                     <span className="truncate">{employeePhone}</span>
                                 </div>

@@ -299,8 +299,8 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                                     {deliveryMode === 'shared' && <div className="h-2 w-2 rounded-full bg-white" />}
                                                 </div>
                                             </div>
-                                            <p className="text-[14px] font-black uppercase tracking-wider text-[#074463]">Standard Relay</p>
-                                            <p className="text-[11px] text-gray-500 font-bold mt-1 leading-relaxed">Premium infrastructure handled by SafeIn. No configuration required.</p>
+                                            <p className="text-[14px] font-semibold uppercase tracking-wider text-[#074463]">Standard Relay</p>
+                                            <p className="text-xs text-gray-500 font-bold mt-1 leading-relaxed">Premium infrastructure handled by SafeIn. No configuration required.</p>
                                         </div>
 
                                         <div 
@@ -316,8 +316,8 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                                     {deliveryMode === 'custom' && <div className="h-2 w-2 rounded-full bg-white" />}
                                                 </div>
                                             </div>
-                                            <p className="text-[14px] font-black uppercase tracking-wider text-[#074463]">Custom Branding</p>
-                                            <p className="text-[11px] text-gray-500 font-bold mt-1 leading-relaxed">Connect your own Meta API credentials for branded delivery.</p>
+                                            <p className="text-[14px] font-semibold uppercase tracking-wider text-[#074463]">Custom Branding</p>
+                                            <p className="text-xs text-gray-500 font-bold mt-1 leading-relaxed">Connect your own Meta API credentials for branded delivery.</p>
                                         </div>
                                     </div>
 
@@ -345,8 +345,8 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                                     <ShieldCheck className="h-5 w-5" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-black text-emerald-900 uppercase tracking-wide">Shared Relay Active</p>
-                                                    <p className="text-[11px] text-emerald-700 font-bold mt-0.5 leading-relaxed">
+                                                    <p className="text-sm font-semibold text-emerald-900 uppercase tracking-wide">Shared Relay Active</p>
+                                                    <p className="text-xs text-emerald-700 font-bold mt-0.5 leading-relaxed">
                                                         All notifications are routed through our enterprise-grade Meta gateway. This ensures 100% delivery without monthly Meta developer maintenance for your team.
                                                     </p>
                                                 </div>
@@ -398,14 +398,14 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                             </div>
                                             <CollapsibleContent>
                                                 <div className="p-4 pt-0 space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
-                                                    <div className="flex items-center gap-2 p-3 bg-[#3882a5]/5 rounded-xl border border-[#3882a5]/20 text-[11px] text-[#074463]">
+                                                    <div className="flex items-center gap-2 p-3 bg-[#3882a5]/5 rounded-xl border border-[#3882a5]/20 text-xs text-[#074463]">
                                                         <Info className="h-4 w-4 shrink-0 text-[#3882a5]" />
                                                         <p>Parameters like <span className="font-bold">{"{{1}}"}</span> must be configured in your <strong>Meta Dashboard</strong> in the exact order shown below for messages to deliver successfully.</p>
                                                     </div>
 
                                                     <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
                                                         <table className="w-full text-left text-xs border-collapse">
-                                                            <thead className="bg-[#f8fafc] text-[#64748b] uppercase font-bold text-[9px] border-b border-border">
+                                                            <thead className="bg-[#f8fafc] text-[#64748b] uppercase font-bold text-xs border-b border-border">
                                                                 <tr>
                                                                     <th className="px-5 py-4 w-1/4">Template Details</th>
                                                                     <th className="px-5 py-4 w-5/12">Variable Mapping Settings</th>
@@ -418,18 +418,18 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                                                         <td className="px-5 py-5 vertical-top">
                                                                             <div className="flex flex-col gap-1.5">
                                                                                 <span className="font-bold text-[#074463] text-[13px]">{t.name}</span>
-                                                                                <span className="text-[10px] text-slate-500 leading-relaxed italic pr-4">{t.usedFor}</span>
-                                                                                <Badge variant="outline" className="w-fit text-[9px] h-5 bg-slate-50 text-slate-400 border-slate-200 font-medium">Lang: {WHATSAPP_META_TEMPLATE_LANGUAGE}</Badge>
+                                                                                <span className="text-xs text-slate-500 leading-relaxed italic pr-4">{t.usedFor}</span>
+                                                                                <Badge variant="outline" className="w-fit text-xs h-5 bg-slate-50 text-slate-400 border-slate-200 font-medium">Lang: {WHATSAPP_META_TEMPLATE_LANGUAGE}</Badge>
                                                                             </div>
                                                                         </td>
                                                                         <td className="px-5 py-5 vertical-top">
                                                                             <div className="grid grid-cols-1 gap-2.5">
                                                                                 {t.params.map(p => (
                                                                                     <div key={p.index} className="flex items-center gap-2.5 group">
-                                                                                        <span className="flex items-center justify-center h-6 w-10 shrink-0 bg-[#3882a5]/10 border border-[#3882a5]/20 rounded-md text-[10px] font-mono font-bold text-[#3882a5]">
+                                                                                        <span className="flex items-center justify-center h-6 w-10 shrink-0 bg-[#3882a5]/10 border border-[#3882a5]/20 rounded-md text-xs font-mono font-bold text-[#3882a5]">
                                                                                             {`{{${p.index}}}`}
                                                                                         </span>
-                                                                                        <span className="text-[11px] text-[#475569] font-medium leading-tight">
+                                                                                        <span className="text-xs text-[#475569] font-medium leading-tight">
                                                                                             {p.label}
                                                                                         </span>
                                                                                     </div>
@@ -440,9 +440,9 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                                                             <div className="flex flex-col items-center gap-3">
                                                                                 <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border bg-white shadow-sm">
                                                                                     {localEnabledTemplates[t.name] !== false ? (
-                                                                                        <><div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /><span className="text-[9px] font-bold text-emerald-600">ACTIVE</span></>
+                                                                                        <><div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /><span className="text-xs font-bold text-emerald-600">ACTIVE</span></>
                                                                                     ) : (
-                                                                                        <><div className="h-1.5 w-1.5 rounded-full bg-slate-300" /><span className="text-[9px] font-bold text-slate-400">INACTIVE</span></>
+                                                                                        <><div className="h-1.5 w-1.5 rounded-full bg-slate-300" /><span className="text-xs font-bold text-slate-400">INACTIVE</span></>
                                                                                     )}
                                                                                 </div>
                                                                                 <div
@@ -476,7 +476,7 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                             <Settings2 size={18} className="text-[#3882a5]" />
                                         </div>
                                         <div className="hidden sm:block">
-                                            <p className="text-sm font-bold text-gray-900">Finalize WhatsApp Settings</p>
+                                            <p className="text-sm font-bold text-gray-800">Finalize WhatsApp Settings</p>
                                             <p className="text-xs text-gray-500">Manual verification is required for credential changes.</p>
                                         </div>
                                     </div>

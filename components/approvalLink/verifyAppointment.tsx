@@ -50,7 +50,7 @@ export function VerifyAppointment() {
                         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-100 p-4 dark:bg-red-900/20">
                             <XCircle className="h-10 w-10 text-red-600" />
                         </div>
-                        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Invalid Link</h2>
+                        <h2 className="mb-2 text-2xl font-bold text-slate-800 dark:text-white">Invalid Link</h2>
                         <p className="text-slate-500 dark:text-slate-400">
                             The verification link is missing or invalid. Please check the link and try again.
                         </p>
@@ -150,7 +150,7 @@ export function VerifyAppointment() {
                                 <XCircle className="h-10 w-10 text-red-600" />
                             )}
                         </div>
-                        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">
+                        <h2 className="mb-2 text-2xl font-bold text-slate-800 dark:text-white">
                             {isOutOfService ? "Service Unavailable" : isExpired ? "Link Expired" : "Invalid Link"}
                         </h2>
                         <p className="text-slate-500 dark:text-slate-400">
@@ -194,7 +194,7 @@ export function VerifyAppointment() {
                         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 p-4 dark:bg-amber-900/20">
                             <XCircle className="h-10 w-10 text-amber-600" />
                         </div>
-                        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Link Inactive</h2>
+                        <h2 className="mb-2 text-2xl font-bold text-slate-800 dark:text-white">Link Inactive</h2>
                         <p className="text-slate-500 dark:text-slate-400">
                             This verification link has already been used or has expired.
                         </p>
@@ -227,7 +227,7 @@ export function VerifyAppointment() {
                                 <XCircle className="h-8 w-8 text-red-600" />
                             )}
                         </div>
-                        <h2 className="mb-1 text-xl font-bold text-slate-900 dark:text-white capitalize">
+                        <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-white capitalize">
                             Appointment {displayStatus}
                         </h2>
                         <p className="text-xs font-bold text-[#3882a5] uppercase tracking-widest mb-1">
@@ -241,7 +241,7 @@ export function VerifyAppointment() {
                         </p>
                         <div className="mt-6 flex w-full flex-col gap-3 max-w-[340px]">
                             <div className="rounded-xl border border-dashed border-slate-200 p-3 text-left dark:border-slate-800 bg-slate-50/20">
-                                <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Visitor Details</p>
+                                <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">Visitor Details</p>
                                 <div className="flex items-center gap-3">
                                     <Avatar className="h-12 w-12 border border-white shadow-sm">
                                         <AvatarImage src={appointment.visitor?.photo} alt={appointment.visitor?.name || "Visitor"} className="object-cover" />
@@ -255,17 +255,17 @@ export function VerifyAppointment() {
                                     </Avatar>
                                     <div className="min-w-0">
                                         <p className="truncate text-xs font-bold text-slate-800">{appointment.visitor?.name || "-"}</p>
-                                        <p className="text-[10px] font-medium text-slate-500">{appointment.visitor?.phone || "-"}</p>
+                                        <p className="text-xs font-medium text-slate-500">{appointment.visitor?.phone || "-"}</p>
                                     </div>
                                 </div>
                                 <div className="mt-3 grid grid-cols-2 gap-2">
                                     <div className="rounded-lg bg-white border border-slate-100 p-2 dark:bg-slate-800/60">
-                                        <p className="text-[9px] font-bold uppercase text-slate-400">Date</p>
-                                        <p className="text-[10px] font-bold text-slate-700">{formattedDate}</p>
+                                        <p className="text-xs font-bold uppercase text-slate-400">Date</p>
+                                        <p className="text-xs font-bold text-slate-700">{formattedDate}</p>
                                     </div>
                                     <div className="rounded-lg bg-white border border-slate-100 p-2 dark:bg-slate-800/60">
-                                        <p className="text-[9px] font-bold uppercase text-slate-400">Time</p>
-                                        <p className="text-[10px] font-bold text-slate-700">
+                                        <p className="text-xs font-bold uppercase text-slate-400">Time</p>
+                                        <p className="text-xs font-bold text-slate-700">
                                             {formatTime(appointment?.appointmentDetails?.scheduledTime)}
                                         </p>
                                     </div>
@@ -300,7 +300,7 @@ export function VerifyAppointment() {
                         </Avatar>
                     </div>
                     <div className="space-y-1">
-                        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                        <h1 className="text-2xl font-semibold tracking-tight text-slate-800 dark:text-white sm:text-3xl">
                             {appointment.company?.companyName || "Verification Request"}
                         </h1>
                         <p className="max-w-md text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -328,7 +328,7 @@ export function VerifyAppointment() {
                                 </div>
                                 <div className="flex-1 space-y-4">
                                     <div className="space-y-1">
-                                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
+                                        <h2 className="text-2xl font-bold text-slate-800 dark:text-white sm:text-3xl">
                                             {appointment.visitor.name}
                                         </h2>
                                         <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
@@ -393,7 +393,7 @@ export function VerifyAppointment() {
                                                     <p className="text-xs font-medium text-slate-400">Meeting With</p>
                                                     <p className="text-sm font-semibold">{appointment.employee.name}</p>
                                                     {appointment.employee.department && (
-                                                        <p className="text-[10px] text-slate-500">{appointment.employee.department}</p>
+                                                        <p className="text-xs text-slate-500">{appointment.employee.department}</p>
                                                     )}
                                                 </div>
                                             </div>
@@ -438,7 +438,7 @@ export function VerifyAppointment() {
                                                             {appointment.visitor.idProof.type.replace("_", " ").toUpperCase()} Verified
                                                         </span>
                                                     </div>
-                                                    <span className="text-[10px] font-mono font-medium text-slate-400">
+                                                    <span className="text-xs font-mono font-medium text-slate-400">
                                                         {appointment.visitor.idProof.number.slice(0, 4)}••••{appointment.visitor.idProof.number.slice(-2)}
                                                     </span>
                                                 </div>

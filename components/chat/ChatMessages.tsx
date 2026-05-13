@@ -99,7 +99,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                                 
                                 <div className="relative">
                                     {!isMe && (
-                                        <span className="text-[11px] font-bold text-[#075e54] dark:text-[#25d366] block mb-1">
+                                        <span className="text-xs font-bold text-[#075e54] dark:text-[#25d366] block mb-1">
                                             SafeIn Support
                                         </span>
                                     )}
@@ -107,7 +107,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                                 </div>
                                 
                                 <div className={cn(
-                                    "text-[10px] mt-1 flex justify-end items-center gap-1 absolute bottom-1 right-2",
+                                    "text-xs mt-1 flex justify-end items-center gap-1 absolute bottom-1 right-2",
                                     isMe ? "text-gray-500 dark:text-gray-300" : "text-gray-400"
                                 )}>
                                     {format(new Date(msg.createdAt), "HH:mm")}

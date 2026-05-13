@@ -362,7 +362,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
                             <div key={item.key} className="flex flex-1 flex-col items-center gap-1.5 px-0.5">
                                 <div 
                                     className={cn(
-                                        "flex h-7 w-7 items-center justify-center rounded-full border text-[10px] font-bold transition-all",
+                                        "flex h-7 w-7 items-center justify-center rounded-full border text-xs font-bold transition-all",
                                         isActive && "border-[#3882a5] bg-[#3882a5] text-white shadow-md ring-2 ring-[#3882a5]/20",
                                         isDone && "border-emerald-500 bg-emerald-500 text-white",
                                         !isDone && !isActive && "border-slate-300 bg-white text-slate-400"
@@ -372,7 +372,7 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
                                 </div>
                                 <span 
                                     className={cn(
-                                        "text-[9px] font-bold uppercase tracking-tighter text-center line-clamp-1",
+                                        "text-xs font-bold uppercase tracking-tighter text-center line-clamp-1",
                                         isActive ? "text-[#1f4f67]" : isDone ? "text-emerald-700" : "text-slate-400"
                                     )}
                                 >
@@ -595,9 +595,9 @@ export function VisitorRegister({ onComplete, initialData, standalone = false, v
                             A visitor named <span className="font-bold text-[#3882a5]">{foundVisitor?.name}</span> with phone number {watchedPhone} is already in the system.
                         </p>
                         <div className="rounded-xl bg-[#3882a5]/5 border border-[#3882a5]/10 p-3 mt-4">
-                            <p className="text-[11px] font-semibold text-[#3882a5] uppercase tracking-wider mb-1">Recommended Actions</p>
+                            <p className="text-xs font-semibold text-[#3882a5] uppercase tracking-wider mb-1">Recommended Actions</p>
                             <p className="text-[12px] leading-relaxed text-slate-600">
-                                Choose <span className="font-bold text-slate-900 underline underline-offset-2">Book Appointment</span> to skip registration, or <span className="font-bold text-slate-900 underline underline-offset-2">Auto-fill & Review</span> to update their details.
+                                Choose <span className="font-bold text-slate-800 underline underline-offset-2">Book Appointment</span> to skip registration, or <span className="font-bold text-slate-800 underline underline-offset-2">Auto-fill & Review</span> to update their details.
                             </p>
                         </div>
                     </div>

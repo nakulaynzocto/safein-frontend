@@ -179,11 +179,11 @@ export function SpotPassList() {
                         )}
                     </div>
                     <div className="flex flex-col min-w-0">
-                        <span className="font-semibold text-sm text-gray-900 truncate">{formatName(item.name)}</span>
+                        <span className="font-semibold text-sm text-gray-800 truncate">{formatName(item.name)}</span>
                         <div className="flex flex-col gap-0.5">
                             <span className="text-xs text-muted-foreground">{item.phone}</span>
                             {item.vehicleNumber && (
-                                <span className="text-[10px] font-bold text-[#3882a5] uppercase tracking-wider">
+                                <span className="text-xs font-bold text-[#3882a5] uppercase tracking-wider">
                                     {item.vehicleNumber}
                                 </span>
                             )}
@@ -203,7 +203,7 @@ export function SpotPassList() {
                             {/* @ts-ignore */}
                             <AvatarImage src={item.employeeId.photo} className="object-cover" />
                             {/* @ts-ignore */}
-                            <AvatarFallback className="bg-[#3882a5]/10 text-[#3882a5] text-[10px] font-bold flex items-center justify-center leading-none">
+                            <AvatarFallback className="bg-[#3882a5]/10 text-[#3882a5] text-xs font-bold flex items-center justify-center leading-none">
                                 {/* @ts-ignore */}
                                 {getInitials(item.employeeId.name)}
                             </AvatarFallback>
@@ -234,10 +234,10 @@ export function SpotPassList() {
             key: "checkInTime",
             render: (item: SpotPass) => (
                 <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-gray-900">
+                    <span className="text-sm font-semibold text-gray-800">
                         {format(new Date(item.checkInTime), "hh:mm a")}
                     </span>
-                    <span className="text-[10px] text-muted-foreground font-medium">
+                    <span className="text-xs text-muted-foreground font-medium">
                         {format(new Date(item.checkInTime), "MMM dd, yyyy")}
                     </span>
                 </div>
@@ -267,10 +267,10 @@ export function SpotPassList() {
                                     className="h-8 gap-1.5 border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-500 transition-all shadow-sm"
                                 >
                                     <LogOut className="h-3.5 w-3.5" />
-                                    <span className="text-[10px] sm:text-xs font-semibold">Check Out</span>
+                                    <span className="text-xs sm:text-xs font-semibold">Check Out</span>
                                 </Button>
                             ) : (
-                                <div className="h-8 w-full flex items-center justify-center text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+                                <div className="h-8 w-full flex items-center justify-center text-xs text-muted-foreground uppercase font-bold tracking-wider">
                                     {item.status === "checked-out" ? "DONE" : "-"}
                                 </div>
                             )}

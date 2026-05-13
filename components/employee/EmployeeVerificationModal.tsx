@@ -99,7 +99,7 @@ export function EmployeeVerificationModal({
                             <Button 
                                 onClick={handleSendOtp} 
                                 disabled={isSending}
-                                className="bg-[#3882a5] hover:bg-[#2c6885] text-white font-black text-[10px] uppercase tracking-[0.2em] h-14 rounded-2xl px-10 shadow-xl shadow-[#3882a5]/10 active:scale-95 transition-all w-full sm:w-auto"
+                                className="bg-[#3882a5] hover:bg-[#2c6885] text-white font-semibold text-xs uppercase tracking-[0.2em] h-14 rounded-2xl px-10 shadow-xl shadow-[#3882a5]/10 active:scale-95 transition-all w-full sm:w-auto"
                             >
                                 {isSending ? (
                                     <>
@@ -113,7 +113,7 @@ export function EmployeeVerificationModal({
                             
                             <button 
                                 onClick={() => onOpenChange(false)}
-                                className="text-gray-400 font-bold text-[9px] uppercase tracking-[0.2em] hover:text-gray-600 transition-colors"
+                                className="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] hover:text-gray-600 transition-colors"
                             >
                                 Dismiss Matrix
                             </button>
@@ -121,7 +121,7 @@ export function EmployeeVerificationModal({
                     ) : (
                         <div className="grid gap-6 py-6 animate-in slide-in-from-bottom-2 duration-500">
                             <div className="space-y-4">
-                                <p className="text-[11px] font-bold text-gray-400 text-center uppercase tracking-wider">Synchronizing Node: {type === 'phone' ? 'Mobile' : 'Email'}</p>
+                                <p className="text-xs font-bold text-gray-400 text-center uppercase tracking-wider">Synchronizing Node: {type === 'phone' ? 'Mobile' : 'Email'}</p>
                                 <div className="flex justify-center py-2">
                                     <InputOTP
                                         id="otp"
@@ -140,7 +140,7 @@ export function EmployeeVerificationModal({
                                                 <InputOTPSlot
                                                     key={index}
                                                     index={index}
-                                                    className="h-12 w-10 sm:h-16 sm:w-14 rounded-2xl border-2 border-gray-100 bg-gray-50/50 text-xl font-black transition-all focus-within:border-[#3882a5] focus-within:ring-4 focus-within:ring-[#3882a5]/5 focus-within:bg-white"
+                                                    className="h-12 w-10 sm:h-16 sm:w-14 rounded-2xl border-2 border-gray-100 bg-gray-50/50 text-xl font-semibold transition-all focus-within:border-[#3882a5] focus-within:ring-4 focus-within:ring-[#3882a5]/5 focus-within:bg-white"
                                                 />
                                             ))}
                                         </InputOTPGroup>
@@ -152,7 +152,7 @@ export function EmployeeVerificationModal({
                                 <Button 
                                     onClick={() => handleVerify()} 
                                     disabled={!otp || isVerifying || otp.length < 6}
-                                    className="bg-[#3882a5] hover:bg-[#2c6885] text-white font-black text-[10px] uppercase tracking-[0.2em] h-14 rounded-2xl px-8 shadow-xl shadow-[#3882a5]/10 active:scale-95 transition-all w-full"
+                                    className="bg-[#3882a5] hover:bg-[#2c6885] text-white font-semibold text-xs uppercase tracking-[0.2em] h-14 rounded-2xl px-8 shadow-xl shadow-[#3882a5]/10 active:scale-95 transition-all w-full"
                                 >
                                     {isVerifying ? (
                                         <>
@@ -168,13 +168,13 @@ export function EmployeeVerificationModal({
                                     <button 
                                         onClick={handleSendOtp} 
                                         disabled={isSending || isVerifying}
-                                        className="text-[9px] font-black text-accent uppercase tracking-widest hover:opacity-70 transition-opacity disabled:opacity-50"
+                                        className="text-xs font-semibold text-accent uppercase tracking-widest hover:opacity-70 transition-opacity disabled:opacity-50"
                                     >
                                         {isSending ? "Resending..." : "Request New OTP"}
                                     </button>
                                     <button 
                                         onClick={() => onOpenChange(false)}
-                                        className="text-[9px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors"
+                                        className="text-xs font-semibold text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors"
                                     >
                                         Abort
                                     </button>

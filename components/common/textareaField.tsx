@@ -18,12 +18,12 @@ const TextareaField = forwardRef<HTMLTextAreaElement, TextareaFieldProps>(
             <div className="space-y-2">
                 {label && (
                     <div className="flex items-center justify-between">
-                        <label className="text-[11px] text-muted-foreground uppercase font-bold tracking-[0.1em]">
+                        <label className="text-xs text-muted-foreground uppercase font-bold tracking-[0.1em]">
                             {label}
                             {required && <span className="ml-1 text-red-500">*</span>}
                         </label>
                         {!required && !error && (
-                            <span className="text-[9px] text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
+                            <span className="text-xs text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
                         )}
                     </div>
                 )}

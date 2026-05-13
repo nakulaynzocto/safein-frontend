@@ -120,7 +120,7 @@ export function ConfirmationDialog({
                             {getIcon()}
                         </div>
                         <DialogHeader className="space-y-0 text-left flex-1">
-                            <DialogTitle className="text-[15px] font-semibold leading-snug" style={{ color: "#161718" }}>
+                            <DialogTitle className="text-sm font-semibold leading-snug" style={{ color: "#161718" }}>
                                 {title}
                             </DialogTitle>
                         </DialogHeader>

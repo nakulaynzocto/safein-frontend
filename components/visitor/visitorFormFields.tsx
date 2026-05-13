@@ -74,7 +74,7 @@ export function VisitorFormFields({
                                                 e.preventDefault();
                                                 onBookAppointment();
                                             }}
-                                            className="text-[10px] font-black uppercase tracking-widest text-[#3882a5] hover:text-[#2d6a87] transition-colors border-b-2 border-[#3882a5]/20 hover:border-[#3882a5] pb-0.5"
+                                            className="text-xs font-semibold uppercase tracking-widest text-[#3882a5] hover:text-[#2d6a87] transition-colors border-b-2 border-[#3882a5]/20 hover:border-[#3882a5] pb-0.5"
                                         >
                                             Book Appointment
                                         </button>

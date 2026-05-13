@@ -421,7 +421,7 @@ export default function SupportWidget() {
                                             <Loader2 className="w-12 h-12 animate-spin text-primary relative z-10" />
                                         </div>
                                         <div className="space-y-2">
-                                            <p className="font-bold text-gray-900 dark:text-white">Authenticating...</p>
+                                            <p className="font-bold text-gray-800 dark:text-white">Authenticating...</p>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">Please wait while we secure your connection</p>
                                         </div>
                                     </div>
@@ -431,7 +431,7 @@ export default function SupportWidget() {
 
                                         <div className="space-y-6 text-center mb-10">
                                             <div className="space-y-2">
-                                                <h4 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                                                <h4 className="text-2xl font-semibold text-slate-800 dark:text-white tracking-tight">
                                                     SafeIn <span className="text-[#3882a5]">Support</span>
                                                 </h4>
                                                 <div className="flex items-center justify-center gap-2">
@@ -462,7 +462,7 @@ export default function SupportWidget() {
                                             </Button>
 
                                             <div className="pt-4 flex flex-col items-center gap-4">
-                                                <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                                                <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-[0.2em]">
                                                     <Shield size={12} className="text-[#3882a5]" />
                                                     Secure Support Channel
                                                 </div>
@@ -470,8 +470,8 @@ export default function SupportWidget() {
                                                 <div className="h-px w-12 bg-slate-100 dark:bg-slate-800"></div>
 
                                                 <div className="flex flex-col items-center gap-1">
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase">Emergency Support</p>
-                                                    <a href="tel:+918699966076" className="text-slate-900 dark:text-white font-black hover:text-primary transition-colors">
+                                                    <p className="text-xs font-bold text-slate-400 uppercase">Emergency Support</p>
+                                                    <a href="tel:+918699966076" className="text-slate-800 dark:text-white font-semibold hover:text-primary transition-colors">
                                                         +91 86999 66076
                                                     </a>
                                                 </div>
@@ -529,7 +529,7 @@ export default function SupportWidget() {
                                 {unreadCount > 0 && (
                                     <span className="absolute -top-1 -right-1 flex h-5 w-5">
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-light opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-5 w-5 items-center justify-center text-white text-[10px] font-bold shadow-lg" style={{ background: GRADIENT_ACCENT }}>
+                                        <span className="relative inline-flex rounded-full h-5 w-5 items-center justify-center text-white text-xs font-bold shadow-lg" style={{ background: GRADIENT_ACCENT }}>
                                             {unreadCount > 9 ? '9+' : unreadCount}
                                         </span>
                                     </span>

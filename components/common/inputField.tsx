@@ -23,12 +23,12 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             <div className="space-y-2">
                 {label && (
                     <div className="flex items-center justify-between">
-                        <label className="text-[11px] text-muted-foreground uppercase font-bold tracking-[0.1em]">
+                        <label className="text-xs text-muted-foreground uppercase font-bold tracking-[0.1em]">
                             {label}
                             {required && <span className="ml-1 text-red-500">*</span>}
                         </label>
                         {!required && !error && (
-                            <span className="text-[9px] text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
+                            <span className="text-xs text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
                         )}
                     </div>
                 )}
@@ -72,12 +72,12 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                     )}
                 </div>
                 {error && (
-                    <p className="text-rose-600 dark:text-rose-400 text-[11px] font-medium mt-1 animate-in fade-in slide-in-from-top-1">
+                    <p className="text-rose-600 dark:text-rose-400 text-xs font-medium mt-1 animate-in fade-in slide-in-from-top-1">
                         {error}
                     </p>
                 )}
                 {helperText && !error && (
-                    <p className="text-muted-foreground/80 text-[11px] leading-relaxed mt-1">
+                    <p className="text-muted-foreground/80 text-xs leading-relaxed mt-1">
                         {helperText}
                     </p>
                 )}

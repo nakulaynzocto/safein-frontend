@@ -234,7 +234,7 @@ export default function EmployeeSettingsPage() {
                                             <Badge variant="secondary" className="bg-primary/5 text-primary hover:bg-primary/10 border-primary/20 gap-1.5 py-1 px-3 rounded-full text-foreground">
                                                 <Clipboard className="h-3.5 w-3.5" />
                                                 <span className="font-bold">{employee.appointmentCount || 0}</span>
-                                                <span className="text-[10px] opacity-70 border-l pl-1.5 ml-0.5">Appointments</span>
+                                                <span className="text-xs opacity-70 border-l pl-1.5 ml-0.5">Appointments</span>
                                             </Badge>
                                         </div>
                                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-muted-foreground">
@@ -251,7 +251,7 @@ export default function EmployeeSettingsPage() {
                                     <div className="flex flex-col items-start sm:items-end gap-1 text-sm bg-muted/50 p-3 rounded-xl border border-border/50 text-foreground">
                                         <div className="flex items-center gap-2">
                                             <div className={`h-2 w-2 rounded-full ${employee.status === 'Active' ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
-                                            <span className="font-bold uppercase tracking-wider text-[10px]">{employee.status}</span>
+                                            <span className="font-bold uppercase tracking-wider text-xs">{employee.status}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Phone className="h-3.5 w-3.5 text-muted-foreground" />
@@ -264,7 +264,7 @@ export default function EmployeeSettingsPage() {
                                                         setVerifyType('phone');
                                                         setShowVerifyDialog(true);
                                                     }}
-                                                    className="text-[10px] text-blue-500 hover:underline ml-1 font-bold"
+                                                    className="text-xs text-blue-500 hover:underline ml-1 font-bold"
                                                 >
                                                     Verify Now
                                                 </button>
@@ -281,7 +281,7 @@ export default function EmployeeSettingsPage() {
                                                         setVerifyType('email');
                                                         setShowVerifyDialog(true);
                                                     }}
-                                                    className="text-[10px] text-blue-500 hover:underline ml-1 font-bold"
+                                                    className="text-xs text-blue-500 hover:underline ml-1 font-bold"
                                                 >
                                                     Verify Now
                                                 </button>
@@ -323,7 +323,7 @@ export default function EmployeeSettingsPage() {
                                                 <Label htmlFor={option.id} className="font-semibold cursor-pointer">
                                                     {option.label}
                                                 </Label>
-                                                <p className="text-[11px] text-muted-foreground leading-tight">
+                                                <p className="text-xs text-muted-foreground leading-tight">
                                                     {option.description}
                                                 </p>
                                             </div>
@@ -408,21 +408,21 @@ export default function EmployeeSettingsPage() {
                             <div className="flex items-center gap-3 text-sm">
                                 <Calendar className="h-4 w-4 text-muted-foreground" />
                                 <div className="space-y-0.5">
-                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Created</p>
+                                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Created</p>
                                     <p className="font-medium">{new Date(employee.createdAt).toLocaleDateString()}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 text-sm">
                                 <Clock className="h-4 w-4 text-muted-foreground" />
                                 <div className="space-y-0.5 text-foreground">
-                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Last Activity</p>
+                                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Last Activity</p>
                                     <p className="font-medium">{new Date(employee.updatedAt).toLocaleDateString()}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 text-sm">
                                 <User className="h-4 w-4 text-muted-foreground" />
                                 <div className="space-y-0.5 text-foreground">
-                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Verified Status</p>
+                                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Verified Status</p>
                                     <p className={`font-bold ${employee.isVerified ? "text-green-600" : "text-amber-600"}`}>
                                         {employee.isVerified ? "Authenticated" : "Pending Verification"}
                                     </p>

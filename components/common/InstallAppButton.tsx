@@ -89,7 +89,7 @@ export function InstallAppButton({ variant = "button", className }: InstallAppBu
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="font-bold text-[13px] sm:text-sm text-foreground leading-tight">Install SafeIn App</p>
-                        <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate uppercase tracking-tighter">Fast & Offline Access</p>
+                        <p className="text-xs sm:text-xs text-muted-foreground mt-0.5 truncate uppercase tracking-tighter">Fast & Offline Access</p>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                         <Button size="sm" className="h-8 px-3 rounded-lg bg-[#074463] text-white text-[12px] font-bold" onClick={handleInstall} disabled={isInstalling}>
@@ -120,7 +120,7 @@ export function InstallAppButton({ variant = "button", className }: InstallAppBu
                                 <h3 className="font-bold text-white text-[13px] sm:text-base lg:text-lg">
                                     {isInstalled ? "SafeIn App Installed" : (platform === "desktop" ? "SafeIn for Desktop" : "Install SafeIn App")}
                                 </h3>
-                                <p className="hidden xs:block text-[11px] sm:text-sm text-gray-300 mt-0.5 leading-tight sm:leading-relaxed max-w-sm">
+                                <p className="hidden xs:block text-xs sm:text-sm text-gray-300 mt-0.5 leading-tight sm:leading-relaxed max-w-sm">
                                     {isInstalled 
                                         ? "You're all set! Open from your home screen." 
                                         : (platform === "ios" ? 'Share → Add to Home Screen' : "Fast, offline-ready check-in experience.")}
@@ -129,7 +129,7 @@ export function InstallAppButton({ variant = "button", className }: InstallAppBu
 
                             {!isInstalled && (
                                 <Button
-                                    className="h-8 sm:h-11 px-4 sm:px-6 rounded-lg sm:rounded-xl bg-white text-[#074463] hover:bg-gray-100 hover:text-black text-[11px] sm:text-[13px] font-bold shadow-md transition-all active:scale-95 shrink-0"
+                                    className="h-8 sm:h-11 px-4 sm:px-6 rounded-lg sm:rounded-xl bg-white text-[#074463] hover:bg-gray-100 hover:text-black text-xs sm:text-[13px] font-bold shadow-md transition-all active:scale-95 shrink-0"
                                     onClick={handleInstall}
                                     disabled={isInstalling || (!deferredPrompt && platform !== "ios")}
                                 >
@@ -149,7 +149,7 @@ export function InstallAppButton({ variant = "button", className }: InstallAppBu
                             {isInstalled && (
                                 <div className="flex items-center gap-1.5 bg-emerald-500/20 px-3 py-1 rounded-full border border-emerald-500/30">
                                     <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                                    <span className="text-[10px] sm:text-[11px] text-emerald-400 font-bold uppercase">Installed</span>
+                                    <span className="text-xs sm:text-xs text-emerald-400 font-bold uppercase">Installed</span>
                                 </div>
                             )}
                         </div>

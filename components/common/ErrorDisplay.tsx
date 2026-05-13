@@ -51,7 +51,7 @@ export function ErrorDisplay({
                 </div>
             </div>
 
-            <h3 className="mb-2 text-lg font-bold text-gray-900 tracking-tight">
+            <h3 className="mb-2 text-lg font-bold text-gray-800 tracking-tight">
                 {title}
             </h3>
 
@@ -63,7 +63,7 @@ export function ErrorDisplay({
 
             {description && (
                 <div className="mb-6 rounded-lg bg-gray-50 px-3 py-2 border border-gray-100 max-w-full overflow-hidden">
-                    <code className="text-[10px] text-gray-400 font-mono break-all whitespace-pre-wrap">
+                    <code className="text-xs text-gray-400 font-mono break-all whitespace-pre-wrap">
                         {description}
                     </code>
                 </div>

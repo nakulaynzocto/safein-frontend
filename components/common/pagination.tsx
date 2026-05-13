@@ -119,7 +119,7 @@ export function Pagination({
                         <select
                             value={pageSize}
                             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                            className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-[#3882a5] focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                            className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-800 focus:border-transparent focus:ring-2 focus:ring-[#3882a5] focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                         >
                             {pageSizeOptions.map((size) => (
                                 <option key={size} value={size}>

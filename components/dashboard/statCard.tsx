@@ -49,14 +49,14 @@ export const StatCard = memo(function StatCard({ title, value, icon: Icon, descr
                 </div>
             )}
             <CardContent className="flex flex-col items-center justify-center py-2 sm:py-3 px-4 sm:px-5">
-                <div className={`text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-center mb-1 ${colorClassName || "text-muted-foreground"}`}>
+                <div className={`text-xs sm:text-xs font-extrabold uppercase tracking-widest text-center mb-1 ${colorClassName || "text-muted-foreground"}`}>
                     {title}
                 </div>
-                <div className={`text-2xl sm:text-3xl font-black tracking-tight leading-none ${colorClassName || ""}`}>
+                <div className={`text-2xl sm:text-3xl font-semibold tracking-tight leading-none ${colorClassName || ""}`}>
                     {value}
                 </div>
                 {description && (
-                    <div className="text-[10px] sm:text-xs text-muted-foreground text-center mt-1 font-medium italic opacity-70">
+                    <div className="text-xs sm:text-xs text-muted-foreground text-center mt-1 font-medium italic opacity-70">
                         {description}
                     </div>
                 )}

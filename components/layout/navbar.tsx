@@ -257,7 +257,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {shouldShowPrivateNavbar && (
                                     <div className={`hidden items-center lg:flex`}>
                                         <div
-                                            className={`text-lg lg:text-xl font-black tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white"
+                                            className={`text-lg lg:text-xl font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-slate-900" : "text-white"
                                                 }`}
                                         >
                                             {formatName(user?.companyName || "Visitor Management System")}
@@ -292,7 +292,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 {shouldShowPrivateNavbar && (
                                     <div className={`hidden items-center lg:flex`}>
                                         <div
-                                            className={`text-lg lg:text-xl font-black tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-[#3882a5]" : "text-white"
+                                            className={`text-lg lg:text-xl font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-slate-900" : "text-white"
                                                 }`}
                                         >
                                             {formatName(user?.companyName || "Visitor Management System")}
@@ -372,7 +372,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                     <Link
                                         href={routes.privateroute.DASHBOARD}
                                         className={cn(
-                                            "rounded-lg px-2 py-1.5 sm:px-6 sm:py-2 text-[11px] sm:text-[14px] font-bold transition-all duration-300 flex items-center justify-center whitespace-nowrap",
+                                            "rounded-lg px-2 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-[14px] font-bold transition-all duration-300 flex items-center justify-center whitespace-nowrap",
                                             ctaBtn
                                         )}
                                         prefetch={true}
@@ -433,7 +433,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 variant="ghost"
                                 size="sm"
                                 className={`rounded-lg p-2 transition-all duration-200 lg:hidden ${shouldShowWhiteNavbar
-                                    ? "text-gray-900 hover:bg-gray-100/80"
+                                    ? "text-gray-800 hover:bg-gray-100/80"
                                     : "text-white hover:bg-white/10"
                                     }`}
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

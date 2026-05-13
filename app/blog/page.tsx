@@ -24,7 +24,7 @@ const BlogCard = ({ post }: { post: Blog }) => (
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#074463]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="absolute bottom-4 left-4">
-                     <span className="bg-white/90 backdrop-blur-md text-[#3882a5] text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-sm">
+                     <span className="bg-white/90 backdrop-blur-md text-[#3882a5] text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-sm">
                         Productivity
                     </span>
                 </div>
@@ -34,22 +34,22 @@ const BlogCard = ({ post }: { post: Blog }) => (
                 <div className="flex items-center gap-4 mb-4 text-slate-400">
                     <div className="flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">
+                        <span className="text-xs font-bold uppercase tracking-widest">
                             {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                     </div>
                     <div className="flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">5 min read</span>
+                        <span className="text-xs font-bold uppercase tracking-widest">5 min read</span>
                     </div>
                 </div>
-                <h3 className="font-black text-[#074463] text-xl mb-4 line-clamp-2 group-hover:text-[#3882a5] transition-colors leading-tight uppercase tracking-tight">
+                <h3 className="font-semibold text-[#074463] text-xl mb-4 line-clamp-2 group-hover:text-[#3882a5] transition-colors leading-tight uppercase tracking-tight">
                     {post.title}
                 </h3>
                 <p className="text-slate-500 text-sm flex-1 mb-6 line-clamp-3 leading-relaxed font-medium">
                     {post.excerpt || (post.content ? post.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...' : '')}
                 </p>
-                <div className="flex items-center text-[#3882a5] font-black text-[10px] uppercase tracking-widest group-hover:gap-2 transition-all">
+                <div className="flex items-center text-[#3882a5] font-semibold text-xs uppercase tracking-widest group-hover:gap-2 transition-all">
                     Read Full Article
                     <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
                 </div>
@@ -85,7 +85,7 @@ export default function BlogsPage() {
                     {/* Hero Section - Matching Help Page Style */}
                     <section className="bg-hero-gradient relative flex min-h-[400px] items-center pt-20 pb-12 sm:min-h-[450px] sm:px-6 sm:pt-28 md:min-h-[500px] md:pt-32">
                         <div className="container mx-auto px-4 sm:px-6 text-center">
-                            <h1 className="mb-4 px-2 text-3xl leading-tight font-black text-white sm:mb-6 sm:px-0 sm:text-4xl md:text-5xl lg:text-6xl uppercase tracking-tighter">
+                            <h1 className="mb-4 px-2 text-3xl leading-tight font-semibold text-white sm:mb-6 sm:px-0 sm:text-4xl md:text-5xl lg:text-6xl uppercase tracking-tighter">
                                 SafeIn Insights
                             </h1>
                             <p className="mx-auto mb-6 max-w-3xl px-2 text-base leading-relaxed text-gray-300 sm:mb-8 sm:px-0 sm:text-lg md:text-xl font-medium">
@@ -140,7 +140,7 @@ export default function BlogsPage() {
                                                         variant={page === p ? "default" : "outline"}
                                                         onClick={() => handlePageChange(p)}
                                                         className={cn(
-                                                            "h-12 w-12 sm:h-14 sm:w-14 rounded-2xl font-black text-base sm:text-lg transition-all active:scale-90",
+                                                            "h-12 w-12 sm:h-14 sm:w-14 rounded-2xl font-semibold text-base sm:text-lg transition-all active:scale-90",
                                                             page === p 
                                                                 ? "bg-[#074463] text-white shadow-xl shadow-[#074463]/20" 
                                                                 : "border-slate-200 text-[#074463] hover:bg-white hover:text-primary"
@@ -167,7 +167,7 @@ export default function BlogsPage() {
                                     <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-slate-50 mb-8">
                                         <ArrowRight className="w-10 h-10 text-slate-300 -rotate-45" />
                                     </div>
-                                    <h3 className="text-2xl font-black text-[#074463] mb-4 uppercase tracking-tight">No Insights Published Yet</h3>
+                                    <h3 className="text-2xl font-semibold text-[#074463] mb-4 uppercase tracking-tight">No Insights Published Yet</h3>
                                     <p className="text-slate-500 font-medium max-w-md mx-auto">We're curating some amazing content for you. Subscribe to our newsletter to stay updated.</p>
                                 </div>
                             )}

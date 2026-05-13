@@ -122,7 +122,7 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                             ) : (
                                 <span
                                     style={{ color: primaryColor }}
-                                    className="font-black text-xs text-center leading-tight uppercase"
+                                    className="font-semibold text-xs text-center leading-tight uppercase"
                                 >
                                     YOUR
                                     <br />
@@ -148,12 +148,12 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                             <div
                                 style={{ backgroundColor: primaryColor }}
-                                className="px-4 py-2 text-white font-bold text-[11px] uppercase tracking-wider"
+                                className="px-4 py-2 text-white font-bold text-xs uppercase tracking-wider"
                             >
                                 INVOICE FROM:
                             </div>
-                            <div className="p-5 text-slate-700 text-[11px] space-y-1">
-                                <p className="font-bold text-base text-slate-900 mb-1">
+                            <div className="p-5 text-slate-700 text-xs space-y-1">
+                                <p className="font-bold text-base text-slate-800 mb-1">
                                     {companyDetails.name || "Aynzo Global Private Limited"}
                                 </p>
                                 {companyDetails.cin && (
@@ -183,12 +183,12 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                             <div
                                 style={{ backgroundColor: primaryColor }}
-                                className="px-4 py-2 text-white font-bold text-[11px] uppercase tracking-wider"
+                                className="px-4 py-2 text-white font-bold text-xs uppercase tracking-wider"
                             >
                                 Invoice To:
                             </div>
-                            <div className="p-5 text-slate-700 text-[11px] space-y-1">
-                                <p className="font-bold text-base text-slate-900 mb-1">
+                            <div className="p-5 text-slate-700 text-xs space-y-1">
+                                <p className="font-bold text-base text-slate-800 mb-1">
                                     {user?.companyName || user?.name || "Client"}
                                 </p>
                                 <p className="leading-relaxed">{user?.address?.street || user?.address?.addressLine1}</p>
@@ -197,7 +197,7 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                                 </p>
                                 <p className="font-medium mt-2">{user?.email}</p>
                                 <p className="font-medium">{user?.mobileNumber || user?.phone}</p>
-                                <p className="mt-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                <p className="mt-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
                                     Place of Supply: {user?.address?.state || "N/A"} ({subscription.placeOfSupplyCode || "N/A"})
                                 </p>
                             </div>
@@ -212,25 +212,25 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                                     className="border-b-2 text-left"
                                     style={{ borderColor: primaryColor }}
                                 >
-                                    <th className="py-3 font-bold text-slate-900 w-[5%] text-left">#</th>
-                                    <th className="py-3 font-bold text-slate-900 w-[55%]">ITEM DESCRIPTION</th>
-                                    <th className="py-3 font-bold text-slate-900 text-center w-[20%]">SAC CODE</th>
-                                    <th className="py-3 font-bold text-slate-900 text-right w-[20%]">AMOUNT</th>
+                                    <th className="py-3 font-bold text-slate-800 w-[5%] text-left">#</th>
+                                    <th className="py-3 font-bold text-slate-800 w-[55%]">ITEM DESCRIPTION</th>
+                                    <th className="py-3 font-bold text-slate-800 text-center w-[20%]">SAC CODE</th>
+                                    <th className="py-3 font-bold text-slate-800 text-right w-[20%]">AMOUNT</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 <tr>
                                     <td className="py-6 text-slate-500 font-medium">1</td>
                                     <td className="py-6 text-slate-800">
-                                        <p className="font-bold text-sm text-slate-900">
+                                        <p className="font-bold text-sm text-slate-800">
                                             {typeof subscription.planId === 'object' ? subscription.planId?.name : (subscription.planName || subscription.planType)} Subscription
                                         </p>
-                                        <p className="text-[11px] text-slate-500 mt-1 italic">
+                                        <p className="text-xs text-slate-500 mt-1 italic">
                                             Valid from {formatDate(subscription.startDate)} to {formatDate(subscription.endDate)}
                                         </p>
                                     </td>
                                     <td className="py-6 text-center text-slate-600 font-bold tracking-widest">998311</td>
-                                    <td className="py-6 text-right font-bold text-slate-900 text-sm">
+                                    <td className="py-6 text-right font-bold text-slate-800 text-sm">
                                         {formatCurrency(amount)}
                                     </td>
                                 </tr>
@@ -243,16 +243,16 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                                 <table className="w-full text-[12px] border-collapse">
                                     <thead>
                                         <tr className="border-b border-slate-200">
-                                            <th className="text-left py-2 text-slate-400 font-bold uppercase text-[9px] tracking-wider">Tax Component</th>
-                                            <th className="text-center py-2 text-slate-400 font-bold uppercase text-[9px] tracking-wider">Rate</th>
-                                            <th className="text-right py-2 text-slate-400 font-bold uppercase text-[9px] tracking-wider">Tax Amount</th>
+                                            <th className="text-left py-2 text-slate-400 font-bold uppercase text-xs tracking-wider">Tax Component</th>
+                                            <th className="text-center py-2 text-slate-400 font-bold uppercase text-xs tracking-wider">Rate</th>
+                                            <th className="text-right py-2 text-slate-400 font-bold uppercase text-xs tracking-wider">Tax Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
                                         <tr className="border-b border-dashed border-slate-100">
                                             <td className="py-2 text-slate-500 font-bold">Subtotal:</td>
                                             <td className="py-2 text-center text-slate-500">-</td>
-                                            <td className="py-2 text-right text-slate-900 font-bold">{formatCurrency(amount)}</td>
+                                            <td className="py-2 text-right text-slate-800 font-bold">{formatCurrency(amount)}</td>
                                         </tr>
                                         {(Number(subscription.discountPercentage || 0) > 0 || Number(discountAmount || 0) > 0) ? (
                                             <tr className="border-b border-dashed border-slate-100 text-emerald-600">
@@ -265,9 +265,9 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                                         ) : null}
                                         {taxSplit.components.map((comp: any, idx: number) => (
                                             <tr key={idx}>
-                                                <td className="py-2 text-slate-600 font-semibold uppercase text-[10px]">{comp.label}</td>
+                                                <td className="py-2 text-slate-600 font-semibold uppercase text-xs">{comp.label}</td>
                                                 <td className="py-2 text-center text-slate-500 font-bold">{comp.rate}%</td>
-                                                <td className="py-2 text-right text-slate-900 font-bold">{formatCurrency(comp.amount)}</td>
+                                                <td className="py-2 text-right text-slate-800 font-bold">{formatCurrency(comp.amount)}</td>
                                             </tr>
                                         ))}
                                         {Math.abs(roundOff) > 0.01 && (
@@ -282,17 +282,17 @@ export const SubscriptionInvoiceTemplate = forwardRef<
 
                                 {/* Total Amount Band - Matched to Screenshot */}
                                 <div className="flex justify-between items-center bg-gray-900 rounded-xl px-4 py-3 mt-4 shadow-lg print:bg-gray-900 print:print-color-adjust-exact">
-                                    <span className="font-black text-white uppercase text-[10px] tracking-widest">
+                                    <span className="font-semibold text-white uppercase text-xs tracking-widest">
                                         Total Paid:
                                     </span>
-                                    <span className="font-black text-white text-xl">
+                                    <span className="font-semibold text-white text-xl">
                                         {formatCurrency(roundedTotal)}
                                     </span>
                                 </div>
 
                                 <div className="mt-4 text-right">
-                                    <p className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.2em] mb-1">Amount in Words:</p>
-                                    <p className="text-[11px] font-bold text-slate-800 leading-tight italic">{subscription.amountInWords}</p>
+                                    <p className="text-xs font-bold text-slate-300 uppercase tracking-[0.2em] mb-1">Amount in Words:</p>
+                                    <p className="text-xs font-bold text-slate-800 leading-tight italic">{subscription.amountInWords}</p>
                                 </div>
                             </div>
                         </div>
@@ -306,15 +306,15 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                         <div className="grid grid-cols-2 gap-8">
                             <div className="space-y-4">
                                 <div>
-                                    <h4 className="font-bold uppercase text-[10px] opacity-60 tracking-wider mb-1">
+                                    <h4 className="font-bold uppercase text-xs opacity-60 tracking-wider mb-1">
                                         Governance Note:
                                     </h4>
-                                    <p className="text-[10px] opacity-90 leading-relaxed italic">
+                                    <p className="text-xs opacity-90 leading-relaxed italic">
                                         This is an electronically generated document. No physical signature is required for authentication.
                                     </p>
                                 </div>
                                 {(subscription.razorpayOrderId || subscription.razorpayPaymentId) && (
-                                    <div className="text-[9px] font-bold opacity-50 space-y-1 border-t border-white/20 pt-3 uppercase tracking-widest">
+                                    <div className="text-xs font-bold opacity-50 space-y-1 border-t border-white/20 pt-3 uppercase tracking-widest">
                                         {subscription.razorpayOrderId && <p>Order Ref: {subscription.razorpayOrderId}</p>}
                                         {subscription.razorpayPaymentId && <p>Network ID: {subscription.razorpayPaymentId}</p>}
                                     </div>
@@ -324,19 +324,19 @@ export const SubscriptionInvoiceTemplate = forwardRef<
                             <div className="text-right">
                                 {hasBankDetails && bankDetails && (
                                     <div className="space-y-1">
-                                        <h4 className="font-bold uppercase text-[10px] opacity-60 tracking-wider mb-2 underline decoration-white/30 underline-offset-4">
+                                        <h4 className="font-bold uppercase text-xs opacity-60 tracking-wider mb-2 underline decoration-white/30 underline-offset-4">
                                             Settlement Details:
                                         </h4>
-                                        <div className="text-[11px] font-bold space-y-0.5 opacity-95">
+                                        <div className="text-xs font-bold space-y-0.5 opacity-95">
                                             {bankDetails.accountHolderName && (
-                                                <p className="text-[10px] mb-1 opacity-80 uppercase tracking-tight">{bankDetails.accountHolderName}</p>
+                                                <p className="text-xs mb-1 opacity-80 uppercase tracking-tight">{bankDetails.accountHolderName}</p>
                                             )}
                                             <p className="font-bold text-base mb-1">{bankDetails.bankName}</p>
-                                            <p><span className="opacity-60 text-[9px] uppercase font-black mr-2">A/C</span> {bankDetails.accountNumber}</p>
-                                            <p><span className="opacity-60 text-[9px] uppercase font-black mr-2">IFSC</span> {bankDetails.ifscCode}</p>
-                                            <p><span className="opacity-60 text-[9px] uppercase font-black mr-2">Node</span> {bankDetails.branchName}</p>
+                                            <p><span className="opacity-60 text-xs uppercase font-semibold mr-2">A/C</span> {bankDetails.accountNumber}</p>
+                                            <p><span className="opacity-60 text-xs uppercase font-semibold mr-2">IFSC</span> {bankDetails.ifscCode}</p>
+                                            <p><span className="opacity-60 text-xs uppercase font-semibold mr-2">Node</span> {bankDetails.branchName}</p>
                                             {bankDetails.upiId && (
-                                                <p className="mt-1"><span className="opacity-60 text-[9px] uppercase font-black mr-2">UPI</span> {bankDetails.upiId}</p>
+                                                <p className="mt-1"><span className="opacity-60 text-xs uppercase font-semibold mr-2">UPI</span> {bankDetails.upiId}</p>
                                             )}
                                         </div>
                                     </div>

@@ -30,7 +30,7 @@ export function SettingsMasterBanner({
                         <Icon size={24} />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-lg">{title}</h3>
+                        <h3 className="font-bold text-gray-800 text-lg">{title}</h3>
                         <p className="text-xs text-gray-500">{description}</p>
                     </div>
                 </div>

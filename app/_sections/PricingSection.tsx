@@ -88,7 +88,7 @@ export default function PricingSection() {
         <section id="pricing" className="bg-white py-12 sm:py-16">
             <div className="container mx-auto px-4">
                 <div className="mb-10 text-center">
-                    <h2 className="mb-4 text-3xl font-black text-slate-900 sm:text-5xl uppercase tracking-tighter">
+                    <h2 className="mb-4 text-3xl font-semibold text-slate-800 sm:text-5xl uppercase tracking-tighter">
                         Pricing <span className="text-[#3882a5]">Plans</span>
                     </h2>
                     <p className="mx-auto max-w-2xl text-slate-600 text-lg sm:text-xl font-medium leading-relaxed max-w-3xl">
@@ -110,23 +110,23 @@ export default function PricingSection() {
                             >
                             {plan.isPopular && (
                                 <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2 transform">
-                                    <Badge className="bg-[#3882a5] px-4 py-1 text-white shadow-md rounded-full border-none font-black text-[10px] uppercase tracking-widest">
+                                    <Badge className="bg-[#3882a5] px-4 py-1 text-white shadow-md rounded-full border-none font-semibold text-xs uppercase tracking-widest">
                                         Most Popular
                                     </Badge>
                                 </div>
                             )}
                             <CardHeader className="pb-8 text-center pt-10 px-6">
-                                <CardTitle className="text-xl font-black uppercase tracking-tight text-slate-900 flex items-center justify-center">
+                                <CardTitle className="text-xl font-semibold uppercase tracking-tight text-slate-800 flex items-center justify-center">
                                     {plan.name}
                                     {String(plan._id) === String(currentPlanId) && (
-                                        <Badge className="ml-2 bg-emerald-500/10 text-emerald-600 text-[9px] font-bold border-none uppercase tracking-widest px-2">
+                                        <Badge className="ml-2 bg-emerald-500/10 text-emerald-600 text-xs font-bold border-none uppercase tracking-widest px-2">
                                             Current
                                         </Badge>
                                     )}
                                 </CardTitle>
                                 <div className="mt-4 flex flex-col items-center min-h-[110px] justify-center">
                                     {plan.name === 'Enterprise' ? (
-                                        <span className="text-slate-900 text-3xl font-black uppercase">Contact Sales</span>
+                                        <span className="text-slate-800 text-3xl font-semibold uppercase">Contact Sales</span>
                                     ) : (
                                         <>
                                             <div className="flex flex-col items-center">
@@ -136,7 +136,7 @@ export default function PricingSection() {
                                                     </span>
                                                 ) : null}
                                                 <div className="flex items-baseline gap-1">
-                                                    <span className="text-slate-900 text-4xl sm:text-5xl font-black tracking-tight">
+                                                    <span className="text-slate-800 text-4xl sm:text-5xl font-semibold tracking-tight">
                                                         {formatCurrency(plan.amount - (plan.amount * (plan.discountPercentage || 0) / 100), plan.currency)}
                                                     </span>
                                                     <span className="text-slate-400 font-bold text-xs sm:text-sm whitespace-nowrap">
@@ -145,7 +145,7 @@ export default function PricingSection() {
                                                 </div>
                                             </div>
                                             {!!plan.discountPercentage && plan.discountPercentage > 0 && (
-                                                <Badge className="mt-3 bg-green-500/10 text-green-600 text-[9px] sm:text-[10px] font-bold border-none uppercase tracking-widest px-3">
+                                                <Badge className="mt-3 bg-green-500/10 text-green-600 text-xs sm:text-xs font-bold border-none uppercase tracking-widest px-3">
                                                     SAVE {plan.discountPercentage}%
                                                 </Badge>
                                             )}
@@ -158,7 +158,7 @@ export default function PricingSection() {
                             </CardHeader>
                             <CardContent className="flex flex-col flex-1 px-8 pb-10">
                                 <Button
-                                    className="mb-8 w-full bg-[#074463] hover:bg-[#074463]/90 text-white h-14 rounded-2xl text-lg font-black transition-all hover:scale-[1.02] uppercase tracking-wider"
+                                    className="mb-8 w-full bg-[#074463] hover:bg-[#074463]/90 text-white h-14 rounded-2xl text-lg font-semibold transition-all hover:scale-[1.02] uppercase tracking-wider"
                                     onClick={() => handleGoToSubscriptionPlan(plan)}
                                 >
                                     {String(plan._id) === String(currentPlanId)

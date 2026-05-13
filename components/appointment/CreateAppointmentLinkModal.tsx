@@ -496,7 +496,7 @@ export function CreateAppointmentLinkModal({
                                             foundVisitor={foundVisitor}
                                         />
                                     )}
-                                    <p className="text-[11px] text-muted-foreground">
+                                    <p className="text-xs text-muted-foreground">
                                         The link is shared on SMS when it is enabled for your workspace.
                                     </p>
                                 </div>

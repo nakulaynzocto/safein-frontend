@@ -194,7 +194,7 @@ export function DataTable<T extends Record<string, any>>({
                     minWidth: minWidth
                 }}
             >
-                <thead className="bg-muted/80 border-border text-muted-foreground border-b text-[10px] font-bold tracking-wider uppercase">
+                <thead className="bg-muted/80 border-border text-muted-foreground border-b text-xs font-bold tracking-wider uppercase">
                     <tr>
                         {columns.map((column, index) => (
                             <th

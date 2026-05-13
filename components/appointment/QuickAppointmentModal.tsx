@@ -291,7 +291,7 @@ export function QuickAppointmentModal({
                                 variant="avatar"
                             />
                         </div>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                             Please capture or upload a clear photo of the visitor.
                         </p>
                         {errors.visitorPhoto && (
@@ -395,7 +395,7 @@ export function QuickAppointmentModal({
                                         <ClipboardList className="h-4 w-4 shrink-0" />
                                         Add vehicle, address and notes
                                     </Label>
-                                    <p className="text-[11px] font-medium text-muted-foreground">
+                                    <p className="text-xs font-medium text-muted-foreground">
                                         Optional — Vehicle number, address, and extra notes for this visit
                                     </p>
                                 </div>
@@ -439,7 +439,7 @@ export function QuickAppointmentModal({
                                     <div className="space-y-2">
                                         <Label className="text-sm font-medium">
                                             Address{" "}
-                                            <span className="text-muted-foreground text-[10px] font-normal">(Optional)</span>
+                                            <span className="text-muted-foreground text-xs font-normal">(Optional)</span>
                                         </Label>
                                         <Textarea
                                             placeholder="Enter visitor address"
@@ -455,7 +455,7 @@ export function QuickAppointmentModal({
                                     <div className="space-y-2">
                                         <Label className="text-sm font-medium">
                                             Notes{" "}
-                                            <span className="text-muted-foreground text-[10px] font-normal">(Optional)</span>
+                                            <span className="text-muted-foreground text-xs font-normal">(Optional)</span>
                                         </Label>
                                         <Textarea
                                             placeholder="Add any notes here..."

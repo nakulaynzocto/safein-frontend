@@ -127,7 +127,7 @@ export function Header({ shouldShowWhiteNavbar = true }: HeaderProps) {
                 >
                     <MessageSquare className="h-5 w-5" />
                     {unreadMessagesCount > 0 && (
-                        <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white shadow-sm">
+                        <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-xs font-bold text-white shadow-sm">
                             {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
                         </span>
                     )}
@@ -216,7 +216,7 @@ export function Header({ shouldShowWhiteNavbar = true }: HeaderProps) {
 
                     <div className="py-2">
                         <div className="px-4 py-1.5">
-                            <p className="text-[15px] font-bold text-[#161718]">Account</p>
+                            <p className="text-sm font-bold text-[#161718]">Account</p>
                             {!isEmployee && (isTrialingSubscription || !hasActiveSubscription) && (
                                 <div className="flex items-center gap-1.5 mt-1.5 group cursor-pointer" onClick={handleOpenUpgradeModal}>
                                     <div className="h-3 w-3 bg-[#e68a00] rounded-[2px]" />
@@ -252,7 +252,7 @@ export function Header({ shouldShowWhiteNavbar = true }: HeaderProps) {
                     </div>
 
                     <div className="py-2 border-t border-border">
-                        <p className="px-4 py-1.5 text-[15px] font-bold text-[#161718]">Manage</p>
+                        <p className="px-4 py-1.5 text-sm font-bold text-[#161718]">Manage</p>
                         <DropdownMenuItem 
                             onClick={() => dispatch(toggleAssistant())}
                             className="px-4 py-1.5 focus:bg-[#f3f6f8] focus:text-[#0a66c2] cursor-pointer group transition-colors"

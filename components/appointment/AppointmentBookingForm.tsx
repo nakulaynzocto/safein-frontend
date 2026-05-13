@@ -181,7 +181,7 @@ export function AppointmentBookingForm({
                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
                                 <User className="h-4 w-4" />
                             </div>
-                            <span className="min-w-0 truncate text-sm font-semibold text-slate-900">
+                            <span className="min-w-0 truncate text-sm font-semibold text-slate-800">
                                 {visitorName || visitorPhone || "Visitor"}
                             </span>
                         </div>
@@ -226,7 +226,7 @@ export function AppointmentBookingForm({
                                                         >
                                                             <div className="flex flex-col text-left">
                                                                 <span className="text-sm font-bold truncate">{emp.name}</span>
-                                                                <span className="text-[10px] opacity-70 truncate">
+                                                                <span className="text-xs opacity-70 truncate">
                                                                     {emp.department} {emp.designation ? `· ${emp.designation}` : ""}
                                                                 </span>
                                                             </div>
@@ -239,7 +239,7 @@ export function AppointmentBookingForm({
                                                 )}
                                             </SelectContent>
                                         </Select>
-                                        {employees.length > 0 && <p className="px-1 text-[10px] font-medium text-slate-400">Choose the person you are here to meet.</p>}
+                                        {employees.length > 0 && <p className="px-1 text-xs font-medium text-slate-400">Choose the person you are here to meet.</p>}
                                     </div>
                                 )}
                             />
@@ -248,11 +248,11 @@ export function AppointmentBookingForm({
                                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#3882a5]/10 text-[#3882a5]">
                                     <User className="h-4 w-4" />
                                 </div>
-                                <span className="min-w-0 truncate text-sm font-semibold text-slate-900">{employeeName || "Employee"}</span>
+                                <span className="min-w-0 truncate text-sm font-semibold text-slate-800">{employeeName || "Employee"}</span>
                             </div>
                         )}
                         {errors.employeeId && (
-                            <span className="text-[10px] font-bold text-destructive uppercase tracking-wide px-1 block mt-1">
+                            <span className="text-xs font-bold text-destructive uppercase tracking-wide px-1 block mt-1">
                                 {errors.employeeId.message}
                             </span>
                         )}

@@ -42,7 +42,7 @@ export function SplashScreen() {
 
                 {/* Brand Name */}
                 <div className="flex flex-col items-center gap-1 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                    <h1 className="text-3xl font-bold tracking-tight text-gray-800 sm:text-4xl">
                         Safe<span className="text-[#3882a5]">In</span>
                     </h1>
                     <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-400 sm:text-sm">
@@ -58,7 +58,7 @@ export function SplashScreen() {
 
             {/* Powered by Aynzo */}
             <div className="absolute bottom-8 flex flex-col items-center gap-1 opacity-60">
-                <span className="text-[10px] font-medium uppercase tracking-widest text-gray-400">Powered by</span>
+                <span className="text-xs font-medium uppercase tracking-widest text-gray-400">Powered by</span>
                 <span className="text-sm font-bold text-gray-600">Aynzo</span>
             </div>
 

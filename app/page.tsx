@@ -337,14 +337,14 @@ export default function HomePage() {
                                 <div className="mb-8 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
                                     <div className="badge-glass flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all hover:bg-white/10">
                                         <Star className="h-3.5 w-3.5 fill-current text-[#3882a5]" />
-                                        <span className="text-[11px] font-bold text-white uppercase tracking-wider">4.9/5 Rating</span>
+                                        <span className="text-xs font-bold text-white uppercase tracking-wider">4.9/5 Rating</span>
                                     </div>
-                                    <div className="badge-glass rounded-full px-3 py-1.5 text-[11px] font-bold text-gray-200 uppercase tracking-wider">
+                                    <div className="badge-glass rounded-full px-3 py-1.5 text-xs font-bold text-gray-200 uppercase tracking-wider">
                                         1000+ Enterprises Trusted
                                     </div>
                                 </div>
 
-                                <h1 className="animate-hero-title mb-6 px-1 text-3xl font-black tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl lg:leading-[1.1]">
+                                <h1 className="animate-hero-title mb-6 px-1 text-3xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl lg:leading-[1.1]">
                                     <span className="text-premium-gradient">Smart Visitor</span> <br />
                                     <span className="text-white lg:opacity-90">Management for Offices</span>
                                 </h1>
@@ -401,7 +401,7 @@ export default function HomePage() {
                 <section id="core-features" className="relative overflow-hidden bg-white py-12 sm:py-16">
                     <div className="container relative z-10 mx-auto px-4 sm:px-6">
                         <div className="mb-12 text-center">
-                            <h2 className="mb-4 text-3xl font-black text-slate-900 sm:text-5xl">
+                            <h2 className="mb-4 text-3xl font-semibold text-slate-800 sm:text-5xl">
                                 Powerful <span className="text-[#3882a5]">Core Features</span>
                             </h2>
                             <p className="mx-auto max-w-2xl text-slate-600 text-lg sm:text-xl font-medium leading-relaxed max-w-3xl">
@@ -436,8 +436,8 @@ export default function HomePage() {
                                         </div>
                                         <div className="flex flex-col">
                                             <h3 className={cn(
-                                                "mb-2 text-2xl font-black tracking-tight transition-colors duration-300",
-                                                featuresActiveStep === idx ? "text-slate-900" : "text-slate-700"
+                                                "mb-2 text-2xl font-semibold tracking-tight transition-colors duration-300",
+                                                featuresActiveStep === idx ? "text-slate-800" : "text-slate-700"
                                             )}>
                                                 {step.title}
                                             </h3>
@@ -506,8 +506,8 @@ export default function HomePage() {
                                             </div>
                                             <div className="flex flex-col">
                                                 <h3 className={cn(
-                                                    "mb-2 text-2xl font-black tracking-tight transition-colors duration-300",
-                                                    featuresActiveStep === actualIdx ? "text-slate-900" : "text-slate-700"
+                                                    "mb-2 text-2xl font-semibold tracking-tight transition-colors duration-300",
+                                                    featuresActiveStep === actualIdx ? "text-slate-800" : "text-slate-700"
                                                 )}>
                                                     {step.title}
                                                 </h3>
@@ -529,7 +529,7 @@ export default function HomePage() {
                 <section id="faq" className="bg-slate-50/50 py-12 sm:py-24">
                     <div className="container mx-auto px-4">
                         <div className="mb-16 text-center">
-                            <h2 className="mb-4 text-3xl font-black text-slate-900 sm:text-5xl uppercase tracking-tight">
+                            <h2 className="mb-4 text-3xl font-semibold text-slate-800 sm:text-5xl uppercase tracking-tight">
                                 Frequently Asked <span className="text-[#3882a5]">Questions</span>
                             </h2>
                             <p className="mx-auto max-w-2xl text-slate-600 text-lg font-medium">
@@ -541,7 +541,7 @@ export default function HomePage() {
                             {faqs.map((faq, idx) => (
                                 <details key={idx} className="group bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden transition-all duration-500 hover:shadow-xl">
                                     <summary className="flex items-center justify-between p-6 sm:p-8 cursor-pointer list-none">
-                                        <h3 className="text-lg sm:text-xl font-black text-[#074463] pr-4 uppercase tracking-tighter transition-colors group-hover:text-[#3882a5]">
+                                        <h3 className="text-lg sm:text-xl font-semibold text-[#074463] pr-4 uppercase tracking-tighter transition-colors group-hover:text-[#3882a5]">
                                             {faq.question}
                                         </h3>
                                         <div className="bg-slate-50 rounded-full p-2 transition-transform duration-500 group-open:rotate-180">

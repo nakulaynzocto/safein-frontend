@@ -68,7 +68,7 @@ export function InlineCameraView({
                     <X className="h-5 w-5" />
                 </button>
                 <div className="flex flex-col items-center">
-                    <span className="text-white text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Photo Mode</span>
+                    <span className="text-white text-xs font-semibold uppercase tracking-[0.2em] opacity-60">Photo Mode</span>
                     <span className="text-white text-sm font-bold uppercase tracking-widest">Capture Image</span>
                 </div>
                 <button
@@ -127,7 +127,7 @@ export function InlineCameraView({
                         <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center">
                             <ImageIcon className="h-5 w-5" />
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider">Gallery</span>
+                        <span className="text-xs font-bold uppercase tracking-wider">Gallery</span>
                     </button>
 
                     <button
@@ -144,7 +144,7 @@ export function InlineCameraView({
                         <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center">
                             <RotateCw className="h-5 w-5" />
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider">Flip</span>
+                        <span className="text-xs font-bold uppercase tracking-wider">Flip</span>
                     </button>
                 </div>
             )}
@@ -373,7 +373,7 @@ export function ImageUploadField({
                 {(isUploading || isImageLoading) && (
                     <div className={cn("absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white z-10", variant !== "avatar" ? "rounded-2xl" : "rounded-full")}>
                         <Loader2 className="h-8 w-8 animate-spin mb-2" />
-                        <p className="text-[10px] font-bold uppercase tracking-widest">Uploading...</p>
+                        <p className="text-xs font-bold uppercase tracking-widest">Uploading...</p>
                     </div>
                 )}
 
@@ -385,7 +385,7 @@ export function ImageUploadField({
             </div>
 
             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) processFile(f); }} />
-            {errors?.message && <p className="text-[10px] font-bold text-red-500 mt-2">{errors.message}</p>}
+            {errors?.message && <p className="text-xs font-bold text-red-500 mt-2">{errors.message}</p>}
         </div>
     );
 }

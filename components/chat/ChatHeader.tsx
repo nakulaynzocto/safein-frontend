@@ -29,11 +29,11 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             {/* Content */}
             <div className="relative z-10 flex flex-col">
                 <div className="flex items-center gap-2 mb-0.5">
-                    <h3 className="text-white font-black text-lg tracking-tight">
+                    <h3 className="text-white font-semibold text-lg tracking-tight">
                         Verified Support
                     </h3>
                 </div>
-                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Expert Agents Online</p>
+                <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest">Expert Agents Online</p>
             </div>
 
             <div className="relative z-10 flex items-center gap-1.5">

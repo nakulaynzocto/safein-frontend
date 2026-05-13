@@ -158,7 +158,7 @@ export default function VisitorSettingsPage() {
                                             <Badge variant="secondary" className="bg-[#3882a5]/5 text-[#3882a5] hover:bg-[#3882a5]/10 border-[#3882a5]/20 gap-1.5 py-1 px-3 rounded-full text-foreground">
                                                 <Clipboard className="h-3.5 w-3.5" />
                                                 <span className="font-bold">{appointmentCheck?.count || 0}</span>
-                                                <span className="text-[10px] opacity-70 border-l pl-1.5 ml-0.5">Total Visits</span>
+                                                <span className="text-xs opacity-70 border-l pl-1.5 ml-0.5">Total Visits</span>
                                             </Badge>
                                         </div>
                                     </div>
@@ -193,10 +193,10 @@ export default function VisitorSettingsPage() {
                                             <User className="h-5 w-5" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Personal</p>
+                                            <p className="text-xs text-muted-foreground uppercase font-semibold tracking-widest">Personal</p>
                                             <div className="space-y-1 mt-1">
                                                 <p className="text-sm font-bold capitalize">{visitor.gender || "N/A"}</p>
-                                                <p className="text-[11px] text-muted-foreground">Gender Identity</p>
+                                                <p className="text-xs text-muted-foreground">Gender Identity</p>
                                             </div>
                                         </div>
                                     </div>
@@ -206,12 +206,12 @@ export default function VisitorSettingsPage() {
                                             <MapPin className="h-5 w-5" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Location</p>
+                                            <p className="text-xs text-muted-foreground uppercase font-semibold tracking-widest">Location</p>
                                             <div className="space-y-1 mt-1">
                                                 <p className="text-sm font-bold">
                                                     {[visitor.address?.city, visitor.address?.state, visitor.address?.country].filter(Boolean).join(", ")}
                                                 </p>
-                                                <p className="text-[11px] text-muted-foreground">{visitor.address?.street || "No street address provided"}</p>
+                                                <p className="text-xs text-muted-foreground">{visitor.address?.street || "No street address provided"}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -223,10 +223,10 @@ export default function VisitorSettingsPage() {
                                             <CreditCard className="h-5 w-5" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Identification</p>
+                                            <p className="text-xs text-muted-foreground uppercase font-semibold tracking-widest">Identification</p>
                                             <div className="space-y-1 mt-1">
                                                 <p className="text-sm font-bold uppercase">{visitor.idProof?.type?.replace("_", " ") || "N/A"}</p>
-                                                <p className="text-[11px] text-muted-foreground font-mono">{visitor.idProof?.number || "No ID number on file"}</p>
+                                                <p className="text-xs text-muted-foreground font-mono">{visitor.idProof?.number || "No ID number on file"}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -237,7 +237,7 @@ export default function VisitorSettingsPage() {
                                                 <FileText className="h-5 w-5" />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Documents</p>
+                                                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-widest">Documents</p>
                                                 <div className="mt-1">
                                                     <button 
                                                         onClick={() => window.open(visitor.photo, "_blank")}
@@ -282,9 +282,9 @@ export default function VisitorSettingsPage() {
                                 <div className="h-8 w-8 bg-blue-50 rounded-lg flex items-center justify-center text-[#3882a5]">
                                     <Clock className="h-4 w-4" />
                                 </div>
-                                <CardTitle className="text-lg font-black uppercase tracking-tight">Quick Actions</CardTitle>
+                                <CardTitle className="text-lg font-semibold uppercase tracking-tight">Quick Actions</CardTitle>
                             </div>
-                            <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-11">Manage visitor status</CardDescription>
+                            <CardDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-11">Manage visitor status</CardDescription>
                         </CardHeader>
                         <CardContent className="grid gap-3 p-8 pt-2">
                             <Button 
@@ -295,7 +295,7 @@ export default function VisitorSettingsPage() {
                                 <div className="h-8 w-8 rounded-xl bg-white border border-gray-100 flex items-center justify-center mr-3 shadow-sm group-hover:scale-110 transition-transform">
                                     <Edit className="h-4 w-4 text-gray-400 group-hover:text-[#3882a5]" />
                                 </div>
-                                <span className="text-[11px] font-black uppercase tracking-widest text-gray-700">Update Profile</span>
+                                <span className="text-xs font-semibold uppercase tracking-widest text-gray-700">Update Profile</span>
                             </Button>
 
                             {visitor.blacklisted ? (
@@ -307,7 +307,7 @@ export default function VisitorSettingsPage() {
                                     <div className="h-8 w-8 rounded-xl bg-white border border-emerald-100 flex items-center justify-center mr-3 shadow-sm group-hover:scale-110 transition-transform">
                                         <UserCheck className="h-4 w-4 text-emerald-500" />
                                     </div>
-                                    <span className="text-[11px] font-black uppercase tracking-widest text-emerald-700">Unblock Visitor</span>
+                                    <span className="text-xs font-semibold uppercase tracking-widest text-emerald-700">Unblock Visitor</span>
                                 </Button>
                             ) : (
                                 <Button 
@@ -318,7 +318,7 @@ export default function VisitorSettingsPage() {
                                     <div className="h-8 w-8 rounded-xl bg-white border border-orange-100 flex items-center justify-center mr-3 shadow-sm group-hover:scale-110 transition-transform">
                                         <UserMinus className="h-4 w-4 text-orange-500" />
                                     </div>
-                                    <span className="text-[11px] font-black uppercase tracking-widest text-orange-700">Block Visitor</span>
+                                    <span className="text-xs font-semibold uppercase tracking-widest text-orange-700">Block Visitor</span>
                                 </Button>
                             )}
                             
@@ -340,13 +340,13 @@ export default function VisitorSettingsPage() {
                                     )}>
                                         <Trash2 className="h-4 w-4" />
                                     </div>
-                                    <span className="text-[11px] font-black uppercase tracking-widest">
+                                    <span className="text-xs font-semibold uppercase tracking-widest">
                                         {appointmentCheck?.hasAppointments ? 'Deletion Restricted' : 'Delete Record'}
                                     </span>
                                 </Button>
                                 {appointmentCheck?.hasAppointments && (
                                     <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.05em] flex items-start gap-2">
+                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-[0.05em] flex items-start gap-2">
                                             <AlertCircle size={12} className="shrink-0 mt-0.5 opacity-50 text-red-500" />
                                             Physical records identified. Permanent deletion is locked due to active appointment lineage.
                                         </p>
@@ -364,8 +364,8 @@ export default function VisitorSettingsPage() {
                                     <Calendar className="h-4 w-4 text-[#3882a5]" />
                                 </div>
                                 <div className="space-y-0.5">
-                                    <p className="text-[9px] text-[#3882a5] uppercase font-black tracking-widest leading-none mb-1">Registration Index</p>
-                                    <p className="font-black text-gray-900 tracking-tight">{formatDate(visitor.createdAt)}</p>
+                                    <p className="text-xs text-[#3882a5] uppercase font-semibold tracking-widest leading-none mb-1">Registration Index</p>
+                                    <p className="font-semibold text-gray-800 tracking-tight">{formatDate(visitor.createdAt)}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 text-sm group">
@@ -373,8 +373,8 @@ export default function VisitorSettingsPage() {
                                     <ShieldCheck className="h-4 w-4 text-[#3882a5]" />
                                 </div>
                                 <div className="space-y-0.5 text-foreground">
-                                    <p className="text-[9px] text-[#3882a5] uppercase font-black tracking-widest leading-none mb-1">Activity Heartbeat</p>
-                                    <p className="font-black text-gray-900 tracking-tight">{formatDate(visitor.updatedAt)}</p>
+                                    <p className="text-xs text-[#3882a5] uppercase font-semibold tracking-widest leading-none mb-1">Activity Heartbeat</p>
+                                    <p className="font-semibold text-gray-800 tracking-tight">{formatDate(visitor.updatedAt)}</p>
                                 </div>
                             </div>
                         </CardContent>

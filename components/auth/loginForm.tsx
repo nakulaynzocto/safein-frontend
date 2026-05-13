@@ -151,7 +151,7 @@ export function LoginForm() {
     return (
         <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="mb-8 text-center sm:text-left">
-                <h1 className="text-3xl font-black text-[#074463] tracking-tight">Login</h1>
+                <h1 className="text-3xl font-semibold text-[#074463] tracking-tight">Login</h1>
                 <p className="text-slate-500 mt-2 font-medium text-sm sm:text-base">
                     Welcome back! Sign in to manage your visitors.
                 </p>
@@ -183,7 +183,7 @@ export function LoginForm() {
                     <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t border-slate-100" />
                     </div>
-                    <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
+                    <div className="relative flex justify-center text-xs uppercase font-bold tracking-widest">
                         <span className="bg-white px-4 text-slate-400">Or use email</span>
                     </div>
                 </div>
@@ -252,7 +252,7 @@ export function LoginForm() {
 
                         <Button
                             type="submit"
-                            className="w-full h-12 rounded-xl font-black bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                            className="w-full h-12 rounded-xl font-semibold bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                             disabled={isLoading || isGoogleLoading}
                         >
                             {isLoading && <Loader2 className="h-5 w-5 animate-spin" />}
@@ -266,7 +266,7 @@ export function LoginForm() {
                         Don't have an account?{" "}
                         <Link
                             href={routes.publicroute.REGISTER}
-                            className="text-[#3882a5] font-black hover:underline"
+                            className="text-[#3882a5] font-semibold hover:underline"
                             prefetch={true}
                         >
                             Create an account

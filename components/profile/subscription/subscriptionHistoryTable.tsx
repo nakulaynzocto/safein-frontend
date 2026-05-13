@@ -114,7 +114,7 @@ export const SubscriptionHistoryTable = ({
     if (!data || data.length === 0) {
         return (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                <h4 className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
                     <History className="text-gray-500" size={20} />
                     Subscription History
                 </h4>
@@ -134,11 +134,11 @@ export const SubscriptionHistoryTable = ({
             className: "px-2 py-3 text-left align-top w-[20%]",
             cell: (item: SubscriptionItem) => (
                 <div className="flex flex-col min-w-[100px]">
-                    <span className="font-bold text-gray-900 capitalize text-xs hover:text-clip overflow-hidden">
+                    <span className="font-bold text-gray-800 capitalize text-xs hover:text-clip overflow-hidden">
                         {item.planName || item.planType}
                     </span>
                     {item.amount === 0 && (
-                        <span className="text-[9px] text-gray-500 font-bold uppercase mt-0.5 leading-tight">
+                        <span className="text-xs text-gray-500 font-bold uppercase mt-0.5 leading-tight">
                             Manual
                         </span>
                     )}
@@ -149,7 +149,7 @@ export const SubscriptionHistoryTable = ({
             header: "Start",
             className: "px-2 py-3 text-left align-top whitespace-nowrap w-[12%]",
             cell: (item: SubscriptionItem) => (
-                <span className="text-gray-500 text-[11px] font-bold">
+                <span className="text-gray-500 text-xs font-bold">
                     {formatDate(item.startDate)}
                 </span>
             ),
@@ -158,7 +158,7 @@ export const SubscriptionHistoryTable = ({
             header: "Expires",
             className: "px-2 py-3 text-left align-top whitespace-nowrap w-[12%]",
             cell: (item: SubscriptionItem) => (
-                <span className="text-gray-500 text-[11px] font-bold">
+                <span className="text-gray-500 text-xs font-bold">
                     {formatDate(item.endDate)}
                 </span>
             ),
@@ -167,7 +167,7 @@ export const SubscriptionHistoryTable = ({
             header: "Status",
             className: "px-2 py-3 text-left align-top whitespace-nowrap w-[15%]",
             cell: (item: SubscriptionItem) => (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border border-gray-200 bg-gray-50 text-gray-900 capitalize">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold border border-gray-200 bg-gray-50 text-gray-800 capitalize">
                     <div
                         className={cn(
                             "h-1.5 w-1.5 rounded-full",
@@ -188,7 +188,7 @@ export const SubscriptionHistoryTable = ({
             header: "Amt",
             className: "px-2 py-3 text-right align-top whitespace-nowrap w-[10%]",
             cell: (item: SubscriptionItem) => (
-                <span className="font-bold text-gray-900 text-xs">
+                <span className="font-bold text-gray-800 text-xs">
                     {item.amount !== null && item.amount !== undefined
                         ? item.amount > 0
                             ? formatCurrency(item.amount)
@@ -249,7 +249,7 @@ export const SubscriptionHistoryTable = ({
     return (
         <>
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 overflow-hidden">
-                <h4 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2 tracking-tight">
+                <h4 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 tracking-tight">
                     <History className="text-gray-500" size={20} />
                     Subscription History
                 </h4>
@@ -257,7 +257,7 @@ export const SubscriptionHistoryTable = ({
                 <div className="space-y-4">
                     <div className="overflow-x-auto rounded-xl border border-gray-200">
                         <table className="w-full text-left min-w-[600px] sm:min-w-full">
-                            <thead className="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider text-[10px] border-b border-gray-200">
+                            <thead className="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider text-xs border-b border-gray-200">
                                 <tr>
                                     {columns.map((col, index) => (
                                         <th key={index} className={col.className}>
@@ -307,8 +307,8 @@ export const SubscriptionHistoryTable = ({
                 >
                     <DialogHeader className="p-6 border-b border-gray-100 sticky top-0 bg-white/80 backdrop-blur-md z-50 flex flex-row items-center justify-between shadow-sm">
                         <div className="flex flex-col">
-                            <DialogTitle className="text-xl font-black text-gray-900 uppercase tracking-tighter">Tax Invoice</DialogTitle>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">Electronic Document System</p>
+                            <DialogTitle className="text-xl font-semibold text-gray-800 uppercase tracking-tighter">Tax Invoice</DialogTitle>
+                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-0.5">Electronic Document System</p>
                         </div>
                         <div className="flex items-center gap-3">
                             <Button
@@ -324,7 +324,7 @@ export const SubscriptionHistoryTable = ({
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => setIsViewOpen(false)}
-                                className="h-10 w-10 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-900 transition-all"
+                                className="h-10 w-10 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-800 transition-all"
                                 aria-label="Close"
                             >
                                 <X size={20} />

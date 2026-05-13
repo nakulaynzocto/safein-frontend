@@ -232,7 +232,7 @@ export function PricingModal({ open, onOpenChange, isRegistrationFlow = false }:
                                                 );
 
                                                 return (
-                                                    <div className="mt-1 flex flex-col items-center text-[10px] text-gray-400 font-medium">
+                                                    <div className="mt-1 flex flex-col items-center text-xs text-gray-400 font-medium">
                                                         <div className="flex justify-between w-32 border-b border-gray-100 pb-0.5">
                                                             <span>Base:</span>
                                                             <span>{formatCurrency(plan.amount, plan.currency)}</span>

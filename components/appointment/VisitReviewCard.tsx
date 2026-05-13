@@ -37,7 +37,7 @@ export function VisitReviewCard({ visitor, appointment, className }: VisitReview
                                 </AvatarFallback>
                             </Avatar>
                             <div>
-                                <h4 className="text-xl font-bold text-slate-900">{visitor.name}</h4>
+                                <h4 className="text-xl font-bold text-slate-800">{visitor.name}</h4>
                                 <p className="text-sm text-slate-500 font-medium">{visitor.phone}</p>
                                 {visitor.email && <p className="text-xs text-slate-400 mt-1">{visitor.email}</p>}
                             </div>
@@ -53,28 +53,28 @@ export function VisitReviewCard({ visitor, appointment, className }: VisitReview
                                 <Briefcase size={20} />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Host</p>
-                                <p className="text-sm font-bold text-slate-900 truncate">{appointment.hostName}</p>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Host</p>
+                                <p className="text-sm font-bold text-slate-800 truncate">{appointment.hostName}</p>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
                             <div className="p-3 bg-white rounded-2xl border border-slate-100">
                                 <Calendar className="h-4 w-4 text-slate-400 mb-2" />
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date</p>
-                                <p className="text-xs font-bold text-slate-900">{appointment.date}</p>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Date</p>
+                                <p className="text-xs font-bold text-slate-800">{appointment.date}</p>
                             </div>
                             <div className="p-3 bg-white rounded-2xl border border-slate-100">
                                 <Clock className="h-4 w-4 text-slate-400 mb-2" />
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Time</p>
-                                <p className="text-xs font-bold text-slate-900">{appointment.time}</p>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Time</p>
+                                <p className="text-xs font-bold text-slate-800">{appointment.time}</p>
                             </div>
                         </div>
 
                         <div className="p-3 bg-white rounded-2xl border border-slate-100">
                             <MessageSquare className="h-4 w-4 text-slate-400 mb-2" />
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Purpose</p>
-                            <p className="text-sm font-bold text-slate-900">{appointment.purpose}</p>
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Purpose</p>
+                            <p className="text-sm font-bold text-slate-800">{appointment.purpose}</p>
                         </div>
                     </CardContent>
                 </Card>

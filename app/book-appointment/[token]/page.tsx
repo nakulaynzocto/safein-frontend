@@ -150,11 +150,11 @@ export default function BookAppointmentPage() {
                             {company?.profilePicture ? <img src={company.profilePicture} className="h-full w-full object-contain p-1" /> : company?.companyName?.charAt(0)}
                         </div>
                         <div className="flex-1">
-                            <h1 className="text-2xl font-black text-slate-900 leading-tight">Welcome to <span className="text-[#3882a5]">{company?.companyName}</span></h1>
+                            <h1 className="text-2xl font-semibold text-slate-800 leading-tight">Welcome to <span className="text-[#3882a5]">{company?.companyName}</span></h1>
                             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 mt-1">
-                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Secure Entry Handshake</p>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Secure Entry Handshake</p>
                                 {appointmentLinkData?.expiresAt && (
-                                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-100">
+                                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-100">
                                         <Calendar className="h-3 w-3" />
                                         Valid until: {new Date(appointmentLinkData.expiresAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
                                     </span>
@@ -169,12 +169,12 @@ export default function BookAppointmentPage() {
                                 <User className="h-5 w-5" />
                             </div>
                             <div>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">You are meeting with</p>
-                                <p className="text-sm font-black text-slate-800 mt-0.5">{(appointmentLinkData?.employeeId as any)?.name || (appointmentLinkData as any)?.employee?.name || "Host"}</p>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-tight">You are meeting with</p>
+                                <p className="text-sm font-semibold text-slate-800 mt-0.5">{(appointmentLinkData?.employeeId as any)?.name || (appointmentLinkData as any)?.employee?.name || "Host"}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="px-3 py-1.5 bg-white rounded-lg border border-slate-200 text-[11px] font-bold text-slate-500 shadow-sm">Purpose: Office Visit</span>
+                            <span className="px-3 py-1.5 bg-white rounded-lg border border-slate-200 text-xs font-bold text-slate-500 shadow-sm">Purpose: Office Visit</span>
                         </div>
                     </div>
                 </Card>
@@ -232,7 +232,7 @@ export default function BookAppointmentPage() {
                         {step === "photo" && (
                             <div className="space-y-8 max-w-2xl mx-auto">
                                 <div className="text-center space-y-2">
-                                    <h3 className="text-xl font-black text-slate-900">Capture Visitor Photo</h3>
+                                    <h3 className="text-xl font-semibold text-slate-800">Capture Visitor Photo</h3>
                                     <p className="text-sm text-slate-500">A clear face photo is required for secure entry verification.</p>
                                 </div>
                                 
@@ -269,7 +269,7 @@ export default function BookAppointmentPage() {
                         {step === "review" && (
                             <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
                                 <div className="text-center space-y-2">
-                                    <h3 className="text-2xl font-black text-slate-900">Review & Confirm</h3>
+                                    <h3 className="text-2xl font-semibold text-slate-800">Review & Confirm</h3>
                                     <p className="text-sm text-slate-500">Please double check your visit details before submitting.</p>
                                 </div>
 

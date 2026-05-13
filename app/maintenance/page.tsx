@@ -36,7 +36,7 @@ export default function MaintenancePage() {
                         </div>
 
                         <div className="space-y-3">
-                            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
+                            <h1 className="text-4xl md:text-5xl font-semibold text-white tracking-tighter">
                                 System <span className="text-[#3882a5]">Upgrade</span>
                             </h1>
                             <p className="text-sm md:text-base text-slate-400 font-medium max-w-xl mx-auto leading-relaxed">
@@ -53,7 +53,7 @@ export default function MaintenancePage() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-white text-sm">Timeline</h3>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">30—45 mins</p>
+                                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">30—45 mins</p>
                                 </div>
                             </div>
                             
@@ -63,7 +63,7 @@ export default function MaintenancePage() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-white text-sm">Data Health</h3>
-                                    <p className="text-[10px] text-emerald-500/80 font-bold uppercase tracking-wider">Encrypted</p>
+                                    <p className="text-xs text-emerald-500/80 font-bold uppercase tracking-wider">Encrypted</p>
                                 </div>
                             </div>
                         </div>
@@ -73,7 +73,7 @@ export default function MaintenancePage() {
                             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                                 <Button 
                                     asChild
-                                    className="h-12 px-8 rounded-xl bg-[#3882a5] hover:bg-[#3882a5]/90 text-white font-bold text-[10px] uppercase tracking-widest shadow-lg shadow-[#3882a5]/20 active:scale-95"
+                                    className="h-12 px-8 rounded-xl bg-[#3882a5] hover:bg-[#3882a5]/90 text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#3882a5]/20 active:scale-95"
                                 >
                                     <Link href="/" className="flex items-center gap-2">
                                         <RefreshCw size={14} className="animate-spin-slow duration-[4s]" />
@@ -84,7 +84,7 @@ export default function MaintenancePage() {
                                 <Button 
                                     variant="outline"
                                     asChild
-                                    className="h-12 px-8 rounded-xl bg-white/5 border-white/10 hover:bg-white/10 text-white font-bold text-[10px] uppercase tracking-widest active:scale-95"
+                                    className="h-12 px-8 rounded-xl bg-white/5 border-white/10 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest active:scale-95"
                                 >
                                     <a href="mailto:support@safein.app" className="flex items-center gap-2">
                                         Support <ArrowRight size={14} />
@@ -93,16 +93,16 @@ export default function MaintenancePage() {
                             </div>
 
                             <div className="flex items-center gap-4 text-slate-600">
-                                <span className="text-[9px] font-bold uppercase tracking-wider">support@safein.app</span>
+                                <span className="text-xs font-bold uppercase tracking-wider">support@safein.app</span>
                                 <div className="h-3 w-px bg-white/10" />
-                                <span className="text-[9px] font-bold uppercase tracking-wider">SafeIn v2.4</span>
+                                <span className="text-xs font-bold uppercase tracking-wider">SafeIn v2.4</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Bottom Decorative Label */}
-                <p className="mt-8 text-[10px] font-black uppercase tracking-[0.5em] text-slate-700 opacity-50 animate-pulse">
+                <p className="mt-8 text-xs font-semibold uppercase tracking-[0.5em] text-slate-700 opacity-50 animate-pulse">
                     Protecting What Matters Most
                 </p>
             </div>

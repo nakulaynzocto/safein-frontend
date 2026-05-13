@@ -63,8 +63,8 @@ export function ChatSidebar({
             <div className="p-5 sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-10 transition-all duration-300 border-b border-gray-100 dark:border-gray-800">
                 {!isAdmin ? (
                     <div className="flex flex-col gap-1">
-                        <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Messages</h1>
-                        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Global Support Center</p>
+                        <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 tracking-tight">Messages</h1>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Global Support Center</p>
                     </div>
                 ) : (
                     <div className="flex items-center gap-3">
@@ -132,15 +132,15 @@ export function ChatSidebar({
                                 <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-baseline mb-0.5">
                                         <h3 className={cn(
-                                            "font-bold text-[15px] truncate transition-colors",
-                                            activeUserId === user.id ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300",
-                                            user.unreadCount && user.unreadCount > 0 && "text-gray-900 dark:text-white"
+                                            "font-bold text-sm truncate transition-colors",
+                                            activeUserId === user.id ? "text-gray-800 dark:text-white" : "text-gray-700 dark:text-gray-300",
+                                            user.unreadCount && user.unreadCount > 0 && "text-gray-800 dark:text-white"
                                         )}>
                                             {formatName(user.name)}
                                         </h3>
                                         {user.lastMessageTime && (
                                             <span className={cn(
-                                                "text-[10px] uppercase font-black tracking-wider ml-2",
+                                                "text-xs uppercase font-semibold tracking-wider ml-2",
                                                 user.unreadCount && user.unreadCount > 0 ? "text-[#074463] animate-pulse" : "text-gray-400"
                                             )}>
                                                 {formatDistanceToNow(user.lastMessageTime, { addSuffix: false }).replace('about ', '').replace('minutes', 'min').replace('hours', 'hr')}
@@ -150,12 +150,12 @@ export function ChatSidebar({
                                     <div className="flex justify-between items-center">
                                         <p className={cn(
                                             "text-xs truncate pr-2 font-medium tracking-tight h-4",
-                                            user.unreadCount && user.unreadCount > 0 ? "text-gray-900 dark:text-white font-bold" : "text-gray-500 dark:text-gray-400"
+                                            user.unreadCount && user.unreadCount > 0 ? "text-gray-800 dark:text-white font-bold" : "text-gray-500 dark:text-gray-400"
                                         )}>
                                             {user.lastMessage || "Start a conversation"}
                                         </p>
                                         {user.unreadCount && user.unreadCount > 0 ? (
-                                            <span className="bg-[#074463] text-white text-[10px] font-black px-2 py-0.5 rounded-full min-w-[20px] text-center flex-shrink-0 animate-in zoom-in shadow-lg shadow-blue-900/20">
+                                            <span className="bg-[#074463] text-white text-xs font-semibold px-2 py-0.5 rounded-full min-w-[20px] text-center flex-shrink-0 animate-in zoom-in shadow-lg shadow-blue-900/20">
                                                 {user.unreadCount}
                                             </span>
                                         ) : null}

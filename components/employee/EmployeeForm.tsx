@@ -505,7 +505,7 @@ export function NewEmployeeModal({
                     <div className="text-sm leading-relaxed text-slate-600">
                         Please verify that <strong>{pendingFormData?.email}</strong> and <strong>{pendingFormData?.phone}</strong> are correct. 
                         Incoming alerts and calls depend on this information.
-                        <p className="mt-2 text-[11px] italic text-amber-700 font-medium">
+                        <p className="mt-2 text-xs italic text-amber-700 font-medium">
                             (Email aur number sahi hona chahiye taki messages receive ho sakein.)
                         </p>
                     </div>
@@ -529,7 +529,7 @@ export function NewEmployeeModal({
                         </div>
                         <label
                             htmlFor="confirmation_checkbox"
-                            className="text-[14px] font-extrabold leading-none cursor-pointer select-none text-slate-900"
+                            className="text-[14px] font-extrabold leading-none cursor-pointer select-none text-slate-800"
                         >
                             I confirm details are 100% correct
                         </label>

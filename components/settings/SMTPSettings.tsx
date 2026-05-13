@@ -147,7 +147,7 @@ export function SMTPSettings() {
                                                     <div className={cn("h-4 w-4 rounded-full border-2", deliveryMode === 'shared' ? "bg-[#3882a5]" : "")} />
                                                 </div>
                                                 <p className="text-sm font-bold">Standard Relay</p>
-                                                <p className="text-[10px] text-muted-foreground">Premium infrastructure handled by Aynzo.</p>
+                                                <p className="text-xs text-muted-foreground">Premium infrastructure handled by Aynzo.</p>
                                             </Card>
 
                                             <Card 
@@ -160,7 +160,7 @@ export function SMTPSettings() {
                                                     <div className={cn("h-4 w-4 rounded-full border-2", deliveryMode === 'custom' ? "bg-primary" : "")} />
                                                 </div>
                                                 <p className="text-sm font-bold">Custom Branding</p>
-                                                <p className="text-[10px] text-muted-foreground">Use your own API Key and sender email.</p>
+                                                <p className="text-xs text-muted-foreground">Use your own API Key and sender email.</p>
                                             </Card>
                                         </div>
 
@@ -169,7 +169,7 @@ export function SMTPSettings() {
                                                 <Server className="h-5 w-5 text-emerald-600" />
                                                 <div>
                                                     <p className="text-xs font-bold text-emerald-900">Shared Relay Active</p>
-                                                    <p className="text-[10px] text-emerald-700">All notifications pass through our verified channels. No extra setup needed.</p>
+                                                    <p className="text-xs text-emerald-700">All notifications pass through our verified channels. No extra setup needed.</p>
                                                 </div>
                                             </div>
                                         ) : (

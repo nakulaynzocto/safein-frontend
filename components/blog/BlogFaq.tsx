@@ -23,7 +23,7 @@ export default function BlogFaq({ faqs }: BlogFaqProps) {
 
     return (
         <div className="mt-20 pt-10 border-t border-slate-100">
-            <h2 className="text-3xl font-black text-[#074463] mb-10 flex items-center gap-3">
+            <h2 className="text-3xl font-semibold text-[#074463] mb-10 flex items-center gap-3">
                 <span className="bg-[#3882a5] w-2 h-8 rounded-full"></span>
                 Frequently Asked Questions
             </h2>

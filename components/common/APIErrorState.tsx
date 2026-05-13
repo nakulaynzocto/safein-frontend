@@ -65,7 +65,7 @@ export function APIErrorState({
                 </div>
             </div>
 
-            <h3 className="mb-2 text-xl font-bold text-gray-900 tracking-tight">
+            <h3 className="mb-2 text-xl font-bold text-gray-800 tracking-tight">
                 {displayTitle}
             </h3>
 
@@ -75,7 +75,7 @@ export function APIErrorState({
 
             {displayDescription && (
                 <div className="mb-6 rounded-lg bg-gray-50 px-3 py-2 border border-gray-100">
-                    <code className="text-[10px] text-gray-400 font-mono">
+                    <code className="text-xs text-gray-400 font-mono">
                         {displayDescription}
                     </code>
                 </div>
@@ -114,7 +114,7 @@ export function APIErrorState({
                 </Button>
             </div>
 
-            <p className="mt-8 text-[10px] text-gray-400 uppercase tracking-widest font-medium">
+            <p className="mt-8 text-xs text-gray-400 uppercase tracking-widest font-medium">
                 System Status: <span className={cn(
                     "inline-block w-2 h-2 rounded-full ml-1",
                     isNetworkError ? "bg-red-400" : "bg-orange-400 animate-pulse"

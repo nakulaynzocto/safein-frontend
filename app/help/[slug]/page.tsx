@@ -98,12 +98,12 @@ export default function HelpArticlePage() {
                                     <span className="w-1 h-1 rounded-full bg-white/50 inline-block px-[2px]"></span>
                                     <Badge
                                         variant="secondary"
-                                        className="bg-[#3882a5] text-white border-none text-[10px] uppercase tracking-widest font-black px-3 py-1"
+                                        className="bg-[#3882a5] text-white border-none text-xs uppercase tracking-widest font-semibold px-3 py-1"
                                     >
                                         {article.category}
                                     </Badge>
                                 </div>
-                                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight uppercase tracking-tighter drop-shadow-lg">
+                                <h1 className="text-3xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight uppercase tracking-tighter drop-shadow-lg">
                                     {article.title}
                                 </h1>
                                 <p className="mt-4 text-lg text-white/80 max-w-2xl leading-relaxed font-medium line-clamp-2 italic">
@@ -118,17 +118,17 @@ export default function HelpArticlePage() {
                         
                         {/* Guide body with optimized typography */}
                         <article className="prose prose-blue prose-lg md:prose-xl max-w-none
-                            prose-headings:text-[#074463] prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tighter
+                            prose-headings:text-[#074463] prose-headings:font-semibold prose-headings:uppercase prose-headings:tracking-tighter
                             prose-p:text-slate-600 prose-p:leading-relaxed prose-p:mb-8 font-medium
-                            prose-a:text-[#3882a5] hover:prose-a:text-[#3882a5]/80 prose-a:font-black
+                            prose-a:text-[#3882a5] hover:prose-a:text-[#3882a5]/80 prose-a:font-semibold
                             prose-img:rounded-[2.5rem] prose-img:shadow-xl prose-img:my-16 prose-img:border prose-img:border-slate-100
-                            prose-strong:text-[#074463] prose-strong:font-black
-                            prose-blockquote:border-l-8 prose-blockquote:border-[#3882a5] prose-blockquote:bg-slate-50 prose-blockquote:py-10 prose-blockquote:px-12 prose-blockquote:rounded-r-[3rem] prose-blockquote:not-italic prose-blockquote:text-[#074463] prose-blockquote:font-black
+                            prose-strong:text-[#074463] prose-strong:font-semibold
+                            prose-blockquote:border-l-8 prose-blockquote:border-[#3882a5] prose-blockquote:bg-slate-50 prose-blockquote:py-10 prose-blockquote:px-12 prose-blockquote:rounded-r-[3rem] prose-blockquote:not-italic prose-blockquote:text-[#074463] prose-blockquote:font-semibold
                             prose-ul:list-disc prose-ol:list-decimal
                             prose-li:text-slate-600 prose-li:my-3
                             prose-hr:border-slate-100 prose-hr:my-16
                             prose-table:border-collapse prose-table:w-full prose-table:my-10
-                            prose-th:bg-slate-50 prose-th:p-4 prose-th:text-[#074463] prose-th:font-black prose-th:uppercase prose-th:text-xs prose-th:tracking-widest
+                            prose-th:bg-slate-50 prose-th:p-4 prose-th:text-[#074463] prose-th:font-semibold prose-th:uppercase prose-th:text-xs prose-th:tracking-widest
                             prose-td:p-4 prose-td:border-b prose-td:border-slate-50 prose-td:text-sm
                         ">
                             <div 
@@ -145,14 +145,14 @@ export default function HelpArticlePage() {
                            </div>
 
                             <div className="relative z-10">
-                                <h3 className="text-2xl font-black text-[#074463] mb-4 uppercase tracking-tight">
+                                <h3 className="text-2xl font-semibold text-[#074463] mb-4 uppercase tracking-tight">
                                     Still Have <span className="text-[#3882a5]">Questions?</span>
                                 </h3>
                                 <p className="mx-auto mb-10 max-w-xl text-slate-500 font-medium">
                                     Can't find the answer you're looking for? Our dedicated support team is ready to help you optimize your visitor experience.
                                 </p>
                                 <div className="flex flex-col sm:flex-row justify-center gap-4">
-                                    <Button asChild className="bg-[#074463] text-white hover:bg-[#074463]/90 h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-[#074463]/20 transition-all active:scale-95">
+                                    <Button asChild className="bg-[#074463] text-white hover:bg-[#074463]/90 h-14 px-8 rounded-2xl font-semibold uppercase tracking-widest text-xs shadow-xl shadow-[#074463]/20 transition-all active:scale-95">
                                         <Link href="/contact" className="flex items-center gap-2">
                                             <MessageCircle size={16} /> Contact Support
                                         </Link>
@@ -160,7 +160,7 @@ export default function HelpArticlePage() {
                                     <Button
                                         asChild
                                         variant="outline"
-                                        className="border-slate-200 text-[#074463] hover:bg-white h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-xs transition-all active:scale-95"
+                                        className="border-slate-200 text-[#074463] hover:bg-white h-14 px-8 rounded-2xl font-semibold uppercase tracking-widest text-xs transition-all active:scale-95"
                                     >
                                         <Link href="/help">Browse Categories</Link>
                                     </Button>

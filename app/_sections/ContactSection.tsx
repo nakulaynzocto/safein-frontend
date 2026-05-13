@@ -71,7 +71,7 @@ export default function ContactSection() {
         <section id="contact" className="bg-white py-12 sm:py-16">
             <div className="container mx-auto px-4">
                 <div className="mb-10 text-center">
-                    <h2 className="mb-4 text-3xl font-black text-slate-900 sm:text-5xl">
+                    <h2 className="mb-4 text-3xl font-semibold text-slate-800 sm:text-5xl">
                         Get in <span className="text-[#3882a5]">Touch</span>
                     </h2>
                     <p className="mx-auto max-w-3xl text-slate-600 text-lg sm:text-xl font-medium leading-relaxed">
@@ -87,9 +87,9 @@ export default function ContactSection() {
                                 <Mail className="h-6 w-6" />
                             </div>
                             <div className="flex flex-col">
-                                <h3 className="text-xl font-bold text-slate-900">Email Support</h3>
+                                <h3 className="text-xl font-bold text-slate-800">Email Support</h3>
                                 <p className="text-slate-600 text-lg sm:text-xl font-medium mb-1">Get help via email</p>
-                                <a href="mailto:support@aynzo.com" className="text-[#3882a5] font-black text-lg hover:underline transition-all">
+                                <a href="mailto:support@aynzo.com" className="text-[#3882a5] font-semibold text-lg hover:underline transition-all">
                                     support@aynzo.com
                                 </a>
                             </div>
@@ -100,9 +100,9 @@ export default function ContactSection() {
                                 <Phone className="h-6 w-6" />
                             </div>
                             <div className="flex flex-col">
-                                <h3 className="text-xl font-bold text-slate-900">Phone Support</h3>
+                                <h3 className="text-xl font-bold text-slate-800">Phone Support</h3>
                                 <p className="text-slate-600 text-lg sm:text-xl font-medium mb-1">Call us directly</p>
-                                <a href="tel:+918699966076" className="text-[#3882a5] font-black text-lg hover:underline transition-all">
+                                <a href="tel:+918699966076" className="text-[#3882a5] font-semibold text-lg hover:underline transition-all">
                                     +91 86999 66076
                                 </a>
                             </div>
@@ -113,9 +113,9 @@ export default function ContactSection() {
                                 <MapPin className="h-6 w-6" />
                             </div>
                             <div className="flex flex-col">
-                                <h3 className="text-xl font-bold text-slate-900">Office Location</h3>
+                                <h3 className="text-xl font-bold text-slate-800">Office Location</h3>
                                 <p className="text-slate-600 text-lg sm:text-xl font-medium mb-1">Visit us in person</p>
-                                <p className="text-slate-900 font-black text-lg leading-tight">
+                                <p className="text-slate-800 font-semibold text-lg leading-tight">
                                     Mohali, Punjab, <br /> India
                                 </p>
                             </div>
@@ -152,7 +152,7 @@ export default function ContactSection() {
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="message" className="text-slate-900 text-sm font-bold">
+                                <Label htmlFor="message" className="text-slate-800 text-sm font-bold">
                                     Message<span className="ml-1 text-red-500">*</span>
                                 </Label>
                                 <Textarea
@@ -171,7 +171,7 @@ export default function ContactSection() {
 
                             <Button
                                 type="submit"
-                                className="bg-[#3882a5] w-full text-white h-16 rounded-2xl text-xl font-black shadow-xl shadow-[#3882a5]/20 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3"
+                                className="bg-[#3882a5] w-full text-white h-16 rounded-2xl text-xl font-semibold shadow-xl shadow-[#3882a5]/20 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3"
                                 disabled={isSubmitting}
                             >
                                 {isSubmitting ? "Sending..." : "Send Message"}

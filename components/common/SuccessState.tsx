@@ -53,7 +53,7 @@ export function SuccessState({
                 </div>
 
                 <div className="space-y-3">
-                    <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">{title}</h2>
+                    <h2 className="text-4xl font-extrabold tracking-tight text-slate-800">{title}</h2>
                     <div className="mx-auto h-1.5 w-12 rounded-full bg-[#3882a5]" />
                     <p className="text-slate-500 font-medium px-4">
                         {message || (
@@ -68,15 +68,15 @@ export function SuccessState({
                     <div className="rounded-[2.5rem] border border-slate-100 bg-slate-50/50 p-6 shadow-sm ring-1 ring-slate-100">
                         <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-left">
                             <div>
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Visitor</p>
+                                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Visitor</p>
                                 <p className="truncate text-sm font-bold text-slate-800">{visitorName || "-"}</p>
                             </div>
                             <div>
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Host</p>
+                                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Host</p>
                                 <p className="truncate text-sm font-bold text-slate-800">{hostName || "-"}</p>
                             </div>
                             <div className="col-span-2">
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 text-center sm:text-left">Reference ID</p>
+                                <p className="text-xs font-bold uppercase tracking-widest text-slate-400 text-center sm:text-left">Reference ID</p>
                                 <p className="font-mono text-[12px] font-bold text-[#3882a5] text-center sm:text-left truncate">{referenceId || "GENERATED"}</p>
                             </div>
                         </div>

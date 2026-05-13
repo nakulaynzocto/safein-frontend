@@ -84,7 +84,7 @@ export default function HelpPage() {
                     <section className="px-4 py-20 bg-slate-50/30">
                         <div className="container mx-auto">
                             <div className="mb-16 text-center">
-                                <h2 className="text-3xl font-black text-[#074463] md:text-4xl uppercase tracking-tight">Popular <span className="text-[#3882a5]">Articles</span></h2>
+                                <h2 className="text-3xl font-semibold text-[#074463] md:text-4xl uppercase tracking-tight">Popular <span className="text-[#3882a5]">Articles</span></h2>
                                 <p className="text-slate-500 font-medium mt-4">Most frequently viewed help articles</p>
                             </div>
 
@@ -105,7 +105,7 @@ export default function HelpPage() {
                                                 <div className="absolute inset-0 bg-gradient-to-t from-[#074463]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                                 <Badge
                                                     variant="secondary"
-                                                    className="absolute top-4 left-4 bg-white/90 backdrop-blur-md text-[#3882a5] border-none text-[10px] uppercase tracking-widest font-bold shadow-sm px-3 py-1.5 rounded-full"
+                                                    className="absolute top-4 left-4 bg-white/90 backdrop-blur-md text-[#3882a5] border-none text-xs uppercase tracking-widest font-bold shadow-sm px-3 py-1.5 rounded-full"
                                                 >
                                                     {article.category}
                                                 </Badge>
@@ -114,19 +114,19 @@ export default function HelpPage() {
                                             <div className="flex flex-1 flex-col p-6">
                                                 <div className="mb-4 flex items-center gap-1.5 text-slate-400">
                                                     <Clock className="w-3.5 h-3.5" />
-                                                    <span className="text-[10px] font-bold uppercase tracking-widest">
+                                                    <span className="text-xs font-bold uppercase tracking-widest">
                                                         {article.readTime}
                                                     </span>
                                                 </div>
                                                 
-                                                <h3 className="font-black text-[#074463] text-xl mb-4 line-clamp-2 group-hover:text-[#3882a5] transition-colors leading-tight uppercase tracking-tight">
+                                                <h3 className="font-semibold text-[#074463] text-xl mb-4 line-clamp-2 group-hover:text-[#3882a5] transition-colors leading-tight uppercase tracking-tight">
                                                     {article.title}
                                                 </h3>
                                                 <p className="text-slate-500 text-sm flex-1 mb-6 line-clamp-3 leading-relaxed font-medium">
                                                     {article.description}
                                                 </p>
 
-                                                <div className="flex items-center text-[#3882a5] font-black text-[10px] uppercase tracking-widest group-hover:gap-2 transition-all">
+                                                <div className="flex items-center text-[#3882a5] font-semibold text-xs uppercase tracking-widest group-hover:gap-2 transition-all">
                                                     Read Full Article
                                                     <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
                                                 </div>

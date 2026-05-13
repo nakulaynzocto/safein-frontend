@@ -90,7 +90,7 @@ export function OtpVerificationStep({
                     1
                 </div>
                 <div>
-                    <h3 className="text-lg font-bold text-slate-900 leading-tight">
+                    <h3 className="text-lg font-bold text-slate-800 leading-tight">
                         Enter your number
                     </h3>
                     <p className="text-sm text-slate-500">
@@ -103,7 +103,7 @@ export function OtpVerificationStep({
                 {!isOtpSent ? (
                     <div className="flex flex-col gap-6">
                         <div className="space-y-2.5">
-                            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
                                 MOBILE NUMBER <span className="text-red-500 font-bold">*</span>
                             </label>
                             <PhoneInputField
@@ -135,7 +135,7 @@ export function OtpVerificationStep({
                             <div className="inline-flex items-center justify-center p-3 bg-emerald-50 rounded-full mb-3">
                                 <ShieldCheck className="h-6 w-6 text-emerald-600" />
                             </div>
-                            <h4 className="font-bold text-slate-900">Enter OTP</h4>
+                            <h4 className="font-bold text-slate-800">Enter OTP</h4>
                             <p className="text-sm text-slate-500">We've sent a 6-digit code to <span className="font-bold text-slate-700">{phone}</span></p>
                         </div>
 
@@ -188,7 +188,7 @@ export function OtpVerificationStep({
             
             <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <p className="text-[10px] sm:text-xs font-medium text-slate-500">
+                <p className="text-xs sm:text-xs font-medium text-slate-500">
                     SafeIn uses end-to-end encryption for your privacy.
                 </p>
             </div>

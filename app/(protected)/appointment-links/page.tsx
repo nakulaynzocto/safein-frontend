@@ -395,7 +395,7 @@ function AppointmentLinksContent() {
                             <div className="min-w-0 flex-1">
                                 <div className="truncate text-sm font-medium sm:text-base flex items-center gap-1">
                                     {formattedName}
-                                    {isSpecial && <span className="text-[10px] bg-[#3882a5]/10 text-[#3882a5] border border-[#3882a5]/20 px-1.5 py-0.5 rounded-md uppercase font-bold tracking-wider shadow-sm">PRIORITY</span>}
+                                    {isSpecial && <span className="text-xs bg-[#3882a5]/10 text-[#3882a5] border border-[#3882a5]/20 px-1.5 py-0.5 rounded-md uppercase font-bold tracking-wider shadow-sm">PRIORITY</span>}
                                 </div>
                                 <div className="flex items-center gap-1 truncate text-xs text-gray-500">
                                     <Phone className="h-3 w-3 shrink-0" />

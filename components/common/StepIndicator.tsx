@@ -56,7 +56,7 @@ export function StepIndicator({ steps, activeIndex, className }: StepIndicatorPr
                         <div key={item.key} className="flex flex-1 flex-col items-center gap-1.5 px-0.5">
                             <div 
                                 className={cn(
-                                    "flex h-7 w-7 items-center justify-center rounded-full border text-[10px] font-bold transition-all",
+                                    "flex h-7 w-7 items-center justify-center rounded-full border text-xs font-bold transition-all",
                                     isActive && "border-[#3882a5] bg-[#3882a5] text-white shadow-md ring-2 ring-[#3882a5]/20 scale-110",
                                     isDone && "border-emerald-500 bg-emerald-500 text-white",
                                     !isDone && !isActive && "border-slate-300 bg-white text-slate-400"

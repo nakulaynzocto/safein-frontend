@@ -32,7 +32,7 @@ function CompactBar({ children, className }: { children: ReactNode; className?: 
                 strokeWidth={2.25}
                 aria-hidden
             />
-            <p className="flex min-w-0 flex-1 items-center gap-x-1.5 text-[11px] leading-snug text-amber-950/95 whitespace-nowrap sm:gap-x-2 sm:text-sm dark:text-amber-50/95">
+            <p className="flex min-w-0 flex-1 items-center gap-x-1.5 text-xs leading-snug text-amber-950/95 whitespace-nowrap sm:gap-x-2 sm:text-sm dark:text-amber-50/95">
                 {children}
             </p>
         </div>

@@ -75,13 +75,13 @@ const FieldHeader = ({
     actionLabel: string;
 }) => (
     <div className="flex items-center justify-between h-5">
-        <label className="text-[11px] text-muted-foreground uppercase font-bold tracking-[0.1em]">
+        <label className="text-xs text-muted-foreground uppercase font-bold tracking-[0.1em]">
             {label} <span className="ml-1 text-red-500">*</span>
         </label>
         <button
             type="button"
             onClick={onAction}
-            className="group flex items-center gap-1.5 text-[10px] text-[#3882a5] font-black hover:text-[#074463] uppercase tracking-wider transition-all duration-200 cursor-pointer select-none"
+            className="group flex items-center gap-1.5 text-xs text-[#3882a5] font-semibold hover:text-[#074463] uppercase tracking-wider transition-all duration-200 cursor-pointer select-none"
         >
             <UserPlus className="h-4 w-4 transition-transform duration-200 group-hover:scale-125 group-hover:rotate-6 text-[#3882a5] group-hover:text-[#074463]" />
             <span className="group-hover:underline underline-offset-4 decoration-2 transition-all">

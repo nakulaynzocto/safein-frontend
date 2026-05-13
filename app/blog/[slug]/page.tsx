@@ -109,9 +109,9 @@ export default function BlogPostPage() {
                                         <span className="w-2.5 h-2.5 rounded-full bg-[#3882a5] inline-block shadow-[0_0_10px_#3882a5]"></span>
                                         {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                                         <span className="w-1 h-1 rounded-full bg-white/50 inline-block px-[2px]"></span>
-                                        <span className="uppercase tracking-widest text-[10px] text-[#3882a5] font-black">Article</span>
+                                        <span className="uppercase tracking-widest text-xs text-[#3882a5] font-semibold">Article</span>
                                     </div>
-                                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight uppercase tracking-tighter">
+                                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight uppercase tracking-tighter">
                                         {post.title}
                                     </h1>
                                     {post.excerpt && (
@@ -135,9 +135,9 @@ export default function BlogPostPage() {
                                 <div className="flex items-center gap-3 mb-4 text-sm text-gray-400 font-medium">
                                     <span className="w-2.5 h-2.5 rounded-full bg-[#3882a5] inline-block"></span>
                                     {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                                    <span className="uppercase tracking-widest text-[10px] text-[#3882a5] font-black ml-2">Article</span>
+                                    <span className="uppercase tracking-widest text-xs text-[#3882a5] font-semibold ml-2">Article</span>
                                 </div>
-                                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-[#074463] leading-tight uppercase tracking-tighter">
+                                <h1 className="text-3xl md:text-5xl lg:text-6xl font-semibold text-[#074463] leading-tight uppercase tracking-tighter">
                                     {post.title}
                                 </h1>
                             </div>
@@ -149,12 +149,12 @@ export default function BlogPostPage() {
                         
                         {/* Article body with optimized typography */}
                         <article className="prose prose-blue prose-lg md:prose-xl max-w-none
-                            prose-headings:text-[#074463] prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tighter
+                            prose-headings:text-[#074463] prose-headings:font-semibold prose-headings:uppercase prose-headings:tracking-tighter
                             prose-p:text-slate-600 prose-p:leading-relaxed prose-p:mb-8 font-medium
-                            prose-a:text-[#3882a5] hover:prose-a:text-[#3882a5]/80 prose-a:font-black
+                            prose-a:text-[#3882a5] hover:prose-a:text-[#3882a5]/80 prose-a:font-semibold
                             prose-img:rounded-[3rem] prose-img:shadow-2xl prose-img:my-16
-                            prose-strong:text-[#074463] prose-strong:font-black
-                            prose-blockquote:border-l-8 prose-blockquote:border-[#3882a5] prose-blockquote:bg-slate-50 prose-blockquote:py-10 prose-blockquote:px-12 prose-blockquote:rounded-r-[3rem] prose-blockquote:italic prose-blockquote:text-[#074463] prose-blockquote:font-black
+                            prose-strong:text-[#074463] prose-strong:font-semibold
+                            prose-blockquote:border-l-8 prose-blockquote:border-[#3882a5] prose-blockquote:bg-slate-50 prose-blockquote:py-10 prose-blockquote:px-12 prose-blockquote:rounded-r-[3rem] prose-blockquote:italic prose-blockquote:text-[#074463] prose-blockquote:font-semibold
                             prose-ul:list-disc prose-ol:list-decimal
                             prose-li:text-slate-600 prose-li:my-3
                         ">

@@ -136,7 +136,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close, on
                     <config.icon className="h-4 w-4 text-[#3882a5]" />
                 </div>
                 <div className="min-w-0">
-                    <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider">{config.label}</p>
+                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">{config.label}</p>
                     <div className="text-xs font-bold text-gray-800 dark:text-white truncate">
                         {config.key === "employeeName" ? (
                             <div className="flex items-center gap-2">
@@ -144,7 +144,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close, on
                                     src={(appointment as any).employeeId?.photo || appointment.employee?.photo || ""}
                                     name={displayValue}
                                     size="sm"
-                                    fallbackClassName="text-[10px]"
+                                    fallbackClassName="text-xs"
                                 />
                                 <span>{formatName(displayValue)}</span>
                             </div>
@@ -188,13 +188,13 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close, on
                     {/* Header Info */}
                     <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-2">
                         <div className="text-center sm:text-left">
-                            <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">{visitorName}</h3>
+                            <h3 className="text-xl font-semibold text-gray-800 dark:text-white tracking-tight">{visitorName}</h3>
                             <div className="mt-0.5 flex items-center justify-center sm:justify-start gap-2">
                                 <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-md border border-gray-200/50">
                                     <Phone className="h-2.5 w-2.5 text-[#3882a5]" />
-                                    <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">{getFieldValue(appointment, "visitorPhone")}</span>
+                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{getFieldValue(appointment, "visitorPhone")}</span>
                                 </div>
-                                <StatusBadge status={status} className="text-[8px] font-black tracking-widest" />
+                                <StatusBadge status={status} className="text-[8px] font-semibold tracking-widest" />
                             </div>
                         </div>
                     </div>
@@ -203,7 +203,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close, on
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {/* Meeting Management Card */}
                         <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 space-y-2 shadow-sm">
-                            <h4 className="text-[9px] font-black uppercase tracking-[0.15em] text-[#3882a5]">Meeting Details</h4>
+                            <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#3882a5]">Meeting Details</h4>
                             <div className="space-y-2">
                                 {meetingDetails.map(renderCardValue)}
                             </div>
@@ -211,7 +211,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close, on
 
                         {/* Schedule Card */}
                         <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 space-y-2 shadow-sm">
-                            <h4 className="text-[9px] font-black uppercase tracking-[0.15em] text-[#3882a5]">Schedule</h4>
+                            <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#3882a5]">Schedule</h4>
                             <div className="space-y-2">
                                 {scheduleDetails.map(renderCardValue)}
                             </div>
@@ -219,7 +219,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close, on
 
                         {/* Check Log Card */}
                         <div className="md:col-span-2 p-3 rounded-xl bg-[#074463]/[0.02] dark:bg-gray-900 border border-gray-100 dark:border-gray-800 space-y-2 shadow-sm">
-                            <h4 className="text-[9px] font-black uppercase tracking-[0.15em] text-[#3882a5]">Attendance Log</h4>
+                            <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#3882a5]">Attendance Log</h4>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {checkDetails.map(renderCardValue)}
                             </div>
@@ -231,7 +231,7 @@ export function AppointmentDetailsDialog({ appointment, mode, open, on_close, on
                         <Button 
                             onClick={on_close} 
                             variant="primary" 
-                            className="px-8 h-9 text-[10px] font-black text-white rounded-xl shadow-lg transition-all active:scale-95 hover:scale-105"
+                            className="px-8 h-9 text-xs font-semibold text-white rounded-xl shadow-lg transition-all active:scale-95 hover:scale-105"
                         >
                             Understood
                         </Button>

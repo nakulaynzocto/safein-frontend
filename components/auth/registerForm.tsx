@@ -232,7 +232,7 @@ export function RegisterForm() {
                 {currentStep === "form" && (
                     <div className="animate-in fade-in duration-500">
                         <div className="mb-8 text-center sm:text-left">
-                            <h1 className="text-3xl font-black text-[#074463] tracking-tight">Register</h1>
+                            <h1 className="text-3xl font-semibold text-[#074463] tracking-tight">Register</h1>
                             <p className="text-slate-500 mt-2 font-medium text-sm sm:text-base">
                                 Join SafeIn and streamline your visitor management.
                             </p>
@@ -263,7 +263,7 @@ export function RegisterForm() {
                             <div className="absolute inset-0 flex items-center">
                                 <span className="w-full border-t border-slate-100" />
                             </div>
-                            <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
+                            <div className="relative flex justify-center text-xs uppercase font-bold tracking-widest">
                                 <span className="bg-white px-4 text-slate-400">Or regiser with email</span>
                             </div>
                         </div>
@@ -321,7 +321,7 @@ export function RegisterForm() {
 
                             <Button
                                 type="submit"
-                                className="w-full h-12 rounded-xl font-black bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                                className="w-full h-12 rounded-xl font-semibold bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                                 disabled={isLoading || isGoogleLoading}
                             >
                                 {isLoading && <Loader2 className="h-5 w-5 animate-spin" />}
@@ -334,7 +334,7 @@ export function RegisterForm() {
                                 Already have an account?{" "}
                                 <Link
                                     href={routes.publicroute.LOGIN}
-                                    className="text-[#3882a5] font-black hover:underline"
+                                    className="text-[#3882a5] font-semibold hover:underline"
                                     prefetch={true}
                                 >
                                     Sign in here
@@ -357,7 +357,7 @@ export function RegisterForm() {
                         </Button>
 
                         <div className="text-center sm:text-left">
-                            <h1 className="text-3xl font-black text-[#074463] tracking-tight">Verify Email</h1>
+                            <h1 className="text-3xl font-semibold text-[#074463] tracking-tight">Verify Email</h1>
                             <p className="text-slate-500 mt-2 font-medium">
                                 Enter the 6-digit code sent to <span className="font-bold text-[#074463]">{userEmail}</span>
                             </p>
@@ -382,7 +382,7 @@ export function RegisterForm() {
                                             <InputOTPSlot
                                                 key={index}
                                                 index={index}
-                                                className="h-12 w-10 sm:h-14 sm:w-12 rounded-xl border-2 border-slate-200 text-xl font-black text-[#074463] transition-all focus-within:border-[#3882a5] focus-within:ring-4 focus-within:ring-[#3882a5]/10"
+                                                className="h-12 w-10 sm:h-14 sm:w-12 rounded-xl border-2 border-slate-200 text-xl font-semibold text-[#074463] transition-all focus-within:border-[#3882a5] focus-within:ring-4 focus-within:ring-[#3882a5]/10"
                                             />
                                         ))}
                                     </InputOTPGroup>
@@ -391,7 +391,7 @@ export function RegisterForm() {
 
                             <Button
                                 type="submit"
-                                className="w-full h-12 rounded-xl font-black bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20 flex items-center justify-center gap-2"
+                                className="w-full h-12 rounded-xl font-semibold bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20 flex items-center justify-center gap-2"
                                 disabled={isVerifyingOtp || otpValue.length !== 6}
                             >
                                 {isVerifyingOtp && <Loader2 className="h-5 w-5 animate-spin" />}
@@ -405,7 +405,7 @@ export function RegisterForm() {
                                 <button
                                     onClick={handleResendOtp}
                                     disabled={isResendingOtp}
-                                    className="text-[#3882a5] font-black hover:underline disabled:opacity-50"
+                                    className="text-[#3882a5] font-semibold hover:underline disabled:opacity-50"
                                 >
                                     {isResendingOtp ? "Sending..." : "Resend OTP"}
                                 </button>
@@ -421,7 +421,7 @@ export function RegisterForm() {
                             <CheckCircle className="h-12 w-12 text-[#3882a5]" />
                         </div>
                         <div className="space-y-2">
-                            <h1 className="text-3xl font-black text-[#074463]">Welcome Aboard!</h1>
+                            <h1 className="text-3xl font-semibold text-[#074463]">Welcome Aboard!</h1>
                             <p className="text-slate-500 font-medium max-w-xs">
                                 Your account is verified. Redirecting you to the dashboard...
                             </p>

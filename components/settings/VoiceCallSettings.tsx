@@ -280,17 +280,17 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                                         <CollapsibleContent>
                                             <div className="p-4 pt-0 space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
                                                 <div className="flex items-center justify-between bg-muted/30 p-1 rounded-lg border border-border/50 max-w-fit">
-                                                    <button type="button" onClick={() => switchLanguage("en-US")} className={cn("px-4 py-1.5 text-[10px] font-bold rounded-md transition-all", currentLang === "en-US" ? "bg-white text-[#3882a5] shadow-sm" : "text-muted-foreground hover:text-foreground")}>English</button>
-                                                    <button type="button" onClick={() => switchLanguage("hi-IN")} className={cn("px-4 py-1.5 text-[10px] font-bold rounded-md transition-all", currentLang === "hi-IN" ? "bg-white text-[#3882a5] shadow-sm" : "text-muted-foreground hover:text-foreground")}>Hindi</button>
+                                                    <button type="button" onClick={() => switchLanguage("en-US")} className={cn("px-4 py-1.5 text-xs font-bold rounded-md transition-all", currentLang === "en-US" ? "bg-white text-[#3882a5] shadow-sm" : "text-muted-foreground hover:text-foreground")}>English</button>
+                                                    <button type="button" onClick={() => switchLanguage("hi-IN")} className={cn("px-4 py-1.5 text-xs font-bold rounded-md transition-all", currentLang === "hi-IN" ? "bg-white text-[#3882a5] shadow-sm" : "text-muted-foreground hover:text-foreground")}>Hindi</button>
                                                 </div>
 
                                                 <div className="space-y-4">
                                                     <div className="flex items-center justify-between">
-                                                        <Label className="text-[11px] font-bold text-[#3882a5] uppercase tracking-wider">Voice Script Message</Label>
+                                                        <Label className="text-xs font-bold text-[#3882a5] uppercase tracking-wider">Voice Script Message</Label>
                                                         <button 
                                                             type="button" 
                                                             onClick={handleResetToDefault} 
-                                                            className="text-[10px] font-bold text-[#3882a5] flex items-center gap-1 hover:underline active:scale-95 transition-all"
+                                                            className="text-xs font-bold text-[#3882a5] flex items-center gap-1 hover:underline active:scale-95 transition-all"
                                                         >
                                                             <RefreshCw size={10} /> Reset to Default
                                                         </button>
@@ -309,12 +309,12 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                                                     />
 
                                                     <div className="flex flex-col gap-3 p-4 bg-muted/5 rounded-xl border border-border/30">
-                                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Personalization Tags (Click to add)</p>
+                                                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Personalization Tags (Click to add)</p>
                                                         <div className="flex flex-wrap gap-2">
                                                             {["{visitorName}", "{employeeName}", "{purpose}", "{date}", "{time}"].map(tag => (
                                                                 <code 
                                                                     key={tag} 
-                                                                    className="px-2 py-1 bg-white border border-border/50 rounded-lg text-[10px] text-[#3882a5] font-mono font-bold cursor-pointer hover:bg-[#3882a5]/10 hover:border-[#3882a5]/30 transition-all active:scale-95 shadow-sm"
+                                                                    className="px-2 py-1 bg-white border border-border/50 rounded-lg text-xs text-[#3882a5] font-mono font-bold cursor-pointer hover:bg-[#3882a5]/10 hover:border-[#3882a5]/30 transition-all active:scale-95 shadow-sm"
                                                                     onClick={() => {
                                                                         const currentVal = watch("callScript");
                                                                         setValue("callScript", currentVal + " " + tag, { shouldDirty: true });
@@ -324,7 +324,7 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                                                                 </code>
                                                             ))}
                                                         </div>
-                                                        <p className="text-[9px] text-muted-foreground italic leading-relaxed">
+                                                        <p className="text-xs text-muted-foreground italic leading-relaxed">
                                                             * Note: These tags will be automatically replaced with real-time data during the automated call.
                                                         </p>
                                                     </div>
@@ -351,7 +351,7 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                                                 <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/5">
                                                     <div className="space-y-0.5">
                                                         <p className="text-sm font-bold text-[#074463]">Backup Routing</p>
-                                                        <p className="text-[11px] text-muted-foreground">Call backup number if host is unreachable</p>
+                                                        <p className="text-xs text-muted-foreground">Call backup number if host is unreachable</p>
                                                     </div>
                                                     <BrandSwitch checked={isBackupEnabled} onCheckedChange={(checked) => setValue("backupEnabled", checked, { shouldDirty: true })} />
                                                 </div>
@@ -371,7 +371,7 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                                                 <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/5">
                                                     <div className="space-y-0.5">
                                                         <p className="text-sm font-bold text-[#074463]">Maximum Retries</p>
-                                                        <p className="text-[11px] text-muted-foreground">Times to retry before initiating backup call</p>
+                                                        <p className="text-xs text-muted-foreground">Times to retry before initiating backup call</p>
                                                     </div>
                                                     <div className="flex items-center gap-3">
                                                         {[1, 2, 3, 4, 5].map(v => (
@@ -391,7 +391,7 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                                         <Settings2 size={18} className="text-[#3882a5]" />
                                     </div>
                                     <div className="hidden sm:block">
-                                        <p className="text-sm font-bold text-gray-900">Finalize Voice Settings</p>
+                                        <p className="text-sm font-bold text-gray-800">Finalize Voice Settings</p>
                                         <p className="text-xs text-gray-500">Changes will apply to all future automated IVR calls.</p>
                                     </div>
                                 </div>

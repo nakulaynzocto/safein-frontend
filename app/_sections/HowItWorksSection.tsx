@@ -9,7 +9,7 @@ export default function HowItWorksSection({ routes }: { routes: any }) {
         <section className="bg-white py-12 sm:py-16">
             <div className="container mx-auto px-4 sm:px-6">
                 <div className="mb-20 text-center">
-                    <h2 className="text-slate-900 mb-4 text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
+                    <h2 className="text-slate-800 mb-4 text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
                         How SafeIn <span className="text-[#3882a5]">Transforms Your Reception</span>
                     </h2>
                     <p className="mx-auto max-w-3xl text-slate-600 text-lg sm:text-xl font-medium leading-relaxed">
@@ -32,7 +32,7 @@ export default function HowItWorksSection({ routes }: { routes: any }) {
                             />
                         </div>
                         <div className="lg:pr-8">
-                            <h3 className="text-slate-900 mb-6 text-3xl font-black tracking-tight sm:text-4xl">
+                            <h3 className="text-slate-800 mb-6 text-3xl font-semibold tracking-tight sm:text-4xl">
                                 Empowering Workplace Efficiency
                             </h3>
                             <p className="text-slate-500 mb-8 text-xl leading-relaxed">
@@ -42,7 +42,7 @@ export default function HowItWorksSection({ routes }: { routes: any }) {
                             </p>
                             <ul className="space-y-8">
                                 <li>
-                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-900">
+                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-800">
                                         One-Click OTP Check-in <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                     <p className="text-slate-500 text-sm leading-relaxed">
@@ -51,7 +51,7 @@ export default function HowItWorksSection({ routes }: { routes: any }) {
                                     </p>
                                 </li>
                                 <li>
-                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-900">
+                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-800">
                                         Digital visitor logs <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                     <p className="text-slate-500 text-sm leading-relaxed">
@@ -60,7 +60,7 @@ export default function HowItWorksSection({ routes }: { routes: any }) {
                                     </p>
                                 </li>
                                 <li>
-                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-900">
+                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-800">
                                         Entrance verification <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                     <p className="text-slate-500 text-sm leading-relaxed">
@@ -75,7 +75,7 @@ export default function HowItWorksSection({ routes }: { routes: any }) {
                     {/* Solution 2: Insightful Intelligence */}
                     <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-24">
                         <div className="order-2 lg:order-1 lg:pl-8">
-                            <h3 className="text-slate-900 mb-6 text-3xl font-black tracking-tight sm:text-4xl">
+                            <h3 className="text-slate-800 mb-6 text-3xl font-semibold tracking-tight sm:text-4xl">
                                 Advanced Security Framework
                             </h3>
                             <p className="text-slate-500 mb-8 text-xl leading-relaxed">
@@ -85,7 +85,7 @@ export default function HowItWorksSection({ routes }: { routes: any }) {
                             </p>
                             <ul className="space-y-8">
                                 <li>
-                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-900">
+                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-800">
                                         Real-time occupancy tracking <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                     <p className="text-slate-500 text-sm leading-relaxed">
@@ -94,7 +94,7 @@ export default function HowItWorksSection({ routes }: { routes: any }) {
                                     </p>
                                 </li>
                                 <li>
-                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-900">
+                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-800">
                                         Visitor pattern analytics <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                     <p className="text-slate-500 text-sm leading-relaxed">
@@ -103,7 +103,7 @@ export default function HowItWorksSection({ routes }: { routes: any }) {
                                     </p>
                                 </li>
                                 <li>
-                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-900">
+                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-800">
                                         Automated safety reports <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                     <p className="text-slate-500 text-sm leading-relaxed">
@@ -138,7 +138,7 @@ export default function HowItWorksSection({ routes }: { routes: any }) {
                             />
                         </div>
                         <div className="lg:pr-8">
-                            <h3 className="text-slate-900 mb-6 text-3xl font-black tracking-tight sm:text-4xl">
+                            <h3 className="text-slate-800 mb-6 text-3xl font-semibold tracking-tight sm:text-4xl">
                                 Connected Digital Reception
                             </h3>
                             <p className="text-slate-500 mb-8 text-xl leading-relaxed">
@@ -148,7 +148,7 @@ export default function HowItWorksSection({ routes }: { routes: any }) {
                             </p>
                             <ul className="space-y-8">
                                 <li>
-                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-900">
+                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-800">
                                         WhatsApp arrival alerts <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                     <p className="text-slate-500 text-sm leading-relaxed">
@@ -157,7 +157,7 @@ export default function HowItWorksSection({ routes }: { routes: any }) {
                                     </p>
                                 </li>
                                 <li>
-                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-900">
+                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-800">
                                         Proactive push notifications <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                     <p className="text-slate-500 text-sm leading-relaxed">
@@ -166,7 +166,7 @@ export default function HowItWorksSection({ routes }: { routes: any }) {
                                     </p>
                                 </li>
                                 <li>
-                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-900">
+                                    <Link href="/#core-features" className="group mb-2 flex items-center text-[#3882a5] font-semibold transition-colors hover:text-slate-800">
                                         Host-visitor internal messaging <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                     <p className="text-slate-500 text-sm leading-relaxed">

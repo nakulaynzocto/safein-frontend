@@ -163,7 +163,7 @@ export default function QRScanPage() {
                             {company?.profilePicture ? <img src={company.profilePicture} className="h-full w-full object-contain p-1" /> : company?.companyName?.charAt(0)}
                         </div>
                         <div className="text-center sm:text-left">
-                            <h1 className="text-2xl font-black text-slate-900">Welcome to <span className="text-[#3882a5]">{company?.companyName}</span></h1>
+                            <h1 className="text-2xl font-semibold text-slate-800">Welcome to <span className="text-[#3882a5]">{company?.companyName}</span></h1>
                             <p className="text-sm text-slate-500 font-medium">Please complete the check-in process</p>
                         </div>
                     </CardContent>
@@ -176,7 +176,7 @@ export default function QRScanPage() {
                             <form onSubmit={handleVerifySubmit((data: any) => handleVerifyOtp(data.phone, data.otp))} className="max-w-lg mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
                                 <div className="p-8 bg-slate-50/50 rounded-[28px] border border-slate-100 space-y-6">
                                     <div className="text-center space-y-1">
-                                        <h3 className="text-lg font-bold text-slate-900">Mobile Verification</h3>
+                                        <h3 className="text-lg font-bold text-slate-800">Mobile Verification</h3>
                                         <p className="text-xs text-slate-500">Enter your number to receive a secure code</p>
                                     </div>
                                     <Controller name="phone" control={verifyControl} render={({ field }) => (
@@ -219,7 +219,7 @@ export default function QRScanPage() {
                         {step === "photo" && (
                             <div className="space-y-8 max-w-2xl mx-auto">
                                 <div className="text-center space-y-2">
-                                    <h3 className="text-xl font-bold text-slate-900">Capture Visitor Photo</h3>
+                                    <h3 className="text-xl font-bold text-slate-800">Capture Visitor Photo</h3>
                                     <p className="text-sm text-slate-500">Face should be clearly visible</p>
                                 </div>
                                 <ImageUploadField 
@@ -245,7 +245,7 @@ export default function QRScanPage() {
                         {step === "review" && (
                             <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
                                 <div className="text-center space-y-2">
-                                    <h3 className="text-2xl font-black text-slate-900">Review Your Check-in</h3>
+                                    <h3 className="text-2xl font-semibold text-slate-800">Review Your Check-in</h3>
                                     <p className="text-sm text-slate-500">Double check everything is correct.</p>
                                 </div>
 

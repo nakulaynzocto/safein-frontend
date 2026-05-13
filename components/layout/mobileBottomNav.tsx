@@ -135,7 +135,7 @@ export function MobileBottomNav() {
                                 />
                                 {/* Unread badge */}
                                 {isMessages && unreadCount > 0 && (
-                                    <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold leading-none text-white shadow-sm">
+                                    <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-0.5 text-xs font-bold leading-none text-white shadow-sm">
                                         {unreadCount > 99 ? "99+" : unreadCount}
                                     </span>
                                 )}
@@ -143,7 +143,7 @@ export function MobileBottomNav() {
 
                             {/* Label */}
                             <span className={cn(
-                                "text-[9px] font-medium leading-none tracking-tight transition-all duration-200",
+                                "text-xs font-medium leading-none tracking-tight transition-all duration-200",
                                 active ? "opacity-100" : "opacity-60"
                             )}>
                                 {item.name}

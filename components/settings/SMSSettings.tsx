@@ -112,7 +112,7 @@ export function SMSSettings() {
                                                     <MessageSquare size={24} />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-bold text-gray-900 text-lg">Message Template Controls</h3>
+                                                    <h3 className="font-bold text-gray-800 text-lg">Message Template Controls</h3>
                                                     <p className="text-xs text-gray-500">Enable or disable SMS notifications for specific events</p>
                                                 </div>
                                             </div>
@@ -144,7 +144,7 @@ export function SMSSettings() {
                                                                 
                                                                  <div className="flex items-center gap-6">
                                                                     <div className="flex items-center gap-3">
-                                                                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-tight">Status</span>
+                                                                        <span className="text-xs uppercase font-bold text-muted-foreground tracking-tight">Status</span>
                                                                         <Switch 
                                                                             checked={normalizedEnabledTemplates[template.id] !== undefined ? normalizedEnabledTemplates[template.id] : coreSmsTemplates.includes(template.id)}
                                                                             onCheckedChange={(checked) => handleToggle(template.id, checked)}
@@ -174,9 +174,9 @@ export function SMSSettings() {
                                                                             </div>
                                                                         </div>
                                                                         <div className="flex flex-wrap gap-2 pt-1">
-                                                                            <span className="text-[10px] font-bold text-muted-foreground uppercase mr-1 text-[9px]">Variables used:</span>
+                                                                            <span className="text-xs font-bold text-muted-foreground uppercase mr-1 text-xs">Variables used:</span>
                                                                             {template.placeholders.map(p => (
-                                                                                <code key={p} className="px-2 py-0.5 rounded bg-blue-50 text-[9px] font-bold text-blue-600 border border-blue-100">{"{"}{p}{"}"}</code>
+                                                                                <code key={p} className="px-2 py-0.5 rounded bg-blue-50 text-xs font-bold text-blue-600 border border-blue-100">{"{"}{p}{"}"}</code>
                                                                             ))}
                                                                         </div>
                                                                     </div>

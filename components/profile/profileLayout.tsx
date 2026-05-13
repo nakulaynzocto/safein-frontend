@@ -142,7 +142,7 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
                                     "flex items-center gap-2.5 px-3 py-2.5 sm:py-3 rounded-lg text-[13px] md:text-sm font-medium transition-all w-max md:w-full",
                                     isActive
                                         ? "bg-white text-[#3882a5] shadow-sm border border-gray-100"
-                                        : "text-gray-500 hover:text-gray-900 hover:bg-white/50"
+                                        : "text-gray-500 hover:text-gray-800 hover:bg-white/50"
                                 )}
                             >
                                 <Icon size={16} className={cn("flex-shrink-0", isActive ? "text-[#3882a5]" : "text-gray-400")} />

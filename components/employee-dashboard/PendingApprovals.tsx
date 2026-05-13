@@ -77,7 +77,7 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
                 <div className="h-20 w-20 rounded-full bg-gray-50 flex items-center justify-center mb-4">
                     <Clock className="h-10 w-10 text-gray-300" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">No Approvals Needed</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">No Approvals Needed</h3>
                 <p className="text-gray-500 text-center max-w-xs">You're all caught up! No visitor requests are waiting for your response.</p>
             </div>
         );
@@ -91,7 +91,7 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
                         <ClipboardList className="h-5 w-5" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-black text-[#074463]">Awaiting Approval</h2>
+                        <h2 className="text-xl font-semibold text-[#074463]">Awaiting Approval</h2>
                         <p className="text-xs text-gray-500 font-medium">Manage incoming visitor requests ({pendingAppointments.length})</p>
                     </div>
                 </div>
@@ -121,7 +121,7 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
                                     {initials}
                                 </div>
                                 <div className="min-w-0">
-                                    <h4 className="truncate text-lg font-black text-[#1a3a4a]">
+                                    <h4 className="truncate text-lg font-semibold text-[#1a3a4a]">
                                         {visitorName}
                                     </h4>
                                     <div className="flex items-center gap-1.5 text-gray-500">
@@ -138,19 +138,19 @@ export function PendingApprovals({ appointments, onApprove, onReject }: PendingA
                                 <div className="rounded-xl bg-gray-50/50 p-3 border border-gray-100">
                                     <div className="flex items-center gap-2 mb-1.5">
                                         <Calendar className="h-3.5 w-3.5 text-[#3882a5]" />
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Schedule</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-tighter">Schedule</span>
                                     </div>
                                     <p className="text-xs font-bold text-gray-700 leading-none mb-1">
                                         {format(scheduledDate, "EEE, MMM dd")}
                                     </p>
-                                    <p className="text-[11px] text-gray-500 font-medium">
+                                    <p className="text-xs text-gray-500 font-medium">
                                         {formatTime(appointment.appointmentDetails.scheduledTime)}
                                     </p>
                                 </div>
                                 <div className="rounded-xl bg-gray-50/50 p-3 border border-gray-100">
                                     <div className="flex items-center gap-2 mb-1.5">
                                         <MessageSquare className="h-3.5 w-3.5 text-[#3882a5]" />
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Purpose</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-tighter">Purpose</span>
                                     </div>
                                     <p className="text-xs font-bold text-gray-700 line-clamp-2 leading-tight">
                                         {appointment.appointmentDetails.purpose || "General Meeting"}

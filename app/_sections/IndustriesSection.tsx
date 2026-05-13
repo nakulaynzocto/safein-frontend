@@ -41,7 +41,7 @@ export default function IndustriesSection() {
                             Industry Solutions
                         </span>
                     </div>
-                    <h2 className="text-slate-900 mb-4 text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
+                    <h2 className="text-slate-800 mb-4 text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
                         Tailored for <span className="text-[#3882a5]">Every Enterprise</span>
                     </h2>
                     <p className="mx-auto max-w-3xl text-slate-600 text-lg sm:text-xl font-medium leading-relaxed">

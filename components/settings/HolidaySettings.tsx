@@ -222,7 +222,7 @@ export function HolidaySettings() {
                                 <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/80 border border-slate-100 dark:bg-slate-900/50">
                                     <div className="space-y-0.5">
                                         <Label className="text-sm font-bold text-slate-800 dark:text-white">Block Portal</Label>
-                                        <p className="text-[11px] text-slate-500 font-medium">Disable check-ins entirely for this day</p>
+                                        <p className="text-xs text-slate-500 font-medium">Disable check-ins entirely for this day</p>
                                     </div>
                                     <Switch 
                                         checked={blockPortal}
@@ -299,7 +299,7 @@ export function HolidaySettings() {
                             <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/80 border border-slate-100 dark:bg-slate-900/50">
                                 <div className="space-y-0.5">
                                     <Label className="text-sm font-bold text-slate-800 dark:text-white">Block Portal</Label>
-                                    <p className="text-[11px] text-slate-500 font-medium">Disable check-ins entirely for this day</p>
+                                    <p className="text-xs text-slate-500 font-medium">Disable check-ins entirely for this day</p>
                                 </div>
                                 <Switch 
                                     checked={editBlockPortal}
@@ -416,7 +416,7 @@ export function HolidaySettings() {
                         {totalPages > 1 && (
                             <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                                 <p className="text-xs text-slate-500 font-medium whitespace-nowrap">
-                                    Showing <span className="text-slate-900 font-bold">{startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, sortedHolidays.length)}</span> of <span className="text-slate-900 font-bold">{sortedHolidays.length}</span> holidays
+                                    Showing <span className="text-slate-800 font-bold">{startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, sortedHolidays.length)}</span> of <span className="text-slate-800 font-bold">{sortedHolidays.length}</span> holidays
                                 </p>
                                 <div className="flex items-center gap-2">
                                     <Button

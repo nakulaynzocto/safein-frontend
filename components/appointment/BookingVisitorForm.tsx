@@ -353,7 +353,7 @@ export function BookingVisitorForm({
                             variant="avatar"
                         />
                     </div>
-                    <p className="text-[11px] text-muted-foreground">Please capture or upload a clear photo of the visitor.</p>
+                    <p className="text-xs text-muted-foreground">Please capture or upload a clear photo of the visitor.</p>
                     {errors.photo && (
                         <p className="text-xs text-red-500 mt-1 font-medium">{errors.photo.message}</p>
                     )}
@@ -366,7 +366,7 @@ export function BookingVisitorForm({
                             <Fingerprint className="h-4 w-4" />
                             Add ID Proof Details
                         </Label>
-                        <p className="text-[11px] text-muted-foreground font-medium">Capture ID documents for enhanced security (Optional)</p>
+                        <p className="text-xs text-muted-foreground font-medium">Capture ID documents for enhanced security (Optional)</p>
                     </div>
                     <Switch 
                         id="id-proof-toggle" 
@@ -384,7 +384,7 @@ export function BookingVisitorForm({
                             <Label className="text-foreground text-sm font-semibold flex items-center gap-2">
                                 <FileText className="h-4 w-4 text-[#3882a5]" />
                                 ID Proof Image
-                                <span className="text-[10px] font-normal text-muted-foreground bg-gray-100 px-2 py-0.5 rounded-full">Recommended</span>
+                                <span className="text-xs font-normal text-muted-foreground bg-gray-100 px-2 py-0.5 rounded-full">Recommended</span>
                             </Label>
                             <div className="flex justify-start">
                                 <ImageUploadField

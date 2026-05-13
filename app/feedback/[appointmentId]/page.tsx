@@ -49,7 +49,7 @@ export default function FeedbackPage() {
                     <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                         <CheckCircle className="w-10 h-10 text-green-600" />
                     </div>
-                    <h1 className="text-3xl font-black tracking-tight text-gray-900 mb-2">Thank You!</h1>
+                    <h1 className="text-3xl font-semibold tracking-tight text-gray-800 mb-2">Thank You!</h1>
                     <p className="text-gray-500 mb-8 leading-relaxed">
                         Your feedback has been successfully submitted. We appreciate your time to help us improve our visitor experience.
                     </p>
@@ -73,7 +73,7 @@ export default function FeedbackPage() {
                     <div className="inline-flex items-center justify-center p-3 bg-gradient-to-tr from-primary/10 to-primary/5 rounded-2xl mb-6 shadow-sm">
                         <ShieldCheck className="w-8 h-8 text-primary" />
                     </div>
-                    <h1 className="text-2xl font-black text-gray-900 tracking-tight mb-2">
+                    <h1 className="text-2xl font-semibold text-gray-800 tracking-tight mb-2">
                         How was your visit?
                     </h1>
                     <p className="text-sm text-gray-500">

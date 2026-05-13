@@ -226,7 +226,7 @@ export function CheckInDialog({ appointment, open, onClose, onConfirm, isLoading
                                 </div>
 
                                 <DialogHeader>
-                                    <DialogTitle className="text-xl font-bold text-gray-900 text-center">Check In Visitor</DialogTitle>
+                                    <DialogTitle className="text-xl font-bold text-gray-800 text-center">Check In Visitor</DialogTitle>
                                     <DialogDescription className="text-gray-500 text-center mt-2">
                                         {isReadyForCheckIn
                                             ? "All security requirements met. Ready to check in."
@@ -241,20 +241,20 @@ export function CheckInDialog({ appointment, open, onClose, onConfirm, isLoading
                                             <User className="h-5 w-5 text-accent" />
                                         </div>
                                         <div className="text-left flex-1 min-w-0">
-                                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Visitor</div>
+                                            <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Visitor</div>
                                             <div className="font-bold text-slate-700 truncate">{getVisitorName()}</div>
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-200/60">
                                         <div className="space-y-1 text-left">
-                                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Date</div>
+                                            <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Date</div>
                                             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
                                                 <Calendar className="h-3.5 w-3.5 text-slate-400" />
                                                 {formatDate(appointment.appointmentDetails?.scheduledDate || "")}
                                             </div>
                                         </div>
                                         <div className="space-y-1 text-left">
-                                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Time</div>
+                                            <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Time</div>
                                             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
                                                 <Clock className="h-3.5 w-3.5 text-slate-400" />
                                                 {appointment.appointmentDetails?.scheduledTime ? formatTime(appointment.appointmentDetails.scheduledTime) : "N/A"}

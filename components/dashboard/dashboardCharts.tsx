@@ -266,10 +266,10 @@ export const DashboardCharts = memo(function DashboardCharts({
                                     </ResponsiveContainer>
                                     {/* Center Text for Doughnut */}
                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none pb-12 sm:pb-14">
-                                        <div className="text-3xl font-black sm:text-4xl leading-none tracking-tight text-foreground">
+                                        <div className="text-3xl font-semibold sm:text-4xl leading-none tracking-tight text-foreground">
                                             {todayStats.todaysAppointmentsCount}
                                         </div>
-                                        <div className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest mt-1">
+                                        <div className="text-xs text-muted-foreground uppercase font-bold tracking-widest mt-1">
                                             Total
                                         </div>
                                     </div>
@@ -472,7 +472,7 @@ export const DashboardCharts = memo(function DashboardCharts({
                                                                 Time: {payload[0].payload.label}
                                                             </span>
                                                             <span className="text-base font-extrabold text-foreground">
-                                                                {payload[0].value} <span className="text-[10px] font-normal">Entries</span>
+                                                                {payload[0].value} <span className="text-xs font-normal">Entries</span>
                                                             </span>
                                                         </div>
                                                     </div>

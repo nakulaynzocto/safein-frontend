@@ -121,7 +121,7 @@ export function StatusPage({
                     {/* Appointment ID Display */}
                     {appointmentId && (
                         <div className="rounded-xl border border-[#3882a5]/10 bg-slate-50/50 p-3 text-center">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Appointment Reference</p>
+                            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Appointment Reference</p>
                             <p className="mt-1 font-mono text-sm font-bold text-[#3882a5]">{appointmentId}</p>
                         </div>
                     )}

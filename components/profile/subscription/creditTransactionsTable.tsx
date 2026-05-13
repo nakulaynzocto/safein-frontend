@@ -56,7 +56,7 @@ export const CreditTransactionsTable = ({
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h4 className="text-lg font-bold text-gray-900 flex items-center gap-2 tracking-tight">
+                    <h4 className="text-lg font-bold text-gray-800 flex items-center gap-2 tracking-tight">
                         <Zap className="text-blue-500" size={20} />
                         {title}
                     </h4>
@@ -98,7 +98,7 @@ export const CreditTransactionsTable = ({
             <div className="space-y-4">
                 <div className="overflow-x-auto rounded-xl border border-gray-200">
                     <table className="w-full text-left min-w-[600px] sm:min-w-full">
-                        <thead className="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider text-[10px] border-b border-gray-200">
+                        <thead className="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider text-xs border-b border-gray-200">
                             <tr>
                                 <th className="px-3 py-3 w-[15%]">Date</th>
                                 <th className="px-3 py-3 w-[15%]">Type</th>
@@ -111,12 +111,12 @@ export const CreditTransactionsTable = ({
                             {hasData ? (
                                 data.map((item) => (
                                     <tr key={item._id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-3 py-3 text-[11px] font-bold text-gray-500">
+                                        <td className="px-3 py-3 text-xs font-bold text-gray-500">
                                             {formatDate(item.createdAt)}
                                         </td>
                                         <td className="px-3 py-3">
                                             <div className={cn(
-                                                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border",
+                                                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold border",
                                                 item.type === 'recharge' 
                                                     ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                                     : item.type === 'usage'
@@ -140,7 +140,7 @@ export const CreditTransactionsTable = ({
                                         </td>
                                         <td className="px-3 py-3 text-right">
                                             <span className={cn(
-                                                "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-bold",
+                                                "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-bold",
                                                 item.type === 'recharge' ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
                                             )}>
                                                 {item.type === 'recharge' ? "+" : "-"}{item.credits || 0}

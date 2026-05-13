@@ -8,7 +8,7 @@ export default function FeatureSection() {
         <section id="features" className="bg-white py-12 sm:py-16">
             <div className="container mx-auto px-4 sm:px-6">
                 <div className="mb-16 text-center">
-                    <h2 className="text-slate-900 mb-4 text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
+                    <h2 className="text-slate-800 mb-4 text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
                         We offer <span className="text-[#3882a5]">Comprehensive </span> <br className="hidden md:block" /> Visitor Solutions
                     </h2>
                     <p className="mx-auto max-w-3xl text-slate-600 text-lg sm:text-xl font-medium leading-relaxed">
@@ -30,7 +30,7 @@ export default function FeatureSection() {
                             />
                         </div>
                         <div className="px-4 pb-4 flex flex-col flex-1">
-                            <h3 className="text-slate-900 mb-3 text-xl font-bold tracking-tight">Smart Appointments</h3>
+                            <h3 className="text-slate-800 mb-3 text-xl font-bold tracking-tight">Smart Appointments</h3>
                             <p className="text-gray-600 text-base leading-relaxed mb-2 font-medium">
                                 Automated booking engine with real-time calendar sync for a prioritized experience.
                             </p>
@@ -49,7 +49,7 @@ export default function FeatureSection() {
                             />
                         </div>
                         <div className="px-4 pb-4 flex flex-col flex-1">
-                            <h3 className="text-slate-900 mb-3 text-xl font-bold tracking-tight">Spot Pass System</h3>
+                            <h3 className="text-slate-800 mb-3 text-xl font-bold tracking-tight">Spot Pass System</h3>
                             <p className="text-gray-600 text-base leading-relaxed mb-2 font-medium">
                                 Seamless walk-in management with instant host alerts and automated badge printing.
                             </p>
@@ -68,7 +68,7 @@ export default function FeatureSection() {
                             />
                         </div>
                         <div className="px-4 pb-4 flex flex-col flex-1">
-                            <h3 className="text-slate-900 mb-3 text-xl font-bold tracking-tight">Real-time Messaging</h3>
+                            <h3 className="text-slate-800 mb-3 text-xl font-bold tracking-tight">Real-time Messaging</h3>
                             <p className="text-gray-600 text-base leading-relaxed mb-2 font-medium">
                                 Secure host-visitor messaging for premium hospitality and direct communication.
                             </p>
@@ -87,7 +87,7 @@ export default function FeatureSection() {
                             />
                         </div>
                         <div className="px-4 pb-4 flex flex-col flex-1">
-                            <h4 className="text-slate-900 mb-3 text-xl font-bold tracking-tight">Workforce Hub</h4>
+                            <h4 className="text-slate-800 mb-3 text-xl font-bold tracking-tight">Workforce Hub</h4>
                             <p className="text-gray-600 text-base leading-relaxed mb-2 font-medium">
                                 Enterprise directory management with granular access controls for all your staff.
                             </p>

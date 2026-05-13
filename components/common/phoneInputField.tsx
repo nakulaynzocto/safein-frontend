@@ -310,12 +310,12 @@ export function PhoneInputField({
         <div className={cn("space-y-1.5 w-full", className)}>
             {label && (
                 <div className="flex items-center justify-between">
-                    <label htmlFor={id} className="text-[11px] text-muted-foreground uppercase font-bold tracking-[0.1em]">
+                    <label htmlFor={id} className="text-xs text-muted-foreground uppercase font-bold tracking-[0.1em]">
                         {label}
                         {required && <span className="ml-1 text-red-500">*</span>}
                     </label>
                     {!required && !error && (
-                        <span className="text-[9px] text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
+                        <span className="text-xs text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
                     )}
                 </div>
             )}

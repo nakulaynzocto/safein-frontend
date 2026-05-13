@@ -394,7 +394,7 @@ export function AppointmentTable({
                                     {date || "N/A"}
                                 </span>
                                 {time && (
-                                    <span className="text-[11px] text-muted-foreground font-medium tabular-nums">
+                                    <span className="text-xs text-muted-foreground font-medium tabular-nums">
                                         {time}
                                     </span>
                                 )}
@@ -411,7 +411,7 @@ export function AppointmentTable({
                         return (
                             <div className="flex items-center gap-2">
                                 <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-primary"></div>
-                                <span className="text-[11px] text-gray-500">Processing...</span>
+                                <span className="text-xs text-gray-500">Processing...</span>
                             </div>
                         );
                     }

@@ -154,7 +154,7 @@ export function EmployeeSettingsDialog({ employee, open, onOpenChange }: Employe
                                             <Label htmlFor={option.id} className="font-semibold cursor-pointer">
                                                 {option.label}
                                             </Label>
-                                            <p className="text-[11px] text-muted-foreground leading-tight">
+                                            <p className="text-xs text-muted-foreground leading-tight">
                                                 {option.description}
                                             </p>
                                         </div>

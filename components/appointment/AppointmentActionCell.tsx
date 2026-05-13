@@ -72,7 +72,7 @@ export const AppointmentActionCell = ({
                 {isSpecial && !isBooked ? (
                     <div className="flex items-center gap-1 p-1 bg-[#3882a5]/5 border border-[#3882a5]/10 rounded-lg transition-all hover:border-[#3882a5]/20">
                         <Input
-                            className="h-7 w-full text-[10px] px-1.5 bg-white border-[#3882a5]/20 focus-visible:ring-[#3882a5] rounded-md tabular-nums"
+                            className="h-7 w-full text-xs px-1.5 bg-white border-[#3882a5]/20 focus-visible:ring-[#3882a5] rounded-md tabular-nums"
                             placeholder="OTP"
                             maxLength={6}
                             value={otpValue}
@@ -98,10 +98,10 @@ export const AppointmentActionCell = ({
                 ) : (
                     <div className="flex items-center justify-center">
                         {isBooked ? (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-[10px] py-0 h-5 font-bold">
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs py-0 h-5 font-bold">
                                 <CheckCircle className="h-3 w-3 mr-1" /> VERIFIED
                             </Badge>
-                        ) : <span className="text-gray-300 text-[10px]">—</span>}
+                        ) : <span className="text-gray-300 text-xs">—</span>}
                     </div>
                 )}
             </div>

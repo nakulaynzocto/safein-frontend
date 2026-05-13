@@ -95,7 +95,7 @@ export default function SubscriptionSuccessPage() {
                                 </div>
                             </div>
                         </div>
-                        <CardTitle className="text-[#3882a5] text-2xl font-black">Subscription Activated!</CardTitle>
+                        <CardTitle className="text-[#3882a5] text-2xl font-semibold">Subscription Activated!</CardTitle>
                         <CardDescription className="font-medium">Redirecting to dashboard...</CardDescription>
                     </CardHeader>
                     <CardContent className="text-center pb-8">
@@ -121,7 +121,7 @@ export default function SubscriptionSuccessPage() {
                             </div>
                         )}
                     </div>
-                    <CardTitle className="text-[#3882a5] text-2xl font-black">
+                    <CardTitle className="text-[#3882a5] text-2xl font-semibold">
                         {hasExceededMaxAttempts ? "Almost There..." : "Verifying Payment"}
                     </CardTitle>
                     <CardDescription className="font-medium">
@@ -158,7 +158,7 @@ export default function SubscriptionSuccessPage() {
                                 Handshaking with payment processor...
                             </p>
                             <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#3882a5] border-t-transparent"></div>
-                            <div className="flex items-center justify-center gap-2 text-[10px] font-bold tracking-widest text-[#3882a5]/40 uppercase">
+                            <div className="flex items-center justify-center gap-2 text-xs font-bold tracking-widest text-[#3882a5]/40 uppercase">
                                 <ShieldCheck className="h-3 w-3" />
                                 Syncing Securely
                             </div>
