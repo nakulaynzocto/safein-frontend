@@ -3,6 +3,7 @@
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useParams } from "next/navigation";
 import { validatePhone, formatPhoneForSubmission } from "@/utils/phoneUtils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -86,17 +87,15 @@ const idProofTypes = [
 
 interface BookingVisitorFormProps {
     initialPhone?: string;
-    /** Shown when phone field is disabled (e.g. verified QR number or link-preset phone). */
     lockedPhoneHelperText?: string;
     initialEmail?: string;
-    /** Shown when email is disabled (e.g. email used when the invite link was created). */
     lockedEmailHelperText?: string;
     initialValues?: Partial<BookingVisitorFormData>;
     onSubmit: (data: any) => void;
     isLoading?: boolean;
-    appointmentToken?: string; // Token for public upload endpoint
+    appointmentToken?: string;
     collectPhotoInForm?: boolean;
-    onBack?: () => void;
+    onBack?: (data?: any) => void;
 }
 
 export function BookingVisitorForm({
@@ -111,6 +110,7 @@ export function BookingVisitorForm({
     collectPhotoInForm = true,
     onBack,
 }: BookingVisitorFormProps) {
+    const { slug } = useParams() as { slug: string };
     const userCountry = useUserCountry();
     const bookingVisitorSchema = useMemo(() => createBookingVisitorSchema(collectPhotoInForm), [collectPhotoInForm]);
     const {
@@ -120,6 +120,7 @@ export function BookingVisitorForm({
         formState: { errors },
         setValue,
         watch,
+        getValues,
     } = useForm<BookingVisitorFormData>({
         resolver: yupResolver(bookingVisitorSchema) as any,
         defaultValues: {
@@ -160,7 +161,7 @@ export function BookingVisitorForm({
     useEffect(() => {
         if (!initialValues && !initialPhone && !initialEmail) return;
         
-        const opts = { shouldValidate: true, shouldDirty: false };
+        const opts = { shouldValidate: true, shouldDirty: true };
 
         if (initialPhone) {
             const formattedPhone = formatPhoneForSubmission(initialPhone);
@@ -172,34 +173,41 @@ export function BookingVisitorForm({
         }
 
         if (initialValues) {
-            const { address, idProof, ...rest } = initialValues;
-            Object.entries(rest).forEach(([key, value]) => {
-                if (value !== undefined) setValue(key as any, value, opts);
-            });
-            if (address) {
-                setValue("address", {
-                    street: address.street || "",
-                    city: address.city || "",
-                    state: address.state || "",
-                    country: address.country || userCountry,
-                }, opts);
+            // Populate top-level fields
+            if (initialValues.name !== undefined) setValue("name", initialValues.name, opts);
+            if (initialValues.email !== undefined) setValue("email", initialValues.email, opts);
+            if (initialValues.phone !== undefined) setValue("phone", formatPhoneForSubmission(initialValues.phone), opts);
+            if (initialValues.photo !== undefined) setValue("photo", initialValues.photo, opts);
+
+            // Populate Address fields explicitly to trigger UI updates in CountryStateCitySelect
+            if (initialValues.address) {
+                const addr = initialValues.address;
+                if (addr.country !== undefined) setValue("address.country", addr.country, opts);
+                if (addr.state !== undefined) setValue("address.state", addr.state, opts);
+                if (addr.city !== undefined) setValue("address.city", addr.city, opts);
+                if (addr.street !== undefined) setValue("address.street", addr.street, opts);
             }
-            if (idProof) {
-                setValue("idProof", {
-                    type: idProof.type || "",
-                    number: idProof.number || "",
-                    image: idProof.image || "",
-                }, opts);
+
+            // Populate ID Proof fields
+            if (initialValues.idProof) {
+                const idp = initialValues.idProof;
+                if (idp.type !== undefined) {
+                    setValue("idProof.type", idp.type, opts);
+                    if (idp.type) setShowIdProof(true); // Auto-expand if ID proof type exists
+                }
+                if (idp.number !== undefined) setValue("idProof.number", idp.number, opts);
+                if (idp.image !== undefined) setValue("idProof.image", idp.image, opts);
             }
         }
-    }, [initialPhone, initialEmail, initialValues, setValue, userCountry]);
+    }, [initialPhone, initialEmail, initialValues, setValue]);
 
-    const handleFormSubmit = (data: BookingVisitorFormData) => {
+    const mapFormDataToPayload = (data: BookingVisitorFormData) => {
         const { address, idProof, email, ...rest } = data;
         const emailTrim = email?.trim();
-        const payload = {
+        return {
             ...rest,
-            email: emailTrim || undefined,
+            phone: rest.phone || initialPhone || initialValues?.phone || "",
+            email: emailTrim || initialEmail || initialValues?.email || undefined,
             address: {
                 street: address.street?.trim() || undefined,
                 city: address.city,
@@ -213,7 +221,10 @@ export function BookingVisitorForm({
             },
             photo: rest.photo || undefined,
         };
-        onSubmit(payload);
+    };
+
+    const handleFormSubmit = (data: BookingVisitorFormData) => {
+        onSubmit(mapFormDataToPayload(data));
     };
 
     return (
@@ -331,13 +342,13 @@ export function BookingVisitorForm({
                     <div className="flex justify-start">
                         <ImageUploadField
                             name="photo"
+                            appointmentToken={appointmentToken}
                             register={register}
                             setValue={setValue}
                             errors={errors.photo}
                             initialUrl={initialValues?.photo}
                             label=""
                             enableImageCapture={true}
-                            appointmentToken={appointmentToken}
                             onUploadStatusChange={setIsFileUploading}
                             variant="avatar"
                         />
@@ -445,7 +456,10 @@ export function BookingVisitorForm({
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={onBack}
+                        onClick={() => {
+                            const currentValues = getValues();
+                            onBack(mapFormDataToPayload(currentValues));
+                        }}
                         disabled={isLoading}
                         className="h-12 flex-1 rounded-xl border-border px-4 font-medium"
                     >

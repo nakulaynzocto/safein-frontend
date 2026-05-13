@@ -37,17 +37,14 @@ import { useUserCountry } from "@/hooks/useUserCountry";
 import { AppointmentBookingForm } from "@/components/appointment/AppointmentBookingForm";
 import { BookingVisitorForm } from "@/components/appointment/BookingVisitorForm";
 import { OtpDigitBoxes } from "@/components/common/otpDigitBoxes";
-import { useFormPersistence } from "@/hooks/useFormPersistence";
 import { StepIndicator, Step } from "@/components/common/StepIndicator";
 import { FormSkeleton } from "@/components/common/FormSkeleton";
-
 import { useVisitorVerification } from "@/hooks/useVisitorVerification";
 
 type StepKey = "verify_phone" | "details" | "photo" | "appointment" | "review";
 
 export default function QRScanPage() {
     const { slug } = useParams() as { slug: string };
-    const PERSIST_KEY = useMemo(() => `qr_scan_draft_${slug}`, [slug]);
 
     const [step, setStep] = useState<StepKey | "loading" | "success" | "error">("loading");
     const [errorMessage, setErrorMessage] = useState("");
@@ -82,12 +79,12 @@ export default function QRScanPage() {
         isSending: isSendingOtpMutation,
         isVerifying: isVerifyingOtpMutation,
         onVerified: (res, phone) => {
+            const visitor = res?.data?.visitor || res?.visitor;
             setVerifiedPhone(phone);
-            if (res.visitor) {
-                setVisitorDraft(res.visitor);
-                setPhotoValue("photo", res.visitor.photo || "");
-                setStep("photo");
-                showSuccessToast(`Welcome back, ${res.visitor.name}!`);
+            if (visitor) {
+                setVisitorDraft({ ...visitor, phone: visitor.phone || phone });
+                setStep("details"); // Go to details to show auto-fill
+                showSuccessToast(`Welcome back, ${visitor.name}!`);
             } else {
                 setStep("details");
             }
@@ -114,21 +111,6 @@ export default function QRScanPage() {
         }
     }, [companyInfo, infoError, slug, step]);
 
-    // Persistence
-    useFormPersistence(
-        PERSIST_KEY,
-        !["loading", "success", "error"].includes(step) ? { step, verifiedPhone, otpSent, visitorId, visitorDraft, appointmentDraft } : null,
-        (saved) => {
-            if (saved.step && !["loading", "success", "error"].includes(saved.step)) {
-                setStep(saved.step as any);
-                setVerifiedPhone(saved.verifiedPhone);
-                setVisitorId(saved.visitorId);
-                setVisitorDraft(saved.visitorDraft);
-                setAppointmentDraft(saved.appointmentDraft);
-            }
-        }
-    );
-
     const handleFinalSubmit = async () => {
         try {
             const res = await submitUnifiedQR({
@@ -140,7 +122,6 @@ export default function QRScanPage() {
             }).unwrap();
             setSubmissionResult(res);
             setStep("success");
-            localStorage.removeItem(PERSIST_KEY);
         } catch (e: any) { showErrorToast(e?.data?.message || "Submit failed"); }
     };
 
@@ -222,7 +203,18 @@ export default function QRScanPage() {
                             </form>
                         )}
 
-                        {step === "details" && <BookingVisitorForm onSubmit={(d) => { setVisitorDraft(d); setStep("photo"); }} initialPhone={verifiedPhone!} onBack={() => setStep("verify_phone")} collectPhotoInForm={false} />}
+                        {step === "details" && (
+                            <BookingVisitorForm 
+                                initialValues={visitorDraft}
+                                onSubmit={(d) => { setVisitorDraft(d); setStep("photo"); }} 
+                                initialPhone={verifiedPhone!} 
+                                onBack={(draft) => {
+                                    if (draft) setVisitorDraft(draft);
+                                    setStep("verify_phone");
+                                }} 
+                                collectPhotoInForm={false} 
+                            />
+                        )}
                         
                         {step === "photo" && (
                             <div className="space-y-8 max-w-2xl mx-auto">

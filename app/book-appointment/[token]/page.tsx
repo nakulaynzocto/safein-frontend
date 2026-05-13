@@ -20,7 +20,6 @@ import { validatePhone, formatPhoneForSubmission } from "@/utils/phoneUtils";
 import { Label } from "@/components/ui/label";
 import { StepIndicator, Step } from "@/components/common/StepIndicator";
 import { FormSkeleton } from "@/components/common/FormSkeleton";
-import { useFormPersistence } from "@/hooks/useFormPersistence";
 import { useVisitorVerification } from "@/hooks/useVisitorVerification";
 import { SuccessState } from "@/components/common/SuccessState";
 import { VisitReviewCard } from "@/components/appointment/VisitReviewCard";
@@ -29,7 +28,6 @@ type StepKey = "verification" | "details" | "photo" | "appointment" | "review";
 
 export default function BookAppointmentPage() {
     const { token } = useParams<{ token: string }>();
-    const PERSIST_KEY = useMemo(() => `booking_state_${token}`, [token]);
 
     const { data: appointmentLinkData, isLoading: isLoadingLink, error: linkError } = useGetAppointmentLinkByTokenQuery(token as string);
     const [createBookingThroughLink, { isLoading: isCreatingBooking }] = useCreateBookingThroughLinkMutation();
@@ -79,21 +77,6 @@ export default function BookAppointmentPage() {
         }
     });
 
-    useFormPersistence(
-        PERSIST_KEY,
-        step !== "loading" ? { step, visitorId, verifiedPhone, otpSent, visitorDraft, appointmentData } : null,
-        (saved) => {
-            if (saved.step && !["success", "loading"].includes(saved.step)) {
-                setStep(saved.step as any);
-                setVisitorId(saved.visitorId);
-                setVerifiedPhone(saved.verifiedPhone);
-                setOtpSent(saved.otpSent);
-                setVisitorDraft(saved.visitorDraft);
-                setAppointmentData(saved.appointmentData);
-            }
-        }
-    );
-
     // --- Initialization Logic ---
     useEffect(() => {
         if (linkError) return setStep("error");
@@ -101,16 +84,12 @@ export default function BookAppointmentPage() {
 
         const linkData = appointmentLinkData as any;
         if (linkData.isBooked) {
-            localStorage.removeItem(PERSIST_KEY);
             return setStep("already_booked");
         }
 
-        // Initialize only if no persistence found
-        if (!localStorage.getItem(PERSIST_KEY)) {
-            setStep("verification");
-            if (linkData.visitorPhone) setVerifyValue("phone", linkData.visitorPhone);
-        }
-    }, [appointmentLinkData, linkError, PERSIST_KEY, setVerifyValue]);
+        setStep("verification");
+        if (linkData.visitorPhone) setVerifyValue("phone", linkData.visitorPhone);
+    }, [appointmentLinkData, linkError, setVerifyValue]);
 
     const handleFinalSubmit = async () => {
         try {
@@ -124,7 +103,6 @@ export default function BookAppointmentPage() {
             const aId = extractIdString(result?._id || result?.id);
             if (aId) setSubmittedAppointmentId(aId);
             setStep("success");
-            localStorage.removeItem(PERSIST_KEY);
         } catch (e: any) {
             const msg = e?.data?.message || e?.message || "Booking failed";
             showErrorToast(msg);
@@ -244,7 +222,10 @@ export default function BookAppointmentPage() {
                                 onSubmit={(d) => { setVisitorDraft(d); setStep("photo"); }} 
                                 appointmentToken={token as string} 
                                 collectPhotoInForm={false} 
-                                onBack={() => setStep("verification")} 
+                                onBack={(draft) => {
+                                    if (draft) setVisitorDraft(draft);
+                                    setStep("verification");
+                                }} 
                             />
                         )}
 
