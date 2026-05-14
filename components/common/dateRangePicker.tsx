@@ -158,9 +158,9 @@ export default function DateRangePicker({
                         id="date"
                         variant="outline"
                         className={cn(
-                            "h-9 px-3 flex items-center gap-1.5 font-normal rounded-lg text-[13px]",
-                            "max-w-[160px] w-auto",
-                            "border-border bg-background",
+                            "h-10 sm:h-12 px-3 flex items-center gap-1.5 font-normal rounded-xl text-[13px]",
+                            "max-w-[180px] sm:max-w-[200px] w-auto",
+                            "border-border bg-background shadow-sm",
                             "hover:bg-[#f0f6fa] hover:border-[#3882a5]/50 hover:text-[#3882a5]",
                             "transition-all duration-150",
                             date ? "text-foreground" : "text-muted-foreground"
