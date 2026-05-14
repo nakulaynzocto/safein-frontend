@@ -163,15 +163,15 @@ export function SMSSettings() {
                                             <div className="px-5 pb-8 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
                                                 <div className="space-y-4 pt-2">
                                                     {[
-                                                        { id: "newRequest", label: "New Appointment Request", icon: Calendar, placeholders: ["companyName", "visitorName", "employeeName", "date", "time", "approvalLink"] },
-                                                        { id: "visitorCheckedIn", label: "Visitor Checked-in / Arrived", icon: MapPin, placeholders: ["companyName", "visitorName", "employeeName"] },
-                                                        { id: "approvedVisitor", label: "Appointment Approved (Visitor)", icon: CheckCircle2, placeholders: ["companyName", "visitorName", "employeeName", "date", "time"] },
-                                                        { id: "approvedEmployee", label: "Appointment Approved (Employee)", icon: User, placeholders: ["visitorName", "employeeName", "date", "time", "companyName"] },
-                                                        { id: "rejectedVisitor", label: "Appointment Rejected (Visitor)", icon: XCircle, placeholders: ["visitorName", "date", "companyName"] },
-                                                        { id: "appointmentLink", label: "Invite Link Notification", icon: Link, placeholders: ["employeeName", "bookingUrl", "companyName"] },
-                                                        { id: "visitorCheckedOut", label: "Visitor Checked-Out", icon: LogOut, placeholders: ["companyName", "visitorName"] },
-                                                        { id: "feedbackRequest", label: "Feedback Request", icon: Star, placeholders: ["companyName", "visitorName", "feedbackLink"] },
-                                                        { id: "hostDelayed", label: "Host Delayed Notification", icon: Clock, placeholders: ["companyName", "visitorName", "employeeName", "delayTime"] },
+                                                        { id: "newRequest", label: "SafeIn_New_Request", icon: Calendar, placeholders: ["companyName", "visitorName", "employeeName", "date", "time", "approvalLink"] },
+                                                        { id: "visitorCheckedIn", label: "SafeIn_Visitor_In", icon: MapPin, placeholders: ["companyName", "visitorName", "employeeName"] },
+                                                        { id: "approvedVisitor", label: "SafeIn_Visit_Confirmed", icon: CheckCircle2, placeholders: ["companyName", "visitorName", "employeeName", "date", "time"] },
+                                                        { id: "approvedEmployee", label: "SafeIn_Visit_Confirmed", icon: User, placeholders: ["visitorName", "employeeName", "date", "time", "companyName"] },
+                                                        { id: "rejectedVisitor", label: "SafeIn_Visit_Reject", icon: XCircle, placeholders: ["visitorName", "date", "companyName"] },
+                                                        { id: "appointmentLink", label: "SafeIn_Booking_Link", icon: Link, placeholders: ["employeeName", "bookingUrl", "companyName"] },
+                                                        { id: "visitorCheckedOut", label: "SafeIn_Visitor_Out", icon: LogOut, placeholders: ["companyName", "visitorName"] },
+                                                        { id: "feedbackRequest", label: "feedback_request", icon: Star, placeholders: ["companyName", "visitorName", "feedbackLink"] },
+                                                        { id: "hostDelayed", label: "host_delayed", icon: Clock, placeholders: ["companyName", "visitorName", "employeeName", "delayTime"] },
                                                     ].map((template) => (
                                                         <div key={template.id} className="border border-border/50 rounded-xl bg-background transition-all overflow-hidden">
                                                             <div className="flex items-center justify-between p-4 px-5">
