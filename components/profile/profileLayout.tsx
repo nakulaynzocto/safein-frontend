@@ -127,34 +127,8 @@ export function ProfileLayout({ children }: ProfileLayoutProps) {
     };
 
     return (
-        <div className="flex flex-col md:flex-row gap-4 lg:gap-6">
-            {/* Sidebar Navigation */}
-            <div className="w-full md:w-[200px] lg:w-[220px] flex-shrink-0 md:sticky md:top-6 md:self-start object-contain overflow-hidden">
-                <div className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible bg-white/50 p-1.5 sm:p-2 rounded-xl border border-gray-200 shadow-sm backdrop-blur-sm no-scrollbar">
-                    {tabs.map((tab) => {
-                        const Icon = tab.icon;
-                        const isActive = activeTab === tab.id;
-                        return (
-                            <button
-                                key={tab.id}
-                                onClick={() => handleTabClick(tab.id, tab.href)}
-                                className={cn(
-                                    "flex items-center gap-2.5 px-3 py-2.5 sm:py-3 rounded-lg text-[13px] md:text-sm font-medium transition-all w-max md:w-full",
-                                    isActive
-                                        ? "bg-white text-[#3882a5] shadow-sm border border-gray-100"
-                                        : "text-gray-500 hover:text-gray-800 hover:bg-white/50"
-                                )}
-                            >
-                                <Icon size={16} className={cn("flex-shrink-0", isActive ? "text-[#3882a5]" : "text-gray-400")} />
-                                <span className="truncate whitespace-nowrap">{tab.label}</span>
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="flex-1 min-w-0">
+        <div className="w-full">
+            <div className="w-full">
                 {children(activeTab)}
             </div>
         </div>

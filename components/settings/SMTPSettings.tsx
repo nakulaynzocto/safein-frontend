@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useGetSettingsQuery, useSaveSMTPConfigMutation } from "@/store/api/settingsApi";
+import { useGetSettingsQuery, useSaveSMTPConfigMutation, useUpdateSettingsMutation } from "@/store/api/settingsApi";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Mail, Save, Server, Key, Palette, Settings2 } from "lucide-react";
+import { Mail, Save, Server, Key, Palette, Settings2, Activity } from "lucide-react";
 import { SettingsHeader } from "./SettingsHeader";
 import { InputField } from "@/components/common/inputField";
 import { MaskedInputField, MASKED_DISPLAY_VALUE } from "@/components/common/MaskedInputField";
@@ -19,6 +19,8 @@ import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmailTemplateSettings } from "./EmailTemplateSettings";
 import { Card } from "@/components/ui/card";
+import { BrandSwitch } from "@/components/common/BrandSwitch";
+import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 
 // Dynamic Schema: Validates only if mode is 'custom'
 const schema = yup.object().shape({
@@ -60,6 +62,9 @@ export function SMTPSettings() {
     const router = useRouter();
     const { data: settings, isLoading, error } = useGetSettingsQuery();
     const [saveSMTP, { isLoading: isSaving }] = useSaveSMTPConfigMutation();
+    const [updateSettings] = useUpdateSettingsMutation();
+    const { activeSubscriptionData } = useAuthSubscription();
+    const modules = activeSubscriptionData?.modules;
     const [selectedPreset, setSelectedPreset] = useState("Brevo API");
 
     const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm({
@@ -135,33 +140,79 @@ export function SMTPSettings() {
                                 <FormContainer isPage isLoading={isLoading}>
                                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                                         
+                                        {/* Master Email Toggle Section */}
+                                        {!!modules?.enableEmail && (
+                                            <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
+                                                <div className="p-5 flex items-center justify-between gap-4">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="h-12 w-12 rounded-xl bg-[#3882a5] text-white shadow-lg flex items-center justify-center">
+                                                            <Activity size={24} />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-bold text-gray-800 text-lg">Master Email Toggle</h3>
+                                                            <p className="text-xs text-gray-500">Enable or disable all Email notifications globally</p>
+                                                        </div>
+                                                    </div>
+                                                    <BrandSwitch 
+                                                        checked={settings?.notifications?.emailEnabled ?? false}
+                                                        onCheckedChange={async (checked) => {
+                                                            try {
+                                                                await updateSettings({
+                                                                    notifications: {
+                                                                        ...settings?.notifications,
+                                                                        emailEnabled: checked
+                                                                    }
+                                                                }).unwrap();
+                                                                toast.success("Master Email settings updated");
+                                                            } catch (err: any) {
+                                                                toast.error(err?.data?.message || "Failed to update master settings");
+                                                            }
+                                                        }}
+                                                        variant="default"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {/* Strategy Selection */}
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <Card 
-                                                className={cn("p-4 cursor-pointer border-2 transition-all", 
-                                                    deliveryMode === 'shared' ? "border-[#3882a5] bg-[#3882a5]/5" : "hover:border-border")}
-                                                onClick={() => { setValue("deliveryMode", 'shared'); handleSubmit(onSubmit)(); }}
-                                            >
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <Server className="h-5 w-5 text-[#3882a5]" />
-                                                    <div className={cn("h-4 w-4 rounded-full border-2", deliveryMode === 'shared' ? "bg-[#3882a5]" : "")} />
-                                                </div>
-                                                <p className="text-sm font-bold">Standard Relay</p>
-                                                <p className="text-xs text-muted-foreground">Premium infrastructure handled by Aynzo.</p>
-                                            </Card>
-
-                                            <Card 
-                                                className={cn("p-4 cursor-pointer border-2 transition-all", 
-                                                    deliveryMode === 'custom' ? "border-primary bg-primary/5" : "hover:border-border")}
-                                                onClick={() => setValue("deliveryMode", 'custom')}
-                                            >
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <Palette className="h-5 w-5 text-primary" />
-                                                    <div className={cn("h-4 w-4 rounded-full border-2", deliveryMode === 'custom' ? "bg-primary" : "")} />
-                                                </div>
-                                                <p className="text-sm font-bold">Custom Branding</p>
-                                                <p className="text-xs text-muted-foreground">Use your own API Key and sender email.</p>
-                                            </Card>
+                                            {[
+                                                { 
+                                                    id: 'shared', 
+                                                    label: 'Standard Relay', 
+                                                    desc: 'Premium infrastructure handled by Aynzo.', 
+                                                    icon: Server, 
+                                                    colorClass: "text-[#3882a5]", 
+                                                    activeClass: "border-[#3882a5] bg-[#3882a5]/5",
+                                                    radioClass: "bg-[#3882a5]"
+                                                },
+                                                { 
+                                                    id: 'custom', 
+                                                    label: 'Custom Branding', 
+                                                    desc: 'Use your own API Key and sender email.', 
+                                                    icon: Palette, 
+                                                    colorClass: "text-primary", 
+                                                    activeClass: "border-primary bg-primary/5",
+                                                    radioClass: "bg-primary"
+                                                }
+                                            ].map((strategy) => (
+                                                <Card 
+                                                    key={strategy.id}
+                                                    className={cn("p-4 cursor-pointer border-2 transition-all", 
+                                                        deliveryMode === strategy.id ? strategy.activeClass : "hover:border-border")}
+                                                    onClick={() => {
+                                                        setValue("deliveryMode", strategy.id as any);
+                                                        if (strategy.id === 'shared') handleSubmit(onSubmit)();
+                                                    }}
+                                                >
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <strategy.icon className={cn("h-5 w-5", strategy.colorClass)} />
+                                                        <div className={cn("h-4 w-4 rounded-full border-2", deliveryMode === strategy.id ? strategy.radioClass : "")} />
+                                                    </div>
+                                                    <p className="text-sm font-bold">{strategy.label}</p>
+                                                    <p className="text-xs text-muted-foreground">{strategy.desc}</p>
+                                                </Card>
+                                            ))}
                                         </div>
 
                                         {deliveryMode === 'shared' ? (

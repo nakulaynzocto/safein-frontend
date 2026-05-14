@@ -220,7 +220,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                 "top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out",
                 variant === "dashboard" ? "sticky" : "fixed",
                 shouldShowWhiteNavbar
-                    ? "bg-white/80 backdrop-blur-xl py-0"
+                    ? "bg-white/95 backdrop-blur-xl py-0 border-b border-gray-200/80 shadow-sm"
                     : "bg-transparent border-transparent shadow-none py-2"
             )}
         >
@@ -229,77 +229,45 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
             <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12">
                 <div className="flex h-20 items-center justify-between">
                     <div className="flex items-center gap-2 lg:gap-3">
-                        {/* Logo - Only show logo, hide text when sidebar is visible (to avoid duplicate branding) */}
-                        {variant === "dashboard" ? (
-                            // For dashboard variant, show minimal branding with text
-                            <>
-                                <Link
-                                    href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME}
-                                    className="flex-shrink-0"
-                                    prefetch={true}
+                        <Link
+                            href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME}
+                            className="flex-shrink-0"
+                            prefetch={true}
+                        >
+                            <div className={cn(
+                                "flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center overflow-hidden bg-transparent transition-all duration-300",
+                                variant !== "dashboard" && "group relative hover:scale-105"
+                            )}>
+                                <Image
+                                    src={user?.profilePicture && user.profilePicture.trim() !== "" ? user.profilePicture : "/safein-logo.svg"}
+                                    alt={user?.companyName || "Company Logo"}
+                                    width={56}
+                                    height={56}
+                                    priority
+                                    className={cn(
+                                        "h-full w-full object-contain",
+                                        variant !== "dashboard" && "transition-transform duration-500 group-hover:rotate-12"
+                                    )}
+                                    onError={(e) => {
+                                        const target = e.currentTarget as HTMLImageElement;
+                                        target.src = "/safein-identity.png";
+                                    }}
+                                />
+                            </div>
+                        </Link>
+                        
+                        {/* Company Name Branding - Show for authenticated users */}
+                        {shouldShowPrivateNavbar && (
+                            <div className="hidden items-center lg:flex">
+                                <div
+                                    className={cn(
+                                        "text-xl lg:text-2xl font-black uppercase tracking-wide transition-all duration-300",
+                                        shouldShowWhiteNavbar ? "text-accent" : "text-white"
+                                    )}
                                 >
-                                    <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl border-2 border-gray-200 bg-white">
-                                        <Image
-                                            src={user?.profilePicture && user.profilePicture.trim() !== "" ? user.profilePicture : "/safein-logo.svg"}
-                                            alt={user?.companyName || "Company Logo"}
-                                            width={56}
-                                            height={56}
-                                            priority
-                                            className="h-full w-full object-contain"
-                                            onError={(e) => {
-                                                const target = e.currentTarget as HTMLImageElement;
-                                                target.src = "/safein-identity.png";
-                                            }}
-                                        />
-                                    </div>
-                                </Link>
-                                {/* Visitor Management System Text - Show for authenticated users */}
-                                {shouldShowPrivateNavbar && (
-                                    <div className={`hidden items-center lg:flex`}>
-                                        <div
-                                            className={`text-lg lg:text-xl font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-slate-900" : "text-white"
-                                                }`}
-                                        >
-                                            {formatName(user?.companyName || "Visitor Management System")}
-                                        </div>
-                                    </div>
-                                )}
-                            </>
-                        ) : (
-                            // For public variant, show full branding
-                            <>
-                                <Link
-                                    href={canAccessDashboard ? routes.privateroute.DASHBOARD : routes.publicroute.HOME}
-                                    className="flex-shrink-0"
-                                    prefetch={true}
-                                >
-                                    <div className="group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-300 hover:scale-105 shadow-sm">
-                                        <Image
-                                            src={user?.profilePicture && user.profilePicture.trim() !== "" ? user.profilePicture : "/safein-logo.svg"}
-                                            alt={user?.companyName || "Company Logo"}
-                                            width={56}
-                                            height={56}
-                                            priority
-                                            className="h-full w-full object-contain transition-transform duration-500 group-hover:rotate-12"
-                                            onError={(e) => {
-                                                const target = e.currentTarget as HTMLImageElement;
-                                                target.src = "/safein-identity.png";
-                                            }}
-                                        />
-                                    </div>
-                                </Link>
-                                {/* Visitor Management System Text - Show for authenticated users */}
-                                {shouldShowPrivateNavbar && (
-                                    <div className={`hidden items-center lg:flex`}>
-                                        <div
-                                            className={`text-lg lg:text-xl font-bold tracking-tight transition-all duration-300 ${shouldShowWhiteNavbar ? "text-slate-900" : "text-white"
-                                                }`}
-                                        >
-                                            {formatName(user?.companyName || "Visitor Management System")}
-                                        </div>
-                                    </div>
-                                )}
-                            </>
+                                    {formatName(user?.companyName || "SafeIn")}
+                                </div>
+                            </div>
                         )}
                     </div>
 
@@ -399,30 +367,27 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                         {/* Sign In / Start Trial - Show ONLY when not authenticated */}
                         {isMounted && (!isAuthenticated || !token) && variant !== "dashboard" && (
                             <>
-                                <Button
-                                    variant="outline"
-                                    asChild
-                                    className={cn(
-                                        "rounded-xl px-4 h-10 min-w-[100px] text-[13px] font-bold transition-all duration-300 flex items-center justify-center border-2",
-                                        shouldShowWhiteNavbar 
-                                            ? "border-brand/20 text-brand hover:bg-brand/5 hover:border-brand/40" 
-                                            : "border-brand-strong/20 text-brand-strong hover:bg-white/10 hover:border-brand-strong/40"
-                                    )}
-                                >
-                                    <Link href={routes.publicroute.LOGIN} prefetch={true}>
-                                        Sign in
-                                    </Link>
-                                </Button>
                                 <Link
                                     href={routes.publicroute.REGISTER}
                                     className={cn(
-                                        "hidden rounded-xl px-5 h-10 min-w-[100px] text-[13px] font-bold transition-all duration-300 sm:flex items-center justify-center relative overflow-hidden group whitespace-nowrap",
-                                        ctaBtn
+                                        "hidden rounded-full px-5 h-[42px] min-w-[100px] text-[14px] font-bold transition-all duration-300 sm:flex items-center justify-center relative overflow-hidden group whitespace-nowrap",
+                                        shouldShowWhiteNavbar ? "bg-[#f0edff] text-[#5e35b1] hover:bg-[#e4dcff]" : "bg-white text-[#5e35b1] hover:bg-gray-100"
                                     )}
                                     prefetch={true}
                                 >
-                                    <span className="relative z-10">Start Trial</span>
-                                    <div className="animate-shimmer absolute inset-0 opacity-10"></div>
+                                    <span className="relative z-10 flex items-center gap-2">
+                                        <Zap className="h-4 w-4" /> Start Trial
+                                    </span>
+                                </Link>
+                                <Link
+                                    href={routes.publicroute.LOGIN}
+                                    className={cn(
+                                        "hidden rounded-full border px-5 h-[42px] min-w-[100px] text-[14px] font-bold transition-all duration-300 sm:flex items-center justify-center bg-white text-gray-900 hover:bg-gray-50",
+                                        !shouldShowWhiteNavbar ? "border-white/20 text-white hover:bg-white/10 bg-transparent" : "border-gray-200"
+                                    )}
+                                    prefetch={true}
+                                >
+                                    <UserCircle className="mr-2 h-4 w-4" /> Sign in
                                 </Link>
                             </>
                         )}

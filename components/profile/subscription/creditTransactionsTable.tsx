@@ -117,13 +117,13 @@ export const CreditTransactionsTable = ({
                                         <td className="px-3 py-3">
                                             <div className={cn(
                                                 "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold border",
-                                                item.type === 'recharge' 
+                                                (item.type === 'recharge' || item.type === 'refund') 
                                                     ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                                     : item.type === 'usage'
                                                         ? "bg-amber-50 text-amber-700 border-amber-200"
                                                         : "bg-slate-50 text-slate-700 border-slate-200"
                                             )}>
-                                                {item.type === 'recharge' ? <ArrowDownLeft size={12} /> : <ArrowUpRight size={12} />}
+                                                {(item.type === 'recharge' || item.type === 'refund') ? <ArrowDownLeft size={12} /> : <ArrowUpRight size={12} />}
                                                 <span className="capitalize">{item.type}</span>
                                             </div>
                                         </td>
@@ -141,9 +141,9 @@ export const CreditTransactionsTable = ({
                                         <td className="px-3 py-3 text-right">
                                             <span className={cn(
                                                 "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-bold",
-                                                item.type === 'recharge' ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
+                                                (item.type === 'recharge' || item.type === 'refund') ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
                                             )}>
-                                                {item.type === 'recharge' ? "+" : "-"}{item.credits || 0}
+                                                {(item.type === 'recharge' || item.type === 'refund') ? "+" : "-"}{item.credits || 0}
                                             </span>
                                         </td>
                                     </tr>

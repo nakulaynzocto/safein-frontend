@@ -137,48 +137,7 @@ export function CompanyControlSettings() {
         }
     ];
 
-    const notificationChannels = [
-        {
-            id: "emailEnabled",
-            title: "Email Notifications",
-            description: "Send appointment updates and alerts via Email",
-            icon: Mail,
-            color: "bg-[#3882a5]",
-            checked: settings?.notifications?.emailEnabled ?? false,
-            handler: (checked: boolean) => handleNotificationToggle("emailEnabled", checked),
-            visible: !!modules?.enableEmail
-        },
-        {
-            id: "smsEnabled",
-            title: "SMS Alerts",
-            description: "Send instant text message alerts for key events",
-            icon: MessageSquare,
-            color: "bg-[#3882a5]",
-            checked: settings?.notifications?.smsEnabled ?? false,
-            handler: (checked: boolean) => handleNotificationToggle("smsEnabled", checked),
-            visible: !!modules?.enableSms
-        },
-        {
-            id: "whatsappEnabled",
-            title: "WhatsApp Business",
-            description: "Deliver rich notifications directly to WhatsApp",
-            icon: Phone,
-            color: "bg-[#3882a5]",
-            checked: settings?.notifications?.whatsappEnabled ?? false,
-            handler: (checked: boolean) => handleNotificationToggle("whatsappEnabled", checked),
-            visible: !!modules?.enableWhatsApp
-        },
-        {
-            id: "voiceEnabled",
-            title: "Smart Voice Calls",
-            description: "Automated IVR calls for urgent appointment approvals",
-            icon: Zap,
-            color: "bg-[#3882a5]",
-            checked: settings?.voiceCall?.enabled ?? false,
-            handler: (checked: boolean) => handleVoiceToggle(checked),
-            visible: !!modules?.enableVoice
-        }
-    ].filter(channel => channel.visible);
+
 
     return (
         <div className="mx-auto w-full max-w-full px-1 pt-4 sm:pt-6">
@@ -243,56 +202,7 @@ export function CompanyControlSettings() {
                                     </Collapsible>
                                 </div>
 
-                                {/* Section: Communication Channels */}
-                                {notificationChannels.length > 0 && (
-                                    <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
-                                        <Collapsible open={expandedSections.includes('channels')} onOpenChange={() => toggleSection('channels')}>
-                                            <div className="p-5 flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('channels')}>
-                                                <div className="flex items-center gap-4">
-                                                    <div className="h-12 w-12 rounded-xl bg-[#3882a5] text-white shadow-lg flex items-center justify-center">
-                                                        <Activity size={24} />
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-bold text-gray-800 text-lg">Communication Channels</h3>
-                                                        <p className="text-xs text-gray-500">Manage master toggles for all notification types</p>
-                                                    </div>
-                                                </div>
-                                                <ChevronRight className={cn("w-5 h-5 text-gray-400 transition-transform duration-300", expandedSections.includes('channels') && "rotate-90")} />
-                                            </div>
 
-                                            <CollapsibleContent>
-                                                <div className="px-5 pb-6 pt-2 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                                                    {notificationChannels.map((item) => (
-                                                        <div 
-                                                            key={item.id}
-                                                            className="group rounded-xl border border-border/40 bg-muted/5 p-4 transition-all hover:bg-muted/10"
-                                                        >
-                                                            <div className="flex items-center justify-between gap-4">
-                                                                <div className="flex items-center gap-4">
-                                                                    <div className={cn(
-                                                                        "h-10 w-10 rounded-lg text-white shadow-md flex items-center justify-center",
-                                                                        item.color
-                                                                    )}>
-                                                                        <item.icon size={18} />
-                                                                    </div>
-                                                                    <div>
-                                                                        <h4 className="font-bold text-gray-800 text-sm">{item.title}</h4>
-                                                                        <p className="text-xs text-gray-500 leading-tight">{item.description}</p>
-                                                                    </div>
-                                                                </div>
-                                                                <BrandSwitch 
-                                                                    checked={item.checked} 
-                                                                    onCheckedChange={item.handler} 
-                                                                    variant="default" 
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </CollapsibleContent>
-                                        </Collapsible>
-                                    </div>
-                                )}
 
                                 {/* Footer Note */}
                                 <div className="rounded-2xl bg-muted/30 p-6 border border-dashed border-border flex items-center gap-4 mt-4">

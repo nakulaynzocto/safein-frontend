@@ -9,6 +9,7 @@ import {
     useInitiateWhatsAppVerificationMutation,
     useConfirmWhatsAppVerificationMutation,
 } from "@/store/api/settingsApi";
+import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
@@ -119,6 +120,8 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
     const [initiateVerify, { isLoading: isInitiatingVerify }] = useInitiateWhatsAppVerificationMutation();
     const [confirmVerify, { isLoading: isConfirmingVerify }] = useConfirmWhatsAppVerificationMutation();
     const userCountry = useUserCountry();
+    const { activeSubscriptionData } = useAuthSubscription();
+    const modules = activeSubscriptionData?.modules;
 
     const [showOtpModal, setShowOtpModal] = useState(false);
     const { expandedSections, toggleSection } = useCollapsibleSections(["credentials", "templates"]);
@@ -282,8 +285,36 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                         />
 
                         <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
-                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 pb-12">
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-12">
                                 <div className="p-2 space-y-6">
+                                    {/* Master Toggle Section */}
+                                    {!!modules?.enableWhatsApp && (
+                                        <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
+                                            <div className="p-5 flex items-center justify-between gap-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="h-12 w-12 rounded-xl bg-[#3882a5] text-white shadow-lg flex items-center justify-center">
+                                                        <MessageSquare size={24} />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-gray-800 text-lg">Master WhatsApp Toggle</h3>
+                                                        <p className="text-xs text-gray-500">Enable or disable all WhatsApp Business notifications globally</p>
+                                                    </div>
+                                                </div>
+                                                <Controller
+                                                    name="whatsappEnabled"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <BrandSwitch 
+                                                            checked={field.value} 
+                                                            onCheckedChange={field.onChange} 
+                                                            variant="default" 
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* Strategy Selection */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-3">
                                         <div 

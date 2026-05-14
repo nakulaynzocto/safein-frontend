@@ -98,6 +98,8 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
         );
     }
 
+    const isFullHeightPage = pathname === routes.privateroute.MESSAGES || pathname?.startsWith("/settings");
+
     return (
         <div className="flex h-[100dvh] flex-col overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
             {shouldShowNavbar && <Navbar variant="dashboard" />}
@@ -137,7 +139,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                 <main
                     className={cn(
                         "flex-1 flex flex-col transition-opacity duration-200 relative",
-                        pathname === routes.privateroute.MESSAGES ? "overflow-hidden" : "overflow-y-auto"
+                        isFullHeightPage ? "overflow-hidden" : "overflow-y-auto"
                     )}
                     style={{
                         backgroundColor: "var(--background)",
@@ -146,7 +148,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                 >
                     <div className={cn(
                         "w-full max-w-full",
-                        pathname === routes.privateroute.MESSAGES ? "flex-1 min-h-0 p-0 md:p-4 h-full overflow-hidden flex flex-col" : "w-full mx-auto px-2 py-4 sm:px-3 sm:py-4 md:px-4 md:py-6 lg:px-6 lg:py-8 pb-32 md:pb-24"
+                        isFullHeightPage ? "flex-1 min-h-0 p-0 h-full overflow-hidden flex flex-col" : "w-full mx-auto px-2 py-4 sm:px-3 sm:py-4 md:px-4 md:py-6 lg:px-6 lg:py-8 pb-32 md:pb-24"
                     )}>
                         {isLoading ? (
                             <PageSkeleton 
@@ -163,7 +165,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
                             />
                         ) : shouldShowContent ? (
                             // Show content if conditions are met
-                            <div className={cn("animate-fade-in flex flex-col", pathname === routes.privateroute.MESSAGES ? "flex-1 min-h-0 h-full" : "min-h-[calc(100vh-200px)]")} style={{ backgroundColor: "var(--background)" }}>
+                            <div className={cn("animate-fade-in flex flex-col", isFullHeightPage ? "flex-1 min-h-0 h-full" : "min-h-[calc(100vh-200px)]")} style={{ backgroundColor: "var(--background)" }}>
                                 {children}
                             </div>
                         ) : (

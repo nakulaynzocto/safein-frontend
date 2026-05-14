@@ -106,7 +106,7 @@ const baseNavigation: Array<{
 
 
 
-export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () => void; isMobile?: boolean }) => {
+export const SidebarContent = ({ onLinkClick, isMobile = false, isCollapsed = false }: { onLinkClick?: () => void; isMobile?: boolean; isCollapsed?: boolean }) => {
     const pathname = usePathname();
     const { user } = useAppSelector((state) => state.auth);
     
@@ -253,13 +253,16 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
                             href={item.href}
                             prefetch={true}
                             className={cn(
-                                "sidebar-item rounded-lg border-0 text-base flex justify-between items-center pr-3",
+                                "sidebar-item rounded-lg border-0 text-base flex items-center",
+                                isCollapsed ? "justify-center px-0 py-3 mx-auto w-10 h-10" : "justify-between pr-3",
                                 isActive(item.href) && "active"
                             )}
                         >
-                            <div className="flex items-center">
-                                <item.icon className="sidebar-item-icon" />
-                                <span className="sidebar-item-text font-medium tracking-wide">{item.name}</span>
+                            <div className={cn("flex items-center", isCollapsed && "justify-center w-full")}>
+                                <item.icon className={cn("sidebar-item-icon", isCollapsed && "mr-0")} />
+                                {!isCollapsed && (
+                                    <span className="sidebar-item-text font-medium tracking-wide">{item.name}</span>
+                                )}
                             </div>
                         </Link>
                     );
@@ -271,20 +274,29 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
 };
 
 export function Sidebar({ className }: SidebarProps) {
+    const pathname = usePathname();
+    const isSettings = pathname?.startsWith("/settings");
     const [collapsed, setCollapsed] = useState(false);
-    const [mobileOpen, setMobileOpen] = useState(false);
+
+    useEffect(() => {
+        if (isSettings) {
+            setCollapsed(true);
+        } else {
+            setCollapsed(false);
+        }
+    }, [isSettings]);
 
     return (
         <>
             {/* Desktop Sidebar */}
             <div
                 className={cn(
-                    "sidebar-hostinger hidden h-full flex-col overflow-hidden transition-all duration-300 ease-in-out md:flex",
+                    "sidebar-hostinger hidden h-full flex-col overflow-hidden transition-all duration-300 ease-in-out md:flex flex-shrink-0 z-40 bg-white border-r",
                     collapsed ? "sidebar-collapsed" : "sidebar-expanded",
                     className,
                 )}
             >
-                <SidebarContent />
+                <SidebarContent isCollapsed={collapsed} />
             </div>
 
             {/* Mobile Sidebar - Now controlled from Navbar */}

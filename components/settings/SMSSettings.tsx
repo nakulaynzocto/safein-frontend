@@ -29,12 +29,16 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
+import { BrandSwitch } from "@/components/common/BrandSwitch";
 import { cn } from "@/lib/utils";
 import { useCollapsibleSections } from "@/hooks/useCollapsibleSections";
+import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 
 export function SMSSettings() {
     const { data: settings, isLoading, error } = useGetSettingsQuery();
     const [updateSettings, { isLoading: isUpdating }] = useUpdateSettingsMutation();
+    const { activeSubscriptionData } = useAuthSubscription();
+    const modules = activeSubscriptionData?.modules;
 
     const { expandedSections, toggleSection } = useCollapsibleSections(["templates"]);
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>("newRequest");
@@ -55,6 +59,20 @@ export function SMSSettings() {
             }).unwrap();
         } catch (err: any) {
             toast.error(err?.data?.message || "Failed to update status");
+        }
+    };
+
+    const handleMasterToggle = async (enabled: boolean) => {
+        try {
+            await updateSettings({
+                notifications: {
+                    ...settings?.notifications,
+                    smsEnabled: enabled
+                }
+            }).unwrap();
+            toast.success("Master SMS settings updated");
+        } catch (err: any) {
+            toast.error(err?.data?.message || "Failed to update master settings");
         }
     };
 
@@ -103,7 +121,29 @@ export function SMSSettings() {
                         />
 
                         <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
-                            <form className="space-y-8 text-foreground pb-12">
+                            <form className="space-y-6 text-foreground pb-12">
+                                {/* Master Toggle Section */}
+                                {!!modules?.enableSms && (
+                                    <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
+                                        <div className="p-5 flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-12 w-12 rounded-xl bg-[#3882a5] text-white shadow-lg flex items-center justify-center">
+                                                    <MessageSquare size={24} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-gray-800 text-lg">Master SMS Toggle</h3>
+                                                    <p className="text-xs text-gray-500">Enable or disable all SMS notifications globally</p>
+                                                </div>
+                                            </div>
+                                            <BrandSwitch 
+                                                checked={settings?.notifications?.smsEnabled ?? false} 
+                                                onCheckedChange={handleMasterToggle} 
+                                                variant="default" 
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
                                     <Collapsible open={expandedSections.includes('templates')} onOpenChange={() => toggleSection('templates')}>
                                         <div className="p-5 flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('templates')}>

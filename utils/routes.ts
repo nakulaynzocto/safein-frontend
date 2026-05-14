@@ -67,7 +67,7 @@ export const routes = {
         SETTINGS_SMTP: "/settings/smtp",
         SETTINGS_SMS: "/settings/sms",
         SETTINGS_SUBSCRIPTION: "/settings/subscription",
-        SETTINGS_QR_CHECKIN: "/settings/qr-checkin",
+        SETTINGS_QR_CHECKIN: "/qr-checkin",
         SETTINGS_VOICE: "/settings/voice",
         SETTINGS_CONTROLS: "/settings/controls",
         SPOT_PASS: "/spot-pass",

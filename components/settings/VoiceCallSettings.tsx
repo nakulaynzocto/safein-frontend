@@ -33,6 +33,8 @@ import { BrandSwitch } from "@/components/common/BrandSwitch";
 import { PhoneInputField } from "../common/phoneInputField";
 import { Label } from "@/components/ui/label";
 import { useCollapsibleSections } from "@/hooks/useCollapsibleSections";
+import { useAuthSubscription } from "@/hooks/useAuthSubscription";
+import { Activity } from "lucide-react";
 
 const FRONTEND_VOICE_DEFAULTS = {
     "en-US": "Hello {employeeName}, you have a new appointment request from {visitorName} for {purpose} scheduled at {time} on {date}. Press 1 to Accept, 2 to Reject, or 3 to Repeat.",
@@ -82,6 +84,8 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
     const [saveVoice, { isLoading: isSaving }] = useSaveVoiceConfigMutation();
     const [updateSettings] = useUpdateSettingsMutation();
     const { expandedSections, toggleSection } = useCollapsibleSections(["triggers", "script", "advanced"]);
+    const { activeSubscriptionData } = useAuthSubscription();
+    const modules = activeSubscriptionData?.modules;
 
     const scripts = useMemo(() => voiceDefaults?.scripts || {}, [voiceDefaults?.scripts]);
     const callCost = walletData?.callCostPerAttempt ?? 4;
@@ -217,6 +221,34 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                             </div>
 
                             <div className="p-2 space-y-2">
+                                {/* Master Toggle Section */}
+                                {!!modules?.enableVoice && (
+                                    <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm mb-6 mx-3">
+                                        <div className="p-5 flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-12 w-12 rounded-xl bg-[#3882a5] text-white shadow-lg flex items-center justify-center">
+                                                    <Activity size={24} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-gray-800 text-lg">Master Voice Calls Toggle</h3>
+                                                    <p className="text-xs text-gray-500">Enable or disable all Voice Call notifications globally</p>
+                                                </div>
+                                            </div>
+                                            <Controller
+                                                name="enabled"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <BrandSwitch 
+                                                        checked={field.value} 
+                                                        onCheckedChange={field.onChange} 
+                                                        variant="default" 
+                                                    />
+                                                )}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Trigger Events Section */}
                                 <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mt-3">
                                     <Collapsible open={expandedSections.includes('triggers')} onOpenChange={() => toggleSection('triggers')}>

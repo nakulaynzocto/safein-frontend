@@ -88,7 +88,10 @@ export default function BookAppointmentPage() {
         }
 
         setStep("verification");
-        if (linkData.visitorPhone) setVerifyValue("phone", linkData.visitorPhone);
+        const phoneToSet = linkData.visitorPhone || linkData.visitor?.phone;
+        if (phoneToSet) {
+            setVerifyValue("phone", String(phoneToSet));
+        }
     }, [appointmentLinkData, linkError, setVerifyValue]);
 
     const handleFinalSubmit = async () => {

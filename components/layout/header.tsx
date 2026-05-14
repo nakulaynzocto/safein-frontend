@@ -120,8 +120,8 @@ export function Header({ shouldShowWhiteNavbar = true }: HeaderProps) {
                 <Link
                     href={routes.privateroute.MESSAGES}
                     className={cn(
-                        "relative flex h-9 w-9 items-center justify-center rounded-full transition-colors",
-                        shouldShowWhiteNavbar ? "text-gray-700 hover:bg-gray-100/80" : "text-white hover:bg-white/10"
+                        "relative flex h-10 w-10 items-center justify-center rounded-full transition-colors",
+                        shouldShowWhiteNavbar ? "text-gray-700 bg-white border border-gray-200 hover:bg-gray-50" : "text-white hover:bg-white/10 border border-transparent"
                     )}
                     title="Messages"
                 >
@@ -136,7 +136,7 @@ export function Header({ shouldShowWhiteNavbar = true }: HeaderProps) {
 
             {/* Notification Bell */}
             <NotificationBell
-                className={shouldShowWhiteNavbar ? "hover:bg-gray-100/80" : "hover:bg-white/10"}
+                className={shouldShowWhiteNavbar ? "bg-white border border-gray-200 hover:bg-gray-50" : "hover:bg-white/10 border border-transparent"}
                 iconClassName={shouldShowWhiteNavbar ? "text-gray-700" : "text-white"}
             />
 
@@ -147,10 +147,10 @@ export function Header({ shouldShowWhiteNavbar = true }: HeaderProps) {
                         variant="ghost"
                         size="icon"
                         className={cn(
-                            "size-9 rounded-full transition-colors",
+                            "h-10 w-10 rounded-full transition-colors",
                             shouldShowWhiteNavbar
-                                ? "text-gray-700 hover:bg-gray-100/80"
-                                : "text-white hover:bg-white/10"
+                                ? "text-gray-700 bg-white border border-gray-200 hover:bg-gray-50"
+                                : "text-white hover:bg-white/10 border border-transparent"
                         )}
                         title="Settings"
                     >
