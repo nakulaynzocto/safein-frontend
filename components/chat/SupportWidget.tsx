@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, MessageSquareText, X, Loader2, Shield } from 'lucide-react';
-import { useGoogleLogin } from '@react-oauth/google';
+import { MessageSquare, MessageSquareText, X, Loader2, Shield, UserPlus, LogIn } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { ChatHeader } from './ChatHeader';
 import { ChatMessages } from './ChatMessages';
@@ -14,8 +14,6 @@ import { supportSocketService } from "@/lib/support-socket";
 import { useLazyGetTicketHistoryQuery, useCreateTicketMutation, useSendMessageMutation } from "@/store/api/supportApi";
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setAssistantOpen, setAssistantMessage } from '@/store/slices/uiSlice';
-import { useGoogleLoginMutation } from '@/store/api/authApi';
-import { setCredentials } from '@/store/slices/authSlice';
 import { isPublicActionRoute } from '@/utils/routes';
 
 // Project color scheme - matching your existing brand
@@ -36,6 +34,7 @@ interface Message {
 }
 
 export default function SupportWidget() {
+    const router = useRouter();
     const dispatch = useAppDispatch();
     const { isAssistantOpen: isOpen } = useAppSelector((state) => state.ui);
     const setIsOpen = (val: boolean) => dispatch(setAssistantOpen(val));
@@ -65,7 +64,6 @@ export default function SupportWidget() {
     const [fetchHistory] = useLazyGetTicketHistoryQuery();
     const [restCreateTicket] = useCreateTicketMutation();
     const [restSendMessage] = useSendMessageMutation();
-    const [googleLogin] = useGoogleLoginMutation();
 
     // --- Effects ---
 
@@ -239,31 +237,7 @@ export default function SupportWidget() {
         });
     };
 
-    const loginWithGoogle = useGoogleLogin({
-        scope: "email profile",
-        onSuccess: async (tokenResponse) => {
-            const gToken = tokenResponse.access_token;
-            localStorage.setItem("safein_support_g_token", gToken);
-            setGoogleToken(gToken);
-            setUserMode("public_verified");
-
-            // ALSO log them into the main app so they are "really" logged in
-            try {
-                setIsAuthenticating(true);
-                const result = await googleLogin({ token: gToken }).unwrap();
-                if (result.token && result.user) {
-                    dispatch(setCredentials(result));
-                }
-            } catch (err) {
-                console.error("Failed to sync main app auth with support google login:", err);
-            } finally {
-                setIsAuthenticating(false);
-            }
-        },
-        onError: () => {
-            toast.error("Google Login Failed");
-        }
-    });
+    // Removed loginWithGoogle handler as per request to replace with Sign Up button
 
     const refreshHistory = () => {
         if (socketRef.current) {
@@ -449,16 +423,27 @@ export default function SupportWidget() {
 
                                         <div className="w-full space-y-4">
                                             <Button
-                                                onClick={() => loginWithGoogle()}
-                                                className="w-full bg-white text-slate-700 hover:bg-slate-50 h-14 rounded-2xl font-bold text-base border border-slate-200 shadow-sm transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 px-6"
+                                                onClick={() => {
+                                                    setIsOpen(false);
+                                                    router.push('/register');
+                                                }}
+                                                className="w-full text-white hover:opacity-90 h-14 rounded-2xl font-bold text-base shadow-lg shadow-primary/25 transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 px-6 border-none"
+                                                style={{ background: GRADIENT_PRIMARY }}
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48">
-                                                    <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
-                                                    <path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
-                                                    <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
-                                                    <path fill="#1976D2" d="M43.611 20.083 43.595 20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
-                                                </svg>
-                                                <span className="text-[#3c4043] font-medium tracking-normal normal-case">Continue with Google</span>
+                                                <UserPlus size={20} className="animate-pulse" />
+                                                <span>Sign Up to Chat</span>
+                                            </Button>
+
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => {
+                                                    setIsOpen(false);
+                                                    router.push('/login');
+                                                }}
+                                                className="w-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 h-14 rounded-2xl font-bold text-base border-2 border-slate-100 dark:border-slate-700 shadow-sm transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 px-6"
+                                            >
+                                                <LogIn size={20} />
+                                                <span>Log In to Account</span>
                                             </Button>
 
                                             <div className="pt-4 flex flex-col items-center gap-4">
