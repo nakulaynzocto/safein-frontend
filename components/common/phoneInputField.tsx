@@ -29,6 +29,7 @@ interface PhoneInputFieldProps {
     autoFocus?: boolean;
     errorAction?: React.ReactNode;
     rightElement?: React.ReactNode;
+    onBlur?: () => void;
 }
 
 type CountryOption = {
@@ -55,6 +56,7 @@ export function PhoneInputField({
     autoFocus = false,
     errorAction,
     rightElement,
+    onBlur,
 }: PhoneInputFieldProps) {
     // 1. Prepare country options
     const countryOptions = useMemo<CountryOption[]>(() => {
@@ -328,7 +330,10 @@ export function PhoneInputField({
                     disabled ? "opacity-50 cursor-not-allowed" : ""
                 )}
                 onFocus={() => !disabled && setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
+                onBlur={() => {
+                    setIsFocused(false);
+                    if (onBlur) onBlur();
+                }}
             >
                 {/* Country Selector */}
                 <div className="w-auto min-w-[70px] shrink-0 h-full flex items-center">

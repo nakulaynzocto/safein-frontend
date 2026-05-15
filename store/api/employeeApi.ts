@@ -237,6 +237,20 @@ export const employeeApi = baseApi.injectEndpoints({
                 { type: "Chat" },
             ],
         }),
+
+        checkEmployeeAvailability: builder.query<{ available: boolean; message?: string }, { field: 'email' | 'phone'; value: string; employeeId?: string }>({
+            query: ({ field, value, employeeId }) => {
+                const params = new URLSearchParams({ field, value });
+                if (employeeId) params.append('employeeId', employeeId);
+                return `/employees/check-availability?${params.toString()}`;
+            },
+            transformResponse: (response: any) => {
+                if (response.success && response.data) {
+                    return response.data;
+                }
+                return response;
+            },
+        }),
     }),
 });
 
@@ -251,4 +265,5 @@ export const {
     useBulkCreateEmployeesMutation,
     useEmployeeSendOtpMutation,
     useEmployeeVerifyOtpMutation,
+    useLazyCheckEmployeeAvailabilityQuery,
 } = employeeApi;

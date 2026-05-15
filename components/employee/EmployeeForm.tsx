@@ -20,7 +20,7 @@ import { SelectField } from "@/components/common/selectField";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { FormContainer } from "@/components/common/formContainer";
-import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQuery } from "@/store/api";
+import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQuery, useLazyCheckEmployeeAvailabilityQuery } from "@/store/api";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
@@ -128,6 +128,28 @@ export function NewEmployeeModal({
 
     const isEmailLocked = isEditMode && !!employeeData?.isEmailVerified;
     const isPhoneLocked = isEditMode && !!employeeData?.isPhoneVerified;
+
+    const [checkAvailability] = useLazyCheckEmployeeAvailabilityQuery();
+
+    const handleCheckAvailability = async (field: 'email' | 'phone', value: string) => {
+        if (!value) return;
+        if (field === 'email' && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value)) return;
+        if (field === 'phone' && !validatePhone(value)) return;
+
+        try {
+            const res = await checkAvailability({ field, value, employeeId }).unwrap();
+            if (!res.available && res.message) {
+                setError(field, {
+                    type: "server",
+                    message: res.message,
+                });
+            } else {
+                clearErrors(field);
+            }
+        } catch (error) {
+            console.error(`Failed to check ${field} availability:`, error);
+        }
+    };
 
     useEffect(() => {
         router.prefetch(routes.privateroute.EMPLOYEELIST);
@@ -342,7 +364,10 @@ export function NewEmployeeModal({
                             id="email"
                             label="Email Address"
                             type="email"
-                            {...register("email", { onChange: clearGeneralError })}
+                            {...register("email", { 
+                                onChange: clearGeneralError,
+                                onBlur: (e) => handleCheckAvailability('email', e.target.value)
+                            })}
                             placeholder="Enter email address"
                             error={errors.email?.message}
                             required
@@ -364,6 +389,7 @@ export function NewEmployeeModal({
                                         field.onChange(value);
                                         clearGeneralError();
                                     }}
+                                    onBlur={() => handleCheckAvailability('phone', field.value)}
                                     error={errors.phone?.message}
                                     required
                                     placeholder="Enter phone number"
@@ -469,7 +495,7 @@ export function NewEmployeeModal({
                     <ActionButton
                         type="submit"
                         variant="primary"
-                        disabled={isLoading || isLoadingEmployee || isFileUploading}
+                        disabled={isLoading || isLoadingEmployee || isFileUploading || Object.keys(errors).length > 0 || !!generalError}
                         size="xl"
                         className="w-full min-w-[170px] px-8 sm:w-auto font-bold transition-all shadow-md active:scale-95 hover:scale-105"
                     >
