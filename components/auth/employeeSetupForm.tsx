@@ -15,6 +15,7 @@ import { useAppDispatch } from "@/store/hooks";
 import { routes } from "@/utils/routes";
 import { CheckCircle, UserCheck, ArrowLeft } from "lucide-react";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
+import { encryptData } from "@/utils/crypto";
 
 const employeeSetupSchema = yup.object({
     newPassword: yup
@@ -67,9 +68,10 @@ export function EmployeeSetupForm() {
 
         try {
             setSubmitError(null);
+            const encryptedPassword = encryptData(data.newPassword);
             const result = await setupPassword({
                 token,
-                newPassword: data.newPassword,
+                newPassword: encryptedPassword,
             }).unwrap();
 
             // Save credentials to Redux

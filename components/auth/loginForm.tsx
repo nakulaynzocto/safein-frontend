@@ -22,12 +22,24 @@ import { encryptData } from "@/utils/crypto";
 import { Controller } from "react-hook-form";
 
 const loginSchema = yup.object({
-    email: yup.string().email("Invalid email address").required("Email is required"),
+    email: yup.string().when("$loginMode", {
+        is: "email",
+        then: (schema) => schema.email("Invalid email address").required("Email is required"),
+        otherwise: (schema) => schema.optional(),
+    }),
     password: yup.string().required("Password is required"),
-    mobileNumber: yup.string().required("Mobile number is required"),
+    mobileNumber: yup.string().when("$loginMode", {
+        is: "phone",
+        then: (schema) => schema.required("Mobile number is required"),
+        otherwise: (schema) => schema.optional(),
+    }),
 });
 
-type LoginFormData = yup.InferType<typeof loginSchema>;
+interface LoginFormData {
+    email: string;
+    password: string;
+    mobileNumber: string;
+}
 
 export function LoginForm() {
     const dispatch = useAppDispatch();
@@ -56,7 +68,8 @@ export function LoginForm() {
         formState: { errors },
         reset
     } = useForm<LoginFormData>({
-        resolver: yupResolver(loginSchema),
+        resolver: yupResolver(loginSchema) as any,
+        context: { loginMode },
         defaultValues: {
             email: "",
             mobileNumber: "",

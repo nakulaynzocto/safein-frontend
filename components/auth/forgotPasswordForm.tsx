@@ -11,6 +11,7 @@ import { InputField } from "@/components/common/inputField";
 import { useForgotPasswordMutation } from "@/store/api/authApi";
 import { routes } from "@/utils/routes";
 import { Mail, ArrowLeft, CheckCircle, Loader2, Sparkles } from "lucide-react";
+import { encryptData } from "@/utils/crypto";
 
 const forgotPasswordSchema = yup.object({
     email: yup.string().email("Invalid email address").required("Email is required"),
@@ -35,7 +36,8 @@ export function ForgotPasswordForm() {
     const onSubmit = async (data: ForgotPasswordFormData) => {
         try {
             setSubmitError(null);
-            await forgotPassword({ email: data.email }).unwrap();
+            const encryptedEmail = encryptData(data.email);
+            await forgotPassword({ email: encryptedEmail }).unwrap();
             setSentEmail(data.email);
             setIsSuccess(true);
         } catch (error: any) {

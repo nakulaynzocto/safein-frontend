@@ -12,6 +12,7 @@ import { InputField } from "@/components/common/inputField";
 import { useResetPasswordMutation } from "@/store/api/authApi";
 import { routes } from "@/utils/routes";
 import { CheckCircle, Lock, ArrowLeft, Loader2, ShieldAlert } from "lucide-react";
+import { encryptData } from "@/utils/crypto";
 
 const resetPasswordSchema = yup.object({
     newPassword: yup
@@ -63,9 +64,10 @@ export function ResetPasswordForm() {
 
         try {
             setSubmitError(null);
+            const encryptedPassword = encryptData(data.newPassword);
             await resetPassword({
                 token,
-                newPassword: data.newPassword,
+                newPassword: encryptedPassword,
             }).unwrap();
             setIsSuccess(true);
 
