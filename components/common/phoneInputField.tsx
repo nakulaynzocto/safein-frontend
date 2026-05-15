@@ -28,6 +28,7 @@ interface PhoneInputFieldProps {
     className?: string;
     autoFocus?: boolean;
     errorAction?: React.ReactNode;
+    rightElement?: React.ReactNode;
 }
 
 type CountryOption = {
@@ -53,6 +54,7 @@ export function PhoneInputField({
     className,
     autoFocus = false,
     errorAction,
+    rightElement,
 }: PhoneInputFieldProps) {
     // 1. Prepare country options
     const countryOptions = useMemo<CountryOption[]>(() => {
@@ -363,6 +365,11 @@ export function PhoneInputField({
                     autoFocus={autoFocus}
                     className="flex-1 min-w-0 h-full bg-transparent border-none pl-1.5 pr-3 text-sm font-medium focus:outline-none placeholder:text-muted-foreground"
                 />
+                {rightElement && (
+                    <div className="shrink-0 pr-2 h-full flex items-center">
+                        {rightElement}
+                    </div>
+                )}
             </div>
 
             {error && (

@@ -36,14 +36,24 @@ export interface User {
 }
 
 export interface LoginRequest {
-    email: string;
+    email?: string;
+    mobileNumber?: string;
     password: string;
 }
 
 export interface RegisterRequest {
-    companyName: string;
     email: string;
+    mobileNumber: string;
     password: string;
+    companyName: string;
+    profilePicture?: string;
+    address: {
+        street: string;
+        city: string;
+        state: string;
+        pincode: string;
+        country: string;
+    };
 }
 
 export interface VerifyOtpRequest {
@@ -160,11 +170,60 @@ export const authApi = baseApi.injectEndpoints({
             invalidatesTags: ["User"],
         }),
 
+        initiatePhoneLogin: builder.mutation<{ mobileNumber: string; otpSent: boolean }, { mobileNumber: string }>({
+            query: (data) => ({
+                url: "/users/initiate-phone-login",
+                method: "POST",
+                body: data,
+            }),
+            transformResponse: (response: any) => {
+                if (response.success && response.data) {
+                    return response.data;
+                }
+                return response;
+            },
+        }),
+
+        verifyPhoneLogin: builder.mutation<AuthResponse, { mobileNumber: string; otp: string }>({
+            query: (data) => ({
+                url: "/users/verify-phone-login",
+                method: "POST",
+                body: data,
+            }),
+            transformResponse: (response: any) => {
+                let data = response;
+                if (response.success && response.data) {
+                    data = response.data;
+                }
+
+                if (data && data.user) {
+                    data.user = normalizeUser(data.user);
+                }
+
+                return data;
+            },
+            invalidatesTags: ["User"],
+        }),
+
         register: builder.mutation<RegisterResponse, RegisterRequest>({
             query: (userData) => ({
                 url: "/users/register",
                 method: "POST",
                 body: userData,
+            }),
+            transformResponse: (response: any) => {
+                if (response.success && response.data) {
+                    return response.data;
+                }
+                return response;
+            },
+        }),
+
+        verifyMobileOtp: builder.mutation<{ email: string; otpSent: boolean; mode: 'email' }, VerifyOtpRequest>({
+            query: (otpData) => ({
+                url: "/users/verify-mobile-otp",
+                method: "POST",
+                body: otpData,
             }),
             transformResponse: (response: any) => {
                 if (response.success && response.data) {
@@ -208,6 +267,48 @@ export const authApi = baseApi.injectEndpoints({
                 }
                 return response;
             },
+        }),
+
+        // [NEW] Independent OTP flow
+        sendEmailOtp: builder.mutation<{ otpSent: boolean; mode: string }, { email: string; password?: string; mobileNumber?: string; companyName?: string }>({
+            query: (userData) => ({
+                url: "/users/send-email-otp",
+                method: "POST",
+                body: userData,
+            }),
+            transformResponse: (response: any) => response.success && response.data ? response.data : response,
+        }),
+
+        sendMobileOtp: builder.mutation<{ otpSent: boolean; mode: string }, { email: string; mobileNumber: string; password?: string; companyName?: string }>({
+            query: (userData) => ({
+                url: "/users/send-mobile-otp",
+                method: "POST",
+                body: userData,
+            }),
+            transformResponse: (response: any) => response.success && response.data ? response.data : response,
+        }),
+
+        verifyRegistrationOtp: builder.mutation<{ verified: boolean; type: string }, { email: string; otp: string; type: 'email' | 'mobile' }>({
+            query: (data) => ({
+                url: "/users/verify-registration-otp",
+                method: "POST",
+                body: data,
+            }),
+            transformResponse: (response: any) => response.success && response.data ? response.data : response,
+        }),
+
+        finalizeRegistration: builder.mutation<AuthResponse, any>({
+            query: (registrationData) => ({
+                url: "/users/finalize-registration",
+                method: "POST",
+                body: registrationData,
+            }),
+            transformResponse: (response: any) => {
+                let data = response.success && response.data ? response.data : response;
+                if (data && data.user) data.user = normalizeUser(data.user);
+                return data;
+            },
+            invalidatesTags: ["User"],
         }),
 
         getCurrentUser: builder.query<User, void>({
@@ -392,7 +493,10 @@ export const authApi = baseApi.injectEndpoints({
 export const {
     useLoginMutation,
     useGoogleLoginMutation,
+    useInitiatePhoneLoginMutation,
+    useVerifyPhoneLoginMutation,
     useRegisterMutation,
+    useVerifyMobileOtpMutation,
     useVerifyOtpMutation,
     useResendOtpMutation,
     useGetCurrentUserQuery,
@@ -404,4 +508,8 @@ export const {
     useSetupEmployeePasswordMutation,
     useExchangeImpersonationTokenMutation,
     useUpdateFCMTokenMutation,
+    useSendEmailOtpMutation,
+    useSendMobileOtpMutation,
+    useVerifyRegistrationOtpMutation,
+    useFinalizeRegistrationMutation,
 } = authApi;

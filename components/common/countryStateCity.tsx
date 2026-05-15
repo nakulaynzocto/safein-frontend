@@ -58,6 +58,7 @@ export function CountryStateCitySelect({ value, onChange, errors, required = fal
                 onChange={(country) => onChange({ ...value, country, state: "", city: "" })}
                 error={errors?.country}
                 required={required}
+                compact={true}
             />
             <SelectField
                 label="State"
@@ -68,6 +69,7 @@ export function CountryStateCitySelect({ value, onChange, errors, required = fal
                 isDisabled={!value.country}
                 error={errors?.state}
                 required={required}
+                compact={true}
             />
             <SelectField
                 label="City"
@@ -78,6 +80,7 @@ export function CountryStateCitySelect({ value, onChange, errors, required = fal
                 isDisabled={!value.country || !value.state}
                 error={errors?.city}
                 required={required}
+                compact={true}
             />
         </div>
     );

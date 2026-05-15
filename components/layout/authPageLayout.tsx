@@ -14,9 +14,10 @@ interface AuthPageLayoutProps {
     children: React.ReactNode;
     title?: string;
     subtitle?: string;
+    showBackButton?: boolean;
 }
 
-export function AuthPageLayout({ children }: AuthPageLayoutProps) {
+export function AuthPageLayout({ children, showBackButton = true }: AuthPageLayoutProps) {
     const router = useRouter();
     const { isInitialized } = useAppSelector((state) => state.auth);
     const [isMounted, setIsMounted] = useState(false);
@@ -71,17 +72,19 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
             {/* Right Side: Form */}
             <div className="flex w-full flex-col lg:w-1/2 px-4 py-6 sm:px-8 sm:py-8 lg:px-12 xl:px-24">
                 {/* Back to Home — in normal flow, never overlaps form */}
-                <div className="mb-6 sm:mb-8">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push(routes.publicroute.HOME)}
-                        className="text-muted-foreground hover:bg-[#3882a5] hover:text-white rounded-lg px-3 flex items-center gap-2 -ml-2"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        <span className="font-medium text-sm">Back to Home</span>
-                    </Button>
-                </div>
+                {showBackButton && (
+                    <div className="mb-6 sm:mb-8">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => router.push(routes.publicroute.HOME)}
+                            className="text-muted-foreground hover:bg-[#3882a5] hover:text-white rounded-lg px-3 flex items-center gap-2 -ml-2"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                            <span className="font-medium text-sm">Back to Home</span>
+                        </Button>
+                    </div>
+                )}
 
                 <div className="mx-auto w-full max-w-md">
                     {!isMounted || !isInitialized ? (

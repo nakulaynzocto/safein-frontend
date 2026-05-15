@@ -11,13 +11,16 @@ export interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElem
     helperText?: string;
     required?: boolean;
     icon?: React.ReactNode;
+    rightElement?: React.ReactNode;
 }
 
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
-    ({ className, label, error, helperText, required = false, type = "text", autoComplete = "off", icon, ...props }, ref) => {
+    ({ className, label, error, helperText, required = false, type = "text", autoComplete = "off", icon, rightElement, ...props }, ref) => {
         const [showPassword, setShowPassword] = useState(false);
         const isPasswordField = type === "password";
         const inputType = isPasswordField && showPassword ? "text" : type;
+
+        const [isTouched, setIsTouched] = useState(false);
 
         return (
             <div className="space-y-2">
@@ -41,6 +44,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                     <input
                         type={inputType}
                         autoComplete={autoComplete}
+                        readOnly={isPasswordField && !isTouched}
                         className={cn(
                             "flex h-12 w-full px-4 py-2 rounded-xl transition-all duration-300 font-medium text-sm",
                             "bg-slate-50/50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700",
@@ -48,20 +52,29 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                             "focus:bg-white dark:focus:bg-slate-950 focus:border-[#3882a5] focus:ring-4 focus:ring-[#3882a5]/5 focus:outline-none",
                             "disabled:cursor-not-allowed disabled:opacity-50",
                             icon && "pl-11",
+                            (isPasswordField || rightElement) && "pr-12",
                             error && "border-rose-500 focus:border-rose-500 focus:ring-rose-500/5",
-                            isPasswordField && "pr-11",
                             className
                         )}
                         ref={ref}
                         {...props}
                         onFocus={(e) => {
+                            if (isPasswordField) {
+                                setIsTouched(true);
+                            }
                             if (type === "number" && e.target.value === "0") {
                                 e.target.select();
                             }
                             props.onFocus?.(e);
                         }}
+                        onClick={(e) => {
+                            if (isPasswordField) {
+                                setIsTouched(true);
+                            }
+                            props.onClick?.(e);
+                        }}
                     />
-                    {isPasswordField && (
+                    {isPasswordField && !rightElement && (
                         <button
                             type="button"
                             className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-[#3882a5] transition-colors duration-300"
@@ -69,6 +82,11 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                         >
                             {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                         </button>
+                    )}
+                    {rightElement && (
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center">
+                            {rightElement}
+                        </div>
                     )}
                 </div>
                 {error && (

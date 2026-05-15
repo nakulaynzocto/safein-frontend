@@ -272,8 +272,8 @@ export default function HomePage() {
                                         <div className="absolute -bottom-20 left-1/2 z-0 h-40 w-12 -translate-x-1/2 rounded-xl bg-gradient-to-b from-gray-900 to-black border-x border-white/5 opacity-80 shadow-2xl"></div>
                                         <div className="absolute -bottom-24 left-1/2 z-0 h-8 w-40 -translate-x-1/2 rounded-[50%] bg-black/40 blur-[4px]"></div>
  
-                                        <div className="relative z-10 w-full aspect-[16/10] overflow-hidden rounded-[2.5rem] border-[12px] border-gray-950 bg-gray-950 shadow-2xl ring-1 ring-white/10">
-                                            <div className="relative w-full h-full bg-gray-950 overflow-hidden">
+                                        <div className="relative z-10 w-full aspect-[16/10] overflow-hidden rounded-[2.5rem] border-[12px] border-gray-950 shadow-2xl ring-1 ring-white/10">
+                                            <div className="relative w-full h-full overflow-hidden">
                                                 {processSteps.map((step, idx) => (
                                                     <div 
                                                         key={`bg-${step.id}`}
@@ -305,8 +305,8 @@ export default function HomePage() {
                                                 <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-gray-800"></div>
                                             </div>
 
-                                            <div className="relative aspect-[9/18] w-full overflow-hidden rounded-[2.2rem] bg-gray-950 shadow-inner ring-1 ring-white/10">
-                                                <div className="absolute inset-0 z-0">
+                                            <div className="relative aspect-[9/18] w-full overflow-hidden rounded-[2.2rem] shadow-inner ring-1 ring-white/10">
+                                                <div className="absolute inset-0 z-10">
                                                     {processSteps.map((step, idx) => (
                                                         <div 
                                                             key={`fg-${step.id}`}
@@ -453,13 +453,13 @@ export default function HomePage() {
                             <div className="order-1 flex justify-center lg:order-2">
                                 <div className="relative w-full max-w-[300px] perspective-[1500px]">
                                     <div className="absolute -inset-10 rounded-full transition-all duration-1000 blur-[80px] opacity-10 bg-[#3882a5]"></div>
-                                    <div className="relative z-10 w-full overflow-hidden rounded-[2.8rem] border-[12px] border-slate-900 bg-slate-900 shadow-[0_60px_100px_-20px_rgba(7,68,99,0.3)] ring-[4px] ring-[#3882a5]/30 transition-all duration-700 hover:scale-[1.05]">
-                                        <div className="relative aspect-[9/18] w-full overflow-hidden rounded-[2.2rem] bg-slate-950 shadow-inner ring-1 ring-white/10">
+                                    <div className="relative z-10 w-full overflow-hidden rounded-[2.8rem] border-[12px] border-slate-900 shadow-[0_60px_100px_-20px_rgba(7,68,99,0.3)] ring-[4px] ring-[#3882a5]/30 transition-all duration-700 hover:scale-[1.05]">
+                                        <div className="relative aspect-[9/18] w-full overflow-hidden rounded-[2.2rem] shadow-inner ring-1 ring-white/10">
                                             {coreFeatureSteps.map((step, idx) => (
                                                 <div 
                                                     key={`feature-img-${step.id}`}
                                                     className={cn(
-                                                        "absolute inset-0 transition-opacity duration-700 ease-in-out",
+                                                        "absolute inset-0 z-10 transition-opacity duration-700 ease-in-out",
                                                         idx === featuresActiveStep ? "opacity-100 scale-100" : "opacity-0 scale-105"
                                                     )}
                                                 >

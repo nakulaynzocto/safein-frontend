@@ -370,8 +370,10 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                                 <Link
                                     href={routes.publicroute.REGISTER}
                                     className={cn(
-                                        "hidden rounded-full px-5 h-[42px] min-w-[100px] text-[14px] font-bold transition-all duration-300 sm:flex items-center justify-center relative overflow-hidden group whitespace-nowrap",
-                                        shouldShowWhiteNavbar ? "bg-[#f0edff] text-[#5e35b1] hover:bg-[#e4dcff]" : "bg-white text-[#5e35b1] hover:bg-gray-100"
+                                        "hidden rounded-full px-5 h-[42px] min-w-[100px] text-[14px] font-bold transition-all duration-300 sm:flex items-center justify-center relative overflow-hidden group whitespace-nowrap shadow-sm",
+                                        shouldShowWhiteNavbar 
+                                            ? "bg-[#3882a5] text-white hover:bg-[#2d6a87]" 
+                                            : "bg-white text-[#3882a5] hover:bg-gray-50"
                                     )}
                                     prefetch={true}
                                 >

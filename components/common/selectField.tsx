@@ -46,6 +46,7 @@ export interface SelectFieldProps {
     formatOptionLabel?: (option: Option) => ReactNode;
     showDropdownIndicator?: boolean;
     noOptionsMessage?: (obj: { inputValue: string }) => ReactNode;
+    compact?: boolean;
 }
 
 const MENU_PORTAL_Z_INDEX = 9999;
@@ -82,6 +83,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         formatOptionLabel,
         showDropdownIndicator = true,
         noOptionsMessage,
+        compact = false,
     },
     ref,
 ) {
@@ -270,16 +272,16 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     );
 
     const defaultFormatOptionLabel = (option: RSOption) => (
-        <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8 border border-border shrink-0">
+        <div className={cn("flex items-center", compact ? "gap-1.5" : "gap-3")}>
+            <Avatar className={cn("border border-border shrink-0", compact ? "h-6 w-6" : "h-8 w-8")}>
                 {option.image ? (
                     <AvatarImage src={option.image} alt={option.label} className="object-cover" />
                 ) : null}
-                <AvatarFallback className="text-xs font-bold bg-slate-100 text-slate-600 flex items-center justify-center">
+                <AvatarFallback className={cn("font-bold bg-slate-100 text-slate-600 flex items-center justify-center", compact ? "text-[8px]" : "text-xs")}>
                     {getInitials(option.label)}
                 </AvatarFallback>
             </Avatar>
-            <span className="truncate">{option.label}</span>
+            <span className={cn("truncate", compact ? "text-xs font-semibold" : "text-sm")}>{option.label}</span>
         </div>
     );
 

@@ -33,6 +33,7 @@ interface ImageUploadFieldProps {
     aspectRatio?: "video" | "square" | "portrait";
     onCameraStart?: () => void;
     onCameraStop?: () => void;
+    isRegistration?: boolean;
 }
 
 
@@ -198,7 +199,8 @@ function CameraCapturePortal({
 // --- Main Component ---
 export function ImageUploadField({
     name, label, setValue, initialUrl, enableImageCapture = false, appointmentToken, qrSlug, onUploadStatusChange,
-    variant = "default", autoOpenCamera = false, directCameraOnly = false, delayedUpload = false, value, onChange, errors, onCameraStart, onCameraStop
+    variant = "default", autoOpenCamera = false, directCameraOnly = false, delayedUpload = false, value, onChange, errors, onCameraStart, onCameraStop,
+    isRegistration = false
 }: ImageUploadFieldProps) {
     const [previewImage, setPreviewImage] = useState<string | null>(typeof initialUrl === "string" ? initialUrl : (typeof value === "string" ? value : null));
     const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -260,7 +262,7 @@ export function ImageUploadField({
                 tempUrl = URL.createObjectURL(compressed);
                 setPreviewImage(tempUrl); // Show immediately
                 
-                const res = await uploadFile({ file: compressed, token: appointmentToken, slug: qrSlug }).unwrap();
+                const res = await uploadFile({ file: compressed, token: appointmentToken, slug: qrSlug, isRegistration }).unwrap();
                 if (res?.url) {
                     setPreviewImage(res.url);
                     if (setValue && name) setValue(name, res.url, { shouldValidate: true });
