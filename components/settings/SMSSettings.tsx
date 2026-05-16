@@ -7,19 +7,9 @@ import {
 } from "@/store/api/settingsApi";
 import { toast } from "sonner";
 import { 
-    MessageSquare, 
-    Calendar,
-    User,
-    CheckCircle2,
-    XCircle,
-    MapPin,
-    ChevronRight,
-    Eye,
-    Loader2,
-    LogOut,
-    Star,
     Clock,
-    Link
+    Link,
+    ShieldCheck
 } from "lucide-react";
 import { SettingsHeader } from "./SettingsHeader";
 import { FormContainer } from "@/components/common/formContainer";
@@ -41,9 +31,9 @@ export function SMSSettings() {
     const modules = activeSubscriptionData?.modules;
 
     const { expandedSections, toggleSection } = useCollapsibleSections(["templates"]);
-    const [selectedTemplate, setSelectedTemplate] = useState<string | null>("newRequest");
+    const [selectedTemplate, setSelectedTemplate] = useState<string | null>("newAppointmentRequest");
 
-    const coreSmsTemplates = ["newRequest", "visitorCheckedIn", "approvedVisitor", "approvedEmployee", "rejectedVisitor", "appointmentLink"];
+    const coreSmsTemplates = ["newAppointmentRequest", "visitorCheckedIn", "visitorApproval", "appointmentRejection", "appointmentLink"];
     const normalizedEnabledTemplates = (settings?.sms as any)?.enabledTemplates || {};
     
     const handleToggle = async (templateId: string, enabled: boolean) => {
@@ -163,15 +153,12 @@ export function SMSSettings() {
                                             <div className="px-5 pb-8 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
                                                 <div className="space-y-4 pt-2">
                                                     {[
-                                                        { id: "newRequest", label: "SafeIn_New_Request", icon: Calendar, placeholders: ["companyName", "visitorName", "employeeName", "date", "time", "approvalLink"] },
-                                                        { id: "visitorCheckedIn", label: "SafeIn_Visitor_In", icon: MapPin, placeholders: ["companyName", "visitorName", "employeeName"] },
-                                                        { id: "approvedVisitor", label: "SafeIn_Visit_Confirmed", icon: CheckCircle2, placeholders: ["companyName", "visitorName", "employeeName", "date", "time"] },
-                                                        { id: "approvedEmployee", label: "SafeIn_Visit_Confirmed", icon: User, placeholders: ["visitorName", "employeeName", "date", "time", "companyName"] },
-                                                        { id: "rejectedVisitor", label: "SafeIn_Visit_Reject", icon: XCircle, placeholders: ["visitorName", "date", "companyName"] },
-                                                        { id: "appointmentLink", label: "SafeIn_Booking_Link", icon: Link, placeholders: ["employeeName", "bookingUrl", "companyName"] },
-                                                        { id: "visitorCheckedOut", label: "SafeIn_Visitor_Out", icon: LogOut, placeholders: ["companyName", "visitorName"] },
-                                                        { id: "feedbackRequest", label: "feedback_request", icon: Star, placeholders: ["companyName", "visitorName", "feedbackLink"] },
-                                                        { id: "hostDelayed", label: "host_delayed", icon: Clock, placeholders: ["companyName", "visitorName", "employeeName", "delayTime"] },
+                                                        { id: "newAppointmentRequest", label: "SafeIn_New_Request", icon: Calendar, placeholders: ["visitorName", "approvalLink"] },
+                                                        { id: "visitorCheckedIn", label: "SafeIn_Visitor_In", icon: MapPin, placeholders: ["visitorName", "employeeName"] },
+                                                        { id: "visitorApproval", label: "SafeIn_Visit_Approved_Visitor", icon: CheckCircle2, placeholders: ["visitorName", "companyName"] },
+                                                        { id: "appointmentRejection", label: "SafeIn_Visit_Reject", icon: XCircle, placeholders: ["visitorName", "companyName"] },
+                                                        { id: "appointmentLink", label: "SafeIn_Booking_Link", icon: Link, placeholders: ["companyName", "bookingUrl"] },
+                                                        { id: "specialVisitorEntry", label: "SafeIn_Special_Entry_Pass", icon: ShieldCheck, placeholders: ["companyName", "otp"] },
                                                     ].map((template) => (
                                                         <div key={template.id} className="border border-border/50 rounded-xl bg-background transition-all overflow-hidden">
                                                             <div className="flex items-center justify-between p-4 px-5">

@@ -120,14 +120,6 @@ export function CompanyControlSettings() {
         },
 
         {
-            id: "enableFeedbackSystem",
-            title: "Feedback System",
-            description: "Collect experience feedback from visitors after their visit",
-            icon: MessageSquareQuote,
-            color: "bg-[#3882a5]",
-            checked: settings?.features?.enableFeedbackSystem ?? false
-        },
-        {
             id: "enableVisitSlip",
             title: "Visit Slip Verification",
             description: "Allow visitors to print or show an entry script as proof of check-in",

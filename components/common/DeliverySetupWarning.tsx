@@ -47,9 +47,7 @@ function CompactBar({ children, className }: { children: ReactNode; className?: 
 export function DeliverySetupWarning({ className }: DeliverySetupWarningProps) {
     const { 
         smtpOk, 
-        smsOk, 
-        settingsReady, 
-        hasAnyDeliveryChannel 
+        settingsReady 
     } = useConfigurationModal();
     const { user } = useAppSelector((s) => s.auth);
     const isEmployee = checkIsEmployee(user);
@@ -72,9 +70,8 @@ export function DeliverySetupWarning({ className }: DeliverySetupWarningProps) {
     if (!settingsReady) return null;
 
     const smtpMissing = !smtpOk;
-    const smsMissing = !smsOk;
 
-    if (!smtpMissing && !smsMissing && !mobileMissing) return null;
+    if (!smtpMissing && !mobileMissing) return null;
 
     return (
         <CompactBar className={className}>
@@ -84,17 +81,7 @@ export function DeliverySetupWarning({ className }: DeliverySetupWarningProps) {
                     Configure SMTP
                 </Link>
             )}
-            {(smtpMissing && (smsMissing || mobileMissing)) && (
-                <span className="shrink-0 text-amber-600/80 dark:text-amber-400/80" aria-hidden>
-                    ·
-                </span>
-            )}
-            {smsMissing && (
-                <Link href={routes.privateroute.SETTINGS_CONTROLS} className={cn(linkClass, "shrink-0")}>
-                    Enable SMS
-                </Link>
-            )}
-            {(smsMissing && mobileMissing) && (
+            {(smtpMissing && mobileMissing) && (
                 <span className="shrink-0 text-amber-600/80 dark:text-amber-400/80" aria-hidden>
                     ·
                 </span>

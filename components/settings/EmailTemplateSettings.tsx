@@ -12,17 +12,9 @@ import { useGetSafeinProfileQuery } from "@/store/api/safeinProfileApi";
 import { useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
 import {
-    Palette,
-    Save,
-    Eye,
-    Settings2,
-    CheckCircle2,
-    Link,
-    Mail,
-    ChevronRight,
-    LogOut,
     Star,
-    Clock
+    Clock,
+    ShieldCheck
 } from "lucide-react";
 
 import { ActionButton } from "@/components/common/actionButton";
@@ -53,17 +45,15 @@ function resolveCompanyLogoUrl(raw: string | undefined | null): string | undefin
 }
 
 export const TEMPLATE_TYPES = [
-    { id: "appointmentApproval", label: "Approval Notification", icon: CheckCircle2, placeholders: ["visitorName", "employeeName", "date", "time", "companyName"] },
+    { id: "visitorApproval", label: "Approval Notification", icon: CheckCircle2, placeholders: ["visitorName", "employeeName", "date", "time", "companyName"] },
     { id: "appointmentRejection", label: "Rejection Notification", icon: Settings2, placeholders: ["visitorName", "employeeName", "date", "time", "companyName"] },
     { id: "newAppointmentRequest", label: "New Request Notification", icon: Mail, placeholders: ["visitorName", "employeeName", "date", "time", "purpose", "approvalToken", "companyName"] },
     { id: "appointmentConfirmation", label: "Confirmation Notification", icon: CheckCircle2, placeholders: ["visitorName", "employeeName", "date", "time", "companyName"] },
     { id: "appointmentLink", label: "Invite Link Notification", icon: Link, placeholders: ["employeeName", "bookingUrl", "companyName"] },
     { id: "visitorCheckedIn", label: "Visitor Checked-In Notification", icon: Mail, placeholders: ["visitorName", "employeeName", "companyName"] },
-    { id: "visitorCheckedOut", label: "Visitor Checked-Out Notification", icon: LogOut, placeholders: ["visitorName", "companyName"] },
-    { id: "feedbackRequest", label: "Feedback Request Notification", icon: Star, placeholders: ["visitorName", "feedbackLink", "companyName"] },
-    { id: "hostDelayed", label: "Host Delayed Notification", icon: Clock, placeholders: ["visitorName", "employeeName", "delayTime", "companyName"] },
     { id: "welcome", label: "Welcome Notification", icon: Mail, placeholders: ["user_name", "companyName"] },
     { id: "employeeSetup", label: "Employee Setup Invite", icon: Link, placeholders: ["signUpLink", "companyName"] },
+    { id: "specialVisitorEntry", label: "Special Entry Access Pass", icon: ShieldCheck, placeholders: ["visitorName", "companyName", "otp", "date"] },
 ];
 
 export function EmailTemplateSettings() {
@@ -72,7 +62,7 @@ export function EmailTemplateSettings() {
     const [saveTemplates, { isLoading: isSaving }] = useSaveEmailTemplatesMutation();
     const [updateSettings] = useUpdateSettingsMutation();
     
-    const [selectedTemplate, setSelectedTemplate] = useState<string | null>("appointmentApproval");
+    const [selectedTemplate, setSelectedTemplate] = useState<string | null>("visitorApproval");
     const { expandedSections, toggleSection } = useCollapsibleSections(["branding", "templates"]);
     
     const [globalStyles, setGlobalStyles] = useState({
@@ -85,15 +75,12 @@ export function EmailTemplateSettings() {
     });
 
     const [templates, setTemplates] = useState<any>({
-        appointmentApproval: { subject: "", body: "" },
+        visitorApproval: { subject: "", body: "" },
         appointmentRejection: { subject: "", body: "" },
         newAppointmentRequest: { subject: "", body: "" },
         appointmentConfirmation: { subject: "", body: "" },
         appointmentLink: { subject: "", body: "" },
         visitorCheckedIn: { subject: "", body: "" },
-        visitorCheckedOut: { subject: "", body: "" },
-        feedbackRequest: { subject: "", body: "" },
-        hostDelayed: { subject: "", body: "" },
         welcome: { subject: "", body: "" },
         employeeSetup: { subject: "", body: "" },
     });
@@ -116,7 +103,7 @@ export function EmailTemplateSettings() {
             }
             if (settings.emailTemplates.enabledTemplates) {
                 const et = settings.emailTemplates.enabledTemplates as Record<string, boolean>;
-                const coreEmailTemplates = ["appointmentApproval", "appointmentRejection", "newAppointmentRequest", "appointmentConfirmation", "appointmentLink", "visitorCheckedIn", "employeeSetup"];
+                const coreEmailTemplates = ["visitorApproval", "appointmentRejection", "newAppointmentRequest", "appointmentConfirmation", "appointmentLink", "visitorCheckedIn", "employeeSetup", "specialVisitorEntry"];
                 const normalized: Record<string, boolean> = {};
                 TEMPLATE_TYPES.forEach(t => {
                     normalized[t.id] = et[t.id] !== undefined ? et[t.id] : coreEmailTemplates.includes(t.id);

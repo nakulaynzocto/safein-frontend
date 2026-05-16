@@ -61,36 +61,6 @@ export const WHATSAPP_META_TEMPLATES: WhatsAppMetaTemplateRow[] = [
     ]
   },
   {
-    name: "visitor_checked_out",
-    usedFor: "Visitor: thank you message after exit (Plain Text fallback)",
-    variables: "{{1}} visitor name, {{2}} company name",
-    params: [
-      { index: 1, label: "Visitor Name" },
-      { index: 2, label: "Company Name" }
-    ]
-  },
-  {
-    name: "feedback_request",
-    usedFor: "Visitor: feedback request after visit (Plain Text fallback)",
-    variables: "{{1}} visitor name, {{2}} feedback link, {{3}} company name",
-    params: [
-      { index: 1, label: "Visitor Name" },
-      { index: 2, label: "Feedback Link" },
-      { index: 3, label: "Company Name" }
-    ]
-  },
-  {
-    name: "host_delayed",
-    usedFor: "Visitor: host delay notification (Plain Text fallback)",
-    variables: "{{1}} visitor name, {{2}} host name, {{3}} delay time, {{4}} company name",
-    params: [
-      { index: 1, label: "Visitor Name" },
-      { index: 2, label: "Host Name" },
-      { index: 3, label: "Delay Time" },
-      { index: 4, label: "Company Name" }
-    ]
-  },
-  {
     name: "visit_status_update",
     usedFor: "Visitor: appointment rejected / unavailable",
     variables: "{{1}} date, {{2}} company name",

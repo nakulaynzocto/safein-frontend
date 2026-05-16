@@ -46,7 +46,7 @@ export interface EmailTemplates {
         logoUrl?: string;
     };
     templates: {
-        appointmentApproval?: EmailTemplate;
+        visitorApproval?: EmailTemplate;
         appointmentRejection?: EmailTemplate;
         newAppointmentRequest?: EmailTemplate;
         appointmentConfirmation?: EmailTemplate;
@@ -82,17 +82,15 @@ export interface Settings {
     smtp?: SmtpConfig;
     sms?: {
         templates?: {
-            newRequest?: string;
-            approvedVisitor?: string;
-            approvedEmployee?: string;
-            rejectedVisitor?: string;
+            newAppointmentRequest?: string;
+            visitorApproval?: string;
+            appointmentRejection?: string;
             visitorCheckedIn?: string;
         };
         enabledTemplates?: {
-            newRequest?: boolean;
-            approvedVisitor?: boolean;
-            approvedEmployee?: boolean;
-            rejectedVisitor?: boolean;
+            newAppointmentRequest?: boolean;
+            visitorApproval?: boolean;
+            appointmentRejection?: boolean;
             visitorCheckedIn?: boolean;
         };
     };
@@ -111,8 +109,6 @@ export interface Settings {
     features?: {
         enableAutoApproval: boolean;
         enableVisitorImageCapture: boolean;
-
-        enableFeedbackSystem: boolean;
         enableVisitSlip: boolean;
     };
     emailTemplates?: EmailTemplates;
@@ -156,8 +152,6 @@ export interface UpdateSettingsRequest {
     features?: {
         enableAutoApproval?: boolean;
         enableVisitorImageCapture?: boolean;
-
-        enableFeedbackSystem?: boolean;
         enableVisitSlip?: boolean;
     };
     sms?: {
@@ -194,17 +188,15 @@ export interface SaveSmtpRequest {
 
 export interface SaveSmsRequest {
     templates: {
-        newRequest: string;
-        approvedVisitor: string;
-        approvedEmployee: string;
-        rejectedVisitor: string;
+        newAppointmentRequest: string;
+        visitorApproval: string;
+        appointmentRejection: string;
         visitorCheckedIn: string;
     };
     enabledTemplates: {
-        newRequest: boolean;
-        approvedVisitor: boolean;
-        approvedEmployee: boolean;
-        rejectedVisitor: boolean;
+        newAppointmentRequest: boolean;
+        visitorApproval: boolean;
+        appointmentRejection: boolean;
         visitorCheckedIn: boolean;
     };
 }
@@ -251,8 +243,6 @@ export const settingsApi = baseApi.injectEndpoints({
                                 draft.features = {
                                     enableAutoApproval: false,
                                     enableVisitorImageCapture: false,
-
-                                    enableFeedbackSystem: false,
                                     enableVisitSlip: false,
                                 };
                             }
