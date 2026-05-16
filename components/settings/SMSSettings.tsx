@@ -9,7 +9,14 @@ import { toast } from "sonner";
 import { 
     Clock,
     Link,
-    ShieldCheck
+    ShieldCheck,
+    MessageSquare,
+    ChevronRight,
+    Calendar,
+    MapPin,
+    CheckCircle2,
+    XCircle,
+    Eye
 } from "lucide-react";
 import { SettingsHeader } from "./SettingsHeader";
 import { FormContainer } from "@/components/common/formContainer";

@@ -12,8 +12,14 @@ import { useGetSafeinProfileQuery } from "@/store/api/safeinProfileApi";
 import { useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
 import {
-    Star,
-    Clock,
+    Palette,
+    Mail,
+    ChevronRight,
+    Eye,
+    Save,
+    CheckCircle2,
+    Settings2,
+    Link,
     ShieldCheck
 } from "lucide-react";
 
@@ -44,17 +50,17 @@ function resolveCompanyLogoUrl(raw: string | undefined | null): string | undefin
     return `${base}/${clean}`;
 }
 
-export const TEMPLATE_TYPES = [
+export const APPOINTMENT_TEMPLATES = [
+    { id: "newAppointmentRequest", label: "New Request Notification", icon: Mail, placeholders: ["visitorName", "employeeName", "date", "time", "purpose", "approvalToken", "companyName"] },
     { id: "visitorApproval", label: "Approval Notification", icon: CheckCircle2, placeholders: ["visitorName", "employeeName", "date", "time", "companyName"] },
     { id: "appointmentRejection", label: "Rejection Notification", icon: Settings2, placeholders: ["visitorName", "employeeName", "date", "time", "companyName"] },
-    { id: "newAppointmentRequest", label: "New Request Notification", icon: Mail, placeholders: ["visitorName", "employeeName", "date", "time", "purpose", "approvalToken", "companyName"] },
     { id: "appointmentConfirmation", label: "Confirmation Notification", icon: CheckCircle2, placeholders: ["visitorName", "employeeName", "date", "time", "companyName"] },
     { id: "appointmentLink", label: "Invite Link Notification", icon: Link, placeholders: ["employeeName", "bookingUrl", "companyName"] },
     { id: "visitorCheckedIn", label: "Visitor Checked-In Notification", icon: Mail, placeholders: ["visitorName", "employeeName", "companyName"] },
-    { id: "welcome", label: "Welcome Notification", icon: Mail, placeholders: ["user_name", "companyName"] },
-    { id: "employeeSetup", label: "Employee Setup Invite", icon: Link, placeholders: ["signUpLink", "companyName"] },
     { id: "specialVisitorEntry", label: "Special Entry Access Pass", icon: ShieldCheck, placeholders: ["visitorName", "companyName", "otp", "date"] },
 ];
+
+const ALL_TEMPLATES = [...APPOINTMENT_TEMPLATES];
 
 export function EmailTemplateSettings() {
     const { user } = useAppSelector((state) => state.auth);
@@ -81,8 +87,7 @@ export function EmailTemplateSettings() {
         appointmentConfirmation: { subject: "", body: "" },
         appointmentLink: { subject: "", body: "" },
         visitorCheckedIn: { subject: "", body: "" },
-        welcome: { subject: "", body: "" },
-        employeeSetup: { subject: "", body: "" },
+        specialVisitorEntry: { subject: "", body: "" },
     });
 
     const [enabledTemplates, setEnabledTemplates] = useState<Record<string, boolean>>({});
@@ -105,13 +110,14 @@ export function EmailTemplateSettings() {
                 const et = settings.emailTemplates.enabledTemplates as Record<string, boolean>;
                 const coreEmailTemplates = ["visitorApproval", "appointmentRejection", "newAppointmentRequest", "appointmentConfirmation", "appointmentLink", "visitorCheckedIn", "employeeSetup", "specialVisitorEntry"];
                 const normalized: Record<string, boolean> = {};
-                TEMPLATE_TYPES.forEach(t => {
+                ALL_TEMPLATES.forEach(t => {
                     normalized[t.id] = et[t.id] !== undefined ? et[t.id] : coreEmailTemplates.includes(t.id);
                 });
                 setEnabledTemplates(normalized);
             }
         }
     }, [settings]);
+
     const { data: safeinProfileResponse } = useGetSafeinProfileQuery(undefined, {
         skip: !user?.id,
     });
@@ -119,9 +125,6 @@ export function EmailTemplateSettings() {
         skip: !user?.id,
     });
 
-
-
-    /** Preview: billing company logo → email branding URL (server syncs profile/default) → profile picture */
     const previewLogoUrl = useMemo(() => {
         const first = (raw: string | undefined | null) => resolveCompanyLogoUrl(raw?.trim() || undefined);
         const safein = safeinProfileResponse?.data;
@@ -177,10 +180,6 @@ export function EmailTemplateSettings() {
         }
     };
 
-    if (isLoading) {
-        return <Skeleton className="h-[600px] w-full rounded-[40px]" />;
-    }
-
     // Sample data for preview
     const mockData: Record<string, string> = {
         visitorName: "Nakul Singh",
@@ -195,6 +194,7 @@ export function EmailTemplateSettings() {
     };
 
     const replaceMock = (text: string) => {
+        if (!text) return "";
         let result = text;
         const data = { ...mockData, primaryColor: globalStyles.primaryColor };
         Object.entries(data).forEach(([key, value]) => {
@@ -203,6 +203,101 @@ export function EmailTemplateSettings() {
         });
         return result;
     };
+
+    const renderTemplateItem = (template: any) => (
+        <div key={template.id} className="border border-border/50 rounded-xl bg-muted/5 transition-all overflow-hidden shadow-[0_1px_3px_rgb(0,0,0,0.02)]">
+            <div className="flex items-center justify-between p-4 px-5">
+                <div className="flex items-center gap-4">
+                    <div className="p-2.5 rounded-lg bg-background border border-border/50 text-[#3882a5]">
+                        <template.icon size={18} />
+                    </div>
+                    <h4 className="font-bold text-[#074463]">{template.label}</h4>
+                </div>
+                
+                <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs uppercase font-bold text-muted-foreground tracking-tight">Status</span>
+                        <BrandSwitch 
+                            checked={enabledTemplates[template.id]}
+                            onCheckedChange={async (checked: boolean) => {
+                                setEnabledTemplates(prev => ({ ...prev, [template.id]: checked }));
+                                try {
+                                    await updateSettings({
+                                        emailTemplates: {
+                                            enabledTemplates: {
+                                                [template.id]: checked
+                                            }
+                                        }
+                                    }).unwrap();
+                                } catch (err: any) {
+                                    setEnabledTemplates(prev => ({ ...prev, [template.id]: !checked }));
+                                    console.error("Failed to update status:", err);
+                                }
+                            }}
+                        />
+                    </div>
+                    <button 
+                        onClick={() => setSelectedTemplate(selectedTemplate === template.id ? null : template.id)} 
+                        className={cn(
+                            "h-9 w-9 flex items-center justify-center rounded-lg border shadow-sm transition-all",
+                            selectedTemplate === template.id ? 'bg-[#074463] text-white border-[#074463]' : 'bg-background text-gray-400 hover:text-[#3882a5]'
+                        )}
+                    >
+                        <Settings2 size={16} />
+                    </button>
+                </div>
+            </div>
+
+            {selectedTemplate === template.id && (
+                <div className="p-6 border-t border-dashed border-border/50 bg-white/40 animate-in fade-in duration-300">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                        <div className="space-y-5">
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-xs font-bold text-gray-700">Email Subject</Label>
+                                    <button onClick={() => resetToDefault(template.id)} className="text-xs font-bold text-[#3882a5] hover:underline">RESET TO DEFAULT</button>
+                                </div>
+                                <InputField value={templates[template.id]?.subject || ""} onChange={(e) => updateTemplate(template.id, 'subject', e.target.value)} className="h-10 rounded-lg border-border" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-gray-700">HTML Body Content</Label>
+                                <Textarea value={templates[template.id]?.body || ""} onChange={(e) => updateTemplate(template.id, 'body', e.target.value)} className="min-h-[250px] rounded-lg p-4 font-mono text-xs border-border bg-background" />
+                            </div>
+                            <div className="flex flex-wrap gap-2 pt-2">
+                                <span className="text-xs font-bold text-muted-foreground uppercase mr-1">Placeholders:</span>
+                                {template.placeholders.map((p: string) => (
+                                    <code key={p} className="px-2 py-1 rounded bg-[#3882a5]/5 text-xs font-bold text-[#3882a5] border border-[#3882a5]/10">{"{"}{p}{"}"}</code>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                                <Eye size={16} className="text-muted-foreground" />
+                                <span className="text-xs font-bold uppercase text-muted-foreground tracking-wider">Live Visual Preview</span>
+                            </div>
+                            <div className="rounded-xl border border-border/50 bg-white overflow-hidden shadow-sm flex flex-col min-h-[400px]">
+                                <div className="bg-muted/30 border-b p-4 font-bold text-sm truncate text-[#074463]">{replaceMock(templates[template.id]?.subject || "Subject Preview")}</div>
+                                <div className="flex-1 bg-muted/5 p-6">
+                                    <div className="mx-auto w-full bg-white shadow-sm rounded-lg overflow-hidden flex flex-col h-full border border-border/20" style={{ color: globalStyles.textColor, fontFamily: 'sans-serif' }}>
+                                        <div className="shrink-0 p-6 text-center border-b border-border/20" style={{ backgroundColor: globalStyles.headerBg }}>
+                                            {previewLogoUrl ? <img src={previewLogoUrl} alt="Logo" className="h-6 mx-auto object-contain" /> : <h1 style={{ color: globalStyles.primaryColor, fontWeight: 900, fontSize: '20px' }}>{mockData.companyName}</h1>}
+                                        </div>
+                                        <div className="flex-1 overflow-y-auto p-6 text-[13px] leading-relaxed" dangerouslySetInnerHTML={{ __html: replaceMock(templates[template.id]?.body || "Content preview here...") }} />
+                                        <div className="shrink-0 p-4 text-center text-xs border-t border-border/20 bg-muted/30 text-muted-foreground">{globalStyles.footerText}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
+    if (isLoading) {
+        return <Skeleton className="h-[600px] w-full rounded-[40px]" />;
+    }
 
     return (
         <div className="space-y-8 pb-4">
@@ -353,99 +448,17 @@ export function EmailTemplateSettings() {
 
                     <CollapsibleContent>
                         <div className="px-5 pb-8 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                            <div className="space-y-4 pt-2">
-                                {TEMPLATE_TYPES.map((template) => (
-                                    <div key={template.id} className="border border-border/50 rounded-xl bg-muted/5 transition-all overflow-hidden shadow-[0_1px_3px_rgb(0,0,0,0.02)]">
-                                        <div className="flex items-center justify-between p-4 px-5">
-                                            <div className="flex items-center gap-4">
-                                                <div className="p-2.5 rounded-lg bg-background border border-border/50 text-[#3882a5]">
-                                                    <template.icon size={18} />
-                                                </div>
-                                                <h4 className="font-bold text-[#074463]">{template.label}</h4>
-                                            </div>
-                                            
-                                            <div className="flex items-center gap-6">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-xs uppercase font-bold text-muted-foreground tracking-tight">Status</span>
-                                                    <BrandSwitch 
-                                                        checked={enabledTemplates[template.id]}
-                                                        onCheckedChange={async (checked: boolean) => {
-                                                            // Optimistic update
-                                                            setEnabledTemplates(prev => ({ ...prev, [template.id]: checked }));
-                                                            try {
-                                                                await updateSettings({
-                                                                    emailTemplates: {
-                                                                        enabledTemplates: {
-                                                                            [template.id]: checked
-                                                                        }
-                                                                    }
-                                                                }).unwrap();
-                                                            } catch (err: any) {
-                                                                // Rollback on error
-                                                                setEnabledTemplates(prev => ({ ...prev, [template.id]: !checked }));
-                                                                console.error("Failed to update status:", err);
-                                                            }
-                                                        }}
-                                                    />
-                                                </div>
-                                                <button 
-                                                    onClick={() => setSelectedTemplate(selectedTemplate === template.id ? null : template.id)} 
-                                                    className={cn(
-                                                        "h-9 w-9 flex items-center justify-center rounded-lg border shadow-sm transition-all",
-                                                        selectedTemplate === template.id ? 'bg-[#074463] text-white border-[#074463]' : 'bg-background text-gray-400 hover:text-[#3882a5]'
-                                                    )}
-                                                >
-                                                    <Settings2 size={16} />
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {selectedTemplate === template.id && (
-                                            <div className="p-6 border-t border-dashed border-border/50 bg-white/40 animate-in fade-in duration-300">
-                                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                                                    <div className="space-y-5">
-                                                        <div className="space-y-2">
-                                                            <div className="flex items-center justify-between">
-                                                                <Label className="text-xs font-bold text-gray-700">Email Subject</Label>
-                                                                <button onClick={() => resetToDefault(template.id)} className="text-xs font-bold text-[#3882a5] hover:underline">RESET TO DEFAULT</button>
-                                                            </div>
-                                                            <InputField value={templates[template.id]?.subject || ""} onChange={(e) => updateTemplate(template.id, 'subject', e.target.value)} className="h-10 rounded-lg border-border" />
-                                                        </div>
-                                                        <div className="space-y-2">
-                                                            <Label className="text-xs font-bold text-gray-700">HTML Body Content</Label>
-                                                            <Textarea value={templates[template.id]?.body || ""} onChange={(e) => updateTemplate(template.id, 'body', e.target.value)} className="min-h-[250px] rounded-lg p-4 font-mono text-xs border-border bg-background" />
-                                                        </div>
-                                                        <div className="flex flex-wrap gap-2 pt-2">
-                                                            <span className="text-xs font-bold text-muted-foreground uppercase mr-1">Placeholders:</span>
-                                                            {template.placeholders.map(p => (
-                                                                <code key={p} className="px-2 py-1 rounded bg-[#3882a5]/5 text-xs font-bold text-[#3882a5] border border-[#3882a5]/10">{"{"}{p}{"}"}</code>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="space-y-3">
-                                                        <div className="flex items-center gap-2">
-                                                            <Eye size={16} className="text-muted-foreground" />
-                                                            <span className="text-xs font-bold uppercase text-muted-foreground tracking-wider">Live Visual Preview</span>
-                                                        </div>
-                                                        <div className="rounded-xl border border-border/50 bg-white overflow-hidden shadow-sm flex flex-col min-h-[400px]">
-                                                            <div className="bg-muted/30 border-b p-4 font-bold text-sm truncate text-[#074463]">{replaceMock(templates[template.id]?.subject || "Subject Preview")}</div>
-                                                            <div className="flex-1 bg-muted/5 p-6">
-                                                                <div className="mx-auto w-full bg-white shadow-sm rounded-lg overflow-hidden flex flex-col h-full border border-border/20" style={{ color: globalStyles.textColor, fontFamily: 'sans-serif' }}>
-                                                                    <div className="shrink-0 p-6 text-center border-b border-border/20" style={{ backgroundColor: globalStyles.headerBg }}>
-                                                                        {previewLogoUrl ? <img src={previewLogoUrl} alt="Logo" className="h-6 mx-auto object-contain" /> : <h1 style={{ color: globalStyles.primaryColor, fontWeight: 900, fontSize: '20px' }}>{mockData.companyName}</h1>}
-                                                                    </div>
-                                                                    <div className="flex-1 overflow-y-auto p-6 text-[13px] leading-relaxed" dangerouslySetInnerHTML={{ __html: replaceMock(templates[template.id]?.body || "Content preview here...") }} />
-                                                                    <div className="shrink-0 p-4 text-center text-xs border-t border-border/20 bg-muted/30 text-muted-foreground">{globalStyles.footerText}</div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
+                            <div className="space-y-10 pt-2">
+                                {/* Appointment Category */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-3 pb-2 border-b border-border/50">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-[#3882a5]"></div>
+                                        <h4 className="text-sm font-bold text-[#074463] uppercase tracking-wider">Appointment Notifications</h4>
                                     </div>
-                                ))}
+                                    <div className="space-y-4">
+                                        {APPOINTMENT_TEMPLATES.map((template) => renderTemplateItem(template))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </CollapsibleContent>
