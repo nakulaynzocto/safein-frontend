@@ -120,8 +120,6 @@ export function QuickAppointmentModal({
         settingsFetching,
         checkConfiguration,
     } = useConfigurationModal();
-    const [confirmSendOpen, setConfirmSendOpen] = useState(false);
-    const [pendingBookingData, setPendingBookingData] = useState<QuickAppointmentFormData | null>(null);
     const userCountry = useUserCountry();
 
     const [createSpecialBooking] = useCreateSpecialBookingMutation();
@@ -163,8 +161,6 @@ export function QuickAppointmentModal({
     useEffect(() => {
         if (isActive) {
             closeConfigModal();
-            setConfirmSendOpen(false);
-            setPendingBookingData(null);
             setShowOptionalVisitDetails(false);
             reset({
                 name: "",
@@ -236,21 +232,7 @@ export function QuickAppointmentModal({
 
         if (!checkConfiguration("any")) return;
 
-        if (!isEmployee && settingsReady && hasAnyDeliveryChannel) {
-            setPendingBookingData(data);
-            setConfirmSendOpen(true);
-            return;
-        }
-
         await executeBooking(data);
-    };
-
-    const handleConfirmSend = async () => {
-        if (!pendingBookingData) return;
-        setConfirmSendOpen(false);
-        const payload = pendingBookingData;
-        setPendingBookingData(null);
-        await executeBooking(payload);
     };
 
     const textareaClass = (hasError?: boolean) =>
@@ -515,33 +497,6 @@ export function QuickAppointmentModal({
         </FormProvider>
     );
 
-    const deliverySummary = (
-        <ul className="mt-2 list-none space-y-2 text-sm text-muted-foreground">
-            {smtpOk && (
-                <li className="flex gap-2 rounded-lg border border-border/80 bg-muted/30 px-3 py-2">
-                    <Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#3882a5]" aria-hidden />
-                    <span>
-                        <span className="font-semibold text-foreground">Email</span> — SMTP is configured. Email-based
-                        notifications can be used by your workspace.
-                    </span>
-                </li>
-            )}
-            {smsOk && (
-                <li className="flex gap-2 rounded-lg border border-border/80 bg-muted/30 px-3 py-2">
-                    <Phone className="mt-0.5 h-4 w-4 shrink-0 text-[#3882a5]" aria-hidden />
-                    <span>
-                        <span className="font-semibold text-foreground">SMS</span> — SMS channel is enabled. The
-                        visitor entry code is sent as a text message to the <strong className="text-foreground">phone</strong> number
-                        you entered.
-                    </span>
-                </li>
-            )}
-        </ul>
-    );
-
-    const deliveryModalFooterBtnClass =
-        "h-auto min-h-9 shrink py-2.5 text-center text-sm leading-snug whitespace-normal md:h-9 md:shrink-0 md:py-2 md:text-[13px] md:leading-[18px] md:whitespace-nowrap";
-
     const modals = (
         <>
             <ConfigurationRequiredModal
@@ -549,69 +504,6 @@ export function QuickAppointmentModal({
                 onClose={closeConfigModal}
                 type={configWarning}
             />
-
-            <Dialog
-                open={confirmSendOpen}
-                onOpenChange={(v) => {
-                    if (!v) {
-                        setConfirmSendOpen(false);
-                        setPendingBookingData(null);
-                    }
-                }}
-            >
-                <DialogContent className="max-h-[90dvh] gap-3 overflow-y-auto p-4 sm:gap-4 sm:p-6 sm:max-w-[480px]">
-                    <DialogHeader className="gap-1.5 pr-10 text-left sm:gap-2 sm:pr-0">
-                        <DialogTitle className="text-base leading-snug font-semibold sm:text-lg sm:leading-none">
-                            Confirm how the visitor will be notified
-                        </DialogTitle>
-                        <DialogDescription className="sr-only">
-                            Review configured notification channels before creating the special visitor booking.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-3 text-left text-sm leading-relaxed break-words text-pretty text-muted-foreground sm:text-base">
-                        <p>
-                            Based on your current configuration, this booking will use the channels below. Use{" "}
-                            <strong className="text-foreground">Confirm &amp; book</strong> to continue.
-                        </p>
-                        {deliverySummary}
-                        {smtpOk && !smsOk && (
-                            <p className="rounded-lg border border-amber-200/80 bg-amber-50 px-3 py-2 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
-                                <strong className="font-semibold">Note:</strong> The entry code is normally sent via{" "}
-                                <strong>SMS</strong>. The SMS channel is currently disabled — enable it in Settings for reliable
-                                delivery to the visitor&apos;s phone.
-                            </p>
-                        )}
-                        {!smtpOk && smsOk && (
-                            <p className="rounded-lg border border-border/80 bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                                Custom <strong className="text-foreground">SMTP</strong> is not configured. Email-based
-                                alerts from your domain may be limited until SMTP is set up.
-                            </p>
-                        )}
-                    </div>
-                    <DialogFooter className="flex-col-reverse gap-2 md:flex-row md:flex-wrap md:justify-end [&>*]:w-full md:[&>*]:w-auto md:[&>*]:min-w-0 md:[&>*]:max-w-full">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className={deliveryModalFooterBtnClass}
-                            onClick={() => {
-                                setConfirmSendOpen(false);
-                                setPendingBookingData(null);
-                            }}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="primary"
-                            className={deliveryModalFooterBtnClass}
-                            onClick={() => void handleConfirmSend()}
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? "Booking…" : "Confirm & book"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </>
     );
 

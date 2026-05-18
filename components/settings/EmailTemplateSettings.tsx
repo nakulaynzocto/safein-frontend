@@ -3,35 +3,28 @@
 import { useState, useEffect, useMemo } from "react";
 import { 
     useGetSettingsQuery, 
-    useSaveEmailTemplatesMutation, 
-    useGetEmailTemplateDefaultsQuery,
     useUpdateSettingsMutation
 } from "@/store/api/settingsApi";
 import { useGetProfileQuery } from "@/store/api/authApi";
 import { useGetSafeinProfileQuery } from "@/store/api/safeinProfileApi";
 import { useAppSelector } from "@/store/hooks";
-import { toast } from "sonner";
 import {
     Palette,
     Mail,
     ChevronRight,
     Eye,
-    Save,
     CheckCircle2,
     Settings2,
     Link,
-    ShieldCheck
+    ShieldCheck,
+    Lock
 } from "lucide-react";
 
-import { ActionButton } from "@/components/common/actionButton";
-import { InputField } from "@/components/common/inputField";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BrandSwitch } from "@/components/common/BrandSwitch";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import { SettingsMasterBanner } from "./SettingsMasterBanner";
 import { useCollapsibleSections } from "@/hooks/useCollapsibleSections";
 
 /** Same default as Gatekeeper `DEFAULT_EMAIL_BRANDING.logoUrl` — used if API state is briefly empty */
@@ -46,7 +39,7 @@ function resolveCompanyLogoUrl(raw: string | undefined | null): string | undefin
     const base =
         (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1\/?$/, "")) ||
         "http://localhost:4010";
-    const clean = s.replace(/^\/?(public\/)?/, "");
+    const clean = s.replace(/^\/?( public\/)?/, "");
     return `${base}/${clean}`;
 }
 
@@ -65,7 +58,6 @@ const ALL_TEMPLATES = [...APPOINTMENT_TEMPLATES];
 export function EmailTemplateSettings() {
     const { user } = useAppSelector((state) => state.auth);
     const { data: settings, isLoading } = useGetSettingsQuery();
-    const [saveTemplates, { isLoading: isSaving }] = useSaveEmailTemplatesMutation();
     const [updateSettings] = useUpdateSettingsMutation();
     
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>("visitorApproval");
@@ -141,45 +133,6 @@ export function EmailTemplateSettings() {
         profileUser?.profilePicture,
     ]);
 
-    const handleSave = async () => {
-        try {
-            await saveTemplates({
-                globalStyles,
-                templates
-            }).unwrap();
-            toast.success("Email settings saved successfully!");
-        } catch (err: any) {
-            toast.error(err?.data?.message || "Failed to save settings");
-        }
-    };
-
-    const updateGlobalStyle = (key: string, value: string) => {
-        setGlobalStyles(prev => ({ ...prev, [key]: value }));
-    };
-
-    const updateTemplate = (key: string, field: string, value: string) => {
-        setTemplates((prev: any) => ({
-            ...prev,
-            [key]: { ...prev[key], [field]: value }
-        }));
-    };
-
-    const { data: defaultData } = useGetEmailTemplateDefaultsQuery();
-
-    const resetToDefault = (id: string) => {
-        const defaults = defaultData?.templates?.[id];
-        if (defaults) {
-            setTemplates((prev: any) => ({
-                ...prev,
-                [id]: { 
-                    subject: defaults.subject,
-                    body: defaults.body
-                }
-            }));
-            toast.success("Reset to default");
-        }
-    };
-
     // Sample data for preview
     const mockData: Record<string, string> = {
         visitorName: "Nakul Singh",
@@ -242,8 +195,9 @@ export function EmailTemplateSettings() {
                             "h-9 w-9 flex items-center justify-center rounded-lg border shadow-sm transition-all",
                             selectedTemplate === template.id ? 'bg-[#074463] text-white border-[#074463]' : 'bg-background text-gray-400 hover:text-[#3882a5]'
                         )}
+                        title="Preview template"
                     >
-                        <Settings2 size={16} />
+                        <Eye size={16} />
                     </button>
                 </div>
             </div>
@@ -252,21 +206,28 @@ export function EmailTemplateSettings() {
                 <div className="p-6 border-t border-dashed border-border/50 bg-white/40 animate-in fade-in duration-300">
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                         <div className="space-y-5">
+                            {/* Read-only info banner */}
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold">
+                                <Lock size={13} />
+                                <span>Templates are managed globally by SafeIn Admin. Contact admin to make changes.</span>
+                            </div>
+
                             <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <Label className="text-xs font-bold text-gray-700">Email Subject</Label>
-                                    <button onClick={() => resetToDefault(template.id)} className="text-xs font-bold text-[#3882a5] hover:underline">RESET TO DEFAULT</button>
+                                <Label className="text-xs font-bold text-gray-700">Email Subject</Label>
+                                <div className="h-10 rounded-lg border border-border bg-muted/30 px-3 flex items-center text-sm text-gray-700 font-medium select-text cursor-default">
+                                    {templates[template.id]?.subject || <span className="text-muted-foreground italic text-xs">No subject configured</span>}
                                 </div>
-                                <InputField value={templates[template.id]?.subject || ""} onChange={(e) => updateTemplate(template.id, 'subject', e.target.value)} className="h-10 rounded-lg border-border" />
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-xs font-bold text-gray-700">HTML Body Content</Label>
-                                <Textarea value={templates[template.id]?.body || ""} onChange={(e) => updateTemplate(template.id, 'body', e.target.value)} className="min-h-[250px] rounded-lg p-4 font-mono text-xs border-border bg-background" />
+                                <div className="min-h-[250px] rounded-lg p-4 font-mono text-xs border border-border bg-muted/20 text-gray-700 whitespace-pre-wrap overflow-y-auto select-text cursor-default">
+                                    {templates[template.id]?.body || <span className="text-muted-foreground italic">No body content configured.</span>}
+                                </div>
                             </div>
                             <div className="flex flex-wrap gap-2 pt-2">
                                 <span className="text-xs font-bold text-muted-foreground uppercase mr-1">Placeholders:</span>
                                 {template.placeholders.map((p: string) => (
-                                    <code key={p} className="px-2 py-1 rounded bg-[#3882a5]/5 text-xs font-bold text-[#3882a5] border border-[#3882a5]/10">{"{"}{p}{"}"}</code>
+                                    <code key={p} className="px-2 py-1 rounded bg-[#3882a5]/5 text-xs font-bold text-[#3882a5] border border-[#3882a5]/10">{"{"+p+"}"}</code>
                                 ))}
                             </div>
                         </div>
@@ -301,7 +262,13 @@ export function EmailTemplateSettings() {
 
     return (
         <div className="space-y-8 pb-4">
-            {/* 1. Global Branding Section */}
+            {/* Read-only global info banner */}
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm font-semibold">
+                <Lock size={16} className="shrink-0" />
+                <span>Email branding and templates are configured globally by SafeIn Admin. These settings are <strong>view-only</strong> for your account.</span>
+            </div>
+
+            {/* 1. Global Branding Section — View Only */}
             <div className="rounded-2xl border border-border/50 bg-background overflow-hidden mb-6 shadow-sm">
                 <Collapsible open={expandedSections.includes('branding')} onOpenChange={() => toggleSection('branding')}>
                     <div className="p-5 flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('branding')}>
@@ -320,7 +287,7 @@ export function EmailTemplateSettings() {
                     <CollapsibleContent>
                         <div className="px-5 pb-8 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
                             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 pt-4">
-                                {/* Branding Controls */}
+                                {/* Branding — Read-only display */}
                                 <div className="xl:col-span-2 space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="p-6 border border-border/50 bg-muted/5 rounded-xl space-y-4">
@@ -328,20 +295,15 @@ export function EmailTemplateSettings() {
                                             <div className="grid grid-cols-1 gap-4">
                                                 <div className="space-y-1.5 w-full">
                                                     <Label className="text-xs font-bold text-muted-foreground uppercase">Primary Color</Label>
-                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border w-full">
-                                                        <input 
-                                                            type="color" 
-                                                            value={globalStyles.primaryColor} 
-                                                            onChange={(e) => updateGlobalStyle("primaryColor", e.target.value)} 
-                                                            className="w-6 h-6 rounded cursor-pointer border-none shrink-0" 
-                                                        />
+                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border w-full opacity-70 cursor-not-allowed">
+                                                        <div className="w-6 h-6 rounded border shrink-0" style={{ backgroundColor: globalStyles.primaryColor }} />
                                                         <span className="text-xs font-mono font-bold truncate">{globalStyles.primaryColor}</span>
                                                     </div>
                                                 </div>
                                                 <div className="space-y-1.5 w-full">
                                                     <Label className="text-xs font-bold text-muted-foreground uppercase">Text Color</Label>
-                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border w-full">
-                                                        <input type="color" value={globalStyles.textColor} onChange={(e) => updateGlobalStyle("textColor", e.target.value)} className="w-6 h-6 rounded cursor-pointer border-none shrink-0" />
+                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border w-full opacity-70 cursor-not-allowed">
+                                                        <div className="w-6 h-6 rounded border shrink-0" style={{ backgroundColor: globalStyles.textColor }} />
                                                         <span className="text-xs font-mono font-bold truncate">{globalStyles.textColor}</span>
                                                     </div>
                                                 </div>
@@ -353,15 +315,15 @@ export function EmailTemplateSettings() {
                                             <div className="grid grid-cols-1 gap-4">
                                                 <div className="space-y-1.5 w-full">
                                                     <Label className="text-xs font-bold text-muted-foreground uppercase">Header Bg</Label>
-                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border w-full">
-                                                        <input type="color" value={globalStyles.headerBg} onChange={(e) => updateGlobalStyle("headerBg", e.target.value)} className="w-6 h-6 rounded cursor-pointer border-none shrink-0" />
+                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border w-full opacity-70 cursor-not-allowed">
+                                                        <div className="w-6 h-6 rounded border shrink-0" style={{ backgroundColor: globalStyles.headerBg }} />
                                                         <span className="text-xs font-mono font-bold truncate">{globalStyles.headerBg}</span>
                                                     </div>
                                                 </div>
                                                 <div className="space-y-1.5 w-full">
                                                     <Label className="text-xs font-bold text-muted-foreground uppercase">Footer Bg</Label>
-                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border w-full">
-                                                        <input type="color" value={globalStyles.footerBg} onChange={(e) => updateGlobalStyle("footerBg", e.target.value)} className="w-6 h-6 rounded cursor-pointer border-none shrink-0" />
+                                                    <div className="flex items-center gap-3 p-2 bg-background rounded-lg border w-full opacity-70 cursor-not-allowed">
+                                                        <div className="w-6 h-6 rounded border shrink-0" style={{ backgroundColor: globalStyles.footerBg }} />
                                                         <span className="text-xs font-mono font-bold truncate">{globalStyles.footerBg}</span>
                                                     </div>
                                                 </div>
@@ -372,20 +334,17 @@ export function EmailTemplateSettings() {
                                     <div className="p-6 border border-border/50 bg-muted/5 rounded-xl space-y-6">
                                         <h3 className="text-sm font-bold text-[#074463]">Company Information</h3>
                                         <div className="grid grid-cols-1 gap-6">
-                                            <InputField
-                                                label="Company Logo URL"
-                                                value={globalStyles.logoUrl ?? ""}
-                                                onChange={(e) => updateGlobalStyle("logoUrl", e.target.value)}
-                                                className="h-10 rounded-lg border-border"
-                                                placeholder="https://yourlogo.com/logo.png"
-                                            />
+                                            <div className="space-y-1.5">
+                                                <Label className="text-xs font-bold text-muted-foreground uppercase">Company Logo URL</Label>
+                                                <div className="h-10 rounded-lg border border-border bg-muted/30 px-3 flex items-center text-sm text-gray-500 cursor-not-allowed select-text opacity-70 overflow-hidden">
+                                                    {globalStyles.logoUrl || <span className="italic text-xs">Auto-detected from your profile</span>}
+                                                </div>
+                                            </div>
                                             <div className="space-y-1.5">
                                                 <Label className="text-xs font-bold text-muted-foreground uppercase">Footer Copyright Text</Label>
-                                                <Textarea 
-                                                    value={globalStyles.footerText} 
-                                                    onChange={(e) => updateGlobalStyle("footerText", e.target.value)} 
-                                                    className="rounded-lg bg-background min-h-[80px] border-border p-3 text-sm resize-none" 
-                                                />
+                                                <div className="rounded-lg bg-muted/20 min-h-[80px] border border-border p-3 text-sm text-gray-600 whitespace-pre-wrap cursor-not-allowed opacity-70">
+                                                    {globalStyles.footerText || <span className="italic text-xs text-muted-foreground">No footer text set</span>}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -440,7 +399,7 @@ export function EmailTemplateSettings() {
                             </div>
                             <div>
                                 <h3 className="font-bold text-gray-800 text-lg">Email Template Controls</h3>
-                                <p className="text-xs text-gray-500">Configure triggers and customize notification content</p>
+                                <p className="text-xs text-gray-500">View notification templates configured by SafeIn Admin</p>
                             </div>
                         </div>
                         <ChevronRight className={cn("w-5 h-5 text-gray-400 transition-transform duration-300", expandedSections.includes('templates') && "rotate-90")} />
@@ -465,19 +424,7 @@ export function EmailTemplateSettings() {
                 </Collapsible>
             </div>
 
-            <div className="flex justify-end pt-10 items-center gap-6">
-                <p className="text-sm font-semibold text-muted-foreground tracking-tight hidden sm:block">Update your branding and templates in one click</p>
-                <ActionButton 
-                    onClick={handleSave} 
-                    isLoading={isSaving || isLoading} 
-                    variant="primary"
-                    size="xl"
-                    disabled={isSaving}
-                    className="font-semibold tracking-widest px-10"
-                    icon={Save}
-                    label="APPLY ALL SETTINGS"
-                />
-            </div>
+            {/* No Save button — read-only mode */}
         </div>
     );
 }

@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
-import { useGetSettingsQuery } from "@/store/api/settingsApi";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { routes } from "@/utils/routes";
 import { cn } from "@/lib/utils";
@@ -40,57 +39,41 @@ function CompactBar({ children, className }: { children: ReactNode; className?: 
 }
 
 /**
- * Reminds admins to configure SMTP (email invites) and/or profile mobile (SMS / account).
- * Employees only see the mobile reminder when their profile number is missing.
- * Single compact row on all breakpoints.
+ * Reminds admins to configure at least one delivery channel (SMTP or SMS).
+ * Warning is shown ONLY when BOTH toggles are OFF.
+ * If either SMTP or SMS toggle is ON → no warning shown at all.
+ * Employees are completely excluded from this warning.
  */
 export function DeliverySetupWarning({ className }: DeliverySetupWarningProps) {
-    const { 
-        smtpOk, 
-        settingsReady 
-    } = useConfigurationModal();
+    const { smtpOk, smsOk, settingsReady } = useConfigurationModal();
     const { user } = useAppSelector((s) => s.auth);
     const isEmployee = checkIsEmployee(user);
-    const mobileMissing = !String(user?.mobileNumber ?? "").trim();
 
+    // Not logged in
     if (!user?.id) return null;
 
-    if (isEmployee) {
-        if (!mobileMissing) return null;
-        return (
-            <CompactBar className={className}>
-                <span className="shrink-0 text-amber-800/85 dark:text-amber-200/90">Profile:</span>
-                <Link href={routes.privateroute.PROFILE} className={cn(linkClass, "shrink-0")}>
-                    Add mobile number
-                </Link>
-            </CompactBar>
-        );
-    }
+    // Employees don't need this warning
+    if (isEmployee) return null;
 
+    // Still loading settings — don't flash warning
     if (!settingsReady) return null;
 
-    const smtpMissing = !smtpOk;
+    // If at least one toggle is ON → no warning needed
+    if (smtpOk || smsOk) return null;
 
-    if (!smtpMissing && !mobileMissing) return null;
-
+    // Both SMTP and SMS are OFF → show setup warning
     return (
         <CompactBar className={className}>
             <span className="shrink-0 text-amber-800/85 dark:text-amber-200/90">Setup:</span>
-            {smtpMissing && (
-                <Link href={routes.privateroute.SETTINGS_SMTP} className={cn(linkClass, "shrink-0")}>
-                    Configure SMTP
-                </Link>
-            )}
-            {(smtpMissing && mobileMissing) && (
-                <span className="shrink-0 text-amber-600/80 dark:text-amber-400/80" aria-hidden>
-                    ·
-                </span>
-            )}
-            {mobileMissing && (
-                <Link href={routes.privateroute.PROFILE} className={cn(linkClass, "shrink-0")}>
-                    Add mobile
-                </Link>
-            )}
+            <Link href={routes.privateroute.SETTINGS_SMTP} className={cn(linkClass, "shrink-0")}>
+                Configure SMTP
+            </Link>
+            <span className="shrink-0 text-amber-600/80 dark:text-amber-400/80" aria-hidden>
+                ·
+            </span>
+            <Link href={routes.privateroute.SETTINGS_SMS} className={cn(linkClass, "shrink-0")}>
+                Enable SMS
+            </Link>
         </CompactBar>
     );
 }

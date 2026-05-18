@@ -7,7 +7,7 @@ import {
 } from "@/store/api/settingsApi";
 import { toast } from "sonner";
 import { 
-    Clock,
+    Lock,
     Link,
     ShieldCheck,
     MessageSquare,
@@ -25,7 +25,7 @@ import { ProfileLayout } from "@/components/profile/profileLayout";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { Switch } from "@/components/ui/switch";
+
 import { BrandSwitch } from "@/components/common/BrandSwitch";
 import { cn } from "@/lib/utils";
 import { useCollapsibleSections } from "@/hooks/useCollapsibleSections";
@@ -40,24 +40,10 @@ export function SMSSettings() {
     const { expandedSections, toggleSection } = useCollapsibleSections(["templates"]);
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>("newAppointmentRequest");
 
-    const coreSmsTemplates = ["newAppointmentRequest", "visitorCheckedIn", "visitorApproval", "appointmentRejection", "appointmentLink"];
+    const coreSmsTemplates = ["newAppointmentRequest", "appointmentLink"];
     const normalizedEnabledTemplates = (settings?.sms as any)?.enabledTemplates || {};
     
-    const handleToggle = async (templateId: string, enabled: boolean) => {
-        try {
-            const currentEnabledTemplates = (settings?.sms as any)?.enabledTemplates || {};
-            await updateSettings({
-                sms: {
-                    enabledTemplates: {
-                        ...currentEnabledTemplates,
-                        [templateId]: enabled
-                    }
-                }
-            }).unwrap();
-        } catch (err: any) {
-            toast.error(err?.data?.message || "Failed to update status");
-        }
-    };
+    // Templates are globally managed by SafeIn Admin — no local toggle allowed
 
     const handleMasterToggle = async (enabled: boolean) => {
         try {
@@ -158,15 +144,21 @@ export function SMSSettings() {
 
                                         <CollapsibleContent>
                                             <div className="px-5 pb-8 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                {/* Read-only info banner */}
+                                                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mb-4">
+                                                    <Lock size={13} />
+                                                    <span>SMS templates are managed globally by SafeIn Admin. These settings are <strong>view-only</strong>.</span>
+                                                </div>
                                                 <div className="space-y-4 pt-2">
                                                     {[
                                                         { id: "newAppointmentRequest", label: "SafeIn_New_Request", icon: Calendar, placeholders: ["visitorName", "approvalLink"] },
-                                                        { id: "visitorCheckedIn", label: "SafeIn_Visitor_In", icon: MapPin, placeholders: ["visitorName", "employeeName"] },
-                                                        { id: "visitorApproval", label: "SafeIn_Visit_Approved_Visitor", icon: CheckCircle2, placeholders: ["visitorName", "companyName"] },
-                                                        { id: "appointmentRejection", label: "SafeIn_Visit_Reject", icon: XCircle, placeholders: ["visitorName", "companyName"] },
                                                         { id: "appointmentLink", label: "SafeIn_Booking_Link", icon: Link, placeholders: ["companyName", "bookingUrl"] },
                                                         { id: "specialVisitorEntry", label: "SafeIn_Special_Entry_Pass", icon: ShieldCheck, placeholders: ["companyName", "otp"] },
-                                                    ].map((template) => (
+                                                    ].map((template) => {
+                                                        const isEnabled = normalizedEnabledTemplates[template.id] !== undefined
+                                                            ? normalizedEnabledTemplates[template.id]
+                                                            : coreSmsTemplates.includes(template.id);
+                                                        return (
                                                         <div key={template.id} className="border border-border/50 rounded-xl bg-background transition-all overflow-hidden">
                                                             <div className="flex items-center justify-between p-4 px-5">
                                                                 <div className="flex items-center gap-4">
@@ -176,15 +168,16 @@ export function SMSSettings() {
                                                                     <h4 className="font-bold text-[#074463]">{template.label}</h4>
                                                                 </div>
                                                                 
-                                                                 <div className="flex items-center gap-6">
-                                                                    <div className="flex items-center gap-3">
-                                                                        <span className="text-xs uppercase font-bold text-muted-foreground tracking-tight">Status</span>
-                                                                        <Switch 
-                                                                            checked={normalizedEnabledTemplates[template.id] !== undefined ? normalizedEnabledTemplates[template.id] : coreSmsTemplates.includes(template.id)}
-                                                                            onCheckedChange={(checked) => handleToggle(template.id, checked)}
-                                                                            disabled={isUpdating}
-                                                                        />
-                                                                    </div>
+                                                                <div className="flex items-center gap-4">
+                                                                    {/* Read-only status badge */}
+                                                                    <span className={cn(
+                                                                        "px-2.5 py-1 rounded-full text-xs font-bold border",
+                                                                        isEnabled
+                                                                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                                                            : "bg-gray-100 text-gray-500 border-gray-200"
+                                                                    )}>
+                                                                        {isEnabled ? "Active" : "Inactive"}
+                                                                    </span>
                                                                     <button 
                                                                         type="button"
                                                                         onClick={() => setSelectedTemplate(selectedTemplate === template.id ? null : template.id)} 
@@ -192,10 +185,11 @@ export function SMSSettings() {
                                                                             "h-9 w-9 flex items-center justify-center rounded-lg border shadow-sm transition-all",
                                                                             selectedTemplate === template.id ? 'bg-[#074463] text-white border-[#074463]' : 'bg-background text-gray-400 hover:text-[#3882a5]'
                                                                         )}
+                                                                        title="Preview template"
                                                                     >
                                                                         <Eye size={16} />
                                                                     </button>
-                                                                 </div>
+                                                                </div>
                                                             </div>
 
                                                             {selectedTemplate === template.id && (
@@ -217,7 +211,7 @@ export function SMSSettings() {
                                                                 </div>
                                                             )}
                                                         </div>
-                                                    ))}
+                                                    )})}
                                                 </div>
                                             </div>
                                         </CollapsibleContent>

@@ -6,7 +6,7 @@ import { AuthPageLayout } from "@/components/layout/authPageLayout";
 
 export default function RegisterPage() {
     return (
-        <AuthPageLayout showBackButton={false}>
+        <AuthPageLayout>
             <Suspense fallback={null}>
                 <RegisterForm />
             </Suspense>

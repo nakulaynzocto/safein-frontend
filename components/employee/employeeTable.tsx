@@ -212,33 +212,21 @@ export function EmployeeTable({
             header: "Status",
             render: (employee: Employee) => (
                 <div className="flex flex-col gap-1 items-start">
-                    {!employee.isVerified ? (
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            className="h-8 rounded-full px-4 bg-amber-500 text-white hover:bg-amber-600 border-none font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-md"
-                            onClick={() => handleVerify(employee)}
-                        >
-                            <ShieldCheck className="h-3.5 w-3.5" />
-                            Verify Now
-                        </Button>
-                    ) : (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
-                                    <StatusBadge status={employee.status.toLowerCase() as any} className="capitalize cursor-pointer" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start">
-                                <DropdownMenuItem onClick={() => handleStatusUpdate(employee, "Active")}>
-                                    Active
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleStatusUpdate(employee, "Inactive")}>
-                                    Inactive
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    )}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
+                                <StatusBadge status={employee.status.toLowerCase() as any} className="capitalize cursor-pointer" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                            <DropdownMenuItem onClick={() => handleStatusUpdate(employee, "Active")}>
+                                Active
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleStatusUpdate(employee, "Inactive")}>
+                                Inactive
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             ),
         });

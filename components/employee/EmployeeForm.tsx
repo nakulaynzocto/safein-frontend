@@ -107,9 +107,6 @@ export function NewEmployeeModal({
     const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
     const [isFileUploading, setIsFileUploading] = useState(false);
-    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-    const [isTermsAgreed, setIsTermsAgreed] = useState(false);
-    const [pendingFormData, setPendingFormData] = useState<EmployeeFormData | null>(null);
     const userCountry = useUserCountry();
 
     const { hasReachedEmployeeLimit, isExpired } = useSubscriptionStatus();
@@ -221,12 +218,6 @@ export function NewEmployeeModal({
 
     const onSubmit = async (data: EmployeeFormData) => {
         try {
-            if (!isEditMode && !showConfirmDialog && !pendingFormData) {
-                setPendingFormData(data);
-                setShowConfirmDialog(true);
-                return;
-            }
-
             setGeneralError(null);
 
             const payload = { ...data };
@@ -247,9 +238,6 @@ export function NewEmployeeModal({
                     setOpen(false);
                 }
                 
-                setPendingFormData(null);
-                setShowConfirmDialog(false);
-                setIsTermsAgreed(false);
                 reset();
 
                 if (onSuccess) {
@@ -262,9 +250,6 @@ export function NewEmployeeModal({
                 showSuccessToast("Employee created successfully");
                 
                 // Important: Clean up state before redirect
-                setPendingFormData(null);
-                setShowConfirmDialog(false);
-                setIsTermsAgreed(false);
                 reset();
 
                 if (onSuccess) {
@@ -280,9 +265,6 @@ export function NewEmployeeModal({
             }
 
         } catch (error: any) {
-            setPendingFormData(null);
-            setShowConfirmDialog(false);
-            setIsTermsAgreed(false);
             if (error?.data?.errors && Array.isArray(error.data.errors)) {
                 error.data.errors.forEach((fieldError: any) => {
                     if (fieldError.field && fieldError.message) {
@@ -321,6 +303,15 @@ export function NewEmployeeModal({
             {generalError && (
                 <Alert variant="destructive" className="mb-4">
                     <AlertDescription>{generalError}</AlertDescription>
+                </Alert>
+            )}
+
+            {!isEditMode && (
+                <Alert className="mb-4 bg-amber-50/50 text-amber-800 border-amber-200">
+                    <AlertCircle className="h-4 w-4 stroke-amber-600" />
+                    <AlertDescription className="text-xs font-medium">
+                        Please ensure the email and phone number are correct. Incoming alerts and calls depend on this information.
+                    </AlertDescription>
                 </Alert>
             )}
 
@@ -425,7 +416,7 @@ export function NewEmployeeModal({
                             required
                         />
 
-                        {(isEditMode && employeeData?.isVerified) && (
+                        {isEditMode && (
                             <Controller
                                 name="status"
                                 control={control}
@@ -514,72 +505,11 @@ export function NewEmployeeModal({
         </form>
     );
 
-    const confirmationDialog = (
-        <ConfirmationDialog
-            open={showConfirmDialog}
-            onOpenChange={(open) => {
-                setShowConfirmDialog(open);
-                if (!open) {
-                    setPendingFormData(null);
-                    setIsTermsAgreed(false);
-                }
-            }}
-            title="Confirm Contact Details"
-            variant="warning"
-            description={
-                <div className="space-y-4 pr-2">
-                    <div className="text-sm leading-relaxed text-slate-600">
-                        Please verify that <strong>{pendingFormData?.email}</strong> and <strong>{pendingFormData?.phone}</strong> are correct. 
-                        Incoming alerts and calls depend on this information.
-                        <p className="mt-2 text-xs italic text-amber-700 font-medium">
-                            (Email aur number sahi hona chahiye taki messages receive ho sakein.)
-                        </p>
-                    </div>
-
-                    <div 
-                        className={cn(
-                            "flex items-center space-x-3 p-4 rounded-xl border-2 transition-all cursor-pointer shadow-sm",
-                            isTermsAgreed 
-                                ? "bg-amber-50 border-amber-500 scale-[1.01]" 
-                                : "bg-white border-slate-300 hover:border-amber-400"
-                        )}
-                        onClick={() => setIsTermsAgreed(!isTermsAgreed)}
-                    >
-                        <div className="relative flex items-center justify-center">
-                            <Checkbox 
-                                id="confirmation_checkbox" 
-                                checked={isTermsAgreed} 
-                                onCheckedChange={(checked) => setIsTermsAgreed(!!checked)}
-                                className="h-6 w-6 border-slate-400 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600 transition-all stroke-[3]"
-                            />
-                        </div>
-                        <label
-                            htmlFor="confirmation_checkbox"
-                            className="text-[14px] font-extrabold leading-none cursor-pointer select-none text-slate-800"
-                        >
-                            I confirm details are 100% correct
-                        </label>
-                    </div>
-                </div>
-            }
-            confirmText={isCreating ? "Creating..." : "Confirm & Create"}
-            onConfirm={() => {
-                if (isTermsAgreed && pendingFormData) {
-                    onSubmit(pendingFormData);
-                }
-            }}
-            disabled={!isTermsAgreed || isCreating}
-        />
-    );
-
     if (isPage) {
         return (
-            <>
-                <FormContainer isPage={true} isLoading={isLoadingEmployee} isEditMode={isEditMode}>
-                    {formContent}
-                </FormContainer>
-                {confirmationDialog}
-            </>
+            <FormContainer isPage={true} isLoading={isLoadingEmployee} isEditMode={isEditMode}>
+                {formContent}
+            </FormContainer>
         );
     }
 
@@ -600,8 +530,6 @@ export function NewEmployeeModal({
                 </FormContainer>
             </DialogContent>
             </Dialog>
-
-            {confirmationDialog}
         </>
     );
 }
