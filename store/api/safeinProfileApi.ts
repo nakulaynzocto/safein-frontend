@@ -48,6 +48,18 @@ export interface ISafeinProfile {
         enableMaintenanceMode: boolean;
         enableRegistration: boolean;
         enableFeedbackSystem: boolean;
+
+        // Dynamic System Warning and Notes Controls
+        enableExpiryWarning?: boolean;
+        expiryWarningMessage?: string;
+        enableSubscriptionEndingSoonWarning?: boolean;
+        subscriptionEndingSoonWarningMessage?: string;
+        subscriptionEndingSoonDays?: number;
+        enableGlobalAlert?: boolean;
+        globalAlertMessage?: string;
+        enableLowWalletWarning?: boolean;
+        lowWalletWarningMessage?: string;
+        lowWalletWarningThreshold?: number;
     };
 }
 

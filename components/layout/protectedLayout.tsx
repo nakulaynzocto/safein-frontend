@@ -1,7 +1,7 @@
 "use client";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { Navbar } from "./navbar";
 import { Sidebar } from "./sidebar";
@@ -14,12 +14,19 @@ import { Banner } from "@/components/common/banner";
 import { useChatNotifications } from "@/hooks/useChatNotifications";
 import { APIErrorState } from "@/components/common/APIErrorState";
 import { cn } from "@/lib/utils";
+import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
+import { useGetSafeinProfileQuery } from "@/store/api/safeinProfileApi";
+import { useGetWalletBalanceQuery } from "@/store/api/walletApi";
+import { RechargeWalletModal } from "@/components/dashboard/RechargeWalletModal";
 
 interface ProtectedLayoutProps {
     children: ReactNode;
 }
 
 export function ProtectedLayout({ children }: ProtectedLayoutProps) {
+    const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+    const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
+
     // Use centralized hook for all auth and subscription logic
     const {
         isClient,
@@ -36,7 +43,24 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
         expiryWarning,
         pathname,
         globalError,
+        activeSubscriptionData,
     } = useAuthSubscription();
+
+    // Fetch safeinProfile to respect toggles and custom messages configured in Admin panel
+    const { data: safeinProfileResponse } = useGetSafeinProfileQuery(undefined, {
+        skip: !isAuthenticated,
+    });
+    const features = safeinProfileResponse?.data?.features;
+
+    // Check if any messaging module is enabled in billing plan to skip wallet queries if not used
+    const modules = activeSubscriptionData?.modules;
+    const isAnyMessagingEnabled = !!(modules?.enableSms || modules?.enableWhatsApp || modules?.enableVoice);
+
+    // Fetch credits balance
+    const { data: walletData } = useGetWalletBalanceQuery(undefined, {
+        skip: !isAuthenticated || !isAnyMessagingEnabled,
+    });
+    const balance = walletData?.balance ?? 0;
 
     // Show navbar for all authenticated users
     const shouldShowNavbar = isClient && !isLoading && shouldShowPrivateNavbar;
@@ -100,39 +124,134 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
     const isFullHeightPage = pathname === routes.privateroute.MESSAGES || pathname?.startsWith("/settings");
 
+    // Banner 1: Expiry Warning (Subscription Expired)
+    const enableExpiryWarning = features?.enableExpiryWarning ?? true;
+    const showExpiry = !!(isClient && expiryWarning?.isExpired && enableExpiryWarning && !isSubscriptionPage && isAuthenticated);
+    
+    let expiryMessage: React.ReactNode = (
+        <span>
+            Your Current Plan Expired on <strong>{expiryWarning?.formattedDate}</strong>. Service is interrupted.
+        </span>
+    );
+    if (features?.expiryWarningMessage && features.expiryWarningMessage.trim() !== "") {
+        const replacedMsg = features.expiryWarningMessage.replace("{date}", expiryWarning?.formattedDate || "");
+        expiryMessage = <span>{replacedMsg}</span>;
+    }
+
+    // Banner 2: Subscription Ending Soon Banner
+    const warningDaysThreshold = features?.subscriptionEndingSoonDays ?? 7;
+    const showEndingSoon = !!(
+        isClient && 
+        expiryWarning?.show && 
+        !expiryWarning?.isExpired && 
+        (expiryWarning?.days !== undefined && expiryWarning.days <= warningDaysThreshold) && 
+        features?.enableSubscriptionEndingSoonWarning && 
+        !isSubscriptionPage && 
+        isAuthenticated
+    );
+
+    let endingSoonMessage: React.ReactNode = (
+        <span>
+            Your plan expires in <strong>{expiryWarning?.days} {expiryWarning?.days === 1 ? "day" : "days"}</strong> on <strong>{expiryWarning?.formattedDate}</strong>.
+        </span>
+    );
+    if (features?.subscriptionEndingSoonWarningMessage && features.subscriptionEndingSoonWarningMessage.trim() !== "") {
+        const replacedMsg = features.subscriptionEndingSoonWarningMessage
+            .replace("{days}", String(expiryWarning?.days || 0))
+            .replace("{date}", expiryWarning?.formattedDate || "");
+        endingSoonMessage = <span>{replacedMsg}</span>;
+    }
+
+    // Banner 3: Global Site Warning & Notes Banner
+    const showGlobalAlert = !!(
+        isClient && 
+        features?.enableGlobalAlert && 
+        features?.globalAlertMessage && 
+        features.globalAlertMessage.trim() !== "" && 
+        !isSubscriptionPage && 
+        isAuthenticated
+    );
+    const globalAlertMessage = features?.globalAlertMessage || "";
+
+    // Banner 4: Low Wallet Balance Banner
+    const showLowWallet = !!(
+        isClient && 
+        features?.enableLowWalletWarning && 
+        isAnyMessagingEnabled && 
+        (balance <= (features?.lowWalletWarningThreshold ?? 100)) && 
+        !isSubscriptionPage && 
+        isAuthenticated
+    );
+
+    let lowWalletMessage: React.ReactNode = (
+        <span>
+            Low Wallet Balance: You only have <strong>{balance}</strong> credits left. Please recharge to avoid service interruption.
+        </span>
+    );
+    if (features?.lowWalletWarningMessage && features.lowWalletWarningMessage.trim() !== "") {
+        const replacedMsg = features.lowWalletWarningMessage.replace("{balance}", String(balance));
+        lowWalletMessage = <span>{replacedMsg}</span>;
+    }
+
     return (
         <div className="flex h-[100dvh] flex-col overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
             {shouldShowNavbar && <Navbar variant="dashboard" />}
-            {/* Expiry warning banner - Only show on private pages (not subscription page) */}
+            
+            {/* 1. Subscription Expired Banner */}
             <Banner
-                show={!!(isClient && expiryWarning?.show && !isSubscriptionPage && isAuthenticated)}
-                variant={expiryWarning?.isExpired ? "error" : "warning"}
-                message={expiryWarning?.isExpired ? (
-                    <span>
-                        Your Current Plan Expired on <strong>{expiryWarning.formattedDate}</strong>. Service is interrupted.
-                    </span>
-                ) : (
-                    <span>
-                        Your plan expires in <strong>{expiryWarning?.days} {expiryWarning?.days === 1 ? "day" : "days"}</strong> on <strong>{expiryWarning?.formattedDate}</strong>.
-                    </span>
-                )}
-                action={expiryWarning?.isExpired ? (
-                    <Link
-                        href={routes.publicroute.PRICING}
-                        className="font-bold underline hover:text-red-100 flex items-center gap-1"
+                show={showExpiry}
+                variant="error"
+                message={expiryMessage}
+                action={
+                    <button
+                        onClick={() => setIsUpgradeModalOpen(true)}
+                        className="font-bold underline flex items-center gap-1 cursor-pointer transition-colors border-none bg-transparent outline-none p-0 hover:text-red-100 text-white"
                     >
                         <span>Plan Expired. Renew Now</span>
                         <span>→</span>
-                    </Link>
-                ) : (
-                    <Link
-                        href={routes.publicroute.PRICING}
-                        className="font-bold underline hover:text-amber-100 bg-white/20 px-3 py-1 rounded-full transition-colors hover:bg-white/30"
-                    >
-                        Renew Now
-                    </Link>
-                )}
+                    </button>
+                }
             />
+
+            {/* 2. Subscription Ending Soon Banner */}
+            <Banner
+                show={showEndingSoon}
+                variant="warning"
+                message={endingSoonMessage}
+                action={
+                    <button
+                        onClick={() => setIsUpgradeModalOpen(true)}
+                        className="font-bold underline flex items-center gap-1 cursor-pointer transition-colors border-none bg-transparent outline-none p-0 hover:text-amber-100 bg-white/20 px-3 py-1 rounded-full hover:bg-white/30 text-white"
+                    >
+                        <span>Renew Now</span>
+                        <span>→</span>
+                    </button>
+                }
+            />
+
+            {/* 3. Global Site Alert Banner */}
+            <Banner
+                show={showGlobalAlert}
+                variant="info"
+                message={<span>{globalAlertMessage}</span>}
+            />
+
+            {/* 4. Low Wallet Warning Banner */}
+            <Banner
+                show={showLowWallet}
+                variant="warning"
+                message={lowWalletMessage}
+                action={
+                    <button
+                        onClick={() => setIsRechargeModalOpen(true)}
+                        className="font-bold underline flex items-center gap-1 cursor-pointer transition-colors border-none bg-transparent outline-none p-0 hover:text-amber-100 bg-white/20 px-3 py-1 rounded-full hover:bg-white/30 text-white"
+                    >
+                        <span>Recharge Now</span>
+                        <span>→</span>
+                    </button>
+                }
+            />
+
             <div className="flex flex-1 overflow-hidden">
                 {/* Only show sidebar if user has active subscription AND token */}
                 {isClient && !isLoading && shouldShowSidebar && <Sidebar />}
@@ -201,6 +320,20 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
             </div>
             {/* Mobile bottom navigation — Instagram/LinkedIn style */}
             {isClient && !isLoading && shouldShowSidebar && <MobileBottomNav />}
+            
+            {/* Expiry / Renew Plan Upgrade Modal */}
+            <UpgradePlanModal 
+                isOpen={isUpgradeModalOpen} 
+                onClose={() => setIsUpgradeModalOpen(false)} 
+            />
+
+            {/* Recharge Wallet Modal */}
+            <RechargeWalletModal
+                isOpen={isRechargeModalOpen}
+                onClose={() => setIsRechargeModalOpen(false)}
+                currentBalance={balance}
+                creditRate={walletData?.creditRate}
+            />
         </div>
     );
 }
