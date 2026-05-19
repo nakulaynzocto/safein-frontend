@@ -181,8 +181,9 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-lg">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
+                <div className="overflow-y-auto max-h-[90vh] p-6">
+                    <DialogHeader>
                     <DialogTitle className="text-xl font-semibold">Upgrade Your Plan</DialogTitle>
                     <DialogDescription className="text-sm">
                         {limitType 
@@ -352,6 +353,7 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
                             </div>
                         </>
                     )}
+                </div>
                 </div>
             </DialogContent>
         </Dialog>

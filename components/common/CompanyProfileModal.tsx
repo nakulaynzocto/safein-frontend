@@ -121,7 +121,7 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="col-span-1">
+                        <div className="col-span-1 md:col-span-2">
                             <InputField
                                 label="Company Name"
                                 placeholder="Enter your company name"
@@ -129,24 +129,6 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                                 error={errors.companyName?.message}
                                 {...register("companyName")}
                                 required
-                            />
-                        </div>
-                        <div className="col-span-1">
-                            <Controller
-                                name="mobileNumber"
-                                control={control}
-                                render={({ field }) => (
-                                    <PhoneInputField
-                                        id="mobileNumber"
-                                        label="Mobile Number"
-                                        value={field.value || ""}
-                                        onChange={(val) => field.onChange(val)}
-                                        placeholder="Enter mobile number"
-                                        error={errors.mobileNumber?.message}
-                                        required
-                                        defaultCountry={phoneDefaultCountry}
-                                    />
-                                )}
                             />
                         </div>
 
@@ -178,6 +160,25 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                         </div>
 
                         <div className="col-span-1">
+                            <Controller
+                                name="mobileNumber"
+                                control={control}
+                                render={({ field }) => (
+                                    <PhoneInputField
+                                        id="mobileNumber"
+                                        label="Mobile Number"
+                                        value={field.value || ""}
+                                        onChange={(val) => field.onChange(val)}
+                                        placeholder="Enter mobile number"
+                                        error={errors.mobileNumber?.message}
+                                        required
+                                        defaultCountry={phoneDefaultCountry}
+                                    />
+                                )}
+                            />
+                        </div>
+
+                        <div className="col-span-1">
                             <InputField
                                 label="Pincode"
                                 placeholder="e.g. 123456"
@@ -187,7 +188,7 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                             />
                         </div>
 
-                        <div className="col-span-1">
+                        <div className="col-span-1 md:col-span-2">
                             <InputField
                                 label="Company Address"
                                 placeholder="Building No, Street..."
