@@ -325,16 +325,7 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                         {/* Show appropriate button based on subscription status */}
                         {isMounted && isAuthenticated && token && !isSubscriptionPage && (
                             <>
-                                {/* Private navbar: Show Upgrade ONLY for trial users or expired subscription AND NOT for employees */}
-                                {isActuallyAuthenticated && !isEmployee && (isTrialingSubscription || !hasActiveSubscription) && (
-                                    <button
-                                        type="button"
-                                        onClick={handleOpenUpgradeModal}
-                                        className="hidden rounded-lg bg-[#3882a5] px-3 py-2 text-xs font-semibold text-white transition-all duration-300 hover:bg-[#2d6a87] sm:flex sm:px-4 sm:text-[14px]"
-                                    >
-                                        UPGRADE
-                                    </button>
-                                )}
+
                                 {/* Public navbar ONLY: Show My Account for logged-in users */}
                                 {forcePublic && isLoggedInPublic && (
                                     <Link
