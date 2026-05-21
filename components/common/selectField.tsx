@@ -47,6 +47,7 @@ export interface SelectFieldProps {
     showDropdownIndicator?: boolean;
     noOptionsMessage?: (obj: { inputValue: string }) => ReactNode;
     compact?: boolean;
+    onMenuScrollToBottom?: () => void;
 }
 
 const MENU_PORTAL_Z_INDEX = 9999;
@@ -84,6 +85,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         showDropdownIndicator = true,
         noOptionsMessage,
         compact = false,
+        onMenuScrollToBottom,
     },
     ref,
 ) {
@@ -333,6 +335,7 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 components={{ Menu }}
                 formatOptionLabel={formatOptionLabel ? (opt) => formatOptionLabel(opt.data) : defaultFormatOptionLabel}
                 noOptionsMessage={noOptionsMessage}
+                onMenuScrollToBottom={onMenuScrollToBottom}
             />
 
             {error && (

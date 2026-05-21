@@ -160,6 +160,20 @@ export function NewAppointmentModal({
     const debouncedEmployeeSearch = useDebounce(employeeSearchInput, 500);
     const debouncedVisitorSearch = useDebounce(visitorSearchInput, 500);
 
+    const [employeePage, setEmployeePage] = useState(1);
+    const [allEmployees, setAllEmployees] = useState<any[]>([]);
+
+    const [visitorPage, setVisitorPage] = useState(1);
+    const [allVisitors, setAllVisitors] = useState<Visitor[]>([]);
+
+    useEffect(() => {
+        setEmployeePage(1);
+    }, [debouncedEmployeeSearch]);
+
+    useEffect(() => {
+        setVisitorPage(1);
+    }, [debouncedVisitorSearch]);
+
     const open = isPage ? true : controlledOpen !== undefined ? controlledOpen : internalOpen;
     const setOpen = isPage ? (_: boolean) => { } : onOpenChange || setInternalOpen;
     const isEditMode = !!appointmentId;
@@ -173,25 +187,70 @@ export function NewAppointmentModal({
     const {
         data: employeesData,
         isLoading: isLoadingEmployees,
+        isFetching: isFetchingEmployees,
         error: employeesError,
     } = useGetEmployeesQuery({
-        page: 1,
+        page: employeePage,
         limit: 50,
         search: debouncedEmployeeSearch || undefined,
         status: "Active" as const,
     });
-    const employees = employeesData?.employees || [];
+
+    useEffect(() => {
+        if (employeesData?.employees) {
+            if (employeePage === 1) {
+                setAllEmployees(employeesData.employees);
+            } else {
+                setAllEmployees(prev => {
+                    // Prevent duplicates
+                    const existingIds = new Set(prev.map(e => e._id));
+                    const newEmployees = employeesData.employees.filter((e: any) => !existingIds.has(e._id));
+                    return [...prev, ...newEmployees];
+                });
+            }
+        }
+    }, [employeesData, employeePage]);
 
     const {
         data: visitorsData,
         isLoading: isLoadingVisitors,
+        isFetching: isFetchingVisitors,
         error: visitorsError,
     } = useGetVisitorsQuery({
-        page: 1,
-        limit: 10,
+        page: visitorPage,
+        limit: 50,
         search: debouncedVisitorSearch || undefined,
     });
-    const visitors: Visitor[] = visitorsData?.visitors || [];
+
+    useEffect(() => {
+        if (visitorsData?.visitors) {
+            if (visitorPage === 1) {
+                setAllVisitors(visitorsData.visitors);
+            } else {
+                setAllVisitors(prev => {
+                    // Prevent duplicates
+                    const existingIds = new Set(prev.map(v => v._id));
+                    const newVisitors = visitorsData.visitors.filter((v: any) => !existingIds.has(v._id));
+                    return [...prev, ...newVisitors];
+                });
+            }
+        }
+    }, [visitorsData, visitorPage]);
+
+    const employees = allEmployees;
+    const visitors = allVisitors;
+
+    const handleEmployeeScrollToBottom = useCallback(() => {
+        if (!isFetchingEmployees && employeesData?.pagination?.hasNextPage) {
+            setEmployeePage(prev => prev + 1);
+        }
+    }, [isFetchingEmployees, employeesData?.pagination?.hasNextPage]);
+
+    const handleVisitorScrollToBottom = useCallback(() => {
+        if (!isFetchingVisitors && visitorsData?.pagination?.hasNextPage) {
+            setVisitorPage(prev => prev + 1);
+        }
+    }, [isFetchingVisitors, visitorsData?.pagination?.hasNextPage]);
 
     const { data: existingAppointment, isLoading: isLoadingAppointment } = useGetAppointmentQuery(appointmentId || "", {
         skip: !appointmentId,
@@ -383,9 +442,10 @@ export function NewAppointmentModal({
                                         error={
                                             errors.visitorId?.message || (visitorsError ? "Failed to load visitors" : undefined)
                                         }
-                                        isLoading={isLoadingVisitors}
+                                        isLoading={isLoadingVisitors || isFetchingVisitors}
                                         isClearable={false}
                                         className="h-12"
+                                        onMenuScrollToBottom={handleVisitorScrollToBottom}
                                         noOptionsMessage={({ inputValue }) => (
                                             <NoResultsFound
                                                 type="visitor"
@@ -420,9 +480,10 @@ export function NewAppointmentModal({
                                             errors.employeeId?.message ||
                                             (employeesError ? "Failed to load employees" : undefined)
                                         }
-                                        isLoading={isLoadingEmployees}
+                                        isLoading={isLoadingEmployees || isFetchingEmployees}
                                         isClearable={false}
                                         className="h-12"
+                                        onMenuScrollToBottom={handleEmployeeScrollToBottom}
                                         noOptionsMessage={({ inputValue }) => (
                                             <NoResultsFound
                                                 type="employee"
