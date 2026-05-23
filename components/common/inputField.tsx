@@ -1,77 +1,107 @@
 "use client";
 
 import type React from "react";
-
 import { forwardRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Eye, EyeOff } from "lucide-react";
 
-interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string;
     error?: string;
     helperText?: string;
     required?: boolean;
     icon?: React.ReactNode;
+    rightElement?: React.ReactNode;
 }
 
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
-    ({ className, label, error, helperText, required = false, type = "text", autoComplete = "off", icon, ...props }, ref) => {
+    ({ className, label, error, helperText, required = false, type = "text", autoComplete = "off", icon, rightElement, ...props }, ref) => {
         const [showPassword, setShowPassword] = useState(false);
         const isPasswordField = type === "password";
         const inputType = isPasswordField && showPassword ? "text" : type;
 
+        const [isTouched, setIsTouched] = useState(false);
+
         return (
-            <div className="space-y-1.5">
+            <div className="space-y-2">
                 {label && (
-                    <label className="text-foreground text-sm font-medium">
-                        {label}
-                        {required ? (
-                            <span className="ml-1 text-red-500 font-bold">*</span>
-                        ) : (
-                            <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                    <div className="flex items-center justify-between">
+                        <label className="text-xs text-muted-foreground uppercase font-bold tracking-[0.1em]">
+                            {label}
+                            {required && <span className="ml-1 text-red-500">*</span>}
+                        </label>
+                        {!required && !error && (
+                            <span className="text-xs text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
                         )}
-                    </label>
+                    </div>
                 )}
-                <div className="relative">
+                <div className="relative group">
                     {icon && (
-                        <div className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60 group-focus-within:text-[#3882a5] transition-colors duration-300">
                             {icon}
                         </div>
                     )}
                     <input
                         type={inputType}
                         autoComplete={autoComplete}
+                        readOnly={isPasswordField && !isTouched}
                         className={cn(
-                            "border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring flex h-12 w-full rounded-xl border px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
-                            icon && "pl-10",
-                            error && "border-destructive focus:ring-destructive",
-                            isPasswordField && "pr-10",
-                            className,
+                            "flex h-12 w-full px-4 py-2 rounded-xl transition-all duration-300 font-medium text-sm",
+                            "bg-slate-50/50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700",
+                            "placeholder:text-slate-400/60 dark:placeholder:text-slate-600",
+                            "focus:bg-white dark:focus:bg-slate-950 focus:border-[#3882a5] focus:ring-4 focus:ring-[#3882a5]/5 focus:outline-none",
+                            "disabled:cursor-not-allowed disabled:opacity-50",
+                            icon && "pl-11",
+                            (isPasswordField || rightElement) && "pr-12",
+                            error && "border-rose-500 focus:border-rose-500 focus:ring-rose-500/5",
+                            className
                         )}
                         ref={ref}
                         {...props}
                         onFocus={(e) => {
+                            if (isPasswordField) {
+                                setIsTouched(true);
+                            }
                             if (type === "number" && e.target.value === "0") {
                                 e.target.select();
                             }
                             props.onFocus?.(e);
                         }}
+                        onClick={(e) => {
+                            if (isPasswordField) {
+                                setIsTouched(true);
+                            }
+                            props.onClick?.(e);
+                        }}
                     />
-                    {isPasswordField && (
+                    {isPasswordField && !rightElement && (
                         <button
                             type="button"
-                            className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-[#3882a5] transition-colors duration-300"
                             onClick={() => setShowPassword(!showPassword)}
                         >
-                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                         </button>
                     )}
+                    {rightElement && (
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center">
+                            {rightElement}
+                        </div>
+                    )}
                 </div>
-                {error && <p className="text-destructive text-xs">{error}</p>}
-                {helperText && !error && <p className="text-muted-foreground text-xs">{helperText}</p>}
+                {error && (
+                    <p className="text-rose-600 dark:text-rose-400 text-xs font-medium mt-1 animate-in fade-in slide-in-from-top-1">
+                        {error}
+                    </p>
+                )}
+                {helperText && !error && (
+                    <p className="text-muted-foreground/80 text-xs leading-relaxed mt-1">
+                        {helperText}
+                    </p>
+                )}
             </div>
         );
-    },
+    }
 );
 
 InputField.displayName = "InputField";

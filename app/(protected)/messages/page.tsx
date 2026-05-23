@@ -21,17 +21,20 @@ import {
 } from "@/lib/chat-utils";
 
 export default function MessagesPage() {
-    const { user, subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
+    const { 
+        user, 
+        subscriptionLimits, 
+        isLoading: isAuthLoading,
+        activeSubscriptionData 
+    } = useAuthSubscription();
+    const modules = activeSubscriptionData?.modules;
 
-    // Check module access
-    // If limits are loaded, check boolean. If loading, wait.
-    const canAccessMessages = subscriptionLimits?.modules?.message;
 
     // Broad Admin Check
     const isAdmin =
         user?.role === "admin" ||
-        user?.role === "super_admin" ||
-        (Array.isArray(user?.roles) && (user?.roles.includes("admin") || user?.roles.includes("super_admin")));
+        user?.role === "superadmin" ||
+        (Array.isArray(user?.roles) && (user?.roles.includes("admin") || user?.roles.includes("superadmin")));
 
 
 
@@ -274,13 +277,17 @@ export default function MessagesPage() {
         );
     }
 
-    if (canAccessMessages === false) {
+    // Subscription-based gating
+    const canAccessMessages = !!modules?.enableChat;
+
+    if (!canAccessMessages && !isAuthLoading) {
         return (
-            <ModuleAccessDenied
-                title="Messaging Not Available"
-                description="Your current subscription plan does not include the Messaging module. Please upgrade your plan to access this feature."
-                containerHeight="h-[60vh]"
-            />
+            <div className="h-full w-full flex items-center justify-center p-4">
+                <ModuleAccessDenied 
+                    title="Employee Chat Restricted"
+                    description="The Employee Chat module is not included in your current subscription plan. Please upgrade to enable real-time messaging between your team."
+                />
+            </div>
         );
     }
 

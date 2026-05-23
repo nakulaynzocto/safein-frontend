@@ -1,41 +1,16 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/store/hooks";
+ 
+import { useModuleGating } from "@/hooks/useModuleGating";
 import { WhatsAppSettings } from "@/components/settings/WhatsAppSettings";
-import { routes } from "@/utils/routes";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
-import { isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { useGetWalletBalanceQuery } from "@/store/api/walletApi";
+import { ModuleAccessDenied } from "@/components/common/moduleAccessDenied";
 
 export default function WhatsAppConfigPage() {
-    const router = useRouter();
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
-    const [isChecking, setIsChecking] = useState(true);
+    const { isChecking, modules, isEmployee, isAuthenticated } = useModuleGating('enableWhatsApp');
+    const { data: walletData } = useGetWalletBalanceQuery();
 
-    // Check if user is employee
-    const isEmployee = checkIsEmployee(user);
-
-    useEffect(() => {
-        if (!isAuthenticated) {
-            router.replace(routes.publicroute.LOGIN);
-            return;
-        }
-
-        // WhatsApp config is only for admins
-        if (isEmployee) {
-            router.replace(routes.privateroute.DASHBOARD);
-            return;
-        }
-
-        setIsChecking(false);
-    }, [user, isAuthenticated, router, isEmployee]);
-
-    // IMMEDIATE CHECK: If employee, show loading and redirect (don't render anything)
-    if (isEmployee) {
-        if (typeof window !== 'undefined' && isAuthenticated) {
-            router.replace(routes.privateroute.DASHBOARD);
-        }
+    if (isChecking || !isAuthenticated) {
         return (
             <div className="container mx-auto max-w-full">
                 <PageSkeleton type="form" />
@@ -43,15 +18,14 @@ export default function WhatsAppConfigPage() {
         );
     }
 
-    // Show loading while checking
-    if (!isAuthenticated || isChecking) {
+    if (isEmployee || (modules && !modules.enableWhatsApp)) {
         return (
-            <div className="container mx-auto max-w-full">
-                <PageSkeleton type="form" />
-            </div>
+            <ModuleAccessDenied 
+                title="WhatsApp Access Restricted"
+                description="Your current plan does not include WhatsApp notification capabilities. Please upgrade to send automated alerts and invites via WhatsApp."
+            />
         );
     }
 
-    // Only admins can access WhatsApp config
-    return <WhatsAppSettings />;
+    return <WhatsAppSettings walletData={walletData} />;
 }

@@ -131,7 +131,7 @@ export function EmployeeDetailsDialog({ employee, mode, open, on_close }: Employ
                                     </div>
                                     <div className="text-foreground text-sm font-semibold break-all">
                                         {key === "_id" ? (
-                                            <span className="font-mono text-xs break-all">{value}</span>
+                                            <span className="font-mono text-xs break-all">{value as any}</span>
                                         ) : (
                                             key === "department" || key === "designation" ? formatName(renderFieldValue(key, value, formatFn)) : renderFieldValue(key, value, formatFn)
                                         )}

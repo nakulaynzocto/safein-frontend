@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, type ChangeEvent } from "react";
+import { useState, useEffect, useCallback, useMemo, type ChangeEvent } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -20,7 +20,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { CountryStateCitySelect } from "@/components/common/countryStateCity";
+import { Country, State, City } from "country-state-city";
+import { SelectField } from "@/components/common/selectField";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { Textarea } from "@/components/ui/textarea"; // Using Textarea component
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
@@ -28,6 +29,7 @@ import { useUploadFileMutation } from "@/store/api";
 import { User as UserType } from "@/store/api/authApi";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
+import { useUserCountry } from "@/hooks/useUserCountry";
 
 // Expanded Schema to match Super Admin
 // Note: Schema validation will be conditional based on user role
@@ -89,6 +91,7 @@ interface ProfileFormProps {
 export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
     const { user: currentUser } = useAppSelector((state) => state.auth);
     const isEmployee = checkIsEmployee(currentUser);
+    const userCountry = useUserCountry();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [profileImage, setProfileImage] = useState<string | null>(profile?.profilePicture || null);
@@ -107,7 +110,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
             street: profile?.address?.street || "",
             city: profile?.address?.city || "",
             state: profile?.address?.state || "",
-            country: profile?.address?.country || "IN",
+            country: profile?.address?.country || userCountry,
             pincode: profile?.address?.pincode || "",
         },
         socialLinks: {
@@ -175,7 +178,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                     street: profile.address?.street || "",
                     city: profile.address?.city || "",
                     state: profile.address?.state || "",
-                    country: profile.address?.country || "IN",
+                    country: profile.address?.country || userCountry,
                     pincode: profile.address?.pincode || "",
                 },
                 socialLinks: {
@@ -203,6 +206,40 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
 
     const companyName = watch("companyName");
     const isActive = watch("isActive");
+
+    // Address selection logic
+    const addressCountry = watch("address.country");
+    const addressState = watch("address.state");
+    const addressCity = watch("address.city");
+
+    const countries = useMemo(() =>
+        Country.getAllCountries().map((c) => ({
+            label: c.name,
+            value: c.isoCode,
+            searchKeywords: `${c.name} ${c.isoCode} ${c.phonecode ?? ""}`.trim(),
+        })), []
+    );
+
+    const states = useMemo(() =>
+        addressCountry
+            ? State.getStatesOfCountry(addressCountry).map((s) => ({
+                label: s.name,
+                value: s.isoCode,
+                searchKeywords: `${s.name} ${s.isoCode}`.trim(),
+            }))
+            : [],
+        [addressCountry]
+    );
+
+    const cities = useMemo(() =>
+        addressCountry && addressState
+            ? City.getCitiesOfState(addressCountry, addressState).map((ct) => ({
+                label: ct.name,
+                value: ct.name,
+            }))
+            : [],
+        [addressCountry, addressState]
+    );
 
     // Existing Upload Logic - Preserved Exactly
     const handleImageUpload = useCallback(
@@ -401,7 +438,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             placeholder="Enter contact number"
                                             error={errors.mobileNumber?.message}
                                             required
-                                            defaultCountry="in"
+                                            defaultCountry={watch("address.country") || userCountry}
                                         />
                                     )}
                                 />
@@ -453,42 +490,74 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps) {
                                             <p className="text-xs text-destructive mt-1">{errors.address.street.message}</p>
                                         )}
                                     </div>
-                                    <div className="pt-2">
-                                        <CountryStateCitySelect
-                                            value={{
-                                                country: watch("address.country") || "IN",
-                                                state: watch("address.state") || "",
-                                                city: watch("address.city") || "",
-                                            }}
-                                            onChange={(v: any) => {
-                                                setValue("address.country", v.country, { shouldDirty: true });
-                                                setValue("address.state", v.state, { shouldDirty: true });
-                                                setValue("address.city", v.city, { shouldDirty: true });
-                                            }}
-                                            errors={{
-                                                country: errors.address?.country?.message,
-                                                state: errors.address?.state?.message,
-                                                city: errors.address?.city?.message,
-                                            }}
-                                            required={true}
-                                        />
+                                    {/* Row 1: Country and State */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">
+                                                Country <span className="text-destructive font-bold">*</span>
+                                            </Label>
+                                            <SelectField
+                                                placeholder="Select country"
+                                                options={countries}
+                                                value={addressCountry}
+                                                onChange={(country) => {
+                                                    setValue("address.country", country, { shouldDirty: true });
+                                                    setValue("address.state", "", { shouldDirty: true });
+                                                    setValue("address.city", "", { shouldDirty: true });
+                                                }}
+                                                error={errors.address?.country?.message}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">
+                                                State <span className="text-destructive font-bold">*</span>
+                                            </Label>
+                                            <SelectField
+                                                placeholder="Select state"
+                                                options={states}
+                                                value={addressState}
+                                                onChange={(state) => {
+                                                    setValue("address.state", state, { shouldDirty: true });
+                                                    setValue("address.city", "", { shouldDirty: true });
+                                                }}
+                                                isDisabled={!addressCountry}
+                                                error={errors.address?.state?.message}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label
-                                            htmlFor="pincode"
-                                            className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
-                                        >
-                                            Pincode <span className="text-destructive font-bold">*</span>
-                                        </Label>
-                                        <Input
-                                            id="pincode"
-                                            {...register("address.pincode")}
-                                            className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.pincode ? "border-destructive" : ""}`}
-                                            placeholder="e.g. 123456"
-                                        />
-                                        {errors.address?.pincode && (
-                                            <p className="text-xs text-destructive mt-1">{errors.address.pincode.message}</p>
-                                        )}
+
+                                    {/* Row 2: City and Pincode */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">
+                                                City <span className="text-destructive font-bold">*</span>
+                                            </Label>
+                                            <SelectField
+                                                placeholder="Select city"
+                                                options={cities}
+                                                value={addressCity}
+                                                onChange={(city) => setValue("address.city", city, { shouldDirty: true })}
+                                                isDisabled={!addressCountry || !addressState}
+                                                error={errors.address?.city?.message}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="pincode"
+                                                className="text-xs text-muted-foreground uppercase font-semibold tracking-wider"
+                                            >
+                                                Pincode <span className="text-destructive font-bold">*</span>
+                                            </Label>
+                                            <Input
+                                                id="pincode"
+                                                {...register("address.pincode")}
+                                                className={`pl-4 h-12 bg-background border-border focus:bg-background transition-all rounded-xl text-foreground font-medium ${errors.address?.pincode ? "border-destructive" : ""}`}
+                                                placeholder="e.g. 123456"
+                                            />
+                                            {errors.address?.pincode && (
+                                                <p className="text-xs text-destructive mt-1">{errors.address.pincode.message}</p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

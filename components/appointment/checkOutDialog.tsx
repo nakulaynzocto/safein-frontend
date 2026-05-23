@@ -76,12 +76,12 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="p-6 text-center">
                         {/* Centered Icon */}
-                        <div className="mx-auto w-16 h-16 rounded-full bg-orange-50 flex items-center justify-center mb-4">
-                            <LogOut className="h-8 w-8 text-orange-600" />
+                        <div className="mx-auto w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
+                            <LogOut className="h-8 w-8 text-accent" />
                         </div>
 
                         <DialogHeader>
-                            <DialogTitle className="text-xl font-bold text-gray-900 text-center">
+                            <DialogTitle className="text-xl font-bold text-gray-800 text-center">
                                 Check Out Visitor
                             </DialogTitle>
                             <p className="text-gray-500 text-center text-sm mt-1">
@@ -93,25 +93,25 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
                         <div className="mt-6 bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3">
                             <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-sm">
-                                    <User className="h-5 w-5 text-orange-600" />
+                                    <User className="h-5 w-5 text-accent" />
                                 </div>
                                 <div className="text-left">
-                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Visitor</div>
+                                    <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Visitor</div>
                                     <div className="font-bold text-slate-700 truncate">{getVisitorName()}</div>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-200/60">
                                 <div className="space-y-1 text-left">
-                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Scheduled Date</div>
-                                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-600">
+                                    <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Scheduled Date</div>
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
                                         <Calendar className="h-3 w-3 text-slate-400" />
                                         {formatDate(appointment.appointmentDetails?.scheduledDate || "")}
                                     </div>
                                 </div>
                                 <div className="space-y-1 text-left">
-                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Check-in Time</div>
-                                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-600">
+                                    <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Check-in Time</div>
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
                                         <Clock className="h-3 w-3 text-slate-400" />
                                         {formatDate(appointment.checkInTime || "")}
                                     </div>
@@ -121,7 +121,7 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
 
                         {/* Notes Field */}
                         <div className="mt-4 text-left space-y-1.5">
-                            <Label htmlFor="notes" className="text-[10px] font-bold text-slate-500 uppercase tracking-wide ml-1">
+                            <Label htmlFor="notes" className="text-xs font-bold text-slate-500 uppercase tracking-wide ml-1">
                                 Check-out Notes (Optional)
                             </Label>
                             <Textarea
@@ -132,7 +132,7 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
                             />
                             <div className="flex justify-end pr-1">
                                 <span className={cn(
-                                    "text-[10px] font-medium",
+                                    "text-xs font-medium",
                                     (notes?.length || 0) > 450 ? "text-rose-500" : "text-slate-400"
                                 )}>
                                     {notes?.length || 0}/500
@@ -141,20 +141,20 @@ export function CheckOutDialog({ appointment, open, onClose, onConfirm, isLoadin
                         </div>
                     </div>
 
-                    <DialogFooter className="flex flex-col sm:flex-row gap-2 p-5 bg-slate-50/50 border-t border-slate-100">
+                    <DialogFooter className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 p-5 bg-slate-50/50 border-t border-slate-100">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={handleClose}
                             disabled={isSubmitting || isLoading}
-                            className="w-full sm:flex-1 h-11 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-semibold transition-colors"
+                            className="w-full sm:w-auto h-11 rounded-2xl border-accent text-accent hover:bg-accent/10 font-bold transition-all px-8"
                         >
                             Cancel
                         </Button>
                         <Button
                             type="submit"
                             disabled={isSubmitting || isLoading}
-                            className="w-full sm:flex-1 h-12 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-lg shadow-orange-600/20 transition-all active:scale-[0.98]"
+                            className="w-full sm:w-auto min-w-0 sm:min-w-[140px] h-12 rounded-2xl bg-accent hover:bg-accent/90 text-white font-bold shadow-lg shadow-accent/20 transition-all active:scale-[0.98] px-8"
                         >
                             {isSubmitting || isLoading ? (
                                 <>

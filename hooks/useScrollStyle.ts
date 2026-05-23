@@ -217,7 +217,7 @@ export function useNavbarScrollStyle(options: UseNavbarScrollStyleOptions): UseN
 
     // Link text color based on navbar style
     const linkText = useMemo(() => {
-        return shouldShowWhiteNavbar ? "text-gray-900" : "text-white";
+        return shouldShowWhiteNavbar ? "text-gray-800" : "text-white";
     }, [shouldShowWhiteNavbar]);
 
     // Link hover background based on navbar style
@@ -229,7 +229,7 @@ export function useNavbarScrollStyle(options: UseNavbarScrollStyleOptions): UseN
     const ctaBtn = useMemo(() => {
         return shouldShowWhiteNavbar
             ? "bg-brand text-white hover:bg-brand/90 transition-all active:scale-95"
-            : "bg-white text-brand-strong hover:bg-white/90 transition-all active:scale-95";
+            : "bg-white text-[#3882a5] hover:bg-white/90 transition-all active:scale-95";
     }, [shouldShowWhiteNavbar]);
 
     return {

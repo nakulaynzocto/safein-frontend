@@ -9,16 +9,28 @@ import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { routes } from "@/utils/routes";
 import { CheckCircle, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
 import { userSubscriptionApi } from "@/store/api/userSubscriptionApi";
+import { useSocket } from "@/hooks/useSocket";
 
 export default function SubscriptionSuccessPage() {
     const router = useRouter();
     const dispatch = useAppDispatch();
     const { user, isAuthenticated, token, isInitialized } = useAppSelector((state) => state.auth);
 
-    const [pollingInterval, setPollingInterval] = useState(5000);
-    const [maxPollAttempts] = useState(12);
-    const [pollAttempts, setPollAttempts] = useState(0);
     const [isRedirecting, setIsRedirecting] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // Replace polling with Socket
+    useSocket({
+        onSubscriptionUpdated: (data) => {
+            if (data.status === "succeeded") {
+                refetchSubscription();
+            }
+        }
+    });
 
     const {
         data: activeSubscriptionData,
@@ -26,7 +38,6 @@ export default function SubscriptionSuccessPage() {
         refetch: refetchSubscription,
     } = useGetUserActiveSubscriptionQuery(user?.id ?? "", {
         skip: !isAuthenticated || !user?.id,
-        pollingInterval: pollingInterval,
     });
 
     const subscriptionIsActive = useMemo(() => {
@@ -54,28 +65,16 @@ export default function SubscriptionSuccessPage() {
             }
             refetchSubscription();
 
-            // Store timer in a variable that won't be cleared by the dependency change re-render
+            // Redirect after a short delay to show success state
             setTimeout(() => {
                 router.replace(routes.privateroute.DASHBOARD);
             }, 1500);
         }
-    }, [subscriptionIsActive, router, user?.id, dispatch, refetchSubscription]);
+    }, [subscriptionIsActive, router, user?.id, dispatch, refetchSubscription, isRedirecting]);
 
-    useEffect(() => {
-        if (isSubscriptionFetching && !subscriptionIsActive) {
-            setPollAttempts((prev) => prev + 1);
-        }
-    }, [isSubscriptionFetching, subscriptionIsActive]);
-
-    useEffect(() => {
-        if (pollAttempts >= maxPollAttempts && !subscriptionIsActive) {
-            setPollingInterval(0);
-        }
-    }, [pollAttempts, maxPollAttempts, subscriptionIsActive]);
-
-    if (!isInitialized) {
+    if (!mounted || !isInitialized) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] dark:bg-slate-950 p-4">
+            <div className="flex min-h-screen items-center justify-center p-4 bg-[#f8fafc] dark:bg-slate-950">
                 <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#3882a5] border-t-transparent"></div>
             </div>
         );
@@ -96,7 +95,7 @@ export default function SubscriptionSuccessPage() {
                                 </div>
                             </div>
                         </div>
-                        <CardTitle className="text-[#3882a5] text-2xl font-black">Subscription Activated!</CardTitle>
+                        <CardTitle className="text-[#3882a5] text-2xl font-semibold">Subscription Activated!</CardTitle>
                         <CardDescription className="font-medium">Redirecting to dashboard...</CardDescription>
                     </CardHeader>
                     <CardContent className="text-center pb-8">
@@ -106,7 +105,7 @@ export default function SubscriptionSuccessPage() {
             );
         }
 
-        const hasExceededMaxAttempts = pollAttempts >= maxPollAttempts;
+        const hasExceededMaxAttempts = false; // Polling removed
 
         return (
             <Card className="w-full max-w-md border-0 bg-white/70 shadow-2xl backdrop-blur-xl ring-1 ring-slate-200 dark:bg-slate-900/70 dark:ring-slate-800 animate-in fade-in zoom-in-95 duration-500">
@@ -122,7 +121,7 @@ export default function SubscriptionSuccessPage() {
                             </div>
                         )}
                     </div>
-                    <CardTitle className="text-[#3882a5] text-2xl font-black">
+                    <CardTitle className="text-[#3882a5] text-2xl font-semibold">
                         {hasExceededMaxAttempts ? "Almost There..." : "Verifying Payment"}
                     </CardTitle>
                     <CardDescription className="font-medium">
@@ -135,17 +134,14 @@ export default function SubscriptionSuccessPage() {
                     {hasExceededMaxAttempts ? (
                         <>
                             <p className="text-slate-500 text-sm font-medium px-4">
-                                Your payment has been received. You'll receive an email once it's fully activated.
+                                Verification is taking longer than expected. You'll receive an email once it's fully activated.
                             </p>
-                            <div className="space-y-3 px-4">
+                            <div className="space-y-3 px-4 mt-6">
                                 <Button
                                     className="w-full h-11 rounded-xl bg-[#3882a5] hover:bg-[#2c6a88] shadow-lg shadow-blue-500/20"
-                                    onClick={() => {
-                                        setPollAttempts(0);
-                                        setPollingInterval(5000);
-                                    }}
+                                    onClick={() => refetchSubscription()}
                                 >
-                                    Check Again
+                                    Check Status Now
                                 </Button>
                                 <Button
                                     variant="outline"
@@ -162,7 +158,7 @@ export default function SubscriptionSuccessPage() {
                                 Handshaking with payment processor...
                             </p>
                             <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#3882a5] border-t-transparent"></div>
-                            <div className="flex items-center justify-center gap-2 text-[10px] font-bold tracking-widest text-[#3882a5]/40 uppercase">
+                            <div className="flex items-center justify-center gap-2 text-xs font-bold tracking-widest text-[#3882a5]/40 uppercase">
                                 <ShieldCheck className="h-3 w-3" />
                                 Syncing Securely
                             </div>

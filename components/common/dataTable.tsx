@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "./EmptyState";
 import { TableSkeleton } from "./tableSkeleton";
-import { ArrowUpDown, ArrowUp, ArrowDown, Plus } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, Plus, type LucideIcon } from "lucide-react";
 
 interface Column<T> {
     key: keyof T | string;
@@ -23,8 +23,10 @@ interface EmptyData {
     primaryActionLabel?: string;
     secondaryActionLabel?: string;
     route?: string;
-    icon?: any;
+    icon?: LucideIcon;
     onPrimaryAction?: () => void;
+    /** Rendered above primary CTA (e.g. mobile-only shortcuts) */
+    beforePrimaryAction?: ReactNode;
 }
 
 interface DataTableProps<T> {
@@ -139,13 +141,36 @@ export function DataTable<T extends Record<string, any>>({
             </Button>
         ) : null;
 
+        const emptyStateContent = (
+            <div 
+                className="flex flex-col items-center justify-center" 
+                style={{ minHeight: minHeight }}
+            >
+                <EmptyState
+                    title={emptyData?.title || emptyMessage}
+                    description={emptyData?.description || description}
+                    beforeAction={emptyData?.beforePrimaryAction}
+                    action={action}
+                    icon={emptyData?.icon}
+                    className="border-none bg-transparent shadow-none"
+                />
+            </div>
+        );
+
+        if (showCard) {
+            return (
+                <div className="bg-card border-border overflow-hidden rounded-2xl border shadow-sm">
+                    <CardContent className="p-0">
+                        {emptyStateContent}
+                    </CardContent>
+                </div>
+            );
+        }
+
         return (
-            <EmptyState
-                title={emptyData?.title || emptyMessage}
-                description={emptyData?.description || description}
-                action={action}
-                icon={emptyData?.icon}
-            />
+            <div className="bg-card border-border overflow-hidden rounded-2xl border shadow-sm">
+                {emptyStateContent}
+            </div>
         );
     }
 
@@ -169,7 +194,7 @@ export function DataTable<T extends Record<string, any>>({
                     minWidth: minWidth
                 }}
             >
-                <thead className="bg-muted/80 border-border text-muted-foreground border-b text-[10px] font-bold tracking-wider uppercase">
+                <thead className="bg-muted/80 border-border text-muted-foreground border-b text-xs font-bold tracking-wider uppercase">
                     <tr>
                         {columns.map((column, index) => (
                             <th
@@ -185,7 +210,10 @@ export function DataTable<T extends Record<string, any>>({
                                 )}
                                 onClick={() => enableSorting && column.sortable && handleSort(column.key as string)}
                             >
-                                <div className="flex items-center gap-1 sm:gap-2">
+                                <div className={cn(
+                                    "flex items-center gap-1 sm:gap-2",
+                                    column.className?.includes("text-center") && "justify-center"
+                                )}>
                                     <span className="truncate">{column.header}</span>
                                     {getSortIcon(column.key as string, column)}
                                 </div>

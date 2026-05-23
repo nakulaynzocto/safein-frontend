@@ -25,6 +25,7 @@ interface StatusPageProps {
     };
     showHomeButton?: boolean;
     showBackButton?: boolean;
+    appointmentId?: string | null;
     className?: string;
 }
 
@@ -72,6 +73,7 @@ export function StatusPage({
     secondaryAction,
     showHomeButton = false,
     showBackButton = false,
+    appointmentId = null,
     className = "",
 }: StatusPageProps) {
     const config = statusConfig[type];
@@ -84,14 +86,14 @@ export function StatusPage({
         if (action.href) {
             return (
                 <Link href={action.href}>
-                    <ActionButton variant={variant} size="xl" className="w-full sm:w-auto">
+                    <ActionButton variant={variant === "default" ? "primary" : variant} size="xl" className="w-full sm:w-auto font-bold transition-all shadow-md active:scale-95 hover:scale-105">
                         {action.label}
                     </ActionButton>
                 </Link>
             );
         }
         return (
-            <ActionButton variant={variant} onClick={action.onClick} size="xl" className="w-full sm:w-auto">
+            <ActionButton variant={variant === "default" ? "primary" : variant} onClick={action.onClick} size="xl" className="w-full sm:w-auto font-bold transition-all shadow-md active:scale-95 hover:scale-105">
                 {action.label}
             </ActionButton>
         );
@@ -115,32 +117,42 @@ export function StatusPage({
                             {message}
                         </p>
                     </div>
+                    
+                    {/* Appointment ID Display */}
+                    {appointmentId && (
+                        <div className="rounded-xl border border-[#3882a5]/10 bg-slate-50/50 p-3 text-center">
+                            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Appointment Reference</p>
+                            <p className="mt-1 font-mono text-sm font-bold text-[#3882a5]">{appointmentId}</p>
+                        </div>
+                    )}
 
                     {/* Description */}
                     {description && <p className="text-center text-sm leading-relaxed text-gray-600">{description}</p>}
 
                     {/* Actions */}
-                    <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+                    <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:flex-wrap sm:justify-center">
                         {primaryAction && renderButton(primaryAction, "default")}
                         {secondaryAction && renderButton(secondaryAction, "outline")}
                         {showHomeButton && (
-                            <Link href={routes.publicroute.HOME}>
-                                <ActionButton variant="outline" size="xl" className="w-full sm:w-auto">
+                            <Link href={routes.publicroute.HOME} className="w-full sm:w-auto">
+                                <ActionButton variant="outline" size="xl" className="w-full font-bold transition-all shadow-sm active:scale-95 hover:scale-105">
                                     <Home className="mr-2 h-4 w-4" />
                                     Go Home
                                 </ActionButton>
                             </Link>
                         )}
                         {showBackButton && (
-                            <ActionButton
-                                variant="outline"
-                                onClick={() => window.history.back()}
-                                size="xl"
-                                className="w-full sm:w-auto"
-                            >
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Go Back
-                            </ActionButton>
+                            <div className="w-full sm:w-auto">
+                                <ActionButton
+                                    variant="outline"
+                                    onClick={() => window.history.back()}
+                                    size="xl"
+                                    className="w-full font-bold transition-all shadow-sm active:scale-95 hover:scale-105"
+                                >
+                                    <ArrowLeft className="mr-2 h-4 w-4" />
+                                    Go Back
+                                </ActionButton>
+                            </div>
                         )}
                     </div>
                 </CardContent>

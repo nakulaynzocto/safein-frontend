@@ -3,7 +3,14 @@ import { validatePhone } from "@/utils/phoneUtils";
 
 export const visitorSchema = yup.object({
     name: yup.string().trim().required("Name is required").min(2, "Name must be at least 2 characters"),
-    email: yup.string().trim().email("Invalid email address").optional(),
+    email: yup
+        .string()
+        .trim()
+        .optional()
+        .test("email-format", "Please enter a valid email address", (value) => {
+            if (!value || value.length === 0) return true;
+            return yup.string().email().isValidSync(value);
+        }),
     phone: yup
         .string()
         .trim()
@@ -21,12 +28,11 @@ export const visitorSchema = yup.object({
     idProof: yup.object({
         type: yup.string().trim().optional(),
         number: yup.string().trim().optional(),
-        image: yup.string().trim().optional(),
+        image: yup.mixed().optional(),
     }),
-    photo: yup.string().optional().default(""),
+    photo: yup.mixed().optional(),
     blacklisted: yup.boolean().default(false),
     blacklistReason: yup.string().trim().optional(),
-    tags: yup.string().trim().optional(),
     emergencyContacts: yup
         .array()
         .of(
@@ -68,18 +74,23 @@ export interface VisitorFormData {
     idProof: {
         type?: string;
         number?: string;
-        image?: string;
+        image?: any;
     };
-    photo?: string;
+    photo?: any;
     blacklisted: boolean;
     blacklistReason?: string;
-    tags?: string;
     emergencyContacts?: {
         name?: string | null;
         phone?: string | null;
         countryCode?: string | null;
     }[];
 }
+
+export const genderOptions = [
+    { value: "male", label: "Male" },
+    { value: "female", label: "Female" },
+    { value: "other", label: "Other" },
+];
 
 export const idProofTypes = [
     { value: "aadhaar", label: "Aadhaar Card" },
@@ -102,3 +113,44 @@ export const countryCodeOptions = [
     { value: "+49", label: "+49 (Germany)" },
     { value: "+33", label: "+33 (France)" },
 ];
+
+/**
+ * Transforms VisitorFormData to CreateVisitorRequest
+ * Centralized logic to avoid duplication in multiple forms
+ */
+export const transformToVisitorPayload = (
+    data: VisitorFormData,
+    photoUrl?: string,
+    idProofImageUrl?: string,
+) => {
+    return {
+        name: data.name,
+        email: data.email?.trim() || undefined,
+        phone: data.phone,
+        gender: (data.gender as any) || undefined,
+        address: {
+            street: data.address.street || undefined,
+            city: data.address.city,
+            state: data.address.state,
+            country: data.address.country,
+        },
+        idProof:
+            data.idProof.type || data.idProof.number || idProofImageUrl
+                ? {
+                      type: data.idProof.type || undefined,
+                      number: data.idProof.number || undefined,
+                      image: idProofImageUrl || undefined,
+                  }
+                : undefined,
+        photo: photoUrl || undefined,
+        blacklisted: data.blacklisted,
+        blacklistReason: data.blacklistReason || undefined,
+        emergencyContacts:
+            data.emergencyContacts && data.emergencyContacts.length > 0
+                ? data.emergencyContacts.map((contact) => ({
+                      name: contact.name || "",
+                      phone: contact.phone || "",
+                  }))
+                : undefined,
+    };
+};

@@ -2,11 +2,13 @@ export const routes = {
     publicroute: {
         // Main Pages
         HOME: "/",
-        FEATURES: "/features",
-        PRICING: "/pricing",
+        FEATURES: "/#features",
+        PRICING: "/#pricing",
         CONTACT: "/contact",
         HELP: "/help",
         PRIVACY_POLICY: "/privacy-policy",
+        BLOG: "/blog",
+        BLOG_DETAIL: "/blog/[slug]",
 
         // Authentication
         LOGIN: "/login",
@@ -27,6 +29,8 @@ export const routes = {
 
         // Appointment Booking (Missing previously)
         BOOK_APPOINTMENT: "/book-appointment/[token]",
+        QR_SCAN: "/scan/[slug]",
+        MAINTENANCE: "/maintenance",
     },
 
     privateroute: {
@@ -37,11 +41,13 @@ export const routes = {
         EMPLOYEELIST: "/employee/list",
         EMPLOYEECREATE: "/employee/create",
         EMPLOYEEEDIT: "/employee/[id]",
+        EMPLOYEESETTINGS: "/employee/[id]/settings",
 
         // Visitor Routes
         VISITORLIST: "/visitor/list",
         VISITORREGISTRATION: "/visitor/register",
         VISITOREDIT: "/visitor/[id]",
+        VISITORSETTINGS: "/visitor/[id]/settings",
 
         // Appointment Routes
         APPOINTMENTLIST: "/appointment/list",
@@ -49,13 +55,21 @@ export const routes = {
         APPOINTMENTEDIT: "/appointment/[id]",
         APPOINTMENT_REQUESTS: "/appointment/requests",
         APPOINTMENT_LINKS: "/appointment-links",
+        APPOINTMENT_LINKS_SEND_LINK: "/appointment-links/send-link",
+        APPOINTMENT_LINKS_VIP_BOOKING: "/appointment-links/vip-booking",
+        APPOINTMENT_LINKS_VIP_BOOKING_CREATE: "/appointment-links/vip-booking/create",
+        APPOINTMENT_LINKS_CREATE: "/appointment-links/create",
 
         // Settings Routes
         SETTINGS: "/settings",
         PROFILE: "/settings/profile",
-        SETTINGS_NOTIFICATION: "/settings/notification",
         SETTINGS_WHATSAPP: "/settings/whatsapp",
         SETTINGS_SMTP: "/settings/smtp",
+        SETTINGS_SMS: "/settings/sms",
+        SETTINGS_SUBSCRIPTION: "/settings/subscription",
+        SETTINGS_QR_CHECKIN: "/qr-checkin",
+        SETTINGS_VOICE: "/settings/voice",
+        SETTINGS_CONTROLS: "/settings/controls",
         SPOT_PASS: "/spot-pass",
         SPOT_PASS_CREATE: "/spot-pass/create",
         MESSAGES: "/messages",
@@ -159,6 +173,7 @@ export const isPublicActionRoute = (path: string): boolean => {
     return (
         path.startsWith("/verify/") ||
         path.startsWith("/book-appointment/") ||
+        path.startsWith("/scan/") ||
         path.startsWith("/email-action/") ||
         path.startsWith("/employee-setup")
     );

@@ -141,7 +141,7 @@ export const safeInPageSEO = {
             "affordable visitor system india",
             "gatekeeper app pricing",
         ],
-        path: "/pricing",
+        path: "/#pricing",
     },
     features: {
         title: "SafeIn Features - Smart Visitor Management & Security India",
@@ -154,7 +154,7 @@ export const safeInPageSEO = {
             "visitor analytics india",
             "smart security notifications",
         ],
-        path: "/features",
+        path: "/#features",
     },
     help: {
         title: "SafeIn Help Center - Guide to Visitor Management",
@@ -166,6 +166,18 @@ export const safeInPageSEO = {
             "safein support resources",
         ],
         path: "/help",
+    },
+    blog: {
+        title: "SafeIn Blog | Smart Visitor Management & Workplace Insights",
+        description: "Expert perspective on digital transformation and workplace security. Learn how to optimize your reception with SafeIn.",
+        keywords: [
+            "safein blog",
+            "visitor management insights",
+            "workplace security tips",
+            "digital reception guide",
+            "office productivity blog",
+        ],
+        path: "/blog",
     },
     login: {
         title: "Login - SafeIn Visitor Management India",

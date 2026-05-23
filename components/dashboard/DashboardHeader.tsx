@@ -49,8 +49,8 @@ export function DashboardHeader({ companyName }: DashboardHeaderProps) {
                         className="h-12 w-full sm:w-auto text-white"
                     >
                         <Button
-                            variant="outline-primary"
-                            className="flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-muted/30 text-xs whitespace-nowrap sm:w-auto sm:text-sm"
+                            variant="primary"
+                            className="flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl text-white whitespace-nowrap sm:w-auto font-bold transition-all shadow-md active:scale-95 hover:scale-105"
                             asChild
                         >
                             <Link href={routes.privateroute.APPOINTMENTCREATE} prefetch>

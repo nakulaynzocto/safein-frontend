@@ -22,6 +22,8 @@ import { useAppDispatch } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { Building2, MapPin, Phone, Loader2 } from "lucide-react";
+import { useUserCountry } from "@/hooks/useUserCountry";
+import { useEffect } from "react";
 
 const companySchema = yup.object({
     companyName: yup.string().required("Company name is required"),
@@ -48,7 +50,10 @@ interface CompanyProfileModalProps {
 }
 
 export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
+    const userCountry = useUserCountry();
     const [updateProfile, { isLoading }] = useUpdateProfileMutation();
+    // Track selected country for phone default (ISO code like "IN", "US", "GB")
+    const [phoneDefaultCountry, setPhoneDefaultCountry] = useState(userCountry);
 
     const {
         register,
@@ -60,11 +65,19 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
     } = useForm<CompanyFormData>({
         resolver: yupResolver(companySchema),
         defaultValues: {
-            country: "IN",
+            country: userCountry,
             state: "",
             city: "",
         },
     });
+    
+    // Sync country and phone default when userCountry hook updates (e.g. after auth load)
+    useEffect(() => {
+        if (userCountry) {
+            setPhoneDefaultCountry(userCountry);
+            setValue("country", userCountry, { shouldValidate: true });
+        }
+    }, [userCountry, setValue]);
 
     const dispatch = useAppDispatch();
     const onSubmit = async (data: CompanyFormData) => {
@@ -93,21 +106,22 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
     return (
         <Dialog open={isOpen}>
             <DialogContent
-                className="sm:max-w-[700px] overflow-y-auto max-h-[90vh]"
+                className="sm:max-w-[700px] p-0"
                 onPointerDownOutside={(e) => e.preventDefault()}
                 onEscapeKeyDown={(e) => e.preventDefault()}
                 showCloseButton={false}
             >
-                <DialogHeader>
-                    <DialogTitle className="text-2xl text-center">Complete Company Profile</DialogTitle>
-                    <DialogDescription className="text-center">
-                        Please provide your company's contact and address details to continue to the dashboard.
-                    </DialogDescription>
-                </DialogHeader>
+                <div className="overflow-y-auto max-h-[90vh] p-6 sm:p-8">
+                    <DialogHeader className="mb-6">
+                        <DialogTitle className="text-2xl text-center">Complete Company Profile</DialogTitle>
+                        <DialogDescription className="text-center">
+                            Please provide your company's contact and address details to continue to the dashboard.
+                        </DialogDescription>
+                    </DialogHeader>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="col-span-1">
+                        <div className="col-span-1 md:col-span-2">
                             <InputField
                                 label="Company Name"
                                 placeholder="Enter your company name"
@@ -115,24 +129,6 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                                 error={errors.companyName?.message}
                                 {...register("companyName")}
                                 required
-                            />
-                        </div>
-                        <div className="col-span-1">
-                            <Controller
-                                name="mobileNumber"
-                                control={control}
-                                render={({ field }) => (
-                                    <PhoneInputField
-                                        id="mobileNumber"
-                                        label="Mobile Number"
-                                        value={field.value || ""}
-                                        onChange={(val) => field.onChange(val)}
-                                        placeholder="Enter mobile number"
-                                        error={errors.mobileNumber?.message}
-                                        required
-                                        defaultCountry="in"
-                                    />
-                                )}
                             />
                         </div>
 
@@ -147,6 +143,12 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                                     setValue("country", val.country, { shouldValidate: true });
                                     setValue("state", val.state, { shouldValidate: true });
                                     setValue("city", val.city, { shouldValidate: true });
+                                    // Sync phone country code when country changes
+                                    if (val.country) {
+                                        setPhoneDefaultCountry(val.country);
+                                        // Reset phone so the new country's dial code is applied
+                                        setValue("mobileNumber", "");
+                                    }
                                 }}
                                 errors={{
                                     country: errors.country?.message,
@@ -154,6 +156,25 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                                     city: errors.city?.message,
                                 }}
                                 required
+                            />
+                        </div>
+
+                        <div className="col-span-1">
+                            <Controller
+                                name="mobileNumber"
+                                control={control}
+                                render={({ field }) => (
+                                    <PhoneInputField
+                                        id="mobileNumber"
+                                        label="Mobile Number"
+                                        value={field.value || ""}
+                                        onChange={(val) => field.onChange(val)}
+                                        placeholder="Enter mobile number"
+                                        error={errors.mobileNumber?.message}
+                                        required
+                                        defaultCountry={phoneDefaultCountry}
+                                    />
+                                )}
                             />
                         </div>
 
@@ -167,7 +188,7 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                             />
                         </div>
 
-                        <div className="col-span-1">
+                        <div className="col-span-1 md:col-span-2">
                             <InputField
                                 label="Company Address"
                                 placeholder="Building No, Street..."
@@ -190,6 +211,7 @@ export function CompanyProfileModal({ isOpen }: CompanyProfileModalProps) {
                         )}
                     </Button>
                 </form>
+                </div>
             </DialogContent>
         </Dialog>
     );

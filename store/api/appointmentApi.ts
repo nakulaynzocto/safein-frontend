@@ -26,6 +26,8 @@ export interface Appointment {
     updatedAt: string;
     approvalLink?: string | null; // One-time approval link
     isTimedOut?: boolean;         // Computed by backend: pending/approved past their scheduled date
+    isVerified?: boolean;
+    visitorPhoto?: string;
 }
 
 export interface EmployeeDetails {
@@ -45,6 +47,7 @@ export interface VisitorDetails {
     phone: string;
     company: string;
     purposeOfVisit: string;
+    photo?: string;
 }
 
 export interface AccompaniedBy {
@@ -87,8 +90,8 @@ export interface CreateAppointmentRequest {
     accompaniedBy?: AccompaniedBy;
     accompanyingCount?: number;
     appointmentDetails: AppointmentDetails;
-    securityDetails: SecurityDetails;
-    notifications: NotificationPreferences;
+    securityDetails?: SecurityDetails;
+    notifications?: NotificationPreferences;
     checkInTime?: string;
 }
 
@@ -144,6 +147,7 @@ export interface AppointmentListResponse {
 export interface CheckInRequest {
     appointmentId: string;
     notes?: string;
+    visitorPhoto?: string;
 }
 
 export interface CheckOutRequest {
@@ -216,6 +220,19 @@ export const appointmentApi = baseApi.injectEndpoints({
             },
             transformResponse: (response: any) => {
                 if (response.success && response.data) {
+                    // Check if it's a paginated response from ResponseUtil.paginate
+                    if (response.data.data && response.data.pagination) {
+                        return {
+                            appointments: response.data.data,
+                            pagination: {
+                                currentPage: response.data.pagination.page,
+                                totalPages: response.data.pagination.pages,
+                                totalAppointments: response.data.pagination.total,
+                                hasNextPage: response.data.pagination.page < response.data.pagination.pages,
+                                hasPrevPage: response.data.pagination.page > 1,
+                            },
+                        };
+                    }
                     return response.data;
                 }
                 return response;
@@ -409,9 +426,9 @@ export const appointmentApi = baseApi.injectEndpoints({
                 url: `/appointments/${id}/resend`,
                 method: "POST",
             }),
-            // Don't invalidate any tags to prevent table re-fetch/blink
             invalidatesTags: [],
         }),
+
     }),
 });
 
@@ -431,4 +448,5 @@ export const {
     useLazyGetAppointmentsQuery,
     useGetDashboardStatsQuery,
     useResendAppointmentNotificationMutation,
+
 } = appointmentApi;

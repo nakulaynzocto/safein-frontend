@@ -15,8 +15,8 @@ import {
 import examples from "libphonenumber-js/mobile/examples";
 
 interface PhoneInputFieldProps {
-    id: string;
-    label: string;
+    id?: string;
+    label?: string;
     value: string;
     onChange: (value: string) => void;
     error?: string;
@@ -27,6 +27,9 @@ interface PhoneInputFieldProps {
     defaultCountry?: string;
     className?: string;
     autoFocus?: boolean;
+    errorAction?: React.ReactNode;
+    rightElement?: React.ReactNode;
+    onBlur?: () => void;
 }
 
 type CountryOption = {
@@ -39,7 +42,7 @@ type CountryOption = {
 };
 
 export function PhoneInputField({
-    id,
+    id = "phone-input",
     label,
     value = "",
     onChange,
@@ -51,6 +54,9 @@ export function PhoneInputField({
     defaultCountry = "IN",
     className,
     autoFocus = false,
+    errorAction,
+    rightElement,
+    onBlur,
 }: PhoneInputFieldProps) {
     // 1. Prepare country options
     const countryOptions = useMemo<CountryOption[]>(() => {
@@ -75,33 +81,33 @@ export function PhoneInputField({
 
     // 3. Sync value
     useEffect(() => {
-        if (!value) {
+        if (!value || String(value).trim() === "") {
             setPhoneNumber("");
             const defaultOpt = countryOptions.find(o => o.value === defaultCountry.toUpperCase());
             if (defaultOpt) setSelectedIso(defaultOpt.value);
             return;
         }
 
-        const stringValue = String(value);
+        const stringValue = String(value).trim();
         const startsWithPlus = stringValue.startsWith("+");
         const cleanValue = stringValue.replace(/\D/g, "");
+
+        if (!cleanValue) {
+            setPhoneNumber("");
+            return;
+        }
 
         // 1. If it starts with '+', strictly parse it as an international number
         if (startsWithPlus) {
             try {
-                // Try to parse with libphonenumber-js
                 const parsed = parsePhoneNumberFromString(stringValue);
-                
                 if (parsed && parsed.country) {
                     setSelectedIso(parsed.country as string);
                     setPhoneNumber(parsed.nationalNumber);
                     return;
                 }
-            } catch (e) {
-                // Fallback to manual mapping below
-            }
+            } catch (e) {}
 
-            // Fallback for startsWithPlus: Match the best country code manually
             const matchingOptions = countryOptions
                 .filter((opt) => cleanValue.startsWith(opt.phoneCode))
                 .sort((a, b) => b.phoneCode.length - a.phoneCode.length);
@@ -114,17 +120,13 @@ export function PhoneInputField({
             }
         }
 
-        // 2. If no '+' prefix, default to the provided defaultCountry (e.g. IN for +91)
+        // 2. Fallback for domestic or code-only formats
         const defaultOpt = countryOptions.find(o => o.value === defaultCountry.toUpperCase());
         if (defaultOpt) {
             setSelectedIso(defaultOpt.value);
-            
-            // Check if the number already starts with the default phone code (without '+')
             if (cleanValue.length > defaultOpt.phoneCode.length && cleanValue.startsWith(defaultOpt.phoneCode)) {
-                // Treat as "CountryCode + Number" format, strip the code for display
                 setPhoneNumber(cleanValue.slice(defaultOpt.phoneCode.length));
             } else {
-                // Treat as a raw domestic number
                 setPhoneNumber(cleanValue);
             }
         }
@@ -268,6 +270,8 @@ export function PhoneInputField({
             ...base,
             padding: 4,
             maxHeight: 250,
+            WebkitOverflowScrolling: "touch",
+            overscrollBehavior: "contain",
         }),
         menuPortal: (base) => ({
             ...base,
@@ -305,28 +309,31 @@ export function PhoneInputField({
     return (
         <div className={cn("space-y-1.5 w-full", className)}>
             {label && (
-                <label htmlFor={id} className="text-foreground text-sm font-medium">
-                    {label}
-                    {required ? (
-                        <span className="ml-1 text-red-500 font-bold">*</span>
-                    ) : (
-                        <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                <div className="flex items-center justify-between">
+                    <label htmlFor={id} className="text-xs text-muted-foreground uppercase font-bold tracking-[0.1em]">
+                        {label}
+                        {required && <span className="ml-1 text-red-500">*</span>}
+                    </label>
+                    {!required && !error && (
+                        <span className="text-xs text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
                     )}
-                </label>
+                </div>
             )}
             <div
                 className={cn(
-                    "phone-unified-input-field flex flex-row items-center overflow-hidden rounded-xl border transition-all duration-200 bg-background",
+                    "phone-unified-input-field flex flex-row items-center overflow-hidden rounded-xl border transition-all duration-300",
                     "h-12 w-full",
-                    error
-                        ? "border-destructive ring-2 ring-destructive/20"
-                        : isFocused
-                            ? "border-accent ring-2 ring-[var(--ring)]"
-                            : "border-border hover:border-border-hover",
+                    "bg-slate-50/50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-800",
+                    "hover:border-slate-400",
+                    isFocused && "bg-white dark:focus:bg-slate-950 border-[#3882a5] ring-4 ring-[#3882a5]/5",
+                    error && "border-rose-500 ring-rose-500/5",
                     disabled ? "opacity-50 cursor-not-allowed" : ""
                 )}
                 onFocus={() => !disabled && setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
+                onBlur={() => {
+                    setIsFocused(false);
+                    if (onBlur) onBlur();
+                }}
             >
                 {/* Country Selector */}
                 <div className="w-auto min-w-[70px] shrink-0 h-full flex items-center">
@@ -343,6 +350,7 @@ export function PhoneInputField({
                         menuPortalTarget={isMounted ? document.body : undefined}
                         menuPosition="fixed"
                         menuPlacement="auto"
+                        captureMenuScroll={false}
                         classNamePrefix="phone-rs"
                     />
                 </div>
@@ -358,13 +366,25 @@ export function PhoneInputField({
                     onChange={handlePhoneChange}
                     placeholder={placeholder}
                     disabled={disabled}
-                    autoComplete="tel"
+                    autoComplete="off"
                     autoFocus={autoFocus}
                     className="flex-1 min-w-0 h-full bg-transparent border-none pl-1.5 pr-3 text-sm font-medium focus:outline-none placeholder:text-muted-foreground"
                 />
+                {rightElement && (
+                    <div className="shrink-0 pr-2 h-full flex items-center">
+                        {rightElement}
+                    </div>
+                )}
             </div>
 
-            {error && <p className="text-destructive text-xs">{error}</p>}
+            {error && (
+                <div className="flex items-center justify-between gap-2 min-h-[20px]">
+                    <p className="text-destructive text-xs font-medium animate-in fade-in slide-in-from-top-1 duration-300">
+                        {error}
+                    </p>
+                    {errorAction}
+                </div>
+            )}
             {helperText && !error && <p className="text-muted-foreground text-xs">{helperText}</p>}
 
             <style jsx global>{`

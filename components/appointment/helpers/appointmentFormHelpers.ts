@@ -19,18 +19,6 @@ export const createAppointmentPayload = (data: AppointmentFormData) => {
             vehicleNumber: data.vehicleNumber || "",
             vehiclePhoto: data.vehiclePhoto || "",
         },
-        securityDetails: {
-            badgeIssued: false,
-            badgeNumber: "",
-            securityClearance: false,
-            securityNotes: "",
-        },
-        notifications: {
-            smsSent: false,
-            emailSent: false,
-            whatsappSent: false,
-            reminderSent: false,
-        },
     };
 };
 
@@ -39,6 +27,8 @@ export const createAppointmentPayload = (data: AppointmentFormData) => {
  */
 export const createUpdateAppointmentPayload = (data: AppointmentFormData, existingAppointment: any) => {
     return {
+        employeeId: data.employeeId,
+        visitorId: data.visitorId,
         accompanyingCount: data.accompanyingCount ?? 0,
         appointmentDetails: {
             purpose: data.purpose,
@@ -55,26 +45,27 @@ export const createUpdateAppointmentPayload = (data: AppointmentFormData, existi
  * Format employee label for select option
  */
 export const formatEmployeeLabel = (emp: any): string => {
-    return `${emp.name} (${emp.email})`;
+    return `${emp.name} (${emp.department || "Staff"})`;
 };
 
 /**
  * Format employee search keywords
  */
 export const formatEmployeeSearchKeywords = (emp: any): string => {
-    return `${emp.name} ${emp.email ?? ""} ${emp.phone ?? ""} ${emp.department ?? ""} ${emp.designation ?? ""}`.trim();
+    return `${emp.name} ${emp.phone ?? ""} ${emp.department ?? ""} ${emp.designation ?? ""} ${emp.email ?? ""}`.toLowerCase().trim();
 };
 
 /**
  * Format visitor label for select option
  */
 export const formatVisitorLabel = (visitor: any): string => {
-    return `${visitor.name} (${visitor.email})`;
+    const phone = visitor.phone || "";
+    return phone ? `${visitor.name} (${phone})` : visitor.name;
 };
 
 /**
  * Format visitor search keywords
  */
 export const formatVisitorSearchKeywords = (visitor: any): string => {
-    return `${visitor.name} ${visitor.email ?? ""} ${visitor.phone ?? ""}`.trim();
+    return `${visitor.name} ${visitor.phone ?? ""}`.trim();
 };

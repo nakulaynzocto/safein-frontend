@@ -9,8 +9,8 @@ import { NavigationProgress } from "@/components/common/navigationProgress";
 import { NavigationProgressProvider } from "@/components/common/navigationProgressProvider";
 import { RouteOptimizer } from "@/components/common/routeOptimizer";
 import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
-import { InstallPromptBanner } from "@/components/pwa/InstallPromptBanner";
 import { NotificationHandler } from "@/components/notifications/NotificationHandler";
+import { SplashScreen } from "@/components/common/SplashScreen";
 import type { Viewport } from "next";
 
 export const viewport: Viewport = {
@@ -192,6 +192,9 @@ export default function RootLayout({
                     transition: "background-color 0.3s ease-in-out",
                 }}
             >
+                {/* Logo-centered Splash screen for initial React boot */}
+                <SplashScreen />
+
                 {/* Navigation Progress Bar - wrapped in Suspense */}
                 <Suspense fallback={null}>
                     <NavigationProgress />
@@ -206,16 +209,15 @@ export default function RootLayout({
                         <Providers>
                             <Suspense
                                 fallback={
-                                    <div
-                                        className="flex min-h-screen items-center justify-center"
-                                        style={{
-                                            backgroundColor: "var(--background)",
-                                            minHeight: "100vh",
-                                            width: "100%",
-                                        }}
-                                    >
-                                        <div className="animate-spin">
-                                            <div className="h-8 w-8 rounded-full border-4 border-[#3882a5] border-t-transparent"></div>
+                                    <div className="flex min-h-screen flex-col items-center justify-center bg-white">
+                                        <div className="relative mb-8 h-20 w-20">
+                                            <div className="absolute inset-0 rounded-full bg-[#3882a5]/10 blur-xl animate-pulse" />
+                                            <div className="relative flex h-full w-full items-center justify-center p-2">
+                                                <img src="/safein-logo.svg" alt="Loading" className="h-full w-full object-contain" />
+                                            </div>
+                                        </div>
+                                        <div className="h-1 w-32 overflow-hidden rounded-full bg-gray-100">
+                                            <div className="h-full bg-[#3882a5] animate-loading-bar" />
                                         </div>
                                     </div>
                                 }
@@ -224,7 +226,6 @@ export default function RootLayout({
                             </Suspense>
                             {/* PWA & Notifications */}
                             <ServiceWorkerRegistrar />
-                            <InstallPromptBanner />
                             <NotificationHandler />
                         </Providers>
                     </NavigationProgressProvider>

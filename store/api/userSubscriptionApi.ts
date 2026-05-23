@@ -12,10 +12,33 @@ export interface IUserSubscription {
     isTrialing: boolean;
     createdAt: string;
     updatedAt: string;
+    planId?: {
+        _id: string;
+        name: string;
+        tier: number;
+    } | any;
     // Backend-provided permission flags (preferred over frontend calculation)
     canAccessDashboard?: boolean;
     hasActiveSubscription?: boolean;
     subscriptionStatus?: "active" | "inactive" | "cancelled" | "expired";
+    modules?: {
+        enableSms: boolean;
+        enableWhatsApp: boolean;
+        enableVoice: boolean;
+        enableEmail: boolean;
+        enableQrCode: boolean;
+        enableInvites: boolean;
+        enableChat: boolean;
+        enablePriorityBooking: boolean;
+        enableSpotPass: boolean;
+    };
+    limits?: {
+        employees: number;
+        visitors: number;
+        appointments: number;
+        spotPasses: number;
+        credits: number;
+    };
 }
 
 interface GetUserActiveSubscriptionResponse {
@@ -35,10 +58,7 @@ export interface TrialLimitsStatus {
         appointments: { limit: number; extra: number; total: number; current: number; reached: boolean; canCreate: boolean };
         spotPasses: { limit: number; extra: number; total: number; current: number; reached: boolean; canCreate: boolean };
     };
-    modules: {
-        visitorInvite: boolean;
-        message: boolean;
-    };
+
 }
 
 interface GetTrialLimitsStatusResponse {
@@ -99,7 +119,7 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
                 }
                 return { data: null };
             },
-            providesTags: ["User"],
+            providesTags: ["Subscription"],
         }),
 
         /**
@@ -127,7 +147,7 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
                     },
                 };
             },
-            providesTags: ["User", "Subscription"],
+            providesTags: ["Subscription"],
         }),
 
         /**
@@ -145,7 +165,7 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
                 }
                 return { data: [] };
             },
-            providesTags: ["User", "Subscription"],
+            providesTags: ["Subscription"],
         }),
 
         /**
@@ -185,7 +205,7 @@ export const userSubscriptionApi = baseApi.injectEndpoints({
                 method: "POST",
                 body: data,
             }),
-            invalidatesTags: ["User", "Subscription"],
+            invalidatesTags: ["Subscription"],
         }),
     }),
 });

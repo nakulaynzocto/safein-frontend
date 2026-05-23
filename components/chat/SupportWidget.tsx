@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, MessageSquareText, X, Loader2 } from 'lucide-react';
-import { useGoogleLogin } from '@react-oauth/google';
+import { MessageSquare, MessageSquareText, X, Loader2, Shield, UserPlus, LogIn } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { ChatHeader } from './ChatHeader';
 import { ChatMessages } from './ChatMessages';
@@ -14,8 +14,6 @@ import { supportSocketService } from "@/lib/support-socket";
 import { useLazyGetTicketHistoryQuery, useCreateTicketMutation, useSendMessageMutation } from "@/store/api/supportApi";
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setAssistantOpen, setAssistantMessage } from '@/store/slices/uiSlice';
-import { useGoogleLoginMutation } from '@/store/api/authApi';
-import { setCredentials } from '@/store/slices/authSlice';
 import { isPublicActionRoute } from '@/utils/routes';
 
 // Project color scheme - matching your existing brand
@@ -36,6 +34,7 @@ interface Message {
 }
 
 export default function SupportWidget() {
+    const router = useRouter();
     const dispatch = useAppDispatch();
     const { isAssistantOpen: isOpen } = useAppSelector((state) => state.ui);
     const setIsOpen = (val: boolean) => dispatch(setAssistantOpen(val));
@@ -65,7 +64,6 @@ export default function SupportWidget() {
     const [fetchHistory] = useLazyGetTicketHistoryQuery();
     const [restCreateTicket] = useCreateTicketMutation();
     const [restSendMessage] = useSendMessageMutation();
-    const [googleLogin] = useGoogleLoginMutation();
 
     // --- Effects ---
 
@@ -239,31 +237,7 @@ export default function SupportWidget() {
         });
     };
 
-    const loginWithGoogle = useGoogleLogin({
-        scope: "email profile",
-        onSuccess: async (tokenResponse) => {
-            const gToken = tokenResponse.access_token;
-            localStorage.setItem("safein_support_g_token", gToken);
-            setGoogleToken(gToken);
-            setUserMode("public_verified");
-
-            // ALSO log them into the main app so they are "really" logged in
-            try {
-                setIsAuthenticating(true);
-                const result = await googleLogin({ token: gToken }).unwrap();
-                if (result.token && result.user) {
-                    dispatch(setCredentials(result));
-                }
-            } catch (err) {
-                console.error("Failed to sync main app auth with support google login:", err);
-            } finally {
-                setIsAuthenticating(false);
-            }
-        },
-        onError: () => {
-            toast.error("Google Login Failed");
-        }
-    });
+    // Removed loginWithGoogle handler as per request to replace with Sign Up button
 
     const refreshHistory = () => {
         if (socketRef.current) {
@@ -421,39 +395,74 @@ export default function SupportWidget() {
                                             <Loader2 className="w-12 h-12 animate-spin text-primary relative z-10" />
                                         </div>
                                         <div className="space-y-2">
-                                            <p className="font-bold text-gray-900 dark:text-white">Authenticating...</p>
+                                            <p className="font-bold text-gray-800 dark:text-white">Authenticating...</p>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">Please wait while we secure your connection</p>
                                         </div>
                                     </div>
                                 ) : (
                                     <>
-                                        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-150">
-                                            <h4 className="font-bold text-gray-900 dark:text-white text-xl">Welcome! 👋</h4>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed">
-                                                This authorization is for security purposes. Sign in with Google to start chatting with our support team.
+                                    <div className="flex flex-col items-center w-full animate-in fade-in slide-in-from-bottom-4 duration-700 pt-8">
+
+                                        <div className="space-y-6 text-center mb-10">
+                                            <div className="space-y-2">
+                                                <h4 className="text-2xl font-semibold text-slate-800 dark:text-white tracking-tight">
+                                                    SafeIn <span className="text-[#3882a5]">Support</span>
+                                                </h4>
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
+                                                    <p className="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">
+                                                        Agents Online
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-relaxed max-w-[260px] mx-auto">
+                                                Experience enterprise-grade support. Sign in to start a secure conversation with our team.
                                             </p>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300 max-w-[280px] leading-relaxed pt-2">
-                                                You can also contact our support team by phone:
-                                            </p>
-                                            <a href="tel:+918699966076" className="text-sm font-semibold text-primary hover:text-accent transition-colors">
-                                                +91 86999 66076
-                                            </a>
                                         </div>
 
-                                        <Button
-                                            onClick={() => loginWithGoogle()}
-                                            className="w-full bg-white dark:bg-slate-800 text-gray-800 dark:text-white border-2 border-gray-200 dark:border-slate-700 hover:border-accent dark:hover:border-accent hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 shadow-lg flex items-center justify-center gap-3 h-12 rounded-xl font-semibold group animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300"
-                                        >
-                                            <img src="https://www.google.com/favicon.ico" alt="G" className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                            Continue with Google
-                                        </Button>
+                                        <div className="w-full space-y-4">
+                                            <Button
+                                                onClick={() => {
+                                                    setIsOpen(false);
+                                                    router.push('/register');
+                                                }}
+                                                className="w-full text-white hover:opacity-90 h-14 rounded-2xl font-bold text-base shadow-lg shadow-primary/25 transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 px-6 border-none"
+                                                style={{ background: GRADIENT_PRIMARY }}
+                                            >
+                                                <UserPlus size={20} className="animate-pulse" />
+                                                <span>Sign Up to Chat</span>
+                                            </Button>
 
-                                        <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1.5 animate-in fade-in duration-700 delay-500">
-                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                                            </svg>
-                                            Secure & encrypted • We'll notify you via email
-                                        </p>
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => {
+                                                    setIsOpen(false);
+                                                    router.push('/login');
+                                                }}
+                                                className="w-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 h-14 rounded-2xl font-bold text-base border-2 border-slate-100 dark:border-slate-700 shadow-sm transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 px-6"
+                                            >
+                                                <LogIn size={20} />
+                                                <span>Log In to Account</span>
+                                            </Button>
+
+                                            <div className="pt-4 flex flex-col items-center gap-4">
+                                                <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-[0.2em]">
+                                                    <Shield size={12} className="text-[#3882a5]" />
+                                                    Secure Support Channel
+                                                </div>
+                                                
+                                                <div className="h-px w-12 bg-slate-100 dark:bg-slate-800"></div>
+
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <p className="text-xs font-bold text-slate-400 uppercase">Emergency Support</p>
+                                                    <a href="tel:+918699966076" className="text-slate-800 dark:text-white font-semibold hover:text-primary transition-colors">
+                                                        +91 86999 66076
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     </>
                                 )}
                             </div>
@@ -505,7 +514,7 @@ export default function SupportWidget() {
                                 {unreadCount > 0 && (
                                     <span className="absolute -top-1 -right-1 flex h-5 w-5">
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-light opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-5 w-5 items-center justify-center text-white text-[10px] font-bold shadow-lg" style={{ background: GRADIENT_ACCENT }}>
+                                        <span className="relative inline-flex rounded-full h-5 w-5 items-center justify-center text-white text-xs font-bold shadow-lg" style={{ background: GRADIENT_ACCENT }}>
                                             {unreadCount > 9 ? '9+' : unreadCount}
                                         </span>
                                     </span>

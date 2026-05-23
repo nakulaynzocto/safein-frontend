@@ -37,6 +37,30 @@ export interface ISafeinProfile {
         branchName?: string;
         upiId?: string;
     };
+    features?: {
+        enableEmail: boolean;
+        enableSms: boolean;
+        enableWhatsApp: boolean;
+        enableVoice: boolean;
+        enableAutoApproval: boolean;
+        enableVisitorImageCapture: boolean;
+
+        enableMaintenanceMode: boolean;
+        enableRegistration: boolean;
+        enableFeedbackSystem: boolean;
+
+        // Dynamic System Warning and Notes Controls
+        enableExpiryWarning?: boolean;
+        expiryWarningMessage?: string;
+        enableSubscriptionEndingSoonWarning?: boolean;
+        subscriptionEndingSoonWarningMessage?: string;
+        subscriptionEndingSoonDays?: number;
+        enableGlobalAlert?: boolean;
+        globalAlertMessage?: string;
+        enableLowWalletWarning?: boolean;
+        lowWalletWarningMessage?: string;
+        lowWalletWarningThreshold?: number;
+    };
 }
 
 export interface ISafeinProfileResponse {
@@ -48,7 +72,7 @@ export const safeinProfileApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         getSafeinProfile: builder.query<ISafeinProfileResponse, void>({
             query: () => "/safein-profile",
-            providesTags: ["Settings"],
+            providesTags: ["SafeinProfile"],
         }),
     }),
 });

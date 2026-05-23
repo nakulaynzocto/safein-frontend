@@ -139,29 +139,21 @@ export function ProfilePageContent() {
     }
 
     return (
-        <div className="mx-auto w-full max-w-full px-1">
-
-
-            <div className="mt-4 sm:mt-6">
-                <ProfileLayout>
-                    {(activeTab) => (
-                        <>
-                            {activeTab === "profile" && (
-                                <ProfileForm profile={profile} onSubmit={handleProfileUpdate} onCancel={handleCancelEdit} />
-                            )}
-                            {activeTab === "subscription" && (
-                                <ProfileSubscription />
-                            )}
-                        </>
-                    )}
-                </ProfileLayout>
-            </div>
+        <div className="mx-auto w-full max-w-full px-1 pt-4 sm:pt-6">
+            <ProfileLayout>
+                {(activeTab) => (
+                    <>
+                        {activeTab === "profile" && (
+                            <ProfileForm profile={profile} onSubmit={handleProfileUpdate} onCancel={handleCancelEdit} />
+                        )}
+                    </>
+                )}
+            </ProfileLayout>
         </div>
     );
 }
 
 // Wrapper to handle dynamic import or just standard import
 import { ProfileLayout } from "./profileLayout";
-import { ProfileSubscription } from "./profileSubscription";
 
 

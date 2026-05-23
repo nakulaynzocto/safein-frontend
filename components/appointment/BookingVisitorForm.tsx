@@ -1,8 +1,9 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useParams } from "next/navigation";
 import { validatePhone, formatPhoneForSubmission } from "@/utils/phoneUtils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -14,41 +15,53 @@ import { CountryStateCitySelect } from "@/components/common/countryStateCity";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { ImageUploadField } from "@/components/common/imageUploadField";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FileText, Camera, Fingerprint } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { useUserCountry } from "@/hooks/useUserCountry";
+import { cn } from "@/lib/utils";
 
-const bookingVisitorSchema = yup.object({
-    name: yup.string().trim().required("Name is required").min(2, "Name must be at least 2 characters"),
-    email: yup.string().trim().email("Invalid email address").required("Email is required"),
-    phone: yup
-        .string()
-        .trim()
-        .required("Phone number is required")
-        .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) => 
-            validatePhone(value)
-        ),
-    address: yup.object({
-        street: yup
+const createBookingVisitorSchema = (collectPhotoInForm: boolean) =>
+    yup.object({
+        name: yup.string().trim().required("Name is required").min(2, "Name must be at least 2 characters"),
+        email: yup
             .string()
             .trim()
-            .required("Company Address is required")
-            .min(2, "Company Address must be at least 2 characters"),
-        city: yup.string().trim().required("City is required"),
-        state: yup.string().trim().required("State is required"),
-        country: yup.string().trim().required("Country is required"),
-    }),
-    idProof: yup.object({
-        type: yup.string().trim().optional(),
-        number: yup.string().trim().optional(),
-        image: yup.string().trim().optional(),
-    }),
-    photo: yup.string().trim().required("Visitor Photo is required"),
-});
+            .optional()
+            .test("email-format", "Please enter a valid email address", (value) => {
+                if (!value || value.length === 0) return true;
+                return yup.string().email().isValidSync(value);
+            }),
+        phone: yup
+            .string()
+            .trim()
+            .required("Phone number is required")
+            .test("is-valid-phone", "Please enter a valid global phone number with country code", (value) =>
+                validatePhone(value)
+            ),
+        address: yup.object({
+            street: yup
+                .string()
+                .trim()
+                .required("Company Address is required")
+                .min(2, "Company Address must be at least 2 characters"),
+            city: yup.string().trim().required("City is required"),
+            state: yup.string().trim().required("State is required"),
+            country: yup.string().trim().required("Country is required"),
+        }),
+        idProof: yup.object({
+            type: yup.string().trim().optional(),
+            number: yup.string().trim().optional(),
+            image: yup.string().trim().optional(),
+        }),
+        photo: collectPhotoInForm
+            ? yup.string().trim().required("Visitor Photo is required")
+            : yup.string().trim().optional().default(""),
+    });
 
 type BookingVisitorFormData = {
     name: string;
-    email: string;
+    email?: string;
     phone: string;
     address: {
         street: string;
@@ -73,22 +86,33 @@ const idProofTypes = [
 ];
 
 interface BookingVisitorFormProps {
-    initialEmail?: string;
     initialPhone?: string;
+    lockedPhoneHelperText?: string;
+    initialEmail?: string;
+    lockedEmailHelperText?: string;
     initialValues?: Partial<BookingVisitorFormData>;
     onSubmit: (data: any) => void;
     isLoading?: boolean;
-    appointmentToken?: string; // Token for public upload endpoint
+    appointmentToken?: string;
+    collectPhotoInForm?: boolean;
+    onBack?: (data?: any) => void;
 }
 
 export function BookingVisitorForm({
-    initialEmail,
     initialPhone,
+    lockedPhoneHelperText,
+    initialEmail,
+    lockedEmailHelperText,
     initialValues,
     onSubmit,
     isLoading = false,
     appointmentToken,
+    collectPhotoInForm = true,
+    onBack,
 }: BookingVisitorFormProps) {
+    const { slug } = useParams() as { slug: string };
+    const userCountry = useUserCountry();
+    const bookingVisitorSchema = useMemo(() => createBookingVisitorSchema(collectPhotoInForm), [collectPhotoInForm]);
     const {
         register,
         handleSubmit,
@@ -96,6 +120,7 @@ export function BookingVisitorForm({
         formState: { errors },
         setValue,
         watch,
+        getValues,
     } = useForm<BookingVisitorFormData>({
         resolver: yupResolver(bookingVisitorSchema) as any,
         defaultValues: {
@@ -106,7 +131,7 @@ export function BookingVisitorForm({
                 street: initialValues?.address?.street || undefined,
                 city: initialValues?.address?.city || "",
                 state: initialValues?.address?.state || "",
-                country: initialValues?.address?.country || "IN",
+                country: initialValues?.address?.country || userCountry,
             },
             idProof: {
                 type: initialValues?.idProof?.type || undefined,
@@ -121,61 +146,68 @@ export function BookingVisitorForm({
     const [isFileUploading, setIsFileUploading] = useState(false);
     const [showIdProof, setShowIdProof] = useState(false);
 
-    // Set default country to India if not set
+    const [watchedCountry, watchedState, watchedCity] = useWatch({
+        control,
+        name: ["address.country", "address.state", "address.city"],
+    });
+
+    // Set default country only if not set
     useEffect(() => {
-        const currentCountry = watch("address.country");
-        if (!currentCountry) {
-            setValue("address.country", "IN", { shouldValidate: false, shouldDirty: false });
+        if (!watchedCountry && userCountry) {
+            setValue("address.country", userCountry, { shouldValidate: false, shouldDirty: false });
         }
-    }, [setValue, watch]);
+    }, [userCountry, setValue, watchedCountry]);
 
     useEffect(() => {
-        const opts = { shouldValidate: true, shouldDirty: false };
-        if (initialEmail) setValue("email", initialEmail, opts);
+        if (!initialValues && !initialPhone && !initialEmail) return;
         
+        const opts = { shouldValidate: true, shouldDirty: true };
+
         if (initialPhone) {
             const formattedPhone = formatPhoneForSubmission(initialPhone);
             setValue("phone", formattedPhone, opts);
         }
 
+        if (initialEmail) {
+            setValue("email", initialEmail, opts);
+        }
+
         if (initialValues) {
-            const { address, idProof, ...rest } = initialValues;
-            Object.entries(rest).forEach(([key, value]) => {
-                if (value) setValue(key as any, value, opts);
-            });
-            if (address) {
-                setValue(
-                    "address",
-                    {
-                        street: address.street || undefined,
-                        city: address.city || "",
-                        state: address.state || "",
-                        country: address.country || "IN",
-                    } as any,
-                    opts,
-                );
+            // Populate top-level fields
+            if (initialValues.name !== undefined) setValue("name", initialValues.name, opts);
+            if (initialValues.email !== undefined) setValue("email", initialValues.email, opts);
+            if (initialValues.phone !== undefined) setValue("phone", formatPhoneForSubmission(initialValues.phone), opts);
+            if (initialValues.photo !== undefined) setValue("photo", initialValues.photo, opts);
+
+            // Populate Address fields explicitly to trigger UI updates in CountryStateCitySelect
+            if (initialValues.address) {
+                const addr = initialValues.address;
+                if (addr.country !== undefined) setValue("address.country", addr.country, opts);
+                if (addr.state !== undefined) setValue("address.state", addr.state, opts);
+                if (addr.city !== undefined) setValue("address.city", addr.city, opts);
+                if (addr.street !== undefined) setValue("address.street", addr.street, opts);
             }
-            if (idProof) {
-                setValue(
-                    "idProof",
-                    {
-                        type: idProof.type || undefined,
-                        number: idProof.number || undefined,
-                        image: idProof.image || "",
-                    } as any,
-                    opts,
-                );
-            }
-            if (initialValues?.photo) {
-                setValue("photo", initialValues.photo, opts);
+
+            // Populate ID Proof fields
+            if (initialValues.idProof) {
+                const idp = initialValues.idProof;
+                if (idp.type !== undefined) {
+                    setValue("idProof.type", idp.type, opts);
+                    if (idp.type) setShowIdProof(true); // Auto-expand if ID proof type exists
+                }
+                if (idp.number !== undefined) setValue("idProof.number", idp.number, opts);
+                if (idp.image !== undefined) setValue("idProof.image", idp.image, opts);
             }
         }
-    }, [initialEmail, initialPhone, initialValues, setValue]);
+    }, [initialPhone, initialEmail, initialValues, setValue]);
 
-    const handleFormSubmit = (data: BookingVisitorFormData) => {
-        const { address, idProof, ...rest } = data;
-        const payload = {
+    const mapFormDataToPayload = (data: BookingVisitorFormData) => {
+        const { address, idProof, email, ...rest } = data;
+        const emailTrim = email?.trim();
+        return {
             ...rest,
+            phone: rest.phone || initialPhone || initialValues?.phone || "",
+            email: emailTrim || initialEmail || initialValues?.email || undefined,
             address: {
                 street: address.street?.trim() || undefined,
                 city: address.city,
@@ -189,7 +221,10 @@ export function BookingVisitorForm({
             },
             photo: rest.photo || undefined,
         };
-        onSubmit(payload);
+    };
+
+    const handleFormSubmit = (data: BookingVisitorFormData) => {
+        onSubmit(mapFormDataToPayload(data));
     };
 
     return (
@@ -201,63 +236,22 @@ export function BookingVisitorForm({
             className="space-y-4 sm:space-y-6"
             noValidate
         >
-            {/* Personal Information Section */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <InputField
-                    id="name"
-                    label="Full Name"
-                    {...register("name")}
-                    placeholder="Enter full name"
-                    error={errors.name?.message}
-                    required
-                />
-
-                <Controller
-                    name="phone"
-                    control={control}
-                    render={({ field }) => (
-                        <PhoneInputField
-                            id="phone"
-                            label="Phone Number"
-                            value={field.value}
-                            onChange={(value) => field.onChange(value)}
-                            error={errors.phone?.message}
-                            required
-                            placeholder="Enter phone number"
-                            defaultCountry="in"
-                            disabled={!!initialPhone}
-                        />
-                    )}
-                />
-
-                <div className="space-y-1.5">
-                <InputField
-                    id="email"
-                    label="Email Address"
-                    type="email"
-                    {...register("email")}
-                    placeholder="Enter email address"
-                    error={errors.email?.message}
-                    required
-                    disabled={!!initialEmail}
-                    readOnly={!!initialEmail}
-                    helperText={initialEmail ? "This email was used to send you the appointment link" : undefined}
-                />
-                </div>
-            </div>
-
-            {/* Address Information */}
+            {/* Address Information - Top priority */}
             <div className="space-y-4">
                 <CountryStateCitySelect
                     value={{
-                        country: watch("address.country") || "",
-                        state: watch("address.state") || "",
-                        city: watch("address.city") || "",
+                        country: watchedCountry || "",
+                        state: watchedState || "",
+                        city: watchedCity || "",
                     }}
                     onChange={(v) => {
-                        setValue("address.country", v.country);
-                        setValue("address.state", v.state);
-                        setValue("address.city", v.city);
+                        setValue("address.country", v.country, { shouldValidate: true });
+                        setValue("address.state", v.state, { shouldValidate: true });
+                        setValue("address.city", v.city, { shouldValidate: true });
+                        // Reset phone when country changes (so new dial code takes effect)
+                        if (v.country && !initialPhone) {
+                            setValue("phone", "");
+                        }
                     }}
                     errors={{
                         country: errors.address?.country?.message as string,
@@ -266,6 +260,64 @@ export function BookingVisitorForm({
                     }}
                     required
                 />
+            </div>
+
+            {/* Personal Information — name, email, phone in one row on md+ */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:items-start">
+                <div className="min-w-0">
+                    <InputField
+                        id="name"
+                        label="Full Name"
+                        {...register("name")}
+                        placeholder="Enter full name"
+                        error={errors.name?.message}
+                        required
+                    />
+                </div>
+                <div className="min-w-0">
+                    <InputField
+                        id="email"
+                        type="email"
+                        autoComplete="off"
+                        label="Email"
+                        {...register("email")}
+                        placeholder="name@example.com"
+                        error={errors.email?.message as string | undefined}
+                        required={!!initialEmail}
+                        disabled={!!initialEmail}
+                        helperText={
+                            initialEmail
+                                ? lockedEmailHelperText ||
+                                  "This email was used when your appointment link was created"
+                                : undefined
+                        }
+                    />
+                </div>
+                <div className="min-w-0">
+                    <Controller
+                        name="phone"
+                        control={control}
+                        render={({ field }) => (
+                            <PhoneInputField
+                                id="phone"
+                                label="Phone Number"
+                                value={field.value}
+                                onChange={(value) => field.onChange(value)}
+                                error={errors.phone?.message}
+                                required
+                                placeholder="Enter phone number"
+                                defaultCountry={watchedCountry || userCountry}
+                                disabled={!!initialPhone}
+                                helperText={
+                                    initialPhone
+                                        ? lockedPhoneHelperText ||
+                                          "This number was used when your appointment link was created"
+                                        : undefined
+                                }
+                            />
+                        )}
+                    />
+                </div>
             </div>
 
             {/* Company Address Section */}
@@ -280,7 +332,7 @@ export function BookingVisitorForm({
             />
 
             {/* ID Verification & Photos */}
-            <div className="space-y-6 pt-2">
+            {collectPhotoInForm && <div className="space-y-6 pt-2">
                 {/* Required Visitor Photo */}
                 <div className="flex flex-col space-y-3 bg-gray-50/50 p-4 rounded-2xl border border-dashed border-gray-200">
                     <Label className="text-foreground text-sm font-semibold flex items-center gap-2">
@@ -290,18 +342,18 @@ export function BookingVisitorForm({
                     <div className="flex justify-start">
                         <ImageUploadField
                             name="photo"
+                            appointmentToken={appointmentToken}
                             register={register}
                             setValue={setValue}
                             errors={errors.photo}
                             initialUrl={initialValues?.photo}
                             label=""
                             enableImageCapture={true}
-                            appointmentToken={appointmentToken}
                             onUploadStatusChange={setIsFileUploading}
                             variant="avatar"
                         />
                     </div>
-                    <p className="text-[11px] text-muted-foreground">Please capture or upload a clear photo of the visitor.</p>
+                    <p className="text-xs text-muted-foreground">Please capture or upload a clear photo of the visitor.</p>
                     {errors.photo && (
                         <p className="text-xs text-red-500 mt-1 font-medium">{errors.photo.message}</p>
                     )}
@@ -314,7 +366,7 @@ export function BookingVisitorForm({
                             <Fingerprint className="h-4 w-4" />
                             Add ID Proof Details
                         </Label>
-                        <p className="text-[11px] text-muted-foreground font-medium">Capture ID documents for enhanced security (Optional)</p>
+                        <p className="text-xs text-muted-foreground font-medium">Capture ID documents for enhanced security (Optional)</p>
                     </div>
                     <Switch 
                         id="id-proof-toggle" 
@@ -332,7 +384,7 @@ export function BookingVisitorForm({
                             <Label className="text-foreground text-sm font-semibold flex items-center gap-2">
                                 <FileText className="h-4 w-4 text-[#3882a5]" />
                                 ID Proof Image
-                                <span className="text-[10px] font-normal text-muted-foreground bg-gray-100 px-2 py-0.5 rounded-full">Recommended</span>
+                                <span className="text-xs font-normal text-muted-foreground bg-gray-100 px-2 py-0.5 rounded-full">Recommended</span>
                             </Label>
                             <div className="flex justify-start">
                                 <ImageUploadField
@@ -385,6 +437,7 @@ export function BookingVisitorForm({
                                 </Label>
                                 <Input
                                     id="idProofNumber"
+                                    autoComplete="off"
                                     {...register("idProof.number")}
                                     placeholder="e.g. Aadhar / DL Number"
                                     className={`h-12 w-full rounded-xl border ${errors.idProof?.number ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus-visible:ring-1 focus-visible:ring-[#3882a5]"} bg-background text-foreground placeholder:text-muted-foreground px-4 py-2 text-sm focus:outline-none font-medium transition-all`}
@@ -396,38 +449,43 @@ export function BookingVisitorForm({
                         </div>
                     </div>
                 )}
-            </div>
+            </div>}
 
-            <div className="flex flex-col-reverse justify-end gap-3 border-t pt-4 sm:flex-row sm:gap-4 sm:pt-6">
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                        // Assuming this is used in context where cancel action is needed
-                        // Perhaps pass onCancel prop?
-                    }}
-                    className="h-12 w-full rounded-xl border-border px-8 font-medium sm:w-auto"
-                    disabled={isLoading}
-                >
-                    Cancel
-                </Button>
+            <div className="flex items-center gap-3 border-t pt-4 sm:gap-4 sm:pt-6">
+                {onBack && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                            const currentValues = getValues();
+                            onBack(mapFormDataToPayload(currentValues));
+                        }}
+                        disabled={isLoading}
+                        className="h-12 flex-1 rounded-xl border-border px-4 font-medium"
+                    >
+                        Back
+                    </Button>
+                )}
                 <Button
                     type="submit"
                     disabled={isLoading || isFileUploading}
-                    className="h-12 w-full rounded-xl bg-[#3882a5] px-8 text-white hover:bg-[#2d6a87] font-medium sm:w-auto"
+                    className={cn(
+                        "h-12 rounded-xl bg-[#3882a5] px-4 text-white hover:bg-[#2d6a87] font-medium transition-all shadow-md",
+                        onBack ? "flex-1" : "w-full"
+                    )}
                 >
                     {isLoading ? (
                         <>
                             <LoadingSpinner size="sm" className="mr-2" />
-                            Creating...
+                            {onBack ? "Saving..." : "Creating..."}
                         </>
                     ) : isFileUploading ? (
                         <>
                             <LoadingSpinner size="sm" className="mr-2" />
-                            Uploading Image...
+                            Uploading...
                         </>
                     ) : (
-                        "Continue to Appointment"
+                        "Continue"
                     )}
                 </Button>
             </div>

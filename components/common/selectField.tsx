@@ -1,7 +1,7 @@
 "use client";
 
-import { forwardRef, useId, useMemo, useState, useEffect, useCallback } from "react";
-import Select, { type GroupBase, type StylesConfig, type SingleValue } from "react-select";
+import { forwardRef, useId, useMemo, useState, useEffect, useCallback, type ReactNode } from "react";
+import Select, { components, type GroupBase, type StylesConfig, type SingleValue, type MenuProps } from "react-select";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/utils/helpers";
@@ -43,11 +43,22 @@ export interface SelectFieldProps {
     disabled?: boolean;
     menuZIndex?: number;
     className?: string;
-    formatOptionLabel?: (option: Option) => React.ReactNode;
+    formatOptionLabel?: (option: Option) => ReactNode;
     showDropdownIndicator?: boolean;
+    noOptionsMessage?: (obj: { inputValue: string }) => ReactNode;
+    compact?: boolean;
+    onMenuScrollToBottom?: () => void;
 }
 
 const MENU_PORTAL_Z_INDEX = 9999;
+
+const Menu = (props: MenuProps<RSOption, false, GroupBase<RSOption>>) => {
+    return (
+        <components.Menu {...props}>
+            <div onWheel={(e) => e.stopPropagation()}>{props.children}</div>
+        </components.Menu>
+    );
+};
 
 const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     {
@@ -72,6 +83,9 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         menuZIndex,
         formatOptionLabel,
         showDropdownIndicator = true,
+        noOptionsMessage,
+        compact = false,
+        onMenuScrollToBottom,
     },
     ref,
 ) {
@@ -135,20 +149,24 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
         () => ({
             control: (base, state) => ({
                 ...base,
-                backgroundColor: "var(--background)",
+                backgroundColor: "rgb(248 250 252 / 0.5)", // bg-slate-50/50
                 minHeight: 48,
                 height: 48,
                 borderRadius: 12,
-                borderColor: error ? "var(--destructive)" : state.isFocused ? "var(--accent)" : "var(--border)",
+                borderWidth: 1,
+                borderColor: error 
+                    ? "var(--destructive)" 
+                    : state.isFocused 
+                        ? "#3882a5" 
+                        : "rgb(203 213 225)", // border-slate-300
+                transition: "all 0.3s ease",
                 boxShadow: state.isFocused
-                    ? error
-                        ? "0 0 0 2px var(--destructive-ring)"
-                        : "0 0 0 2px var(--ring)"
+                    ? "0 0 0 4px rgb(56 130 165 / 0.05)"
                     : "none",
                 cursor: isFieldDisabled ? "not-allowed" : "pointer",
                 opacity: isFieldDisabled ? 0.6 : 1,
                 "&:hover": {
-                    borderColor: state.isFocused ? (error ? "var(--destructive)" : "var(--accent)") : "var(--border)",
+                    borderColor: state.isFocused ? "#3882a5" : "rgb(148 163 184)", // border-slate-400 on hover
                 },
             }),
             valueContainer: (base) => ({
@@ -196,20 +214,26 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 ...base,
                 backgroundColor: "var(--popover, #ffffff)",
                 border: "1px solid var(--border, #e5e7eb)",
-                borderRadius: 8,
-                boxShadow: "0 10px 40px rgba(0, 0, 0, 0.2)",
+                borderRadius: 12,
+                boxShadow: "0 10px 40px rgba(0, 0, 0, 0.25)",
                 marginTop: 4,
                 overflow: "hidden",
                 zIndex: 9999,
+                width: "100%",
+                minWidth: "100%",
+                maxWidth: "calc(100vw - 2rem)",
             }),
             menuList: (base) => ({
                 ...base,
                 padding: 4,
-                maxHeight: 250,
+                maxHeight: typeof window !== 'undefined' && window.innerHeight < 600 ? 150 : 250,
+                WebkitOverflowScrolling: "touch",
+                overscrollBehavior: "contain",
             }),
             menuPortal: (base) => ({
                 ...base,
                 zIndex: menuZIndex ?? MENU_PORTAL_Z_INDEX,
+                pointerEvents: "auto",
             }),
             option: (base, { isDisabled: optDisabled, isFocused, isSelected }) => ({
                 ...base,
@@ -250,30 +274,31 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
     );
 
     const defaultFormatOptionLabel = (option: RSOption) => (
-        <div className="flex items-center gap-3">
-            {option.image ? (
-                <Avatar className="h-8 w-8 border border-border">
+        <div className={cn("flex items-center", compact ? "gap-1.5" : "gap-3")}>
+            <Avatar className={cn("border border-border shrink-0", compact ? "h-6 w-6" : "h-8 w-8")}>
+                {option.image ? (
                     <AvatarImage src={option.image} alt={option.label} className="object-cover" />
-                    <AvatarFallback className="text-xs font-medium leading-none bg-secondary text-secondary-foreground flex items-center justify-center">
-                        {getInitials(option.label)}
-                    </AvatarFallback>
-                </Avatar>
-            ) : null}
-            <span className="truncate">{option.label}</span>
+                ) : null}
+                <AvatarFallback className={cn("font-bold bg-slate-100 text-slate-600 flex items-center justify-center", compact ? "text-[8px]" : "text-xs")}>
+                    {getInitials(option.label)}
+                </AvatarFallback>
+            </Avatar>
+            <span className={cn("truncate", compact ? "text-xs font-semibold" : "text-sm")}>{option.label}</span>
         </div>
     );
 
     return (
         <div className={cn("space-y-1.5 relative", error ? "z-20" : "z-10", className)}>
             {label && (
-                <label htmlFor={controlId} className="text-foreground text-sm font-medium">
-                    {label}
-                    {required ? (
-                        <span className="ml-1 text-red-500 font-bold">*</span>
-                    ) : (
-                        <span className="ml-1 text-muted-foreground text-[10px] font-normal leading-none">(Optional)</span>
+                <div className="flex items-center justify-between">
+                    <label htmlFor={controlId} className="text-xs text-muted-foreground uppercase font-bold tracking-[0.1em]">
+                        {label}
+                        {required && <span className="ml-1 text-red-500">*</span>}
+                    </label>
+                    {!required && !error && (
+                        <span className="text-xs text-muted-foreground/60 uppercase font-medium tracking-wider">Optional</span>
                     )}
-                </label>
+                </div>
             )}
 
             <Select<RSOption, false, GroupBase<RSOption>>
@@ -305,8 +330,12 @@ const SelectField = forwardRef<any, SelectFieldProps>(function SelectField(
                 tabSelectsValue={true}
                 escapeClearsValue={false}
                 backspaceRemovesValue={true}
-                menuShouldScrollIntoView={false}
+                menuShouldScrollIntoView={true}
+                captureMenuScroll={false}
+                components={{ Menu }}
                 formatOptionLabel={formatOptionLabel ? (opt) => formatOptionLabel(opt.data) : defaultFormatOptionLabel}
+                noOptionsMessage={noOptionsMessage}
+                onMenuScrollToBottom={onMenuScrollToBottom}
             />
 
             {error && (

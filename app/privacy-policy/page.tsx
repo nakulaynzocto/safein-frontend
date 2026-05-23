@@ -12,7 +12,7 @@ export default function PrivacyPolicyPage() {
                     <div className="mb-8">
                         <div className="mb-4 flex items-center gap-3">
                             <Shield className="h-8 w-8 text-[#3882a5]" />
-                            <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">Privacy Policy</h1>
+                            <h1 className="text-3xl font-bold text-gray-800 sm:text-4xl">Privacy Policy</h1>
                         </div>
                         <p className="text-sm text-gray-500">
                             Last updated:{" "}
@@ -51,7 +51,7 @@ export default function PrivacyPolicyPage() {
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm text-gray-700">
                             <div>
-                                <h3 className="mb-2 font-semibold text-gray-900">1. Personal Information</h3>
+                                <h3 className="mb-2 font-semibold text-gray-800">1. Personal Information</h3>
                                 <ul className="ml-4 list-inside list-disc space-y-1">
                                     <li>Name, email address, phone number</li>
                                     <li>Company name and business details</li>
@@ -60,7 +60,7 @@ export default function PrivacyPolicyPage() {
                                 </ul>
                             </div>
                             <div>
-                                <h3 className="mb-2 font-semibold text-gray-900">2. Visitor Information</h3>
+                                <h3 className="mb-2 font-semibold text-gray-800">2. Visitor Information</h3>
                                 <ul className="ml-4 list-inside list-disc space-y-1">
                                     <li>Visitor name, contact details, and identification proof</li>
                                     <li>Appointment details and meeting history</li>
@@ -68,7 +68,7 @@ export default function PrivacyPolicyPage() {
                                 </ul>
                             </div>
                             <div>
-                                <h3 className="mb-2 font-semibold text-gray-900">3. Technical Information</h3>
+                                <h3 className="mb-2 font-semibold text-gray-800">3. Technical Information</h3>
                                 <ul className="ml-4 list-inside list-disc space-y-1">
                                     <li>IP address, browser type, and device information</li>
                                     <li>Usage data and analytics</li>

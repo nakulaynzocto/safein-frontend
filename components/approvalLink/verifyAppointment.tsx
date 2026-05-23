@@ -14,7 +14,6 @@ import {
     Calendar,
     Clock,
     User,
-    Mail,
     Phone,
     Building2,
     ShieldCheck,
@@ -51,7 +50,7 @@ export function VerifyAppointment() {
                         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-100 p-4 dark:bg-red-900/20">
                             <XCircle className="h-10 w-10 text-red-600" />
                         </div>
-                        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Invalid Link</h2>
+                        <h2 className="mb-2 text-2xl font-bold text-slate-800 dark:text-white">Invalid Link</h2>
                         <p className="text-slate-500 dark:text-slate-400">
                             The verification link is missing or invalid. Please check the link and try again.
                         </p>
@@ -132,21 +131,34 @@ export function VerifyAppointment() {
     }
 
     if (error || (data && !data.success)) {
-        const errorMessage = (error as any)?.data?.message || data?.message || "Invalid or expired link";
+        const err = error as any;
+        const errorMessage = err?.data?.message || data?.message || "Invalid or expired link";
         const isExpired = errorMessage.includes("expired") || errorMessage.includes("already used");
+        const isOutOfService = err?.status === 402 || errorMessage.toLowerCase().includes("out of service") || errorMessage.toLowerCase().includes("subscription");
 
         return (
             <div className="flex min-h-screen items-center justify-center p-4">
-                <Card className="w-full max-w-md border-0 bg-white shadow-2xl backdrop-blur-xl dark:bg-slate-900/80">
+                <Card className="w-full max-w-md border-0 bg-white shadow-2xl dark:bg-slate-900/80">
                     <CardContent className="flex flex-col items-center justify-center py-12 text-center animate-in zoom-in-95 duration-300">
-                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 p-4 dark:bg-amber-900/20">
-                            <XCircle className="h-10 w-10 text-amber-600" />
+                        <div className={cn(
+                            "mb-6 flex h-20 w-20 items-center justify-center rounded-full p-4",
+                            isOutOfService ? "bg-amber-100 dark:bg-amber-900/20" : "bg-red-100 dark:bg-red-900/20"
+                        )}>
+                            {isOutOfService ? (
+                                <ShieldCheck className="h-10 w-10 text-amber-600" />
+                            ) : (
+                                <XCircle className="h-10 w-10 text-red-600" />
+                            )}
                         </div>
-                        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">
-                            {isExpired ? "Link Expired" : "Invalid Link"}
+                        <h2 className="mb-2 text-2xl font-bold text-slate-800 dark:text-white">
+                            {isOutOfService ? "Service Unavailable" : isExpired ? "Link Expired" : "Invalid Link"}
                         </h2>
                         <p className="text-slate-500 dark:text-slate-400">
-                            {isExpired ? "This verification link has expired or has already been used." : errorMessage}
+                            {isOutOfService 
+                                ? "This company's service is currently suspended due to an expired subscription. Please contact administration." 
+                                : isExpired 
+                                    ? "This verification link has expired or has already been used." 
+                                    : errorMessage}
                         </p>
                         <Button className="mt-8" variant="outline" onClick={() => (window.location.href = "/")}>
                             Go to Homepage
@@ -158,6 +170,8 @@ export function VerifyAppointment() {
     }
 
     const appointment = data?.data?.appointment;
+    const isUsedLink = !!data?.data?.isUsed;
+    const isExpiredByTime = !!data?.data?.isExpiredByTime;
     if (!appointment) return null;
 
     const scheduledDate = new Date(appointment.appointmentDetails.scheduledDate);
@@ -170,43 +184,94 @@ export function VerifyAppointment() {
 
     const currentStatus = completedStatus || appointment.status;
     const isProcessed = actionCompleted || ["approved", "rejected"].includes(currentStatus);
+    const shouldShowExpiredState = isUsedLink && !isProcessed;
+
+    if (shouldShowExpiredState) {
+        return (
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <Card className="w-full max-w-md border-0 bg-white shadow-2xl backdrop-blur-xl dark:bg-slate-900/80">
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 p-4 dark:bg-amber-900/20">
+                            <XCircle className="h-10 w-10 text-amber-600" />
+                        </div>
+                        <h2 className="mb-2 text-2xl font-bold text-slate-800 dark:text-white">Link Inactive</h2>
+                        <p className="text-slate-500 dark:text-slate-400">
+                            This verification link has already been used or has expired.
+                        </p>
+                        <Button className="mt-8" variant="outline" onClick={() => (window.location.href = "/")}>
+                            Go to Homepage
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     if (isProcessed) {
         const displayStatus = currentStatus === "approved" ? "approved" : "rejected";
         return (
             <div className="flex min-h-screen items-center justify-center p-4">
-                <Card className="w-full max-w-md overflow-hidden border-0 bg-white shadow-2xl dark:bg-slate-900 animate-in zoom-in-95 duration-500">
+                <Card className="w-full max-w-lg overflow-hidden border-0 bg-white shadow-2xl dark:bg-slate-900 animate-in zoom-in-95 duration-500">
                     <div className={cn(
-                        "h-2",
+                        "h-1.5",
                         displayStatus === "approved" ? "bg-green-500" : "bg-red-500"
                     )} />
-                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                    <CardContent className="flex flex-col items-center justify-center py-8 text-center">
                         <div className={cn(
-                            "mb-6 flex h-20 w-20 items-center justify-center rounded-full p-4",
+                            "mb-4 flex h-16 w-16 items-center justify-center rounded-full p-3",
                             displayStatus === "approved" ? "bg-green-100 dark:bg-green-900/20" : "bg-red-100 dark:bg-red-900/20"
                         )}>
                             {displayStatus === "approved" ? (
-                                <CheckCircle2 className="h-10 w-10 text-green-600" />
+                                <CheckCircle2 className="h-8 w-8 text-green-600" />
                             ) : (
-                                <XCircle className="h-10 w-10 text-red-600" />
+                                <XCircle className="h-8 w-8 text-red-600" />
                             )}
                         </div>
-                        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white capitalize">
+                        <h2 className="mb-1 text-xl font-bold text-slate-800 dark:text-white capitalize">
                             Appointment {displayStatus}
                         </h2>
-                        <p className="text-slate-500 dark:text-slate-400">
+                        <p className="text-xs font-bold text-[#3882a5] uppercase tracking-widest mb-1">
+                            {appointment.company?.companyName}
+                        </p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
                             {actionCompleted
                                 ? `The appointment has been ${displayStatus} successfully.`
                                 : `This appointment was already ${displayStatus}.`
                             }
                         </p>
-                        <div className="mt-8 flex flex-col w-full gap-3">
-                            <div className="rounded-xl border border-dashed border-slate-200 p-4 text-left dark:border-slate-800">
-                                <p className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-2">Details</p>
-                                <p className="text-sm font-semibold truncate">{appointment.visitor.name}</p>
-                                <p className="text-xs text-slate-500">{formattedDate}</p>
+                        <div className="mt-6 flex w-full flex-col gap-3 max-w-[340px]">
+                            <div className="rounded-xl border border-dashed border-slate-200 p-3 text-left dark:border-slate-800 bg-slate-50/20">
+                                <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">Visitor Details</p>
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-12 w-12 border border-white shadow-sm">
+                                        <AvatarImage src={appointment.visitor?.photo} alt={appointment.visitor?.name || "Visitor"} className="object-cover" />
+                                        <AvatarFallback className="bg-slate-100 text-xs font-bold text-[#3882a5]">
+                                            {(appointment.visitor?.name || "V")
+                                                .split(" ")
+                                                .map((n: string) => n[0])
+                                                .join("")
+                                                .toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="min-w-0">
+                                        <p className="truncate text-xs font-bold text-slate-800">{appointment.visitor?.name || "-"}</p>
+                                        <p className="text-xs font-medium text-slate-500">{appointment.visitor?.phone || "-"}</p>
+                                    </div>
+                                </div>
+                                <div className="mt-3 grid grid-cols-2 gap-2">
+                                    <div className="rounded-lg bg-white border border-slate-100 p-2 dark:bg-slate-800/60">
+                                        <p className="text-xs font-bold uppercase text-slate-400">Date</p>
+                                        <p className="text-xs font-bold text-slate-700">{formattedDate}</p>
+                                    </div>
+                                    <div className="rounded-lg bg-white border border-slate-100 p-2 dark:bg-slate-800/60">
+                                        <p className="text-xs font-bold uppercase text-slate-400">Time</p>
+                                        <p className="text-xs font-bold text-slate-700">
+                                            {formatTime(appointment?.appointmentDetails?.scheduledTime)}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <Button className="w-full" variant="outline" onClick={() => (window.location.href = "/")}>
+                            <Button className="w-full font-bold text-xs h-11 uppercase tracking-wider" variant="outline" onClick={() => (window.location.href = "/")}>
                                 Back to Portal
                             </Button>
                         </div>
@@ -220,16 +285,28 @@ export function VerifyAppointment() {
         <div className="flex min-h-screen items-center justify-center px-4 py-8 sm:py-12">
             <div className="w-full max-w-3xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 {/* Brand Logo or Header */}
-                <div className="flex flex-col items-center gap-2 text-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#3882a5] shadow-lg shadow-[#3882a5]/20">
-                        <ShieldCheck className="h-7 w-7 text-white" />
+                <div className="flex flex-col items-center gap-3 text-center">
+                    <div className="relative group">
+                        <div className="absolute -inset-1 rounded-[24px] bg-gradient-to-tr from-[#3882a5] to-[#98c7dd] opacity-20 blur group-hover:opacity-40 transition duration-500" />
+                        <Avatar className="h-20 w-20 rounded-[24px] border-4 border-white shadow-xl dark:border-slate-900 bg-white p-1">
+                            <AvatarImage 
+                                src={appointment.company?.profilePicture} 
+                                alt={appointment.company?.companyName || "Company Logo"} 
+                                className="object-contain rounded-[20px]" 
+                            />
+                            <AvatarFallback className="bg-[#3882a5] rounded-[20px] text-white">
+                                <ShieldCheck className="h-10 w-10" />
+                            </AvatarFallback>
+                        </Avatar>
                     </div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-                        SafeIn Verification
-                    </h1>
-                    <p className="max-w-md text-slate-500 dark:text-slate-400">
-                        Please review the meeting details carefully before making a decision.
-                    </p>
+                    <div className="space-y-1">
+                        <h1 className="text-2xl font-semibold tracking-tight text-slate-800 dark:text-white sm:text-3xl">
+                            {appointment.company?.companyName || "Verification Request"}
+                        </h1>
+                        <p className="max-w-md text-sm font-medium text-slate-500 dark:text-slate-400">
+                            Please review the meeting details carefully before making a decision.
+                        </p>
+                    </div>
                 </div>
 
                 <Card className="overflow-hidden border-0 bg-white/70 shadow-2xl backdrop-blur-xl ring-1 ring-slate-200 dark:bg-slate-900/70 dark:ring-slate-800">
@@ -251,7 +328,7 @@ export function VerifyAppointment() {
                                 </div>
                                 <div className="flex-1 space-y-4">
                                     <div className="space-y-1">
-                                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
+                                        <h2 className="text-2xl font-bold text-slate-800 dark:text-white sm:text-3xl">
                                             {appointment.visitor.name}
                                         </h2>
                                         <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
@@ -270,19 +347,11 @@ export function VerifyAppointment() {
                                         </div>
                                     </div>
                                     
-                                    <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-                                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800">
-                                                <Mail className="h-4 w-4" />
-                                            </div>
-                                            <span className="truncate">{appointment.visitor.email}</span>
+                                    <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800">
+                                            <Phone className="h-4 w-4" />
                                         </div>
-                                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800">
-                                                <Phone className="h-4 w-4" />
-                                            </div>
-                                            <span>{appointment.visitor.phone}</span>
-                                        </div>
+                                        <span>{appointment.visitor.phone}</span>
                                     </div>
                                 </div>
                             </div>
@@ -324,7 +393,7 @@ export function VerifyAppointment() {
                                                     <p className="text-xs font-medium text-slate-400">Meeting With</p>
                                                     <p className="text-sm font-semibold">{appointment.employee.name}</p>
                                                     {appointment.employee.department && (
-                                                        <p className="text-[10px] text-slate-500">{appointment.employee.department}</p>
+                                                        <p className="text-xs text-slate-500">{appointment.employee.department}</p>
                                                     )}
                                                 </div>
                                             </div>
@@ -369,7 +438,7 @@ export function VerifyAppointment() {
                                                             {appointment.visitor.idProof.type.replace("_", " ").toUpperCase()} Verified
                                                         </span>
                                                     </div>
-                                                    <span className="text-[10px] font-mono font-medium text-slate-400">
+                                                    <span className="text-xs font-mono font-medium text-slate-400">
                                                         {appointment.visitor.idProof.number.slice(0, 4)}••••{appointment.visitor.idProof.number.slice(-2)}
                                                     </span>
                                                 </div>

@@ -17,6 +17,8 @@ export interface VerifyTokenResponse {
     message: string;
     data: {
         isValid: boolean;
+        isUsed?: boolean;
+        isExpiredByTime?: boolean;
         appointment?: {
             _id: string;
             appointmentId: string;
@@ -47,6 +49,10 @@ export interface VerifyTokenResponse {
                     number: string;
                     image?: string;
                 };
+            };
+            company?: {
+                companyName: string;
+                profilePicture?: string;
             };
             accompaniedBy?: {
                 name: string;

@@ -26,6 +26,8 @@ import {
 } from "@/store/api/appointmentApi";
 import { useGetEmployeesQuery, useGetEmployeeQuery } from "@/store/api/employeeApi";
 import { useGetVisitorsQuery, useGetVisitorQuery, Visitor } from "@/store/api/visitorApi";
+import { useGetSafeinProfileQuery } from "@/store/api/safeinProfileApi";
+import { useGetSettingsQuery } from "@/store/api/settingsApi";
 import { showSuccessToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
 import { Calendar, Car, Info, UserPlus } from "lucide-react";
@@ -60,6 +62,74 @@ interface NewAppointmentModalProps {
     layout?: "modal" | "page";
 }
 
+/**
+ * Sub-component for field headers with an "Add New" action
+ */
+const FieldHeader = ({
+    label,
+    onAction,
+    actionLabel
+}: {
+    label: string;
+    onAction: () => void;
+    actionLabel: string;
+}) => (
+    <div className="flex items-center justify-between h-5">
+        <label className="text-xs text-muted-foreground uppercase font-bold tracking-[0.1em]">
+            {label} <span className="ml-1 text-red-500">*</span>
+        </label>
+        <button
+            type="button"
+            onClick={onAction}
+            className="group flex items-center gap-1.5 text-xs text-[#3882a5] font-semibold hover:text-[#074463] uppercase tracking-wider transition-all duration-200 cursor-pointer select-none"
+        >
+            <UserPlus className="h-4 w-4 transition-transform duration-200 group-hover:scale-125 group-hover:rotate-6 text-[#3882a5] group-hover:text-[#074463]" />
+            <span className="group-hover:underline underline-offset-4 decoration-2 transition-all">
+                {actionLabel}
+            </span>
+        </button>
+    </div>
+);
+
+/**
+ * Sub-component for custom "No Options" state in SelectField
+ */
+const NoResultsFound = ({
+    inputValue,
+    type,
+    onAction
+}: {
+    inputValue: string;
+    type: 'visitor' | 'employee';
+    onAction: () => void;
+}) => (
+    <div className="flex flex-col items-center justify-center py-6 px-4 text-center">
+        <div className="bg-primary/5 p-3 rounded-full mb-3">
+            <UserPlus className="h-6 w-6 text-primary/40" />
+        </div>
+        <p className="text-sm font-medium text-foreground mb-1">
+            No {type} found "{inputValue}"
+        </p>
+        <p className="text-xs text-muted-foreground mb-4 max-w-[200px]">
+            We couldn't find any {type} with those details.
+        </p>
+        <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            className="w-full gap-2 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer h-10"
+            onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onAction();
+            }}
+        >
+            <UserPlus className="h-4 w-4" />
+            <span>Add New {type === 'visitor' ? 'Visitor' : 'Employee'}</span>
+        </Button>
+    </div>
+);
+
 export function NewAppointmentModal({
     appointmentId,
     initialVisitorId,
@@ -90,36 +160,97 @@ export function NewAppointmentModal({
     const debouncedEmployeeSearch = useDebounce(employeeSearchInput, 500);
     const debouncedVisitorSearch = useDebounce(visitorSearchInput, 500);
 
+    const [employeePage, setEmployeePage] = useState(1);
+    const [allEmployees, setAllEmployees] = useState<any[]>([]);
+
+    const [visitorPage, setVisitorPage] = useState(1);
+    const [allVisitors, setAllVisitors] = useState<Visitor[]>([]);
+
+    useEffect(() => {
+        setEmployeePage(1);
+    }, [debouncedEmployeeSearch]);
+
+    useEffect(() => {
+        setVisitorPage(1);
+    }, [debouncedVisitorSearch]);
+
     const open = isPage ? true : controlledOpen !== undefined ? controlledOpen : internalOpen;
     const setOpen = isPage ? (_: boolean) => { } : onOpenChange || setInternalOpen;
     const isEditMode = !!appointmentId;
 
     const [createAppointment, { isLoading: isCreating }] = useCreateAppointmentMutation();
     const [updateAppointment, { isLoading: isUpdating }] = useUpdateAppointmentMutation();
+    const { data: profileData } = useGetSafeinProfileQuery();
+    const { data: settings } = useGetSettingsQuery();
 
     const isLoading = isCreating || isUpdating;
     const {
         data: employeesData,
         isLoading: isLoadingEmployees,
+        isFetching: isFetchingEmployees,
         error: employeesError,
     } = useGetEmployeesQuery({
-        page: 1,
-        limit: 10,
+        page: employeePage,
+        limit: 50,
         search: debouncedEmployeeSearch || undefined,
         status: "Active" as const,
     });
-    const employees = employeesData?.employees || [];
+
+    useEffect(() => {
+        if (employeesData?.employees) {
+            if (employeePage === 1) {
+                setAllEmployees(employeesData.employees);
+            } else {
+                setAllEmployees(prev => {
+                    // Prevent duplicates
+                    const existingIds = new Set(prev.map(e => e._id));
+                    const newEmployees = employeesData.employees.filter((e: any) => !existingIds.has(e._id));
+                    return [...prev, ...newEmployees];
+                });
+            }
+        }
+    }, [employeesData, employeePage]);
 
     const {
         data: visitorsData,
         isLoading: isLoadingVisitors,
+        isFetching: isFetchingVisitors,
         error: visitorsError,
     } = useGetVisitorsQuery({
-        page: 1,
-        limit: 10,
+        page: visitorPage,
+        limit: 50,
         search: debouncedVisitorSearch || undefined,
     });
-    const visitors: Visitor[] = visitorsData?.visitors || [];
+
+    useEffect(() => {
+        if (visitorsData?.visitors) {
+            if (visitorPage === 1) {
+                setAllVisitors(visitorsData.visitors);
+            } else {
+                setAllVisitors(prev => {
+                    // Prevent duplicates
+                    const existingIds = new Set(prev.map(v => v._id));
+                    const newVisitors = visitorsData.visitors.filter((v: any) => !existingIds.has(v._id));
+                    return [...prev, ...newVisitors];
+                });
+            }
+        }
+    }, [visitorsData, visitorPage]);
+
+    const employees = allEmployees;
+    const visitors = allVisitors;
+
+    const handleEmployeeScrollToBottom = useCallback(() => {
+        if (!isFetchingEmployees && employeesData?.pagination?.hasNextPage) {
+            setEmployeePage(prev => prev + 1);
+        }
+    }, [isFetchingEmployees, employeesData?.pagination?.hasNextPage]);
+
+    const handleVisitorScrollToBottom = useCallback(() => {
+        if (!isFetchingVisitors && visitorsData?.pagination?.hasNextPage) {
+            setVisitorPage(prev => prev + 1);
+        }
+    }, [isFetchingVisitors, visitorsData?.pagination?.hasNextPage]);
 
     const { data: existingAppointment, isLoading: isLoadingAppointment } = useGetAppointmentQuery(appointmentId || "", {
         skip: !appointmentId,
@@ -253,7 +384,9 @@ export function NewAppointmentModal({
                 showSuccessToast("Appointment created successfully");
                 if (!isPage) setOpen(false);
 
-                if (result.approvalLink) {
+                const isAutoApproveOn = settings?.features?.enableAutoApproval === true;
+
+                if (result.approvalLink && !isAutoApproveOn) {
                     setApprovalLink(result.approvalLink);
                     setShowApprovalLinkModal(true);
                 } else {
@@ -287,53 +420,81 @@ export function NewAppointmentModal({
 
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                        <Controller
-                            name="visitorId"
-                            control={control}
-                            render={({ field }) => (
-                                <SelectField
-                                    label="Visitor"
-                                    placeholder="Select visitor"
-                                    options={visitorOptions}
-                                    value={field.value}
-                                    onChange={(val) => {
-                                        field.onChange(val ?? "");
-                                        handleVisitorSelect(val);
-                                    }}
-                                    onInputChange={handleVisitorSearchChange}
-                                    error={
-                                        errors.visitorId?.message || (visitorsError ? "Failed to load visitors" : undefined)
-                                    }
-                                    isLoading={isLoadingVisitors}
-                                    isClearable={false}
-                                    required
-                                />
-                            )}
-                        />
+                        <div className="flex flex-col gap-1.5 min-w-0">
+                            <FieldHeader
+                                label="Visitor"
+                                actionLabel="New Visitor"
+                                onAction={() => router.push(routes.privateroute.VISITORREGISTRATION)}
+                            />
+                            <Controller
+                                name="visitorId"
+                                control={control}
+                                render={({ field }) => (
+                                    <SelectField
+                                        placeholder="Select visitor"
+                                        options={visitorOptions}
+                                        value={field.value}
+                                        onChange={(val) => {
+                                            field.onChange(val ?? "");
+                                            handleVisitorSelect(val);
+                                        }}
+                                        onInputChange={handleVisitorSearchChange}
+                                        error={
+                                            errors.visitorId?.message || (visitorsError ? "Failed to load visitors" : undefined)
+                                        }
+                                        isLoading={isLoadingVisitors || isFetchingVisitors}
+                                        isClearable={false}
+                                        className="h-12"
+                                        onMenuScrollToBottom={handleVisitorScrollToBottom}
+                                        noOptionsMessage={({ inputValue }) => (
+                                            <NoResultsFound
+                                                type="visitor"
+                                                inputValue={inputValue}
+                                                onAction={() => router.push(routes.privateroute.VISITORREGISTRATION)}
+                                            />
+                                        )}
+                                    />
+                                )}
+                            />
+                        </div>
 
-                        <Controller
-                            name="employeeId"
-                            control={control}
-                            render={({ field }) => (
-                                <SelectField
-                                    label="Employee to Meet"
-                                    placeholder="Select employee"
-                                    options={employeeOptions}
-                                    value={field.value}
-                                    onChange={(val) => {
-                                        field.onChange(val ?? "");
-                                    }}
-                                    onInputChange={handleEmployeeSearchChange}
-                                    error={
-                                        errors.employeeId?.message ||
-                                        (employeesError ? "Failed to load employees" : undefined)
-                                    }
-                                    isLoading={isLoadingEmployees}
-                                    isClearable={false}
-                                    required
-                                />
-                            )}
-                        />
+                        <div className="flex flex-col gap-1.5 min-w-0">
+                            <FieldHeader
+                                label="Employee to Meet"
+                                actionLabel="New Employee"
+                                onAction={() => router.push(routes.privateroute.EMPLOYEECREATE)}
+                            />
+                            <Controller
+                                name="employeeId"
+                                control={control}
+                                render={({ field }) => (
+                                    <SelectField
+                                        placeholder="Select employee"
+                                        options={employeeOptions}
+                                        value={field.value}
+                                        onChange={(val) => {
+                                            field.onChange(val ?? "");
+                                        }}
+                                        onInputChange={handleEmployeeSearchChange}
+                                        error={
+                                            errors.employeeId?.message ||
+                                            (employeesError ? "Failed to load employees" : undefined)
+                                        }
+                                        isLoading={isLoadingEmployees || isFetchingEmployees}
+                                        isClearable={false}
+                                        className="h-12"
+                                        onMenuScrollToBottom={handleEmployeeScrollToBottom}
+                                        noOptionsMessage={({ inputValue }) => (
+                                            <NoResultsFound
+                                                type="employee"
+                                                inputValue={inputValue}
+                                                onAction={() => router.push(routes.privateroute.EMPLOYEECREATE)}
+                                            />
+                                        )}
+                                    />
+                                )}
+                            />
+                        </div>
 
                         <div className="md:col-span-1">
                             <InputField
@@ -467,7 +628,7 @@ export function NewAppointmentModal({
                     >
                         <ActionButton
                             type="submit"
-                            variant="outline-primary"
+                            variant="primary"
                             disabled={isLoading || isFileUploading}
                             size="xl"
                             className="w-full min-w-[180px] px-6 sm:w-auto"

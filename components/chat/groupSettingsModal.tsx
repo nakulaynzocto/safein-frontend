@@ -184,12 +184,12 @@ export function GroupSettingsModal({
                 <DialogHeader className="bg-white border-b border-gray-100 px-8 py-6 shrink-0 relative">
                     <div className="flex justify-between items-center relative z-10">
                         <div className="space-y-1">
-                            <DialogTitle className="text-xl font-bold text-gray-900 tracking-tight leading-none">
+                            <DialogTitle className="text-xl font-bold text-gray-800 tracking-tight leading-none">
                                 {isGroupAdmin ? "Manage Group" : "Group Info"}
                             </DialogTitle>
                             <div className="flex items-center gap-2">
                                 <span className={cn("h-1.5 w-1.5 rounded-full", isGroupAdmin ? "bg-blue-500" : "bg-gray-400")} />
-                                <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.15em]">
+                                <p className="text-gray-400 text-xs font-bold uppercase tracking-[0.15em]">
                                     {participantsCount > 0 ? `${participantsCount} Members` : "Group Management"}
                                 </p>
                             </div>
@@ -204,7 +204,7 @@ export function GroupSettingsModal({
                             <div className="relative shrink-0">
                                 <Avatar className="h-20 w-20 sm:h-28 w-28 border-4 border-gray-50 shadow-2xl transition-transform hover:scale-105 duration-300">
                                     <AvatarImage src={activeChat?.groupPicture} className="object-cover" />
-                                    <AvatarFallback className="bg-[#074463] text-white text-2xl sm:text-4xl font-black flex items-center justify-center leading-none">
+                                    <AvatarFallback className="bg-[#074463] text-white text-2xl sm:text-4xl font-semibold flex items-center justify-center leading-none">
                                         {getInitials(activeChat?.groupName || "G")}
                                     </AvatarFallback>
                                 </Avatar>
@@ -222,7 +222,7 @@ export function GroupSettingsModal({
 
                             <div className="flex-1 w-full space-y-3">
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Group Management Name</label>
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Group Management Name</label>
                                     <div className="flex gap-2">
                                         <Input
                                             value={groupName}
@@ -299,8 +299,8 @@ export function GroupSettingsModal({
                                                                 </AvatarFallback>
                                                             </Avatar>
                                                             <div>
-                                                                <p className="text-sm font-bold text-gray-900 leading-none">{formatName(emp.name)}</p>
-                                                                <p className="text-[10px] text-gray-400 mt-1">{emp.email}</p>
+                                                                <p className="text-sm font-bold text-gray-800 leading-none">{formatName(emp.name)}</p>
+                                                                <p className="text-xs text-gray-400 mt-1">{emp.email}</p>
                                                             </div>
                                                         </div>
                                                         <Button
@@ -326,7 +326,7 @@ export function GroupSettingsModal({
                                                     <div className="relative">
                                                         <Avatar className="h-11 w-11 border-2 border-white shadow-md">
                                                             <AvatarImage src={p.profilePicture || p.avatar} />
-                                                            <AvatarFallback className="bg-gray-100 text-[#074463] font-black text-sm flex items-center justify-center leading-none">
+                                                            <AvatarFallback className="bg-gray-100 text-[#074463] font-semibold text-sm flex items-center justify-center leading-none">
                                                                 {getInitials(p.name)}
                                                             </AvatarFallback>
                                                         </Avatar>
@@ -337,11 +337,11 @@ export function GroupSettingsModal({
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-extrabold text-gray-900 flex items-center gap-2">
+                                                        <p className="text-sm font-extrabold text-gray-800 flex items-center gap-2">
                                                             {formatName(p.name)}
-                                                            {String(p._id) === currentUserId && <span className="text-[9px] bg-blue-100 text-[#074463] px-2 py-0.5 rounded-full font-black tracking-tighter uppercase">You</span>}
+                                                            {String(p._id) === currentUserId && <span className="text-xs bg-blue-100 text-[#074463] px-2 py-0.5 rounded-full font-semibold tracking-tighter uppercase">You</span>}
                                                         </p>
-                                                        <p className="text-[11px] text-gray-500 font-medium">{p.email}</p>
+                                                        <p className="text-xs text-gray-500 font-medium">{p.email}</p>
                                                     </div>
                                                 </div>
                                                 {isGroupAdmin && String(p._id) !== currentUserId && (
@@ -369,7 +369,7 @@ export function GroupSettingsModal({
                                     variant="ghost"
                                     onClick={() => setConfirmDeleteGroup(true)}
                                     disabled={isUpdating}
-                                    className="w-full justify-center text-red-500 hover:text-red-600 hover:bg-red-50 rounded-2xl gap-3 font-black text-xs uppercase tracking-widest h-12 border border-dashed border-red-100 hover:border-red-200 transition-all duration-300"
+                                    className="w-full justify-center text-red-500 hover:text-red-600 hover:bg-red-50 rounded-2xl gap-3 font-semibold text-xs uppercase tracking-widest h-12 border border-dashed border-red-100 hover:border-red-200 transition-all duration-300"
                                 >
                                     <Trash2 className="h-4 w-4" />
                                     Terminate Group

@@ -59,8 +59,8 @@ export const helpArticles: HelpArticle[] = [
       <h2>Step 3: Activating 'Smart Appointments'</h2>
       <p>Now that your team is ready, start inviting guests. SafeIn offers two primary ways to schedule visits:</p>
       <ul>
-          <li><strong>VIP Booking:</strong> The host fills in the visitor's details directly. The visitor receives an automated <strong>OTP (One-Time Password)</strong> via WhatsApp and Email for secure verification.</li>
-          <li><strong>Invite Links:</strong> Send a registration link via WhatsApp or Email. The visitor clicks the link, fills in their own details, and the appointment is automatically booked.</li>
+          <li><strong>Priority Booking:</strong> The host fills in the visitor's details directly. The visitor receives an automated <strong>OTP (One-Time Password)</strong> via WhatsApp and Email for secure verification.</li>
+          <li><strong>Smart Invite Links:</strong> Send a registration link via WhatsApp or Email. The visitor clicks the link, fills in their own details, and the appointment is automatically booked.</li>
           <li><strong>Pre-Verification:</strong> You can ask visitors to provide their details (like vehicle number or ID) before they even arrive.</li>
       </ul>
 
@@ -72,7 +72,7 @@ export const helpArticles: HelpArticle[] = [
       <p>For visitors who arrive without an appointment, SafeIn provides the <strong>Spot Pass</strong> feature.</p>
       <ul>
           <li><strong>Spot Pass Creation:</strong> The security guard or receptionist can generate a 'Spot Pass' directly from the dashboard.</li>
-          <li><strong>Frictionless Entry:</strong> Unlike VIP bookings, <strong>Spot Pass does not require an OTP</strong>, allowing for rapid registration of walk-in guests.</li>
+          <li><strong>Frictionless Entry:</strong> Unlike Priority Bookings, <strong>Spot Pass does not require an OTP</strong>, allowing for rapid registration of walk-in guests.</li>
           <li><strong>Instant Notification:</strong> As soon as a Spot Pass is generated, the assigned host receives an instant alert.</li>
       </ul>
 
@@ -86,21 +86,29 @@ export const helpArticles: HelpArticle[] = [
           <li><strong>Host-Visitor Direct Chat:</strong> Hosts can chat directly with their arriving visitors through the dashboard or mobile app.</li>
           <li><strong>Status Updates:</strong> Tell your visitor <em>"I'm on my way"</em> or <em>"Please wait in the cafe"</em> with one click.</li>
           <li><strong>Secure History:</strong> All communication is encrypted and stored in the visitor log for security audits.</li>
-          <li><strong>In-App Notifications:</strong> Hosts receive real-time push notifications of new messages from their guests.</li>
       </ul>
 
       <div style="margin: 24px 0;">
         <img src="/images/features/chat_hero_1772358492233.png" alt="Real-time Chat Feature" style="border-radius: 12px; width: 100%; height: auto; border: 1px solid #eee;" />
       </div>
 
+      <h2>Step 6: Advanced Settings & Core Integrations</h2>
+      <p>To fully automate your workflow, you must configure your communication channels under <strong>Settings</strong>.</p>
+      <ul>
+          <li><strong>SMTP Configuration:</strong> By default, SafeIn sends emails from its official server. To use your own company email (e.g., <em>reception@yourcompany.com</em>), go to <strong>Settings > SMTP</strong>. Enter your server host, port, and credentials to enable white-labeled email invites.</li>
+          <li><strong>WhatsApp API Integration:</strong> Enable the <strong>WhatsApp</strong> channel to send secure <strong>OTP codes</strong> and <strong>Smart Invite Links</strong> directly to your visitors' phones. This has a much higher open rate than traditional email.</li>
+          <li><strong>SMS Gateway:</strong> Configure <strong>SMS</strong> as a secondary fallback. This ensures that even visitors without an active internet connection receive their entry codes and arrival alerts instantly.</li>
+          <li><strong>Notification Center:</strong> In <strong>Settings > Notifications</strong>, you can toggle which events trigger alerts (e.g., <em>Visitor Arrival, Check-out, Messages</em>) and choose the delivery channel (Email, WhatsApp, or SMS) for each specific event.</li>
+      </ul>
+
       <hr />
 
       <h2>Summary of the Flow</h2>
-      <p>1. <strong>Admin Setup:</strong> Profile & Branding <br/>
+      <p>1. <strong>Admin Setup:</strong> Profile, Branding & SMTP/WhatsApp Settings <br/>
          2. <strong>Workforce:</strong> Manual or Bulk Employee Registration <br/>
          3. <strong>Operation:</strong> Create Appointments or Spot Passes <br/>
-         4. <strong>Communication:</strong> Chat directly with visitors in real-time <br/>
-         5. <strong>Intelligence:</strong> Review dashboard data.</p>
+         4. <strong>Communication:</strong> Chat directly with visitors or automate alerts via WhatsApp/SMS <br/>
+         5. <strong>Intelligence:</strong> Review dashboard data and audit logs.</p>
       
       <p>If you encounter any issues during these steps, our <strong>24/7 Live Chat</strong> is available right inside your dashboard to assist you.</p>
     `,
@@ -134,12 +142,13 @@ export const helpArticles: HelpArticle[] = [
       <h3>2. Choose Booking Method</h3>
       <p>Decide how you'd like to invite your guest:</p>
       <ul>
-          <li><strong>VIP Booking (Manual Entry):</strong> Enter the visitor's Name, Email, and Phone. The system will send them a secure <strong>OTP</strong> to show at the gate.</li>
-          <li><strong>Invite Link:</strong> Copy the unique appointment link and send it via WhatsApp/Email. The guest will fill out their own details to complete the booking.</li>
+          <li><strong>Priority Booking (Manual Entry):</strong> Enter the visitor's Name, Email, and Phone. The system will send them a secure <strong>OTP</strong> to show at the gate.</li>
+          <li><strong>Smart Invite Link:</strong> Copy the unique appointment link and send it via WhatsApp/Email. The guest will fill out their own details to complete the booking.</li>
+          <li><strong>QR-Based Self-Registration:</strong> Visitors can scan the printed QR code at your entry gate. This opens a registration page on their phone, allowing them to book a visit on-the-spot.</li>
       </ul>
 
       <blockquote>
-        <strong>Pro Tip:</strong> If the visitor has visited before, the system will suggest auto-completing their details from the database.
+        <strong>Pro Tip:</strong> If the visitor has visited before, the system will suggest auto-completing their details from the database (even via QR scan).
       </blockquote>
 
       <h3>3. Scheduling Details</h3>
@@ -160,7 +169,7 @@ export const helpArticles: HelpArticle[] = [
       <h2>What Happens Next?</h2>
       <p>Immediately after creation, the system triggers:</p>
       <ol>
-          <li><strong>Visitor Notification:</strong> The guest receives an automated message with the <strong>OTP</strong> (for VIP bookings) or the **Form Link** (for invite links).</li>
+          <li><strong>Visitor Notification:</strong> The guest receives an automated message with the <strong>OTP</strong> (for Priority Bookings) or the **Form Link** (for Smart Invite Links).</li>
           <li><strong>Host Notification:</strong> You (or the assigned host) will receive a confirmation alert once the appointment is finalized.</li>
       </ol>
     `,
@@ -192,7 +201,7 @@ export const helpArticles: HelpArticle[] = [
 
       <h3>3. ID Scanning & Documents</h3>
       <p>Enable <strong>OCR ID Scanning</strong> to allow security guards to scan visitor IDs and auto-fill details instantly, reducing manual errors.</p>
-      <p>For VIP bookings, the visitor must provide the <strong>OTP</strong> received on their phone to the guard for verification.</p>
+      <p>For Priority Bookings, the visitor must provide the <strong>OTP</strong> received on their phone to the guard for verification.</p>
 
       <h2>Gatekeeper Interface</h2>
       <p>Security personnel use the <strong>Gatekeeper App</strong> to verify visitor details and OTPs. Ensure your guards have the appropriate device permissions assigned in the <strong>Workforce Hub</strong>.</p>
@@ -200,29 +209,41 @@ export const helpArticles: HelpArticle[] = [
     },
     {
         id: "3",
-        title: "Configuring notifications",
+        title: "Configuring Communication Channels",
         slug: "configuring-email-notifications",
         category: "Getting Started",
-        description: "Master the communication flow with automated alerts and triggers.",
-        readTime: "4 min read",
-        lastUpdated: "Dec 2025",
+        description: "Master the communication flow with automated alerts via SMTP, WhatsApp, and SMS.",
+        readTime: "5 min read",
+        lastUpdated: "Mar 2026",
         content: `
-      <h2>The Importance of Communication</h2>
-      <p>Automated status updates ensure that your hosts and security staff are always in sync. SafeIn's notification engine handles these communications via WhatsApp and Email.</p>
+      <h2>The Importance of Multi-Channel Communication</h2>
+      <p>Automated status updates ensure that your hosts and security staff are always in sync. SafeIn's notification engine handles these communications via three primary channels.</p>
 
-      <h2>Notification Types</h2>
+      <h2>1. SMTP (White-Labeled Email)</h2>
+      <p>By default, notifications are sent from SafeIn. To build better trust with your guests, configure your own email server.</p>
+      <ul>
+          <li>Navigate to <strong>Settings > SMTP</strong>.</li>
+          <li>Enter your Host (e.g., mail.yourcompany.com), Port, and Password.</li>
+          <li>Once active, all visitor invites and check-in emails will come from your official email address.</li>
+      </ul>
 
-      <h3>1. Visitor Arrival (Host Notification)</h3>
-      <p><strong>Trigger:</strong> Visitor is checked in by the Gatekeeper or via Spot Pass.</p>
-      <p><strong>Recipient:</strong> The assigned Host.</p>
-      <p><strong>Content:</strong> Instant alert on the dashboard and via WhatsApp.</p>
+      <h2>2. WhatsApp Notifications</h2>
+      <p>WhatsApp is our most effective channel with near-instant open rates and high trust.</p>
+      <ul>
+          <li><strong>Secure OTPs:</strong> Visitors receive their 6-digit entry codes directly on WhatsApp.</li>
+          <li><strong>Smart Links:</strong> Send interactive registration forms that open directly in the chat interface.</li>
+          <li><strong>Activation:</strong> Toggle this on under <strong>Settings > WhatsApp</strong>.</li>
+      </ul>
 
-      <h3>2. Invite (Visitor Notification)</h3>
-      <p><strong>Trigger:</strong> Appointment is created.</p>
-      <p><strong>Content:</strong> Contains visit details and either a secure <strong>OTP</strong> (for VIP bookings) or a <strong>Form Link</strong> (for invite links).</p>
+      <h2>3. SMS Fallback</h2>
+      <p>Ensure 100% reach even when your visitor doesn't have an active data connection.</p>
+      <ul>
+          <li>Configure SMS settings under <strong>Settings > SMS</strong>.</li>
+          <li>Useful for remote locations or visitors without smartphones.</li>
+      </ul>
       
-      <h2>Customizing Templates</h2>
-      <p>Go to <strong>Settings</strong> > <strong>Notifications</strong>. You can customize the message branding and default content for all outgoing alerts.</p>
+      <h2>Notification Center Control</h2>
+      <p>Go to <strong>Settings</strong> > <strong>Notifications</strong>. You can map specific events to these channels. For example, you might want <em>Visitor Arrival</em> to trigger both an Email and a WhatsApp alert, but <em>Check-out</em> to only send an Email.</p>
     `,
     },
     {
@@ -327,15 +348,15 @@ export const helpArticles: HelpArticle[] = [
       <h3>Phase 1: Pre-Arrival & Scheduling</h3>
       <p>There are two primary ways to schedule a visit:</p>
       <ul>
-          <li><strong>VIP Booking:</strong> The host enters the visitor's details. The visitor receives an automated <strong>OTP (One-Time Password)</strong> via WhatsApp and Email for secure verification.</li>
-          <li><strong>Invite Link:</strong> The host sends a link. The visitor opens the link, fills in their details, and the appointment is booked once submitted.</li>
+          <li><strong>Priority Booking:</strong> The host enters the visitor's details. The visitor receives an automated <strong>OTP (One-Time Password)</strong> via WhatsApp and Email for secure verification.</li>
+          <li><strong>Smart Invite Link:</strong> The host sends a link. The visitor opens the link, fills in their details, and the appointment is booked once submitted.</li>
       </ul>
 
       <h3>Phase 2: Arrival & Verification</h3>
       <p>When the visitor arrives at the entry gate:</p>
       <ul>
-          <li><strong>VIP Booking:</strong> The visitor tells the <strong>OTP</strong> to the Guard. The Guard enters it into the system to verify the identity and appointment instantly.</li>
-          <li><strong>Invite Link Booking:</strong> The Guard checks the visitor's Name/Details in the "Expected Today" list on the dashboard.</li>
+          <li><strong>Priority Booking:</strong> The visitor tells the <strong>OTP</strong> to the Guard. The Guard enters it into the system to verify the identity and appointment instantly.</li>
+          <li><strong>Smart Invite Link Booking:</strong> The Guard checks the visitor's Name/Details in the "Expected Today" list on the dashboard.</li>
           <li><strong>Spot Pass (Walk-In):</strong> Visitors without a prior invite can be registered on the spot by the Guard. <strong>No OTP is required</strong> for Spot Pass entries.</li>
       </ul>
 
@@ -616,13 +637,56 @@ export const helpArticles: HelpArticle[] = [
         </ul>
       `,
     },
+    {
+        id: "qr-checkin-guide",
+        title: "Understanding QR Check-in & Self-Service",
+        slug: "qr-checkin-self-service-guide",
+        category: "Security & Privacy",
+        description: "How to set up and use touchless QR check-in for a friction-free visitor experience.",
+        readTime: "4 min read",
+        lastUpdated: "Mar 2026",
+        content: `
+      <h2>The Power of Touchless QR Entry</h2>
+      <p>In the modern workspace, speed and security must go hand-in-hand. SafeIn's <strong>QR Check-in</strong> system allows visitors to register themselves using their own smartphones, reducing wait times at the reception desk.</p>
+
+      <h2>How it Works</h2>
+      <p>The flow is designed to be simple, secure, and entirely digital:</p>
+      <ol>
+          <li><strong>Printing the QR:</strong> The Admin generates and prints a unique QR code from the dashboard.</li>
+          <li><strong>Visitor Scan:</strong> Upon arrival, the visitor scans the QR code at the entry gate.</li>
+          <li><strong>Self-Registration:</strong> A secure mobile form opens on the visitor's phone. They enter their details (Name, Phone, Purpose of Visit).</li>
+          <li><strong>Host Approval:</strong> Once submitted, the Host receives an instant alert to approve or decline the visit.</li>
+          <li><strong>Entry Pass:</strong> After approval, a digital entry pass is generated on the visitor's phone.</li>
+      </ol>
+
+      <h2>Setting Up Your QR Gate</h2>
+      <p>To activate this feature for your office:</p>
+      <ul>
+          <li>Navigate to <strong>Settings > QR Check-in</strong>.</li>
+          <li><strong>Configure Fields:</strong> Choose which visitor details are mandatory during self-scan.</li>
+          <li><strong>Download QR:</strong> Click the "Download & Print" button. We recommend placing this QR code at eye level on your main entry gate or reception desk.</li>
+          <li><strong>Verification Level:</strong> You can choose to require an OTP verification even for QR scans for extra security.</li>
+      </ul>
+
+      <h2>Benefits of QR Check-in</h2>
+      <ul>
+          <li><strong>Touchless:</strong> Visitors don't need to touch a shared tablet or physical logbook.</li>
+          <li><strong>Zero Queues:</strong> Multiple visitors can scan and register simultaneously.</li>
+          <li><strong>Privacy:</strong> Visitor data is entered directly on their private device, not visible to others.</li>
+      </ul>
+      
+      <blockquote>
+        <strong>Note:</strong> QR Check-in works perfectly alongside Priority Bookings and Spot Passes, giving you 360-degree control over facility entry.
+      </blockquote>
+    `,
+    },
 ];
 
 export const helpCategories = [
     {
         icon: Calendar,
-        title: "Getting Started",
-        description: "Learn the basics of setting up your SafeIn management system",
+        title: "Onboarding & System Setup",
+        description: "Master the fundamentals of your SafeIn platform: from first login to core configuration.",
         articles: [
             "safein-onboarding-guide",
             "how-to-create-your-first-appointment",
@@ -631,8 +695,8 @@ export const helpCategories = [
     },
     {
         icon: Users,
-        title: "User Management",
-        description: "Manage employees, visitors, and user permissions",
+        title: "Workforce Hub & Visitor Logs",
+        description: "Manage your employee directory, visitor registrations, and granular user roles.",
         articles: [
             "adding-and-managing-employees",
             "visitor-registration-process",
@@ -641,12 +705,13 @@ export const helpCategories = [
     },
     {
         icon: Shield,
-        title: "Security & Privacy",
-        description: "Learn about security features and data protection",
+        title: "Security Controls & Compliance",
+        description: "Explore advanced security settings, QR protocols, and data protection standards.",
         articles: [
             "data-encryption-and-security",
             "privacy-policy-compliance",
             "access-control-settings",
+            "qr-checkin-guide",
         ],
     },
 ];

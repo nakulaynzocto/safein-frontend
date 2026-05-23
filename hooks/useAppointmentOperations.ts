@@ -61,7 +61,7 @@ export interface UseAppointmentOperationsReturn {
     setSortBy: (field: string) => void;
     setSortOrder: (order: "asc" | "desc") => void;
     deleteAppointment: (appointmentId: string) => Promise<void>;
-    checkInAppointment: (appointmentId: string, notes?: string) => Promise<void>;
+    checkInAppointment: (appointmentId: string, notes?: string, visitorPhoto?: string) => Promise<void>;
     checkOutAppointment: (appointmentId: string, notes?: string) => Promise<void>;
     approveAppointment: (appointmentId: string) => Promise<void>;
     rejectAppointment: (appointmentId: string) => Promise<void>;
@@ -170,9 +170,12 @@ export function useAppointmentOperations(
         }
     };
 
-    const checkInAppointment = async (appointmentId: string, notes?: string): Promise<void> => {
+    const checkInAppointment = async (appointmentId: string, notes?: string, visitorPhoto?: string): Promise<void> => {
         try {
-            await checkInAppointmentMutation({ appointmentId, notes }).unwrap();
+            const payload: any = { appointmentId, notes };
+            if (visitorPhoto) payload.visitorPhoto = visitorPhoto;
+            
+            await checkInAppointmentMutation(payload).unwrap();
             toast.success("Visitor checked in successfully");
             refetch();
         } catch (error) {

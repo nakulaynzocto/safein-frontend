@@ -61,7 +61,7 @@ export default function TestimonialsSection() {
                                     className="rounded-full shadow-md"
                                 />
                                 <div>
-                                    <p className="font-bold text-gray-900">{testimonial.name}</p>
+                                    <p className="font-bold text-gray-800">{testimonial.name}</p>
                                     <p className="text-sm text-gray-500">{testimonial.role}</p>
                                 </div>
                             </div>

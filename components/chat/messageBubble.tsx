@@ -22,7 +22,7 @@ export function MessageBubble({ isSender, message, timestamp, status }: MessageB
                 <p className="text-sm leading-relaxed whitespace-pre-wrap breakdown-words">{message}</p>
                 <div
                     className={cn(
-                        "flex items-center justify-end gap-1 mt-1 text-[10px]",
+                        "flex items-center justify-end gap-1 mt-1 text-xs",
                         isSender ? "text-blue-100" : "text-gray-400"
                     )}
                 >

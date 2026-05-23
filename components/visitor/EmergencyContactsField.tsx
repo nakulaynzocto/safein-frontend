@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { VisitorFormData } from "./visitorSchema";
+import { useUserCountry } from "@/hooks/useUserCountry";
 
 interface EmergencyContactsFieldProps {
     control: Control<VisitorFormData>;
@@ -20,6 +21,7 @@ export function EmergencyContactsField({ control, register, errors }: EmergencyC
         control,
         name: "emergencyContacts",
     });
+    const userCountry = useUserCountry();
 
     return (
         <div className="space-y-4">
@@ -107,7 +109,7 @@ export function EmergencyContactsField({ control, register, errors }: EmergencyC
                                                 placeholder="Enter phone number"
                                                 error={errors.emergencyContacts?.[index]?.phone?.message}
                                                 required
-                                                defaultCountry="in"
+                                                defaultCountry={userCountry}
                                             />
                                         )}
                                     />

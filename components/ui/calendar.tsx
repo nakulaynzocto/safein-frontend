@@ -90,7 +90,7 @@ function Calendar({
                 range_middle: cn("rounded-none", defaultClassNames.range_middle),
                 range_end: cn("rounded-r-md bg-accent", defaultClassNames.range_end),
                 today: cn(
-                    "bg-accent text-accent-foreground rounded-md data-[selected=true]:rounded-none",
+                    "rounded-md",
                     defaultClassNames.today,
                 ),
                 outside: cn("text-muted-foreground aria-selected:text-muted-foreground", defaultClassNames.outside),
@@ -130,7 +130,7 @@ function Calendar({
     );
 }
 
-function CalendarDayButton({ className, day, modifiers, ...props }: ComponentProps<typeof DayButton>) {
+function CalendarDayButton({ className, day, modifiers, children: _children, ...props }: ComponentProps<typeof DayButton>) {
     const defaultClassNames = getDefaultClassNames();
 
     const ref = useRef<HTMLButtonElement>(null);
@@ -144,19 +144,20 @@ function CalendarDayButton({ className, day, modifiers, ...props }: ComponentPro
             variant="ghost"
             size="icon"
             data-day={day.date.toLocaleDateString()}
-            data-selected-single={
-                modifiers.selected && !modifiers.range_start && !modifiers.range_end && !modifiers.range_middle
-            }
-            data-range-start={modifiers.range_start}
-            data-range-end={modifiers.range_end}
-            data-range-middle={modifiers.range_middle}
             className={cn(
-                "data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs [&>span]:opacity-70",
+                "flex aspect-square size-auto w-full min-w-(--cell-size) items-center justify-center leading-none font-semibold group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px]",
+                modifiers.selected
+                    ? "border-2 border-[#3882a5] text-[#3882a5] font-bold hover:bg-[#3882a5]/10"
+                    : "text-foreground hover:bg-accent/5",
+                modifiers.today && !modifiers.selected && "border-2 border-[#3882a5] text-[#3882a5] font-bold",
+                modifiers.today && modifiers.selected && "bg-[#3882a5] border-2 border-[#3882a5] !text-white font-bold",
                 defaultClassNames.day,
                 className,
             )}
             {...props}
-        />
+        >
+            {day.date.getDate()}
+        </Button>
     );
 }
 

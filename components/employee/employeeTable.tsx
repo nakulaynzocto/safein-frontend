@@ -10,7 +10,7 @@ import { DataTable } from "@/components/common/dataTable";
 import { ConfirmationDialog } from "@/components/common/confirmationDialog";
 import { Pagination } from "@/components/common/pagination";
 import { StatusBadge } from "@/components/common/statusBadge";
-import { Edit, Trash2, Eye, MoreVertical, Plus, Phone, Mail, Building, User } from "lucide-react";
+import { Settings, Plus, Phone, Mail, Building, User, ShieldCheck } from "lucide-react";
 import { Employee } from "@/store/api/employeeApi";
 import { SearchInput } from "@/components/common/searchInput";
 import { EmployeeDetailsDialog } from "./employeeDetailsDialog";
@@ -25,7 +25,6 @@ import { routes } from "@/utils/routes";
 import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { formatName, getInitials } from "@/utils/helpers";
 import { EmployeeVerificationModal } from "./EmployeeVerificationModal";
-import { ShieldCheck } from "lucide-react";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
@@ -150,6 +149,10 @@ export function EmployeeTable({
         setShowVerifyDialog(true);
     };
 
+    const handleSettings = (employee: Employee) => {
+        router.push(routes.privateroute.EMPLOYEESETTINGS.replace("[id]", employee._id));
+    };
+
     const handleEditEmployee = (employee: Employee) => {
         router.push(routes.privateroute.EMPLOYEEEDIT.replace("[id]", employee._id));
     };
@@ -209,33 +212,21 @@ export function EmployeeTable({
             header: "Status",
             render: (employee: Employee) => (
                 <div className="flex flex-col gap-1 items-start">
-                    {!employee.isVerified ? (
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            className="h-8 rounded-full px-4 bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-200/50 font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-sm"
-                            onClick={() => handleVerify(employee)}
-                        >
-                            <ShieldCheck className="h-3.5 w-3.5" />
-                            Verify Now
-                        </Button>
-                    ) : (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
-                                    <StatusBadge status={employee.status.toLowerCase() as any} className="capitalize cursor-pointer" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start">
-                                <DropdownMenuItem onClick={() => handleStatusUpdate(employee, "Active")}>
-                                    Active
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleStatusUpdate(employee, "Inactive")}>
-                                    Inactive
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    )}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
+                                <StatusBadge status={employee.status.toLowerCase() as any} className="capitalize cursor-pointer" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                            <DropdownMenuItem onClick={() => handleStatusUpdate(employee, "Active")}>
+                                Active
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleStatusUpdate(employee, "Inactive")}>
+                                Inactive
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             ),
         });
@@ -243,55 +234,18 @@ export function EmployeeTable({
         baseColumns.push({
             key: "actions",
             header: "Actions",
+            className: "text-center min-w-[200px] whitespace-nowrap",
             render: (employee: Employee) => (
                 <div className="flex justify-center">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreVertical className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                            {onView && (
-                                <DropdownMenuItem onClick={() => handleView(employee)}>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    View Details
-                                </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem onClick={() => handleEditEmployee(employee)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                            </DropdownMenuItem>
-                            {!employee.isVerified && (
-                                <DropdownMenuItem onClick={() => handleVerify(employee)}>
-                                    <ShieldCheck className="mr-2 h-4 w-4 text-primary" />
-                                    Verify Employee
-                                </DropdownMenuItem>
-                            )}
-                            {onDelete && (
-                                <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                        onClick={() => {
-                                            if ((employee as any).canDelete !== false) {
-                                                // Close other modals
-                                                setShowViewDialog(false);
-                                                setShowVerifyDialog(false);
-
-                                                setSelectedEmployee(employee);
-                                                setShowDeleteDialog(true);
-                                            }
-                                        }}
-                                        className="text-destructive"
-                                        disabled={(employee as any).canDelete === false}
-                                    >
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        {(employee as any).canDelete === false ? 'Cannot Delete (Has Appointments)' : 'Delete'}
-                                    </DropdownMenuItem>
-                                </>
-                            )}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button 
+                        variant="primary" 
+                        size="sm" 
+                        className="h-8 px-4 rounded-lg gap-1.5 font-bold transition-all duration-300 shadow-md hover:scale-105 active:scale-95"
+                        onClick={() => handleSettings(employee)}
+                    >
+                        <Settings className="h-4 w-4" />
+                        <span className="text-[12px]">Settings</span>
+                    </Button>
                 </div>
             ),
         });
@@ -419,6 +373,8 @@ export function EmployeeTable({
                     employeeId={selectedEmployee._id}
                     employeeName={selectedEmployee.name}
                     email={selectedEmployee.email}
+                    phone={selectedEmployee.phone}
+                    type="email"
                     onSuccess={() => {
                         // Optional: Refresh list logic is usually handled by cache invalidation
                     }}

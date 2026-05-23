@@ -12,6 +12,7 @@ import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { ShieldAlert } from "lucide-react";
 import { getTaxSplit } from "@/utils/invoiceHelpers";
 import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
+import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionApi";
 
 declare global {
     interface Window {
@@ -52,18 +53,18 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
     const [createCheckoutSession, { isLoading: isCreating }] = useCreateCheckoutSessionMutation();
     const [verifyRazorpayPayment] = useVerifyRazorpayPaymentMutation();
 
+    const { data: activeSubData } = useGetUserActiveSubscriptionQuery(user?.id ?? "", {
+        skip: !isAuthenticated || !user?.id,
+    });
+
+    const activeSub = activeSubData?.data;
+    const currentPlanId = activeSub?.planId?._id || activeSub?.planId;
+
     const companyDetails = safeinProfile?.data?.companyDetails;
 
     const plans: ISubscriptionPlan[] = data?.data?.plans || [];
     
-    const availablePlans = useMemo(() => {
-        return plans.filter((plan) => {
-            if (!plan.isPublic) return false;
-            // Hide free plan for logged-in users
-            if ((isAuthenticated || token) && plan.planType === 'free') return false;
-            return true;
-        });
-    }, [plans, isAuthenticated, token]);
+    const availablePlans = plans; // Logic moved to backend API via userId query param
     
     // Selected plan in the modal. Start with no selection, then auto-select first public plan when data loads.
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
@@ -180,8 +181,9 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-lg">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
+                <div className="overflow-y-auto max-h-[90vh] p-6">
+                    <DialogHeader>
                     <DialogTitle className="text-xl font-semibold">Upgrade Your Plan</DialogTitle>
                     <DialogDescription className="text-sm">
                         {limitType 
@@ -197,7 +199,7 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
                                 <ShieldAlert className="h-8 w-8" />
                             </div>
                             <div className="space-y-2">
-                                <p className="font-semibold text-gray-900 text-lg">Admin Access Required</p>
+                                <p className="font-semibold text-gray-800 text-lg">Admin Access Required</p>
                                 <p className="text-sm text-gray-500 max-w-[300px]">
                                     Only administrators can purchase subscriptions or upgrade plans. Please contact your manager.
                                 </p>
@@ -225,7 +227,7 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
                                                     type="button"
                                                     onClick={() => setSelectedPlanId(plan._id)}
                                                     className={`flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-xs transition sm:text-sm ${isSelected
-                                                        ? "bg-[#3882a5]/10 border-[#3882a5] border text-slate-900"
+                                                        ? "bg-[#3882a5]/10 border-[#3882a5] border text-slate-800"
                                                         : "border border-transparent text-slate-800 hover:bg-slate-100"
                                                         }`}
                                                 >
@@ -237,26 +239,40 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
                                                         <div className="font-medium">
                                                             {plan.name}
                                                             {plan.isPopular && (
-                                                                <span className="bg-[#3882a5]/10 text-[#3882a5] ml-2 rounded-full px-2 py-0.5 text-[10px] tracking-wide uppercase">
+                                                                <span className="bg-[#3882a5]/10 text-[#3882a5] ml-2 rounded-full px-2 py-0.5 text-xs tracking-wide uppercase">
                                                                     Popular
+                                                                </span>
+                                                            )}
+                                                            {String(plan._id) === String(currentPlanId) && (
+                                                                <span className="bg-emerald-100 text-emerald-700 ml-2 rounded-full px-2 py-0.5 text-xs tracking-wide uppercase font-bold">
+                                                                    Current Plan
                                                                 </span>
                                                             )}
                                                         </div>
                                                     </div>
                                                     <div className="text-slate-700">
                                                         {plan.name === 'Enterprise' ? (
-                                                            <span className="text-[11px] text-[#3882a5] font-medium italic">Talk to Sales</span>
+                                                            <span className="text-xs text-[#3882a5] font-medium italic">Talk to Sales</span>
                                                         ) : (
                                                             <>
                                                                 {plan.amount > 0 ? (
-                                                                    <>
-                                                                        {formatCurrency(plan.totalAmount || plan.amount, plan.currency)}{" "}
-                                                                        <span className="text-[11px] text-slate-500">
+                                                                    <div className="flex flex-col items-end">
+                                                                        <div className="flex items-center gap-1.5">
+                                                                            {plan.discountPercentage && plan.discountPercentage > 0 ? (
+                                                                                <span className="text-xs text-slate-400 line-through">
+                                                                                    {formatCurrency(plan.amount + (plan.amount * (plan.taxPercentage || 0) / 100), plan.currency)}
+                                                                                </span>
+                                                                            ) : null}
+                                                                            <span className="font-bold">
+                                                                                {formatCurrency(plan.totalAmount || plan.amount, plan.currency)}
+                                                                            </span>
+                                                                        </div>
+                                                                        <span className="text-xs text-slate-500">
                                                                             / {plan.planType.replace("ly", "")}
                                                                         </span>
-                                                                    </>
+                                                                    </div>
                                                                 ) : (
-                                                                    <span className="text-[11px] text-slate-500 italic">Free Plan</span>
+                                                                    <span className="text-xs text-slate-500 italic">Free Plan</span>
                                                                 )}
                                                             </>
                                                         )}
@@ -273,28 +289,29 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
 
                                         const baseAmount = selectedPlan.amount;
                                         const totalAmount = selectedPlan.totalAmount || selectedPlan.amount;
-                                        const gstAmount = totalAmount - baseAmount;
-                                        const taxSplit = getTaxSplit(
-                                            gstAmount,
-                                            selectedPlan.taxPercentage || 0,
-                                            user?.address,
-                                            companyDetails?.state,
-                                            companyDetails?.country
-                                        );
+                                        const taxSplit = selectedPlan.taxSplit;
+
+                                        if (!taxSplit) return null;
 
                                         return (
                                             <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-3 space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
-                                                <div className="flex justify-between text-[11px] text-slate-600">
+                                                <div className="flex justify-between text-xs text-slate-600">
                                                     <span>Base Price:</span>
                                                     <span>{formatCurrency(baseAmount, selectedPlan.currency)}</span>
                                                 </div>
-                                                {taxSplit.components.map((comp, idx) => (
-                                                    <div key={idx} className="flex justify-between text-[11px] text-slate-600">
+                                                {selectedPlan.discountPercentage && selectedPlan.discountPercentage > 0 ? (
+                                                    <div className="flex justify-between text-xs text-emerald-600 font-medium">
+                                                        <span>Discount ({selectedPlan.discountPercentage}%):</span>
+                                                        <span>- {formatCurrency((baseAmount * selectedPlan.discountPercentage) / 100, selectedPlan.currency)}</span>
+                                                    </div>
+                                                ) : null}
+                                                {taxSplit.components.map((comp: any, idx: number) => (
+                                                    <div key={idx} className="flex justify-between text-xs text-slate-600">
                                                         <span>{comp.label} ({comp.rate}%):</span>
                                                         <span>+ {formatCurrency(comp.amount, selectedPlan.currency)}</span>
                                                     </div>
                                                 ))}
-                                                <div className="flex justify-between border-t border-slate-200 pt-1.5 mt-1 font-bold text-slate-900 text-xs uppercase tracking-tight">
+                                                <div className="flex justify-between border-t border-slate-200 pt-1.5 mt-1 font-bold text-slate-800 text-xs uppercase tracking-tight">
                                                     <span>Total Payable:</span>
                                                     <span>{formatCurrency(totalAmount, selectedPlan.currency)}</span>
                                                 </div>
@@ -311,7 +328,7 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
                                     <button 
                                         type="button"
                                         onClick={() => handleAskSafeIn()}
-                                        className="text-[10px] text-slate-400 hover:text-[#3882a5] transition-colors"
+                                        className="text-xs text-slate-400 hover:text-[#3882a5] transition-colors"
                                     >
                                         Ask SafeIn
                                     </button>
@@ -320,13 +337,23 @@ export function UpgradePlanModal({ isOpen, onClose, limitType = null, initialPla
                                     <Button variant="outline" onClick={onClose} disabled={isCreating} className="h-12 rounded-xl px-6">
                                         Cancel
                                     </Button>
-                                    <Button onClick={handleUpgradeClick} variant="primary" disabled={isCreating || !selectedPlanId} className="h-12 rounded-xl px-8">
-                                        {isCreating ? "Processing..." : (availablePlans.find(p => p._id === selectedPlanId)?.name === 'Enterprise' ? "Contact Sales Team" : "Upgrade Now")}
+                                    <Button 
+                                        onClick={handleUpgradeClick} 
+                                        variant="primary" 
+                                        disabled={isCreating || !selectedPlanId} 
+                                        className="h-12 rounded-xl px-8"
+                                    >
+                                        {isCreating 
+                                            ? "Processing..." 
+                                            : (availablePlans.find(p => p._id === selectedPlanId)?.name === 'Enterprise' 
+                                                ? "Contact Sales Team" 
+                                                : (String(selectedPlanId) === String(currentPlanId) ? "Extend Plan" : "Upgrade Now"))}
                                     </Button>
                                 </div>
                             </div>
                         </>
                     )}
+                </div>
                 </div>
             </DialogContent>
         </Dialog>

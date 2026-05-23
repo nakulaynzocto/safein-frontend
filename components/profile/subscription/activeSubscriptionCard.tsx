@@ -46,7 +46,7 @@ export const ActiveSubscriptionCard = ({
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-100 pb-4 mb-6 gap-4 flex-wrap">
-                <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900">
+                <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800">
                     <CreditCard className="text-[#3882a5]" size={20} />
                     Current Plan
                 </h3>
@@ -112,7 +112,7 @@ export const ActiveSubscriptionCard = ({
                             <AlertCircle className="text-gray-400" size={24} />
                         </div>
                         <div>
-                            <h4 className="font-medium text-gray-900">
+                            <h4 className="font-medium text-gray-800">
                                 No Active Subscription
                             </h4>
                             <p className="text-sm">

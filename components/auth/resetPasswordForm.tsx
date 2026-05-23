@@ -12,6 +12,7 @@ import { InputField } from "@/components/common/inputField";
 import { useResetPasswordMutation } from "@/store/api/authApi";
 import { routes } from "@/utils/routes";
 import { CheckCircle, Lock, ArrowLeft, Loader2, ShieldAlert } from "lucide-react";
+import { encryptData } from "@/utils/crypto";
 
 const resetPasswordSchema = yup.object({
     newPassword: yup
@@ -63,9 +64,10 @@ export function ResetPasswordForm() {
 
         try {
             setSubmitError(null);
+            const encryptedPassword = encryptData(data.newPassword);
             await resetPassword({
                 token,
-                newPassword: data.newPassword,
+                newPassword: encryptedPassword,
             }).unwrap();
             setIsSuccess(true);
 
@@ -85,7 +87,7 @@ export function ResetPasswordForm() {
                     <CheckCircle className="h-12 w-12 text-[#3882a5]" />
                 </div>
                 <div className="space-y-2">
-                    <h1 className="text-3xl font-black text-[#074463] tracking-tight">Reset Successful!</h1>
+                    <h1 className="text-3xl font-semibold text-[#074463] tracking-tight">Reset Successful!</h1>
                     <p className="text-slate-500 font-medium max-w-xs mx-auto">
                         Your password has been updated. You'll be redirected to login shortly.
                     </p>
@@ -97,7 +99,7 @@ export function ResetPasswordForm() {
                         </AlertDescription>
                     </Alert>
                     <Button
-                        className="w-full h-12 rounded-xl font-black bg-[#3882a5] hover:bg-[#2c6a88] text-white"
+                        className="w-full h-12 rounded-xl font-semibold bg-[#3882a5] hover:bg-[#2c6a88] text-white"
                         onClick={() => router.replace(routes.publicroute.LOGIN)}
                     >
                         Go to Sign In
@@ -116,7 +118,7 @@ export function ResetPasswordForm() {
                             <ShieldAlert className="h-10 w-10 text-red-500" />
                         </div>
                     </div>
-                    <h1 className="text-3xl font-black text-[#074463] tracking-tight mb-2">Invalid Reset Link</h1>
+                    <h1 className="text-3xl font-semibold text-[#074463] tracking-tight mb-2">Invalid Reset Link</h1>
                     <p className="text-slate-500 font-medium">This password reset link is invalid or has expired</p>
                 </div>
 
@@ -129,7 +131,7 @@ export function ResetPasswordForm() {
 
                     <div className="space-y-4">
                         <Button
-                            className="w-full h-12 rounded-xl font-black bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20"
+                            className="w-full h-12 rounded-xl font-semibold bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20"
                             onClick={() => router.push(routes.publicroute.FORGOT_PASSWORD)}
                         >
                             Request New Reset Link
@@ -158,7 +160,7 @@ export function ResetPasswordForm() {
                     </div>
                 </div>
                 <div className="space-y-2 text-center lg:text-left">
-                    <h1 className="text-3xl font-black text-[#074463] tracking-tight">Secure Your Account</h1>
+                    <h1 className="text-3xl font-semibold text-[#074463] tracking-tight">Secure Your Account</h1>
                     <p className="text-slate-500 font-medium text-sm sm:text-base">
                         Choose a new strong password for your SafeIn account.
                     </p>
@@ -197,7 +199,7 @@ export function ResetPasswordForm() {
 
                     <Button
                         type="submit"
-                        className="w-full h-12 rounded-xl font-black bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                        className="w-full h-12 rounded-xl font-semibold bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                         disabled={isLoading}
                     >
                         {isLoading && <Loader2 className="h-5 w-5 animate-spin" />}

@@ -61,7 +61,7 @@ export default function AppointmentRequestsPage() {
                 <Card className="w-full max-w-md">
                     <CardContent className="flex flex-col items-center justify-center py-12">
                         <AlertCircle className="h-16 w-16 text-gray-300 mb-4" />
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Access Denied</h3>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-2">Access Denied</h3>
                         <p className="text-sm text-gray-600 text-center max-w-md">
                             This page is only accessible to employees.
                         </p>
@@ -74,12 +74,7 @@ export default function AppointmentRequestsPage() {
     const pendingAppointments = appointmentsData?.appointments || [];
 
     return (
-        <div className="space-y-4 sm:space-y-6">
-            <PageHeader
-                title="Visit Approvals"
-                description="Review and manage incoming visit requests"
-            />
-
+        <div className="space-y-4 sm:space-y-6 pt-4">
             {appointmentsLoading ? (
                 <PageSkeleton type="table" showStats={false} />
             ) : pendingAppointments.length > 0 ? (
@@ -88,7 +83,7 @@ export default function AppointmentRequestsPage() {
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center py-12">
                         <AlertCircle className="h-16 w-16 text-gray-300 mb-4" />
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Pending Requests</h3>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-2">No Pending Requests</h3>
                         <p className="text-sm text-gray-600 text-center max-w-md">
                             You don't have any pending appointment requests at the moment.
                         </p>

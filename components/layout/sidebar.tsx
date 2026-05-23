@@ -10,6 +10,7 @@ import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { useAppSelector } from "@/store/hooks";
 // Import Chat Query
 import { useGetChatsQuery } from "@/store/api/chatApi";
+import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionApi";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -27,6 +28,7 @@ import {
     Link as LinkIcon,
     MessageSquare,
     Mail,
+    QrCode,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -39,6 +41,7 @@ const baseNavigation: Array<{
     href: string | ((role: string) => string);
     icon: any;
     roles: string[];
+    requiredModule?: "enableInvites" | "enablePriorityBooking" | "enableQrCode" | "enableChat" | "enableSpotPass";
 }> = [
         {
             name: "Dashboard",
@@ -65,16 +68,32 @@ const baseNavigation: Array<{
             roles: ["admin", "employee"], // Both admin and employee can see
         },
         {
-            name: "Visitor Invites",
-            href: routes.privateroute.APPOINTMENT_LINKS,
+            name: "Invite Links",
+            href: routes.privateroute.APPOINTMENT_LINKS_SEND_LINK,
             icon: LinkIcon,
             roles: ["admin", "employee"], // Both admin and employee
+            requiredModule: "enableInvites",
+        },
+        {
+            name: "Priority Bookings",
+            href: routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING,
+            icon: UserCircle,
+            roles: ["admin", "employee"], // Both admin and employee
+            requiredModule: "enablePriorityBooking",
         },
         {
             name: "Spot Pass",
             href: routes.privateroute.SPOT_PASS,
             icon: ClipboardList,
             roles: ["admin"], // Only admin
+            requiredModule: "enableSpotPass",
+        },
+        {
+            name: "QR Check-in",
+            href: routes.privateroute.SETTINGS_QR_CHECKIN,
+            icon: QrCode,
+            roles: ["admin", "employee"], // Both admin and employee
+            requiredModule: "enableQrCode",
         },
         {
             name: "Visit Approvals",
@@ -87,32 +106,36 @@ const baseNavigation: Array<{
 
 
 
-export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?: () => void; isMobile?: boolean }) => {
+export const SidebarContent = ({ onLinkClick, isMobile = false, isCollapsed = false }: { onLinkClick?: () => void; isMobile?: boolean; isCollapsed?: boolean }) => {
     const pathname = usePathname();
     const { user } = useAppSelector((state) => state.auth);
-
-    // Check if user is employee
+    
+    // Determine user roles and type first
+    const userRoles = user?.roles || (user?.role ? [user.role] : []);
     const isEmployee = checkIsEmployee(user);
 
-    // Determine user role - if user is not loaded, default to empty to hide menus
-    let userRole = 'admin';
-    if (user) {
-        if (checkIsEmployee(user)) {
-            userRole = 'employee';
-        } else if (user.role) {
-            userRole = user.role;
-        }
-    } else {
-        // If user is not loaded yet, don't show admin menus
-        userRole = '';
-    }
+    // For employees, we need to fetch the subscription of their Admin (createdBy)
+    const subscriptionOwnerId = isEmployee ? user?.createdBy : user?.id;
+    const { data: subscriptionData } = useGetUserActiveSubscriptionQuery(subscriptionOwnerId as string, { skip: !subscriptionOwnerId });
+    const modules = subscriptionData?.data?.modules;
 
-    // Filter navigation items based on role and set correct href
+    // Filter navigation items based on role, subscription modules, and set correct href
     const navigation = baseNavigation
-        .filter(item => userRole && item.roles.includes(userRole as any))
+        .filter(item => {
+            // Check if any of the user's roles match the item's allowed roles
+            const hasRequiredRole = item.roles.some(role => userRoles.includes(role));
+            if (!hasRequiredRole) return false;
+
+            // Check Subscription Module
+            if (item.requiredModule) {
+                if (!modules || !modules[item.requiredModule]) return false;
+            }
+
+            return true;
+        })
         .map(item => ({
             ...item,
-            href: typeof item.href === 'function' ? item.href(userRole) : item.href
+            href: typeof item.href === 'function' ? item.href(userRoles[0] || 'admin') : item.href
         }));
 
     const prevPathnameRef = useRef(pathname);
@@ -150,15 +173,24 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
             return pathname === routes.privateroute.APPOINTMENT_REQUESTS;
         }
 
-        if (href === routes.privateroute.APPOINTMENT_LINKS) {
+        if (href === routes.privateroute.APPOINTMENT_LINKS_SEND_LINK) {
             return (
-                pathname === routes.privateroute.APPOINTMENT_LINKS ||
-                pathname?.startsWith(routes.privateroute.APPOINTMENT_LINKS)
+                pathname === routes.privateroute.APPOINTMENT_LINKS_SEND_LINK ||
+                pathname === routes.privateroute.APPOINTMENT_LINKS_CREATE ||
+                pathname === routes.privateroute.APPOINTMENT_LINKS
             );
+        }
+
+        if (href === routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING) {
+            return pathname === routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING;
         }
 
         if (href === routes.privateroute.SPOT_PASS) {
             return pathname === routes.privateroute.SPOT_PASS;
+        }
+
+        if (href === routes.privateroute.SETTINGS_QR_CHECKIN) {
+            return pathname === routes.privateroute.SETTINGS_QR_CHECKIN;
         }
 
         return false;
@@ -190,14 +222,14 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
                                 href={item.href}
                                 prefetch={true}
                                 className={cn(
-                                    "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 relative",
+                                    "flex items-center gap-4 rounded-xl px-4 py-4 text-[16px] font-bold transition-all duration-200 relative",
                                     isActive(item.href)
                                         ? "bg-primary/10 text-primary shadow-sm"
                                         : "text-gray-700 hover:bg-gray-100 active:bg-gray-200",
                                 )}
                                 onClick={onLinkClick}
                             >
-                                <item.icon className="h-5 w-5 shrink-0" />
+                                <item.icon className="h-6 w-6 shrink-0" />
                                 <span className="truncate">{item.name}</span>
                             </Link>
                         );
@@ -221,13 +253,16 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
                             href={item.href}
                             prefetch={true}
                             className={cn(
-                                "sidebar-item rounded-lg border-0 text-base flex justify-between items-center pr-3",
+                                "sidebar-item rounded-lg border-0 text-base flex items-center",
+                                isCollapsed ? "justify-center px-0 py-3 mx-auto w-10 h-10" : "justify-between pr-3",
                                 isActive(item.href) && "active"
                             )}
                         >
-                            <div className="flex items-center">
-                                <item.icon className="sidebar-item-icon" />
-                                <span className="sidebar-item-text font-medium tracking-wide">{item.name}</span>
+                            <div className={cn("flex items-center", isCollapsed && "justify-center w-full")}>
+                                <item.icon className={cn("sidebar-item-icon", isCollapsed && "mr-0")} />
+                                {!isCollapsed && (
+                                    <span className="sidebar-item-text font-medium tracking-wide">{item.name}</span>
+                                )}
                             </div>
                         </Link>
                     );
@@ -239,20 +274,29 @@ export const SidebarContent = ({ onLinkClick, isMobile = false }: { onLinkClick?
 };
 
 export function Sidebar({ className }: SidebarProps) {
+    const pathname = usePathname();
+    const isSettings = pathname?.startsWith("/settings");
     const [collapsed, setCollapsed] = useState(false);
-    const [mobileOpen, setMobileOpen] = useState(false);
+
+    useEffect(() => {
+        if (isSettings) {
+            setCollapsed(true);
+        } else {
+            setCollapsed(false);
+        }
+    }, [isSettings]);
 
     return (
         <>
             {/* Desktop Sidebar */}
             <div
                 className={cn(
-                    "sidebar-hostinger hidden h-full flex-col overflow-hidden transition-all duration-300 ease-in-out md:flex",
+                    "sidebar-hostinger hidden h-full flex-col overflow-hidden transition-all duration-300 ease-in-out md:flex flex-shrink-0 z-40 bg-white border-r",
                     collapsed ? "sidebar-collapsed" : "sidebar-expanded",
                     className,
                 )}
             >
-                <SidebarContent />
+                <SidebarContent isCollapsed={collapsed} />
             </div>
 
             {/* Mobile Sidebar - Now controlled from Navbar */}

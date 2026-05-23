@@ -15,6 +15,19 @@ export interface Employee {
     createdAt: string;
     updatedAt: string;
     isVerified: boolean;
+    /** When true, email must not be edited (OTP and/or linked user verified) */
+    isEmailVerified?: boolean;
+    /** When true, phone must not be edited (linked user verified mobile) */
+    isPhoneVerified?: boolean;
+    canDelete?: boolean;
+    appointmentCount?: number;
+    notificationSettings: {
+        email: boolean;
+        whatsapp: boolean;
+        sms: boolean;
+        call: boolean;
+    };
+    isPublic?: boolean;
 }
 
 export interface CreateEmployeeRequest {
@@ -25,6 +38,7 @@ export interface CreateEmployeeRequest {
     designation?: string;
     photo?: string;
     status?: "Active" | "Inactive";
+    isPublic?: boolean;
 }
 
 export interface UpdateEmployeeRequest {
@@ -36,6 +50,13 @@ export interface UpdateEmployeeRequest {
     designation?: string;
     photo?: string;
     status?: "Active" | "Inactive";
+    notificationSettings?: {
+        email?: boolean;
+        whatsapp?: boolean;
+        sms?: boolean;
+        call?: boolean;
+    };
+    isPublic?: boolean;
 }
 
 export interface GetEmployeesQuery {
@@ -196,24 +217,39 @@ export const employeeApi = baseApi.injectEndpoints({
             invalidatesTags: [{ type: "Employee", id: "LIST" }, { type: "Chat" }, { type: "Subscription" }],
         }),
 
-        employeeSendOtp: builder.mutation<void, string>({
-            query: (id) => ({
+        employeeSendOtp: builder.mutation<void, { id: string; type: "email" | "phone" }>({
+            query: ({ id, type }) => ({
                 url: `/employees/${id}/send-otp`,
                 method: "POST",
+                body: { type },
             }),
         }),
 
-        employeeVerifyOtp: builder.mutation<void, { id: string; otp: string }>({
-            query: ({ id, otp }) => ({
+        employeeVerifyOtp: builder.mutation<void, { id: string; otp: string; type: "email" | "phone" }>({
+            query: ({ id, otp, type }) => ({
                 url: `/employees/${id}/verify-otp`,
                 method: "POST",
-                body: { otp },
+                body: { otp, type },
             }),
             invalidatesTags: (result, error, { id }) => [
                 { type: "Employee", id },
                 { type: "Employee", id: "LIST" },
                 { type: "Chat" },
             ],
+        }),
+
+        checkEmployeeAvailability: builder.query<{ available: boolean; message?: string }, { field: 'email' | 'phone'; value: string; employeeId?: string }>({
+            query: ({ field, value, employeeId }) => {
+                const params = new URLSearchParams({ field, value });
+                if (employeeId) params.append('employeeId', employeeId);
+                return `/employees/check-availability?${params.toString()}`;
+            },
+            transformResponse: (response: any) => {
+                if (response.success && response.data) {
+                    return response.data;
+                }
+                return response;
+            },
         }),
     }),
 });
@@ -229,4 +265,5 @@ export const {
     useBulkCreateEmployeesMutation,
     useEmployeeSendOtpMutation,
     useEmployeeVerifyOtpMutation,
+    useLazyCheckEmployeeAvailabilityQuery,
 } = employeeApi;

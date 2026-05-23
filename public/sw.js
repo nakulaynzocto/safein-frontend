@@ -1,7 +1,7 @@
 // SafeIn PWA Service Worker
 // Version is injected via URL query param: /sw.js?v=1.1
 // Set NEXT_PUBLIC_APP_VERSION in .env to control this — no need to edit this file!
-const _swVersion = '1.2';
+const _swVersion = '1.3';
 const CACHE_NAME = `safein-v${_swVersion}`;
 
 const OFFLINE_URL = '/offline';

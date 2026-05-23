@@ -3,6 +3,8 @@ import { baseApi } from "./baseApi";
 export interface UploadFileRequest {
     file: File;
     token?: string; // Appointment link token for public upload
+    slug?: string; // Company slug for QR scan public upload
+    isRegistration?: boolean; // For public registration profile pic
 }
 
 export interface UploadFileResponse {
@@ -19,13 +21,29 @@ export const uploadApi = baseApi.injectEndpoints({
     overrideExisting: true,
     endpoints: (builder) => ({
         uploadFile: builder.mutation<UploadFileResponse["data"], UploadFileRequest>({
-            query: ({ file, token }) => {
+            query: ({ file, token, slug, isRegistration }) => {
                 const formData = new FormData();
                 formData.append("file", file);
+
+                if (isRegistration) {
+                    return {
+                        url: "/upload/registration",
+                        method: "POST",
+                        body: formData,
+                    };
+                }
 
                 if (token) {
                     return {
                         url: `/upload/public?token=${encodeURIComponent(token)}`,
+                        method: "POST",
+                        body: formData,
+                    };
+                }
+
+                if (slug) {
+                    return {
+                        url: `/upload/qr?slug=${encodeURIComponent(slug)}`,
                         method: "POST",
                         body: formData,
                     };

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useMemo, useCallback, useEffect, Suspense } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setAssistantOpen, setAssistantMessage } from "@/store/slices/uiSlice";
 import { routes, fillRoute } from "@/utils/routes";
@@ -23,21 +23,11 @@ import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { formatDate, formatDateTime, isEmployee as checkIsEmployee } from "@/utils/helpers";
 import {
     Plus,
-    LayoutGrid,
-    List,
     Trash2,
-    Search,
-    Filter,
     RefreshCw,
     MoreVertical,
-    MoreHorizontal,
     Copy,
-    QrCode,
-    Mail,
-    Link as LinkIcon,
-    Download,
     Check,
-    ShieldAlert,
     Link2,
     User,
     CheckCircle,
@@ -50,7 +40,12 @@ import {
     Send,
     UserPlus,
     Car,
+    ArrowUp,
+    Printer,
 } from "lucide-react";
+import { VisitSlip } from "@/components/appointment/VisitSlip";
+import { useReactToPrint } from "react-to-print";
+import { useRef } from "react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -61,8 +56,6 @@ import {
 import { AppointmentLink } from "@/store/api/appointmentLinkApi";
 import { getInitials, formatName } from "@/utils/helpers";
 import { useCooldown } from "@/hooks/useCooldown";
-import { CreateAppointmentLinkModal } from "@/components/appointment/CreateAppointmentLinkModal";
-import { QuickAppointmentModal } from "@/components/appointment/QuickAppointmentModal";
 import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { PageSkeleton } from "@/components/common/pageSkeleton";
 import { StatusBadge } from "@/components/common/statusBadge";
@@ -72,147 +65,74 @@ import { ModuleAccessDenied } from "@/components/common/moduleAccessDenied";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { Input } from "@/components/ui/input";
+import { OtpDigitBoxes } from "@/components/common/otpDigitBoxes";
+import { DeliverySetupWarning } from "@/components/common/DeliverySetupWarning";
+import { OtpVerificationModal } from "@/components/common/OtpVerificationModal";
+import { AppointmentActionCell } from "@/components/appointment/AppointmentActionCell";
 
-interface AppointmentActionCellProps {
-    item: any;
-    user: any;
-    handleCopyLink: (link: any) => void;
-    handleResend: (item: any) => void;
-    cooldowns: Record<string, number>;
-    setDeleteLinkId: (id: string) => void;
-    setSelectedBookingId: (id: string) => void;
-    setNoteValue: (value: string) => void;
-    setShowEditNoteModal: (show: boolean) => void;
-    handleInlineVerifyOtp: (bookingId: string, otp: string) => Promise<void>;
-    isVerifyingInline: string | null;
+interface AppointmentStatsProps {
+    stats: {
+        totalBooked: number;
+        totalNotBooked: number;
+    };
 }
 
-const AppointmentActionCell = ({
-    item,
-    user,
-    handleCopyLink,
-    handleResend,
-    cooldowns,
-    setDeleteLinkId,
-    setSelectedBookingId,
-    setNoteValue,
-    setShowEditNoteModal,
-    handleInlineVerifyOtp,
-    isVerifyingInline
-}: AppointmentActionCellProps) => {
-    const [otpValue, setOtpValue] = useState("");
-    const isCreator = user?._id && (
-        item.createdBy === user._id ||
-        (typeof item.createdBy === 'object' && item.createdBy?._id === user._id)
-    );
-    const isSpecial = item.entryType === 'special';
-    const isBooked = item.isBooked;
-
-    return (
-        <div className="flex items-center justify-end gap-2">
-            {/* Inline OTP Field for Special Bookings */}
-            {isSpecial && !isBooked && (
-                <div className="flex items-center gap-1.5 p-1 px-1.5 bg-[#3882a5]/5 border border-[#3882a5]/10 rounded-xl transition-all hover:border-[#3882a5]/20">
-                    <Input
-                        className="h-8 w-18 text-xs px-2 bg-white border-[#3882a5]/20 focus-visible:ring-[#3882a5] rounded-lg tabular-nums"
-                        placeholder="OTP"
-                        maxLength={6}
-                        value={otpValue}
-                        onChange={(e) => setOtpValue(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleInlineVerifyOtp(item._id, otpValue);
-                        }}
-                    />
-                    <Button
-                        variant="default"
-                        size="icon"
-                        onClick={() => handleInlineVerifyOtp(item._id, otpValue)}
-                        disabled={isVerifyingInline === item._id || !otpValue}
-                        className="h-7 w-7 bg-[#3882a5] hover:bg-[#2d6a87] text-white rounded-lg shadow-sm"
-                        title="Verify"
-                    >
-                        {isVerifyingInline === item._id ? (
-                            <LoadingSpinner size="sm" className="h-4 w-4 border-white" />
-                        ) : (
-                            <Check className="h-4 w-4" />
-                        )}
-                    </Button>
+const AppointmentStats = ({ stats }: AppointmentStatsProps) => (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+        <Card className="card-hostinger">
+            <CardContent className="p-4 sm:p-5">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-muted-foreground mb-1 text-xs sm:text-sm">Total Invites</p>
+                        <p className="text-accent text-xl font-bold sm:text-2xl">
+                            {stats.totalBooked + stats.totalNotBooked}
+                        </p>
+                    </div>
+                    <div className="bg-accent/10 flex h-10 w-10 items-center justify-center rounded-full sm:h-12 sm:w-12">
+                        <Link2 className="text-accent h-5 w-5 sm:h-6 sm:w-6" />
+                    </div>
                 </div>
-            )}
-
-            {/* Action Three-Dots Menu */}
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 rounded-xl hover:bg-gray-100 text-gray-500"
-                    >
-                        <MoreHorizontal className="h-5 w-5" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-xl border-gray-100">
-                    {isSpecial && isCreator && (
-                        <DropdownMenuItem
-                            onClick={() => {
-                                setSelectedBookingId(item._id);
-                                setNoteValue(item.notes || "");
-                                setShowEditNoteModal(true);
-                            }}
-                            className="rounded-xl flex items-center gap-2 text-[#3882a5] focus:text-[#3882a5] focus:bg-[#3882a5]/5 cursor-pointer p-2.5"
-                        >
-                            <MessageSquare className="h-4 w-4" />
-                            <span>{item.notes ? "Edit Note" : "Add Note"}</span>
-                        </DropdownMenuItem>
-                    )}
-
-                    {item.entryType === 'link' && !isBooked && (
-                        <DropdownMenuItem
-                            onClick={() => handleCopyLink(item)}
-                            className="rounded-xl flex items-center gap-2 text-[#3882a5] focus:text-[#3882a5] focus:bg-[#3882a5]/5 cursor-pointer p-2.5"
-                        >
-                            <Copy className="h-4 w-4" />
-                            <span>Copy Link</span>
-                        </DropdownMenuItem>
-                    )}
-
-                    {!isBooked && (
-                        <DropdownMenuItem
-                            onClick={() => handleResend(item)}
-                            disabled={!!cooldowns[item._id]}
-                            className={`rounded-xl flex items-center gap-2 p-2.5 cursor-pointer ${
-                                cooldowns[item._id] ? 'text-gray-400 opacity-50' : 'text-[#3882a5] focus:text-[#3882a5] focus:bg-[#3882a5]/5'
-                                }`}
-                        >
-                            <Send className="h-4 w-4" />
-                            <span>
-                                {cooldowns[item._id] ? `Retry in ${cooldowns[item._id]}s` : "Resend Notification"}
-                            </span>
-                        </DropdownMenuItem>
-                    )}
-
-                    <DropdownMenuSeparator className="my-1 bg-gray-50" />
-
-                    <DropdownMenuItem
-                        onClick={() => setDeleteLinkId(item._id)}
-                        className="rounded-xl flex items-center gap-2 text-red-600 focus:text-red-700 focus:bg-red-50 cursor-pointer p-2.5"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                        <span>Delete</span>
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
-    );
-};
+            </CardContent>
+        </Card>
+        <Card className="card-hostinger">
+            <CardContent className="p-4 sm:p-5">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-muted-foreground mb-1 text-xs sm:text-sm">Booked</p>
+                        <p className="text-xl font-bold text-green-700 sm:text-2xl">
+                            {stats.totalBooked}
+                        </p>
+                    </div>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 sm:h-12 sm:w-12">
+                        <CheckCircle className="h-5 w-5 text-green-700 sm:h-6 sm:w-6" />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+        <Card className="card-hostinger">
+            <CardContent className="p-4 sm:p-5">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-muted-foreground mb-1 text-xs sm:text-sm">Pending</p>
+                        <p className="text-xl font-bold text-yellow-800 sm:text-2xl">
+                            {stats.totalNotBooked}
+                        </p>
+                    </div>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100 sm:h-12 sm:w-12">
+                        <XCircle className="h-5 w-5 text-yellow-800 sm:h-6 sm:w-6" />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    </div>
+);
 
 function AppointmentLinksContent() {
     // ALL HOOKS MUST BE CALLED AT TOP LEVEL - BEFORE ANY CONDITIONAL RETURNS
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const urlType = searchParams.get('type');
+    const pathname = usePathname();
     const dispatch = useAppDispatch();
-    const { user: authUser, isAuthenticated, subscriptionLimits, isLoading: isAuthLoading } = useAuthSubscription();
+    const { user: authUser, isAuthenticated, activeSubscriptionData, isLoading: isAuthLoading } = useAuthSubscription();
     const user = authUser; // Maintain compatibility with existing code
     const [isChecking, setIsChecking] = useState(true);
     const isEmployee = checkIsEmployee(user);
@@ -222,18 +142,49 @@ function AppointmentLinksContent() {
     const [isBooked, setIsBooked] = useState<boolean | undefined>(undefined);
     const [filterType, setFilterType] = useState<string>("link");
 
-    // Handle URL type parameter (?type=special or ?type=link)
+    // Drive mode from route only. Sidebar navigation controls selected mode.
     useEffect(() => {
-        if (urlType === 'special') {
+        if (pathname === routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING) {
             setFilterType('special');
-        } else if (urlType === 'link') {
-            setFilterType('link');
+            setPage(1);
+            return;
         }
-    }, [urlType]);
+        setFilterType('link');
+        setPage(1);
+    }, [pathname]);
     const [search, setSearch] = useState("");
     const [deleteLinkId, setDeleteLinkId] = useState<string | null>(null);
-    const [showLinkModal, setShowLinkModal] = useState(false);
-    const [showVipModal, setShowVipModal] = useState(false);
+
+    // Print functionality
+    const printRef = useRef<HTMLDivElement>(null);
+    const [passToPrint, setPassToPrint] = useState<any>(null);
+
+    const handlePrintRequest = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: `Pass_${passToPrint?.visitorId?.name || 'Visitor'}`,
+    });
+
+    const handlePrintPass = (item: any) => {
+        // Adapt item data to match VisitSlip expected format
+        const adaptedPass = {
+            _id: item._id,
+            visitorId: item.visitorId,
+            employeeId: item.employeeId,
+            appointmentDetails: {
+                purpose: item.notes || "VIP Visit",
+                scheduledDate: item.updatedAt || new Date().toISOString(),
+                scheduledTime: new Date(item.updatedAt || new Date()).toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit', 
+                    hour12: true 
+                }),
+            }
+        };
+        setPassToPrint(adaptedPass);
+        setTimeout(() => {
+            handlePrintRequest();
+        }, 100);
+    };
     const { hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
     const {
         showUpgradeModal,
@@ -252,29 +203,12 @@ function AppointmentLinksContent() {
     const [selectedNote, setSelectedNote] = useState("");
     const [showEditNoteModal, setShowEditNoteModal] = useState(false);
     const [noteValue, setNoteValue] = useState("");
-
-    // Use cooldown hook
-    const { cooldowns, startCooldown, isOnCooldown } = useCooldown();
-
-    // ... hooks ...
-
     const [updateSpecialBookingNote, { isLoading: isUpdatingNote }] = useUpdateSpecialBookingNoteMutation();
+    const [verifyOtp, { isLoading: isVerifying }] = useVerifySpecialBookingOtpMutation();
+    const [deleteAppointmentLink, { isLoading: isDeleting }] = useDeleteAppointmentLinkMutation();
+    const [resendLink] = useResendAppointmentLinkMutation();
+    const [resendOtp] = useResendOtpMutation();
 
-    const handleUpdateNote = async () => {
-        if (!selectedBookingId) return;
-        try {
-            await updateSpecialBookingNote({ bookingId: selectedBookingId, notes: noteValue }).unwrap();
-            showSuccessToast("Note updated successfully");
-            setShowEditNoteModal(false);
-            setNoteValue("");
-            refetchAll();
-        } catch (error: any) {
-            showErrorToast(error.data?.message || "Failed to update note");
-        }
-    };
-
-    // Fetch Appointment Links
-    // Fetch Appointment Links
     const { data: linksData, isLoading: isLoadingLinks, error: linksError, refetch: refetchLinks } = useGetAllAppointmentLinksQuery({
         page,
         limit,
@@ -295,14 +229,58 @@ function AppointmentLinksContent() {
         skip: !isAuthenticated || isChecking || filterType === "link",
     });
 
-    const [verifyOtp, { isLoading: isVerifying }] = useVerifySpecialBookingOtpMutation();
-    const [deleteAppointmentLink, { isLoading: isDeleting }] = useDeleteAppointmentLinkMutation();
-    const [resendLink] = useResendAppointmentLinkMutation();
-    const [resendOtp] = useResendOtpMutation();
 
-    const handleResend = useCallback(async (item: any) => {
-        if (isOnCooldown(item._id)) return;
+    const refetchAll = useCallback(() => {
+        if (filterType === "link") refetchLinks();
+        if (filterType === "special") refetchSpecial();
+    }, [refetchLinks, refetchSpecial, filterType]);
 
+    const handleUpdateNote = async () => {
+        if (!selectedBookingId) return;
+        try {
+            await updateSpecialBookingNote({ bookingId: selectedBookingId, notes: noteValue }).unwrap();
+            showSuccessToast("Note updated successfully");
+            setShowEditNoteModal(false);
+            setNoteValue("");
+            refetchAll();
+        } catch (error: any) {
+            showErrorToast(error.data?.message || "Failed to update note");
+        }
+    };
+
+    const processOtpVerification = useCallback(async (bookingId: string, otp: string, isInline: boolean = true) => {
+        if (!otp || otp.length < 4) {
+            showErrorToast("Please enter a valid OTP");
+            return;
+        }
+
+        try {
+            if (isInline) setIsVerifyingInline(bookingId);
+            await verifyOtp({ bookingId, otp }).unwrap();
+            showSuccessToast(isInline ? "OTP verified successfully!" : "OTP verified and appointment scheduled!");
+            
+            if (!isInline) {
+                setShowOtpModal(false);
+                setOtpValue("");
+            }
+            refetchAll();
+        } catch (error: any) {
+            showErrorToast(error.data?.message || "Invalid OTP");
+        } finally {
+            if (isInline) setIsVerifyingInline(null);
+        }
+    }, [verifyOtp, refetchAll]);
+
+    // Auto-verify when 6 digits are entered (Standardized to 6)
+    useEffect(() => {
+        if (otpValue.length === 6 && showOtpModal && selectedBookingId) {
+            processOtpVerification(selectedBookingId, otpValue, false);
+        }
+    }, [otpValue, showOtpModal, selectedBookingId, processOtpVerification]);
+
+
+
+    const handleResendApi = useCallback(async (item: any) => {
         try {
             if (item.entryType === 'special') {
                 await resendOtp({ bookingId: item._id }).unwrap();
@@ -310,11 +288,18 @@ function AppointmentLinksContent() {
                 await resendLink(item._id).unwrap();
             }
             showSuccessToast("Notification resent successfully");
-            startCooldown(item._id);
+            return true;
         } catch (error: any) {
             showErrorToast(error.data?.message || "Failed to resend notification");
+            return false;
         }
-    }, [isOnCooldown, startCooldown, resendOtp, resendLink]);
+    }, [resendOtp, resendLink]);
+
+
+
+
+
+
 
     // Combined Data
     const combinedList = useMemo(() => {
@@ -325,7 +310,6 @@ function AppointmentLinksContent() {
         return (specialData?.bookings || []).map(b => ({
             ...b,
             entryType: 'special',
-            visitorEmail: b.visitorEmail,
             isBooked: b.status === 'verified',
         }));
     }, [linksData, specialData, filterType]);
@@ -333,12 +317,7 @@ function AppointmentLinksContent() {
     const isLoading = filterType === "link" ? isLoadingLinks : isLoadingSpecial;
     const paginationData = filterType === "link" ? linksData?.pagination : specialData?.pagination;
 
-    // Refetch both
-    // Refetch active query
-    const refetchAll = useCallback(() => {
-        if (filterType === "link") refetchLinks();
-        if (filterType === "special") refetchSpecial();
-    }, [refetchLinks, refetchSpecial, filterType]);
+
 
     // ALL HOOKS (useCallback, useMemo) MUST BE CALLED BEFORE CONDITIONAL RETURNS
     const handleDelete = useCallback(async () => {
@@ -355,36 +334,7 @@ function AppointmentLinksContent() {
         }
     }, [deleteLinkId, deleteAppointmentLink, refetchAll]);
 
-    const handleVerifyOtp = async () => {
-        if (!selectedBookingId || !otpValue) return;
-        try {
-            await verifyOtp({ bookingId: selectedBookingId, otp: otpValue }).unwrap();
-            showSuccessToast("OTP verified and appointment scheduled!");
-            setShowOtpModal(false);
-            setOtpValue("");
-            refetchAll();
-        } catch (error: any) {
-            showErrorToast(error.data?.message || "Invalid OTP");
-        }
-    };
 
-    const handleInlineVerifyOtp = useCallback(async (bookingId: string, otp: string) => {
-        if (!otp || otp.length < 4) {
-            showErrorToast("Please enter a valid OTP");
-            return;
-        }
-
-        try {
-            setIsVerifyingInline(bookingId);
-            await verifyOtp({ bookingId, otp }).unwrap();
-            showSuccessToast("OTP verified successfully!");
-            refetchAll();
-        } catch (error: any) {
-            showErrorToast(error.data?.message || "Invalid OTP");
-        } finally {
-            setIsVerifyingInline(null);
-        }
-    }, [verifyOtp, refetchAll]);
 
     const handleCopyLink = useCallback((link: AppointmentLink) => {
         // Generate booking URL if not provided by backend
@@ -402,19 +352,18 @@ function AppointmentLinksContent() {
     const columns = useMemo(
         () => [
             {
-                key: "visitorEmail",
+                key: "visitorPhone",
                 header: "Visitor",
                 render: (item: any) => {
                     const isSpecial = item.entryType === 'special';
                     const visitorId = item.visitorId;
                     const visitor = !isSpecial
                         ? (item.visitor || (typeof visitorId === "object" && visitorId !== null ? visitorId : null))
-                        : { name: item.visitorName, phone: item.visitorPhone };
+                        : { name: item.visitorName, phone: item.visitorPhone, photo: item.visitorPhoto };
 
                     const visitorName = visitor?.name || "Unknown Visitor";
                     const formattedName = formatName(visitorName) || visitorName;
-                    const visitorEmail = item.visitorEmail;
-                    const visitorPhone = visitor?.phone || "N/A";
+                    const visitorPhone = visitor?.phone || item.visitorPhone || "N/A";
                     const visitorPhoto = (visitor as any)?.photo || "";
 
                     return (
@@ -446,18 +395,12 @@ function AppointmentLinksContent() {
                             <div className="min-w-0 flex-1">
                                 <div className="truncate text-sm font-medium sm:text-base flex items-center gap-1">
                                     {formattedName}
-                                    {isSpecial && <span className="text-[10px] bg-purple-100/50 text-purple-700 border border-purple-200 px-1.5 py-0.5 rounded-md uppercase font-bold tracking-wider shadow-sm">VIP</span>}
+                                    {isSpecial && <span className="text-xs bg-[#3882a5]/10 text-[#3882a5] border border-[#3882a5]/20 px-1.5 py-0.5 rounded-md uppercase font-bold tracking-wider shadow-sm">PRIORITY</span>}
                                 </div>
                                 <div className="flex items-center gap-1 truncate text-xs text-gray-500">
-                                    <Mail className="h-3 w-3 shrink-0" />
-                                    <span className="truncate">{visitorEmail}</span>
+                                    <Phone className="h-3 w-3 shrink-0" />
+                                    <span className="truncate">{visitorPhone}</span>
                                 </div>
-                                {visitorPhone !== "N/A" && (
-                                    <div className="flex items-center gap-1 truncate text-xs text-gray-500">
-                                        <Phone className="h-3 w-3 shrink-0" />
-                                        <span className="truncate">{visitorPhone}</span>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     );
@@ -478,7 +421,7 @@ function AppointmentLinksContent() {
 
                     const employeeNameRaw = employee.name || "Unknown Employee";
                     const employeeName = formatName(employeeNameRaw) || employeeNameRaw;
-                    const employeeEmail = employee.email || "N/A";
+                    const employeePhone = employee.phone || "N/A";
 
                     return (
                         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
@@ -490,8 +433,8 @@ function AppointmentLinksContent() {
                             <div className="min-w-0 flex-1">
                                 <div className="truncate text-sm font-medium sm:text-base">{employeeName}</div>
                                 <div className="flex items-center gap-1 truncate text-xs text-gray-500">
-                                    <Mail className="h-3 w-3 shrink-0" />
-                                    <span className="truncate">{employeeEmail}</span>
+                                    <Phone className="h-3 w-3 shrink-0" />
+                                    <span className="truncate">{employeePhone}</span>
                                 </div>
                             </div>
                         </div>
@@ -566,36 +509,29 @@ function AppointmentLinksContent() {
             {
                 key: "actions",
                 header: "Actions",
-                className: "text-right",
+                className: "text-center min-w-[240px] whitespace-nowrap",
                 sticky: 'right' as const,
                 render: (item: any) => (
                     <AppointmentActionCell
                         item={item}
                         user={user}
                         handleCopyLink={handleCopyLink}
-                        handleResend={handleResend}
-                        cooldowns={cooldowns}
+                        handleResendApi={handleResendApi}
+                        handlePrintPass={handlePrintPass}
                         setDeleteLinkId={setDeleteLinkId}
                         setSelectedBookingId={setSelectedBookingId}
                         setNoteValue={setNoteValue}
                         setShowEditNoteModal={setShowEditNoteModal}
-                        handleInlineVerifyOtp={handleInlineVerifyOtp}
+                        handleInlineVerifyOtp={(bid, otp) => processOtpVerification(bid, otp, true)}
                         isVerifyingInline={isVerifyingInline}
                     />
                 ),
             },
         ],
-        // Don't include cooldowns in dependencies to prevent re-render on every tick
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [handleCopyLink, handleResend, filterType, user, isVerifyingInline, handleInlineVerifyOtp, cooldowns],
+        [handleCopyLink, handleResendApi, filterType, user, isVerifyingInline, processOtpVerification],
     );
 
 
-
-    const handleFilterChange = useCallback((value: string) => {
-        setFilterType(value);
-        setPage(1);
-    }, []);
 
     // useEffect for redirects - must be after all other hooks
     useEffect(() => {
@@ -608,135 +544,68 @@ function AppointmentLinksContent() {
     }, [user, isAuthenticated, router]);
 
     // Show loading state - ALL HOOKS HAVE BEEN CALLED ABOVE
-    if (!isAuthenticated || isChecking) {
-        return (
-            <div className="flex min-h-[60vh] items-center justify-center">
-                <LoadingSpinner />
-            </div>
-        );
+    if (isAuthLoading || isChecking || !isAuthenticated) {
+        return <PageSkeleton type="table" />;
     }
 
-    if (isLoading || isAuthLoading) {
-        return <PageSkeleton />;
-    }
+    // Subscription-based gating logic
+    const modules = activeSubscriptionData?.modules;
+    const isPriorityPage = pathname === routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING;
+    
+    // Check if the specific module is enabled
+    const canAccess = isPriorityPage 
+        ? !!modules?.enablePriorityBooking 
+        : !!modules?.enableInvites;
 
-    const canAccessAppointmentLinks = subscriptionLimits?.modules?.visitorInvite;
-
-    if (canAccessAppointmentLinks === false) {
+    if (!canAccess) {
         return (
-            <ModuleAccessDenied
-                title="Visitor Invites Not Available"
-                description="Your current subscription plan does not include the Visitor Invite module. Please upgrade your plan to access this feature."
-                isExpired={isExpired}
+            <ModuleAccessDenied 
+                title={isPriorityPage ? "Priority Booking Restricted" : "Smart Invites Restricted"}
+                description={isPriorityPage 
+                    ? "The Priority Booking module is not included in your current subscription plan. Please upgrade to allow high-priority visitor entries."
+                    : "The Smart Invites module is not included in your current subscription plan. Please upgrade to start sending digital invitations to your visitors."
+                }
+                icon={isPriorityPage ? User : Link2}
             />
         );
     }
 
-
+    // If access granted, show loading skeleton for data
+    if (isLoading) {
+        return <PageSkeleton type="table" />;
+    }
 
     return (
         <div className="space-y-4 sm:space-y-6">
-            {/* Header Card */}
-
+            <DeliverySetupWarning />
 
             {/* Stats Cards */}
-            {linksData?.stats && (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-                    <Card className="card-hostinger">
-                        <CardContent className="p-4 sm:p-5">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-muted-foreground mb-1 text-xs sm:text-sm">Total Invites</p>
-                                    <p className="text-accent text-xl font-bold sm:text-2xl">
-                                        {linksData.stats.totalBooked + linksData.stats.totalNotBooked}
-                                    </p>
-                                </div>
-                                <div className="bg-accent/10 flex h-10 w-10 items-center justify-center rounded-full sm:h-12 sm:w-12">
-                                    <Link2 className="text-accent h-5 w-5 sm:h-6 sm:w-6" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="card-hostinger">
-                        <CardContent className="p-4 sm:p-5">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-muted-foreground mb-1 text-xs sm:text-sm">Booked</p>
-                                    <p className="text-xl font-bold text-green-700 sm:text-2xl">
-                                        {linksData.stats.totalBooked}
-                                    </p>
-                                </div>
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 sm:h-12 sm:w-12">
-                                    <CheckCircle className="h-5 w-5 text-green-700 sm:h-6 sm:w-6" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="card-hostinger">
-                        <CardContent className="p-4 sm:p-5">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-muted-foreground mb-1 text-xs sm:text-sm">Pending</p>
-                                    <p className="text-xl font-bold text-yellow-800 sm:text-2xl">
-                                        {linksData.stats.totalNotBooked}
-                                    </p>
-                                </div>
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100 sm:h-12 sm:w-12">
-                                    <XCircle className="h-5 w-5 text-yellow-800 sm:h-6 sm:w-6" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            )}
+            {linksData?.stats && <AppointmentStats stats={linksData.stats} />}
 
             {/* Table Section */}
             <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="flex flex-col w-full gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                    <div className="w-full sm:w-[260px] sm:flex-none">
-                        <SearchInput
-                            placeholder="Search by visitor..."
-                            value={search}
-                            onChange={setSearch}
-                            debounceDelay={500}
-                            className="w-full"
-                        />
-                    </div>
-                    <div className="flex w-full items-center gap-2 sm:w-auto sm:justify-end">
-                        <div className="flex-1 sm:w-auto sm:flex-none">
-                            <div className="flex p-1 bg-gray-100/80 rounded-lg border border-gray-200">
-                                <button
-                                    onClick={() => handleFilterChange("link")}
-                                    className={`flex-1 sm:flex-none px-4 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${filterType === "link"
-                                        ? "bg-white text-[#3882a5] shadow-sm ring-1 ring-black/5"
-                                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
-                                        }`}
-                                >
-                                    Send Link
-                                </button>
-                                <button
-                                    onClick={() => handleFilterChange("special")}
-                                    className={`flex-1 sm:flex-none px-4 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${filterType === "special"
-                                        ? "bg-white text-[#3882a5] shadow-sm ring-1 ring-black/5"
-                                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
-                                        }`}
-                                >
-                                    VIP Booking
-                                </button>
-                            </div>
-                        </div>
+                <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
+                    <SearchInput
+                        placeholder="Search by visitor..."
+                        value={search}
+                        onChange={setSearch}
+                        debounceDelay={500}
+                        className="flex-1 min-w-[120px] sm:w-[260px] sm:flex-none"
+                    />
+                    <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
                         <Button
                             variant="outline"
                             size="icon"
                             onClick={refetchAll}
                             disabled={isLoading}
-                            className="shrink-0 h-9 w-9 sm:h-10 sm:w-10 border-gray-200 hover:bg-gray-50 bg-white shadow-sm transition-all active:scale-95"
+                            className="shrink-0 h-10 w-10 sm:h-12 sm:w-12 border-gray-200 hover:bg-gray-50 bg-white shadow-sm transition-all active:scale-95 rounded-xl"
                             title="Refresh Table"
                         >
                             <RefreshCw className={`h-4 w-4 text-gray-500 ${isLoading ? 'animate-spin' : ''}`} />
                         </Button>
-                        <div className="shrink-0">
+                        <div className="shrink-0 flex items-center">
                             <SubscriptionActionButtons
+                                isEmployee={isEmployee}
                                 isExpired={isExpired}
                                 hasReachedLimit={hasReachedAppointmentLimit}
                                 limitType="appointment"
@@ -744,44 +613,29 @@ function AppointmentLinksContent() {
                                 openUpgradeModal={openUpgradeModal}
                                 closeUpgradeModal={closeUpgradeModal}
                                 upgradeLabel="Upgrade Plan"
-                                icon={UserPlus}
-                                className="flex items-center justify-center gap-2 text-xs whitespace-nowrap sm:text-sm text-white px-6 min-w-[150px]"
+                                icon={ArrowUp}
                             >
-                                <CreateAppointmentLinkModal
-                                    open={showLinkModal}
-                                    onOpenChange={setShowLinkModal}
-                                    onSuccess={() => {
-                                        refetchAll();
-                                    }}
-                                />
-                                <QuickAppointmentModal
-                                    open={showVipModal}
-                                    onOpenChange={setShowVipModal}
-                                    onSuccess={() => {
-                                        refetchAll();
-                                    }}
-                                />
                                 <ActionButton
-                                    variant="outline-primary"
+                                    variant="primary"
                                     size="xl"
-                                    className="flex items-center justify-center sm:gap-2 text-xs whitespace-nowrap sm:text-sm"
+                                    className="flex h-10 sm:h-12 items-center justify-center rounded-xl gap-2 px-4 sm:px-6 text-xs sm:text-sm font-bold shadow-md transition-all active:scale-95"
                                     onClick={() => {
                                         if (filterType === "special") {
-                                            setShowVipModal(true);
+                                            router.push(routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING_CREATE);
                                         } else {
-                                            setShowLinkModal(true);
+                                            router.push(routes.privateroute.APPOINTMENT_LINKS_CREATE);
                                         }
                                     }}
                                 >
                                     {filterType === "special" ? (
                                         <>
-                                            <User className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                            <span className="hidden sm:inline">Book VIP</span>
+                                            <UserPlus className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+                                            <span className="inline-flex">Create Priority Booking</span>
                                         </>
                                     ) : (
                                         <>
                                             <Link2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-                                            <span className="hidden sm:inline">Create Link</span>
+                                            <span className="inline-flex">Create Smart Link</span>
                                         </>
                                     )}
                                 </ActionButton>
@@ -798,7 +652,8 @@ function AppointmentLinksContent() {
                         emptyData={{
                             title: "No appointment links found",
                             description: "Create your first appointment link to get started.",
-                            primaryActionLabel: isExpired ? "Upgrade Plan" : (hasReachedAppointmentLimit ? "Support Chat" : (filterType === "special" ? "Book VIP" : "Create Link")),
+                            primaryActionLabel: isExpired ? "Upgrade Plan" : (hasReachedAppointmentLimit ? "Support Chat" : (filterType === "special" ? "Create Priority Booking" : "Create Invite Link")),
+                            icon: filterType === "special" ? UserPlus : Link2
                         }}
                         onPrimaryAction={() => {
                             if (isExpired) {
@@ -808,9 +663,9 @@ function AppointmentLinksContent() {
                                 dispatch(setAssistantOpen(true));
                             } else {
                                 if (filterType === "special") {
-                                    setShowVipModal(true);
+                                    router.push(routes.privateroute.APPOINTMENT_LINKS_VIP_BOOKING_CREATE);
                                 } else {
-                                    setShowLinkModal(true);
+                                    router.push(routes.privateroute.APPOINTMENT_LINKS_CREATE);
                                 }
                             }
                         }}
@@ -843,101 +698,15 @@ function AppointmentLinksContent() {
                 />
 
                 {/* OTP Verification Modal */}
-                <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
-                    <DialogContent className="sm:max-w-[400px]">
-                        <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-                                <Key className="h-5 w-5 text-orange-600" />
-                                Verify OTP
-                            </DialogTitle>
-                            <DialogDescription>
-                                Enter the 4-digit OTP sent to the visitor's mobile.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="py-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-3">OTP Code</label>
-                            <div className="flex justify-center gap-3">
-                                {[0, 1, 2, 3].map((index) => (
-                                    <input
-                                        key={index}
-                                        id={`otp-${index}`}
-                                        type="text"
-                                        inputMode="numeric"
-                                        maxLength={1}
-                                        value={otpValue[index] || ''}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/\D/g, '');
-                                            if (value) {
-                                                const newOtp = otpValue.split('');
-                                                newOtp[index] = value;
-                                                const newOtpValue = newOtp.join('');
-                                                setOtpValue(newOtpValue);
-
-                                                // Auto-focus next input
-                                                if (index < 3) {
-                                                    document.getElementById(`otp-${index + 1}`)?.focus();
-                                                }
-
-                                                // Auto-submit when all 4 digits are entered
-                                                if (index === 3 && newOtpValue.length === 4) {
-                                                    handleVerifyOtp();
-                                                }
-                                            }
-                                        }}
-                                        onKeyDown={(e) => {
-                                            // Handle backspace
-                                            if (e.key === 'Backspace' && !otpValue[index] && index > 0) {
-                                                const newOtp = otpValue.split('');
-                                                newOtp[index - 1] = '';
-                                                setOtpValue(newOtp.join(''));
-                                                document.getElementById(`otp-${index - 1}`)?.focus();
-                                            } else if (e.key === 'Backspace' && otpValue[index]) {
-                                                const newOtp = otpValue.split('');
-                                                newOtp[index] = '';
-                                                setOtpValue(newOtp.join(''));
-                                            }
-                                            // Handle arrow keys
-                                            else if (e.key === 'ArrowLeft' && index > 0) {
-                                                document.getElementById(`otp-${index - 1}`)?.focus();
-                                            } else if (e.key === 'ArrowRight' && index < 3) {
-                                                document.getElementById(`otp-${index + 1}`)?.focus();
-                                            }
-                                        }}
-                                        onPaste={(e) => {
-                                            e.preventDefault();
-                                            const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
-                                            setOtpValue(pastedData);
-
-                                            // Focus the last filled box or the first empty one
-                                            const nextIndex = Math.min(pastedData.length, 3);
-                                            document.getElementById(`otp-${nextIndex}`)?.focus();
-
-                                            // Auto-submit if 4 digits pasted
-                                            if (pastedData.length === 4) {
-                                                setTimeout(() => handleVerifyOtp(), 100);
-                                            }
-                                        }}
-                                        className="w-14 h-16 sm:w-16 sm:h-18 text-center text-2xl sm:text-3xl font-bold border-2 rounded-lg focus:border-[#3882a5] focus:ring-2 focus:ring-[#3882a5]/20 outline-none transition-all"
-                                        autoFocus={index === 0}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                        <DialogFooter className="flex flex-col sm:flex-row gap-3">
-                            <Button variant="outline" onClick={() => setShowOtpModal(false)} className="w-full sm:flex-1">
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={handleVerifyOtp}
-                                disabled={otpValue.length !== 4 || isVerifying}
-                                variant="primary"
-                                className="w-full sm:flex-1"
-                            >
-                                {isVerifying ? <LoadingSpinner size="sm" className="mr-2" /> : "Verify & Schedule"}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                <OtpVerificationModal
+                    isOpen={showOtpModal}
+                    onClose={() => setShowOtpModal(false)}
+                    onVerify={(otp) => processOtpVerification(selectedBookingId!, otp, false)}
+                    isLoading={isVerifying}
+                    length={6}
+                    title="Verify VIP Booking"
+                    description="Enter the 6-digit code sent to the visitor's phone number to authorize this priority entry."
+                />
 
                 {/* Note Viewer Modal */}
                 <Dialog open={showNoteModal} onOpenChange={setShowNoteModal}>
@@ -995,6 +764,9 @@ function AppointmentLinksContent() {
                     </DialogContent>
                 </Dialog>
             </div>
+
+            {/* Hidden Visit Slip for printing */}
+            <VisitSlip ref={printRef} appointment={passToPrint} />
         </div>
     );
 }

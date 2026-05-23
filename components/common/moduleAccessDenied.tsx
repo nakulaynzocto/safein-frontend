@@ -61,7 +61,7 @@ export function ModuleAccessDenied({
                     )}>
                         <Icon className="h-7 w-7 sm:h-8 sm:w-8" />
                     </div>
-                    <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+                    <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-800 tracking-tight">
                         {title}
                     </CardTitle>
                     <CardDescription className="text-base sm:text-lg text-gray-500 mt-2 leading-relaxed max-w-xl mx-auto">

@@ -1,17 +1,16 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useMemo, useCallback } from "react";
+import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle, AlertCircle, Info } from "lucide-react";
+import { AlertCircle, AlertTriangle, Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ConfirmationDialogProps {
@@ -23,6 +22,8 @@ interface ConfirmationDialogProps {
     cancelText?: string;
     onConfirm: () => void;
     onCancel?: () => void;
+    secondaryActionText?: string;
+    onSecondaryAction?: () => void;
     variant?: "default" | "destructive" | "warning";
     children?: ReactNode;
     disabled?: boolean;
@@ -38,90 +39,187 @@ export function ConfirmationDialog({
     cancelText = "Cancel",
     onConfirm,
     onCancel,
+    secondaryActionText,
+    onSecondaryAction,
     variant = "default",
     children,
     disabled = false,
     disabledMessage,
 }: ConfirmationDialogProps) {
-    const handleCancel = useCallback(() => {
+    const hasSecondary = !!secondaryActionText;
+
+    const handleCancel = useCallback((e?: React.MouseEvent) => {
+        e?.preventDefault();
+        e?.stopPropagation();
         onCancel?.();
         onOpenChange(false);
     }, [onCancel, onOpenChange]);
 
-    const handleConfirm = useCallback(() => {
+    const handleConfirm = useCallback((e?: React.MouseEvent) => {
+        e?.preventDefault();
+        e?.stopPropagation();
         if (!disabled) {
             onConfirm();
             onOpenChange(false);
         }
     }, [disabled, onConfirm, onOpenChange]);
 
+    const handleSecondary = useCallback((e?: React.MouseEvent) => {
+        e?.preventDefault();
+        e?.stopPropagation();
+        onSecondaryAction?.();
+        onOpenChange(false);
+    }, [onSecondaryAction, onOpenChange]);
+
     const getIcon = () => {
         switch (variant) {
             case "destructive":
-                return <AlertCircle className="h-8 w-8 text-red-500" />;
+                return <AlertCircle className="h-5 w-5 text-red-500" />;
             case "warning":
-                return <AlertTriangle className="h-8 w-8 text-red-500" />;
+                return <AlertTriangle className="h-5 w-5 text-amber-500" />;
             default:
-                return <Info className="h-8 w-8 text-blue-500" />;
+                return <Info className="h-5 w-5" style={{ color: "#3882a5" }} />;
         }
     };
 
     const getIconBg = () => {
         switch (variant) {
             case "destructive":
+                return "bg-red-50 border border-red-100";
             case "warning":
-                return "bg-red-50";
+                return "bg-amber-50 border border-amber-100";
             default:
-                return "bg-blue-50";
+                return "border";
         }
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[400px] rounded-3xl border-none shadow-2xl bg-white p-0 overflow-hidden">
-                <div className="p-6 text-center">
-                    <div className={cn(
-                        "mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4",
-                        getIconBg()
-                    )}>
-                        {getIcon()}
+            <DialogContent
+                showCloseButton={false}
+                className="max-w-[92vw] sm:max-w-[460px] rounded-xl border border-border bg-white shadow-lg p-0 gap-0 overflow-hidden"
+            >
+                {/* Header */}
+                <div className="relative px-6 pt-6 pb-5">
+                    <button
+                        type="button"
+                        onClick={handleCancel}
+                        className="absolute right-4 top-4 text-muted-foreground hover:text-foreground transition-colors rounded-md p-1 hover:bg-muted"
+                    >
+                        <X size={15} />
+                    </button>
+
+                    {/* Icon + Title row */}
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className={cn(
+                            "w-9 h-9 rounded-lg flex items-center justify-center shrink-0",
+                            getIconBg()
+                        )}
+                        style={variant === "default" ? { backgroundColor: "rgba(56,130,165,0.08)", borderColor: "rgba(56,130,165,0.2)" } : undefined}
+                        >
+                            {getIcon()}
+                        </div>
+                        <DialogHeader className="space-y-0 text-left flex-1">
+                            <DialogTitle className="text-sm font-semibold leading-snug" style={{ color: "#161718" }}>
+                                {title}
+                            </DialogTitle>
+                        </DialogHeader>
                     </div>
-                    <DialogHeader>
-                        <DialogTitle className="text-xl font-bold text-gray-900 text-center">
-                            {title}
-                        </DialogTitle>
-                        <DialogDescription className="text-gray-500 text-center mt-2">
-                            {description}
-                        </DialogDescription>
-                    </DialogHeader>
+
+                    {/* Description */}
+                    <DialogDescription asChild className="text-[13px] leading-relaxed" style={{ color: "#6b7280" }}>
+                        <div className="pl-[3.25rem]">{description}</div>
+                    </DialogDescription>
+
                     {disabled && disabledMessage && (
-                        <div className="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800 text-left">
+                        <div className="mt-3 ml-[3.25rem] rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-[12px] text-yellow-800 font-medium">
                             {disabledMessage}
                         </div>
                     )}
-                    {children && <div className="mt-4">{children}</div>}
+                    {children && <div className="mt-3 pl-[3.25rem]">{children}</div>}
                 </div>
-                <DialogFooter className="flex flex-col sm:flex-row gap-2 p-6 bg-gray-50/50 border-t border-gray-100">
-                    <Button 
-                        variant="outline" 
-                        onClick={handleCancel} 
-                        className="w-full sm:flex-1 h-11 rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-semibold transition-colors"
-                    >
-                        {cancelText}
-                    </Button>
-                    <Button 
-                        onClick={handleConfirm}
-                        disabled={disabled}
-                        className={cn(
-                            "w-full sm:flex-1 h-12 rounded-xl text-white font-semibold shadow-lg transition-all active:scale-[0.98]",
-                            variant === "destructive" || variant === "warning" 
-                                ? "bg-red-500 hover:bg-red-600 shadow-red-500/20" 
-                                : "bg-[#3882a5] hover:bg-[#2d6a87] shadow-[#3882a5]/20"
-                        )}
-                    >
-                        {confirmText}
-                    </Button>
-                </DialogFooter>
+
+                {/* Divider */}
+                <div className="border-t border-border" />
+
+                {/* Footer */}
+                <div className="px-6 py-4 bg-muted/30">
+                    {hasSecondary ? (
+                        /**
+                         * 3 actions → primary CTA full-width on top,
+                         * Cancel + Secondary side by side below
+                         */
+                        <div className="flex flex-col gap-2">
+                            {/* Primary — full width */}
+                            <Button
+                                type="button"
+                                onClick={handleConfirm}
+                                disabled={disabled}
+                                className={cn(
+                                    "w-full h-9 rounded-lg text-[13px] font-medium text-white transition-all",
+                                    variant === "destructive"
+                                        ? "bg-destructive hover:bg-destructive/90"
+                                        : "hover:opacity-90"
+                                )}
+                                style={variant === "default" || variant === "warning" ? { backgroundColor: "#074463" } : undefined}
+                            >
+                                {confirmText}
+                            </Button>
+
+                            {/* Cancel + Secondary — equal halves */}
+                            <div className="flex gap-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handleCancel}
+                                    className="flex-1 h-9 rounded-lg text-[13px] font-medium border-border text-foreground hover:bg-muted transition-all"
+                                >
+                                    {cancelText}
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handleSecondary}
+                                    className="flex-1 h-9 rounded-lg text-[13px] font-medium transition-all"
+                                    style={{
+                                        borderColor: "rgba(56,130,165,0.4)",
+                                        color: "#3882a5",
+                                    }}
+                                >
+                                    {secondaryActionText}
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        /**
+                         * 2 actions → Cancel left, Confirm right
+                         */
+                        <div className="flex gap-2 justify-end">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleCancel}
+                                className="h-9 rounded-lg text-[13px] font-medium border-border text-foreground hover:bg-muted transition-all px-5"
+                            >
+                                {cancelText}
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={handleConfirm}
+                                disabled={disabled}
+                                className={cn(
+                                    "h-9 rounded-lg text-[13px] font-medium text-white px-5 transition-all",
+                                    variant === "destructive"
+                                        ? "bg-destructive hover:bg-destructive/90"
+                                        : "hover:opacity-90"
+                                )}
+                                style={variant === "default" || variant === "warning" ? { backgroundColor: "#074463" } : undefined}
+                            >
+                                {confirmText}
+                            </Button>
+                        </div>
+                    )}
+                </div>
             </DialogContent>
         </Dialog>
     );

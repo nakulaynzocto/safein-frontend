@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, CalendarPlus, UserPlus, Users, Send, ClipboardList, IdCard, Contact } from "lucide-react";
+import { Calendar, CalendarPlus, UserPlus, Users, Send, ClipboardList, IdCard, Contact, QrCode } from "lucide-react";
 import { routes } from "@/utils/routes";
 
+import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useAppSelector } from "@/store/hooks";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
@@ -60,6 +61,9 @@ export function QuickActions() {
     const router = useRouter();
     const { user } = useAppSelector((state) => state.auth);
     const { hasReachedEmployeeLimit, hasReachedAppointmentLimit, isExpired } = useSubscriptionStatus();
+    const { activeSubscriptionData } = useAuthSubscription();
+    const modules = activeSubscriptionData?.modules;
+
     const {
         showUpgradeModal,
         openUpgradeModal,
@@ -68,7 +72,15 @@ export function QuickActions() {
 
     // Check if user is employee
     const isEmployee = checkIsEmployee(user);
-    const quickActions = isEmployee ? employeeQuickActions : adminQuickActions;
+    
+    // Filter quick actions based on subscription modules
+    const baseActions = isEmployee ? employeeQuickActions : adminQuickActions;
+    const quickActions = baseActions.filter(action => {
+        if (action.href === routes.privateroute.SPOT_PASS && !modules?.enableInvites) return false;
+        return true;
+    });
+
+    const showInvites = !!modules?.enableInvites;
 
     return (
         <Card>
@@ -90,23 +102,34 @@ export function QuickActions() {
                         className="h-16 flex-col bg-transparent w-full text-xs sm:h-20 sm:text-sm border-2 border-dashed border-brand/20 hover:border-brand/40 hover:bg-brand/5 rounded-xl transition-all"
                     >
                         {isEmployee ? (
-                            <Button
-                                className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm w-full text-brand-strong hover:text-brand"
-                                variant="outline"
-                                onClick={() => router.push(routes.privateroute.APPOINTMENT_LINKS)}
-                            >
-                                <Send className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                <span className="line-clamp-2 text-center font-medium">Visitor Invites</span>
-                            </Button>
+                            showInvites ? (
+                                <Button
+                                    className="h-16 flex-col p-2 text-xs sm:h-20 sm:text-sm w-full transition-all"
+                                    variant="primary"
+                                    onClick={() => router.push(routes.privateroute.APPOINTMENT_LINKS)}
+                                >
+                                    <Send className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
+                                    <span className="line-clamp-2 text-center font-bold">Visitor Invites</span>
+                                </Button>
+                            ) : (
+                                <Button
+                                    className="h-16 flex-col p-2 text-xs sm:h-20 sm:text-sm w-full transition-all"
+                                    variant="primary"
+                                    onClick={() => router.push(routes.privateroute.APPOINTMENTLIST)}
+                                >
+                                    <Calendar className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
+                                    <span className="line-clamp-2 text-center font-bold">View Appointments</span>
+                                </Button>
+                            )
                         ) : (
                             <Button
-                                className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm w-full text-brand-strong hover:text-brand"
-                                variant="outline"
+                                className="h-16 flex-col p-2 text-xs sm:h-20 sm:text-sm w-full transition-all"
+                                variant="primary"
                                 asChild
                             >
                                 <Link href={routes.privateroute.APPOINTMENTCREATE} prefetch>
                                     <CalendarPlus className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                    <span className="line-clamp-2 text-center font-medium">Create Appointment</span>
+                                    <span className="line-clamp-2 text-center font-bold">Create Appointment</span>
                                 </Link>
                             </Button>
                         )}
@@ -115,13 +138,13 @@ export function QuickActions() {
                     {quickActions.map((action) => (
                         <Button
                             key={action.href}
-                            className="h-16 flex-col bg-transparent p-2 text-xs sm:h-20 sm:text-sm text-brand-strong hover:text-brand"
-                            variant="outline"
+                            className="h-16 flex-col p-2 text-xs sm:h-20 sm:text-sm w-full transition-all"
+                            variant="primary"
                             asChild
                         >
                             <Link href={action.href} prefetch={true}>
                                 <action.icon className="mb-1 h-5 w-5 sm:mb-2 sm:h-6 sm:w-6" />
-                                <span className="line-clamp-2 text-center font-medium">{action.label}</span>
+                                <span className="line-clamp-2 text-center font-bold">{action.label}</span>
                             </Link>
                         </Button>
                     ))}

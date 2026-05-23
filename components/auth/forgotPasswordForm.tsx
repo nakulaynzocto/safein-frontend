@@ -11,6 +11,7 @@ import { InputField } from "@/components/common/inputField";
 import { useForgotPasswordMutation } from "@/store/api/authApi";
 import { routes } from "@/utils/routes";
 import { Mail, ArrowLeft, CheckCircle, Loader2, Sparkles } from "lucide-react";
+import { encryptData } from "@/utils/crypto";
 
 const forgotPasswordSchema = yup.object({
     email: yup.string().email("Invalid email address").required("Email is required"),
@@ -35,7 +36,8 @@ export function ForgotPasswordForm() {
     const onSubmit = async (data: ForgotPasswordFormData) => {
         try {
             setSubmitError(null);
-            await forgotPassword({ email: data.email }).unwrap();
+            const encryptedEmail = encryptData(data.email);
+            await forgotPassword({ email: encryptedEmail }).unwrap();
             setSentEmail(data.email);
             setIsSuccess(true);
         } catch (error: any) {
@@ -55,7 +57,7 @@ export function ForgotPasswordForm() {
                             </div>
                         </div>
                     </div>
-                    <h1 className="text-3xl font-black text-[#074463] tracking-tight mb-2">Check Your Email</h1>
+                    <h1 className="text-3xl font-semibold text-[#074463] tracking-tight mb-2">Check Your Email</h1>
                     <p className="text-slate-500 font-medium">We've sent a recovery link to your inbox</p>
                 </div>
 
@@ -70,7 +72,7 @@ export function ForgotPasswordForm() {
                     <div className="flex flex-col gap-3">
                         <Button
                             asChild
-                            className="w-full h-12 rounded-xl font-black bg-[#3882a5] hover:bg-[#2c6a88] text-white"
+                            className="w-full h-12 rounded-xl font-semibold bg-[#3882a5] hover:bg-[#2c6a88] text-white"
                         >
                             <Link href={routes.publicroute.LOGIN}>Back to Sign In</Link>
                         </Button>
@@ -93,13 +95,8 @@ export function ForgotPasswordForm() {
     return (
         <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="mb-8 ">
-                <div className="mb-6 flex">
-                    <div className="bg-[#3882a5]/10 flex h-14 w-14 items-center justify-center rounded-2xl shadow-inner border border-[#3882a5]/5 text-[#3882a5]">
-                        <Sparkles className="h-7 w-7" />
-                    </div>
-                </div>
                 <div className="space-y-2">
-                    <h1 className="text-3xl font-black text-[#074463] tracking-tight">Forgot Password?</h1>
+                    <h1 className="text-3xl font-semibold text-[#074463] tracking-tight">Forgot Password?</h1>
                     <p className="text-slate-500 font-medium text-sm sm:text-base">
                         No worries, we'll send you instructions to reset it.
                     </p>
@@ -126,7 +123,7 @@ export function ForgotPasswordForm() {
 
                     <Button
                         type="submit"
-                        className="w-full h-12 rounded-xl font-black bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                        className="w-full h-12 rounded-xl font-semibold bg-[#3882a5] hover:bg-[#2c6a88] text-white shadow-xl shadow-[#3882a5]/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                         disabled={isLoading}
                     >
                         {isLoading && <Loader2 className="h-5 w-5 animate-spin" />}

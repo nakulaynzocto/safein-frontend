@@ -115,8 +115,8 @@ export function ChatWindow({
                         <div className="absolute inset-0 bg-blue-500/5 rounded-[2rem] blur-xl group-hover:bg-blue-500/10 transition-colors"></div>
                         <span className="text-5xl filter drop-shadow-md relative z-10 transition-transform group-hover:rotate-12">📨</span>
                     </div>
-                    <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-3 tracking-tight font-sans">Chat Messaging</h3>
-                    <p className="text-gray-500 dark:text-gray-400 mb-10 leading-relaxed text-[15px] font-medium">
+                    <h3 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-3 tracking-tight font-sans">Chat Messaging</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-10 leading-relaxed text-sm font-medium">
                         Seamlessly connect with your team. Select a conversation to start collaborating in real-time.
                     </p>
                     <Button 
@@ -177,13 +177,13 @@ export function ChatWindow({
                         )}
                     </div>
                     <div className="flex flex-col">
-                        <h2 className="text-base sm:text-[17px] font-extrabold text-gray-900 dark:text-gray-100 leading-tight tracking-tight truncate max-w-[160px] sm:max-w-none hover:text-[#074463] transition-colors cursor-pointer">
+                        <h2 className="text-base sm:text-[17px] font-extrabold text-gray-800 dark:text-gray-100 leading-tight tracking-tight truncate max-w-[160px] sm:max-w-none hover:text-[#074463] transition-colors cursor-pointer">
                             {formatName(activeUser.name)}
                         </h2>
                         <div className="flex items-center gap-1.5 mt-0.5">
                             {activeUser.isOnline && <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>}
                             <span className={cn(
-                                "text-[11px] font-semibold uppercase tracking-wider",
+                                "text-xs font-semibold uppercase tracking-wider",
                                 activeUser.isOnline ? "text-green-600 dark:text-green-400" : "text-gray-400"
                             )}>
                                 {activeUser.role === 'group' || (activeUser as any).isGroup
@@ -223,7 +223,7 @@ export function ChatWindow({
                 {/* Loader for older messages */}
                 {isFetching && (
                     <div className="flex justify-center mb-6 sticky top-2 z-20">
-                        <div className="flex gap-2 items-center bg-white/90 dark:bg-gray-800/90 backdrop-blur-md px-4 py-1.5 rounded-2xl shadow-lg border border-gray-100/50 dark:border-gray-700/50 text-[11px] font-bold text-[#074463] dark:text-blue-400 animate-in fade-in zoom-in">
+                        <div className="flex gap-2 items-center bg-white/90 dark:bg-gray-800/90 backdrop-blur-md px-4 py-1.5 rounded-2xl shadow-lg border border-gray-100/50 dark:border-gray-700/50 text-xs font-bold text-[#074463] dark:text-blue-400 animate-in fade-in zoom-in">
                              <div className="h-3 w-3 border-2 border-[#074463] border-t-transparent rounded-full animate-spin"></div>
                              LOADING MESSAGES
                         </div>
@@ -260,7 +260,7 @@ export function ChatWindow({
                                 <div key={msg.id}>
                                     {showDateDivider && (
                                         <div className="flex justify-center my-8 sticky top-0 z-20">
-                                            <div className="bg-gray-100/80 dark:bg-gray-800/80 backdrop-blur-md px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400 shadow-sm border border-gray-200/50 dark:border-gray-700/50">
+                                            <div className="bg-gray-100/80 dark:bg-gray-800/80 backdrop-blur-md px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400 shadow-sm border border-gray-200/50 dark:border-gray-700/50">
                                                 {getDateDivider(msg.createdAt)}
                                             </div>
                                         </div>
@@ -277,7 +277,7 @@ export function ChatWindow({
                                                 {isLastInSequence ? (
                                                     <Avatar className="h-8 w-8 border-2 border-white dark:border-gray-800 shadow-sm transition-transform hover:scale-110">
                                                         <AvatarImage src={msg.senderAvatar} />
-                                                        <AvatarFallback className="bg-blue-100 dark:bg-gray-800 text-[#074463] dark:text-blue-400 text-[10px] font-black">
+                                                        <AvatarFallback className="bg-blue-100 dark:bg-gray-800 text-[#074463] dark:text-blue-400 text-xs font-semibold">
                                                             {getInitials(msg.senderName || "U")}
                                                         </AvatarFallback>
                                                     </Avatar>
@@ -290,7 +290,7 @@ export function ChatWindow({
                                             isOwn ? "items-end" : "items-start"
                                         )}>
                                             <div className={cn(
-                                                "px-4 py-2.5 shadow-sm text-[15px] sm:text-[16px] break-words whitespace-pre-wrap relative transition-all duration-300",
+                                                "px-4 py-2.5 shadow-sm text-sm sm:text-[16px] break-words whitespace-pre-wrap relative transition-all duration-300",
                                                 isOwn
                                                     ? "bg-[#074463] text-white rounded-[1.25rem] rounded-tr-[0.25rem] shadow-[#074463]/10"
                                                     : "bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded-[1.25rem] rounded-tl-[0.25rem] border border-gray-100 dark:border-gray-800 shadow-gray-200/40 dark:shadow-none",
@@ -337,7 +337,7 @@ export function ChatWindow({
                                                 </div>
 
                                                 <div className={cn(
-                                                    "text-[10px] mt-1.5 flex items-center justify-end gap-1.5 select-none leading-none font-bold",
+                                                    "text-xs mt-1.5 flex items-center justify-end gap-1.5 select-none leading-none font-bold",
                                                     isOwn ? "text-blue-100/70" : "text-gray-400 dark:text-gray-500"
                                                 )}>
                                                     <span>{formatTime(msg.createdAt)}</span>

@@ -14,14 +14,17 @@ import { CheckCircle } from "lucide-react";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { FormContainer } from "@/components/common/formContainer";
 import { VisitorFormFields } from "./visitorFormFields";
-import { visitorSchema, VisitorFormData } from "./visitorSchema";
+import { visitorSchema, VisitorFormData, transformToVisitorPayload } from "./visitorSchema";
 import { useCreateVisitorMutation, useUpdateVisitorMutation, useGetVisitorQuery, type CreateVisitorRequest } from "@/store/api/visitorApi";
+import { useUploadFileMutation } from "@/store/api/uploadApi";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
 import { UserPlus } from "lucide-react";
+import { useUserCountry } from "@/hooks/useUserCountry";
+import { useGetSettingsQuery } from "@/store/api/settingsApi";
 
 interface NewVisitorModalProps {
     visitorId?: string;
@@ -48,6 +51,7 @@ export function NewVisitorModal({
     const setOpen = isPage ? (_: boolean) => { } : onOpenChange || setInternalOpen;
     const [createVisitor, { isLoading: isCreating }] = useCreateVisitorMutation();
     const [updateVisitor, { isLoading: isUpdating }] = useUpdateVisitorMutation();
+    const [uploadFile, { isLoading: isUploadingFile }] = useUploadFileMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
     const [isFileUploading, setIsFileUploading] = useState(false);
     const { hasReachedVisitorLimit, isExpired } = useSubscriptionStatus();
@@ -58,7 +62,9 @@ export function NewVisitorModal({
     } = useSubscriptionActions();
 
     const isEditMode = !!visitorId;
-    const isLoading = isCreating || isUpdating;
+    const isLoading = isCreating || isUpdating || isUploadingFile;
+    const defaultCountry = useUserCountry();
+    const { data: settings } = useGetSettingsQuery();
 
     const { data: visitorData, isLoading: isLoadingVisitor } = useGetVisitorQuery(visitorId!, {
         skip: !isEditMode,
@@ -73,9 +79,7 @@ export function NewVisitorModal({
             visitorData.photo);
     const hasSecurityData =
         visitorData &&
-        ((visitorData as any).emergencyContacts?.length > 0 ||
-            (visitorData as any).blacklisted ||
-            (visitorData as any).tags);
+        ((visitorData as any).emergencyContacts?.length > 0);
 
     const [showIdVerificationFields, setShowIdVerificationFields] = useState<boolean>(!!hasIdVerificationData);
     const [showSecurityFields, setShowSecurityFields] = useState<boolean>(!!hasSecurityData);
@@ -89,6 +93,7 @@ export function NewVisitorModal({
         setValue,
         clearErrors,
         watch,
+        setError,
     } = useForm<VisitorFormData>({
         resolver: yupResolver(visitorSchema) as any,
         mode: "onSubmit",
@@ -102,7 +107,7 @@ export function NewVisitorModal({
                 street: "",
                 city: "",
                 state: "",
-                country: "IN",
+                country: defaultCountry,
             },
             idProof: {
                 type: "",
@@ -110,9 +115,6 @@ export function NewVisitorModal({
                 image: "",
             },
             photo: "",
-            blacklisted: false,
-            blacklistReason: "",
-            tags: "",
             emergencyContacts: [],
         },
     });
@@ -123,10 +125,10 @@ export function NewVisitorModal({
             setGeneralError(null);
             clearErrors();
         } else {
-            // Set default country to India when modal opens
+            // Set default country from hook when modal opens
             const currentCountry = watch("address.country");
             if (!currentCountry) {
-                setValue("address.country", "IN", { shouldValidate: false, shouldDirty: false });
+                setValue("address.country", defaultCountry, { shouldValidate: false, shouldDirty: false });
             }
         }
     }, [open, reset, clearErrors, setValue, watch]);
@@ -140,9 +142,7 @@ export function NewVisitorModal({
                 visitorData.photo
             );
             const hasSecurity = !!(
-                (visitorData as any).emergencyContacts?.length > 0 ||
-                (visitorData as any).blacklisted ||
-                (visitorData as any).tags
+                (visitorData as any).emergencyContacts?.length > 0
             );
             setShowIdVerificationFields(hasIdVerification);
             setShowSecurityFields(hasSecurity);
@@ -151,12 +151,15 @@ export function NewVisitorModal({
                 name: visitorData.name || "",
                 email: visitorData.email || "",
                 phone: visitorData.phone || "",
-                gender: (visitorData as any).gender?.trim().toLowerCase() || "",
+                gender: ((visitorData as any).gender || (visitorData as any).Gender || "")
+                    .toString()
+                    .trim()
+                    .toLowerCase() || "",
                 address: {
                     street: visitorData.address?.street || "",
                     city: visitorData.address?.city || "",
                     state: visitorData.address?.state || "",
-                    country: visitorData.address?.country || "IN",
+                    country: visitorData.address?.country || defaultCountry,
                 },
                 idProof: {
                     type: visitorData.idProof?.type || "",
@@ -166,7 +169,6 @@ export function NewVisitorModal({
                 photo: visitorData.photo || "",
                 blacklisted: (visitorData as any).blacklisted || false,
                 blacklistReason: (visitorData as any).blacklistReason || "",
-                tags: (visitorData as any).tags?.join(", ") || "",
                 emergencyContacts: (visitorData as any).emergencyContacts?.map((c: any) => ({
                     name: c.name,
                     phone: c.phone?.startsWith("+") ? c.phone : `${c.countryCode || ""}${c.phone || ""}`,
@@ -196,7 +198,6 @@ export function NewVisitorModal({
         if (!checked) {
             setValue("blacklisted", false);
             setValue("blacklistReason", "");
-            setValue("tags", "");
             setValue("emergencyContacts", []);
         }
     };
@@ -205,41 +206,32 @@ export function NewVisitorModal({
         try {
             setGeneralError(null);
 
-            const visitorPayload: CreateVisitorRequest = {
-                name: data.name,
-                email: data.email,
-                phone: data.phone,
-                gender: (data.gender as any) || undefined,
-                address: {
-                    street: data.address.street || undefined,
-                    city: data.address.city,
-                    state: data.address.state,
-                    country: data.address.country,
-                },
-                idProof:
-                    data.idProof.type || data.idProof.number || data.idProof.image
-                        ? {
-                            type: data.idProof.type || undefined,
-                            number: data.idProof.number || undefined,
-                            image: data.idProof.image || undefined,
-                        }
-                        : undefined,
-                photo: data.photo || undefined,
-                blacklisted: data.blacklisted,
-                blacklistReason: data.blacklistReason || undefined,
-                tags: data.tags ? data.tags.split(",").map((t) => t.trim()) : undefined,
-                emergencyContacts: data.emergencyContacts && data.emergencyContacts.length > 0
-                    ? data.emergencyContacts.map((contact) => {
-                        const fullPhone = contact.phone || "";
-                        const parsed = parsePhoneNumberFromString(fullPhone.startsWith("+") ? fullPhone : `+${fullPhone}`);
-                        return {
-                            name: contact.name || "",
-                            countryCode: parsed ? `+${parsed.countryCallingCode}` : "+91",
-                            phone: parsed ? parsed.nationalNumber : fullPhone.replace(/^\+\d+/, ""),
-                        };
-                    })
-                    : undefined,
-            };
+            // Mandatory photo check if enabled
+            if (settings?.features?.enableVisitorImageCapture && !data.photo) {
+                setError("photo", { type: "manual", message: "Visitor photo is required" });
+                showErrorToast("Visitor photo is required");
+                return;
+            }
+
+            let finalPhotoUrl = typeof data.photo === "string" ? data.photo : undefined;
+            if (data.photo instanceof File) {
+                const uploadRes = await uploadFile({ file: data.photo }).unwrap();
+                finalPhotoUrl = uploadRes.url;
+            }
+
+            let finalIdProofUrl = typeof data.idProof?.image === "string" ? data.idProof.image : undefined;
+            if (data.idProof && data.idProof.image instanceof File) {
+                const uploadRes = await uploadFile({ file: data.idProof.image }).unwrap();
+                finalIdProofUrl = uploadRes.url;
+            }
+
+            const visitorPayload = transformToVisitorPayload(data, finalPhotoUrl, finalIdProofUrl);
+            
+            // Adjust for edit mode differences if any
+            if (isEditMode) {
+                (visitorPayload as any).email = (data.email?.trim() ? data.email.trim() : null);
+            }
+
 
             if (isEditMode && visitorId) {
                 await updateVisitor({ id: visitorId, ...visitorPayload }).unwrap();
@@ -270,45 +262,8 @@ export function NewVisitorModal({
                 router.push(`${routes.privateroute.APPOINTMENTCREATE}?visitorId=${newVisitorId}`);
             }
         } catch (error: any) {
-            if (error?.data?.message) {
-                const message = error.data.message.toLowerCase();
-                if (message.includes("email") && message.includes("already exists")) {
-                    setGeneralError("Email address is already registered");
-                } else if (message.includes("phone") && message.includes("already exists")) {
-                    setGeneralError("Phone number is already registered");
-                } else if (message.includes("id proof")) {
-                    const friendlyMessage = error.data.message
-                        .replace(/idProof\.type:/gi, "ID Proof Type: ")
-                        .replace(/idProof\.number:/gi, "ID Proof Number: ")
-                        .replace(
-                            /must be at least 2 characters long/gi,
-                            "must be at least 2 characters. Please enter a complete value or leave it empty",
-                        )
-                        .replace(/validation failed:/gi, "")
-                        .trim();
-                    setGeneralError(
-                        friendlyMessage ||
-                        "Please check the ID proof fields. They must be at least 2 characters or left empty.",
-                    );
-                } else if (message.includes("address.street") || message.includes("street address")) {
-                    const friendlyMessage = error.data.message
-                        .replace(/address\.street:/gi, "Company Address: ")
-                        .replace(/street address/gi, "Company Address")
-                        .replace(
-                            /must be at least 2 characters long/gi,
-                            "must be at least 2 characters. Please enter a complete address or leave it empty",
-                        )
-                        .replace(/validation failed:/gi, "")
-                        .trim();
-                    setGeneralError(friendlyMessage || "Company Address must be at least 2 characters or left empty.");
-                } else {
-                    setGeneralError(error.data.message);
-                }
-            } else {
-                const errorMessage =
-                    error?.message || (isEditMode ? "Failed to update visitor" : "Failed to register visitor");
-                setGeneralError(errorMessage);
-            }
+            const errorMessage = error?.data?.message || (error as any)?.message || "An error occurred during registration";
+            setGeneralError(errorMessage);
         }
     };
 
@@ -337,8 +292,8 @@ export function NewVisitorModal({
                 showSecurityFields={showSecurityFields}
                 onToggleSecurityFields={handleToggleSecurity}
                 setIsFileUploading={setIsFileUploading}
-                visitorId={visitorId}
                 initialData={visitorData}
+                enableVisitorImageCapture={settings?.features?.enableVisitorImageCapture}
             />
 
 
@@ -373,10 +328,10 @@ export function NewVisitorModal({
                 >
                     <ActionButton
                         type="submit"
-                        variant="outline-primary"
+                        variant="primary"
                         disabled={isLoading || isFileUploading}
                         size="xl"
-                        className="w-full min-w-[200px] px-8 sm:w-auto"
+                        className="w-full min-w-[220px] px-8 sm:w-auto font-bold transition-all shadow-md active:scale-95 hover:scale-105"
                     >
                         {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
                         <CheckCircle className="mr-2 h-4 w-4" />

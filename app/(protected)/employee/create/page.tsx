@@ -60,7 +60,10 @@ export default function Employeecreat() {
                 </div>
             </div>
             <div className="w-full">
-                <NewEmployeeModal layout="page" />
+                <NewEmployeeModal 
+                    layout="page" 
+                    onSuccess={() => router.push(routes.privateroute.EMPLOYEELIST)} 
+                />
             </div>
         </div>
     );

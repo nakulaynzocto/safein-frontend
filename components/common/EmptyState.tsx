@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -5,7 +6,9 @@ interface EmptyStateProps {
     title: string;
     description: string;
     icon?: LucideIcon;
-    action?: React.ReactNode;
+    /** Shown above the primary action (e.g. mobile-only quick actions) */
+    beforeAction?: ReactNode;
+    action?: ReactNode;
     className?: string;
 }
 
@@ -13,6 +16,7 @@ export function EmptyState({
     title,
     description,
     icon: Icon,
+    beforeAction,
     action,
     className
 }: EmptyStateProps) {
@@ -29,6 +33,9 @@ export function EmptyState({
             <p className="mb-6 text-sm text-muted-foreground max-w-sm">
                 {description}
             </p>
+            {beforeAction && (
+                <div className="mb-4 w-full max-w-sm sm:hidden">{beforeAction}</div>
+            )}
             {action && (
                 <div>{action}</div>
             )}

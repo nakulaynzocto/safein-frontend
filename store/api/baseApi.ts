@@ -94,6 +94,16 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
             }
         }
 
+        // Maintenance Mode Redirection
+        if (result.error && result.error.status === 503) {
+            if (typeof window !== "undefined") {
+                const currentPath = window.location.pathname;
+                if (currentPath !== routes.publicroute.MAINTENANCE) {
+                    window.location.href = routes.publicroute.MAINTENANCE;
+                }
+            }
+        }
+
         return result;
     } catch (error: any) {
         return {
@@ -122,6 +132,10 @@ export const baseApi = createApi({
         "SpotPass",
         "Chat",
         "DashboardStats",
+        "QRSetup",
+        "Blog",
+        "Wallet",
+        "SafeinProfile",
     ],
     endpoints: () => ({}),
     refetchOnMountOrArgChange: false,

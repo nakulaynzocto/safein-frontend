@@ -134,7 +134,7 @@ export function ChatInput({ onSendMessage, isLoading, isAdmin }: ChatInputProps)
                             "w-full min-h-[42px] max-h-[150px] resize-none py-[10px] px-4 transition-all duration-200",
                             "bg-transparent border-none outline-none ring-0",
                             "focus-visible:ring-0 focus-visible:ring-offset-0",
-                            "placeholder:text-gray-500 dark:placeholder:text-gray-400 text-[14px] sm:text-[15px] font-medium leading-tight font-sans",
+                            "placeholder:text-gray-500 dark:placeholder:text-gray-400 text-[14px] sm:text-sm font-medium leading-tight font-sans",
                             "scrollbar-none"
                         )}
                         rows={1}

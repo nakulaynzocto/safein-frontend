@@ -11,14 +11,16 @@ import { ActionButton } from "@/components/common/actionButton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, UserPlus, AlertCircle, Mail, Phone, Info } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { ImageUploadField } from "@/components/common/imageUploadField";
 import { SelectField } from "@/components/common/selectField";
 import { PhoneInputField } from "@/components/common/phoneInputField";
 import { LoadingSpinner } from "@/components/common/loadingSpinner";
 import { FormContainer } from "@/components/common/formContainer";
-import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQuery } from "@/store/api";
+import { useCreateEmployeeMutation, useUpdateEmployeeMutation, useGetEmployeeQuery, useLazyCheckEmployeeAvailabilityQuery } from "@/store/api";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { routes } from "@/utils/routes";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
@@ -26,7 +28,9 @@ import { UpgradePlanModal } from "@/components/common/upgradePlanModal";
 import { InputField } from "../common/inputField";
 import { useSubscriptionActions } from "@/hooks/useSubscriptionActions";
 import { SubscriptionActionButtons } from "@/components/common/SubscriptionActionButtons";
-import { UserPlus } from "lucide-react";
+import { useUserCountry } from "@/hooks/useUserCountry";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ConfirmationDialog } from "@/components/common/confirmationDialog";
 
 const employeeSchema = yup.object({
     name: yup
@@ -57,6 +61,7 @@ const employeeSchema = yup.object({
         .max(100, "Position cannot exceed 100 characters"),
     status: yup.string().oneOf(["Active", "Inactive"]).default("Active"),
     photo: yup.string().default(""),
+    isPublic: yup.boolean().default(true),
 });
 
 type EmployeeFormData = {
@@ -67,6 +72,7 @@ type EmployeeFormData = {
     designation: string;
     status: "Active" | "Inactive";
     photo: string;
+    isPublic: boolean;
 };
 
 const statusOptions = [
@@ -101,6 +107,7 @@ export function NewEmployeeModal({
     const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
     const [generalError, setGeneralError] = useState<string | null>(null);
     const [isFileUploading, setIsFileUploading] = useState(false);
+    const userCountry = useUserCountry();
 
     const { hasReachedEmployeeLimit, isExpired } = useSubscriptionStatus();
     const {
@@ -115,6 +122,35 @@ export function NewEmployeeModal({
     const { data: employeeData, isLoading: isLoadingEmployee } = useGetEmployeeQuery(employeeId!, {
         skip: !isEditMode,
     });
+
+    const isEmailLocked = isEditMode && !!employeeData?.isEmailVerified;
+    const isPhoneLocked = isEditMode && !!employeeData?.isPhoneVerified;
+
+    const [checkAvailability] = useLazyCheckEmployeeAvailabilityQuery();
+
+    const handleCheckAvailability = async (field: 'email' | 'phone', value: string) => {
+        if (!value) return;
+        if (field === 'email' && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value)) return;
+        if (field === 'phone' && !validatePhone(value)) return;
+
+        try {
+            const res = await checkAvailability({ field, value, employeeId }).unwrap();
+            if (!res.available && res.message) {
+                setError(field, {
+                    type: "server",
+                    message: res.message,
+                });
+            } else {
+                clearErrors(field);
+            }
+        } catch (error) {
+            console.error(`Failed to check ${field} availability:`, error);
+        }
+    };
+
+    useEffect(() => {
+        router.prefetch(routes.privateroute.EMPLOYEELIST);
+    }, [router]);
 
     const {
         register,
@@ -136,6 +172,7 @@ export function NewEmployeeModal({
             designation: "",
             status: "Active",
             photo: "",
+            isPublic: true,
         },
     });
 
@@ -149,6 +186,7 @@ export function NewEmployeeModal({
                 designation: employeeData.designation || "",
                 status: employeeData.status,
                 photo: employeeData.photo || "",
+                isPublic: employeeData.isPublic !== undefined ? employeeData.isPublic : true,
             });
         }
     }, [isEditMode, employeeData, reset]);
@@ -182,17 +220,24 @@ export function NewEmployeeModal({
         try {
             setGeneralError(null);
 
-            const employeeData = {
-                ...data,
-            };
+            const payload = { ...data };
+            if (isEditMode && employeeData) {
+                if (employeeData.isEmailVerified) {
+                    payload.email = employeeData.email;
+                }
+                if (employeeData.isPhoneVerified) {
+                    payload.phone = employeeData.phone;
+                }
+            }
 
             if (isEditMode) {
-                await updateEmployee({ id: employeeId!, ...employeeData }).unwrap();
+                await updateEmployee({ id: employeeId!, ...payload }).unwrap();
                 showSuccessToast("Employee updated successfully");
 
                 if (!isPage) {
                     setOpen(false);
                 }
+                
                 reset();
 
                 if (onSuccess) {
@@ -201,13 +246,16 @@ export function NewEmployeeModal({
                     router.push(routes.privateroute.EMPLOYEELIST);
                 }
             } else {
-                await createEmployee(employeeData).unwrap();
+                await createEmployee(payload).unwrap();
                 showSuccessToast("Employee created successfully");
+                
+                // Important: Clean up state before redirect
                 reset();
 
                 if (onSuccess) {
                     onSuccess();
                 } else {
+                    console.log("Redirecting to employee list...");
                     router.push(routes.privateroute.EMPLOYEELIST);
                 }
 
@@ -258,6 +306,15 @@ export function NewEmployeeModal({
                 </Alert>
             )}
 
+            {!isEditMode && (
+                <Alert className="mb-4 bg-amber-50/50 text-amber-800 border-amber-200">
+                    <AlertCircle className="h-4 w-4 stroke-amber-600" />
+                    <AlertDescription className="text-xs font-medium">
+                        Please ensure the email and phone number are correct. Incoming alerts and calls depend on this information.
+                    </AlertDescription>
+                </Alert>
+            )}
+
             <div className="flex flex-col gap-8 md:flex-row">
                 {/* Employee Photo Section (Left Side) */}
                 <div className="flex flex-col items-center shrink-0">
@@ -298,10 +355,15 @@ export function NewEmployeeModal({
                             id="email"
                             label="Email Address"
                             type="email"
-                            {...register("email", { onChange: clearGeneralError })}
+                            {...register("email", { 
+                                onChange: clearGeneralError,
+                                onBlur: (e) => handleCheckAvailability('email', e.target.value)
+                            })}
                             placeholder="Enter email address"
                             error={errors.email?.message}
                             required
+                            disabled={isEmailLocked}
+                            className={isEmailLocked ? "opacity-60 cursor-not-allowed" : undefined}
                         />
                     </div>
 
@@ -318,10 +380,12 @@ export function NewEmployeeModal({
                                         field.onChange(value);
                                         clearGeneralError();
                                     }}
+                                    onBlur={() => handleCheckAvailability('phone', field.value)}
                                     error={errors.phone?.message}
                                     required
                                     placeholder="Enter phone number"
-                                    defaultCountry="in"
+                                    defaultCountry={userCountry}
+                                    disabled={isPhoneLocked}
                                 />
                             )}
                         />
@@ -352,7 +416,7 @@ export function NewEmployeeModal({
                             required
                         />
 
-                        {(isEditMode && employeeData?.isVerified) && (
+                        {isEditMode && (
                             <Controller
                                 name="status"
                                 control={control}
@@ -373,6 +437,27 @@ export function NewEmployeeModal({
                             />
                         )}
                     </div>
+                    
+                    <Controller
+                        name="isPublic"
+                        control={control}
+                        render={({ field }) => (
+                            <div className="flex items-center justify-between p-4 border border-border rounded-xl bg-muted/20 mt-4 h-20 shadow-sm border-dashed">
+                                <div className="space-y-1">
+                                    <Label className="text-sm font-bold text-foreground">Public Directory Visibility</Label>
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                        Show employee in the QR code visitor check-in list
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    disabled={isLoading}
+                                    className="data-[state=checked]:bg-primary"
+                                />
+                            </div>
+                        )}
+                    />
                 </div>
             </div>
 
@@ -400,10 +485,10 @@ export function NewEmployeeModal({
                 >
                     <ActionButton
                         type="submit"
-                        variant="outline-primary"
-                        disabled={isLoading || isLoadingEmployee || isFileUploading}
+                        variant="primary"
+                        disabled={isLoading || isLoadingEmployee || isFileUploading || Object.keys(errors).length > 0 || !!generalError}
                         size="xl"
-                        className="w-full min-w-[160px] px-6 sm:w-auto"
+                        className="w-full min-w-[170px] px-8 sm:w-auto font-bold transition-all shadow-md active:scale-95 hover:scale-105"
                     >
                         {isLoading ? <LoadingSpinner size="sm" className="mr-2" /> : isFileUploading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
                         {isFileUploading ? "Uploading Photo..." : isEditMode ? "Update Employee" : "Create Employee"}
@@ -429,7 +514,8 @@ export function NewEmployeeModal({
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <>
+            <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
 
             <DialogContent className="max-h-[90vh] overflow-hidden bg-white p-4 sm:max-w-2xl sm:p-6 dark:bg-gray-900">
@@ -443,7 +529,8 @@ export function NewEmployeeModal({
                     {formContent}
                 </FormContainer>
             </DialogContent>
-        </Dialog>
+            </Dialog>
+        </>
     );
 }
 

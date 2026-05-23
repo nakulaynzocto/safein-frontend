@@ -7,6 +7,7 @@ import { routes } from "@/utils/routes";
 import { isEmployee as checkIsEmployee } from "@/utils/helpers";
 import { useAppSelector } from "@/store/hooks";
 import { useGetChatsQuery } from "@/store/api/chatApi";
+import { useGetUserActiveSubscriptionQuery } from "@/store/api/userSubscriptionApi";
 import {
     LayoutDashboard,
     Users,
@@ -23,6 +24,7 @@ interface NavItem {
     href: string;
     icon: any;
     roles: string[];
+    requiredModule?: "enableInvites" | "enablePriorityBooking" | "enableQrCode" | "enableChat";
 }
 
 const allNavItems: NavItem[] = [
@@ -30,8 +32,8 @@ const allNavItems: NavItem[] = [
     { name: "Employees",  href: routes.privateroute.EMPLOYEELIST, icon: Users, roles: ["admin"] },
     { name: "Visitors",   href: routes.privateroute.VISITORLIST, icon: UserPlus, roles: ["admin"] },
     { name: "Appointments", href: routes.privateroute.APPOINTMENTLIST, icon: Calendar, roles: ["admin", "employee"] },
-    { name: "Invites",    href: routes.privateroute.APPOINTMENT_LINKS, icon: LinkIcon, roles: ["admin", "employee"] },
-    { name: "Messages",   href: routes.privateroute.MESSAGES, icon: MessageSquare, roles: ["admin", "employee"] },
+    { name: "Invites",    href: routes.privateroute.APPOINTMENT_LINKS_SEND_LINK, icon: LinkIcon, roles: ["admin", "employee"], requiredModule: "enableInvites" },
+    { name: "Messages",   href: routes.privateroute.MESSAGES, icon: MessageSquare, roles: ["admin", "employee"], requiredModule: "enableChat" },
     { name: "Settings",   href: routes.privateroute.PROFILE, icon: Settings, roles: ["admin"] },
     { name: "Approvals",  href: routes.privateroute.APPOINTMENT_REQUESTS, icon: ClipboardList, roles: ["employee"] },
 ];
@@ -50,6 +52,8 @@ export function MobileBottomNav() {
     const pathname = usePathname();
     const { user } = useAppSelector((state) => state.auth);
     const { data: chats } = useGetChatsQuery(undefined, { skip: !user });
+    const { data: subscriptionData } = useGetUserActiveSubscriptionQuery(user?.id as string, { skip: !user?.id });
+    const modules = subscriptionData?.data?.modules;
 
     const unreadCount = (chats || []).reduce((acc, chat) => {
         const userId = user?.id || (user as any)?._id;
@@ -62,7 +66,17 @@ export function MobileBottomNav() {
 
     // Filter & cap at 5 for clean bottom bar
     const navItems = allNavItems
-        .filter((item) => userRole && item.roles.includes(userRole))
+        .filter((item) => {
+            // Check Role
+            if (!userRole || !item.roles.includes(userRole)) return false;
+
+            // Check Subscription Module
+            if (item.requiredModule) {
+                if (!modules || !modules[item.requiredModule]) return false;
+            }
+
+            return true;
+        })
         .slice(0, 5);
 
     if (!userRole || navItems.length === 0) return null;
@@ -121,7 +135,7 @@ export function MobileBottomNav() {
                                 />
                                 {/* Unread badge */}
                                 {isMessages && unreadCount > 0 && (
-                                    <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold leading-none text-white shadow-sm">
+                                    <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-0.5 text-xs font-bold leading-none text-white shadow-sm">
                                         {unreadCount > 99 ? "99+" : unreadCount}
                                     </span>
                                 )}
@@ -129,7 +143,7 @@ export function MobileBottomNav() {
 
                             {/* Label */}
                             <span className={cn(
-                                "text-[9px] font-medium leading-none tracking-tight transition-all duration-200",
+                                "text-xs font-medium leading-none tracking-tight transition-all duration-200",
                                 active ? "opacity-100" : "opacity-60"
                             )}>
                                 {item.name}

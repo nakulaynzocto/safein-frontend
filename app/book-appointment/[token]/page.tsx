@@ -2,351 +2,303 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
-import {
-    useGetAppointmentLinkByTokenQuery,
-    useCreateVisitorThroughLinkMutation,
-    useCreateAppointmentThroughLinkMutation,
-} from "@/store/api/appointmentLinkApi";
-import dynamic from "next/dynamic";
-import { Skeleton } from "@/components/ui/skeleton";
-import { 
-    Clock, 
-    CheckCircle2, 
-    XCircle, 
-    User, 
-    Building2, 
-    CalendarCheck, 
-    ShieldCheck,
-    ArrowRight,
-    ArrowLeft
-} from "lucide-react";
-import { StatusPage } from "@/components/common/statusPage";
+import { useForm, Controller } from "react-hook-form";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { showSuccessToast, showErrorToast } from "@/utils/toast";
+import { useGetAppointmentLinkByTokenQuery, useCreateBookingThroughLinkMutation, useSendVisitorOtpMutation, useVerifyVisitorOtpMutation } from "@/store/api/appointmentLinkApi";
+import { BookingVisitorForm } from "@/components/appointment/BookingVisitorForm";
+import { AppointmentBookingForm } from "@/components/appointment/AppointmentBookingForm";
+import { StatusPage } from "@/components/common/statusPage";
+import { showErrorToast, showSuccessToast } from "@/utils/toast";
 import { extractIdString, isValidId } from "@/utils/idExtractor";
 import { cn } from "@/lib/utils";
+import { Camera, User, Phone, ArrowRight, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ImageUploadField } from "@/components/common/imageUploadField";
+import { PhoneInputField } from "@/components/common/phoneInputField";
+import { OtpDigitBoxes } from "@/components/common/otpDigitBoxes";
+import { validatePhone, formatPhoneForSubmission } from "@/utils/phoneUtils";
+import { Label } from "@/components/ui/label";
+import { StepIndicator, Step } from "@/components/common/StepIndicator";
+import { FormSkeleton } from "@/components/common/FormSkeleton";
+import { useVisitorVerification } from "@/hooks/useVisitorVerification";
+import { SuccessState } from "@/components/common/SuccessState";
+import { VisitReviewCard } from "@/components/appointment/VisitReviewCard";
 
-const AppointmentBookingForm = dynamic(() => import("@/components/appointment/AppointmentBookingForm").then(mod => mod.AppointmentBookingForm), {
-    loading: () => <FormSkeleton title="Appointment Details" />
-});
-
-const BookingVisitorForm = dynamic(() => import("@/components/appointment/BookingVisitorForm").then(mod => mod.BookingVisitorForm), {
-    loading: () => <FormSkeleton title="Visitor Information" />
-});
-
-function FormSkeleton({ title }: { title: string }) {
-    return (
-        <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-                <Skeleton className="h-6 w-6 rounded-full" />
-                <Skeleton className="h-6 w-48" />
-            </div>
-            <div className="grid gap-6 md:grid-cols-2">
-                {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="space-y-2">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-10 w-full rounded-lg" />
-                    </div>
-                ))}
-            </div>
-            <Skeleton className="h-32 w-full rounded-lg" />
-            <div className="flex justify-end pt-4">
-                <Skeleton className="h-11 w-40 rounded-xl" />
-            </div>
-        </div>
-    );
-}
+type StepKey = "verification" | "details" | "photo" | "appointment" | "review";
 
 export default function BookAppointmentPage() {
-    const params = useParams();
-    const rawToken = params?.token as string;
-    const token = rawToken ? decodeURIComponent(rawToken) : "";
+    const { token } = useParams<{ token: string }>();
 
-    const [step, setStep] = useState<"loading" | "visitor" | "appointment" | "success" | "error">("loading");
-    const [errorMessage, setErrorMessage] = useState<string>("");
+    const { data: appointmentLinkData, isLoading: isLoadingLink, error: linkError } = useGetAppointmentLinkByTokenQuery(token as string);
+    const [createBookingThroughLink, { isLoading: isCreatingBooking }] = useCreateBookingThroughLinkMutation();
+    const [sendOtp, { isLoading: isSendingOtpMutation }] = useSendVisitorOtpMutation();
+    const [verifyOtp, { isLoading: isVerifyingOtpMutation }] = useVerifyVisitorOtpMutation();
+
+    const [step, setStep] = useState<StepKey | "loading" | "error" | "success" | "already_booked">("loading");
     const [visitorId, setVisitorId] = useState<string | null>(null);
-    const [appointmentLinkData, setAppointmentLinkData] = useState<any>(null);
-    const [visitorData, setVisitorData] = useState<any>(null);
+    const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
+    const [visitorDraft, setVisitorDraft] = useState<any>(null);
+    const [appointmentData, setAppointmentData] = useState<any>(null);
+    const [submittedAppointmentId, setSubmittedAppointmentId] = useState<string | null>(null);
 
-    const {
-        data: linkData,
-        isLoading: isLoadingLink,
-        error: linkError,
-    } = useGetAppointmentLinkByTokenQuery(token || "", { 
-        skip: !token,
-        refetchOnMountOrArgChange: true 
+    const { control: verifyControl, handleSubmit: handleVerifySubmit, watch: watchVerifyForm, setValue: setVerifyValue } = useForm({
+        defaultValues: { phone: "", otp: "" },
     });
 
-    const [createVisitorThroughLink, { isLoading: isCreatingVisitor }] = useCreateVisitorThroughLinkMutation();
-    const [createAppointmentThroughLink, { isLoading: isCreatingAppointment }] =
-        useCreateAppointmentThroughLinkMutation();
+    // Verification Logic (Unified)
+    const { 
+        otpSent, 
+        setOtpSent, 
+        isSending, 
+        isVerifying, 
+        handleSendOtp, 
+        handleVerifyOtp 
+    } = useVisitorVerification({
+        sendOtpMutation: sendOtp,
+        verifyOtpMutation: verifyOtp,
+        contextId: token as string,
+        contextKey: "token",
+        isSending: isSendingOtpMutation,
+        isVerifying: isVerifyingOtpMutation,
+        onVerified: (res, phone) => {
+            const existingVisitor = (res as any)?.data?.visitor || (res as any)?.visitor;
+            setVerifiedPhone(phone);
+            if (existingVisitor) {
+                setVisitorId(extractIdString(existingVisitor?._id || existingVisitor?._id));
+                setVisitorDraft({
+                    ...existingVisitor,
+                    phone: existingVisitor.phone || phone,
+                    email: existingVisitor.email || (appointmentLinkData as any)?.visitorEmail || ""
+                });
+            } else {
+                setVisitorDraft({ phone, email: (appointmentLinkData as any)?.visitorEmail || "" });
+            }
+            setStep("details");
+        }
+    });
 
+    // --- Initialization Logic ---
     useEffect(() => {
-        if (!token) {
-            setErrorMessage("Invalid appointment link - token is missing");
-            setStep("error");
-            return;
+        if (linkError) return setStep("error");
+        if (!appointmentLinkData) return;
+
+        const linkData = appointmentLinkData as any;
+        if (linkData.isBooked) {
+            return setStep("already_booked");
         }
 
-        if (linkError) {
-            const error = linkError as any;
-            const errorMessage = error?.data?.message || error?.message || "Invalid or expired appointment link";
-            setErrorMessage(error?.status === 404 ? "Appointment link not found. Please check the link and try again." : errorMessage);
-            setStep("error");
-            return;
+        setStep("verification");
+        const phoneToSet = linkData.visitorPhone || linkData.visitor?.phone;
+        if (phoneToSet) {
+            setVerifyValue("phone", String(phoneToSet));
         }
+    }, [appointmentLinkData, linkError, setVerifyValue]);
 
-        if (linkData) {
-            setAppointmentLinkData(linkData);
-            if (linkData.visitor) setVisitorData(linkData.visitor);
-
-            let finalVisitorId: string | null = null;
-            if (linkData.visitorId) {
-                const extractedVisitorId = extractIdString(linkData.visitorId);
-                if (isValidId(extractedVisitorId)) finalVisitorId = extractedVisitorId;
-            }
-
-            if (!finalVisitorId && linkData.visitor) {
-                const visitorIdFromObject = extractIdString(linkData.visitor._id || (linkData.visitor as any).id || linkData.visitor);
-                if (isValidId(visitorIdFromObject)) finalVisitorId = visitorIdFromObject;
-            }
-
-            if (finalVisitorId && isValidId(finalVisitorId)) {
-                setVisitorId(finalVisitorId);
-                setStep("appointment");
-            } else {
-                setStep("visitor");
-            }
-        }
-    }, [linkData, linkError, token]);
-
-    const handleVisitorSubmit = async (data: any) => {
-        if (!token) return;
+    const handleFinalSubmit = async () => {
         try {
-            const response = await createVisitorThroughLink({ token, visitorData: data }).unwrap();
-            const result = (response as any)?.data || response;
-            const extractedId = extractIdString(result?._id || result?.id);
-
-            if (isValidId(extractedId)) {
-                setVisitorId(extractedId);
-                showSuccessToast("Information saved! Let's schedule the time.");
-                setStep("appointment");
-            } else {
-                showErrorToast("Failed to process visitor ID.");
-            }
-        } catch (error: any) {
-            showErrorToast(error?.data?.message || error?.message || "Failed to save information");
-        }
-    };
-
-    const handleAppointmentSubmit = async (appointmentData: any) => {
-        if (!visitorId || !appointmentLinkData || !token) return;
-        try {
-            const { visitorId: _, employeeId: __, ...restData } = appointmentData;
-            const cleanData = {
-                ...restData,
-                visitorId: extractIdString(visitorId),
-                employeeId: extractIdString(appointmentLinkData.employeeId),
-            };
-            await createAppointmentThroughLink({ token, appointmentData: cleanData }).unwrap();
+            const { visitorId: _v, ...rest } = appointmentData;
+            const res = await createBookingThroughLink({
+                token: token as string,
+                visitorData: visitorDraft || undefined,
+                appointmentData: { ...rest, employeeId: extractIdString(appointmentLinkData?.employeeId) },
+            }).unwrap();
+            const result = (res as any)?.data || res;
+            const aId = extractIdString(result?._id || result?.id);
+            if (aId) setSubmittedAppointmentId(aId);
             setStep("success");
-        } catch (error: any) {
-            showErrorToast(error?.data?.message || error?.message || "Failed to book appointment");
+        } catch (e: any) {
+            const msg = e?.data?.message || e?.message || "Booking failed";
+            showErrorToast(msg);
+            if (e?.status === 409 || msg.toLowerCase().includes("slot")) setStep("appointment");
         }
     };
 
-    const errorConfig = useMemo(() => {
-        const messageStr = String(errorMessage || "");
-        const isExpired = /expired|used|created|isbooked/i.test(messageStr);
-        return {
-            title: isExpired ? "Link Expired" : "Invalid Link",
-            message: isExpired 
-                ? "This appointment link has expired or has already been used. Please contact the person who sent you this link."
-                : "This appointment link is invalid. Please contact the person who sent you this link.",
-        };
-    }, [errorMessage]);
+    const steps: Step[] = useMemo(() => [
+        { key: "verification", label: "Verify", mobileLabel: "Phone" },
+        { key: "details", label: "Details", mobileLabel: "Details" },
+        { key: "photo", label: "Photo", mobileLabel: "Photo" },
+        { key: "appointment", label: "Book", mobileLabel: "Book" },
+        { key: "review", label: "Review", mobileLabel: "Review" },
+    ], []);
 
-    if (step === "loading" || isLoadingLink) {
-        return (
-            <div className="flex min-h-screen items-center justify-center p-4 bg-[#f8fafc] dark:bg-slate-950">
-                <div className="w-full max-w-2xl space-y-8 animate-pulse">
-                    <div className="text-center space-y-4">
-                        <Skeleton className="mx-auto h-16 w-16 rounded-2xl" />
-                        <Skeleton className="mx-auto h-8 w-64 rounded-lg" />
-                        <Skeleton className="mx-auto h-4 w-48 rounded-md" />
-                    </div>
-                    <Card className="overflow-hidden border-0 bg-white/60 shadow-2xl backdrop-blur-xl ring-1 ring-slate-200 dark:bg-slate-900/60 dark:ring-slate-800">
-                        <CardContent className="p-8">
-                            <div className="flex justify-center gap-8 mb-10">
-                                <Skeleton className="h-10 w-32 rounded-full" />
-                                <Skeleton className="h-10 w-32 rounded-full" />
-                            </div>
-                            <FormSkeleton title="Loading" />
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-        );
-    }
+    const activeIndex = steps.findIndex(s => s.key === step);
+    const company = appointmentLinkData?.createdBy;
 
-    if (step === "error") {
-        return (
-            <StatusPage
-                type="error"
-                title={errorConfig.title}
-                message={errorMessage}
-                description={errorConfig.message}
-                showHomeButton={true}
-            />
-        );
-    }
-
+    if (step === "loading" || isLoadingLink) return <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50"><Card className="max-w-2xl w-full p-8 rounded-3xl shadow-none border-none bg-transparent"><FormSkeleton /></Card></div>;
+    if (step === "error") return <StatusPage type="error" title="Invalid Link" message={(linkError as any)?.data?.message || "Expired or invalid link."} />;
+    
     if (step === "success") {
         return (
-            <StatusPage
-                type="success"
-                title="Appointment Booked!"
-                message="Your visit has been confirmed successfully."
-                description="A confirmation has been sent to your email. We look forward to seeing you!"
-                showHomeButton={true}
+            <SuccessState 
+                companyName={company?.companyName} 
+                visitorName={visitorDraft?.name} 
+                hostName={(appointmentLinkData?.employeeId as any)?.name || (appointmentLinkData as any)?.employee?.name}
+                referenceId={submittedAppointmentId || "CONFIRMED"}
+                enableVisitSlip
+                visitorPhone={verifiedPhone || visitorDraft?.phone}
+                visitorPhoto={visitorDraft?.photo}
+                customFooterMessage="Your appointment has been scheduled successfully. Please show this slip at the reception upon arrival."
             />
         );
     }
 
-    const employee = appointmentLinkData?.employee || (typeof appointmentLinkData?.employeeId === 'object' ? appointmentLinkData.employeeId : null);
+    if (step === "already_booked") return <StatusPage type="info" title="Already Booked" message="This invitation link has already been used to schedule an appointment." />;
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 px-4 py-8 sm:py-16 selection:bg-[#3882a5]/30">
-            <div className="mx-auto max-w-3xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                
-                {/* Branding Section */}
-                <div className="flex flex-col items-center gap-4 text-center">
-                    {appointmentLinkData?.createdBy?.profilePicture ? (
-                        <div className="relative group">
-                            <div className="absolute -inset-1 rounded-2xl bg-[#3882a5] opacity-20 blur transition group-hover:opacity-40" />
-                            <div className="relative h-16 w-16 sm:h-20 sm:w-20 overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-100 p-2">
-                                <img
-                                    src={appointmentLinkData.createdBy.profilePicture}
-                                    alt="Logo"
-                                    className="h-full w-full object-contain"
-                                />
-                            </div>
+        <div className="min-h-screen bg-[#f7fafc] px-3 py-4 sm:px-5 sm:py-10">
+            <div className="mx-auto w-full max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <Card className="rounded-3xl border-[#3882a5]/15 shadow-sm p-6 mb-6">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+                        <div className="h-16 w-16 bg-[#3882a5] rounded-2xl flex items-center justify-center text-white font-bold text-2xl overflow-hidden">
+                            {company?.profilePicture ? <img src={company.profilePicture} className="h-full w-full object-contain p-1" /> : company?.companyName?.charAt(0)}
                         </div>
-                    ) : (
-                        <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-[#3882a5] shadow-xl text-white font-bold text-2xl">
-                            {appointmentLinkData?.createdBy?.companyName?.charAt(0).toUpperCase() || "S"}
-                        </div>
-                    )}
-                    
-                    <div className="space-y-1">
-                        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-                            {appointmentLinkData?.createdBy?.companyName || "Book Appointment"}
-                        </h1>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
-                            {employee?.name ? `Schedule a meeting with ${employee.name}` : "Please fill in the details below"}
-                        </p>
-                    </div>
-                </div>
-
-                <Card className="overflow-hidden border-0 bg-white/70 shadow-2xl backdrop-blur-xl ring-1 ring-slate-200 dark:bg-slate-900/70 dark:ring-slate-800">
-                    {/* Visual Progress Header */}
-                    <div className="bg-[#3882a5]/5 border-b border-slate-100 dark:border-slate-800 px-6 py-4">
-                        <div className="flex items-center justify-center gap-4 sm:gap-12">
-                            <div className={cn(
-                                "flex items-center gap-2 text-sm font-bold transition-all duration-300",
-                                step === "visitor" ? "text-[#3882a5]" : "text-slate-400"
-                            )}>
-                                <div className={cn(
-                                    "flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all",
-                                    step === "visitor" ? "bg-[#3882a5] border-[#3882a5] text-white shadow-lg" : "bg-emerald-50 border-emerald-500 text-emerald-600"
-                                )}>
-                                    {step === "visitor" ? "1" : <CheckCircle2 className="h-4 w-4" />}
-                                </div>
-                                <span className={cn("hidden sm:inline", step !== "visitor" && "opacity-60")}>Visitor Info</span>
-                            </div>
-                            
-                            <div className="h-0.5 w-8 rounded-full bg-slate-200 dark:bg-slate-700" />
-
-                            <div className={cn(
-                                "flex items-center gap-2 text-sm font-bold transition-all duration-300",
-                                step === "appointment" ? "text-[#3882a5]" : "text-slate-400"
-                            )}>
-                                <div className={cn(
-                                    "flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all",
-                                    step === "appointment" ? "bg-[#3882a5] border-[#3882a5] text-white shadow-lg" : "bg-slate-100 border-slate-200 text-slate-400"
-                                )}>
-                                    2
-                                </div>
-                                <span className="hidden sm:inline">Scheduling</span>
+                        <div className="flex-1">
+                            <h1 className="text-2xl font-semibold text-slate-800 leading-tight">Welcome to <span className="text-[#3882a5]">{company?.companyName}</span></h1>
+                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 mt-1">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Secure Entry Handshake</p>
+                                {appointmentLinkData?.expiresAt && (
+                                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-100">
+                                        <Calendar className="h-3 w-3" />
+                                        Valid until: {new Date(appointmentLinkData.expiresAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>
+                    {/* Meeting Info Badge */}
+                    <div className="mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[#3882a5] shadow-sm">
+                                <User className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-tight">You are meeting with</p>
+                                <p className="text-sm font-semibold text-slate-800 mt-0.5">{(appointmentLinkData?.employeeId as any)?.name || (appointmentLinkData as any)?.employee?.name || "Host"}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="px-3 py-1.5 bg-white rounded-lg border border-slate-200 text-xs font-bold text-slate-500 shadow-sm">Purpose: Office Visit</span>
+                        </div>
+                    </div>
+                </Card>
 
+                <Card className="overflow-hidden border-slate-200 shadow-xl rounded-3xl bg-white">
+                    <div className="bg-slate-50/50 border-b p-6"><StepIndicator steps={steps} activeIndex={activeIndex} /></div>
                     <CardContent className="p-6 sm:p-10">
-                        {step === "visitor" && (
-                            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                                <div className="mb-8 flex items-center gap-3">
-                                    <div className="h-10 w-1 rounded-full bg-[#3882a5]" />
-                                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">Personal Details</h3>
+                        {step === "verification" && (
+                            <form onSubmit={handleVerifySubmit((data: any) => handleVerifyOtp(data.phone, data.otp))} className="max-w-lg mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                                <div className="p-6 bg-slate-50 rounded-2xl border space-y-4">
+                                    <Label className="text-sm font-bold text-slate-700">Mobile Verification</Label>
+                                    <Controller name="phone" control={verifyControl} render={({ field }) => (
+                                        <PhoneInputField 
+                                            value={field.value} 
+                                            onChange={field.onChange} 
+                                            disabled={!!appointmentLinkData?.visitorPhone}
+                                            helperText={appointmentLinkData?.visitorPhone ? "This number is tied to your secure invitation." : undefined}
+                                        />
+                                    )} />
+                                    <Button type="button" variant="primary" size="lg" className="w-full h-14 rounded-2xl shadow-lg shadow-[#3882a5]/10 font-bold" onClick={() => handleSendOtp(watchVerifyForm("phone"), (val) => setVerifyValue("otp", val))} disabled={isSending}>
+                                        {otpSent ? "Resend Verification Code" : "Get Verification Code"}
+                                    </Button>
                                 </div>
-                                <BookingVisitorForm
-                                    initialEmail={appointmentLinkData?.visitorEmail}
-                                    initialPhone={appointmentLinkData?.visitorPhone}
-                                    initialValues={visitorData}
-                                    onSubmit={handleVisitorSubmit}
-                                    isLoading={isCreatingVisitor}
-                                    appointmentToken={token}
-                                />
+                                
+                                {otpSent && (
+                                    <div className="p-8 bg-[#3882a5]/5 rounded-[28px] border border-[#3882a5]/10 space-y-6 animate-in slide-in-from-top-4 duration-500">
+                                        <div className="text-center space-y-1">
+                                            <h3 className="text-lg font-bold text-[#3882a5]">Enter Secure Code</h3>
+                                            <p className="text-xs text-slate-500">Check your phone for the 6-digit code</p>
+                                        </div>
+                                        <Controller name="otp" control={verifyControl} render={({ field }) => <OtpDigitBoxes value={field.value} onChange={field.onChange} />} />
+                                        <Button type="submit" variant="primary" size="lg" className="w-full h-14 rounded-2xl font-bold" disabled={isVerifying}>Verify Identity & Continue</Button>
+                                    </div>
+                                )}
+                            </form>
+                        )}
+
+                        {step === "details" && (
+                            <BookingVisitorForm 
+                                initialValues={visitorDraft} 
+                                initialEmail={appointmentLinkData?.visitorEmail}
+                                lockedEmailHelperText="This email is tied to your secure invitation."
+                                initialPhone={verifiedPhone || appointmentLinkData?.visitorPhone}
+                                lockedPhoneHelperText={appointmentLinkData?.visitorPhone ? "This phone number is tied to your secure invitation." : undefined}
+                                onSubmit={(d) => { setVisitorDraft(d); setStep("photo"); }} 
+                                appointmentToken={token as string} 
+                                collectPhotoInForm={false} 
+                                onBack={(draft) => {
+                                    if (draft) setVisitorDraft(draft);
+                                    setStep("verification");
+                                }} 
+                            />
+                        )}
+
+                        {step === "photo" && (
+                            <div className="space-y-8 max-w-2xl mx-auto">
+                                <div className="text-center space-y-2">
+                                    <h3 className="text-xl font-semibold text-slate-800">Capture Visitor Photo</h3>
+                                    <p className="text-sm text-slate-500">A clear face photo is required for secure entry verification.</p>
+                                </div>
+                                
+                                <div className="max-w-md mx-auto w-full">
+                                    <ImageUploadField 
+                                        initialUrl={visitorDraft?.photo} 
+                                        onChange={(p) => setVisitorDraft({...visitorDraft, photo: p})} 
+                                        enableImageCapture 
+                                        autoOpenCamera={false} 
+                                        directCameraOnly 
+                                        appointmentToken={token as string} 
+                                    />
+                                </div>
+
+                                <div className="flex gap-4 pt-4">
+                                    <Button variant="outline" size="xl" className="flex-1" onClick={() => setStep("details")}>Back</Button>
+                                    <Button variant="primary" size="xl" className="flex-1" onClick={() => { if (!visitorDraft?.photo) return showErrorToast("Photo required"); setStep("appointment"); }}>Continue</Button>
+                                </div>
                             </div>
                         )}
 
                         {step === "appointment" && (
-                            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                                <div className="mb-8 flex items-center gap-3">
-                                    <div className="h-10 w-1 rounded-full bg-[#3882a5]" />
-                                    <div>
-                                        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">Meeting Schedule</h3>
-                                        <p className="text-xs text-slate-400 mt-1 font-medium">Schedule your visit with {employee?.name}</p>
-                                    </div>
+                            <AppointmentBookingForm 
+                                visitorId={visitorId!} 
+                                visitorName={visitorDraft?.name} 
+                                employeeId={extractIdString(appointmentLinkData?.employeeId)} 
+                                employeeName={(appointmentLinkData?.employeeId as any)?.name || (appointmentLinkData as any)?.employee?.name}
+                                onSubmit={(d) => { setAppointmentData(d); setStep("review"); }} 
+                                onBack={() => setStep("photo")} 
+                                showVehicleDetails={false} 
+                            />
+                        )}
+
+                        {step === "review" && (
+                            <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+                                <div className="text-center space-y-2">
+                                    <h3 className="text-2xl font-semibold text-slate-800">Review & Confirm</h3>
+                                    <p className="text-sm text-slate-500">Please double check your visit details before submitting.</p>
                                 </div>
-                                <div className="relative">
-                                    <AppointmentBookingForm
-                                        visitorId={visitorId!}
-                                        employeeId={extractIdString(appointmentLinkData.employeeId)}
-                                        employeeName={employee?.name || ""}
-                                        visitorEmail={appointmentLinkData.visitorEmail}
-                                        visitorName={visitorData?.name || ""}
-                                        onSubmit={handleAppointmentSubmit}
-                                        isLoading={isCreatingAppointment}
-                                        appointmentToken={token}
-                                    />
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="mt-6 text-slate-400 hover:text-[#3882a5]"
-                                        onClick={() => setStep("visitor")}
-                                    >
-                                        <ArrowLeft className="mr-2 h-4 w-4" />
-                                        Back to Visitor Info
-                                    </Button>
+
+                                <VisitReviewCard 
+                                    visitor={{
+                                        name: visitorDraft?.name,
+                                        phone: visitorDraft?.phone || verifiedPhone,
+                                        email: visitorDraft?.email,
+                                        photo: visitorDraft?.photo
+                                    }}
+                                    appointment={{
+                                        hostName: (appointmentLinkData?.employeeId as any)?.name || (appointmentLinkData as any)?.employee?.name || "Host",
+                                        date: appointmentData?.appointmentDetails?.scheduledDate || appointmentData?.appointmentDate,
+                                        time: appointmentData?.appointmentDetails?.scheduledTime || appointmentData?.appointmentTime,
+                                        purpose: appointmentData?.appointmentDetails?.purpose || appointmentData?.purpose
+                                    }}
+                                />
+                                
+                                <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                                    <Button variant="outline" size="xl" className="flex-1 rounded-2xl h-14" onClick={() => setStep("appointment")}>Edit Schedule</Button>
+                                    <Button variant="primary" size="xl" className="flex-1 rounded-2xl h-14 shadow-2xl shadow-[#3882a5]/30 font-bold" onClick={handleFinalSubmit} disabled={isCreatingBooking}>Confirm & Complete Booking</Button>
                                 </div>
                             </div>
                         )}
                     </CardContent>
                 </Card>
-
-                {/* Footer Brand Info */}
-                <div className="flex flex-col items-center gap-4 py-8 border-t border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold tracking-wide uppercase">
-                        <ShieldCheck className="h-3 w-3" />
-                        Secure Booking Powered by SafeIn
-                    </div>
-                    <div className="flex gap-6">
-                        <a href="/privacy-policy" className="text-xs text-slate-400 hover:text-[#3882a5] transition-colors">Privacy Policy</a>
-                        <a href="/contact" className="text-xs text-slate-400 hover:text-[#3882a5] transition-colors">Support</a>
-                    </div>
-                </div>
             </div>
         </div>
     );

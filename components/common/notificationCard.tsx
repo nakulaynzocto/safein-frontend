@@ -107,7 +107,7 @@ export const NotificationCard = memo(function NotificationCard({
                     <div className="flex items-start gap-3">
                         <User className="text-muted-foreground mt-1 h-4 w-4 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-gray-900">Visitor</p>
+                            <p className="text-sm font-medium text-gray-800">Visitor</p>
                             <p className="truncate text-sm text-gray-600">{visitorName}</p>
                         </div>
                     </div>
@@ -115,7 +115,7 @@ export const NotificationCard = memo(function NotificationCard({
                     <div className="flex items-start gap-3">
                         <Calendar className="text-muted-foreground mt-1 h-4 w-4 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-gray-900">Date</p>
+                            <p className="text-sm font-medium text-gray-800">Date</p>
                             <p className="text-sm text-gray-600">{formattedDate}</p>
                         </div>
                     </div>
@@ -123,7 +123,7 @@ export const NotificationCard = memo(function NotificationCard({
                     <div className="flex items-start gap-3">
                         <ClockIcon className="text-muted-foreground mt-1 h-4 w-4 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-gray-900">Time</p>
+                            <p className="text-sm font-medium text-gray-800">Time</p>
                             <p className="text-sm text-gray-600">{formatTime(appointment.appointmentDetails.scheduledTime)}</p>
                         </div>
                     </div>
@@ -131,14 +131,14 @@ export const NotificationCard = memo(function NotificationCard({
                     <div className="flex items-start gap-3">
                         <User className="text-muted-foreground mt-1 h-4 w-4 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-gray-900">Meeting With</p>
+                            <p className="text-sm font-medium text-gray-800">Meeting With</p>
                             <p className="truncate text-sm text-gray-600">{employeeName}</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
-                    <p className="mb-2 text-sm font-medium text-gray-900">Purpose</p>
+                    <p className="mb-2 text-sm font-medium text-gray-800">Purpose</p>
                     <p className="line-clamp-2 text-sm leading-relaxed text-gray-600">
                         {appointment.appointmentDetails.purpose}
                     </p>

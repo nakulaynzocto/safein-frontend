@@ -159,7 +159,7 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
                 <div className="flex items-center justify-between border-b bg-gradient-to-r from-gray-50 to-white p-4">
                     <div className="flex items-center gap-2">
                         <Bell className="h-5 w-5 text-blue-500" />
-                        <h3 className="font-semibold text-gray-900">Notifications</h3>
+                        <h3 className="font-semibold text-gray-800">Notifications</h3>
                         {unreadCount > 0 && (
                             <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600">
                                 {unreadCount} new
@@ -202,7 +202,7 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
                                 <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
                                     <Bell className="h-8 w-8 text-gray-400" />
                                 </div>
-                                <p className="font-medium text-gray-900">No notifications yet</p>
+                                <p className="font-medium text-gray-800">No notifications yet</p>
                                 <p className="mt-1 text-sm text-gray-500">You&apos;ll see appointment updates here</p>
                             </div>
                         ) : (
@@ -251,7 +251,7 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
                                                 className={cn(
                                                     "text-sm",
                                                     !notification.read
-                                                        ? "font-semibold text-gray-900"
+                                                        ? "font-semibold text-gray-800"
                                                         : "font-medium text-gray-700",
                                                 )}
                                             >

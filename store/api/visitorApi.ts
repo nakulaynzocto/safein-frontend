@@ -21,10 +21,9 @@ export interface Visitor {
     gender?: "male" | "female" | "other";
     blacklisted?: boolean;
     blacklistReason?: string;
-    tags?: string[];
     emergencyContacts?: Array<{
         name: string;
-        countryCode: string;
+        countryCode?: string;
         phone: string;
     }>;
     createdAt: string;
@@ -33,7 +32,6 @@ export interface Visitor {
 
 export interface VisitorSearchRequest {
     phone?: string;
-    email?: string;
 }
 
 export interface VisitorSearchResponse {
@@ -44,7 +42,7 @@ export interface VisitorSearchResponse {
 
 export interface CreateVisitorRequest {
     name: string;
-    email?: string;
+    email?: string | null;
     phone: string;
     address: {
         street?: string;
@@ -61,17 +59,16 @@ export interface CreateVisitorRequest {
     gender?: "male" | "female" | "other";
     blacklisted?: boolean;
     blacklistReason?: string;
-    tags?: string[];
     emergencyContacts?: Array<{
         name: string;
-        countryCode: string;
+        countryCode?: string;
         phone: string;
     }>;
 }
 
 export interface UpdateVisitorRequest {
     name?: string;
-    email?: string;
+    email?: string | null;
     phone?: string;
     address?: {
         street?: string;
@@ -89,10 +86,9 @@ export interface UpdateVisitorRequest {
     gender?: "male" | "female" | "other";
     blacklisted?: boolean;
     blacklistReason?: string;
-    tags?: string[];
     emergencyContacts?: Array<{
         name: string;
-        countryCode: string;
+        countryCode?: string;
         phone: string;
     }>;
 }
@@ -251,16 +247,28 @@ export const visitorApi = baseApi.injectEndpoints({
                 { type: "Subscription" },
             ],
         }),
+
+        checkVisitorByPhone: builder.query<{ exists: boolean; visitor: Visitor | null }, string>({
+            query: (phone) => `/visitors/check-phone/${encodeURIComponent(phone)}`,
+            transformResponse: (response: any) => {
+                if (response.success && response.data) {
+                    return response.data;
+                }
+                return response;
+            },
+        }),
     }),
 });
 
 export const {
     useCreateVisitorMutation,
     useGetVisitorsQuery,
-    useLazyGetVisitorsQuery, // Export Lazy Query
+    useLazyGetVisitorsQuery,
+    useLazyCheckVisitorByPhoneQuery, // Export Lazy Query
     useGetVisitorCountQuery,
     useGetVisitorQuery,
     useUpdateVisitorMutation,
     useDeleteVisitorMutation,
     useCheckVisitorHasAppointmentsQuery,
+    useCheckVisitorByPhoneQuery,
 } = visitorApi;

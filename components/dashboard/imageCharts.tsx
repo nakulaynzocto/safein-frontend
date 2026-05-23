@@ -112,7 +112,7 @@ function DonutChart({ data }: { data: ImageChartProps["data"] }) {
 
                     {/* Center text */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-lg font-bold text-gray-900 sm:text-xl md:text-2xl">{total}</span>
+                        <span className="text-lg font-bold text-gray-800 sm:text-xl md:text-2xl">{total}</span>
                         <span className="text-xs text-gray-500 sm:text-sm">Total</span>
                     </div>
                 </div>
@@ -165,11 +165,11 @@ function BarChart({ data }: { data: ImageChartProps["data"] }) {
                                         backgroundColor: item.color || colors[index % colors.length],
                                     }}
                                 />
-                                <div className="mt-1 text-[10px] font-medium text-gray-600 sm:mt-2 sm:text-xs">
+                                <div className="mt-1 text-xs font-medium text-gray-600 sm:mt-2 sm:text-xs">
                                     {item.value}
                                 </div>
                             </div>
-                            <div className="mt-0.5 w-full truncate px-0.5 text-center text-[10px] text-gray-500 sm:mt-1 sm:text-xs">
+                            <div className="mt-0.5 w-full truncate px-0.5 text-center text-xs text-gray-500 sm:mt-1 sm:text-xs">
                                 {item.label}
                             </div>
                         </div>
@@ -242,7 +242,7 @@ function LineChart({ data }: { data: ImageChartProps["data"] }) {
             </svg>
 
             {/* Labels */}
-            <div className="absolute right-0 bottom-0 left-0 flex justify-between px-1 text-[10px] text-gray-500 sm:text-xs">
+            <div className="absolute right-0 bottom-0 left-0 flex justify-between px-1 text-xs text-gray-500 sm:text-xs">
                 {data.map((item, index) => (
                     <span key={index} className="max-w-[35px] truncate sm:max-w-none">
                         {item.label}
@@ -310,7 +310,7 @@ function AreaChart({ data }: { data: ImageChartProps["data"] }) {
             </svg>
 
             {/* Labels */}
-            <div className="absolute right-0 bottom-0 left-0 flex justify-between px-1 text-[10px] text-gray-500 sm:text-xs">
+            <div className="absolute right-0 bottom-0 left-0 flex justify-between px-1 text-xs text-gray-500 sm:text-xs">
                 {data.map((item, index) => (
                     <span key={index} className="max-w-[35px] truncate sm:max-w-none">
                         {item.label}
@@ -371,7 +371,7 @@ function ScatterChart({ data }: { data: ImageChartProps["data"] }) {
             </svg>
 
             {/* Labels */}
-            <div className="absolute right-0 bottom-0 left-0 flex justify-between px-1 text-[10px] text-gray-500 sm:text-xs">
+            <div className="absolute right-0 bottom-0 left-0 flex justify-between px-1 text-xs text-gray-500 sm:text-xs">
                 {data.map((item, index) => (
                     <span key={index} className="max-w-[35px] truncate sm:max-w-none">
                         {item.label}
