@@ -76,7 +76,7 @@ export function QuickActions() {
     // Filter quick actions based on subscription modules
     const baseActions = isEmployee ? employeeQuickActions : adminQuickActions;
     const quickActions = baseActions.filter(action => {
-        if (action.href === routes.privateroute.SPOT_PASS && !modules?.enableInvites) return false;
+        if (action.href === routes.privateroute.SPOT_PASS && !modules?.enableSpotPass) return false;
         return true;
     });
 

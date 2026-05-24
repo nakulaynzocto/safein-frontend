@@ -243,19 +243,20 @@ export function SMTPSettings() {
                                                 <div className="grid grid-cols-1 gap-6 bg-muted/20 p-6 rounded-2xl border-dashed border">
                                                     <MaskedInputField
                                                         label="API Key / Token"
+                                                        placeholder="Enter your provider API Key"
                                                         {...register("apiKey")}
                                                         error={errors.apiKey?.message as any}
                                                         required
                                                     />
                                                     {provider === 'mailgun' && (
-                                                        <InputField label="Mailgun Domain" {...register("host")} error={errors.host?.message as any} required />
+                                                        <InputField label="Mailgun Domain" placeholder="e.g., mg.yourdomain.com" {...register("host")} error={errors.host?.message as any} required />
                                                     )}
                                                 </div>
 
                                                 {/* Branding */}
                                                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 bg-muted/20 p-6 rounded-2xl border-dashed border">
-                                                    <InputField label="Sender Name" {...register("fromName")} error={errors.fromName?.message as any} required />
-                                                    <InputField label="Sender Email" {...register("fromEmail")} error={errors.fromEmail?.message as any} required />
+                                                    <InputField label="Sender Name" placeholder="e.g., Aynzo Notifications" {...register("fromName")} error={errors.fromName?.message as any} required />
+                                                    <InputField label="Sender Email" placeholder="e.g., info@yourdomain.com" {...register("fromEmail")} error={errors.fromEmail?.message as any} required />
                                                 </div>
                                             </div>
                                         )}

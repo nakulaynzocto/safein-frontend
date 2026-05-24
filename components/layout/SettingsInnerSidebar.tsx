@@ -15,6 +15,7 @@ import {
     LayoutTemplate,
     ShieldCheck
 } from "lucide-react";
+import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 
 const settingsNavigation = [
     { name: "Profile", href: "/settings/profile", icon: User },
@@ -28,11 +29,21 @@ const settingsNavigation = [
 
 export function SettingsInnerSidebar() {
     const pathname = usePathname();
+    const { activeSubscriptionData } = useAuthSubscription();
+    const modules = activeSubscriptionData?.modules;
+
+    const filteredNavigation = settingsNavigation.filter((item) => {
+        if (item.name === "WhatsApp Config" && modules && !modules.enableWhatsApp) return false;
+        if (item.name === "Voice Call Config" && modules && !modules.enableVoice) return false;
+        if (item.name === "SMS Config" && modules && !modules.enableSms) return false;
+        if (item.name === "SMTP Delivery" && modules && !modules.enableEmail) return false;
+        return true;
+    });
 
     return (
         <div className="w-full md:w-[260px] flex-shrink-0 bg-white border-b md:border border-gray-200 md:rounded-2xl flex flex-col h-fit p-2 md:p-3 shadow-sm md:shadow-none">
             <nav className="flex md:flex-col gap-1 md:space-y-1 overflow-x-auto md:overflow-visible no-scrollbar pb-1 md:pb-0">
-                {settingsNavigation.map((item) => {
+                {filteredNavigation.map((item) => {
                     const isActive = pathname === item.href || pathname?.startsWith(item.href);
                     return (
                         <Link
