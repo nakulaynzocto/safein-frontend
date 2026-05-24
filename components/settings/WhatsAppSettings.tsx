@@ -17,6 +17,9 @@ import {
     MessageSquare,
     Save,
     Key,
+    Lock,
+    Link,
+    Calendar,
     Cloud,
     ChevronRight,
     Settings2,
@@ -315,8 +318,99 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                         </div>
                                     )}
 
+                                    {/* Template Management Section */}
+                                    <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
+                                        <Collapsible open={expandedSections.includes('templates')} onOpenChange={() => toggleSection('templates')}>
+                                            <div className="p-5 flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('templates')}>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="h-12 w-12 rounded-xl bg-[#3882a5] text-white shadow-lg flex items-center justify-center">
+                                                        <ListOrdered size={24} />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-gray-800 text-lg">Message Template Controls</h3>
+                                                        <p className="text-xs text-gray-500">Enable or disable WhatsApp notifications for specific events</p>
+                                                    </div>
+                                                </div>
+                                                <ChevronRight className={cn("w-5 h-5 text-gray-400 transition-transform duration-300", expandedSections.includes('templates') && "rotate-90")} />
+                                            </div>
+                                             <CollapsibleContent>
+                                                <div className="px-5 pb-8 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                    {/* Read-only info banner */}
+                                                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mb-4">
+                                                        <Lock size={13} />
+                                                        <span>WhatsApp template content is managed globally by SafeIn Admin. You can <strong>turn them on or off</strong> individually below.</span>
+                                                    </div>
+
+                                                    <div className="space-y-4 pt-2">
+                                                        {WHATSAPP_META_TEMPLATES.map((t) => {
+                                                            const isEnabled = localEnabledTemplates[t.name] !== false;
+                                                            
+                                                            // Determine icon based on template name
+                                                            let IconComponent = MessageSquare;
+                                                            if (t.name === "system_config_update") IconComponent = Key;
+                                                            else if (t.name === "new_appointment") IconComponent = Calendar;
+                                                            else if (t.name === "appointment_confirmed") IconComponent = CheckCircle2;
+                                                            else if (t.name === "visitor_checked_in") IconComponent = MapPin;
+                                                            else if (t.name === "visit_status_update") IconComponent = XCircle;
+                                                            else if (t.name === "visitor_invitation") IconComponent = Link;
+                                                            else if (t.name === "visitor_entry_pass") IconComponent = ShieldCheck;
+
+                                                            return (
+                                                                <div key={t.name} className="border border-border/50 rounded-xl bg-background transition-all overflow-hidden">
+                                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 px-5 gap-4">
+                                                                        <div className="flex items-start gap-4">
+                                                                            <div className="p-2.5 rounded-lg bg-muted text-[#3882a5] shrink-0 mt-0.5">
+                                                                                <IconComponent size={18} />
+                                                                            </div>
+                                                                            <div className="space-y-1">
+                                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                                    <h4 className="font-bold text-[#074463] text-sm">{t.name}</h4>
+                                                                                    <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4.5 bg-slate-50 text-slate-400 border-slate-200 font-medium">Lang: {WHATSAPP_META_TEMPLATE_LANGUAGE}</Badge>
+                                                                                </div>
+                                                                                <p className="text-xs text-gray-500 font-medium leading-relaxed">{t.usedFor}</p>
+                                                                                <div className="flex flex-wrap gap-1.5 pt-1.5">
+                                                                                    {t.params.map(p => (
+                                                                                        <span key={p.index} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50/50 border border-blue-100 text-[10px] font-medium text-slate-600">
+                                                                                            <span className="font-bold text-[#3882a5]">{`{{${p.index}}}`}</span>
+                                                                                            <span>{p.label}</span>
+                                                                                        </span>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
+                                                                            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border bg-white shadow-sm shrink-0">
+                                                                                {isEnabled ? (
+                                                                                    <><div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /><span className="text-[10px] font-bold text-emerald-600">ACTIVE</span></>
+                                                                                ) : (
+                                                                                    <><div className="h-1.5 w-1.5 rounded-full bg-slate-300" /><span className="text-[10px] font-bold text-slate-400">INACTIVE</span></>
+                                                                                )}
+                                                                            </div>
+                                                                            <div
+                                                                                className="inline-flex"
+                                                                                onClick={(e) => e.stopPropagation()}
+                                                                                onPointerDown={(e) => e.stopPropagation()}
+                                                                            >
+                                                                                <BrandSwitch 
+                                                                                    checked={isEnabled}
+                                                                                    onCheckedChange={() => handleTemplateToggle(t.name)}
+                                                                                    disabled={isUpdating}
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            </CollapsibleContent>
+                                        </Collapsible>
+                                    </div>
+
                                     {/* Strategy Selection */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div 
                                             className={cn("p-6 cursor-pointer border-2 rounded-2xl transition-all relative overflow-hidden", 
                                                 deliveryMode === 'shared' ? "border-[#3882a5] bg-[#3882a5]/5" : "hover:border-border bg-white shadow-sm")}
@@ -355,7 +449,7 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                     {deliveryMode === 'shared' ? (
                                         <div className="space-y-4 animate-in fade-in slide-in-from-top-1 duration-300">
                                             {/* Wallet Info Banner */}
-                                            <div className="mx-3 bg-gradient-to-r from-amber-500/[0.05] to-transparent p-5 rounded-2xl border border-amber-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                            <div className="bg-gradient-to-r from-amber-500/[0.05] to-transparent p-5 rounded-2xl border border-amber-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                                 <div className="flex items-center gap-4">
                                                     <div className="h-10 w-10 bg-amber-500/10 rounded-xl flex items-center justify-center">
                                                         <Wallet className="h-5 w-5 text-amber-600" />
@@ -371,7 +465,7 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                                 </div>
                                             </div>
 
-                                            <div className="mx-3 p-5 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-start gap-4">
+                                            <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-start gap-4">
                                                 <div className="p-2 bg-emerald-500 rounded-lg text-white">
                                                     <ShieldCheck className="h-5 w-5" />
                                                 </div>
@@ -384,20 +478,23 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mt-3 animate-in fade-in slide-in-from-top-2 duration-400">
+                                        <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm animate-in fade-in slide-in-from-top-2 duration-400">
                                             <Collapsible open={expandedSections.includes('credentials')} onOpenChange={() => toggleSection('credentials')}>
-                                                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('credentials')}>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
-                                                            <Key size={18} />
+                                                <div className="p-5 flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('credentials')}>
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="h-12 w-12 rounded-xl bg-[#3882a5] text-white shadow-lg flex items-center justify-center">
+                                                            <Key size={24} />
                                                         </div>
-                                                        <h4 className="font-bold text-[#074463] text-sm">Meta API Credentials</h4>
+                                                        <div>
+                                                            <h3 className="font-bold text-gray-800 text-lg">Meta API Credentials</h3>
+                                                            <p className="text-xs text-gray-500">Configure your custom Meta App IDs and Access Tokens</p>
+                                                        </div>
                                                     </div>
-                                                    <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('credentials') && "rotate-90")} />
+                                                    <ChevronRight className={cn("w-5 h-5 text-gray-400 transition-transform duration-300", expandedSections.includes('credentials') && "rotate-90")} />
                                                 </div>
                                                 <CollapsibleContent>
-                                                    <div className="p-4 pt-0 space-y-6 animate-in fade-in slide-in-from-top-1 duration-200">
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-xl bg-muted/30 border border-border/50">
+                                                    <div className="px-5 pb-8 pt-2 animate-in fade-in slide-in-from-top-2 duration-300 space-y-6">
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 rounded-2xl bg-muted/30 border border-border/50">
                                                             <InputField label="Phone Number ID" placeholder="e.g. 10472938.." {...register("phoneNumberId")} error={errors.phoneNumberId?.message} className="h-10 bg-background" />
                                                             <MaskedInputField label="Permanent Access Token" placeholder={isVerified ? MASKED_DISPLAY_VALUE : "EAAG...."} {...register("accessToken")} error={errors.accessToken?.message} className="h-10 bg-background" />
                                                         </div>
@@ -415,90 +512,6 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                         </div>
                                     )}
 
-                                    {/* Template Management Section */}
-                                    <div className="rounded-xl border border-border/30 bg-background overflow-hidden mx-3 mb-3">
-                                        <Collapsible open={expandedSections.includes('templates')} onOpenChange={() => toggleSection('templates')}>
-                                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/5 transition-colors" onClick={() => toggleSection('templates')}>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="p-2 rounded-lg bg-[#3882a5]/10 text-[#3882a5]">
-                                                        <ListOrdered size={18} />
-                                                    </div>
-                                                    <h4 className="font-bold text-[#074463] text-sm">Template Management</h4>
-                                                </div>
-                                                <ChevronRight className={cn("w-4 h-4 text-gray-400 transition-transform duration-300", expandedSections.includes('templates') && "rotate-90")} />
-                                            </div>
-                                            <CollapsibleContent>
-                                                <div className="p-4 pt-0 space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
-                                                    <div className="flex items-center gap-2 p-3 bg-[#3882a5]/5 rounded-xl border border-[#3882a5]/20 text-xs text-[#074463]">
-                                                        <Info className="h-4 w-4 shrink-0 text-[#3882a5]" />
-                                                        <p>Parameters like <span className="font-bold">{"{{1}}"}</span> must be configured in your <strong>Meta Dashboard</strong> in the exact order shown below for messages to deliver successfully.</p>
-                                                    </div>
-
-                                                    <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
-                                                        <table className="w-full text-left text-xs border-collapse">
-                                                            <thead className="bg-[#f8fafc] text-[#64748b] uppercase font-bold text-xs border-b border-border">
-                                                                <tr>
-                                                                    <th className="px-5 py-4 w-1/4">Template Details</th>
-                                                                    <th className="px-5 py-4 w-5/12">Variable Mapping Settings</th>
-                                                                    <th className="px-5 py-4 text-center w-1/6">Status</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody className="divide-y divide-border/50">
-                                                                {WHATSAPP_META_TEMPLATES.map(t => (
-                                                                    <tr key={t.name} className="hover:bg-slate-50/50 transition-colors">
-                                                                        <td className="px-5 py-5 vertical-top">
-                                                                            <div className="flex flex-col gap-1.5">
-                                                                                <span className="font-bold text-[#074463] text-[13px]">{t.name}</span>
-                                                                                <span className="text-xs text-slate-500 leading-relaxed italic pr-4">{t.usedFor}</span>
-                                                                                <Badge variant="outline" className="w-fit text-xs h-5 bg-slate-50 text-slate-400 border-slate-200 font-medium">Lang: {WHATSAPP_META_TEMPLATE_LANGUAGE}</Badge>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td className="px-5 py-5 vertical-top">
-                                                                            <div className="grid grid-cols-1 gap-2.5">
-                                                                                {t.params.map(p => (
-                                                                                    <div key={p.index} className="flex items-center gap-2.5 group">
-                                                                                        <span className="flex items-center justify-center h-6 w-10 shrink-0 bg-[#3882a5]/10 border border-[#3882a5]/20 rounded-md text-xs font-mono font-bold text-[#3882a5]">
-                                                                                            {`{{${p.index}}}`}
-                                                                                        </span>
-                                                                                        <span className="text-xs text-[#475569] font-medium leading-tight">
-                                                                                            {p.label}
-                                                                                        </span>
-                                                                                    </div>
-                                                                                ))}
-                                                                            </div>
-                                                                        </td>
-                                                                        <td className="px-5 py-5 text-center vertical-middle">
-                                                                            <div className="flex flex-col items-center gap-3">
-                                                                                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border bg-white shadow-sm">
-                                                                                    {localEnabledTemplates[t.name] !== false ? (
-                                                                                        <><div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /><span className="text-xs font-bold text-emerald-600">ACTIVE</span></>
-                                                                                    ) : (
-                                                                                        <><div className="h-1.5 w-1.5 rounded-full bg-slate-300" /><span className="text-xs font-bold text-slate-400">INACTIVE</span></>
-                                                                                    )}
-                                                                                </div>
-                                                                                <div
-                                                                                    className="inline-flex"
-                                                                                    onClick={(e) => e.stopPropagation()}
-                                                                                    onPointerDown={(e) => e.stopPropagation()}
-                                                                                >
-                                                                                     <BrandSwitch
-                                                                                        checked={localEnabledTemplates[t.name] !== false}
-                                                                                        onCheckedChange={() => handleTemplateToggle(t.name)}
-                                                                                        disabled={isUpdating}
-                                                                                        className="scale-[0.85]"
-                                                                                    />
-                                                                                </div>
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                ))}
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </CollapsibleContent>
-                                        </Collapsible>
-                                    </div>
                                 </div>
 
                                 <div className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border border-dashed border-border mt-8">

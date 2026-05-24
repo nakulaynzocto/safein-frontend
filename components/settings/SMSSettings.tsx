@@ -15,8 +15,7 @@ import {
     Calendar,
     MapPin,
     CheckCircle2,
-    XCircle,
-    Eye
+    XCircle
 } from "lucide-react";
 import { SettingsHeader } from "./SettingsHeader";
 import { FormContainer } from "@/components/common/formContainer";
@@ -38,12 +37,11 @@ export function SMSSettings() {
     const modules = activeSubscriptionData?.modules;
 
     const { expandedSections, toggleSection } = useCollapsibleSections(["templates"]);
-    const [selectedTemplate, setSelectedTemplate] = useState<string | null>("newAppointmentRequest");
 
     const coreSmsTemplates = ["newAppointmentRequest", "appointmentLink"];
     const normalizedEnabledTemplates = (settings?.sms as any)?.enabledTemplates || {};
     
-    // Templates are globally managed by SafeIn Admin — no local toggle allowed
+    // SMS toggles are managed individually by tenants, while templates are global
 
     const handleMasterToggle = async (enabled: boolean) => {
         try {
@@ -147,7 +145,7 @@ export function SMSSettings() {
                                                 {/* Read-only info banner */}
                                                 <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mb-4">
                                                     <Lock size={13} />
-                                                    <span>SMS templates are managed globally by SafeIn Admin. These settings are <strong>view-only</strong>.</span>
+                                                    <span>SMS template content is managed globally by SafeIn Admin. You can <strong>turn them on or off</strong> individually below.</span>
                                                 </div>
                                                 <div className="space-y-4 pt-2">
                                                     {[
@@ -161,57 +159,37 @@ export function SMSSettings() {
                                                         return (
                                                         <div key={template.id} className="border border-border/50 rounded-xl bg-background transition-all overflow-hidden">
                                                             <div className="flex items-center justify-between p-4 px-5">
-                                                                <div className="flex items-center gap-4">
+                                                                 <div className="flex items-center gap-4">
                                                                     <div className="p-2.5 rounded-lg bg-muted text-[#3882a5]">
                                                                         <template.icon size={18} />
                                                                     </div>
                                                                     <h4 className="font-bold text-[#074463]">{template.label}</h4>
                                                                 </div>
                                                                 
-                                                                <div className="flex items-center gap-4">
-                                                                    {/* Read-only status badge */}
-                                                                    <span className={cn(
-                                                                        "px-2.5 py-1 rounded-full text-xs font-bold border",
-                                                                        isEnabled
-                                                                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                                                            : "bg-gray-100 text-gray-500 border-gray-200"
-                                                                    )}>
-                                                                        {isEnabled ? "Active" : "Inactive"}
-                                                                    </span>
-                                                                    <button 
-                                                                        type="button"
-                                                                        onClick={() => setSelectedTemplate(selectedTemplate === template.id ? null : template.id)} 
-                                                                        className={cn(
-                                                                            "h-9 w-9 flex items-center justify-center rounded-lg border shadow-sm transition-all",
-                                                                            selectedTemplate === template.id ? 'bg-[#074463] text-white border-[#074463]' : 'bg-background text-gray-400 hover:text-[#3882a5]'
-                                                                        )}
-                                                                        title="Preview template"
-                                                                    >
-                                                                        <Eye size={16} />
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-
-                                                            {selectedTemplate === template.id && (
-                                                                <div className="p-6 border-t border-dashed border-border/50 bg-muted/10 animate-in fade-in duration-300">
-                                                                    <div className="space-y-4">
-                                                                        <div className="space-y-2">
-                                                                            <Label className="text-xs font-bold text-[#3882a5] uppercase tracking-wider">SMS message preview</Label>
-                                                                            <div className="min-h-[60px] rounded-xl p-4 font-medium text-sm border border-border/50 bg-background text-gray-800 shadow-inner leading-relaxed">
-                                                                                {(settings?.sms?.templates as any)?.[template.id] || "No template content configured."}
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="flex flex-wrap gap-2 pt-1">
-                                                                            <span className="text-xs font-bold text-muted-foreground uppercase mr-1 text-xs">Variables used:</span>
-                                                                            {template.placeholders.map(p => (
-                                                                                <code key={p} className="px-2 py-0.5 rounded bg-blue-50 text-xs font-bold text-blue-600 border border-blue-100">{"{"}{p}{"}"}</code>
-                                                                            ))}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )})}
+                                                                 <div className="flex items-center gap-4">
+                                                                    <BrandSwitch 
+                                                                        checked={isEnabled}
+                                                                        onCheckedChange={async (checked) => {
+                                                                            try {
+                                                                                await updateSettings({
+                                                                                    sms: {
+                                                                                        enabledTemplates: {
+                                                                                            ...normalizedEnabledTemplates,
+                                                                                            [template.id]: checked
+                                                                                        }
+                                                                                    }
+                                                                                }).unwrap();
+                                                                                toast.success(`${template.label} updated successfully`);
+                                                                            } catch (err: any) {
+                                                                                toast.error(err?.data?.message || "Failed to update notification settings");
+                                                                            }
+                                                                        }}
+                                                                        variant="default"
+                                                                    />
+                                                                 </div>
+                                                             </div>
+                                                         </div>
+                                                     )})}
                                                 </div>
                                             </div>
                                         </CollapsibleContent>
