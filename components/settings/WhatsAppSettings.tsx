@@ -114,6 +114,7 @@ interface FormValues {
     testNumber: string;
     phoneNumberId: string;
     accessToken: string;
+    enabledTemplates: Record<string, boolean>;
 }
 
 export function WhatsAppSettings({ walletData }: { walletData?: any }) {
@@ -128,7 +129,6 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
 
     const [showOtpModal, setShowOtpModal] = useState(false);
     const { expandedSections, toggleSection } = useCollapsibleSections(["credentials", "templates"]);
-    const [localEnabledTemplates, setLocalEnabledTemplates] = useState<Record<string, boolean>>({});
 
     const {
         register,
@@ -148,6 +148,7 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
             testNumber: "",
             phoneNumberId: "",
             accessToken: "",
+            enabledTemplates: {},
         },
     });
 
@@ -156,10 +157,20 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
     const [isMutationInProgress, setIsMutationInProgress] = useState(false);
     const whatsappCost = walletData?.whatsappCostPerMessage ?? 1.5;
 
+    const localEnabledTemplates = watch("enabledTemplates") || {};
+
     // Form fields only — do not tie template toggles to `isMutationInProgress` (avoids stale overwrite after template save)
     useEffect(() => {
         if (!settings || isMutationInProgress) return;
         if (!isDirty) {
+            const normalized = normalizeWhatsappEnabledTemplates(settings.whatsapp?.enabledTemplates);
+            const merged: Record<string, boolean> = {};
+            const coreTemplates = ["system_config_update", "new_appointment", "appointment_confirmed", "visit_status_update", "visitor_invitation", "visitor_entry_pass", "visitor_checked_in"];
+            WHATSAPP_META_TEMPLATES.forEach((t) => {
+                const isCore = coreTemplates.includes(t.name);
+                merged[t.name] = normalized[t.name] !== undefined ? normalized[t.name] : isCore;
+            });
+            
             reset({
                 whatsappEnabled: settings.notifications?.whatsappEnabled ?? false,
                 deliveryMode: settings.whatsapp?.deliveryMode || 'shared',
@@ -167,22 +178,10 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                 testNumber: settings.whatsapp?.testNumber || "",
                 phoneNumberId: settings.whatsapp?.phoneNumberId || "",
                 accessToken: settings.whatsapp?.accessToken || "",
+                enabledTemplates: merged,
             });
         }
     }, [settings, reset, isMutationInProgress, isDirty]);
-
-    // Template toggles: hydrate from server whenever `settings` updates (after refetch)
-    useEffect(() => {
-        if (!settings?.whatsapp) return;
-        const normalized = normalizeWhatsappEnabledTemplates(settings.whatsapp.enabledTemplates);
-        const merged: Record<string, boolean> = {};
-        const coreTemplates = ["system_config_update", "new_appointment", "appointment_confirmed", "visit_status_update", "visitor_invitation", "visitor_entry_pass", "visitor_checked_in"];
-        WHATSAPP_META_TEMPLATES.forEach((t) => {
-            const isCore = coreTemplates.includes(t.name);
-            merged[t.name] = normalized[t.name] !== undefined ? normalized[t.name] : isCore;
-        });
-        setLocalEnabledTemplates(merged);
-    }, [settings]);
 
     const isVerified = settings?.whatsapp?.deliveryMode === 'custom' && (!!settings?.whatsapp?.metaVerified || !!settings?.whatsapp?.verified);
     const credentialsChanged =
@@ -245,23 +244,12 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
         }
     };
 
-    const handleTemplateToggle = async (templateName: string) => {
+    const handleTemplateToggle = (templateName: string) => {
         /** Match UI default: missing key counts as enabled (`!== false`) */
         const currentOn = localEnabledTemplates[templateName] !== false;
         const newValue = !currentOn;
         const updatedTemplates = { ...localEnabledTemplates, [templateName]: newValue };
-        setLocalEnabledTemplates(updatedTemplates);
-
-        try {
-            await updateSettingsMutation({
-                whatsapp: {
-                    enabledTemplates: updatedTemplates,
-                },
-            }).unwrap();
-        } catch (err) {
-            setLocalEnabledTemplates((prev) => ({ ...prev, [templateName]: !newValue }));
-            toast.error("Failed to update template status");
-        }
+        setValue('enabledTemplates', updatedTemplates, { shouldDirty: true });
     };
 
     const handleVerifyOtp = async (otpValue: string) => {
@@ -281,11 +269,29 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
             <ProfileLayout>
                 {() => (
                     <div className="mx-auto w-full max-w-full">
-                        <SettingsHeader
-                            title="WhatsApp Configuration"
-                            description="Connect your Meta WhatsApp Cloud API to send automated notifications. All credentials are encrypted."
-                            icon={Cloud}
-                        />
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <SettingsHeader
+                                title="WhatsApp Configuration"
+                                description="Connect your Meta WhatsApp Cloud API to send automated notifications."
+                                icon={Cloud}
+                            />
+                            
+                            <ActionButton
+                                type="button"
+                                onClick={handleSubmit(onSubmit)}
+                                disabled={isUpdating || isInitiatingVerify || !isDirty}
+                                isLoading={isUpdating || isInitiatingVerify}
+                                loadingLabel="Saving..."
+                                variant="primary"
+                                size="xl"
+                                className={cn(
+                                    "w-full sm:w-auto min-w-[220px] font-bold transition-all shadow-lg active:scale-95",
+                                    !isDirty && "opacity-50 grayscale pointer-events-none"
+                                )}
+                                icon={Save}
+                                label={needsVerification ? "Verify & Save" : "Update Configuration"}
+                            />
+                        </div>
 
                         <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-12">
@@ -512,32 +518,6 @@ export function WhatsAppSettings({ walletData }: { walletData?: any }) {
                                         </div>
                                     )}
 
-                                </div>
-
-                                <div className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border border-dashed border-border mt-8">
-                                    <div className="flex items-center gap-3 text-foreground">
-                                        <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center border border-border">
-                                            <Settings2 size={18} className="text-[#3882a5]" />
-                                        </div>
-                                        <div className="hidden sm:block">
-                                            <p className="text-sm font-bold text-gray-800">Finalize WhatsApp Settings</p>
-                                            <p className="text-xs text-gray-500">Manual verification is required for credential changes.</p>
-                                        </div>
-                                    </div>
-                                    <ActionButton
-                                        type="submit"
-                                        disabled={isUpdating || isInitiatingVerify || !isDirty}
-                                        isLoading={isUpdating || isInitiatingVerify}
-                                        loadingLabel="Saving..."
-                                        variant="primary"
-                                        size="xl"
-                                        className={cn(
-                                            "min-w-[220px] font-bold transition-all shadow-lg active:scale-95",
-                                            !isDirty && "opacity-50 grayscale pointer-events-none"
-                                        )}
-                                        icon={Save}
-                                        label={needsVerification ? "Verify & Save" : "Update Configuration"}
-                                    />
                                 </div>
                             </form>
                         </FormContainer>

@@ -24,6 +24,9 @@ import { ProfileLayout } from "@/components/profile/profileLayout";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { useForm, Controller } from "react-hook-form";
+import { ActionButton } from "@/components/common/actionButton";
+import { Save } from "lucide-react";
 
 import { BrandSwitch } from "@/components/common/BrandSwitch";
 import { cn } from "@/lib/utils";
@@ -39,21 +42,47 @@ export function SMSSettings() {
     const { expandedSections, toggleSection } = useCollapsibleSections(["templates"]);
 
     const coreSmsTemplates = ["newAppointmentRequest", "appointmentLink"];
-    const normalizedEnabledTemplates = (settings?.sms as any)?.enabledTemplates || {};
     
-    // SMS toggles are managed individually by tenants, while templates are global
+    const { handleSubmit, setValue, watch, reset, control, formState: { isDirty } } = useForm({
+        defaultValues: {
+            smsEnabled: false,
+            enabledTemplates: {} as Record<string, boolean>
+        }
+    });
 
-    const handleMasterToggle = async (enabled: boolean) => {
+    const smsEnabled = watch("smsEnabled");
+    const enabledTemplates = watch("enabledTemplates") || {};
+
+    useEffect(() => {
+        if (!settings) return;
+        if (!isDirty) {
+            const rawTemplates = (settings?.sms as any)?.enabledTemplates || {};
+            const merged: Record<string, boolean> = {};
+            ["newAppointmentRequest", "appointmentLink", "specialVisitorEntry"].forEach(t => {
+                merged[t] = rawTemplates[t] !== undefined ? rawTemplates[t] : coreSmsTemplates.includes(t);
+            });
+            reset({
+                smsEnabled: settings?.notifications?.smsEnabled ?? false,
+                enabledTemplates: merged
+            });
+        }
+    }, [settings, isDirty, reset]);
+
+    const onSubmit = async (data: any) => {
         try {
             await updateSettings({
                 notifications: {
                     ...settings?.notifications,
-                    smsEnabled: enabled
+                    smsEnabled: data.smsEnabled
+                },
+                sms: {
+                    enabledTemplates: data.enabledTemplates
                 }
             }).unwrap();
-            toast.success("Master SMS settings updated");
+            toast.success("SMS settings updated successfully");
+            reset(data);
         } catch (err: any) {
-            toast.error(err?.data?.message || "Failed to update master settings");
+            toast.error(err?.data?.message || "Failed to update settings");
         }
     };
 
@@ -95,11 +124,28 @@ export function SMSSettings() {
             <ProfileLayout>
                 {() => (
                     <div className="mx-auto w-full max-w-full">
-                        <SettingsHeader
-                            title="SMS Gateway"
-                            description="Customize the SMS notifications sent for appointment events. All messages are delivered via the system's platform gateway."
-                            icon={MessageSquare}
-                        />
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <SettingsHeader
+                                title="SMS Gateway"
+                                description="Customize the SMS notifications sent for appointment events."
+                                icon={MessageSquare}
+                            />
+                            <ActionButton
+                                type="button"
+                                onClick={handleSubmit(onSubmit)}
+                                disabled={isUpdating || !isDirty}
+                                isLoading={isUpdating}
+                                loadingLabel="Saving..."
+                                variant="primary"
+                                size="xl"
+                                className={cn(
+                                    "w-full sm:w-auto min-w-[220px] font-bold transition-all shadow-lg active:scale-95",
+                                    !isDirty && "opacity-50 grayscale pointer-events-none"
+                                )}
+                                icon={Save}
+                                label="Update Configuration"
+                            />
+                        </div>
 
                         <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
                             <form className="space-y-6 text-foreground pb-12">
@@ -116,10 +162,16 @@ export function SMSSettings() {
                                                     <p className="text-xs text-gray-500">Enable or disable all SMS notifications globally</p>
                                                 </div>
                                             </div>
-                                            <BrandSwitch 
-                                                checked={settings?.notifications?.smsEnabled ?? false} 
-                                                onCheckedChange={handleMasterToggle} 
-                                                variant="default" 
+                                            <Controller
+                                                name="smsEnabled"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <BrandSwitch 
+                                                        checked={field.value} 
+                                                        onCheckedChange={field.onChange} 
+                                                        variant="default" 
+                                                    />
+                                                )}
                                             />
                                         </div>
                                     </div>
@@ -153,9 +205,7 @@ export function SMSSettings() {
                                                         { id: "appointmentLink", label: "SafeIn_Booking_Link", icon: Link, placeholders: ["companyName", "bookingUrl"] },
                                                         { id: "specialVisitorEntry", label: "SafeIn_Special_Entry_Pass", icon: ShieldCheck, placeholders: ["companyName", "otp"] },
                                                     ].map((template) => {
-                                                        const isEnabled = normalizedEnabledTemplates[template.id] !== undefined
-                                                            ? normalizedEnabledTemplates[template.id]
-                                                            : coreSmsTemplates.includes(template.id);
+                                                        const isEnabled = enabledTemplates[template.id] !== false;
                                                         return (
                                                         <div key={template.id} className="border border-border/50 rounded-xl bg-background transition-all overflow-hidden">
                                                             <div className="flex items-center justify-between p-4 px-5">
@@ -169,20 +219,11 @@ export function SMSSettings() {
                                                                  <div className="flex items-center gap-4">
                                                                     <BrandSwitch 
                                                                         checked={isEnabled}
-                                                                        onCheckedChange={async (checked) => {
-                                                                            try {
-                                                                                await updateSettings({
-                                                                                    sms: {
-                                                                                        enabledTemplates: {
-                                                                                            ...normalizedEnabledTemplates,
-                                                                                            [template.id]: checked
-                                                                                        }
-                                                                                    }
-                                                                                }).unwrap();
-                                                                                toast.success(`${template.label} updated successfully`);
-                                                                            } catch (err: any) {
-                                                                                toast.error(err?.data?.message || "Failed to update notification settings");
-                                                                            }
+                                                                        onCheckedChange={(checked) => {
+                                                                            setValue('enabledTemplates', {
+                                                                                ...enabledTemplates,
+                                                                                [template.id]: checked
+                                                                            }, { shouldDirty: true });
                                                                         }}
                                                                         variant="default"
                                                                     />

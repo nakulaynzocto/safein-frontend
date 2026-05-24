@@ -258,12 +258,13 @@ export function Navbar({ forcePublic = false, showUpgradeButton = false, variant
                         
                         {/* Company Name Branding - Show for authenticated users */}
                         {shouldShowPrivateNavbar && (
-                            <div className="hidden items-center lg:flex">
+                            <div className="hidden items-center lg:flex ml-2">
                                 <div
                                     className={cn(
-                                        "text-xl lg:text-2xl font-black uppercase tracking-wide transition-all duration-300",
+                                        "text-base lg:text-lg font-bold uppercase tracking-tight transition-all duration-300 truncate max-w-[250px] xl:max-w-[400px]",
                                         shouldShowWhiteNavbar ? "text-accent" : "text-white"
                                     )}
+                                    title={user?.companyName || "SafeIn"}
                                 >
                                     {formatName(user?.companyName || "SafeIn")}
                                 </div>

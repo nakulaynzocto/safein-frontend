@@ -11,7 +11,7 @@ import { MaskedInputField, MASKED_DISPLAY_VALUE } from "@/components/common/Mask
 import { ActionButton } from "@/components/common/actionButton";
 import { FormContainer } from "@/components/common/formContainer";
 import { APIErrorState } from "@/components/common/APIErrorState";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ProfileLayout } from "@/components/profile/profileLayout";
@@ -61,7 +61,7 @@ export function SMTPSettings() {
     const router = useRouter();
     const { data: settings, isLoading, error } = useGetSettingsQuery();
     const [saveSMTP, { isLoading: isSaving }] = useSaveSMTPConfigMutation();
-    const [updateSettings] = useUpdateSettingsMutation();
+    const [updateSettings, { isLoading: isUpdatingSettings }] = useUpdateSettingsMutation();
     const { activeSubscriptionData } = useAuthSubscription();
     const modules = activeSubscriptionData?.modules;
     const [selectedPreset, setSelectedPreset] = useState("Brevo API");
@@ -77,7 +77,7 @@ export function SMTPSettings() {
         { id: "specialVisitorEntry", label: "Special Visitor Entry Pass", desc: "Sent to VIP / Special Visitors with access credentials.", icon: ShieldCheck }
     ];
 
-    const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm({
+    const { register, handleSubmit, setValue, watch, reset, control, formState: { errors, isDirty } } = useForm({
         resolver: yupResolver(schema) as any,
         defaultValues: {
             deliveryMode: 'shared',
@@ -85,27 +85,41 @@ export function SMTPSettings() {
             apiKey: "",
             fromName: "",
             fromEmail: "",
-            host: ""
+            host: "",
+            emailEnabled: false,
+            enabledTemplates: {} as Record<string, boolean>
         },
     });
 
     const deliveryMode = watch("deliveryMode");
     const provider = watch("provider");
+    const emailEnabled = watch("emailEnabled");
+    const enabledTemplates = watch("enabledTemplates") || {};
 
     // Sync form with backend data
     useEffect(() => {
-        if (!settings?.smtp) return;
-        const s = settings.smtp;
-        reset({
-            deliveryMode: s.deliveryMode || 'shared',
-            provider: s.provider || 'brevo',
-            apiKey: s.apiKey ? MASKED_DISPLAY_VALUE : "",
-            fromName: s.fromName || "",
-            fromEmail: s.fromEmail || "",
-            host: s.host || ""
-        });
-        setSelectedPreset(PRESETS.find(p => p.provider === s.provider)?.label || "Brevo API");
-    }, [settings, reset]);
+        if (!settings) return;
+        if (!isDirty) {
+            const s = settings.smtp || {};
+            const rawTemplates = settings.emailTemplates?.enabledTemplates || {};
+            const mergedTemplates: Record<string, boolean> = {};
+            emailTemplatesList.forEach(t => {
+                mergedTemplates[t.id] = rawTemplates[t.id] !== false;
+            });
+
+            reset({
+                deliveryMode: s.deliveryMode || 'shared',
+                provider: s.provider || 'brevo',
+                apiKey: s.apiKey ? MASKED_DISPLAY_VALUE : "",
+                fromName: s.fromName || "",
+                fromEmail: s.fromEmail || "",
+                host: s.host || "",
+                emailEnabled: settings.notifications?.emailEnabled ?? false,
+                enabledTemplates: mergedTemplates
+            });
+            setSelectedPreset(PRESETS.find(p => p.provider === s.provider)?.label || "Brevo API");
+        }
+    }, [settings, reset, isDirty]);
 
     const onSubmit = async (data: any) => {
         const payload = {
@@ -114,12 +128,29 @@ export function SMTPSettings() {
         };
 
         try {
-            await saveSMTP(payload).unwrap();
-            toast.success(data.deliveryMode === 'custom' ? "Custom configuration verified!" : "Switched to Standard Relay");
+            if (data.deliveryMode === 'custom' || data.deliveryMode === 'shared') {
+                await saveSMTP(payload).unwrap();
+            }
+
+            await updateSettings({
+                notifications: {
+                    ...settings?.notifications,
+                    emailEnabled: data.emailEnabled
+                },
+                emailTemplates: {
+                    ...settings?.emailTemplates,
+                    enabledTemplates: data.enabledTemplates
+                }
+            }).unwrap();
+
+            toast.success("Settings updated successfully!");
+            reset(data); // reset to new clean state
         } catch (err: any) {
             toast.error(err?.data?.message || "Operation failed.");
         }
     };
+
+    const isSavingOverall = isSaving || isUpdatingSettings;
 
     if (error) return <APIErrorState title="Failed to load settings" error={error} />;
 
@@ -128,13 +159,30 @@ export function SMTPSettings() {
             <ProfileLayout>
                 {() => (
                     <div className="mx-auto w-full max-w-full">
-                        <SettingsHeader
-                            title="Email Delivery Settings"
-                            description="Configure how official notifications are delivered to your visitors and employees."
-                            isVerified={!!settings?.smtp?.verified}
-                            providerName={deliveryMode === 'shared' ? "Aynzo Relay" : selectedPreset}
-                            icon={Mail}
-                        />
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <SettingsHeader
+                                title="Email Delivery Settings"
+                                description="Configure how official notifications are delivered to your visitors and employees."
+                                isVerified={!!settings?.smtp?.verified}
+                                providerName={deliveryMode === 'shared' ? "Aynzo Relay" : selectedPreset}
+                                icon={Mail}
+                            />
+                            <ActionButton
+                                type="button"
+                                onClick={handleSubmit(onSubmit)}
+                                disabled={isSavingOverall || !isDirty}
+                                isLoading={isSavingOverall}
+                                loadingLabel="Saving..."
+                                variant="primary"
+                                size="xl"
+                                className={cn(
+                                    "w-full sm:w-auto min-w-[220px] font-bold transition-all shadow-lg active:scale-95",
+                                    !isDirty && "opacity-50 grayscale pointer-events-none"
+                                )}
+                                icon={Save}
+                                label="Update Configuration"
+                            />
+                        </div>
 
                         <FormContainer isPage isLoading={isLoading}>
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -152,22 +200,16 @@ export function SMTPSettings() {
                                                     <p className="text-xs text-gray-500">Enable or disable all Email notifications globally</p>
                                                 </div>
                                             </div>
-                                            <BrandSwitch 
-                                                checked={settings?.notifications?.emailEnabled ?? false}
-                                                onCheckedChange={async (checked) => {
-                                                    try {
-                                                        await updateSettings({
-                                                            notifications: {
-                                                                ...settings?.notifications,
-                                                                emailEnabled: checked
-                                                            }
-                                                        }).unwrap();
-                                                        toast.success("Master Email settings updated");
-                                                    } catch (err: any) {
-                                                        toast.error(err?.data?.message || "Failed to update master settings");
-                                                    }
-                                                }}
-                                                variant="default"
+                                            <Controller
+                                                name="emailEnabled"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <BrandSwitch 
+                                                        checked={field.value}
+                                                        onCheckedChange={field.onChange}
+                                                        variant="default"
+                                                    />
+                                                )}
                                             />
                                         </div>
                                     </div>
@@ -197,7 +239,7 @@ export function SMTPSettings() {
                                                 <div className="px-5 pb-8 pt-2 border-t border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
                                                     <div className="space-y-4 pt-4">
                                                         {emailTemplatesList.map((template) => {
-                                                            const isEnabled = settings?.emailTemplates?.enabledTemplates?.[template.id] !== false;
+                                                            const isEnabled = enabledTemplates[template.id] !== false;
                                                             return (
                                                                 <div key={template.id} className="border border-border/50 rounded-xl bg-background transition-all overflow-hidden">
                                                                     <div className="flex items-center justify-between p-4 px-5">
@@ -213,21 +255,11 @@ export function SMTPSettings() {
                                                                         
                                                                         <BrandSwitch 
                                                                             checked={isEnabled}
-                                                                            onCheckedChange={async (checked) => {
-                                                                                try {
-                                                                                    await updateSettings({
-                                                                                        emailTemplates: {
-                                                                                            ...settings?.emailTemplates,
-                                                                                            enabledTemplates: {
-                                                                                                ...(settings?.emailTemplates?.enabledTemplates || {}),
-                                                                                                [template.id]: checked
-                                                                                            }
-                                                                                        }
-                                                                                    }).unwrap();
-                                                                                    toast.success(`${template.label} updated successfully`);
-                                                                                } catch (err: any) {
-                                                                                    toast.error(err?.data?.message || "Failed to update notification settings");
-                                                                                }
+                                                                            onCheckedChange={(checked) => {
+                                                                                setValue('enabledTemplates', {
+                                                                                    ...enabledTemplates,
+                                                                                    [template.id]: checked
+                                                                                }, { shouldDirty: true });
                                                                             }}
                                                                             variant="default"
                                                                         />
@@ -269,8 +301,7 @@ export function SMTPSettings() {
                                             className={cn("p-4 cursor-pointer border-2 transition-all", 
                                                 deliveryMode === strategy.id ? strategy.activeClass : "hover:border-border")}
                                             onClick={() => {
-                                                setValue("deliveryMode", strategy.id as any);
-                                                if (strategy.id === 'shared') handleSubmit(onSubmit)();
+                                                setValue("deliveryMode", strategy.id as any, { shouldDirty: true });
                                             }}
                                         >
                                             <div className="flex items-center justify-between mb-2">
@@ -329,10 +360,7 @@ export function SMTPSettings() {
                                     </div>
                                 )}
 
-                                <div className="flex justify-end gap-3 pt-6 border-t">
-                                    <ActionButton type="submit" isLoading={isSaving} variant="primary" size="xl" className="min-w-[200px]" label="Verify & Save" icon={Save} />
-                                </div>
-                            </form>
+                                </form>
                         </FormContainer>
                     </div>
                 )}
