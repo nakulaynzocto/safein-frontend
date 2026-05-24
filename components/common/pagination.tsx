@@ -103,38 +103,22 @@ export function Pagination({
     }
 
     return (
-        <div className={cn("flex w-full flex-row items-center justify-between gap-2", className)}>
-            {/* Items info */}
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+        <div className={cn("flex w-full items-center justify-center md:justify-between py-1", className)}>
+            {/* Items info - Hidden on mobile, visible on desktop */}
+            <div className="hidden md:block text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
                 Showing <span className="font-medium">{startItem || 0}</span> to{" "}
                 <span className="font-medium">{endItem || 0}</span> of{" "}
                 <span className="font-medium">{safeTotalItems || 0}</span> items
             </div>
 
-            <div className="flex items-center gap-4">
-                {/* Page size selector (optional) */}
-                {showPageSizeSelector && onPageSizeChange && (
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Show:</span>
-                        <select
-                            value={pageSize}
-                            onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                            className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-800 focus:border-transparent focus:ring-2 focus:ring-[#3882a5] focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-                        >
-                            {pageSizeOptions.map((size) => (
-                                <option key={size} value={size}>
-                                    {size}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                )}
-
-                {/* React Paginate */}
-                <ReactPaginate
-                    {...getPaginationConfig(totalPages, safeCurrentPage, hasNextPage, hasPrevPage)}
-                    onPageChange={handlePageClick}
-                />
+            <div className="flex flex-row items-center gap-4 max-w-full overflow-x-auto">
+                {/* React Paginate - Always visible */}
+                <div className="shrink-0 max-w-full overflow-x-auto">
+                    <ReactPaginate
+                        {...getPaginationConfig(totalPages, safeCurrentPage, hasNextPage, hasPrevPage)}
+                        onPageChange={handlePageClick}
+                    />
+                </div>
             </div>
         </div>
     );
@@ -162,16 +146,18 @@ export function CompactPagination({
     }
 
     return (
-        <div className={cn("flex w-full flex-row items-center justify-between gap-2", className)}>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+        <div className={cn("flex w-full flex-col sm:flex-row items-center justify-between gap-3", className)}>
+            <div className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap shrink-0">
                 <span className="font-medium">{startItem || 0}</span>-
                 <span className="font-medium">{endItem || 0}</span> of{" "}
                 <span className="font-medium">{safeTotalItems || 0}</span>
             </div>
-            <ReactPaginate
-                {...getPaginationConfig(totalPages, safeCurrentPage, hasNextPage, hasPrevPage, 2, true)}
-                onPageChange={handlePageClick}
-            />
+            <div className="shrink-0 max-w-full overflow-x-auto pb-1 sm:pb-0">
+                <ReactPaginate
+                    {...getPaginationConfig(totalPages, safeCurrentPage, hasNextPage, hasPrevPage, 2, true)}
+                    onPageChange={handlePageClick}
+                />
+            </div>
         </div>
     );
 }

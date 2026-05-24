@@ -296,15 +296,6 @@ export const settingsApi = baseApi.injectEndpoints({
             query: () => "/settings/voice-call/defaults",
             transformResponse: (res: any) => res?.data ?? res,
         }),
-        saveEmailTemplates: builder.mutation<Settings, EmailTemplates>({
-            query: (body) => ({ url: "/settings/email-templates", method: "POST", body }),
-            transformResponse: (res: any) => res?.data ?? res,
-            invalidatesTags: ["Settings"],
-        }),
-        getEmailTemplateDefaults: builder.query<{ templates: Record<string, EmailTemplate>; globalStyles: any }, void>({
-            query: () => "/settings/email-templates/defaults",
-            transformResponse: (res: any) => res?.data ?? res,
-        }),
     }),
 });
 
@@ -318,6 +309,4 @@ export const {
     useRemoveSMSConfigMutation,
     useSaveVoiceConfigMutation,
     useGetVoiceDefaultsQuery,
-    useSaveEmailTemplatesMutation,
-    useGetEmailTemplateDefaultsQuery,
 } = settingsApi;

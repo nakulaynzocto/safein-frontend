@@ -15,8 +15,7 @@ import {
     Calendar,
     MapPin,
     CheckCircle2,
-    XCircle,
-    Eye
+    XCircle
 } from "lucide-react";
 import { SettingsHeader } from "./SettingsHeader";
 import { FormContainer } from "@/components/common/formContainer";
@@ -25,6 +24,9 @@ import { ProfileLayout } from "@/components/profile/profileLayout";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { useForm, Controller } from "react-hook-form";
+import { ActionButton } from "@/components/common/actionButton";
+import { Save } from "lucide-react";
 
 import { BrandSwitch } from "@/components/common/BrandSwitch";
 import { cn } from "@/lib/utils";
@@ -38,24 +40,49 @@ export function SMSSettings() {
     const modules = activeSubscriptionData?.modules;
 
     const { expandedSections, toggleSection } = useCollapsibleSections(["templates"]);
-    const [selectedTemplate, setSelectedTemplate] = useState<string | null>("newAppointmentRequest");
 
     const coreSmsTemplates = ["newAppointmentRequest", "appointmentLink"];
-    const normalizedEnabledTemplates = (settings?.sms as any)?.enabledTemplates || {};
     
-    // Templates are globally managed by SafeIn Admin — no local toggle allowed
+    const { handleSubmit, setValue, watch, reset, control, formState: { isDirty } } = useForm({
+        defaultValues: {
+            smsEnabled: false,
+            enabledTemplates: {} as Record<string, boolean>
+        }
+    });
 
-    const handleMasterToggle = async (enabled: boolean) => {
+    const smsEnabled = watch("smsEnabled");
+    const enabledTemplates = watch("enabledTemplates") || {};
+
+    useEffect(() => {
+        if (!settings) return;
+        if (!isDirty) {
+            const rawTemplates = (settings?.sms as any)?.enabledTemplates || {};
+            const merged: Record<string, boolean> = {};
+            ["newAppointmentRequest", "appointmentLink", "specialVisitorEntry"].forEach(t => {
+                merged[t] = rawTemplates[t] !== undefined ? rawTemplates[t] : coreSmsTemplates.includes(t);
+            });
+            reset({
+                smsEnabled: settings?.notifications?.smsEnabled ?? false,
+                enabledTemplates: merged
+            });
+        }
+    }, [settings, isDirty, reset]);
+
+    const onSubmit = async (data: any) => {
         try {
             await updateSettings({
                 notifications: {
                     ...settings?.notifications,
-                    smsEnabled: enabled
+                    smsEnabled: data.smsEnabled
+                },
+                sms: {
+                    enabledTemplates: data.enabledTemplates
                 }
             }).unwrap();
-            toast.success("Master SMS settings updated");
+            toast.success("SMS settings updated successfully");
+            reset(data);
         } catch (err: any) {
-            toast.error(err?.data?.message || "Failed to update master settings");
+            toast.error(err?.data?.message || "Failed to update settings");
         }
     };
 
@@ -97,11 +124,28 @@ export function SMSSettings() {
             <ProfileLayout>
                 {() => (
                     <div className="mx-auto w-full max-w-full">
-                        <SettingsHeader
-                            title="SMS Gateway"
-                            description="Customize the SMS notifications sent for appointment events. All messages are delivered via the system's platform gateway."
-                            icon={MessageSquare}
-                        />
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <SettingsHeader
+                                title="SMS Gateway"
+                                description="Customize the SMS notifications sent for appointment events."
+                                icon={MessageSquare}
+                            />
+                            <ActionButton
+                                type="button"
+                                onClick={handleSubmit(onSubmit)}
+                                disabled={isUpdating || !isDirty}
+                                isLoading={isUpdating}
+                                loadingLabel="Saving..."
+                                variant="primary"
+                                size="xl"
+                                className={cn(
+                                    "w-full sm:w-auto min-w-[220px] font-bold transition-all shadow-lg active:scale-95",
+                                    !isDirty && "opacity-50 grayscale pointer-events-none"
+                                )}
+                                icon={Save}
+                                label="Update Configuration"
+                            />
+                        </div>
 
                         <FormContainer isPage={true} isLoading={isLoading} isEditMode={false}>
                             <form className="space-y-6 text-foreground pb-12">
@@ -118,10 +162,16 @@ export function SMSSettings() {
                                                     <p className="text-xs text-gray-500">Enable or disable all SMS notifications globally</p>
                                                 </div>
                                             </div>
-                                            <BrandSwitch 
-                                                checked={settings?.notifications?.smsEnabled ?? false} 
-                                                onCheckedChange={handleMasterToggle} 
-                                                variant="default" 
+                                            <Controller
+                                                name="smsEnabled"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <BrandSwitch 
+                                                        checked={field.value} 
+                                                        onCheckedChange={field.onChange} 
+                                                        variant="default" 
+                                                    />
+                                                )}
                                             />
                                         </div>
                                     </div>
@@ -147,7 +197,7 @@ export function SMSSettings() {
                                                 {/* Read-only info banner */}
                                                 <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mb-4">
                                                     <Lock size={13} />
-                                                    <span>SMS templates are managed globally by SafeIn Admin. These settings are <strong>view-only</strong>.</span>
+                                                    <span>SMS template content is managed globally by SafeIn Admin. You can <strong>turn them on or off</strong> individually below.</span>
                                                 </div>
                                                 <div className="space-y-4 pt-2">
                                                     {[
@@ -155,63 +205,32 @@ export function SMSSettings() {
                                                         { id: "appointmentLink", label: "SafeIn_Booking_Link", icon: Link, placeholders: ["companyName", "bookingUrl"] },
                                                         { id: "specialVisitorEntry", label: "SafeIn_Special_Entry_Pass", icon: ShieldCheck, placeholders: ["companyName", "otp"] },
                                                     ].map((template) => {
-                                                        const isEnabled = normalizedEnabledTemplates[template.id] !== undefined
-                                                            ? normalizedEnabledTemplates[template.id]
-                                                            : coreSmsTemplates.includes(template.id);
+                                                        const isEnabled = enabledTemplates[template.id] !== false;
                                                         return (
                                                         <div key={template.id} className="border border-border/50 rounded-xl bg-background transition-all overflow-hidden">
                                                             <div className="flex items-center justify-between p-4 px-5">
-                                                                <div className="flex items-center gap-4">
+                                                                 <div className="flex items-center gap-4">
                                                                     <div className="p-2.5 rounded-lg bg-muted text-[#3882a5]">
                                                                         <template.icon size={18} />
                                                                     </div>
                                                                     <h4 className="font-bold text-[#074463]">{template.label}</h4>
                                                                 </div>
                                                                 
-                                                                <div className="flex items-center gap-4">
-                                                                    {/* Read-only status badge */}
-                                                                    <span className={cn(
-                                                                        "px-2.5 py-1 rounded-full text-xs font-bold border",
-                                                                        isEnabled
-                                                                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                                                            : "bg-gray-100 text-gray-500 border-gray-200"
-                                                                    )}>
-                                                                        {isEnabled ? "Active" : "Inactive"}
-                                                                    </span>
-                                                                    <button 
-                                                                        type="button"
-                                                                        onClick={() => setSelectedTemplate(selectedTemplate === template.id ? null : template.id)} 
-                                                                        className={cn(
-                                                                            "h-9 w-9 flex items-center justify-center rounded-lg border shadow-sm transition-all",
-                                                                            selectedTemplate === template.id ? 'bg-[#074463] text-white border-[#074463]' : 'bg-background text-gray-400 hover:text-[#3882a5]'
-                                                                        )}
-                                                                        title="Preview template"
-                                                                    >
-                                                                        <Eye size={16} />
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-
-                                                            {selectedTemplate === template.id && (
-                                                                <div className="p-6 border-t border-dashed border-border/50 bg-muted/10 animate-in fade-in duration-300">
-                                                                    <div className="space-y-4">
-                                                                        <div className="space-y-2">
-                                                                            <Label className="text-xs font-bold text-[#3882a5] uppercase tracking-wider">SMS message preview</Label>
-                                                                            <div className="min-h-[60px] rounded-xl p-4 font-medium text-sm border border-border/50 bg-background text-gray-800 shadow-inner leading-relaxed">
-                                                                                {(settings?.sms?.templates as any)?.[template.id] || "No template content configured."}
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="flex flex-wrap gap-2 pt-1">
-                                                                            <span className="text-xs font-bold text-muted-foreground uppercase mr-1 text-xs">Variables used:</span>
-                                                                            {template.placeholders.map(p => (
-                                                                                <code key={p} className="px-2 py-0.5 rounded bg-blue-50 text-xs font-bold text-blue-600 border border-blue-100">{"{"}{p}{"}"}</code>
-                                                                            ))}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )})}
+                                                                 <div className="flex items-center gap-4">
+                                                                    <BrandSwitch 
+                                                                        checked={isEnabled}
+                                                                        onCheckedChange={(checked) => {
+                                                                            setValue('enabledTemplates', {
+                                                                                ...enabledTemplates,
+                                                                                [template.id]: checked
+                                                                            }, { shouldDirty: true });
+                                                                        }}
+                                                                        variant="default"
+                                                                    />
+                                                                 </div>
+                                                             </div>
+                                                         </div>
+                                                     )})}
                                                 </div>
                                             </div>
                                         </CollapsibleContent>

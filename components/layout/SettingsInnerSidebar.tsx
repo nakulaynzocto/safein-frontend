@@ -10,6 +10,7 @@ import {
     QrCode, 
     MessageSquare, 
     Phone, 
+    MessageCircle,
     Mail, 
     Settings, 
     LayoutTemplate,
@@ -20,7 +21,7 @@ import { useAuthSubscription } from "@/hooks/useAuthSubscription";
 const settingsNavigation = [
     { name: "Profile", href: "/settings/profile", icon: User },
     { name: "Billing & Plan", href: "/settings/subscription", icon: CreditCard },
-    { name: "WhatsApp Config", href: "/settings/whatsapp", icon: Phone },
+    { name: "WhatsApp Config", href: "/settings/whatsapp", icon: MessageCircle },
     { name: "SMTP Delivery", href: "/settings/smtp", icon: Mail },
     { name: "SMS Config", href: "/settings/sms", icon: MessageSquare },
     { name: "Voice Call Config", href: "/settings/voice", icon: Phone },

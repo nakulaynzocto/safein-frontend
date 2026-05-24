@@ -47,7 +47,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     } = useAuthSubscription();
 
     // Fetch safeinProfile to respect toggles and custom messages configured in Admin panel
-    const { data: safeinProfileResponse } = useGetSafeinProfileQuery(undefined, {
+    const { data: safeinProfileResponse, isLoading: isSafeinProfileLoading } = useGetSafeinProfileQuery(undefined, {
         skip: !isAuthenticated,
     });
     const features = safeinProfileResponse?.data?.features;
@@ -57,7 +57,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     const isAnyMessagingEnabled = !!(modules?.enableSms || modules?.enableWhatsApp || modules?.enableVoice);
 
     // Fetch credits balance
-    const { data: walletData } = useGetWalletBalanceQuery(undefined, {
+    const { data: walletData, isLoading: isWalletLoading, isSuccess: isWalletLoaded } = useGetWalletBalanceQuery(undefined, {
         skip: !isAuthenticated || !isAnyMessagingEnabled,
     });
     const balance = walletData?.balance ?? 0;
@@ -126,7 +126,15 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
     // Banner 1: Expiry Warning (Subscription Expired)
     const enableExpiryWarning = features?.enableExpiryWarning ?? true;
-    const showExpiry = !!(!isLoading && isClient && expiryWarning?.isExpired && enableExpiryWarning && !isSubscriptionPage && isAuthenticated);
+    const showExpiry = !!(
+        !isLoading &&
+        !isSafeinProfileLoading &&
+        isClient &&
+        expiryWarning?.isExpired &&
+        enableExpiryWarning &&
+        !isSubscriptionPage &&
+        isAuthenticated
+    );
     
     let expiryMessage: React.ReactNode = (
         <span>
@@ -142,6 +150,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     const warningDaysThreshold = features?.subscriptionEndingSoonDays ?? 7;
     const showEndingSoon = !!(
         !isLoading &&
+        !isSafeinProfileLoading &&
         isClient && 
         expiryWarning?.show && 
         !expiryWarning?.isExpired && 
@@ -166,6 +175,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     // Banner 3: Global Site Warning & Notes Banner
     const showGlobalAlert = !!(
         !isLoading &&
+        !isSafeinProfileLoading &&
         isClient && 
         features?.enableGlobalAlert && 
         features?.globalAlertMessage && 
@@ -178,6 +188,9 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     // Banner 4: Low Wallet Balance Banner
     const showLowWallet = !!(
         !isLoading &&
+        !isSafeinProfileLoading &&
+        !isWalletLoading &&
+        isWalletLoaded &&
         isClient && 
         features?.enableLowWalletWarning && 
         isAnyMessagingEnabled && 

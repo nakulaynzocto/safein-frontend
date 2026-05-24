@@ -196,11 +196,25 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
             <ProfileLayout>
                 {() => (
                     <div className="mx-auto w-full max-w-full">
-                        <SettingsHeader
-                            title="Voice Call Alerts"
-                            description="Configure automated voice calls for immediate appointment approvals. When enabled, the system will call host numbers directly."
-                            icon={PhoneCall}
-                        />
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <SettingsHeader
+                                title="Voice Call Alerts"
+                                description="Configure automated voice calls for immediate appointment approvals."
+                                icon={PhoneCall}
+                            />
+                            
+                            <Button
+                                type="button"
+                                onClick={handleSubmit(onSubmit)}
+                                disabled={isSaving || !isDirty}
+                                className={cn(
+                                    "w-full sm:w-auto min-w-[180px] h-12 rounded-xl font-bold transition-all shadow-lg active:scale-95",
+                                    isDirty ? "bg-[#3882a5] hover:bg-[#2c6985] text-white" : "bg-muted text-muted-foreground shadow-none"
+                                )}
+                            >
+                                {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="mr-2 h-4 w-4" /> Update Configuration</>}
+                            </Button>
+                        </div>
 
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 text-foreground pb-12">
                             {/* Wallet Info Banner */}
@@ -279,15 +293,9 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                                                             </div>
                                                         </div>
                                                         <BrandSwitch 
-                                                            checked={settings?.voiceCall?.[trigger.id as keyof typeof settings.voiceCall] as boolean ?? true} 
-                                                            onCheckedChange={async (checked) => {
-                                                                try {
-                                                                    await updateSettings({
-                                                                        voiceCall: { [trigger.id]: checked }
-                                                                    }).unwrap();
-                                                                } catch (err) {
-                                                                    toast.error(`Failed to update ${trigger.label} status`);
-                                                                }
+                                                            checked={watch(trigger.id as any)} 
+                                                            onCheckedChange={(checked) => {
+                                                                setValue(trigger.id as any, checked, { shouldDirty: true });
                                                             }}
                                                         />
                                                     </div>
@@ -417,27 +425,6 @@ export function VoiceCallSettings({ walletData }: { walletData?: any }) {
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border border-dashed border-border mt-8">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center border border-border">
-                                        <Settings2 size={18} className="text-[#3882a5]" />
-                                    </div>
-                                    <div className="hidden sm:block">
-                                        <p className="text-sm font-bold text-gray-800">Finalize Voice Settings</p>
-                                        <p className="text-xs text-gray-500">Changes will apply to all future automated IVR calls.</p>
-                                    </div>
-                                </div>
-                                <Button
-                                    type="submit"
-                                    disabled={isSaving || !isDirty}
-                                    className={cn(
-                                        "min-w-[180px] h-12 rounded-xl font-bold transition-all shadow-lg active:scale-95",
-                                        isDirty ? "bg-[#3882a5] hover:bg-[#2c6985] text-white" : "bg-muted text-muted-foreground shadow-none"
-                                    )}
-                                >
-                                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="mr-2 h-4 w-4" /> Update Configuration</>}
-                                </Button>
-                            </div>
                         </form>
                     </div>
                 )}
