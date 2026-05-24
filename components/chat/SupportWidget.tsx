@@ -362,10 +362,10 @@ export default function SupportWidget() {
             {isOpen && (
                 <div
                     className={cn(
-                        "bg-white dark:bg-slate-900 shadow-2xl overflow-hidden flex flex-col transition-all duration-500 ease-in-out border border-gray-100 dark:border-slate-800 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-500",
+                        "fixed top-0 right-0 h-[100dvh] bg-white dark:bg-slate-900 shadow-2xl overflow-hidden flex flex-col transition-all duration-500 ease-in-out border-l border-gray-100 dark:border-slate-800 pointer-events-auto animate-in slide-in-from-right duration-500",
                         isExpanded
-                            ? "fixed inset-0 sm:inset-10 w-full h-full sm:w-auto sm:h-auto rounded-none sm:rounded-3xl"
-                            : "w-full sm:w-[400px] h-[500px] sm:h-[650px] max-h-[calc(100dvh-100px)] rounded-3xl mb-4"
+                            ? "w-full sm:w-[600px]"
+                            : "w-full sm:w-[400px]"
                     )}
                 >
                     {/* A. Header */}

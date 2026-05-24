@@ -5,9 +5,16 @@ import { QuickAppointmentModal } from "@/components/appointment/QuickAppointment
 import { routes } from "@/utils/routes";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useModuleGating } from "@/hooks/useModuleGating";
+import { PageSkeleton } from "@/components/common/pageSkeleton";
 
 export default function CreateVipBookingPage() {
     const router = useRouter();
+    const { isChecking } = useModuleGating('enablePriorityBooking', routes.privateroute.DASHBOARD);
+
+    if (isChecking) {
+        return <PageSkeleton type="form" />;
+    }
 
     return (
         <div className="container mx-auto max-w-full py-3 sm:py-4">
