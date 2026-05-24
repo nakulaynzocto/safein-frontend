@@ -126,7 +126,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
     // Banner 1: Expiry Warning (Subscription Expired)
     const enableExpiryWarning = features?.enableExpiryWarning ?? true;
-    const showExpiry = !!(isClient && expiryWarning?.isExpired && enableExpiryWarning && !isSubscriptionPage && isAuthenticated);
+    const showExpiry = !!(!isLoading && isClient && expiryWarning?.isExpired && enableExpiryWarning && !isSubscriptionPage && isAuthenticated);
     
     let expiryMessage: React.ReactNode = (
         <span>
@@ -141,6 +141,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     // Banner 2: Subscription Ending Soon Banner
     const warningDaysThreshold = features?.subscriptionEndingSoonDays ?? 7;
     const showEndingSoon = !!(
+        !isLoading &&
         isClient && 
         expiryWarning?.show && 
         !expiryWarning?.isExpired && 
@@ -164,6 +165,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
     // Banner 3: Global Site Warning & Notes Banner
     const showGlobalAlert = !!(
+        !isLoading &&
         isClient && 
         features?.enableGlobalAlert && 
         features?.globalAlertMessage && 
@@ -175,6 +177,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
     // Banner 4: Low Wallet Balance Banner
     const showLowWallet = !!(
+        !isLoading &&
         isClient && 
         features?.enableLowWalletWarning && 
         isAnyMessagingEnabled && 

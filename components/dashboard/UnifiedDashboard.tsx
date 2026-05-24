@@ -46,10 +46,8 @@ export function UnifiedDashboard() {
             sortBy: "createdAt",
             sortOrder: "desc" as const,
             timezoneOffsetMinutes: timezoneOffset,
-            startDate: chartDateRange.startDate,
-            endDate: chartDateRange.endDate,
         }),
-        [timezoneOffset, chartDateRange.startDate, chartDateRange.endDate],
+        [timezoneOffset],
     );
 
     const {
